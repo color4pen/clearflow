@@ -61,11 +61,15 @@ export async function submitRequestAction(
   const session = await auth();
   if (!session?.user?.id) return;
 
-  await submitRequest({
+  const result = await submitRequest({
     requestId,
     organizationId: session.user.organizationId,
     actorId: session.user.id,
   });
+
+  if (!result.ok) {
+    throw new Error(result.reason);
+  }
 
   revalidatePath(`/requests/${requestId}`);
   revalidatePath("/requests");
@@ -79,11 +83,15 @@ export async function approveRequestAction(
   if (!session?.user?.id) return;
   if (session.user.role !== "admin") return;
 
-  await approveRequest({
+  const result = await approveRequest({
     requestId,
     organizationId: session.user.organizationId,
     actorId: session.user.id,
   });
+
+  if (!result.ok) {
+    throw new Error(result.reason);
+  }
 
   revalidatePath(`/requests/${requestId}`);
   revalidatePath("/requests");
@@ -97,11 +105,15 @@ export async function rejectRequestAction(
   if (!session?.user?.id) return;
   if (session.user.role !== "admin") return;
 
-  await rejectRequest({
+  const result = await rejectRequest({
     requestId,
     organizationId: session.user.organizationId,
     actorId: session.user.id,
   });
+
+  if (!result.ok) {
+    throw new Error(result.reason);
+  }
 
   revalidatePath(`/requests/${requestId}`);
   revalidatePath("/requests");
