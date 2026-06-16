@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "2b41565c-d429-4c6e-abf5-03bea0cbb23b",
   "createdAt": "2026-06-16T07:18:57.942Z",
-  "updatedAt": "2026-06-16T07:18:59.577Z",
+  "updatedAt": "2026-06-16T07:25:12.299Z",
   "request": {
     "title": "トランザクション導入・middleware接続・テナント分離強化",
     "type": "spec-change",
@@ -17,8 +17,11 @@
   "branch": "change/transaction-middleware-test-foundation-2b41565c",
   "error": null,
   "pipelineId": "standard",
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 6,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }

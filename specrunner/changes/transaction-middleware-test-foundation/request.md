@@ -38,10 +38,10 @@ PR#3 で DB基盤・認証・基本ドメインモデルを導入した。コー
 <!-- コツ: 実装の最重量部（既存機構の一般化・暗黙の前提の変更）は行間に隠さず要件として名指しする。 -->
 
 1. **トランザクション導入**: `approveRequest`, `rejectRequest`, `submitRequest` の各 usecase で、ステータス更新と監査ログ記録を `db.transaction()` で囲む。トランザクション内で失敗した場合はロールバックされること
-2. **middleware.ts の作成**: `src/middleware.ts` を作成し、`proxy.ts` のロジックを移動または接続する。Next.js の middleware として認証ガードが機能するようにする。`src/proxy.ts` は削除する
+2. **middleware.ts の作成**: `src/middleware.ts` を作成し、`proxy.ts` のロジックを移動する。Next.js の middleware として認証ガードが機能するようにする。`src/proxy.ts` は削除する。`proxy.ts` を参照している既存テスト（`src/__tests__/static/projectStructure.test.ts` の TC-021 / TC-044 / TC-048）を `middleware.ts` 参照に更新する
 3. **userRepository.findByEmail のリネーム**: `findByEmail` を `findByEmailForAuth(email: string)` にリネームして、ログイン専用であることを明示する。Auth.js の authorize は login 時点で organizationId を特定できないため、テナント条件は付与しない
-4. **Server Actions のエラーレスポンス統一**: approve/reject/submit の認証失敗時に `{ success: false, message: "認証が必要です" }` 形式のレスポンスを返す。全 Server Actions で統一されたエラーレスポンス型を使う
-5. **db.ts の環境変数チェック**: `DATABASE_URL` 未設定時に明示的なエラーメッセージで throw する
+4. **Server Actions のエラーレスポンス統一**: approve/reject/submit の認証失敗時に `{ success: false, message: "認証が必要です" }` 形式のレスポンスを返す。`createRequestAction` は既存の `CreateRequestState` 型（フィールドレベル errors 含む）を維持する — UI のフォームバリデーション表示に使われているため変更すると UI 修正が必要になる
+5. **db.ts の環境変数チェック**: `DATABASE_URL` 未設定時に `"DATABASE_URL environment variable is not set"` メッセージで throw する
 
 ## スコープ外
 
@@ -60,7 +60,8 @@ PR#3 で DB基盤・認証・基本ドメインモデルを導入した。コー
 - [ ] `src/application/usecases/approveRequest.ts`, `rejectRequest.ts`, `submitRequest.ts` 内に `db.transaction` の呼び出しがある
 - [ ] `userRepository` に `findByEmail` 関数が存在しない（`findByEmailForAuth` に置き換え済み）
 - [ ] 全 Server Actions の認証失敗レスポンスが `{ success: false, message: string }` 形式
-- [ ] `src/infrastructure/db.ts` で `DATABASE_URL` 未設定時に明示的な Error を throw する
+- [ ] `src/infrastructure/db.ts` で `DATABASE_URL` 未設定時に `"DATABASE_URL environment variable is not set"` メッセージで throw する
+- [ ] `proxy.ts` 参照の既存テスト（TC-021 / TC-044 / TC-048）が `middleware.ts` 参照に更新されている
 - [ ] 依存方向が `actions → usecases → domain / infrastructure` を遵守している
 - [ ] `typecheck` が green
 
@@ -70,4 +71,5 @@ PR#3 で DB基盤・認証・基本ドメインモデルを導入した。コー
 
 1. **findByEmail のリネーム方式を採用、引数追加方式を却下** — Auth.js の authorize コールバックは login 時点でユーザーの organizationId を知らない（email + password のみ）。organizationId を必須引数にすると login が壊れる。関数名で用途を限定し、テナント跨ぎの誤用を命名で防ぐ
 2. **proxy.ts を middleware.ts に移動・削除を採用、re-export 方式を却下** — proxy.ts を残して middleware.ts から re-export する方式は不要なファイルが残る。middleware.ts に直接ロジックを置く
-3. **エラーレスポンス型の統一**: Server Actions の戻り値を `{ success: boolean, message?: string, data?: T }` 形式に統一する
+3. **エラーレスポンス型**: approve/reject/submit の戻り値を `{ success: boolean, message?: string }` 形式にする。`createRequestAction` は既存の `CreateRequestState` 型を維持（フォームバリデーション UI に依存しているため）
+4. **トランザクションコンテキスト伝播**: リポジトリ関数に省略可能な `tx` 引数を追加し、渡された場合は `tx` を、省略時は `db` をクエリ実行に使う。usecase が `db.transaction(async (tx) => { ... })` 内でリポジトリ関数に `tx` を渡す方式。リポジトリのインターフェース変更は最小限（末尾に `tx?` を追加するのみ）
