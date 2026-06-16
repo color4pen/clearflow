@@ -1,5 +1,6 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "../db";
+import type { Transaction } from "../db";
 import { requests } from "../schema";
 import type { Request, RequestStatus } from "@/domain/models/request";
 
@@ -62,9 +63,11 @@ export async function updateStatus(
   id: string,
   organizationId: string,
   status: RequestStatus,
-  updatedAt: Date
+  updatedAt: Date,
+  tx?: Transaction
 ): Promise<Request | null> {
-  const result = await db
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
     .update(requests)
     .set({ status, updatedAt })
     .where(and(eq(requests.id, id), eq(requests.organizationId, organizationId)))

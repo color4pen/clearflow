@@ -5,7 +5,7 @@ import type { User } from "@/domain/models/user";
 
 type UserWithPassword = User & { hashedPassword: string };
 
-export async function findByEmail(
+export async function findByEmailForAuth(
   email: string
 ): Promise<UserWithPassword | null> {
   const result = await db

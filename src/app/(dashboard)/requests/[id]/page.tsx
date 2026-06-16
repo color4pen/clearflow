@@ -43,9 +43,15 @@ export default async function RequestDetailPage({
     notFound();
   }
 
-  const submitAction = submitRequestAction.bind(null, id);
-  const approveAction = approveRequestAction.bind(null, id);
-  const rejectAction = rejectRequestAction.bind(null, id);
+  const submitAction = submitRequestAction.bind(null, id) as unknown as (
+    formData: FormData
+  ) => Promise<void>;
+  const approveAction = approveRequestAction.bind(null, id) as unknown as (
+    formData: FormData
+  ) => Promise<void>;
+  const rejectAction = rejectRequestAction.bind(null, id) as unknown as (
+    formData: FormData
+  ) => Promise<void>;
 
   return (
     <div>

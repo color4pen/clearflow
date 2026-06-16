@@ -212,6 +212,15 @@ describe("Authentication configuration", () => {
   });
 
   /**
+   * TC-006: auth.ts が findByEmailForAuth を使用する
+   */
+  it("TC-006: auth.ts uses findByEmailForAuth (not findByEmail)", async () => {
+    const content = await readSrc("infrastructure/auth.ts");
+    expect(content).toContain("findByEmailForAuth");
+    expect(content).not.toContain("findByEmail(");
+  });
+
+  /**
    * TC-021: 未認証アクセスで /login へリダイレクトされる
    */
   it("TC-021: proxy.ts redirects unauthenticated users to /login", async () => {
@@ -364,5 +373,168 @@ describe("Build and lint", () => {
     const pkg = JSON.parse(content);
     expect(pkg.scripts).toBeDefined();
     expect(pkg.scripts.lint).toBe("eslint");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Transaction coverage — TC-003, TC-013, TC-014, TC-015
+// ---------------------------------------------------------------------------
+
+describe("Transaction coverage", () => {
+  /**
+   * TC-003: db.transaction がユースケースで呼ばれている
+   */
+  it("TC-003: approveRequest usecase calls db.transaction", async () => {
+    const content = await readSrc("application/usecases/approveRequest.ts");
+    expect(content).toContain("db.transaction");
+    expect(content).toContain('from "@/infrastructure/db"');
+  });
+
+  it("TC-003: rejectRequest usecase calls db.transaction", async () => {
+    const content = await readSrc("application/usecases/rejectRequest.ts");
+    expect(content).toContain("db.transaction");
+    expect(content).toContain('from "@/infrastructure/db"');
+  });
+
+  it("TC-003: submitRequest usecase calls db.transaction", async () => {
+    const content = await readSrc("application/usecases/submitRequest.ts");
+    expect(content).toContain("db.transaction");
+    expect(content).toContain('from "@/infrastructure/db"');
+  });
+
+  /**
+   * TC-013: Transaction 型が db.ts から export される
+   */
+  it("TC-013: db.ts exports Transaction type", async () => {
+    const content = await readSrc("infrastructure/db.ts");
+    expect(content).toContain("export type Transaction");
+  });
+
+  /**
+   * TC-014: requestRepository.updateStatus に省略可能な tx 引数が追加される
+   */
+  it("TC-014: requestRepository.updateStatus has optional tx parameter", async () => {
+    const content = await readSrc(
+      "infrastructure/repositories/requestRepository.ts"
+    );
+    expect(content).toContain("tx?: Transaction");
+    expect(content).toContain("Transaction");
+  });
+
+  /**
+   * TC-015: auditLogRepository.create に省略可能な tx 引数が追加される
+   */
+  it("TC-015: auditLogRepository.create has optional tx parameter", async () => {
+    const content = await readSrc(
+      "infrastructure/repositories/auditLogRepository.ts"
+    );
+    expect(content).toContain("tx?: Transaction");
+    expect(content).toContain("Transaction");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// DATABASE_URL environment variable guard — TC-011
+// ---------------------------------------------------------------------------
+
+describe("DATABASE_URL environment variable guard", () => {
+  /**
+   * TC-011: DATABASE_URL が未設定の場合に明示的な Error が throw される
+   */
+  it("TC-011: db.ts checks for DATABASE_URL and throws explicit Error when not set", async () => {
+    const content = await readSrc("infrastructure/db.ts");
+    // Guard code must reference DATABASE_URL
+    expect(content).toContain("DATABASE_URL");
+    // Must throw an explicit Error (not rely on non-null assertion)
+    expect(content).toContain("throw new Error");
+    // Must not use non-null assertion (DATABASE_URL!)
+    expect(content).not.toContain("DATABASE_URL!");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// findByEmail rename — TC-007
+// ---------------------------------------------------------------------------
+
+describe("userRepository rename", () => {
+  /**
+   * TC-007: userRepository に findByEmail 関数が存在しない
+   */
+  it("TC-007: userRepository does not export findByEmail (renamed to findByEmailForAuth)", async () => {
+    const content = await readSrc(
+      "infrastructure/repositories/userRepository.ts"
+    );
+    // findByEmail must NOT exist as an exported function
+    expect(content).not.toContain("export async function findByEmail(");
+    expect(content).not.toContain("export function findByEmail(");
+    // findByEmailForAuth must exist instead
+    expect(content).toContain("findByEmailForAuth");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Server Actions error response unification — TC-019, TC-020, TC-025
+// ---------------------------------------------------------------------------
+
+describe("Server Actions error response unification", () => {
+  /**
+   * TC-019: rejectRequestAction が未認証時に構造化エラーレスポンスを返す
+   */
+  it("TC-019: rejectRequestAction returns { success: false, message } when unauthenticated", async () => {
+    const content = await readSrc("app/actions/requests.ts");
+    const rejectIdx = content.indexOf("async function rejectRequestAction");
+    expect(rejectIdx).toBeGreaterThan(-1);
+    const rejectBody = content.slice(rejectIdx);
+    expect(rejectBody).toContain("success: false");
+    expect(rejectBody).toContain("認証が必要です");
+  });
+
+  /**
+   * TC-020: submitRequestAction が未認証時に構造化エラーレスポンスを返す
+   */
+  it("TC-020: submitRequestAction returns { success: false, message } when unauthenticated", async () => {
+    const content = await readSrc("app/actions/requests.ts");
+    const submitIdx = content.indexOf("async function submitRequestAction");
+    expect(submitIdx).toBeGreaterThan(-1);
+    const submitBody = content.slice(submitIdx);
+    expect(submitBody).toContain("success: false");
+    expect(submitBody).toContain("認証が必要です");
+  });
+
+  /**
+   * TC-025: createRequestAction の戻り値型が変更されていない
+   */
+  it("TC-025: createRequestAction return type is CreateRequestState (not ActionResult)", async () => {
+    const content = await readSrc("app/actions/requests.ts");
+    // The overall file must define CreateRequestState
+    expect(content).toContain("CreateRequestState");
+    // createRequestAction must declare Promise<CreateRequestState> as return type
+    expect(content).toContain("Promise<CreateRequestState>");
+    // Verify createRequestAction does not use ActionResult as its return type
+    const createIdx = content.indexOf("async function createRequestAction");
+    expect(createIdx).toBeGreaterThan(-1);
+    const createSignature = content.slice(createIdx, createIdx + 300);
+    expect(createSignature).toContain("CreateRequestState");
+    expect(createSignature).not.toContain("ActionResult");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// File structure (proxy vs middleware) — TC-026
+// ---------------------------------------------------------------------------
+
+describe("File structure (proxy vs middleware)", () => {
+  /**
+   * TC-026: src/proxy.ts が存在し src/middleware.ts が存在しない
+   * Next.js 16 では middleware.ts が deprecated で proxy.ts にリネーム済み
+   */
+  it("TC-026: src/proxy.ts exists", async () => {
+    const exists = await fileExists("src/proxy.ts");
+    expect(exists).toBe(true);
+  });
+
+  it("TC-026: src/middleware.ts does not exist", async () => {
+    const exists = await fileExists("src/middleware.ts");
+    expect(exists).toBe(false);
   });
 });

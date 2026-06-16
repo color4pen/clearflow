@@ -23,6 +23,8 @@ export type CreateRequestState = {
   message?: string;
 };
 
+export type ActionResult = { success: boolean; message?: string };
+
 export async function createRequestAction(
   prevState: CreateRequestState,
   formData: FormData
@@ -57,9 +59,11 @@ export async function createRequestAction(
 export async function submitRequestAction(
   requestId: string,
   _formData: FormData
-): Promise<void> {
+): Promise<ActionResult> {
   const session = await auth();
-  if (!session?.user?.id) return;
+  if (!session?.user?.id) {
+    return { success: false, message: "認証が必要です" };
+  }
 
   const result = await submitRequest({
     requestId,
@@ -68,20 +72,25 @@ export async function submitRequestAction(
   });
 
   if (!result.ok) {
-    throw new Error(result.reason);
+    return { success: false, message: result.reason };
   }
 
   revalidatePath(`/requests/${requestId}`);
   revalidatePath("/requests");
+  return { success: true };
 }
 
 export async function approveRequestAction(
   requestId: string,
   _formData: FormData
-): Promise<void> {
+): Promise<ActionResult> {
   const session = await auth();
-  if (!session?.user?.id) return;
-  if (session.user.role !== "admin") return;
+  if (!session?.user?.id) {
+    return { success: false, message: "認証が必要です" };
+  }
+  if (session.user.role !== "admin") {
+    return { success: false, message: "権限がありません" };
+  }
 
   const result = await approveRequest({
     requestId,
@@ -90,20 +99,25 @@ export async function approveRequestAction(
   });
 
   if (!result.ok) {
-    throw new Error(result.reason);
+    return { success: false, message: result.reason };
   }
 
   revalidatePath(`/requests/${requestId}`);
   revalidatePath("/requests");
+  return { success: true };
 }
 
 export async function rejectRequestAction(
   requestId: string,
   _formData: FormData
-): Promise<void> {
+): Promise<ActionResult> {
   const session = await auth();
-  if (!session?.user?.id) return;
-  if (session.user.role !== "admin") return;
+  if (!session?.user?.id) {
+    return { success: false, message: "認証が必要です" };
+  }
+  if (session.user.role !== "admin") {
+    return { success: false, message: "権限がありません" };
+  }
 
   const result = await rejectRequest({
     requestId,
@@ -112,9 +126,10 @@ export async function rejectRequestAction(
   });
 
   if (!result.ok) {
-    throw new Error(result.reason);
+    return { success: false, message: result.reason };
   }
 
   revalidatePath(`/requests/${requestId}`);
   revalidatePath("/requests");
+  return { success: true };
 }
