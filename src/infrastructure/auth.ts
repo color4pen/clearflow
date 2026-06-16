@@ -4,7 +4,7 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import bcrypt from "bcryptjs";
 import { db } from "./db";
 import { users, accounts, sessions, verificationTokens } from "./schema";
-import { findByEmail } from "./repositories/userRepository";
+import { findByEmailForAuth } from "./repositories/userRepository";
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
   adapter: DrizzleAdapter(db, {
@@ -33,7 +33,7 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
         const email = credentials.email as string;
         const password = credentials.password as string;
 
-        const user = await findByEmail(email);
+        const user = await findByEmailForAuth(email);
         if (!user) return null;
 
         const passwordMatch = await bcrypt.compare(

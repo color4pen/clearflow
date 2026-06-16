@@ -1,5 +1,6 @@
 import { requestRepository, auditLogRepository } from "@/infrastructure/repositories";
 import { validateTransition } from "@/domain/services/requestTransition";
+import { db } from "@/infrastructure/db";
 import type { Request } from "@/domain/models/request";
 
 export type SubmitRequestResult =
@@ -24,23 +25,38 @@ export async function submitRequest(data: {
     return { ok: false, reason: validation.reason };
   }
 
-  const updated = await requestRepository.updateStatus(
-    data.requestId,
-    data.organizationId,
-    "pending",
-    new Date()
-  );
-  if (!updated) {
-    return { ok: false, reason: "Failed to update request." };
+  try {
+    const updated = await db.transaction(async (tx) => {
+      const result = await requestRepository.updateStatus(
+        data.requestId,
+        data.organizationId,
+        "pending",
+        new Date(),
+        tx
+      );
+      if (!result) {
+        throw new Error("Failed to update request.");
+      }
+
+      await auditLogRepository.create(
+        {
+          action: "request.submit",
+          targetType: "request",
+          targetId: data.requestId,
+          actorId: data.actorId,
+          organizationId: data.organizationId,
+        },
+        tx
+      );
+
+      return result;
+    });
+
+    return { ok: true, request: updated };
+  } catch (err) {
+    return {
+      ok: false,
+      reason: err instanceof Error ? err.message : "Failed to update request.",
+    };
   }
-
-  await auditLogRepository.create({
-    action: "request.submit",
-    targetType: "request",
-    targetId: data.requestId,
-    actorId: data.actorId,
-    organizationId: data.organizationId,
-  });
-
-  return { ok: true, request: updated };
 }

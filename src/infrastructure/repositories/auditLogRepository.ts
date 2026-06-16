@@ -1,16 +1,21 @@
 import { db } from "../db";
+import type { Transaction } from "../db";
 import { auditLogs } from "../schema";
 import type { AuditLog } from "@/domain/models/auditLog";
 
-export async function create(data: {
-  action: string;
-  targetType: string;
-  targetId: string;
-  actorId: string;
-  organizationId: string;
-  metadata?: Record<string, unknown> | null;
-}): Promise<AuditLog> {
-  const result = await db
+export async function create(
+  data: {
+    action: string;
+    targetType: string;
+    targetId: string;
+    actorId: string;
+    organizationId: string;
+    metadata?: Record<string, unknown> | null;
+  },
+  tx?: Transaction
+): Promise<AuditLog> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
     .insert(auditLogs)
     .values({
       action: data.action,
