@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Test files use Bun-specific APIs not recognized by ESLint
+    "src/__tests__/**",
   ]),
 ]);
 
