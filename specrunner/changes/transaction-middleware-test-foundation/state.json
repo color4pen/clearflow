@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "2b41565c-d429-4c6e-abf5-03bea0cbb23b",
   "createdAt": "2026-06-16T07:18:57.942Z",
-  "updatedAt": "2026-06-16T08:17:10.208Z",
+  "updatedAt": "2026-06-16T08:20:52.682Z",
   "request": {
     "title": "トランザクション導入・middleware接続・テナント分離強化",
     "type": "spec-change",
@@ -12,14 +12,14 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-fixer",
+  "step": "conformance",
   "status": "running",
   "branch": "change/transaction-middleware-test-foundation-2b41565c",
   "error": null,
   "pipelineId": "standard",
   "resumePoint": null,
   "_journal": {
-    "historyCount": 49,
+    "historyCount": 53,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -28,7 +28,8 @@
       "implementer": 1,
       "verification": 3,
       "build-fixer": 2,
-      "code-review": 1
+      "code-review": 1,
+      "code-fixer": 1
     }
   }
 }

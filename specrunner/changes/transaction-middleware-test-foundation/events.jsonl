@@ -71,3 +71,9 @@
 {"type":"transition","ts":"2026-06-16T08:17:10.206Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-16T08:17:10.207Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-16T08:17:10.208Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-16T08:20:52.672Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"5f7a2198-5952-4d6a-80be-b9f12ae6d507","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-16T08:17:10.217Z","endedAt":"2026-06-16T08:20:51.088Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-16T08:20:51.088Z","outputs":[{"path":"specrunner/changes/transaction-middleware-test-foundation","hash":null}],"inputs":[{"path":"specrunner/changes/transaction-middleware-test-foundation/review-feedback-001.md","hash":"sha256:7e8a7c949cacb88a2968a096cb1a269c01e504f8aa9d256665d8cb106ba89545"}]}
+{"type":"transition","ts":"2026-06-16T08:20:52.679Z","step":"step-transition","status":"ok","message":"code-fixer → conformance"}
+{"type":"transition","ts":"2026-06-16T08:20:52.680Z","step":"conformance","status":"started","message":"conformance iteration 1 started"}
+{"type":"transition","ts":"2026-06-16T08:20:52.682Z","step":"conformance-started","status":"started","message":"Starting conformance step"}
