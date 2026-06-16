@@ -90,6 +90,7 @@ export async function updateStatus(
 export async function resetSteps(
   requestId: string,
   fromStepOrder: number,
+  organizationId: string,
   tx?: Transaction
 ): Promise<void> {
   const queryRunner = tx ?? db;
@@ -104,6 +105,7 @@ export async function resetSteps(
     .where(
       and(
         eq(approvalSteps.requestId, requestId),
+        eq(approvalSteps.organizationId, organizationId),
         gte(approvalSteps.stepOrder, fromStepOrder)
       )
     );

@@ -48,6 +48,7 @@ export async function resubmitRequest(data: {
         await approvalStepRepository.resetSteps(
           data.requestId,
           rejectedStep.stepOrder,
+          data.organizationId,
           tx
         );
       }

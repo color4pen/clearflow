@@ -80,6 +80,11 @@ export async function approveRequest(data: {
   }
 
   // Multi-step approval flow
+  const transitionValidation = validateTransition(existing.status, "approved");
+  if (!transitionValidation.ok) {
+    return { ok: false, reason: transitionValidation.reason };
+  }
+
   const currentStep = getCurrentStep(steps);
   if (!currentStep) {
     return { ok: false, reason: "All approval steps are already completed." };
