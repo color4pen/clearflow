@@ -1,13 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
-import { getRequest } from "@/application/usecases";
+import { getRequest, getApprovalSteps } from "@/application/usecases";
 import {
   submitRequestAction,
   approveRequestAction,
   rejectRequestAction,
+  resubmitRequestAction,
 } from "@/app/actions/requests";
 import type { RequestStatus } from "@/domain/models/request";
+import type { ApprovalStep, ApprovalStepStatus } from "@/domain/models/approvalStep";
 
 function statusLabel(status: RequestStatus): string {
   const labels: Record<RequestStatus, string> = {
@@ -15,6 +17,7 @@ function statusLabel(status: RequestStatus): string {
     pending: "審査中",
     approved: "承認済み",
     rejected: "却下",
+    revision: "差し戻し",
   };
   return labels[status];
 }
@@ -25,8 +28,74 @@ function statusClass(status: RequestStatus): string {
     pending: "bg-yellow-100 text-yellow-700",
     approved: "bg-green-100 text-green-700",
     rejected: "bg-red-100 text-red-700",
+    revision: "bg-orange-100 text-orange-700",
   };
   return classes[status];
+}
+
+function stepStatusLabel(status: ApprovalStepStatus): string {
+  const labels: Record<ApprovalStepStatus, string> = {
+    pending: "審査中",
+    approved: "承認済み",
+    rejected: "差し戻し",
+  };
+  return labels[status];
+}
+
+function stepStatusClass(status: ApprovalStepStatus): string {
+  const classes: Record<ApprovalStepStatus, string> = {
+    pending: "bg-yellow-100 text-yellow-700",
+    approved: "bg-green-100 text-green-700",
+    rejected: "bg-orange-100 text-orange-700",
+  };
+  return classes[status];
+}
+
+function ApprovalStepsSection({ steps }: { steps: ApprovalStep[] }) {
+  if (steps.length === 0) return null;
+
+  return (
+    <div className="mb-6">
+      <h3 className="text-sm font-medium text-gray-700 mb-3">承認ステップ</h3>
+      <ol className="space-y-3">
+        {steps.map((step) => (
+          <li key={step.id} className="flex items-start gap-3 p-3 border border-gray-200 rounded-md">
+            <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-600">
+              {step.stepOrder}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm font-medium text-gray-800">
+                  {step.approverRole}
+                </span>
+                <span
+                  className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${stepStatusClass(step.status)}`}
+                >
+                  {stepStatusLabel(step.status)}
+                </span>
+              </div>
+              {step.approvedAt && (
+                <p className="text-xs text-gray-500">
+                  {step.approvedAt.toLocaleDateString("ja-JP", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              )}
+              {step.comment && (
+                <p className="mt-1 text-xs text-orange-700 bg-orange-50 rounded px-2 py-1">
+                  差し戻しコメント: {step.comment}
+                </p>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
 }
 
 export default async function RequestDetailPage({
@@ -43,6 +112,8 @@ export default async function RequestDetailPage({
     notFound();
   }
 
+  const steps = await getApprovalSteps({ requestId: id, organizationId });
+
   const submitAction = submitRequestAction.bind(null, id) as unknown as (
     formData: FormData
   ) => Promise<void>;
@@ -50,6 +121,9 @@ export default async function RequestDetailPage({
     formData: FormData
   ) => Promise<void>;
   const rejectAction = rejectRequestAction.bind(null, id) as unknown as (
+    formData: FormData
+  ) => Promise<void>;
+  const resubmitAction = resubmitRequestAction.bind(null, id) as unknown as (
     formData: FormData
   ) => Promise<void>;
 
@@ -110,6 +184,9 @@ export default async function RequestDetailPage({
           </div>
         </div>
 
+        {/* Approval steps progress */}
+        <ApprovalStepsSection steps={steps} />
+
         {/* Action buttons based on status */}
         {request.status === "draft" && (
           <div className="border-t border-gray-200 pt-6">
@@ -132,7 +209,7 @@ export default async function RequestDetailPage({
             <h3 className="text-sm font-medium text-gray-700 mb-3">
               アクション
             </h3>
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-wrap">
               <form action={approveAction}>
                 <button
                   type="submit"
@@ -141,7 +218,8 @@ export default async function RequestDetailPage({
                   承認する
                 </button>
               </form>
-              <form action={rejectAction}>
+              <form action={rejectAction} className="flex flex-col gap-2">
+                <input type="hidden" name="targetStatus" value="rejected" />
                 <button
                   type="submit"
                   className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
@@ -150,6 +228,49 @@ export default async function RequestDetailPage({
                 </button>
               </form>
             </div>
+            {/* 差し戻しフォーム */}
+            <div className="mt-4">
+              <form action={rejectAction} className="space-y-2">
+                <input type="hidden" name="targetStatus" value="revision" />
+                <div>
+                  <label
+                    htmlFor="revision-comment"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    差し戻しコメント
+                  </label>
+                  <textarea
+                    id="revision-comment"
+                    name="comment"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    placeholder="差し戻し理由を入力してください"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                >
+                  差し戻す
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {request.status === "revision" && (
+          <div className="border-t border-gray-200 pt-6">
+            <h3 className="text-sm font-medium text-gray-700 mb-3">
+              アクション
+            </h3>
+            <form action={resubmitAction}>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                再申請する
+              </button>
+            </form>
           </div>
         )}
       </div>

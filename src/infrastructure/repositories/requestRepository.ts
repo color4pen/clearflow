@@ -4,6 +4,7 @@ import type { Transaction } from "../db";
 import { requests } from "../schema";
 import type { Request, RequestStatus } from "@/domain/models/request";
 
+
 function mapRow(row: typeof requests.$inferSelect): Request {
   return {
     id: row.id,
@@ -17,13 +18,17 @@ function mapRow(row: typeof requests.$inferSelect): Request {
   };
 }
 
-export async function create(data: {
-  title: string;
-  description?: string | null;
-  organizationId: string;
-  creatorId: string;
-}): Promise<Request> {
-  const result = await db
+export async function create(
+  data: {
+    title: string;
+    description?: string | null;
+    organizationId: string;
+    creatorId: string;
+  },
+  tx?: Transaction
+): Promise<Request> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
     .insert(requests)
     .values({
       title: data.title,

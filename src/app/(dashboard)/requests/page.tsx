@@ -9,6 +9,7 @@ function statusLabel(status: RequestStatus): string {
     pending: "審査中",
     approved: "承認済み",
     rejected: "却下",
+    revision: "差し戻し",
   };
   return labels[status];
 }
@@ -19,6 +20,7 @@ function statusClass(status: RequestStatus): string {
     pending: "bg-yellow-100 text-yellow-700",
     approved: "bg-green-100 text-green-700",
     rejected: "bg-red-100 text-red-700",
+    revision: "bg-orange-100 text-orange-700",
   };
   return classes[status];
 }

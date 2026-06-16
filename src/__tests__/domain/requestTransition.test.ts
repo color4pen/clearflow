@@ -48,4 +48,42 @@ describe("validateTransition — state transition rules", () => {
       expect(result.reason).toContain("approved");
     }
   });
+
+  /**
+   * TC-006: pending から revision への遷移が許可される（差し戻し）
+   */
+  it("TC-006: allows pending → revision", () => {
+    const result = validateTransition("pending", "revision");
+    expect(result.ok).toBe(true);
+  });
+
+  /**
+   * TC-007: revision から pending への遷移が許可される（再申請）
+   */
+  it("TC-007: allows revision → pending", () => {
+    const result = validateTransition("revision", "pending");
+    expect(result.ok).toBe(true);
+  });
+
+  /**
+   * TC-008: revision から approved への遷移が拒否される
+   */
+  it("TC-008: rejects revision → approved", () => {
+    const result = validateTransition("revision", "approved");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBeTruthy();
+    }
+  });
+
+  /**
+   * TC-009: revision から rejected への遷移が拒否される
+   */
+  it("TC-009: rejects revision → rejected", () => {
+    const result = validateTransition("revision", "rejected");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBeTruthy();
+    }
+  });
 });

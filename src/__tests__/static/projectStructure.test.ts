@@ -104,6 +104,8 @@ describe("Domain model integrity", () => {
       "domain/models/user.ts",
       "domain/models/request.ts",
       "domain/models/auditLog.ts",
+      "domain/models/approvalStep.ts",
+      "domain/models/approvalTemplate.ts",
     ];
     for (const file of modelFiles) {
       const content = await readSrc(file);
@@ -131,8 +133,11 @@ describe("Domain model integrity", () => {
       "domain/models/user.ts",
       "domain/models/request.ts",
       "domain/models/auditLog.ts",
+      "domain/models/approvalStep.ts",
+      "domain/models/approvalTemplate.ts",
       "domain/models/index.ts",
       "domain/services/requestTransition.ts",
+      "domain/services/approvalStepService.ts",
       "domain/services/index.ts",
     ];
     for (const file of files) {

@@ -207,6 +207,44 @@ describe("Authorization in Server Actions", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Multi-stage approval — TC-060 to TC-063
+// ---------------------------------------------------------------------------
+
+describe("Multi-stage approval usecase structure", () => {
+  /**
+   * TC-060: resubmitRequest usecase が存在し validateTransition を呼び出す
+   */
+  it("TC-060: resubmitRequest usecase exists and calls validateTransition", async () => {
+    const src = await readSrc("application/usecases/resubmitRequest.ts");
+    expect(src).toContain("validateTransition");
+  });
+
+  /**
+   * TC-061: resubmitRequest usecase が db.transaction を使用する
+   */
+  it("TC-061: resubmitRequest usecase uses db.transaction", async () => {
+    const src = await readSrc("application/usecases/resubmitRequest.ts");
+    expect(src).toContain("db.transaction");
+  });
+
+  /**
+   * TC-062: resubmitRequest usecase が auditLogRepository を使用する
+   */
+  it("TC-062: resubmitRequest usecase uses auditLogRepository", async () => {
+    const src = await readSrc("application/usecases/resubmitRequest.ts");
+    expect(src).toContain("auditLogRepository");
+  });
+
+  /**
+   * TC-063: approveRequest usecase が approvalStepRepository を使用する
+   */
+  it("TC-063: approveRequest usecase uses approvalStepRepository", async () => {
+    const src = await readSrc("application/usecases/approveRequest.ts");
+    expect(src).toContain("approvalStepRepository");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Request creation — TC-024
 // ---------------------------------------------------------------------------
 

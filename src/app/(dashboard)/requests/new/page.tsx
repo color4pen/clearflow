@@ -1,9 +1,14 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createRequestAction, type CreateRequestState } from "@/app/actions/requests";
+import {
+  createRequestAction,
+  listApprovalTemplatesAction,
+  type CreateRequestState,
+} from "@/app/actions/requests";
+import type { ApprovalTemplate } from "@/domain/models/approvalTemplate";
 
 const initialState: CreateRequestState = {};
 
@@ -13,6 +18,15 @@ export default function NewRequestPage() {
     createRequestAction,
     initialState
   );
+  const [templates, setTemplates] = useState<ApprovalTemplate[]>([]);
+
+  useEffect(() => {
+    listApprovalTemplatesAction().then((result) => {
+      if (result.success) {
+        setTemplates(result.templates);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     // Redirect on success (no errors, no message, and state has been touched)
@@ -84,6 +98,29 @@ export default function NewRequestPage() {
               </p>
             )}
           </div>
+
+          {templates.length > 0 && (
+            <div>
+              <label
+                htmlFor="templateId"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                承認テンプレート（任意）
+              </label>
+              <select
+                id="templateId"
+                name="templateId"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              >
+                <option value="">テンプレートを選択しない</option>
+                {templates.map((template) => (
+                  <option key={template.id} value={template.id}>
+                    {template.name}（{template.steps.length}段階承認）
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="flex items-center gap-3 pt-2">
             <button

@@ -4,3 +4,5 @@ export { getRequest } from "./getRequest";
 export { submitRequest } from "./submitRequest";
 export { approveRequest } from "./approveRequest";
 export { rejectRequest } from "./rejectRequest";
+export { resubmitRequest } from "./resubmitRequest";
+export { getApprovalSteps } from "./getApprovalSteps";
