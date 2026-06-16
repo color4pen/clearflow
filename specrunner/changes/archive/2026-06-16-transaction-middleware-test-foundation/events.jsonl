@@ -106,3 +106,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/transaction-middleware-test-foundation/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-16T08:36:24.088Z","endedAt":"2026-06-16T08:36:25.879Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-16T08:36:25.879Z","outputs":[{"path":"specrunner/changes/transaction-middleware-test-foundation/pr-create-result.md","hash":"sha256:78c90489c3b7791770b498aa8a495d7e205f79a9a32e26dc3ae1d7f85f1d43da"}],"inputs":[{"path":"change/transaction-middleware-test-foundation-2b41565c","hash":null}]}
 {"type":"transition","ts":"2026-06-16T08:36:25.884Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-16T08:38:54.904Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
