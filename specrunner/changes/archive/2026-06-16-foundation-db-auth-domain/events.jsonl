@@ -135,3 +135,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/foundation-db-auth-domain/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-16T07:11:21.313Z","endedAt":"2026-06-16T07:11:23.248Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-16T07:11:23.248Z","outputs":[{"path":"specrunner/changes/foundation-db-auth-domain/pr-create-result.md","hash":"sha256:7c111258678d1cec14249f71630b957606ad9fc41b1a998782608f59766e6449"}],"inputs":[{"path":"feat/foundation-db-auth-domain-f66a06f7","hash":null}]}
 {"type":"transition","ts":"2026-06-16T07:11:23.255Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-16T07:15:34.056Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
