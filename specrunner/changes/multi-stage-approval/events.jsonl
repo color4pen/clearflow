@@ -102,3 +102,9 @@
 {"type":"transition","ts":"2026-06-16T11:40:13.976Z","step":"domain-invariants","status":"ok","message":"domain-invariants iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-16T11:40:13.976Z","step":"step-transition","status":"ok","message":"domain-invariants → code-fixer"}
 {"type":"transition","ts":"2026-06-16T11:40:13.978Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-16T11:42:11.234Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"6f49e8fd-2528-4043-baff-3df837e919b6","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-06-16T11:40:13.993Z","endedAt":"2026-06-16T11:42:09.770Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-16T11:42:09.770Z","outputs":[{"path":"specrunner/changes/multi-stage-approval","hash":null}],"inputs":[{"path":"specrunner/changes/multi-stage-approval/domain-invariants-result-001.md","hash":"sha256:63ce2f71f8285420f04ff22501dea0d0bcdf2955bf013eee595a0c41d63489ee"}]}
+{"type":"transition","ts":"2026-06-16T11:42:11.240Z","step":"step-transition","status":"ok","message":"code-fixer → regression-gate"}
+{"type":"transition","ts":"2026-06-16T11:42:11.242Z","step":"regression-gate","status":"started","message":"regression-gate iteration 1 started"}
+{"type":"transition","ts":"2026-06-16T11:42:11.243Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
