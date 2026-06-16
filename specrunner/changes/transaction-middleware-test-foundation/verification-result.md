@@ -6,23 +6,45 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | failed | 10.4s | 1 |
+| 1 | build | passed | 6.6s | 0 |
 | 2 | typecheck | skipped | — | — |
 | 3 | test | skipped | — | — |
-| 4 | lint | skipped | — | — |
+| 4 | lint | passed | 2.1s | 0 |
 | 5 | security | skipped | — | — |
-| 6 | test-coverage | skipped | — | — |
+| 6 | test-coverage | failed | 0.0s | 1 |
 
 ## Phase: build
-
-Step 'build' failed
 
 ```
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 5.6s
+✓ Compiled successfully in 3.7s
   Running TypeScript ...
+  Finished TypeScript in 1629ms ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/7) ...
+  Generating static pages using 7 workers (1/7) 
+  Generating static pages using 7 workers (3/7) 
+  Generating static pages using 7 workers (5/7) 
+✓ Generating static pages using 7 workers (7/7) in 131ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/auth/[...nextauth]
+├ ○ /login
+├ ƒ /requests
+├ ƒ /requests/[id]
+└ ƒ /requests/new
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
 
 $ next build
 ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
@@ -32,24 +54,6 @@ $ next build
  Detected additional lockfiles: 
    * bun.lock
 
-Failed to type check.
-
-./src/app/(dashboard)/requests/[id]/page.tsx:113:19
-Type error: Type '(_formData: FormData) => Promise<ActionResult>' is not assignable to type 'string | ((formData: FormData) => void | Promise<void>) | undefined'.
-  Type '(_formData: FormData) => Promise<ActionResult>' is not assignable to type '(formData: FormData) => void | Promise<void>'.
-    Type 'Promise<ActionResult>' is not assignable to type 'void | Promise<void>'.
-      Type 'Promise<ActionResult>' is not assignable to type 'Promise<void>'.
-        Type 'ActionResult' is not assignable to type 'void'.
-
-  [90m111 |[0m               アクション
-  [90m112 |[0m             </h3>
-[31m[1m>[0m [90m113 |[0m             <form action={submitAction}>
-  [90m    |[0m                   [31m[1m^[0m
-  [90m114 |[0m               <button
-  [90m115 |[0m                 [36mtype[0m=[32m"submit"[0m
-  [90m116 |[0m                 className=[32m"px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-m...[0m
-Next.js build worker exited with code: 1 and signal: null
-error: script "build" exited with code 1
 
 ```
 
@@ -63,7 +67,19 @@ _(skipped — script not found in package.json)_
 
 ## Phase: lint
 
-_(skipped — script not found in package.json)_
+```
+
+src/app/actions/requests.ts
+   61:3  warning  '_formData' is defined but never used  @typescript-eslint/no-unused-vars
+   85:3  warning  '_formData' is defined but never used  @typescript-eslint/no-unused-vars
+  112:3  warning  '_formData' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 3 problems (0 errors, 3 warnings)
+
+
+$ eslint
+
+```
 
 ## Phase: security
 
@@ -71,4 +87,9 @@ _(skipped — script not found in package.json)_
 
 ## Phase: test-coverage
 
-_(skipped — script not found in package.json)_
+Step 'test-coverage' failed
+
+```
+test-coverage: 22/23 must TCs covered
+Missing: TC-006
+```
