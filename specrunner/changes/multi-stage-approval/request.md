@@ -35,13 +35,15 @@
 2. **承認テンプレートテーブルの追加**: `approval_templates` テーブルを新設する。カラム: id, name, organizationId (FK), steps (jsonb — `[{ stepOrder: number, approverRole: string }]`), createdAt。組織ごとに承認フローのテンプレートを定義し、申請作成時に適用する
 3. **状態遷移の拡張**: `RequestStatus` に `"revision"` を追加し、差し戻し後の修正中状態を表す。遷移ルール: `draft → pending`, `pending → approved | rejected | revision`, `revision → pending`。`approved` と `rejected` は終端状態
 4. **承認ロジックの変更**: `approveRequest` usecase を拡張する。現在のステップを承認した後、次のステップが存在すれば申請は `pending` のまま次ステップへ進む。全ステップが承認されたら申請を `approved` にする
-5. **差し戻しロジック**: `rejectRequest` usecase を拡張する。任意のステップで差し戻し可能。差し戻し時に申請のステータスを `revision` に変更し、コメント（差し戻し理由）を記録する
+5. **差し戻しロジック**: `reviseRequest` usecase を新設する。任意のステップで差し戻し可能。差し戻し時に申請のステータスを `revision` に変更し、コメント（差し戻し理由）を承認ステップに記録する。`rejectRequest` は最終却下専用として維持し、申請を `rejected`（終端状態）に遷移させる
 6. **再申請ロジック**: `resubmitRequest` usecase を新設する。`revision` 状態の申請を `pending` に戻し、差し戻されたステップ以降の承認ステータスをリセットする。差し戻し前に完了したステップはリセットしない
-7. **ドメインモデル**: `src/domain/models/` に `ApprovalStep` 型と `ApprovalTemplate` 型を追加する
-8. **ドメインサービス拡張**: `requestTransition.ts` に新しい遷移ルール（revision 状態を含む）を追加する。承認ステップの進行判定ロジックを `src/domain/services/approvalStepService.ts` に配置する
-9. **リポジトリ**: `approvalStepRepository.ts` と `approvalTemplateRepository.ts` を `src/infrastructure/repositories/` に追加する
-10. **UI拡張**: 申請詳細画面に承認ステップの進捗表示を追加する。差し戻し時のコメント入力フォームを追加する。再申請ボタンを追加する。申請作成時に承認テンプレートを選択できるようにする
-11. **監査ログ**: 各ステップの承認・差し戻し・再申請をそれぞれ audit_logs に記録する。トランザクション内で記録する
+7. **createRequest の拡張**: `createRequest` usecase に `templateId` パラメータを追加する。テンプレートの steps 定義をもとに `approval_steps` レコードをトランザクション内で生成する
+8. **ドメインモデル**: `src/domain/models/` に `ApprovalStep` 型と `ApprovalTemplate` 型を追加する
+9. **ドメインサービス拡張**: `requestTransition.ts` に新しい遷移ルール（revision 状態を含む）を追加する。承認ステップの進行判定ロジックを `src/domain/services/approvalStepService.ts` に配置する。ステップ承認の認可ルール: `approvalStep.approverRole` が `user.role` と一致するユーザーのみ承認可能
+10. **リポジトリ**: `approvalStepRepository.ts` と `approvalTemplateRepository.ts` を `src/infrastructure/repositories/` に追加する
+11. **UI拡張**: 申請詳細画面に承認ステップの進捗表示を追加する。差し戻し時のコメント入力フォームを追加する。再申請ボタンを追加する。申請作成時に承認テンプレートを選択できるようにする。テンプレートが存在しない組織では申請作成を禁止しエラーメッセージを表示する
+12. **監査ログ**: 各ステップの承認・差し戻し・再申請・最終却下をそれぞれ audit_logs に記録する。トランザクション内で記録する
+13. **シードデータ拡張**: 既存のシードスクリプトにデフォルトの承認テンプレート（2段階: admin → admin）を追加する
 
 ## スコープ外
 
@@ -64,7 +66,9 @@
 - [ ] 状態遷移テスト: `revision → approved` が拒否される
 - [ ] 全ステップ承認後に申請が `approved` になることをテストで確認する
 - [ ] 差し戻し後の再申請で、差し戻しステップ以降のみリセットされることをテストで確認する
-- [ ] 各操作（ステップ承認、差し戻し、再申請）で audit_logs にレコードが記録される
+- [ ] 各操作（ステップ承認、差し戻し、再申請、最終却下）で audit_logs にレコードが記録される
+- [ ] 申請作成時に `approval_steps` がテンプレートに基づいて生成されることをテストで確認する
+- [ ] `rejectRequest`（最終却下）と `reviseRequest`（差し戻し）が別ユースケースとして存在する
 - [ ] 承認・差し戻し・再申請の各操作が `db.transaction()` 内で実行される
 - [ ] 依存方向 `actions → usecases → domain / infrastructure` を遵守
 - [ ] `typecheck` が green
