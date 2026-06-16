@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f66a06f7-de6c-4f54-8bcf-336671398ed6",
   "createdAt": "2026-06-16T05:34:17.026Z",
-  "updatedAt": "2026-06-16T05:49:13.372Z",
+  "updatedAt": "2026-06-16T05:53:20.311Z",
   "request": {
     "title": "DB基盤・認証・基本ドメインモデルの導入",
     "type": "new-feature",
@@ -12,17 +12,18 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "spec-review",
+  "step": "spec-fixer",
   "status": "running",
   "branch": "feat/foundation-db-auth-domain-f66a06f7",
   "error": null,
   "pipelineId": "standard",
   "resumePoint": null,
   "_journal": {
-    "historyCount": 13,
+    "historyCount": 17,
     "stepCounts": {
       "request-review": 2,
-      "design": 1
+      "design": 1,
+      "spec-review": 1
     }
   }
 }
