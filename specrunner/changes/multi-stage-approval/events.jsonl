@@ -108,3 +108,10 @@
 {"type":"transition","ts":"2026-06-16T11:42:11.240Z","step":"step-transition","status":"ok","message":"code-fixer → regression-gate"}
 {"type":"transition","ts":"2026-06-16T11:42:11.242Z","step":"regression-gate","status":"started","message":"regression-gate iteration 1 started"}
 {"type":"transition","ts":"2026-06-16T11:42:11.243Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
+{"type":"transition","ts":"2026-06-16T11:45:40.109Z","step":"regression-gate-verdict","status":"ok","message":"regression-gate verdict: approved"}
+{"type":"step-attempt","step":"regression-gate","sessionId":"d1db84b4-006c-4a2f-8276-1b16f80a4022","outcome":{"verdict":"approved","findingsPath":"specrunner/changes/multi-stage-approval/regression-gate-result-001.md","error":null,"toolResult":{"ok":true,"approved":true,"findings":[],"observations":[{"severity":"low","file":"src/app/actions/requests.ts","title":"resubmitRequest が申請者本人（creatorId）確認を行わない（意図的設計）","rationale":"resubmitRequestAction は creatorId チェックを行っていないが、spec.md に「初期実装では組織内の認証済みユーザーであれば実行可能、申請者本人確認は将来対応」と明記されており意図的な設計判断。テナント分離（organizationId）は維持されているため別テナントのデータへのアクセスは不可能。","line":159}]},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-16T11:42:11.256Z","endedAt":"2026-06-16T11:45:38.532Z"}
+{"type":"lineage","step":"regression-gate","ts":"2026-06-16T11:45:38.532Z","outputs":[{"path":"specrunner/changes/multi-stage-approval/regression-gate-result-002.md","hash":null}],"inputs":[{"path":".","hash":null}]}
+{"type":"transition","ts":"2026-06-16T11:45:40.114Z","step":"regression-gate","status":"ok","message":"regression-gate iteration 1 completed with verdict: approved"}
+{"type":"transition","ts":"2026-06-16T11:45:40.114Z","step":"step-transition","status":"ok","message":"regression-gate → conformance"}
+{"type":"transition","ts":"2026-06-16T11:45:40.116Z","step":"conformance","status":"started","message":"conformance iteration 1 started"}
+{"type":"transition","ts":"2026-06-16T11:45:40.117Z","step":"conformance-started","status":"started","message":"Starting conformance step"}
