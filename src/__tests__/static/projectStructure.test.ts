@@ -212,6 +212,15 @@ describe("Authentication configuration", () => {
   });
 
   /**
+   * TC-006: auth.ts が findByEmailForAuth を使用する
+   */
+  it("TC-006: auth.ts uses findByEmailForAuth (not findByEmail)", async () => {
+    const content = await readSrc("infrastructure/auth.ts");
+    expect(content).toContain("findByEmailForAuth");
+    expect(content).not.toContain("findByEmail(");
+  });
+
+  /**
    * TC-021: 未認証アクセスで /login へリダイレクトされる
    */
   it("TC-021: proxy.ts redirects unauthenticated users to /login", async () => {
