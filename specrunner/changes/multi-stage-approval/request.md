@@ -68,7 +68,7 @@
 - [ ] 差し戻し後の再申請で、差し戻しステップ以降のみリセットされることをテストで確認する
 - [ ] 各操作（ステップ承認、差し戻し、再申請、最終却下）で audit_logs にレコードが記録される
 - [ ] 申請作成時に `approval_steps` がテンプレートに基づいて生成されることをテストで確認する
-- [ ] `rejectRequest` usecase が `targetStatus: "rejected"` で最終却下、`targetStatus: "revision"` で差し戻しを処理する（1 つの usecase で両操作をカバーする）
+- [ ] `rejectRequest`（最終却下）と `reviseRequest`（差し戻し）が別ユースケースとして存在する
 - [ ] 承認・差し戻し・再申請の各操作が `db.transaction()` 内で実行される
 - [ ] 依存方向 `actions → usecases → domain / infrastructure` を遵守
 - [ ] `typecheck` が green

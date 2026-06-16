@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "bea3d04f-b9e6-4cb2-a3a4-ddfff2641bc0",
   "createdAt": "2026-06-16T08:41:13.869Z",
-  "updatedAt": "2026-06-16T09:35:53.168Z",
+  "updatedAt": "2026-06-16T11:14:25.418Z",
   "request": {
     "title": "複数段階承認と差し戻し・再申請",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "build-fixer",
+  "step": "code-review",
   "status": "running",
   "branch": "feat/multi-stage-approval-bea3d04f",
   "error": null,
@@ -35,7 +35,7 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 36,
+    "historyCount": 51,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -43,7 +43,9 @@
       "spec-fixer": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 2,
+      "build-fixer": 1,
+      "code-review": 1
     }
   }
 }

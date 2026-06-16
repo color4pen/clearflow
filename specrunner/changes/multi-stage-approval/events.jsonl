@@ -52,3 +52,23 @@
 {"type":"transition","ts":"2026-06-16T09:35:53.166Z","step":"verification","status":"warning","message":"verification iteration 1 completed with verdict: failed"}
 {"type":"transition","ts":"2026-06-16T09:35:53.166Z","step":"step-transition","status":"ok","message":"verification → build-fixer"}
 {"type":"transition","ts":"2026-06-16T09:35:53.168Z","step":"build-fixer-started","status":"started","message":"Starting build-fixer step"}
+{"type":"transition","ts":"2026-06-16T09:40:37.949Z","step":"build-fixer-verdict","status":"ok","message":"build-fixer verdict: success"}
+{"type":"step-attempt","step":"build-fixer","sessionId":"33d7362e-954c-461a-bf25-26cbc99f3232","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-16T09:35:53.180Z","endedAt":"2026-06-16T09:40:36.510Z"}
+{"type":"lineage","step":"build-fixer","ts":"2026-06-16T09:40:36.510Z","outputs":[{"path":"specrunner/changes/multi-stage-approval","hash":null}],"inputs":[{"path":"specrunner/changes/multi-stage-approval/verification-result.md","hash":"sha256:259ae0c1ce17ece618804d1c82519306e97f3c69799e9e01025a119e15606b23"}]}
+{"type":"transition","ts":"2026-06-16T09:40:37.958Z","step":"step-transition","status":"ok","message":"build-fixer → verification"}
+{"type":"transition","ts":"2026-06-16T09:40:37.962Z","step":"verification","status":"started","message":"verification iteration 2 started"}
+{"type":"transition","ts":"2026-06-16T09:40:37.963Z","step":"step-transition","status":"ok","message":"Transitioning to verification step"}
+{"type":"transition","ts":"2026-06-16T09:40:48.180Z","step":"verification-verdict","status":"ok","message":"verification verdict: passed"}
+{"type":"step-attempt","step":"verification","sessionId":null,"outcome":{"verdict":"passed","findingsPath":"specrunner/changes/multi-stage-approval/verification-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-16T09:40:37.964Z","endedAt":"2026-06-16T09:40:48.178Z"}
+{"type":"lineage","step":"verification","ts":"2026-06-16T09:40:48.178Z","outputs":[{"path":"specrunner/changes/multi-stage-approval/verification-result.md","hash":"sha256:ddba0667133c5af10e26be099b6a786161cf6b18d8cf1befdc1e1612472f85b7"}],"inputs":[{"path":".","hash":null}]}
+{"type":"transition","ts":"2026-06-16T09:40:48.185Z","step":"verification","status":"ok","message":"verification iteration 2 completed with verdict: passed"}
+{"type":"transition","ts":"2026-06-16T09:40:48.186Z","step":"step-transition","status":"ok","message":"verification → code-review"}
+{"type":"transition","ts":"2026-06-16T09:40:48.187Z","step":"code-review","status":"started","message":"code-review iteration 1 started"}
+{"type":"transition","ts":"2026-06-16T09:40:48.188Z","step":"code-review-started","status":"started","message":"Starting code-review step"}
+{"type":"transition","ts":"2026-06-16T11:13:32.090Z","step":"store-fail","status":"ok","message":"running → failed: Claude Code SDK query failed: Claude Code returned an error result: API Error: Unable to connect to API (ConnectionRefused)"}
+{"type":"step-attempt","step":"code-review","sessionId":null,"outcome":{"verdict":null,"findingsPath":null,"error":{"code":"CLAUDE_CODE_QUERY_FAILED","message":"Claude Code SDK query failed: Claude Code returned an error result: API Error: Unable to connect to API (ConnectionRefused)","hint":""},"transientRetryAttempts":3},"startedAt":"2026-06-16T09:40:48.201Z","endedAt":"2026-06-16T11:13:32.090Z"}
+{"type":"transition","ts":"2026-06-16T11:13:32.096Z","step":"code-review","status":"error","message":"code-review iteration 1 completed with verdict: error"}
+{"type":"transition","ts":"2026-06-16T11:13:32.097Z","step":"pipeline","status":"ok","message":"failed → awaiting-resume: Claude Code SDK query failed: Claude Code returned an error result: API Error: Unable to connect to API (ConnectionRefused)"}
+{"type":"transition","ts":"2026-06-16T11:14:25.359Z","step":"resume","status":"ok","message":"awaiting-resume → running: Resuming from step 'code-review'"}
+{"type":"transition","ts":"2026-06-16T11:14:25.416Z","step":"code-review","status":"started","message":"code-review iteration 1 started"}
+{"type":"transition","ts":"2026-06-16T11:14:25.418Z","step":"code-review-started","status":"started","message":"Starting code-review step"}
