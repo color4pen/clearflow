@@ -114,3 +114,15 @@
 {"type":"transition","ts":"2026-06-16T07:04:33.374Z","step":"verification","status":"warning","message":"verification iteration 1 completed with verdict: failed"}
 {"type":"transition","ts":"2026-06-16T07:04:33.374Z","step":"step-transition","status":"ok","message":"verification → build-fixer"}
 {"type":"transition","ts":"2026-06-16T07:04:33.378Z","step":"build-fixer-started","status":"started","message":"Starting build-fixer step"}
+{"type":"transition","ts":"2026-06-16T07:05:49.445Z","step":"build-fixer-verdict","status":"ok","message":"build-fixer verdict: success"}
+{"type":"step-attempt","step":"build-fixer","sessionId":"50ddb1ee-bd44-4452-b379-08d90a4ad4de","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-06-16T07:04:33.392Z","endedAt":"2026-06-16T07:05:47.978Z"}
+{"type":"lineage","step":"build-fixer","ts":"2026-06-16T07:05:47.978Z","outputs":[{"path":"specrunner/changes/foundation-db-auth-domain","hash":null}],"inputs":[{"path":"specrunner/changes/foundation-db-auth-domain/verification-result.md","hash":"sha256:5f86e89311ed9bd01cc8c5608552ac5a41b5a5aa43812d1ea5058f03a5533036"}]}
+{"type":"transition","ts":"2026-06-16T07:05:49.449Z","step":"step-transition","status":"ok","message":"build-fixer → verification"}
+{"type":"transition","ts":"2026-06-16T07:05:49.450Z","step":"verification","status":"started","message":"verification iteration 2 started"}
+{"type":"transition","ts":"2026-06-16T07:05:49.451Z","step":"step-transition","status":"ok","message":"Transitioning to verification step"}
+{"type":"transition","ts":"2026-06-16T07:05:59.975Z","step":"verification-verdict","status":"ok","message":"verification verdict: passed"}
+{"type":"step-attempt","step":"verification","sessionId":null,"outcome":{"verdict":"passed","findingsPath":"specrunner/changes/foundation-db-auth-domain/verification-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-16T07:05:49.451Z","endedAt":"2026-06-16T07:05:59.974Z"}
+{"type":"lineage","step":"verification","ts":"2026-06-16T07:05:59.974Z","outputs":[{"path":"specrunner/changes/foundation-db-auth-domain/verification-result.md","hash":"sha256:2d0e8c6457d7131acbcb676b4c30064930cdaf2c38359f81b52418e3867fffd8"}],"inputs":[{"path":".","hash":null}]}
+{"type":"transition","ts":"2026-06-16T07:05:59.977Z","step":"verification","status":"ok","message":"verification iteration 2 completed with verdict: passed"}
+{"type":"transition","ts":"2026-06-16T07:05:59.977Z","step":"step-transition","status":"ok","message":"verification → adr-gen"}
+{"type":"transition","ts":"2026-06-16T07:05:59.979Z","step":"adr-gen-started","status":"started","message":"Starting adr-gen step"}
