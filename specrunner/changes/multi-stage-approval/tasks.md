@@ -177,7 +177,7 @@
 - [ ] `src/app/actions/requests.ts` の `createRequestAction` に `templateId` フィールド処理を追加する。`formData.get("templateId")` で取得し、空文字列の場合は `undefined` として扱う
 - [ ] `src/app/actions/requests.ts` の `rejectRequestAction` の引数に差し戻しモードを追加する。`formData.get("targetStatus")` で `"rejected" | "revision"` を取得し、`formData.get("comment")` でコメントを取得する。`rejectRequest` usecase に渡す
 - [ ] `src/app/actions/requests.ts` に `resubmitRequestAction` を新設する。認証チェック → `resubmitRequest` usecase 呼び出し → `revalidatePath` の流れ。申請者本人のみ実行可能とする（`session.user.id === request.creatorId` の検証は usecase 側ではなく action 側で行う。ただし初期実装では認証済みユーザーなら実行可能とする）
-- [ ] `src/app/actions/requests.ts` に `listApprovalTemplatesAction` を新設する。認証チェック → `approvalTemplateRepository.findByOrganization` 呼び出し（usecase を経由しない読み取り専用操作）
+- [ ] `src/app/actions/requests.ts` に `listApprovalTemplatesAction` を新設する。認証チェック → `session.user.organizationId` を取得（セッションから取得する。URL クエリや request パラメータからは取得しない）→ `approvalTemplateRepository.findByOrganization(session.user.organizationId)` 呼び出し（usecase を経由しない読み取り専用操作）
 - [ ] `src/app/actions/requests.ts` の `approveRequestAction` に `actorRole` を渡す。`session.user.role` を `approveRequest` usecase の `actorRole` 引数に渡す
 - [ ] `src/application/usecases/index.ts` に `resubmitRequest` の re-export が追加されていることを確認する（T-08 で実施済みの想定）
 
@@ -190,15 +190,19 @@
 - 全 mutation 系 action で `revalidatePath` が呼ばれる
 - `typecheck` が green
 
-## T-11: getRequest usecase の拡張（承認ステップ取得）
+## T-11: getApprovalSteps usecase の新設（承認ステップ取得）
 
-- [ ] `src/application/usecases/getRequest.ts` を拡張し、申請と一緒に承認ステップを返すようにする。戻り値を `{ request: Request; approvalSteps: ApprovalStep[] } | null` に変更する
-- [ ] または、承認ステップ取得用の専用 usecase `getApprovalSteps` を新設する（`src/application/usecases/getApprovalSteps.ts`）
-- [ ] 申請詳細画面で承認ステップの進捗を表示するために必要なデータ取得手段を提供する
+- [ ] `src/application/usecases/getApprovalSteps.ts` を新規作成する。承認ステップ取得専用の usecase として `getRequest` は変更しない
+- [ ] `getApprovalSteps` 関数を実装する。引数: `{ requestId: string; organizationId: string }`。戻り値: `ApprovalStep[]`
+- [ ] `approvalStepRepository.findByRequestId(requestId, organizationId)` を呼び出して取得する
+- [ ] `src/application/usecases/index.ts` に `getApprovalSteps` の re-export を追加する
+- [ ] `src/app/actions/requests.ts` の `getApprovalStepsAction` は `getApprovalSteps` usecase を呼び出す。`session` から `organizationId` を取得し usecase に渡す（URL クエリや request パラメータから `organizationId` を取得しない）
 
 **Acceptance Criteria**:
-- 申請詳細画面から承認ステップのデータを取得できる
-- テナント分離（organizationId 条件）が適用されている
+- `src/application/usecases/getApprovalSteps.ts` が存在し `getApprovalSteps` 関数を export している
+- 申請詳細画面から `getApprovalStepsAction` 経由で承認ステップのデータを取得できる
+- テナント分離（organizationId 条件）がセッション由来の値で適用されている
+- `getRequest` usecase の戻り値型は変更されない（後方互換を維持）
 - `typecheck` が green
 
 ## T-12: UI 拡張 — 申請詳細画面

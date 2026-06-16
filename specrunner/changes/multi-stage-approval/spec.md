@@ -44,6 +44,16 @@
 **When** `validateTransition("revision", "approved")` を実行する
 **Then** `{ ok: false }` が返される
 
+### Requirement: resubmitRequest は認証済みユーザーのみが実行できる
+
+`resubmitRequestAction` は認証済みユーザーであれば実行可能 SHALL とする（初期実装）。未認証アクセスはエラーを返す MUST。
+
+#### Scenario: 未認証ユーザーが再申請を試みる
+
+**Given** 認証されていない状態で `resubmitRequestAction` が呼び出される
+**When** アクションが実行される
+**Then** エラーが返され、申請のステータスは変更されない
+
 ### Requirement: 再申請は差し戻しステップ以降のみリセットする
 
 `resubmitRequest` は `revision` 状態の申請を `pending` に戻す際、差し戻されたステップ以降のステップのみをリセット SHALL し、差し戻し前に完了したステップは維持する MUST。
@@ -69,6 +79,22 @@
 **Given** 承認ステップが 0 件の `pending` 状態の申請が存在する
 **When** admin ユーザーが `approveRequest` を実行する
 **Then** 申請が直接 `approved` に遷移する（従来の動作と同一）
+
+### Requirement: 最終却下は rejected 終端状態に遷移し、その後の操作を拒否する
+
+`rejectRequest` に `targetStatus: "rejected"` を指定した場合、申請は `rejected` 終端状態に遷移 SHALL する。`rejected` 状態の申請に対して `resubmitRequest` を実行しようとするとエラーが返される MUST。
+
+#### Scenario: 最終却下で申請が rejected 終端状態に遷移する
+
+**Given** 承認ステップを持つ `pending` 状態の申請が存在する
+**When** admin ユーザーが `targetStatus: "rejected"` で `rejectRequest` を実行する
+**Then** 申請が `rejected` に遷移し、`audit_logs` に `action: "request.reject"` のレコードが作成される
+
+#### Scenario: rejected 状態の申請への再申請は拒否される
+
+**Given** `rejected` 状態の申請が存在する
+**When** 申請者が `resubmitRequest` を実行する
+**Then** エラーが返され（`revision → pending` の遷移ルールにより `rejected → pending` は許可されない）、申請のステータスは変更されない
 
 ### Requirement: 各操作はトランザクション内で実行され監査ログが記録される
 
