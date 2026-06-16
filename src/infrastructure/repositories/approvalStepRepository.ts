@@ -1,7 +1,7 @@
 import { eq, and, gte } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
-import { approvalSteps } from "../schema";
+import { approvalSteps, users } from "../schema";
 import type { ApprovalStep, ApprovalStepStatus } from "@/domain/models/approvalStep";
 
 function mapRow(row: typeof approvalSteps.$inferSelect): ApprovalStep {
@@ -12,6 +12,7 @@ function mapRow(row: typeof approvalSteps.$inferSelect): ApprovalStep {
     approverRole: row.approverRole,
     status: row.status,
     approvedBy: row.approvedBy ?? null,
+    approvedByName: null,
     approvedAt: row.approvedAt ?? null,
     comment: row.comment ?? null,
     organizationId: row.organizationId,
@@ -51,8 +52,12 @@ export async function findByRequestId(
 ): Promise<ApprovalStep[]> {
   const queryRunner = tx ?? db;
   const result = await queryRunner
-    .select()
+    .select({
+      step: approvalSteps,
+      approverName: users.name,
+    })
     .from(approvalSteps)
+    .leftJoin(users, eq(approvalSteps.approvedBy, users.id))
     .where(
       and(
         eq(approvalSteps.requestId, requestId),
@@ -60,7 +65,10 @@ export async function findByRequestId(
       )
     )
     .orderBy(approvalSteps.stepOrder);
-  return result.map(mapRow);
+  return result.map((row) => ({
+    ...mapRow(row.step),
+    approvedByName: row.approverName ?? null,
+  }));
 }
 
 export async function updateStatus(

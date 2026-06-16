@@ -74,6 +74,9 @@ function ApprovalStepsSection({ steps }: { steps: ApprovalStep[] }) {
                   {stepStatusLabel(step.status)}
                 </span>
               </div>
+              {step.approvedByName && (
+                <p className="text-xs text-gray-500">承認者: {step.approvedByName}</p>
+              )}
               {step.approvedAt && (
                 <p className="text-xs text-gray-500">
                   {step.approvedAt.toLocaleDateString("ja-JP", {

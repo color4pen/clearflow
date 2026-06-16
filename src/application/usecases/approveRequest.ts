@@ -85,6 +85,7 @@ export async function approveRequest(data: {
     return { ok: false, reason: transitionValidation.reason };
   }
 
+  // Pre-check role authorization using outer snapshot (non-security-critical fast-fail)
   const currentStep = getCurrentStep(steps);
   if (!currentStep) {
     return { ok: false, reason: "All approval steps are already completed." };
@@ -99,8 +100,20 @@ export async function approveRequest(data: {
 
   try {
     const updated = await db.transaction(async (tx) => {
+      // Re-fetch steps inside the transaction to get a consistent snapshot
+      // and avoid TOCTOU races on isAllApproved computation
+      const freshSteps = await approvalStepRepository.findByRequestId(
+        data.requestId,
+        data.organizationId,
+        tx
+      );
+      const freshCurrentStep = getCurrentStep(freshSteps);
+      if (!freshCurrentStep) {
+        throw new Error("All approval steps are already completed.");
+      }
+
       await approvalStepRepository.updateStatus(
-        currentStep.id,
+        freshCurrentStep.id,
         {
           status: "approved",
           approvedBy: data.actorId,
@@ -117,17 +130,17 @@ export async function approveRequest(data: {
           actorId: data.actorId,
           organizationId: data.organizationId,
           metadata: {
-            stepId: currentStep.id,
-            stepOrder: currentStep.stepOrder,
-            approverRole: currentStep.approverRole,
+            stepId: freshCurrentStep.id,
+            stepOrder: freshCurrentStep.stepOrder,
+            approverRole: freshCurrentStep.approverRole,
           },
         },
         tx
       );
 
-      // Optimistically compute updated steps to check if all approved
-      const updatedSteps = steps.map((s) =>
-        s.id === currentStep.id
+      // Compute updated steps based on fresh snapshot
+      const updatedSteps = freshSteps.map((s) =>
+        s.id === freshCurrentStep.id
           ? {
               ...s,
               status: "approved" as const,

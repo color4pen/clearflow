@@ -54,13 +54,17 @@ export async function createRequestAction(
       ? rawTemplateId.trim()
       : undefined;
 
-  await createRequest({
+  const result = await createRequest({
     title: parsed.data.title,
     description: parsed.data.description ?? null,
     organizationId: session.user.organizationId,
     creatorId: session.user.id,
     templateId,
   });
+
+  if (!result.ok) {
+    return { message: result.reason };
+  }
 
   revalidatePath("/requests");
   return {};
