@@ -73,6 +73,7 @@ export async function findByRequestId(
 
 export async function updateStatus(
   stepId: string,
+  organizationId: string,
   data: {
     status: ApprovalStepStatus;
     approvedBy?: string | null;
@@ -90,7 +91,12 @@ export async function updateStatus(
       approvedAt: data.approvedAt ?? null,
       comment: data.comment ?? null,
     })
-    .where(eq(approvalSteps.id, stepId))
+    .where(
+      and(
+        eq(approvalSteps.id, stepId),
+        eq(approvalSteps.organizationId, organizationId)
+      )
+    )
     .returning();
   return result[0] ? mapRow(result[0]) : null;
 }

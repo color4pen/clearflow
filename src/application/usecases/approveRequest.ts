@@ -114,6 +114,7 @@ export async function approveRequest(data: {
 
       await approvalStepRepository.updateStatus(
         freshCurrentStep.id,
+        data.organizationId,
         {
           status: "approved",
           approvedBy: data.actorId,

@@ -78,24 +78,34 @@ export async function createRequest(data: {
     }
   }
 
-  // No template: traditional creation without steps
+  // No template: wrap in transaction so audit log and request creation are atomic
   try {
-    const request = await requestRepository.create({
-      title: data.title,
-      description: data.description ?? null,
-      organizationId: data.organizationId,
-      creatorId: data.creatorId,
+    const result = await db.transaction(async (tx) => {
+      const request = await requestRepository.create(
+        {
+          title: data.title,
+          description: data.description ?? null,
+          organizationId: data.organizationId,
+          creatorId: data.creatorId,
+        },
+        tx
+      );
+
+      await auditLogRepository.create(
+        {
+          action: "request.create",
+          targetType: "request",
+          targetId: request.id,
+          actorId: data.creatorId,
+          organizationId: data.organizationId,
+        },
+        tx
+      );
+
+      return request;
     });
 
-    await auditLogRepository.create({
-      action: "request.create",
-      targetType: "request",
-      targetId: request.id,
-      actorId: data.creatorId,
-      organizationId: data.organizationId,
-    });
-
-    return { ok: true, request };
+    return { ok: true, request: result };
   } catch (err) {
     return {
       ok: false,

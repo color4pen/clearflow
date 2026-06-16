@@ -48,6 +48,7 @@ export async function rejectRequest(data: {
         if (currentStep) {
           await approvalStepRepository.updateStatus(
             currentStep.id,
+            data.organizationId,
             {
               status: "rejected",
               comment: data.comment ?? null,
