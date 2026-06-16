@@ -1,17 +1,17 @@
 # Verification Result — foundation-db-auth-domain — iter 1
 
-## Verdict: failed
+## Verdict: passed
 
 ## Phase Results
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 6.9s | 0 |
+| 1 | build | passed | 6.5s | 0 |
 | 2 | typecheck | skipped | — | — |
 | 3 | test | skipped | — | — |
-| 4 | lint | passed | 1.5s | 0 |
+| 4 | lint | passed | 1.3s | 0 |
 | 5 | security | skipped | — | — |
-| 6 | test-coverage | failed | 0.0s | 1 |
+| 6 | test-coverage | passed | 0.0s | 0 |
 
 ## Phase: build
 
@@ -19,15 +19,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 4.0s
+✓ Compiled successfully in 3.6s
   Running TypeScript ...
-  Finished TypeScript in 1716ms ...
+  Finished TypeScript in 1686ms ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/7) ...
   Generating static pages using 7 workers (1/7) 
   Generating static pages using 7 workers (3/7) 
   Generating static pages using 7 workers (5/7) 
-✓ Generating static pages using 7 workers (7/7) in 105ms
+✓ Generating static pages using 7 workers (7/7) in 132ms
   Finalizing page optimization ...
 
 Route (app)
@@ -87,9 +87,6 @@ _(skipped — script not found in package.json)_
 
 ## Phase: test-coverage
 
-Step 'test-coverage' failed
-
 ```
-test-coverage: 0/46 must TCs covered
-Missing: TC-001, TC-002, TC-003, TC-004, TC-005, TC-007, TC-008, TC-009, TC-010, TC-011, TC-012, TC-013, TC-014, TC-015, TC-016, TC-017, TC-018, TC-019, TC-020, TC-021, TC-022, TC-023, TC-024, TC-025, TC-026, TC-027, TC-028, TC-029, TC-031, TC-032, TC-033, TC-034, TC-035, TC-036, TC-039, TC-040, TC-041, TC-042, TC-044, TC-045, TC-046, TC-048, TC-050, TC-056, TC-058, TC-059
+test-coverage: 46/46 must TCs covered
 ```
