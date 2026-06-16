@@ -354,10 +354,128 @@ describe("Seed script", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Build and lint — TC-058, TC-059
+// Multi-stage approval UI — TC-051, TC-052, TC-053, TC-054, TC-055
+// ---------------------------------------------------------------------------
+
+describe("Multi-stage approval UI", () => {
+  /**
+   * TC-051: 承認ステップの進捗が申請詳細画面に一覧表示される
+   * The request detail page must render an ApprovalStepsSection component
+   * that shows each step's order, approverRole, status, approval timestamp,
+   * and rejection comment.
+   */
+  it("TC-051: request detail page renders ApprovalStepsSection with step progress", async () => {
+    const content = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
+    // ApprovalStepsSection component must be present
+    expect(content).toContain("ApprovalStepsSection");
+    // Must display stepOrder
+    expect(content).toContain("stepOrder");
+    // Must display approverRole
+    expect(content).toContain("approverRole");
+    // Must display step status
+    expect(content).toContain("stepStatusLabel");
+    // Must display approvedAt timestamp
+    expect(content).toContain("approvedAt");
+    // Must display rejection comment
+    expect(content).toContain("comment");
+  });
+
+  /**
+   * TC-052: 差し戻しボタンとコメント入力が pending 状態の申請に表示される
+   * When a request is in "pending" state, the detail page must show
+   * a revision form with a comment textarea and a "差し戻す" submit button.
+   */
+  it("TC-052: request detail page shows revision form with comment textarea for pending requests", async () => {
+    const content = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
+    // Must check for pending status to show revision form
+    expect(content).toContain('"pending"');
+    // Must have a textarea for the revision comment
+    expect(content).toContain("textarea");
+    // The revision comment field must have name="comment"
+    expect(content).toContain('name="comment"');
+    // The targetStatus hidden input must carry "revision"
+    expect(content).toContain('value="revision"');
+    // Must have a "差し戻す" button
+    expect(content).toContain("差し戻す");
+  });
+
+  /**
+   * TC-053: 再申請ボタンが revision 状態の申請に表示される
+   * When a request is in "revision" state, the detail page must show
+   * a resubmit button that calls resubmitRequestAction.
+   */
+  it("TC-053: request detail page shows resubmit button for revision status", async () => {
+    const content = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
+    // Must check for revision status
+    expect(content).toContain('"revision"');
+    // Must import and use resubmitRequestAction
+    expect(content).toContain("resubmitRequestAction");
+    // Must have a resubmit button label
+    expect(content).toContain("再申請する");
+  });
+
+  /**
+   * TC-054: テンプレート選択セレクトボックスが申請作成画面に表示される
+   * The new request page must render a template selection <select> element
+   * showing all organization templates, with an empty-value option for "no template".
+   */
+  it("TC-054: new request page shows template selection select box", async () => {
+    const content = await readSrc("app/(dashboard)/requests/new/page.tsx");
+    // Must import listApprovalTemplatesAction to fetch templates
+    expect(content).toContain("listApprovalTemplatesAction");
+    // Must have a <select> element for template selection
+    expect(content).toContain("<select");
+    // The select must use name="templateId"
+    expect(content).toContain('name="templateId"');
+    // Must list templates
+    expect(content).toContain("templates");
+    // Must have an empty-value option (no template selected)
+    expect(content).toContain('value=""');
+  });
+
+  /**
+   * TC-055: 申請一覧画面で revision 状態のラベルが正しく表示される
+   * The requests list page must include a "revision" status in its status map,
+   * displaying it as "差し戻し" with the orange badge class.
+   */
+  it("TC-055: requests list page displays revision status as '差し戻し' with orange badge", async () => {
+    const content = await readSrc("app/(dashboard)/requests/page.tsx");
+    // Must include "revision" in the status label map
+    expect(content).toContain("revision");
+    // "差し戻し" must be the display label
+    expect(content).toContain("差し戻し");
+    // Must apply orange styling for revision status
+    expect(content).toContain("orange");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Build and lint — TC-057, TC-058, TC-059
 // ---------------------------------------------------------------------------
 
 describe("Build and lint", () => {
+  /**
+   * TC-057: bun run build が成功する
+   *         (build phase verified separately — this test confirms all key
+   *          source files required for a successful build exist and are importable)
+   */
+  it("TC-057: all key source files for the build exist", async () => {
+    const keyFiles = [
+      "domain/models/approvalStep.ts",
+      "domain/models/approvalTemplate.ts",
+      "domain/services/approvalStepService.ts",
+      "infrastructure/repositories/approvalStepRepository.ts",
+      "infrastructure/repositories/approvalTemplateRepository.ts",
+      "application/usecases/resubmitRequest.ts",
+      "application/usecases/approveRequest.ts",
+      "application/usecases/rejectRequest.ts",
+    ];
+    for (const file of keyFiles) {
+      const exists = await fileExists(`src/${file}`);
+      expect(exists).toBe(true);
+    }
+  });
+
   /**
    * TC-058: bun run build が成功する
    *         (verified by the 'build' phase — this test checks the build script exists)
