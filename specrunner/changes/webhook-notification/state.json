@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "61645c36-62d6-4138-812b-73796f2237da",
   "createdAt": "2026-06-17T14:32:38.546Z",
-  "updatedAt": "2026-06-17T15:24:50.329Z",
+  "updatedAt": "2026-06-17T15:25:25.039Z",
   "request": {
     "title": "Webhook通知とイベント配信基盤",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-fixer",
+  "step": "domain-invariants",
   "status": "running",
   "branch": "feat/webhook-notification-61645c36",
   "error": null,
@@ -35,7 +35,7 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 41,
+    "historyCount": 45,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -43,7 +43,8 @@
       "test-case-gen": 1,
       "implementer": 1,
       "verification": 1,
-      "code-review": 1
+      "code-review": 1,
+      "code-fixer": 1
     }
   }
 }
