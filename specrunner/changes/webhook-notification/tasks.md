@@ -21,7 +21,7 @@
 
 - [ ] `src/infrastructure/schema.ts` に `webhookDeliveryStatusEnum = pgEnum("webhook_delivery_status", ["pending", "delivered", "failed"])` を追加する
 - [ ] `src/infrastructure/schema.ts` に `webhookEndpoints` テーブルを追加する。カラム: `id` (uuid PK defaultRandom), `organizationId` (uuid FK -> organizations, notNull), `url` (text, notNull), `secret` (text, notNull), `isActive` (boolean, notNull, default true -- `boolean("is_active")` を使用), `events` (text[].notNull -- `text("events").array().notNull()` を使用), `createdAt` (timestamp, defaultNow, notNull), `updatedAt` (timestamp, defaultNow, notNull)
-- [ ] `src/infrastructure/schema.ts` に `webhookDeliveries` テーブルを追加する。カラム: `id` (uuid PK defaultRandom), `endpointId` (uuid FK -> webhookEndpoints, notNull), `event` (text, notNull), `payload` (jsonb, notNull), `status` (webhookDeliveryStatusEnum, notNull, default "pending"), `statusCode` (integer, nullable), `attempts` (integer, notNull, default 0 -- `integer("attempts").notNull().default(0)` を使用), `lastAttemptAt` (timestamp, nullable), `createdAt` (timestamp, defaultNow, notNull)
+- [ ] `src/infrastructure/schema.ts` に `webhookDeliveries` テーブルを追加する。カラム: `id` (uuid PK defaultRandom), `endpointId` (uuid FK -> webhookEndpoints, notNull, onDelete: "cascade"), `event` (text, notNull), `payload` (jsonb, notNull), `status` (webhookDeliveryStatusEnum, notNull, default "pending"), `statusCode` (integer, nullable), `attempts` (integer, notNull, default 0 -- `integer("attempts").notNull().default(0)` を使用), `lastAttemptAt` (timestamp, nullable), `createdAt` (timestamp, defaultNow, notNull)
 - [ ] `webhookEndpoints` の relations を追加する: `organizations` への one, `webhookDeliveries` への many
 - [ ] `webhookDeliveries` の relations を追加する: `webhookEndpoints` への one
 - [ ] 既存の `organizationsRelations` に `webhookEndpoints` への `many` relation を追加する
@@ -96,12 +96,12 @@
   ```
   `deliverWebhookEvent` を `@/infrastructure/webhookDelivery` から import する
 - [ ] `src/application/usecases/submitRequest.ts` のトランザクション完了後に同様のパターンで `"request.submitted"` イベントを配信する。`data: { requestId: updated.id, requestTitle: updated.title, actorId: data.actorId, status: "pending" }`
-- [ ] `src/application/usecases/approveRequest.ts` のトランザクション完了後にイベントを配信する:
+- [ ] `src/application/usecases/approveRequest.ts` を修正する。`db.transaction` のコールバック戻り値の型を `{ request: Request, approvedStep: ApprovalStep | null, allApproved: boolean }` に変更し、トランザクション外でステップデータを参照可能にする。トランザクション完了後にイベントを配信する:
   - ステップなし（`steps.length === 0`）パス: `"request.approved"` イベント
-  - マルチステップ承認パス: 常に `"step.approved"` イベントを配信。全ステップ完了で `approved` に遷移した場合は追加で `"request.approved"` イベントも配信する。配信時に `requestTitle` を既存の `existing` 変数から取得できる
+  - マルチステップ承認パス: 常に `"step.approved"` イベントを配信。`approvedStep` の `id`, `stepOrder`, `approverRole` を `metadata` に含める。全ステップ完了で `approved` に遷移した場合は追加で `"request.approved"` イベントも配信する
   - 注意: `approveRequest` は複数の return パスがあるため、各 return の直前に適切なイベントを配信する
-- [ ] `src/application/usecases/rejectRequest.ts` のトランザクション完了後にイベントを配信する:
-  - `targetStatus === "revision"` パス: `"request.revised"` と `"step.rejected"` の両方を配信
+- [ ] `src/application/usecases/rejectRequest.ts` を修正する。`db.transaction` のコールバック戻り値に `currentStep` を含めて、トランザクション外でステップデータを参照可能にする。トランザクション完了後にイベントを配信する:
+  - `targetStatus === "revision"` パス: `"request.revised"` と `"step.rejected"` の両方を配信。`currentStep` の `id`, `stepOrder`, `approverRole` を step イベントの `metadata` に含める
   - `targetStatus === "rejected"` パス: `"request.rejected"` イベントを配信
 - [ ] `src/application/usecases/resubmitRequest.ts` のトランザクション完了後に `"request.resubmitted"` イベントを配信する
 
@@ -121,7 +121,7 @@
 - [ ] `listWebhookEndpointsAction()` を実装する。`webhookEndpointRepository.findByOrganization(session.user.organizationId)` を呼び出す。エンドポイント一覧を返す。secret は最初の 8 文字 + `...` にマスクして返す
 - [ ] `createWebhookEndpointAction(formData: FormData)` を実装する:
   1. `formData` から `url` (string) と `events` (string[] -- 複数選択) を取得する
-  2. `url` のバリデーション: `z.string().url()` で検証する
+  2. `url` のバリデーション: `z.string().url()` で検証した後、以下の SSRF 対策を行う: (a) スキーム制限: `https://` のみ許可し `http://` をブロック。(b) 私有 IP ブロック: `new URL(url)` で hostname を取り出し、`localhost`, `127.0.0.1`, `::1`, `169.254.*`（リンクローカル）, `10.*`, `172.16-31.*`, `192.168.*`（RFC 1918）に該当する場合は `{ success: false, message: "内部ネットワークの URL は登録できません" }` を返す
   3. `events` のバリデーション: 各要素が `WEBHOOK_EVENT_TYPES` に含まれることを確認する
   4. `secret` を自動生成する: `crypto.randomBytes(32).toString("hex")` で生成し、`"whsec_"` プレフィックスを付与する
   5. `webhookEndpointRepository.create({ organizationId, url, secret, events })` を呼び出す
