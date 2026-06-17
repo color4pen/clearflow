@@ -24,12 +24,20 @@ export default async function DashboardLayout({
           </div>
           <div className="flex items-center gap-4">
             {session.user.role === "admin" && (
-              <Link
-                href="/settings/webhooks"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                設定
-              </Link>
+              <>
+                <Link
+                  href="/settings/webhooks"
+                  className="text-sm font-medium text-gray-700 hover:text-gray-900"
+                >
+                  設定
+                </Link>
+                <Link
+                  href="/settings/audit-logs"
+                  className="text-sm font-medium text-gray-700 hover:text-gray-900"
+                >
+                  監査ログ
+                </Link>
+              </>
             )}
             <div className="text-right">
               <p className="text-sm font-medium text-gray-900">

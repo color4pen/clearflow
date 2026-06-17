@@ -14,6 +14,7 @@ function mapRow(row: typeof webhookDeliveries.$inferSelect): WebhookDelivery {
     statusCode: row.statusCode ?? null,
     attempts: row.attempts,
     lastAttemptAt: row.lastAttemptAt ?? null,
+    nextRetryAt: row.nextRetryAt ?? null,
     createdAt: row.createdAt,
   };
 }
@@ -43,6 +44,7 @@ export async function updateStatus(
     statusCode?: number | null;
     attempts: number;
     lastAttemptAt: Date | null;
+    nextRetryAt?: Date | null;
   }
 ): Promise<void> {
   await db
@@ -52,6 +54,36 @@ export async function updateStatus(
       statusCode: data.statusCode ?? null,
       attempts: data.attempts,
       lastAttemptAt: data.lastAttemptAt,
+      ...(data.nextRetryAt !== undefined ? { nextRetryAt: data.nextRetryAt } : {}),
+    })
+    .where(eq(webhookDeliveries.id, id));
+}
+
+export async function findById(
+  id: string,
+  organizationId: string
+): Promise<WebhookDelivery | null> {
+  const result = await db
+    .select({ delivery: webhookDeliveries })
+    .from(webhookDeliveries)
+    .innerJoin(
+      webhookEndpoints,
+      and(
+        eq(webhookDeliveries.endpointId, webhookEndpoints.id),
+        eq(webhookEndpoints.organizationId, organizationId)
+      )
+    )
+    .where(eq(webhookDeliveries.id, id))
+    .limit(1);
+  return result[0] ? mapRow(result[0].delivery) : null;
+}
+
+export async function resetForRetry(id: string): Promise<void> {
+  await db
+    .update(webhookDeliveries)
+    .set({
+      status: "pending",
+      nextRetryAt: null,
     })
     .where(eq(webhookDeliveries.id, id));
 }

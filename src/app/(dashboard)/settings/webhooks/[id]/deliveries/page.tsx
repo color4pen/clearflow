@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
-import { listWebhookDeliveriesAction } from "@/app/actions/webhooks";
+import { listWebhookDeliveriesAction, retryWebhookDeliveryAction } from "@/app/actions/webhooks";
 import Link from "next/link";
 
 const statusColors = {
@@ -14,6 +14,12 @@ const statusLabels = {
   failed: "失敗",
   pending: "処理中",
 };
+
+async function handleRetry(formData: FormData) {
+  "use server";
+  const deliveryId = formData.get("deliveryId") as string;
+  await retryWebhookDeliveryAction(deliveryId);
+}
 
 export default async function WebhookDeliveriesPage({
   params,
@@ -60,6 +66,7 @@ export default async function WebhookDeliveriesPage({
                   <th className="px-6 py-3">試行回数</th>
                   <th className="px-6 py-3">最終試行日時</th>
                   <th className="px-6 py-3">作成日時</th>
+                  <th className="px-6 py-3">操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -84,9 +91,27 @@ export default async function WebhookDeliveriesPage({
                       {delivery.lastAttemptAt
                         ? new Date(delivery.lastAttemptAt).toLocaleString("ja-JP")
                         : "—"}
+                      {delivery.nextRetryAt && (
+                        <div className="text-xs text-orange-500 mt-0.5">
+                          次のリトライ予定: {new Date(delivery.nextRetryAt).toLocaleString("ja-JP")}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-4 text-gray-500">
                       {new Date(delivery.createdAt).toLocaleString("ja-JP")}
+                    </td>
+                    <td className="px-6 py-4">
+                      {delivery.status === "failed" && (
+                        <form action={handleRetry}>
+                          <input type="hidden" name="deliveryId" value={delivery.id} />
+                          <button
+                            type="submit"
+                            className="text-xs text-blue-600 hover:text-blue-800 border border-blue-300 rounded px-2 py-0.5 hover:bg-blue-50"
+                          >
+                            リトライ
+                          </button>
+                        </form>
+                      )}
                     </td>
                   </tr>
                 ))}

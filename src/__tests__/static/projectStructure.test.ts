@@ -480,6 +480,7 @@ describe("Build and lint", () => {
       "application/usecases/resubmitRequest.ts",
       "application/usecases/approveRequest.ts",
       "application/usecases/rejectRequest.ts",
+      "app/api/audit-logs/export/route.ts",
     ];
     for (const file of keyFiles) {
       const exists = await fileExists(`src/${file}`);

@@ -11,5 +11,6 @@ export type WebhookDelivery = {
   statusCode: number | null;
   attempts: number;
   lastAttemptAt: Date | null;
+  nextRetryAt: Date | null;
   createdAt: Date;
 };

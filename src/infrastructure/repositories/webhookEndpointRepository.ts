@@ -37,6 +37,23 @@ export async function create(data: {
   return mapRow(result[0]);
 }
 
+export async function findById(
+  id: string,
+  organizationId: string
+): Promise<WebhookEndpoint | null> {
+  const result = await db
+    .select()
+    .from(webhookEndpoints)
+    .where(
+      and(
+        eq(webhookEndpoints.id, id),
+        eq(webhookEndpoints.organizationId, organizationId)
+      )
+    )
+    .limit(1);
+  return result[0] ? mapRow(result[0]) : null;
+}
+
 export async function findByOrganization(
   organizationId: string
 ): Promise<WebhookEndpoint[]> {
