@@ -106,6 +106,9 @@ describe("Domain model integrity", () => {
       "domain/models/auditLog.ts",
       "domain/models/approvalStep.ts",
       "domain/models/approvalTemplate.ts",
+      "domain/models/webhookEvent.ts",
+      "domain/models/webhookEndpoint.ts",
+      "domain/models/webhookDelivery.ts",
     ];
     for (const file of modelFiles) {
       const content = await readSrc(file);
@@ -135,6 +138,9 @@ describe("Domain model integrity", () => {
       "domain/models/auditLog.ts",
       "domain/models/approvalStep.ts",
       "domain/models/approvalTemplate.ts",
+      "domain/models/webhookEvent.ts",
+      "domain/models/webhookEndpoint.ts",
+      "domain/models/webhookDelivery.ts",
       "domain/models/index.ts",
       "domain/services/requestTransition.ts",
       "domain/services/approvalStepService.ts",
@@ -461,10 +467,16 @@ describe("Build and lint", () => {
     const keyFiles = [
       "domain/models/approvalStep.ts",
       "domain/models/approvalTemplate.ts",
+      "domain/models/webhookEvent.ts",
+      "domain/models/webhookEndpoint.ts",
+      "domain/models/webhookDelivery.ts",
       "domain/services/approvalStepService.ts",
       "domain/services/templateSelectionService.ts",
       "infrastructure/repositories/approvalStepRepository.ts",
       "infrastructure/repositories/approvalTemplateRepository.ts",
+      "infrastructure/repositories/webhookEndpointRepository.ts",
+      "infrastructure/repositories/webhookDeliveryRepository.ts",
+      "infrastructure/webhookDelivery.ts",
       "application/usecases/resubmitRequest.ts",
       "application/usecases/approveRequest.ts",
       "application/usecases/rejectRequest.ts",

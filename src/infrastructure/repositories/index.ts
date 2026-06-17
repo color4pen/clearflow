@@ -4,3 +4,5 @@ export * as requestRepository from "./requestRepository";
 export * as auditLogRepository from "./auditLogRepository";
 export * as approvalStepRepository from "./approvalStepRepository";
 export * as approvalTemplateRepository from "./approvalTemplateRepository";
+export * as webhookEndpointRepository from "./webhookEndpointRepository";
+export * as webhookDeliveryRepository from "./webhookDeliveryRepository";

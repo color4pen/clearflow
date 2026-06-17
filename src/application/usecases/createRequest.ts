@@ -6,6 +6,7 @@ import {
 } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
 import { selectTemplate } from "@/domain/services";
+import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
 import type { Request } from "@/domain/models/request";
 
 export type CreateRequestResult =
@@ -77,6 +78,12 @@ export async function createRequest(data: {
       );
 
       return request;
+    });
+
+    void deliverWebhookEvent({
+      organizationId: data.organizationId,
+      event: "request.created",
+      data: { requestId: result.id, requestTitle: result.title, actorId: data.creatorId, status: "draft" },
     });
 
     return { ok: true, request: result };

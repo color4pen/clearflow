@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { auth, signOut } from "@/infrastructure/auth";
 
 export default async function DashboardLayout({
@@ -22,6 +23,14 @@ export default async function DashboardLayout({
             </span>
           </div>
           <div className="flex items-center gap-4">
+            {session.user.role === "admin" && (
+              <Link
+                href="/settings/webhooks"
+                className="text-sm font-medium text-gray-700 hover:text-gray-900"
+              >
+                設定
+              </Link>
+            )}
             <div className="text-right">
               <p className="text-sm font-medium text-gray-900">
                 {session.user.name}

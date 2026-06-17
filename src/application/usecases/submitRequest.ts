@@ -1,6 +1,7 @@
 import { requestRepository, auditLogRepository } from "@/infrastructure/repositories";
 import { validateTransition } from "@/domain/services/requestTransition";
 import { db } from "@/infrastructure/db";
+import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
 import type { Request } from "@/domain/models/request";
 
 export type SubmitRequestResult =
@@ -50,6 +51,12 @@ export async function submitRequest(data: {
       );
 
       return result;
+    });
+
+    void deliverWebhookEvent({
+      organizationId: data.organizationId,
+      event: "request.submitted",
+      data: { requestId: updated.id, requestTitle: updated.title, actorId: data.actorId, status: "pending" },
     });
 
     return { ok: true, request: updated };

@@ -6,6 +6,7 @@ import {
 import { validateTransition } from "@/domain/services/requestTransition";
 import { getStepsToReset } from "@/domain/services/approvalStepService";
 import { db } from "@/infrastructure/db";
+import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
 import type { Request } from "@/domain/models/request";
 
 export type ResubmitRequestResult =
@@ -79,6 +80,12 @@ export async function resubmitRequest(data: {
       );
 
       return result;
+    });
+
+    void deliverWebhookEvent({
+      organizationId: data.organizationId,
+      event: "request.resubmitted",
+      data: { requestId: updated.id, requestTitle: updated.title, actorId: data.actorId, status: "pending" },
     });
 
     return { ok: true, request: updated };

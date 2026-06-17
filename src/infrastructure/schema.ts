@@ -6,12 +6,18 @@ import {
   timestamp,
   integer,
   jsonb,
+  boolean,
   primaryKey,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Enums
 export const roleEnum = pgEnum("role", ["admin", "member", "manager", "finance"]);
+export const webhookDeliveryStatusEnum = pgEnum("webhook_delivery_status", [
+  "pending",
+  "delivered",
+  "failed",
+]);
 export const requestStatusEnum = pgEnum("request_status", [
   "draft",
   "pending",
@@ -110,6 +116,35 @@ export const approvalTemplates = pgTable("approval_templates", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Webhook endpoints table
+export const webhookEndpoints = pgTable("webhook_endpoints", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+  url: text("url").notNull(),
+  secret: text("secret").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  events: text("events").array().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Webhook deliveries table
+export const webhookDeliveries = pgTable("webhook_deliveries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  endpointId: uuid("endpoint_id")
+    .notNull()
+    .references(() => webhookEndpoints.id, { onDelete: "cascade" }),
+  event: text("event").notNull(),
+  payload: jsonb("payload").notNull(),
+  status: webhookDeliveryStatusEnum("status").notNull().default("pending"),
+  statusCode: integer("status_code"),
+  attempts: integer("attempts").notNull().default(0),
+  lastAttemptAt: timestamp("last_attempt_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Auth.js adapter tables
 export const accounts = pgTable(
   "accounts",
@@ -156,6 +191,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   auditLogs: many(auditLogs),
   approvalSteps: many(approvalSteps),
   approvalTemplates: many(approvalTemplates),
+  webhookEndpoints: many(webhookEndpoints),
 }));
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -227,6 +263,27 @@ export const approvalTemplatesRelations = relations(
     organization: one(organizations, {
       fields: [approvalTemplates.organizationId],
       references: [organizations.id],
+    }),
+  })
+);
+
+export const webhookEndpointsRelations = relations(
+  webhookEndpoints,
+  ({ one, many }) => ({
+    organization: one(organizations, {
+      fields: [webhookEndpoints.organizationId],
+      references: [organizations.id],
+    }),
+    deliveries: many(webhookDeliveries),
+  })
+);
+
+export const webhookDeliveriesRelations = relations(
+  webhookDeliveries,
+  ({ one }) => ({
+    endpoint: one(webhookEndpoints, {
+      fields: [webhookDeliveries.endpointId],
+      references: [webhookEndpoints.id],
     }),
   })
 );
