@@ -39,11 +39,13 @@
 5. **createRequest の変更**: `templateId` の直接指定を廃止し、金額に基づくテンプレート自動選択に変更する。`createRequest` usecase は金額を受け取り、`templateSelectionService` で適切なテンプレートを決定し、`approval_steps` を生成する
 6. **approverRole のテンプレート更新**: シードデータのテンプレートを更新し、`approverRole` に `"manager"` と `"finance"` を使用する
 7. **canApprove の維持**: `approvalStepService.canApprove` の単純比較ロジックはそのまま維持する。ロール追加により自然に「manager ステップは manager のみ承認可能」が実現する
-8. **Request モデルに amount 追加**: `src/domain/models/request.ts` の `Request` 型に `amount: number | null` を追加する
-9. **ApprovalTemplate モデルに金額条件追加**: `src/domain/models/approvalTemplate.ts` の `ApprovalTemplate` 型に `minAmount: number | null` と `maxAmount: number | null` を追加する
-10. **UI更新**: 申請作成フォームに金額入力フィールドを追加する。テンプレート選択UIを削除し、金額入力に基づく自動選択に変更する。申請一覧・詳細画面に金額を表示する
-11. **シードデータ更新**: 3つのテンプレートを定義する — デフォルト（金額条件なし、manager 1段階）、少額（〜10万円、manager 1段階）、高額（10万円超、manager → finance 2段階）。ユーザーに manager と finance ロールを追加する
-12. **監査ログ**: テンプレート自動選択の結果を audit_logs に記録する（選択されたテンプレートID）
+8. **Server Actions のロールガード更新**: `approveRequestAction` と `rejectRequestAction` の `session.user.role !== "admin"` ガードを、`admin`, `manager`, `finance` のいずれかであれば許可するチェックに変更する。承認可否の最終判定は `canApprove` に委ねる
+9. **Role 型の更新**: `src/domain/models/user.ts` の `Role` 型に `"manager"` と `"finance"` を追加する。`src/infrastructure/auth.ts` の JWT/session コールバック内の型キャスト（`as { role: "admin" | "member" }`）も同様に更新する
+10. **Request モデルに amount 追加**: `src/domain/models/request.ts` の `Request` 型に `amount: number | null` を追加する
+11. **ApprovalTemplate モデルに金額条件追加**: `src/domain/models/approvalTemplate.ts` の `ApprovalTemplate` 型に `minAmount: number | null` と `maxAmount: number | null` を追加する
+12. **UI更新**: 申請作成フォームに金額入力フィールドを追加する。テンプレート選択UIを削除し、金額入力に基づく自動選択に変更する。申請一覧・詳細画面に金額を表示する
+13. **シードデータ更新**: 3つのテンプレートを定義する — デフォルト（minAmount=null, maxAmount=null, manager 1段階）、少額（minAmount=null, maxAmount=100000, manager 1段階）、高額（minAmount=100001, maxAmount=null, manager → finance 2段階）。ユーザーに manager ロールと finance ロールのユーザーを追加する
+14. **監査ログ**: テンプレート自動選択の結果を audit_logs に記録する（選択されたテンプレートID）
 
 ## スコープ外
 
@@ -67,6 +69,10 @@
 - [ ] 金額未指定の申請に対してデフォルトテンプレートが選択されることをテストで確認する
 - [ ] `canApprove` で manager ユーザーが manager ステップを承認でき、finance ステップを承認できないことをテストで確認する
 - [ ] 申請作成フォームにテンプレート選択UIが存在しない（金額入力に置き換え済み）
+- [ ] `approveRequestAction` / `rejectRequestAction` が manager / finance ロールで実行可能であることをテストで確認する
+- [ ] `Role` 型に `"manager"` と `"finance"` が含まれる
+- [ ] 金額100000の申請が少額テンプレート（maxAmount=100000）に該当することをテストで確認する
+- [ ] 金額100001の申請が高額テンプレート（minAmount=100001）に該当することをテストで確認する
 - [ ] 各操作で audit_logs にレコードが記録される
 - [ ] 依存方向 `actions → usecases → domain / infrastructure` を遵守
 - [ ] `typecheck` が green
