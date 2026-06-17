@@ -89,3 +89,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/rbac-amount-routing/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-17T14:28:16.723Z","endedAt":"2026-06-17T14:28:19.182Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-17T14:28:19.182Z","outputs":[{"path":"specrunner/changes/rbac-amount-routing/pr-create-result.md","hash":"sha256:a295634d38287c78f0924eb875a4e04305ccaa6d7e94bedf7aa8b366414a7961"}],"inputs":[{"path":"feat/rbac-amount-routing-342653fb","hash":null}]}
 {"type":"transition","ts":"2026-06-17T14:28:19.190Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-17T14:30:30.000Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
