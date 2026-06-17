@@ -65,3 +65,9 @@
 {"type":"transition","ts":"2026-06-17T18:17:53.068Z","step":"domain-invariants","status":"ok","message":"domain-invariants iteration 2 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-17T18:17:53.068Z","step":"step-transition","status":"ok","message":"domain-invariants → code-fixer"}
 {"type":"transition","ts":"2026-06-17T18:17:53.069Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-17T18:18:51.572Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"8d817ef9-7bc8-41fa-affd-871fbc4d7d8c","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-06-17T18:17:53.080Z","endedAt":"2026-06-17T18:18:50.181Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-17T18:18:50.181Z","outputs":[{"path":"specrunner/changes/optimistic-lock-idempotency","hash":null}],"inputs":[{"path":"specrunner/changes/optimistic-lock-idempotency/domain-invariants-result-002.md","hash":"sha256:3242874d37db9d1bf36ef62dc68f06936f7668a65be33b9022ce1966c8d73da9"}]}
+{"type":"transition","ts":"2026-06-17T18:18:51.579Z","step":"step-transition","status":"ok","message":"code-fixer → regression-gate"}
+{"type":"transition","ts":"2026-06-17T18:18:51.582Z","step":"regression-gate","status":"started","message":"regression-gate iteration 1 started"}
+{"type":"transition","ts":"2026-06-17T18:18:51.584Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
