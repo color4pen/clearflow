@@ -108,7 +108,7 @@ export async function deliverSingleAttempt(
   const jsonPayload = JSON.stringify(payload);
   const signature = computeSignature(endpoint.secret, jsonPayload);
 
-  const current = await webhookDeliveryRepository.findById(deliveryId);
+  const current = await webhookDeliveryRepository.findById(deliveryId, endpoint.organizationId);
   const currentAttempts = current?.attempts ?? 0;
 
   let response: Response | undefined;

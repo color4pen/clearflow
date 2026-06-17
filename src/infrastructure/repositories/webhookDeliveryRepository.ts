@@ -59,13 +59,23 @@ export async function updateStatus(
     .where(eq(webhookDeliveries.id, id));
 }
 
-export async function findById(id: string): Promise<WebhookDelivery | null> {
+export async function findById(
+  id: string,
+  organizationId: string
+): Promise<WebhookDelivery | null> {
   const result = await db
-    .select()
+    .select({ delivery: webhookDeliveries })
     .from(webhookDeliveries)
+    .innerJoin(
+      webhookEndpoints,
+      and(
+        eq(webhookDeliveries.endpointId, webhookEndpoints.id),
+        eq(webhookEndpoints.organizationId, organizationId)
+      )
+    )
     .where(eq(webhookDeliveries.id, id))
     .limit(1);
-  return result[0] ? mapRow(result[0]) : null;
+  return result[0] ? mapRow(result[0].delivery) : null;
 }
 
 export async function resetForRetry(id: string): Promise<void> {

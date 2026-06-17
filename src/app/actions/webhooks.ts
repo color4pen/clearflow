@@ -162,7 +162,10 @@ export async function retryWebhookDeliveryAction(deliveryId: string) {
   if (!session?.user?.id) return { success: false, message: "認証が必要です" };
   if (session.user.role !== "admin") return { success: false, message: "権限がありません" };
 
-  const delivery = await webhookDeliveryRepository.findById(deliveryId);
+  const delivery = await webhookDeliveryRepository.findById(
+    deliveryId,
+    session.user.organizationId
+  );
   if (!delivery) return { success: false, message: "配信レコードが見つかりません" };
 
   const endpoint = await webhookEndpointRepository.findById(
