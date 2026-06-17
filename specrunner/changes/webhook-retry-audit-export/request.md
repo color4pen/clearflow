@@ -26,11 +26,11 @@ PR#8 で Webhook 配信基盤を導入したが、配信失敗時のリトライ
 
 ## 要件
 
-1. **Webhook リトライロジック**: `deliverToEndpoint` に exponential backoff リトライを追加する。最大3回リトライ（初回含め計4回試行）。バックオフ間隔: 1秒, 4秒, 16秒（`baseDelay * 4^attempt`）。各試行で `attempts` をインクリメントし `lastAttemptAt` を更新する。全試行失敗後に `status: "failed"` を確定する
+1. **Webhook リトライロジック**: `deliverToEndpoint` に exponential backoff リトライを追加する。最大3回リトライ（初回含め計4回試行）。バックオフ間隔: リトライ番号 n = 1,2,3 に対して `1 * 4^(n-1)` 秒待機（1秒, 4秒, 16秒）。各試行で `attempts` をインクリメントし `lastAttemptAt` を更新する。全試行失敗後に `status: "failed"` を確定する
 2. **webhook_deliveries に nextRetryAt カラム追加**: `nextRetryAt` (timestamp, nullable) カラムを追加する。失敗時に次のリトライ予定時刻を記録する。全リトライ完了後は null にする
-3. **手動リトライ機能**: Webhook 管理UIの配信ログ画面に「リトライ」ボタンを追加する。`failed` 状態の配信を手動でリトライできる。admin ロールのみ実行可能
+3. **手動リトライ機能**: Webhook 管理UIの配信ログ画面に「リトライ」ボタンを追加する。`failed` 状態の配信を手動で1回のみ再試行できる（exponential backoff は適用しない）。`attempts` は既存の値に1を加算する。成功時は `status: "delivered"`、失敗時は `status: "failed"` に更新し、`nextRetryAt` は null にする。admin ロールのみ実行可能
 4. **監査ログ一覧取得**: `auditLogRepository` に `findByOrganization(organizationId: string, options?: { limit, offset, startDate, endDate })` を追加する。organizationId でフィルタし、createdAt 降順で取得する
-5. **監査ログ CSV エクスポート**: `/api/audit-logs/export` Route Handler を追加する。認証チェック + admin ロールチェック後、組織の監査ログを CSV 形式でストリーミング出力する。CSV カラム: timestamp, action, targetType, targetId, actorId, metadata
+5. **監査ログ CSV エクスポート**: `/api/audit-logs/export` Route Handler を追加する。認証チェック + admin ロールチェック後、組織の監査ログを全件取得し CSV 文字列を生成して `text/csv` Content-Type で返す。CSV カラム: timestamp, action, targetType, targetId, actorId, metadata（JSON.stringify で1カラム）
 6. **監査ログ一覧 UI**: 管理画面に監査ログ一覧ページを追加する。フィルタ: 日付範囲、アクション種別。CSV ダウンロードボタンを配置する。admin ロールのみアクセス可能
 7. **テナント分離**: 監査ログの一覧取得と CSV エクスポートに organizationId 条件を付与する
 
@@ -49,6 +49,9 @@ PR#8 で Webhook 配信基盤を導入したが、配信失敗時のリトライ
 - [ ] バックオフ間隔が `1s, 4s, 16s` であることをテストで確認する
 - [ ] 全リトライ失敗後に `status: "failed"`, `attempts: 4` になることをテストで確認する
 - [ ] `webhook_deliveries` テーブルに `nextRetryAt` カラムが存在する
+- [ ] `WebhookDelivery` ドメインモデルに `nextRetryAt` フィールドが含まれる
+- [ ] 手動リトライが1回のみの単発試行であることをテストで確認する
+- [ ] 手動リトライ後の `nextRetryAt` が null であることをテストで確認する
 - [ ] 手動リトライが admin ロールのみ実行可能
 - [ ] `/api/audit-logs/export` が CSV を返す
 - [ ] CSV エクスポートに organizationId フィルタが適用されている
