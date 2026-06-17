@@ -11,6 +11,8 @@ import {
   verificationTokens,
   approvalSteps,
   approvalTemplates,
+  webhookEndpoints,
+  webhookDeliveries,
 } from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -32,6 +34,8 @@ async function seed() {
   await db.delete(accounts);
   await db.delete(sessions);
   await db.delete(verificationTokens);
+  await db.delete(webhookDeliveries);
+  await db.delete(webhookEndpoints);
   await db.delete(users);
   await db.delete(organizations);
 
@@ -266,6 +270,25 @@ async function seed() {
     },
   ]);
   console.log("✅ Created audit logs");
+
+  // Create webhook endpoint for default organization
+  await db.insert(webhookEndpoints).values({
+    url: "https://example.com/webhook",
+    secret: "whsec_test_secret_for_development",
+    isActive: true,
+    events: [
+      "request.created",
+      "request.submitted",
+      "request.approved",
+      "request.rejected",
+      "request.revised",
+      "request.resubmitted",
+      "step.approved",
+      "step.rejected",
+    ],
+    organizationId: org.id,
+  });
+  console.log("✅ Created webhook endpoint for default organization");
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");

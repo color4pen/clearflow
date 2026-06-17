@@ -10,7 +10,9 @@ import {
   canApprove,
 } from "@/domain/services/approvalStepService";
 import { db } from "@/infrastructure/db";
+import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
 import type { Request } from "@/domain/models/request";
+import type { ApprovalStep } from "@/domain/models/approvalStep";
 
 export type ApproveRequestResult =
   | { ok: true; request: Request }
@@ -69,6 +71,12 @@ export async function approveRequest(data: {
         return result;
       });
 
+      void deliverWebhookEvent({
+        organizationId: data.organizationId,
+        event: "request.approved",
+        data: { requestId: updated.id, requestTitle: updated.title, actorId: data.actorId, status: "approved" },
+      });
+
       return { ok: true, request: updated };
     } catch (err) {
       return {
@@ -99,7 +107,7 @@ export async function approveRequest(data: {
   }
 
   try {
-    const updated = await db.transaction(async (tx) => {
+    const txResult = await db.transaction(async (tx): Promise<{ request: Request; approvedStep: ApprovalStep | null; allApproved: boolean }> => {
       // Re-fetch steps inside the transaction to get a consistent snapshot
       // and avoid TOCTOU races on isAllApproved computation
       const freshSteps = await approvalStepRepository.findByRequestId(
@@ -174,14 +182,45 @@ export async function approveRequest(data: {
           tx
         );
 
-        return result;
+        return { request: result, approvedStep: freshCurrentStep, allApproved: true };
       }
 
       // More steps remain — request stays pending
-      return existing;
+      return { request: existing, approvedStep: freshCurrentStep, allApproved: false };
     });
 
-    return { ok: true, request: updated };
+    // Deliver step.approved event
+    void deliverWebhookEvent({
+      organizationId: data.organizationId,
+      event: "step.approved",
+      data: {
+        requestId: data.requestId,
+        requestTitle: existing.title,
+        actorId: data.actorId,
+        status: "pending",
+        metadata: {
+          stepId: txResult.approvedStep?.id,
+          stepOrder: txResult.approvedStep?.stepOrder,
+          approverRole: txResult.approvedStep?.approverRole,
+        },
+      },
+    });
+
+    // If all steps are approved, also deliver request.approved
+    if (txResult.allApproved) {
+      void deliverWebhookEvent({
+        organizationId: data.organizationId,
+        event: "request.approved",
+        data: {
+          requestId: txResult.request.id,
+          requestTitle: txResult.request.title,
+          actorId: data.actorId,
+          status: "approved",
+        },
+      });
+    }
+
+    return { ok: true, request: txResult.request };
   } catch (err) {
     return {
       ok: false,

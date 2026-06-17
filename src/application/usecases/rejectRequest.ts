@@ -6,7 +6,9 @@ import {
 import { validateTransition } from "@/domain/services/requestTransition";
 import { getCurrentStep } from "@/domain/services/approvalStepService";
 import { db } from "@/infrastructure/db";
+import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
 import type { Request } from "@/domain/models/request";
+import type { ApprovalStep } from "@/domain/models/approvalStep";
 
 export type RejectRequestResult =
   | { ok: true; request: Request }
@@ -37,7 +39,7 @@ export async function rejectRequest(data: {
   if (targetStatus === "revision") {
     // Revision (差し戻し) flow
     try {
-      const updated = await db.transaction(async (tx) => {
+      const txResult = await db.transaction(async (tx): Promise<{ request: Request; currentStep: ApprovalStep | null }> => {
         const steps = await approvalStepRepository.findByRequestId(
           data.requestId,
           data.organizationId,
@@ -85,10 +87,37 @@ export async function rejectRequest(data: {
           tx
         );
 
-        return result;
+        return { request: result, currentStep };
       });
 
-      return { ok: true, request: updated };
+      void deliverWebhookEvent({
+        organizationId: data.organizationId,
+        event: "request.revised",
+        data: {
+          requestId: txResult.request.id,
+          requestTitle: txResult.request.title,
+          actorId: data.actorId,
+          status: "revision",
+        },
+      });
+
+      void deliverWebhookEvent({
+        organizationId: data.organizationId,
+        event: "step.rejected",
+        data: {
+          requestId: txResult.request.id,
+          requestTitle: txResult.request.title,
+          actorId: data.actorId,
+          status: "revision",
+          metadata: {
+            stepId: txResult.currentStep?.id,
+            stepOrder: txResult.currentStep?.stepOrder,
+            approverRole: txResult.currentStep?.approverRole,
+          },
+        },
+      });
+
+      return { ok: true, request: txResult.request };
     } catch (err) {
       return {
         ok: false,
@@ -124,6 +153,17 @@ export async function rejectRequest(data: {
       );
 
       return result;
+    });
+
+    void deliverWebhookEvent({
+      organizationId: data.organizationId,
+      event: "request.rejected",
+      data: {
+        requestId: updated.id,
+        requestTitle: updated.title,
+        actorId: data.actorId,
+        status: "rejected",
+      },
     });
 
     return { ok: true, request: updated };
