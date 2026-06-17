@@ -9,6 +9,7 @@ import {
   webhookDeliveryRepository,
 } from "@/infrastructure/repositories";
 import { WEBHOOK_EVENT_TYPES } from "@/domain/models/webhookEvent";
+import { deliverSingleAttempt } from "@/infrastructure/webhookDelivery";
 
 const PRIVATE_IP_PATTERNS = [
   /^localhost$/i,
@@ -154,4 +155,31 @@ export async function listWebhookDeliveriesAction(endpointId: string) {
   );
 
   return { success: true, deliveries };
+}
+
+export async function retryWebhookDeliveryAction(deliveryId: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, message: "認証が必要です" };
+  if (session.user.role !== "admin") return { success: false, message: "権限がありません" };
+
+  const delivery = await webhookDeliveryRepository.findById(deliveryId);
+  if (!delivery) return { success: false, message: "配信レコードが見つかりません" };
+
+  const endpoint = await webhookEndpointRepository.findById(
+    delivery.endpointId,
+    session.user.organizationId
+  );
+  if (!endpoint) return { success: false, message: "配信レコードが見つかりません" };
+
+  if (delivery.status !== "failed") {
+    return { success: false, message: "failed 状態の配信のみリトライできます" };
+  }
+
+  await webhookDeliveryRepository.resetForRetry(deliveryId);
+
+  void deliverSingleAttempt(endpoint, delivery.payload, deliveryId);
+
+  revalidatePath(`/settings/webhooks/${endpoint.id}/deliveries`);
+
+  return { success: true };
 }

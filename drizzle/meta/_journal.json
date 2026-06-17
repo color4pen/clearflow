@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781713452721,
+      "tag": "0002_webhook_retry_audit_export",
+      "breakpoints": true
+    }
+  ]
+}

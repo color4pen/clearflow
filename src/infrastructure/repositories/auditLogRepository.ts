@@ -1,3 +1,4 @@
+import { eq, and, desc, gte, lte } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { auditLogs } from "../schema";
@@ -37,4 +38,52 @@ export async function create(
     metadata: row.metadata as Record<string, unknown> | null,
     createdAt: row.createdAt,
   };
+}
+
+export async function findByOrganization(
+  organizationId: string,
+  options?: {
+    limit?: number;
+    offset?: number;
+    startDate?: Date;
+    endDate?: Date;
+    action?: string;
+  }
+): Promise<AuditLog[]> {
+  const conditions = [eq(auditLogs.organizationId, organizationId)];
+
+  if (options?.startDate) {
+    conditions.push(gte(auditLogs.createdAt, options.startDate));
+  }
+  if (options?.endDate) {
+    conditions.push(lte(auditLogs.createdAt, options.endDate));
+  }
+  if (options?.action) {
+    conditions.push(eq(auditLogs.action, options.action));
+  }
+
+  let query = db
+    .select()
+    .from(auditLogs)
+    .where(and(...conditions))
+    .orderBy(desc(auditLogs.createdAt));
+
+  if (options?.limit !== undefined) {
+    query = query.limit(options.limit) as typeof query;
+  }
+  if (options?.offset !== undefined) {
+    query = query.offset(options.offset) as typeof query;
+  }
+
+  const result = await query;
+  return result.map((row) => ({
+    id: row.id,
+    action: row.action,
+    targetType: row.targetType,
+    targetId: row.targetId,
+    actorId: row.actorId,
+    organizationId: row.organizationId,
+    metadata: row.metadata as Record<string, unknown> | null,
+    createdAt: row.createdAt,
+  }));
 }
