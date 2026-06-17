@@ -55,11 +55,11 @@
 ## T-03: 手動リトライ機能 -- リポジトリ拡張
 
 - [ ] `src/infrastructure/repositories/webhookDeliveryRepository.ts` に `findById(id: string): Promise<WebhookDelivery | null>` を追加する。`webhookDeliveries` から `id` で検索し、見つからなければ `null` を返す。`mapRow` で変換する
-- [ ] `src/infrastructure/repositories/webhookDeliveryRepository.ts` に `resetForRetry(id: string): Promise<void>` を追加する。`webhookDeliveries` の `id` レコードを `status: "pending"`, `statusCode: null`, `attempts: 0`, `lastAttemptAt: null`, `nextRetryAt: null` にリセットする
+- [ ] `src/infrastructure/repositories/webhookDeliveryRepository.ts` に `resetForRetry(id: string): Promise<void>` を追加する。`webhookDeliveries` の `id` レコードを `status: "pending"`, `nextRetryAt: null` に更新する（`attempts`, `lastAttemptAt`, `statusCode` はリセットしない。手動リトライは単発試行のため、`attempts` は配信関数内でインクリメントする）
 
 **Acceptance Criteria**:
 - `findById` が `WebhookDelivery | null` を返す
-- `resetForRetry` が status, statusCode, attempts, lastAttemptAt, nextRetryAt をリセットする
+- `resetForRetry` が status を "pending" に、nextRetryAt を null に更新する（attempts はリセットしない）
 - `typecheck` が green
 
 ## T-04: 手動リトライ機能 -- Server Action
@@ -70,34 +70,32 @@
 - [ ] テナント分離: `webhookEndpointRepository` から `endpointId` でエンドポイントを取得する。取得方法は `webhookEndpointRepository` に `findById(id: string, organizationId: string)` 関数を追加するか、既存の `findByOrganization` + filter で検証する。エンドポイントが見つからない or `organizationId` が不一致の場合は `{ success: false, message: "配信レコードが見つかりません" }` を返す（情報漏洩防止のため具体的なエラーは返さない）
 - [ ] `delivery.status !== "failed"` の場合は `{ success: false, message: "failed 状態の配信のみリトライできます" }` を返す
 - [ ] `webhookDeliveryRepository.resetForRetry(deliveryId)` で配信レコードをリセットする
-- [ ] エンドポイント情報からペイロード、url、secret を取得し、`deliverToEndpoint(endpoint, delivery.payload)` を `void` で呼び出す。`deliverToEndpoint` を export する必要がある（現在は内部関数）。代替案として `deliverToEndpoint` を export せず、同等のロジックを action 内に持つか、`webhookDelivery.ts` に `retryDelivery(deliveryId)` 関数を追加する
+- [ ] エンドポイント情報から url、secret を取得し、`deliverSingleAttempt(endpoint, delivery.payload, deliveryId)` を `void` で呼び出す（fire-and-forget。exponential backoff なし、1回のみ試行）。`deliverSingleAttempt` を `src/infrastructure/webhookDelivery.ts` から export する（後述）
 - [ ] `revalidatePath` を呼び出す（配信ログページのパス）
 - [ ] `return { success: true }` を返す
 
-補足: `deliverToEndpoint` を直接呼ぶために、`src/infrastructure/webhookDelivery.ts` から export する。export 名は `retryDelivery(endpoint: WebhookEndpoint, payload: WebhookPayload, deliveryId: string)` とし、既存 delivery レコードの ID を受け取り、新規 delivery を作成せずにリトライを開始するバリアントを追加する方が適切。
+補足: 手動リトライは exponential backoff を適用しない単発試行のため、`deliverToEndpoint`（リトライループ付き）とは別に `deliverSingleAttempt` 関数を `src/infrastructure/webhookDelivery.ts` に追加する。
 
 実装案:
-- `src/infrastructure/webhookDelivery.ts` に `retryDelivery(endpoint: WebhookEndpoint, payload: WebhookPayload, deliveryId: string)` を追加する。`deliverToEndpoint` のリトライループと同じロジックだが、`webhookDeliveryRepository.create` をスキップし、渡された `deliveryId` に対して `updateStatus` を呼ぶ
-- または、`deliverToEndpoint` に `existingDeliveryId?: string` オプション引数を追加する。指定された場合は `create` をスキップし、そのIDに対して `updateStatus` を呼ぶ
-
-後者の方がコード重複が少ない。`deliverToEndpoint` のシグネチャを拡張する:
 ```typescript
-async function deliverToEndpoint(
+export async function deliverSingleAttempt(
   endpoint: WebhookEndpoint,
   payload: WebhookPayload,
-  existingDeliveryId?: string
+  deliveryId: string
 ): Promise<void>
 ```
-`existingDeliveryId` が指定されている場合は `webhookDeliveryRepository.create` をスキップし、そのIDを使う。
-
-`deliverToEndpoint` を export する（現在は内部関数。テストでも直接テストする必要はなく、action 経由でのみ呼ばれるため、named export で十分）。
+- `webhookDeliveryRepository.create` をスキップし、渡された `deliveryId` に対して 1 回だけ fetch を試行する
+- `attempts: delivery.attempts + 1`, `lastAttemptAt: new Date()` で `updateStatus` を呼ぶ（現在の attempts 値を取得するため、関数内で `findById` を呼ぶか、引数で受け取る）
+- 成功: `status: "delivered"`, `nextRetryAt: null`
+- 失敗: `status: "failed"`, `nextRetryAt: null`
+- ループなし・`Bun.sleep` なし（単発試行）
 
 **Acceptance Criteria**:
 - `retryWebhookDeliveryAction` が `webhooks.ts` に存在する
 - admin ロールチェックが実行される
 - `failed` 状態以外の配信をリトライしようとするとエラーが返される
 - テナント分離: 他組織の配信レコードをリトライできない
-- リトライ実行後に exponential backoff が適用される
+- リトライは1回のみの単発試行であり、exponential backoff は適用されない
 - `revalidatePath` が呼ばれる
 - `typecheck` が green
 
@@ -155,9 +153,11 @@ async function deliverToEndpoint(
 - [ ] GET ハンドラを export する: `export async function GET(request: Request)`
 - [ ] 認証チェック: `const session = await auth()` → 未認証なら `new Response("Unauthorized", { status: 401 })` を返す
 - [ ] admin ロールチェック: `session.user.role !== "admin"` なら `new Response("Forbidden", { status: 403 })` を返す
-- [ ] URL クエリパラメータから `startDate`, `endDate`, `action` を取得する: `new URL(request.url).searchParams`。各パラメータは `Date` に変換する（`startDate`, `endDate`）、`action` はそのまま文字列
+- [ ] URL クエリパラメータから `startDate`, `endDate`, `action` を取得する: `new URL(request.url).searchParams`。`startDate`, `endDate` は `new Date(param)` で変換するが、変換後の Date が無効（`isNaN(date.getTime())`）の場合はそのパラメータを無視する（`undefined` として扱い、フィルタに含めない）。`action` はそのまま文字列として使用する
 - [ ] `auditLogRepository.findByOrganization(session.user.organizationId, { startDate, endDate, action })` で監査ログを取得する（limit なし = 全件）
-- [ ] CSV 生成ヘルパー関数 `escapeCsvValue(value: string): string` を実装する。値にカンマ、ダブルクォート、改行が含まれる場合はダブルクォートで囲み、ダブルクォート自体は `""` にエスケープする
+- [ ] CSV 生成ヘルパー関数 `escapeCsvValue(value: string): string` を実装する。以下の順でエスケープを適用する:
+  1. **CSV Formula Injection 対策 (CWE-1236)**: 値が `=`, `+`, `-`, `@` のいずれかで始まる場合、先頭にシングルクォート `'` を付与する（Excel/スプレッドシートで数式として評価されることを防ぐ）
+  2. **CSV 構造エスケープ**: 値にカンマ、ダブルクォート、改行が含まれる場合はダブルクォートで囲み、値中のダブルクォートは `""` にエスケープする
 - [ ] CSV ヘッダー行: `timestamp,action,targetType,targetId,actorId,metadata`
 - [ ] 各行: `createdAt.toISOString()`, `action`, `targetType`, `targetId`, `actorId`, `JSON.stringify(metadata ?? {})` を CSV 形式に変換する。各値は `escapeCsvValue` でエスケープする
 - [ ] BOM (`﻿`) を先頭に付与する（Excel 対応）
@@ -180,6 +180,8 @@ async function deliverToEndpoint(
 - `startDate`, `endDate`, `action` クエリパラメータでフィルタ可能
 - metadata が `JSON.stringify` で 1 カラムに出力される
 - カンマやダブルクォートを含む値がエスケープされる
+- `=`, `+`, `-`, `@` で始まる値に先頭シングルクォートが付与される（CSV Formula Injection 対策）
+- 無効な `startDate`/`endDate` クエリパラメータ（例: `?startDate=abc`）は無視され、エラーにならない
 - `Content-Disposition` にファイル名が含まれる
 - `typecheck` が green
 
@@ -242,6 +244,8 @@ async function deliverToEndpoint(
   - `domain/models/webhookDelivery.ts` に `nextRetryAt` が存在することを検証する
   - `app/actions/webhooks.ts` に `retryWebhookDeliveryAction` が存在することを検証する
   - `app/actions/webhooks.ts` の `retryWebhookDeliveryAction` 以降に `"failed"` 文字列が存在することを検証する
+  - `webhookDelivery.ts` に `deliverSingleAttempt` 関数が export されていることを検証する（手動リトライ用の単発試行関数）
+  - `app/actions/webhooks.ts` の `retryWebhookDeliveryAction` 以降に `deliverSingleAttempt` の呼び出しが存在することを検証する（exponential backoff なしの単発試行であることの確認）
 - [ ] 監査ログ CSV エクスポート関連テスト:
   - `infrastructure/repositories/auditLogRepository.ts` に `findByOrganization` が存在することを検証する
   - `findByOrganization` の定義に `organizationId` パラメータが存在することを検証する

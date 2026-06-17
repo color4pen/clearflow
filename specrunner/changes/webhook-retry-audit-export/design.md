@@ -89,18 +89,18 @@ Drizzle マイグレーション: `drizzle/0002_webhook_retry_audit_export.sql` 
 2. `webhookDeliveryRepository.findById(deliveryId)` で配信レコードを取得する（新規関数）
 3. テナント分離: 配信レコードの `endpointId` に紐づく `webhookEndpoints` の `organizationId` がセッションの `organizationId` と一致するか検証する
 4. `status !== "failed"` の場合はエラーを返す（`"failed 状態の配信のみリトライできます"`）
-5. 配信レコードの `status` を `"pending"` に、`attempts` を `0` にリセットする
+5. 配信レコードの `status` を `"pending"` に更新する（`attempts` はリセットしない。既存の値を維持する）
 6. `webhookEndpointRepository` からエンドポイント情報（url, secret）を取得する
-7. `deliverToEndpoint` を `void` で呼び出す（fire-and-forget。リトライロジック込みで再実行される）
+7. `deliverSingleAttempt(endpoint, delivery.payload, deliveryId)` を `void` で呼び出す（fire-and-forget。exponential backoff は適用しない。1回のみ試行し、成功時は `status: "delivered"`, `nextRetryAt: null`、失敗時は `status: "failed"`, `nextRetryAt: null` に更新する。`attempts` は既存の値に 1 を加算する）
 8. `revalidatePath` で配信ログページを更新する
 
 `webhookDeliveryRepository` に追加する関数:
 - `findById(id: string)`: `WebhookDelivery | null` を返す
-- `resetForRetry(id: string)`: `status: "pending"`, `attempts: 0`, `nextRetryAt: null` にリセットする
+- `resetForRetry(id: string)`: `status: "pending"`, `nextRetryAt: null` に更新する（`attempts`, `lastAttemptAt` はリセットしない）
 
 配信ログ一覧ページ（`deliveries/page.tsx`）に、`status === "failed"` の行のみ「リトライ」ボタンを表示する。form + Server Action パターンで実装する。
 
-**Rationale**: 手動リトライは `failed` 状態のみ許可する。リトライ時は attempts をリセットし、`deliverToEndpoint` の exponential backoff を最初から適用する。明示的な操作であり、全リトライ回数を再消費できるべきである。
+**Rationale**: 手動リトライは `failed` 状態のみ許可する。request.md 要件3の通り、手動リトライは1回のみの単発試行であり exponential backoff は適用しない。`attempts` はリセットせず既存の値に 1 を加算する（管理者の「もう1回だけ試す」という明示的な操作であり、自動リトライサイクルの再消費ではない）。成功・失敗いずれの場合も `nextRetryAt` は null にする。
 
 ### D4: `auditLogRepository.findByOrganization` の追加
 

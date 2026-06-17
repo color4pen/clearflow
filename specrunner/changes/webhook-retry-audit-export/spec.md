@@ -76,6 +76,22 @@
 **When** `retryWebhookDeliveryAction(deliveryId)` を呼び出す
 **Then** エラーが返される
 
+### Requirement: 手動リトライは1回のみの単発試行であり exponential backoff は適用しない
+
+`retryWebhookDeliveryAction` による手動リトライは1回のみ配信を試行する MUST。exponential backoff は適用しない MUST。`attempts` は既存の値に 1 を加算する MUST。成功時は `status: "delivered"`, `nextRetryAt: null`、失敗時は `status: "failed"`, `nextRetryAt: null` に更新する MUST。
+
+#### Scenario: 手動リトライが1回のみ試行される
+
+**Given** `admin` ロールのユーザーが認証されており、`attempts: 3` の `failed` 状態の配信レコードが存在する
+**When** `retryWebhookDeliveryAction(deliveryId)` を呼び出す
+**Then** 配信が1回のみ試行され（exponential backoff なし）、成功時は `status: "delivered"`, `attempts: 4`, `nextRetryAt: null`、失敗時は `status: "failed"`, `attempts: 4`, `nextRetryAt: null` に更新される
+
+#### Scenario: 手動リトライ後の nextRetryAt が null である
+
+**Given** `admin` ロールのユーザーが認証されており、`failed` 状態の配信レコードが存在する
+**When** `retryWebhookDeliveryAction(deliveryId)` を呼び出す
+**Then** リトライ結果（成功・失敗）にかかわらず `nextRetryAt` が null になる
+
 ### Requirement: 手動リトライのテナント分離
 
 `retryWebhookDeliveryAction` は配信レコードに紐づくエンドポイントの `organizationId` がセッションの `organizationId` と一致することを検証 SHALL する。
