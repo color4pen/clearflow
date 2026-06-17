@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "bea3d04f-b9e6-4cb2-a3a4-ddfff2641bc0",
   "createdAt": "2026-06-16T08:41:13.869Z",
-  "updatedAt": "2026-06-17T13:10:34.965Z",
+  "updatedAt": "2026-06-17T13:22:02.990Z",
   "request": {
     "title": "複数段階承認と差し戻し・再申請",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/multi-stage-approval-bea3d04f",
   "error": null,
   "pipelineId": "standard",
@@ -40,7 +40,7 @@
     "createdAt": "2026-06-17T13:10:34.961Z"
   },
   "_journal": {
-    "historyCount": 106,
+    "historyCount": 107,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
