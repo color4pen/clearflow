@@ -11,6 +11,7 @@ import {
   resubmitRequest,
   getApprovalSteps,
 } from "@/application/usecases";
+import { idempotencyKeyRepository } from "@/infrastructure/repositories";
 
 const createRequestSchema = z.object({
   title: z.string().min(1, "タイトルは必須です"),
@@ -28,6 +29,18 @@ export type CreateRequestState = {
 };
 
 export type ActionResult = { success: boolean; message?: string };
+
+/** UUID v4 format regex (36 chars: 8-4-4-4-12 hex + hyphens). */
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Returns true only if the value is a string that matches UUID v4 format.
+ * This guards against arbitrary strings being persisted to idempotency_keys.key.
+ */
+function isValidIdempotencyKey(value: unknown): value is string {
+  return typeof value === "string" && UUID_RE.test(value);
+}
 
 export async function createRequestAction(
   prevState: CreateRequestState,
@@ -70,11 +83,22 @@ export async function createRequestAction(
 
 export async function submitRequestAction(
   requestId: string,
-  _formData: FormData
+  formData: FormData
 ): Promise<ActionResult> {
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
+  }
+
+  const idempotencyKey = formData.get("idempotencyKey");
+  if (isValidIdempotencyKey(idempotencyKey)) {
+    const cached = await idempotencyKeyRepository.findByKey(
+      idempotencyKey,
+      session.user.organizationId
+    );
+    if (cached) {
+      return cached.result as ActionResult;
+    }
   }
 
   const result = await submitRequest({
@@ -83,8 +107,21 @@ export async function submitRequestAction(
     actorId: session.user.id,
   });
 
+  const actionResult: ActionResult = result.ok
+    ? { success: true }
+    : { success: false, message: result.reason };
+
+  if (isValidIdempotencyKey(idempotencyKey)) {
+    await idempotencyKeyRepository.create({
+      key: idempotencyKey,
+      action: "submitRequest",
+      result: actionResult,
+      organizationId: session.user.organizationId,
+    });
+  }
+
   if (!result.ok) {
-    return { success: false, message: result.reason };
+    return actionResult;
   }
 
   revalidatePath(`/requests/${requestId}`);
@@ -94,7 +131,7 @@ export async function submitRequestAction(
 
 export async function approveRequestAction(
   requestId: string,
-  _formData: FormData
+  formData: FormData
 ): Promise<ActionResult> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -104,6 +141,17 @@ export async function approveRequestAction(
     return { success: false, message: "権限がありません" };
   }
 
+  const idempotencyKey = formData.get("idempotencyKey");
+  if (isValidIdempotencyKey(idempotencyKey)) {
+    const cached = await idempotencyKeyRepository.findByKey(
+      idempotencyKey,
+      session.user.organizationId
+    );
+    if (cached) {
+      return cached.result as ActionResult;
+    }
+  }
+
   const result = await approveRequest({
     requestId,
     organizationId: session.user.organizationId,
@@ -111,8 +159,21 @@ export async function approveRequestAction(
     actorRole: session.user.role,
   });
 
+  const actionResult: ActionResult = result.ok
+    ? { success: true }
+    : { success: false, message: result.reason };
+
+  if (isValidIdempotencyKey(idempotencyKey)) {
+    await idempotencyKeyRepository.create({
+      key: idempotencyKey,
+      action: "approveRequest",
+      result: actionResult,
+      organizationId: session.user.organizationId,
+    });
+  }
+
   if (!result.ok) {
-    return { success: false, message: result.reason };
+    return actionResult;
   }
 
   revalidatePath(`/requests/${requestId}`);
@@ -132,6 +193,17 @@ export async function rejectRequestAction(
     return { success: false, message: "権限がありません" };
   }
 
+  const idempotencyKey = formData.get("idempotencyKey");
+  if (isValidIdempotencyKey(idempotencyKey)) {
+    const cached = await idempotencyKeyRepository.findByKey(
+      idempotencyKey,
+      session.user.organizationId
+    );
+    if (cached) {
+      return cached.result as ActionResult;
+    }
+  }
+
   const rawTargetStatus = formData.get("targetStatus");
   const targetStatus =
     rawTargetStatus === "revision" ? "revision" : "rejected";
@@ -145,8 +217,21 @@ export async function rejectRequestAction(
     comment: typeof comment === "string" && comment.trim() !== "" ? comment.trim() : undefined,
   });
 
+  const actionResult: ActionResult = result.ok
+    ? { success: true }
+    : { success: false, message: result.reason };
+
+  if (isValidIdempotencyKey(idempotencyKey)) {
+    await idempotencyKeyRepository.create({
+      key: idempotencyKey,
+      action: "rejectRequest",
+      result: actionResult,
+      organizationId: session.user.organizationId,
+    });
+  }
+
   if (!result.ok) {
-    return { success: false, message: result.reason };
+    return actionResult;
   }
 
   revalidatePath(`/requests/${requestId}`);
@@ -156,11 +241,22 @@ export async function rejectRequestAction(
 
 export async function resubmitRequestAction(
   requestId: string,
-  _formData: FormData
+  formData: FormData
 ): Promise<ActionResult> {
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
+  }
+
+  const idempotencyKey = formData.get("idempotencyKey");
+  if (isValidIdempotencyKey(idempotencyKey)) {
+    const cached = await idempotencyKeyRepository.findByKey(
+      idempotencyKey,
+      session.user.organizationId
+    );
+    if (cached) {
+      return cached.result as ActionResult;
+    }
   }
 
   const result = await resubmitRequest({
@@ -169,8 +265,21 @@ export async function resubmitRequestAction(
     actorId: session.user.id,
   });
 
+  const actionResult: ActionResult = result.ok
+    ? { success: true }
+    : { success: false, message: result.reason };
+
+  if (isValidIdempotencyKey(idempotencyKey)) {
+    await idempotencyKeyRepository.create({
+      key: idempotencyKey,
+      action: "resubmitRequest",
+      result: actionResult,
+      organizationId: session.user.organizationId,
+    });
+  }
+
   if (!result.ok) {
-    return { success: false, message: result.reason };
+    return actionResult;
   }
 
   revalidatePath(`/requests/${requestId}`);

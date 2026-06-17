@@ -6,3 +6,4 @@ export * as approvalStepRepository from "./approvalStepRepository";
 export * as approvalTemplateRepository from "./approvalTemplateRepository";
 export * as webhookEndpointRepository from "./webhookEndpointRepository";
 export * as webhookDeliveryRepository from "./webhookDeliveryRepository";
+export * as idempotencyKeyRepository from "./idempotencyKeyRepository";

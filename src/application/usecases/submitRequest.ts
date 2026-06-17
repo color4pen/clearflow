@@ -4,6 +4,8 @@ import { db } from "@/infrastructure/db";
 import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
 import type { Request } from "@/domain/models/request";
 
+const OPTIMISTIC_LOCK_ERROR = "この申請は他のユーザーによって更新されました。画面を更新してください";
+
 export type SubmitRequestResult =
   | { ok: true; request: Request }
   | { ok: false; reason: string };
@@ -33,10 +35,11 @@ export async function submitRequest(data: {
         data.organizationId,
         "pending",
         new Date(),
+        existing.version,
         tx
       );
       if (!result) {
-        throw new Error("Failed to update request.");
+        throw new Error(OPTIMISTIC_LOCK_ERROR);
       }
 
       await auditLogRepository.create(

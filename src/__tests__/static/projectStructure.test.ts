@@ -390,9 +390,12 @@ describe("Multi-stage approval UI", () => {
    * TC-052: 差し戻しボタンとコメント入力が pending 状態の申請に表示される
    * When a request is in "pending" state, the detail page must show
    * a revision form with a comment textarea and a "差し戻す" submit button.
+   * Action buttons are implemented in ActionButtons.tsx (Client Component).
    */
   it("TC-052: request detail page shows revision form with comment textarea for pending requests", async () => {
-    const content = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
+    const page = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
+    const actionButtons = await readSrc("app/(dashboard)/requests/[id]/ActionButtons.tsx");
+    const content = page + actionButtons;
     // Must check for pending status to show revision form
     expect(content).toContain('"pending"');
     // Must have a textarea for the revision comment
@@ -409,9 +412,12 @@ describe("Multi-stage approval UI", () => {
    * TC-053: 再申請ボタンが revision 状態の申請に表示される
    * When a request is in "revision" state, the detail page must show
    * a resubmit button that calls resubmitRequestAction.
+   * Action buttons are implemented in ActionButtons.tsx (Client Component).
    */
   it("TC-053: request detail page shows resubmit button for revision status", async () => {
-    const content = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
+    const page = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
+    const actionButtons = await readSrc("app/(dashboard)/requests/[id]/ActionButtons.tsx");
+    const content = page + actionButtons;
     // Must check for revision status
     expect(content).toContain('"revision"');
     // Must import and use resubmitRequestAction

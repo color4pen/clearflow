@@ -14,6 +14,8 @@ import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
 import type { Request } from "@/domain/models/request";
 import type { ApprovalStep } from "@/domain/models/approvalStep";
 
+const OPTIMISTIC_LOCK_ERROR = "この申請は他のユーザーによって更新されました。画面を更新してください";
+
 export type ApproveRequestResult =
   | { ok: true; request: Request }
   | { ok: false; reason: string };
@@ -51,10 +53,11 @@ export async function approveRequest(data: {
           data.organizationId,
           "approved",
           new Date(),
+          existing.version,
           tx
         );
         if (!result) {
-          throw new Error("Failed to update request.");
+          throw new Error(OPTIMISTIC_LOCK_ERROR);
         }
 
         await auditLogRepository.create(
@@ -120,7 +123,17 @@ export async function approveRequest(data: {
         throw new Error("All approval steps are already completed.");
       }
 
-      await approvalStepRepository.updateStatus(
+      // Re-validate role against the fresh step inside the transaction.
+      // The outer canApprove check used the pre-TX snapshot; if another
+      // transaction approved Step N between then and now, freshCurrentStep
+      // may be Step N+1 with a different approverRole requirement.
+      if (!canApprove(freshCurrentStep, data.actorRole)) {
+        throw new Error(
+          `Unauthorized: role "${data.actorRole}" cannot approve this step (requires "${freshCurrentStep.approverRole}").`
+        );
+      }
+
+      const updatedStep = await approvalStepRepository.updateStatus(
         freshCurrentStep.id,
         data.organizationId,
         {
@@ -128,8 +141,12 @@ export async function approveRequest(data: {
           approvedBy: data.actorId,
           approvedAt: new Date(),
         },
+        freshCurrentStep.version,
         tx
       );
+      if (!updatedStep) {
+        throw new Error(OPTIMISTIC_LOCK_ERROR);
+      }
 
       await auditLogRepository.create(
         {
@@ -160,15 +177,23 @@ export async function approveRequest(data: {
       );
 
       if (isAllApproved(updatedSteps)) {
+        // Use existing.version (the pre-TX outer snapshot) as the optimistic
+        // lock token. This ensures that if a concurrent operation (e.g.
+        // rejectRequest) committed between the outer findById and now, its
+        // version increment causes this UPDATE to match 0 rows and the
+        // transaction rolls back — preventing an invalid rejected→approved
+        // state transition. Using freshRequest.version would silently accept
+        // a concurrent write and allow the invalid transition.
         const result = await requestRepository.updateStatus(
           data.requestId,
           data.organizationId,
           "approved",
           new Date(),
+          existing.version,
           tx
         );
         if (!result) {
-          throw new Error("Failed to update request status.");
+          throw new Error(OPTIMISTIC_LOCK_ERROR);
         }
 
         await auditLogRepository.create(

@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { requests } from "../schema";
@@ -16,6 +16,7 @@ function mapRow(row: typeof requests.$inferSelect): Request {
     creatorId: row.creatorId,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    version: row.version,
   };
 }
 
@@ -46,9 +47,11 @@ export async function create(
 
 export async function findById(
   id: string,
-  organizationId: string
+  organizationId: string,
+  tx?: Transaction
 ): Promise<Request | null> {
-  const result = await db
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
     .select()
     .from(requests)
     .where(and(eq(requests.id, id), eq(requests.organizationId, organizationId)))
@@ -72,13 +75,20 @@ export async function updateStatus(
   organizationId: string,
   status: RequestStatus,
   updatedAt: Date,
+  expectedVersion: number,
   tx?: Transaction
 ): Promise<Request | null> {
   const queryRunner = tx ?? db;
   const result = await queryRunner
     .update(requests)
-    .set({ status, updatedAt })
-    .where(and(eq(requests.id, id), eq(requests.organizationId, organizationId)))
+    .set({ status, updatedAt, version: sql`version + 1` })
+    .where(
+      and(
+        eq(requests.id, id),
+        eq(requests.organizationId, organizationId),
+        eq(requests.version, expectedVersion)
+      )
+    )
     .returning();
   return result[0] ? mapRow(result[0]) : null;
 }
