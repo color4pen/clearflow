@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "61645c36-62d6-4138-812b-73796f2237da",
   "createdAt": "2026-06-17T14:32:38.546Z",
-  "updatedAt": "2026-06-17T14:47:51.825Z",
+  "updatedAt": "2026-06-17T14:54:59.726Z",
   "request": {
     "title": "Webhook通知とイベント配信基盤",
     "type": "new-feature",
@@ -35,11 +35,11 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 15,
+    "historyCount": 21,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1
+      "spec-review": 2
     }
   }
 }
