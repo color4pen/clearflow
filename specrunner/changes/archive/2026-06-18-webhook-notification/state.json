@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "61645c36-62d6-4138-812b-73796f2237da",
   "createdAt": "2026-06-17T14:32:38.546Z",
-  "updatedAt": "2026-06-17T15:39:37.224Z",
+  "updatedAt": "2026-06-17T15:41:45.366Z",
   "request": {
     "title": "Webhook通知とイベント配信基盤",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/webhook-notification-61645c36",
   "error": null,
   "pipelineId": "standard",
@@ -40,7 +40,7 @@
     "createdAt": "2026-06-17T15:39:37.210Z"
   },
   "_journal": {
-    "historyCount": 69,
+    "historyCount": 70,
     "stepCounts": {
       "request-review": 1,
       "design": 1,

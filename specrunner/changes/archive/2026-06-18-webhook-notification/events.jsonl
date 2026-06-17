@@ -99,3 +99,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/webhook-notification/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-17T15:39:34.104Z","endedAt":"2026-06-17T15:39:37.211Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-17T15:39:37.211Z","outputs":[{"path":"specrunner/changes/webhook-notification/pr-create-result.md","hash":"sha256:3929a249df0f4e91e6a01cd141ccfae60d1087417059acff51158a8eb803d3c5"}],"inputs":[{"path":"feat/webhook-notification-61645c36","hash":null}]}
 {"type":"transition","ts":"2026-06-17T15:39:37.224Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-17T15:41:45.366Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
