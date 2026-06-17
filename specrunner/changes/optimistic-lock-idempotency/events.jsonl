@@ -41,3 +41,9 @@
 {"type":"transition","ts":"2026-06-17T17:54:04.457Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-17T17:54:04.457Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-17T17:54:04.462Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-17T17:59:12.715Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"8d817ef9-7bc8-41fa-affd-871fbc4d7d8c","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-17T17:54:04.478Z","endedAt":"2026-06-17T17:59:10.773Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-17T17:59:10.773Z","outputs":[{"path":"specrunner/changes/optimistic-lock-idempotency","hash":null}],"inputs":[{"path":"specrunner/changes/optimistic-lock-idempotency/review-feedback-001.md","hash":"sha256:156582eb16ec0584b12f257b17769cb70168cb29a1070d938c1c6f7231ed9caf"}]}
+{"type":"transition","ts":"2026-06-17T17:59:12.725Z","step":"step-transition","status":"ok","message":"code-fixer → domain-invariants"}
+{"type":"transition","ts":"2026-06-17T17:59:12.729Z","step":"domain-invariants","status":"started","message":"domain-invariants iteration 1 started"}
+{"type":"transition","ts":"2026-06-17T17:59:12.730Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
