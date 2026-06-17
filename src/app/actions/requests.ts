@@ -30,6 +30,18 @@ export type CreateRequestState = {
 
 export type ActionResult = { success: boolean; message?: string };
 
+/** UUID v4 format regex (36 chars: 8-4-4-4-12 hex + hyphens). */
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Returns true only if the value is a string that matches UUID v4 format.
+ * This guards against arbitrary strings being persisted to idempotency_keys.key.
+ */
+function isValidIdempotencyKey(value: unknown): value is string {
+  return typeof value === "string" && UUID_RE.test(value);
+}
+
 export async function createRequestAction(
   prevState: CreateRequestState,
   formData: FormData
@@ -79,7 +91,7 @@ export async function submitRequestAction(
   }
 
   const idempotencyKey = formData.get("idempotencyKey");
-  if (typeof idempotencyKey === "string" && idempotencyKey.trim() !== "") {
+  if (isValidIdempotencyKey(idempotencyKey)) {
     const cached = await idempotencyKeyRepository.findByKey(
       idempotencyKey,
       session.user.organizationId
@@ -99,7 +111,7 @@ export async function submitRequestAction(
     ? { success: true }
     : { success: false, message: result.reason };
 
-  if (typeof idempotencyKey === "string" && idempotencyKey.trim() !== "") {
+  if (isValidIdempotencyKey(idempotencyKey)) {
     await idempotencyKeyRepository.create({
       key: idempotencyKey,
       action: "submitRequest",
@@ -130,7 +142,7 @@ export async function approveRequestAction(
   }
 
   const idempotencyKey = formData.get("idempotencyKey");
-  if (typeof idempotencyKey === "string" && idempotencyKey.trim() !== "") {
+  if (isValidIdempotencyKey(idempotencyKey)) {
     const cached = await idempotencyKeyRepository.findByKey(
       idempotencyKey,
       session.user.organizationId
@@ -151,7 +163,7 @@ export async function approveRequestAction(
     ? { success: true }
     : { success: false, message: result.reason };
 
-  if (typeof idempotencyKey === "string" && idempotencyKey.trim() !== "") {
+  if (isValidIdempotencyKey(idempotencyKey)) {
     await idempotencyKeyRepository.create({
       key: idempotencyKey,
       action: "approveRequest",
@@ -182,7 +194,7 @@ export async function rejectRequestAction(
   }
 
   const idempotencyKey = formData.get("idempotencyKey");
-  if (typeof idempotencyKey === "string" && idempotencyKey.trim() !== "") {
+  if (isValidIdempotencyKey(idempotencyKey)) {
     const cached = await idempotencyKeyRepository.findByKey(
       idempotencyKey,
       session.user.organizationId
@@ -209,7 +221,7 @@ export async function rejectRequestAction(
     ? { success: true }
     : { success: false, message: result.reason };
 
-  if (typeof idempotencyKey === "string" && idempotencyKey.trim() !== "") {
+  if (isValidIdempotencyKey(idempotencyKey)) {
     await idempotencyKeyRepository.create({
       key: idempotencyKey,
       action: "rejectRequest",
@@ -237,7 +249,7 @@ export async function resubmitRequestAction(
   }
 
   const idempotencyKey = formData.get("idempotencyKey");
-  if (typeof idempotencyKey === "string" && idempotencyKey.trim() !== "") {
+  if (isValidIdempotencyKey(idempotencyKey)) {
     const cached = await idempotencyKeyRepository.findByKey(
       idempotencyKey,
       session.user.organizationId
@@ -257,7 +269,7 @@ export async function resubmitRequestAction(
     ? { success: true }
     : { success: false, message: result.reason };
 
-  if (typeof idempotencyKey === "string" && idempotencyKey.trim() !== "") {
+  if (isValidIdempotencyKey(idempotencyKey)) {
     await idempotencyKeyRepository.create({
       key: idempotencyKey,
       action: "resubmitRequest",

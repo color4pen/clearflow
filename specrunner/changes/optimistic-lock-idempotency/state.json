@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "ff768708-c139-46fe-a70e-9e240f354199",
   "createdAt": "2026-06-17T17:12:24.183Z",
-  "updatedAt": "2026-06-17T18:13:55.346Z",
+  "updatedAt": "2026-06-17T18:17:53.069Z",
   "request": {
     "title": "楽観的ロックと冪等性キー",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "code-fixer",
   "status": "running",
   "branch": "feat/optimistic-lock-idempotency-ff768708",
   "error": null,
@@ -34,7 +34,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 41,
+    "historyCount": 45,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -44,7 +44,7 @@
       "verification": 1,
       "code-review": 1,
       "code-fixer": 2,
-      "domain-invariants": 1
+      "domain-invariants": 2
     }
   }
 }
