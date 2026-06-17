@@ -30,13 +30,14 @@
 - [ ] `src/infrastructure/repositories/requestRepository.ts` — `mapRow` 関数に `amount: row.amount ?? null` を追加する
 - [ ] `src/infrastructure/repositories/requestRepository.ts` — `create` 関数の引数に `amount?: number | null` を追加し、`.values()` に `amount: data.amount ?? null` を含める
 - [ ] `src/infrastructure/repositories/approvalTemplateRepository.ts` — `mapRow` 関数に `minAmount: row.minAmount ?? null` と `maxAmount: row.maxAmount ?? null` を追加する
-- [ ] `src/infrastructure/repositories/approvalTemplateRepository.ts` — `findByOrganizationForAmount` 関数を新設する。`organizationId` と `amount: number | null` を引数に取り、金額条件にマッチするテンプレート一覧を返す。金額が null の場合は `minAmount IS NULL AND maxAmount IS NULL` のテンプレートのみ返す。金額が指定されている場合は `(minAmount IS NULL OR minAmount <= amount) AND (maxAmount IS NULL OR maxAmount >= amount)` のテンプレートを返す
+- [ ] `src/infrastructure/repositories/approvalTemplateRepository.ts` — `findByOrganizationForAmount` 関数を新設する。`organizationId` と `amount: number | null` を引数に取り、金額条件にマッチするテンプレート一覧を返す。金額が null の場合は `minAmount IS NULL AND maxAmount IS NULL` のテンプレートのみ返す。金額が指定されている場合は `(minAmount IS NULL OR minAmount <= amount) AND (maxAmount IS NULL OR maxAmount >= amount)` のテンプレートを返す。**並び順として `CASE WHEN min_amount IS NULL AND max_amount IS NULL THEN 1 ELSE 0 END ASC` を必ず ORDER BY に指定し、デフォルトテンプレート（minAmount・maxAmount 共に null）が最後に来るようにする**。これにより `selectTemplate` が「最初に見つかったものを使用」するアルゴリズムでも決定的に動作する
 
 **Acceptance Criteria**:
 - `requestRepository.mapRow` が `amount` フィールドを含む `Request` を返す
 - `requestRepository.create` が `amount` を受け取り DB に保存する
 - `approvalTemplateRepository.mapRow` が `minAmount` / `maxAmount` を含む `ApprovalTemplate` を返す
 - `approvalTemplateRepository.findByOrganizationForAmount` が金額条件でフィルタリングされたテンプレート一覧を返す
+- `findByOrganizationForAmount` の結果が「デフォルトテンプレートが最後」の順序で返される（ORDER BY 保証）
 
 ## T-04: テンプレート自動選択ドメインサービス新設
 
@@ -44,14 +45,15 @@
 - [ ] `selectTemplate(templates: ApprovalTemplate[], amount: number | null): ApprovalTemplate | null` 関数を実装する。純粋関数としてテンプレート配列と金額を受け取り、マッチするテンプレートを返す。該当なしの場合は null を返す
 - [ ] 選択ロジック:
   - `amount` が null の場合: `minAmount === null && maxAmount === null` のテンプレートを返す（デフォルトテンプレート）
-  - `amount` が指定されている場合: `(minAmount === null || minAmount <= amount) && (maxAmount === null || maxAmount >= amount)` にマッチする最初のテンプレートを返す
+  - `amount` が指定されている場合: まず templates 配列を特定度の高い順（`minAmount !== null || maxAmount !== null` のテンプレートを先に）にソートしてから、`(minAmount === null || minAmount <= amount) && (maxAmount === null || maxAmount >= amount)` にマッチする最初のテンプレートを返す。この並び替えにより、デフォルトテンプレート（minAmount=null, maxAmount=null）は常に最後の候補となり、より特定的なテンプレートが優先される。ただし、`findByOrganizationForAmount` が ORDER BY によって既に正しい順序で返す実装であれば、selectTemplate 側での並び替えは省略可能（DB 順序に依存するため、ソートを selectTemplate 側でも行う方が純粋関数として安全）
 - [ ] `src/domain/services/index.ts` に `selectTemplate` を export に追加する
 
 **Acceptance Criteria**:
 - `templateSelectionService.ts` が `src/domain/services/` に存在する
 - `selectTemplate` が純粋関数（副作用なし、DB アクセスなし）として実装されている
 - 金額 null → デフォルトテンプレート選択
-- 金額指定 → 範囲マッチするテンプレート選択
+- 金額指定 → 範囲マッチするテンプレート選択（デフォルトテンプレートより特定的なテンプレートを優先）
+- 金額 100000 に対し、デフォルト（null,null）と少額（null,100000）が共に配列に存在する場合、少額テンプレートが返される
 - 該当なし → null 返却
 - `src/domain/services/index.ts` から `selectTemplate` が export されている
 
@@ -87,12 +89,15 @@
 - member ロールのユーザーは引き続き拒否される
 - `listApprovalTemplatesAction` が削除されている
 
-## T-07: next-auth 型定義の更新
+## T-07: next-auth 型定義と auth.ts のキャスト更新
 
 - [ ] `src/types/next-auth.d.ts` — `Role` 型を import している箇所は変更不要（T-02 で Role 型を拡張済みのため自動的に反映される）。ただし型定義ファイルが正しく機能することを確認する
+- [ ] `src/infrastructure/auth.ts` — JWT コールバック内の `(user as { role: "admin" | "member" }).role` キャストを `(user as { role: Role }).role` または `(user as { role: "admin" | "member" | "manager" | "finance" }).role` に更新する（`Role` 型は `@/domain/models/user` から import する）
+- [ ] `src/infrastructure/auth.ts` — セッションコールバック内の `token.role as "admin" | "member"` キャストを `token.role as Role` または `token.role as "admin" | "member" | "manager" | "finance"` に更新する。これらのキャストを陳腐化させたまま放置すると、`"manager"` / `"finance"` ロールのユーザーがログイン時にセッションに正しいロールを持てない可能性があるため、**必ず更新すること**（request.md 要件9参照）
 
 **Acceptance Criteria**:
 - `session.user.role` が `"admin" | "member" | "manager" | "finance"` を受け入れる
+- `auth.ts` のキャストが4値のロール体系に更新されている（`"admin" | "member"` のハードコードキャストが残っていない）
 - TypeScript の型チェックが通る
 
 ## T-08: UI 変更 — 申請作成フォーム
@@ -155,12 +160,16 @@
 - [ ] `src/__tests__/usecases/requestWorkflow.test.ts` — TC-018, TC-019, TC-020, TC-023 のテストを新しい権限モデルに合わせて更新する:
   - `role !== "admin"` の検証を `role === "member"` の検証に変更する
 - [ ] `src/__tests__/usecases/requestWorkflow.test.ts` — createRequest のテストを更新: `templateId` ではなく `amount` を使用するコードパターンを検証する
+- [ ] `src/__tests__/usecases/requestWorkflow.test.ts` — **TC-047 を削除または更新する**。T-06 で `listApprovalTemplatesAction` を削除するため、`listApprovalTemplatesAction` の存在を `expect(src).toContain("listApprovalTemplatesAction")` で検証している TC-047（L341–357）は `bun test` を失敗させる。TC-047 のテスト内容を「`listApprovalTemplatesAction` が存在しないこと」の検証に書き換えるか、または TC-047 ごと削除する
+- [ ] `src/__tests__/static/projectStructure.test.ts` — **TC-054 を削除または更新する**。T-08 でテンプレート選択 UI（`<select name="templateId">`）と `listApprovalTemplatesAction` の import を除去するため、これらの存在を検証している TC-054（L422–434）は `bun test` を失敗させる。TC-054 のテスト内容を新しい申請フォームの仕様（`<input type="number" name="amount">`が存在する、`listApprovalTemplatesAction` が存在しない）の検証に書き換える
 - [ ] `src/__tests__/static/projectStructure.test.ts` — `templateSelectionService.ts` が `src/domain/services/` に存在することを検証するテストケースを追加する（既存の構造テストパターンに準拠）
 
 **Acceptance Criteria**:
 - `templateSelectionService` のテストが全件 green
 - `canApprove` の新ロールに関するテストが全件 green
 - 既存テストが新しい権限モデルに合わせて更新され全件 green
+- TC-047 が削除または更新され、`listApprovalTemplatesAction` 削除後も `bun test` が通る
+- TC-054 が削除または更新され、テンプレート選択 UI 除去後も `bun test` が通る
 - `bun test` が全件 green
 
 ## T-12: ビルド・型チェック・lint 確認

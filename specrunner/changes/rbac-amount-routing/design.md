@@ -68,6 +68,7 @@
 
 - **Rationale**: `canApprove` domain サービスがステップ単位のロールチェックを行うため、アクション層では「承認操作を試行できるロール」のゲートのみ必要。admin / manager / finance はいずれも承認操作を試行可能であり、実際の権限チェックは usecase 層の `canApprove` に委ねる
 - **Alternatives considered**: (A) 許可ロールをリスト化 `["admin", "manager", "finance"]` — ロール追加時にリスト更新が必要。(B) member 排除 `role === "member"` — ロール追加に強い。(B) を採用
+- **⚠️ 逆リスク（将来ロール追加時の注意）**: `role === "member"` 排除パターンは、将来 `auditor`・`viewer` などの閲覧専用ロールが追加された場合に、その閲覧専用ロールが明示的な設計意図なく承認・却下権限を自動的に取得する。新ロールを追加する際は、そのロールが承認操作を行うべきかを必ず確認し、承認不要のロールであれば本パターンを (A) の許可リスト方式に変更するか、別途 `canApprove` での制限を追加すること
 
 ### D6: createRequest のインタフェース変更
 
@@ -79,7 +80,7 @@
 
 - **[Risk] pgEnum への値追加マイグレーション** → Drizzle Kit が pgEnum の値追加を正しく生成しない可能性がある。生成されたマイグレーション SQL を確認し、必要に応じて `ALTER TYPE role ADD VALUE` を手動で記述する
 - **[Risk] 既存テストの破壊** → `role !== "admin"` チェックに依存するテスト（TC-018, TC-019, TC-020, TC-023）が失敗する。テストを新しい権限モデルに合わせて更新する
-- **[Trade-off] 複数テンプレート該当時の非決定性** → 最初に見つかったテンプレートを使用する方式はクエリの順序依存。スコープ外として許容するが、将来的に priority カラム追加で対応可能
+- **[Trade-off] 複数テンプレート該当時の選択順序** → `findByOrganizationForAmount` は `CASE WHEN min_amount IS NULL AND max_amount IS NULL THEN 1 ELSE 0 END ASC` で ORDER BY し、デフォルトテンプレート（minAmount/maxAmount 共に null）を最後に置く。これにより amount 指定時は常に特定的なテンプレートが優先され、spec の「金額10万円 → 少額テンプレート選択」シナリオが決定的に動作する。`selectTemplate` 側でも同じ順序でソートすることで、DB 挿入順に依存しない純粋関数となる
 
 ## Open Questions
 

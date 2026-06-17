@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "342653fb-b415-40bc-925e-493bcce88a9f",
   "createdAt": "2026-06-17T13:24:02.715Z",
-  "updatedAt": "2026-06-17T13:41:21.476Z",
+  "updatedAt": "2026-06-17T13:47:36.512Z",
   "request": {
     "title": "RBAC拡張と金額による承認経路の自動分岐",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "spec-review",
+  "step": "spec-fixer",
   "status": "running",
   "branch": "feat/rbac-amount-routing-342653fb",
   "error": null,
@@ -35,10 +35,11 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 13,
+    "historyCount": 17,
     "stepCounts": {
       "request-review": 2,
-      "design": 1
+      "design": 1,
+      "spec-review": 1
     }
   }
 }
