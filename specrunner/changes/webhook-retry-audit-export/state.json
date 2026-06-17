@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f2f813bd-58c7-4cd8-b231-056f831040e4",
   "createdAt": "2026-06-17T15:43:27.947Z",
-  "updatedAt": "2026-06-17T16:41:00.883Z",
+  "updatedAt": "2026-06-17T16:47:43.027Z",
   "request": {
     "title": "Webhookリトライと監査ログCSVエクスポート",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-review",
+  "step": "code-fixer",
   "status": "running",
   "branch": "feat/webhook-retry-audit-export-f2f813bd",
   "error": null,
@@ -35,7 +35,7 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 45,
+    "historyCount": 49,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -44,7 +44,8 @@
       "test-case-gen": 1,
       "implementer": 1,
       "verification": 2,
-      "build-fixer": 1
+      "build-fixer": 1,
+      "code-review": 1
     }
   }
 }
