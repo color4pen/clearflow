@@ -23,3 +23,9 @@
 {"type":"transition","ts":"2026-06-17T13:47:36.509Z","step":"spec-review","status":"warning","message":"spec-review iteration 1 completed with verdict: needs-fix"}
 {"type":"transition","ts":"2026-06-17T13:47:36.509Z","step":"step-transition","status":"ok","message":"spec-review → spec-fixer"}
 {"type":"transition","ts":"2026-06-17T13:47:36.512Z","step":"spec-fixer-started","status":"started","message":"Starting spec-fixer step"}
+{"type":"transition","ts":"2026-06-17T13:51:01.166Z","step":"spec-fixer-verdict","status":"ok","message":"spec-fixer verdict: approved"}
+{"type":"step-attempt","step":"spec-fixer","sessionId":"b4e94304-9810-4ac8-bc7c-4e00fffe2a6d","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-17T13:47:36.528Z","endedAt":"2026-06-17T13:50:59.352Z"}
+{"type":"lineage","step":"spec-fixer","ts":"2026-06-17T13:50:59.352Z","outputs":[{"path":"specrunner/changes/rbac-amount-routing/design.md","hash":"sha256:5d60dff410eb2c4c3cd8ec7aa5e2fba8fb267dae4ba23c24bcbb357919196eef"},{"path":"specrunner/changes/rbac-amount-routing/spec.md","hash":"sha256:da862f54a5808752ee31cec87e8016ea21ea169b4e9771b515798383b3f885d1"}],"inputs":[{"path":"specrunner/changes/rbac-amount-routing/spec-review-result-001.md","hash":"sha256:48c758a601e279496cf58b405bc657107e4d71eccc68a1d3026eeca8e5c61b09"}]}
+{"type":"transition","ts":"2026-06-17T13:51:01.170Z","step":"step-transition","status":"ok","message":"spec-review complete → spec-review (iter 2)"}
+{"type":"transition","ts":"2026-06-17T13:51:01.171Z","step":"spec-review","status":"started","message":"spec-review iteration 2 started"}
+{"type":"transition","ts":"2026-06-17T13:51:01.172Z","step":"spec-review-started","status":"started","message":"Starting spec-review step"}
