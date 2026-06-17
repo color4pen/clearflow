@@ -1,4 +1,4 @@
-import { eq, and, gte } from "drizzle-orm";
+import { eq, and, gte, sql } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { approvalSteps, users } from "../schema";
@@ -16,6 +16,7 @@ function mapRow(row: typeof approvalSteps.$inferSelect): ApprovalStep {
     approvedAt: row.approvedAt ?? null,
     comment: row.comment ?? null,
     organizationId: row.organizationId,
+    version: row.version,
   };
 }
 
@@ -80,6 +81,7 @@ export async function updateStatus(
     approvedAt?: Date | null;
     comment?: string | null;
   },
+  expectedVersion: number,
   tx?: Transaction
 ): Promise<ApprovalStep | null> {
   const queryRunner = tx ?? db;
@@ -90,11 +92,13 @@ export async function updateStatus(
       approvedBy: data.approvedBy ?? null,
       approvedAt: data.approvedAt ?? null,
       comment: data.comment ?? null,
+      version: sql`version + 1`,
     })
     .where(
       and(
         eq(approvalSteps.id, stepId),
-        eq(approvalSteps.organizationId, organizationId)
+        eq(approvalSteps.organizationId, organizationId),
+        eq(approvalSteps.version, expectedVersion)
       )
     )
     .returning();
@@ -115,6 +119,7 @@ export async function resetSteps(
       approvedBy: null,
       approvedAt: null,
       comment: null,
+      version: sql`version + 1`,
     })
     .where(
       and(

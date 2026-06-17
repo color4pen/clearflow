@@ -10,6 +10,8 @@ import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
 import type { Request } from "@/domain/models/request";
 import type { ApprovalStep } from "@/domain/models/approvalStep";
 
+const OPTIMISTIC_LOCK_ERROR = "この申請は他のユーザーによって更新されました。画面を更新してください";
+
 export type RejectRequestResult =
   | { ok: true; request: Request }
   | { ok: false; reason: string };
@@ -48,15 +50,19 @@ export async function rejectRequest(data: {
 
         const currentStep = getCurrentStep(steps);
         if (currentStep) {
-          await approvalStepRepository.updateStatus(
+          const updatedStep = await approvalStepRepository.updateStatus(
             currentStep.id,
             data.organizationId,
             {
               status: "rejected",
               comment: data.comment ?? null,
             },
+            currentStep.version,
             tx
           );
+          if (!updatedStep) {
+            throw new Error(OPTIMISTIC_LOCK_ERROR);
+          }
         }
 
         const result = await requestRepository.updateStatus(
@@ -64,10 +70,11 @@ export async function rejectRequest(data: {
           data.organizationId,
           "revision",
           new Date(),
+          existing.version,
           tx
         );
         if (!result) {
-          throw new Error("Failed to update request.");
+          throw new Error(OPTIMISTIC_LOCK_ERROR);
         }
 
         await auditLogRepository.create(
@@ -135,10 +142,11 @@ export async function rejectRequest(data: {
         data.organizationId,
         "rejected",
         new Date(),
+        existing.version,
         tx
       );
       if (!result) {
-        throw new Error("Failed to update request.");
+        throw new Error(OPTIMISTIC_LOCK_ERROR);
       }
 
       await auditLogRepository.create(

@@ -68,6 +68,7 @@ export const requests = pgTable("requests", {
     .references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  version: integer("version").notNull().default(1),
 });
 
 // Audit logs table
@@ -101,6 +102,19 @@ export const approvalSteps = pgTable("approval_steps", {
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id),
+  version: integer("version").notNull().default(1),
+});
+
+// Idempotency keys table
+export const idempotencyKeys = pgTable("idempotency_keys", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  key: text("key").notNull().unique(),
+  action: text("action").notNull(),
+  result: jsonb("result").notNull(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // Approval templates table
@@ -193,6 +207,14 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   approvalSteps: many(approvalSteps),
   approvalTemplates: many(approvalTemplates),
   webhookEndpoints: many(webhookEndpoints),
+  idempotencyKeys: many(idempotencyKeys),
+}));
+
+export const idempotencyKeysRelations = relations(idempotencyKeys, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [idempotencyKeys.organizationId],
+    references: [organizations.id],
+  }),
 }));
 
 export const usersRelations = relations(users, ({ one, many }) => ({

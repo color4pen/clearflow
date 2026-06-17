@@ -17,3 +17,8 @@
 {"type":"transition","ts":"2026-06-17T17:27:52.008Z","step":"spec-review","status":"ok","message":"spec-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-17T17:27:52.008Z","step":"step-transition","status":"ok","message":"spec-review → test-case-gen"}
 {"type":"transition","ts":"2026-06-17T17:27:52.011Z","step":"test-case-gen-started","status":"started","message":"Starting test-case-gen step"}
+{"type":"transition","ts":"2026-06-17T17:31:12.009Z","step":"test-case-gen-verdict","status":"ok","message":"test-case-gen verdict: success"}
+{"type":"step-attempt","step":"test-case-gen","sessionId":"e69b9c58-c3ee-4cf6-b086-b15601f27fbe","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-17T17:27:52.029Z","endedAt":"2026-06-17T17:31:10.688Z"}
+{"type":"lineage","step":"test-case-gen","ts":"2026-06-17T17:31:10.688Z","outputs":[{"path":"specrunner/changes/optimistic-lock-idempotency/test-cases.md","hash":"sha256:b81e6250defbcd4b345f69c66c00dc12c1e059d302e93c6084a698fcf51c93e3"}],"inputs":[{"path":"specrunner/changes/optimistic-lock-idempotency/design.md","hash":"sha256:e5da24159864b6ffcc74f711915f889465976766c4089abbde07fadd98eea2e5"},{"path":"specrunner/changes/optimistic-lock-idempotency/tasks.md","hash":"sha256:21c203fee550271bd8da57868f9cbfc02e1f93fb76a8e8913fe497d4bbed241c"}]}
+{"type":"transition","ts":"2026-06-17T17:31:12.013Z","step":"step-transition","status":"ok","message":"spec-review complete → implementer (iter 1)"}
+{"type":"transition","ts":"2026-06-17T17:31:12.015Z","step":"implementer-started","status":"started","message":"Starting implementer step"}

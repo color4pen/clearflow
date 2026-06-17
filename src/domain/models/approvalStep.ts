@@ -11,4 +11,5 @@ export type ApprovalStep = {
   approvedAt: Date | null;
   comment: string | null;
   organizationId: string;
+  version: number;
 };

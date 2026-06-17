@@ -10,4 +10,5 @@ export type Request = {
   creatorId: string;
   createdAt: Date;
   updatedAt: Date;
+  version: number;
 };

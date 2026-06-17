@@ -8,6 +8,7 @@ import {
   rejectRequestAction,
   resubmitRequestAction,
 } from "@/app/actions/requests";
+import { ActionButtons } from "./ActionButtons";
 import type { RequestStatus } from "@/domain/models/request";
 import type { ApprovalStep, ApprovalStepStatus } from "@/domain/models/approvalStep";
 
@@ -117,18 +118,10 @@ export default async function RequestDetailPage({
 
   const steps = await getApprovalSteps({ requestId: id, organizationId });
 
-  const submitAction = submitRequestAction.bind(null, id) as unknown as (
-    formData: FormData
-  ) => Promise<void>;
-  const approveAction = approveRequestAction.bind(null, id) as unknown as (
-    formData: FormData
-  ) => Promise<void>;
-  const rejectAction = rejectRequestAction.bind(null, id) as unknown as (
-    formData: FormData
-  ) => Promise<void>;
-  const resubmitAction = resubmitRequestAction.bind(null, id) as unknown as (
-    formData: FormData
-  ) => Promise<void>;
+  const submitAction = submitRequestAction.bind(null, id) as unknown as (formData: FormData) => Promise<void>;
+  const approveAction = approveRequestAction.bind(null, id) as unknown as (formData: FormData) => Promise<void>;
+  const rejectAction = rejectRequestAction.bind(null, id) as unknown as (formData: FormData) => Promise<void>;
+  const resubmitAction = resubmitRequestAction.bind(null, id) as unknown as (formData: FormData) => Promise<void>;
 
   return (
     <div>
@@ -199,91 +192,13 @@ export default async function RequestDetailPage({
         <ApprovalStepsSection steps={steps} />
 
         {/* Action buttons based on status */}
-        {request.status === "draft" && (
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">
-              アクション
-            </h3>
-            <form action={submitAction}>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                提出する（審査へ）
-              </button>
-            </form>
-          </div>
-        )}
-
-        {request.status === "pending" && (
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">
-              アクション
-            </h3>
-            <div className="flex gap-3 flex-wrap">
-              <form action={approveAction}>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                >
-                  承認する
-                </button>
-              </form>
-              <form action={rejectAction} className="flex flex-col gap-2">
-                <input type="hidden" name="targetStatus" value="rejected" />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                >
-                  却下する
-                </button>
-              </form>
-            </div>
-            {/* 差し戻しフォーム */}
-            <div className="mt-4">
-              <form action={rejectAction} className="space-y-2">
-                <input type="hidden" name="targetStatus" value="revision" />
-                <div>
-                  <label
-                    htmlFor="revision-comment"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    差し戻しコメント
-                  </label>
-                  <textarea
-                    id="revision-comment"
-                    name="comment"
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                    placeholder="差し戻し理由を入力してください"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                >
-                  差し戻す
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {request.status === "revision" && (
-          <div className="border-t border-gray-200 pt-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">
-              アクション
-            </h3>
-            <form action={resubmitAction}>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                再申請する
-              </button>
-            </form>
-          </div>
-        )}
+        <ActionButtons
+          requestStatus={request.status}
+          submitAction={submitAction}
+          approveAction={approveAction}
+          rejectAction={rejectAction}
+          resubmitAction={resubmitAction}
+        />
       </div>
     </div>
   );

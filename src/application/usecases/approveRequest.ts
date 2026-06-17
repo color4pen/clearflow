@@ -14,6 +14,8 @@ import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
 import type { Request } from "@/domain/models/request";
 import type { ApprovalStep } from "@/domain/models/approvalStep";
 
+const OPTIMISTIC_LOCK_ERROR = "この申請は他のユーザーによって更新されました。画面を更新してください";
+
 export type ApproveRequestResult =
   | { ok: true; request: Request }
   | { ok: false; reason: string };
@@ -51,10 +53,11 @@ export async function approveRequest(data: {
           data.organizationId,
           "approved",
           new Date(),
+          existing.version,
           tx
         );
         if (!result) {
-          throw new Error("Failed to update request.");
+          throw new Error(OPTIMISTIC_LOCK_ERROR);
         }
 
         await auditLogRepository.create(
@@ -120,7 +123,7 @@ export async function approveRequest(data: {
         throw new Error("All approval steps are already completed.");
       }
 
-      await approvalStepRepository.updateStatus(
+      const updatedStep = await approvalStepRepository.updateStatus(
         freshCurrentStep.id,
         data.organizationId,
         {
@@ -128,8 +131,12 @@ export async function approveRequest(data: {
           approvedBy: data.actorId,
           approvedAt: new Date(),
         },
+        freshCurrentStep.version,
         tx
       );
+      if (!updatedStep) {
+        throw new Error(OPTIMISTIC_LOCK_ERROR);
+      }
 
       await auditLogRepository.create(
         {
@@ -160,15 +167,26 @@ export async function approveRequest(data: {
       );
 
       if (isAllApproved(updatedSteps)) {
+        // Re-fetch request inside the transaction to get the latest version
+        const freshRequest = await requestRepository.findById(
+          data.requestId,
+          data.organizationId,
+          tx
+        );
+        if (!freshRequest) {
+          throw new Error("Request not found.");
+        }
+
         const result = await requestRepository.updateStatus(
           data.requestId,
           data.organizationId,
           "approved",
           new Date(),
+          freshRequest.version,
           tx
         );
         if (!result) {
-          throw new Error("Failed to update request status.");
+          throw new Error(OPTIMISTIC_LOCK_ERROR);
         }
 
         await auditLogRepository.create(
