@@ -2,7 +2,8 @@ import type { RequestStatus } from "../models/request";
 
 const VALID_TRANSITIONS: Partial<Record<RequestStatus, RequestStatus[]>> = {
   draft: ["pending"],
-  pending: ["approved", "rejected"],
+  pending: ["approved", "rejected", "revision"],
+  revision: ["pending"],
 };
 
 export function validateTransition(

@@ -12,11 +12,13 @@ describe("Domain models", () => {
       "pending",
       "approved",
       "rejected",
+      "revision",
     ];
     expect(statuses).toContain("draft");
     expect(statuses).toContain("pending");
     expect(statuses).toContain("approved");
     expect(statuses).toContain("rejected");
-    expect(statuses.length).toBe(4);
+    expect(statuses).toContain("revision");
+    expect(statuses.length).toBe(5);
   });
 });

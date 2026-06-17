@@ -17,6 +17,12 @@ export const requestStatusEnum = pgEnum("request_status", [
   "pending",
   "approved",
   "rejected",
+  "revision",
+]);
+export const approvalStepStatusEnum = pgEnum("approval_step_status", [
+  "pending",
+  "approved",
+  "rejected",
 ]);
 
 // Organizations table
@@ -73,6 +79,34 @@ export const auditLogs = pgTable("audit_logs", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Approval steps table
+export const approvalSteps = pgTable("approval_steps", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  requestId: uuid("request_id")
+    .notNull()
+    .references(() => requests.id),
+  stepOrder: integer("step_order").notNull(),
+  approverRole: text("approver_role").notNull(),
+  status: approvalStepStatusEnum("status").notNull().default("pending"),
+  approvedBy: uuid("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  comment: text("comment"),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+});
+
+// Approval templates table
+export const approvalTemplates = pgTable("approval_templates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+  steps: jsonb("steps").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Auth.js adapter tables
 export const accounts = pgTable(
   "accounts",
@@ -117,6 +151,8 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   users: many(users),
   requests: many(requests),
   auditLogs: many(auditLogs),
+  approvalSteps: many(approvalSteps),
+  approvalTemplates: many(approvalTemplates),
 }));
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -130,7 +166,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   sessions: many(sessions),
 }));
 
-export const requestsRelations = relations(requests, ({ one }) => ({
+export const requestsRelations = relations(requests, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [requests.organizationId],
     references: [organizations.id],
@@ -139,6 +175,7 @@ export const requestsRelations = relations(requests, ({ one }) => ({
     fields: [requests.creatorId],
     references: [users.id],
   }),
+  approvalSteps: many(approvalSteps),
 }));
 
 export const auditLogsRelations = relations(auditLogs, ({ one }) => ({
@@ -165,3 +202,28 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const approvalStepsRelations = relations(approvalSteps, ({ one }) => ({
+  request: one(requests, {
+    fields: [approvalSteps.requestId],
+    references: [requests.id],
+  }),
+  approver: one(users, {
+    fields: [approvalSteps.approvedBy],
+    references: [users.id],
+  }),
+  organization: one(organizations, {
+    fields: [approvalSteps.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
+export const approvalTemplatesRelations = relations(
+  approvalTemplates,
+  ({ one }) => ({
+    organization: one(organizations, {
+      fields: [approvalTemplates.organizationId],
+      references: [organizations.id],
+    }),
+  })
+);

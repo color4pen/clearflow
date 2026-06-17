@@ -9,6 +9,8 @@ import {
   accounts,
   sessions,
   verificationTokens,
+  approvalSteps,
+  approvalTemplates,
 } from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -24,7 +26,9 @@ async function seed() {
 
   // Truncate all tables (order matters for FK constraints)
   await db.delete(auditLogs);
+  await db.delete(approvalSteps);
   await db.delete(requests);
+  await db.delete(approvalTemplates);
   await db.delete(accounts);
   await db.delete(sessions);
   await db.delete(verificationTokens);
@@ -69,6 +73,30 @@ async function seed() {
     .returning();
   console.log(`✅ Created member user: ${memberUser.email}`);
 
+  // Create approval templates
+  const [singleStepTemplate] = await db
+    .insert(approvalTemplates)
+    .values({
+      name: "上長承認のみ",
+      organizationId: org.id,
+      steps: [{ stepOrder: 1, approverRole: "admin" }],
+    })
+    .returning();
+  console.log(`✅ Created template: ${singleStepTemplate.name}`);
+
+  const [twoStepTemplate] = await db
+    .insert(approvalTemplates)
+    .values({
+      name: "上長承認 → 経理承認",
+      organizationId: org.id,
+      steps: [
+        { stepOrder: 1, approverRole: "admin" },
+        { stepOrder: 2, approverRole: "admin" },
+      ],
+    })
+    .returning();
+  console.log(`✅ Created template: ${twoStepTemplate.name}`);
+
   // Create requests in various statuses
   const [draftRequest] = await db
     .insert(requests)
@@ -105,6 +133,21 @@ async function seed() {
     })
     .returning();
   console.log(`✅ Created approved request: ${approvedRequest.title}`);
+
+  // Add approval steps for the pending request (using single-step template)
+  const [pendingStep] = await db
+    .insert(approvalSteps)
+    .values({
+      requestId: pendingRequest.id,
+      stepOrder: 1,
+      approverRole: "admin",
+      status: "pending",
+      organizationId: org.id,
+    })
+    .returning();
+  console.log(
+    `✅ Created approval step for pending request: step ${pendingStep.stepOrder}`
+  );
 
   // Create audit logs for status changes
   await db.insert(auditLogs).values([

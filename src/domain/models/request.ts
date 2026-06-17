@@ -1,4 +1,4 @@
-export type RequestStatus = "draft" | "pending" | "approved" | "rejected";
+export type RequestStatus = "draft" | "pending" | "approved" | "rejected" | "revision";
 
 export type Request = {
   id: string;

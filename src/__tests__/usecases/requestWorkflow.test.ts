@@ -207,6 +207,44 @@ describe("Authorization in Server Actions", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Multi-stage approval — TC-060 to TC-063
+// ---------------------------------------------------------------------------
+
+describe("Multi-stage approval usecase structure", () => {
+  /**
+   * TC-060: resubmitRequest usecase が存在し validateTransition を呼び出す
+   */
+  it("TC-060: resubmitRequest usecase exists and calls validateTransition", async () => {
+    const src = await readSrc("application/usecases/resubmitRequest.ts");
+    expect(src).toContain("validateTransition");
+  });
+
+  /**
+   * TC-061: resubmitRequest usecase が db.transaction を使用する
+   */
+  it("TC-061: resubmitRequest usecase uses db.transaction", async () => {
+    const src = await readSrc("application/usecases/resubmitRequest.ts");
+    expect(src).toContain("db.transaction");
+  });
+
+  /**
+   * TC-062: resubmitRequest usecase が auditLogRepository を使用する
+   */
+  it("TC-062: resubmitRequest usecase uses auditLogRepository", async () => {
+    const src = await readSrc("application/usecases/resubmitRequest.ts");
+    expect(src).toContain("auditLogRepository");
+  });
+
+  /**
+   * TC-063: approveRequest usecase が approvalStepRepository を使用する
+   */
+  it("TC-063: approveRequest usecase uses approvalStepRepository", async () => {
+    const src = await readSrc("application/usecases/approveRequest.ts");
+    expect(src).toContain("approvalStepRepository");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Request creation — TC-024
 // ---------------------------------------------------------------------------
 
@@ -223,5 +261,97 @@ describe("Request creation", () => {
     const createFnIdx = src.indexOf("export async function create");
     const draftIdx = src.indexOf('"draft"', createFnIdx);
     expect(draftIdx).toBeGreaterThan(-1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Backward-compatible approval (no steps) — TC-030
+// ---------------------------------------------------------------------------
+
+describe("Backward-compatible single-step approval", () => {
+  /**
+   * TC-030: ステップなし申請の承認（後方互換）
+   * When a request has no approval steps, approveRequest transitions it
+   * directly to "approved" without requiring a current step.
+   */
+  it("TC-030: approveRequest handles empty steps with direct approved transition", async () => {
+    const src = await readSrc("application/usecases/approveRequest.ts");
+    // Must check steps.length === 0 for the backward-compatible path
+    expect(src).toContain("steps.length === 0");
+    // The no-steps path must transition directly to "approved"
+    const noStepsIdx = src.indexOf("steps.length === 0");
+    const approvedIdx = src.indexOf('"approved"', noStepsIdx);
+    expect(approvedIdx).toBeGreaterThan(-1);
+    // Must still record an audit log in the no-steps path
+    const auditIdx = src.indexOf("auditLogRepository", noStepsIdx);
+    expect(auditIdx).toBeGreaterThan(-1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Resubmit partial reset — TC-037, TC-038
+// ---------------------------------------------------------------------------
+
+describe("Resubmit partial step reset", () => {
+  /**
+   * TC-037: 2 段階目で差し戻された後の再申請
+   * When step 2 was rejected, only steps with stepOrder >= 2 are reset.
+   * Steps before the rejected step (stepOrder < 2) stay approved.
+   */
+  it("TC-037: resubmitRequest finds rejected step and resets steps from that order onward", async () => {
+    const src = await readSrc("application/usecases/resubmitRequest.ts");
+    // Must find the rejected step
+    expect(src).toContain('status === "rejected"');
+    // Must call getStepsToReset with the rejected step's stepOrder
+    expect(src).toContain("getStepsToReset");
+    expect(src).toContain("rejectedStep.stepOrder");
+    // Must call resetSteps to apply the partial reset
+    expect(src).toContain("resetSteps");
+  });
+
+  /**
+   * TC-038: 1 段階目で差し戻された後の再申請
+   * When step 1 was rejected (first step), getStepsToReset returns all steps,
+   * so all steps are reset on resubmission.
+   * The same code path handles this correctly since stepOrder >= 1 covers all steps.
+   */
+  it("TC-038: resubmitRequest resets all steps when the first step is rejected", async () => {
+    const src = await readSrc("application/usecases/resubmitRequest.ts");
+    // getStepsToReset is used with rejectedStep.stepOrder
+    // When stepOrder is 1 (the first step), all steps satisfy stepOrder >= 1
+    expect(src).toContain("getStepsToReset");
+    expect(src).toContain("rejectedStep.stepOrder");
+    // resetSteps is called with that stepOrder
+    const resetStepsIdx = src.indexOf("resetSteps");
+    const stepOrderAfterReset = src.indexOf("stepOrder", resetStepsIdx);
+    expect(stepOrderAfterReset).toBeGreaterThan(-1);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Server Action: listApprovalTemplatesAction — TC-047
+// ---------------------------------------------------------------------------
+
+describe("Server Action: listApprovalTemplatesAction", () => {
+  /**
+   * TC-047: listApprovalTemplatesAction が認証チェック後にテンプレート一覧を返す
+   * The action must take organizationId from the session (not URL params)
+   * and call approvalTemplateRepository.findByOrganization.
+   */
+  it("TC-047: listApprovalTemplatesAction uses session.user.organizationId and calls findByOrganization", async () => {
+    const src = await readSrc("app/actions/requests.ts");
+    // listApprovalTemplatesAction must exist
+    expect(src).toContain("listApprovalTemplatesAction");
+    const fnIdx = src.indexOf("async function listApprovalTemplatesAction");
+    expect(fnIdx).toBeGreaterThan(-1);
+    const fnBody = src.slice(fnIdx);
+    // Must use auth() for session
+    expect(fnBody).toContain("auth()");
+    // Must read organizationId from session (not URL/formData)
+    expect(fnBody).toContain("session.user.organizationId");
+    // Must NOT read from formData or URL params
+    expect(fnBody).not.toContain('formData.get("organizationId")');
+    // Must call findByOrganization
+    expect(fnBody).toContain("findByOrganization");
   });
 });
