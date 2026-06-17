@@ -9,6 +9,7 @@ import {
   resubmitRequestAction,
 } from "@/app/actions/requests";
 import { ActionButtons } from "./ActionButtons";
+import type { ServerAction } from "./ActionButtons";
 import type { RequestStatus } from "@/domain/models/request";
 import type { ApprovalStep, ApprovalStepStatus } from "@/domain/models/approvalStep";
 
@@ -118,10 +119,10 @@ export default async function RequestDetailPage({
 
   const steps = await getApprovalSteps({ requestId: id, organizationId });
 
-  const submitAction = submitRequestAction.bind(null, id) as unknown as (formData: FormData) => Promise<void>;
-  const approveAction = approveRequestAction.bind(null, id) as unknown as (formData: FormData) => Promise<void>;
-  const rejectAction = rejectRequestAction.bind(null, id) as unknown as (formData: FormData) => Promise<void>;
-  const resubmitAction = resubmitRequestAction.bind(null, id) as unknown as (formData: FormData) => Promise<void>;
+  const submitAction = submitRequestAction.bind(null, id) as unknown as ServerAction;
+  const approveAction = approveRequestAction.bind(null, id) as unknown as ServerAction;
+  const rejectAction = rejectRequestAction.bind(null, id) as unknown as ServerAction;
+  const resubmitAction = resubmitRequestAction.bind(null, id) as unknown as ServerAction;
 
   return (
     <div>
