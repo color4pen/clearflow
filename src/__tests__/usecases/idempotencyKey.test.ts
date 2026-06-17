@@ -25,13 +25,18 @@ describe("Schema: idempotency_keys table", () => {
     expect(src).toContain('pgTable("idempotency_keys"');
   });
 
-  it("idempotency_keys table has key column with unique constraint", async () => {
+  it("idempotency_keys table has (key, organizationId) composite unique constraint", async () => {
     const src = await readSrc("infrastructure/schema.ts");
     const tableStart = src.indexOf('pgTable("idempotency_keys"');
-    const tableEnd = src.indexOf("});", tableStart);
-    const table = src.substring(tableStart, tableEnd);
+    // Table definition ends with ]); because it uses a constraints array as the third argument
+    const tableEnd = src.indexOf("]);", tableStart);
+    const table = src.substring(tableStart, tableEnd + 3);
     expect(table).toContain('text("key")');
-    expect(table).toContain(".unique()");
+    // Must use a composite unique constraint on (key, organizationId),
+    // not a single-column .unique() which would allow cross-tenant collisions.
+    expect(table).toContain("unique(");
+    expect(table).toContain("table.key");
+    expect(table).toContain("table.organizationId");
   });
 
   it("idempotency_keys table has action column", async () => {

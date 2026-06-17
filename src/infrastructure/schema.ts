@@ -8,6 +8,7 @@ import {
   jsonb,
   boolean,
   primaryKey,
+  unique,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -108,14 +109,19 @@ export const approvalSteps = pgTable("approval_steps", {
 // Idempotency keys table
 export const idempotencyKeys = pgTable("idempotency_keys", {
   id: uuid("id").primaryKey().defaultRandom(),
-  key: text("key").notNull().unique(),
+  key: text("key").notNull(),
   action: text("action").notNull(),
   result: jsonb("result").notNull(),
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  // Unique per (key, organizationId) so tenants cannot collide on the same key.
+  // A global key-only unique constraint would let Org A's key silently block
+  // Org B's idempotency guarantee if the 23505 error is swallowed.
+  unique("idempotency_keys_key_org_unique").on(table.key, table.organizationId),
+]);
 
 // Approval templates table
 export const approvalTemplates = pgTable("approval_templates", {
