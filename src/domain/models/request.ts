@@ -5,6 +5,7 @@ export type Request = {
   title: string;
   description: string | null;
   status: RequestStatus;
+  amount: number | null;
   organizationId: string;
   creatorId: string;
   createdAt: Date;

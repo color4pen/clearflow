@@ -25,6 +25,11 @@ function statusClass(status: RequestStatus): string {
   return classes[status];
 }
 
+function formatAmount(amount: number | null): string {
+  if (amount === null) return "-";
+  return amount.toLocaleString("ja-JP") + "円";
+}
+
 export default async function RequestsPage() {
   const session = await auth();
   const organizationId = session!.user.organizationId;
@@ -64,6 +69,9 @@ export default async function RequestsPage() {
                   ステータス
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  金額
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   作成日時
                 </th>
               </tr>
@@ -88,6 +96,9 @@ export default async function RequestsPage() {
                     >
                       {statusLabel(request.status)}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-500">
+                    {formatAmount(request.amount)}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500">
                     {request.createdAt.toLocaleDateString("ja-JP", {

@@ -73,29 +73,74 @@ async function seed() {
     .returning();
   console.log(`✅ Created member user: ${memberUser.email}`);
 
-  // Create approval templates
-  const [singleStepTemplate] = await db
-    .insert(approvalTemplates)
+  // Create manager user
+  const [managerUser] = await db
+    .insert(users)
     .values({
-      name: "上長承認のみ",
+      email: "manager@example.com",
+      hashedPassword,
+      name: "Manager User",
       organizationId: org.id,
-      steps: [{ stepOrder: 1, approverRole: "admin" }],
+      role: "manager",
     })
     .returning();
-  console.log(`✅ Created template: ${singleStepTemplate.name}`);
+  console.log(`✅ Created manager user: ${managerUser.email}`);
 
-  const [twoStepTemplate] = await db
+  // Create finance user
+  const [financeUser] = await db
+    .insert(users)
+    .values({
+      email: "finance@example.com",
+      hashedPassword,
+      name: "Finance User",
+      organizationId: org.id,
+      role: "finance",
+    })
+    .returning();
+  console.log(`✅ Created finance user: ${financeUser.email}`);
+
+  // Create approval templates
+  // Default template: no amount condition, single manager approval step
+  const [defaultTemplate] = await db
     .insert(approvalTemplates)
     .values({
-      name: "上長承認 → 経理承認",
+      name: "デフォルト（上長承認）",
+      organizationId: org.id,
+      steps: [{ stepOrder: 1, approverRole: "manager" }],
+      minAmount: null,
+      maxAmount: null,
+    })
+    .returning();
+  console.log(`✅ Created template: ${defaultTemplate.name}`);
+
+  // Small amount template: up to 100,000 yen, single manager approval
+  const [smallTemplate] = await db
+    .insert(approvalTemplates)
+    .values({
+      name: "少額申請（上長承認）",
+      organizationId: org.id,
+      steps: [{ stepOrder: 1, approverRole: "manager" }],
+      minAmount: null,
+      maxAmount: 100000,
+    })
+    .returning();
+  console.log(`✅ Created template: ${smallTemplate.name}`);
+
+  // Large amount template: over 100,000 yen, manager then finance approval
+  const [largeTemplate] = await db
+    .insert(approvalTemplates)
+    .values({
+      name: "高額申請（上長→経理承認）",
       organizationId: org.id,
       steps: [
-        { stepOrder: 1, approverRole: "admin" },
-        { stepOrder: 2, approverRole: "admin" },
+        { stepOrder: 1, approverRole: "manager" },
+        { stepOrder: 2, approverRole: "finance" },
       ],
+      minAmount: 100001,
+      maxAmount: null,
     })
     .returning();
-  console.log(`✅ Created template: ${twoStepTemplate.name}`);
+  console.log(`✅ Created template: ${largeTemplate.name}`);
 
   // Create requests in various statuses
   const [draftRequest] = await db
@@ -104,6 +149,7 @@ async function seed() {
       title: "備品購入申請",
       description: "オフィス用の椅子を5脚購入したい",
       status: "draft",
+      amount: 50000,
       organizationId: org.id,
       creatorId: memberUser.id,
     })
@@ -116,6 +162,7 @@ async function seed() {
       title: "出張申請 - 東京オフィス訪問",
       description: "来週月曜日に東京オフィスへの出張を申請します",
       status: "pending",
+      amount: 150000,
       organizationId: org.id,
       creatorId: memberUser.id,
     })
@@ -128,19 +175,20 @@ async function seed() {
       title: "ソフトウェアライセンス購入",
       description: "開発ツールのライセンスを購入したい",
       status: "approved",
+      amount: 30000,
       organizationId: org.id,
       creatorId: memberUser.id,
     })
     .returning();
   console.log(`✅ Created approved request: ${approvedRequest.title}`);
 
-  // Add approval steps for the pending request (using single-step template)
+  // Add approval steps for the pending request (using large template: manager -> finance)
   const [pendingStep] = await db
     .insert(approvalSteps)
     .values({
       requestId: pendingRequest.id,
       stepOrder: 1,
-      approverRole: "admin",
+      approverRole: "manager",
       status: "pending",
       organizationId: org.id,
     })
@@ -148,6 +196,14 @@ async function seed() {
   console.log(
     `✅ Created approval step for pending request: step ${pendingStep.stepOrder}`
   );
+
+  await db.insert(approvalSteps).values({
+    requestId: pendingRequest.id,
+    stepOrder: 2,
+    approverRole: "finance",
+    status: "pending",
+    organizationId: org.id,
+  });
 
   // Create audit logs for status changes
   await db.insert(auditLogs).values([
@@ -157,6 +213,11 @@ async function seed() {
       targetId: draftRequest.id,
       actorId: memberUser.id,
       organizationId: org.id,
+      metadata: {
+        templateId: smallTemplate.id,
+        templateName: smallTemplate.name,
+        amount: 50000,
+      },
     },
     {
       action: "request.create",
@@ -164,6 +225,11 @@ async function seed() {
       targetId: pendingRequest.id,
       actorId: memberUser.id,
       organizationId: org.id,
+      metadata: {
+        templateId: largeTemplate.id,
+        templateName: largeTemplate.name,
+        amount: 150000,
+      },
     },
     {
       action: "request.submit",
@@ -178,6 +244,11 @@ async function seed() {
       targetId: approvedRequest.id,
       actorId: memberUser.id,
       organizationId: org.id,
+      metadata: {
+        templateId: smallTemplate.id,
+        templateName: smallTemplate.name,
+        amount: 30000,
+      },
     },
     {
       action: "request.submit",
@@ -190,7 +261,7 @@ async function seed() {
       action: "request.approve",
       targetType: "request",
       targetId: approvedRequest.id,
-      actorId: adminUser.id,
+      actorId: managerUser.id,
       organizationId: org.id,
     },
   ]);
@@ -198,8 +269,10 @@ async function seed() {
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");
-  console.log("  Admin: admin@example.com / password123");
-  console.log("  Member: member@example.com / password123");
+  console.log("  Admin:   admin@example.com / password123");
+  console.log("  Member:  member@example.com / password123");
+  console.log("  Manager: manager@example.com / password123");
+  console.log("  Finance: finance@example.com / password123");
 }
 
 seed()

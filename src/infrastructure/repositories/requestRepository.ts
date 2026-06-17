@@ -11,6 +11,7 @@ function mapRow(row: typeof requests.$inferSelect): Request {
     title: row.title,
     description: row.description,
     status: row.status,
+    amount: row.amount ?? null,
     organizationId: row.organizationId,
     creatorId: row.creatorId,
     createdAt: row.createdAt,
@@ -22,6 +23,7 @@ export async function create(
   data: {
     title: string;
     description?: string | null;
+    amount?: number | null;
     organizationId: string;
     creatorId: string;
   },
@@ -33,6 +35,7 @@ export async function create(
     .values({
       title: data.title,
       description: data.description ?? null,
+      amount: data.amount ?? null,
       status: "draft",
       organizationId: data.organizationId,
       creatorId: data.creatorId,
