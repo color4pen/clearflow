@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "342653fb-b415-40bc-925e-493bcce88a9f",
   "createdAt": "2026-06-17T13:24:02.715Z",
-  "updatedAt": "2026-06-17T14:25:27.060Z",
+  "updatedAt": "2026-06-17T14:28:19.190Z",
   "request": {
     "title": "RBAC拡張と金額による承認経路の自動分岐",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/rbac-amount-routing-342653fb",
   "error": null,
   "pipelineId": "standard",
@@ -34,8 +34,13 @@
     }
   ],
   "resumePoint": null,
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/7",
+    "number": 7,
+    "createdAt": "2026-06-17T14:28:19.181Z"
+  },
   "_journal": {
-    "historyCount": 56,
+    "historyCount": 61,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -47,7 +52,9 @@
       "code-review": 1,
       "domain-invariants": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
