@@ -155,4 +155,24 @@ describe("approvalStepService — canApprove", () => {
     const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "admin" });
     expect(canApprove(step, "")).toBe(false);
   });
+
+  it("returns true when manager approves a manager step", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "manager" });
+    expect(canApprove(step, "manager")).toBe(true);
+  });
+
+  it("returns false when manager tries to approve a finance step", () => {
+    const step = makeStep({ stepOrder: 2, status: "pending", approverRole: "finance" });
+    expect(canApprove(step, "manager")).toBe(false);
+  });
+
+  it("returns true when finance approves a finance step", () => {
+    const step = makeStep({ stepOrder: 2, status: "pending", approverRole: "finance" });
+    expect(canApprove(step, "finance")).toBe(true);
+  });
+
+  it("returns false when finance tries to approve a manager step", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "manager" });
+    expect(canApprove(step, "finance")).toBe(false);
+  });
 });

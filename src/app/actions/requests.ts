@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
-import { approvalTemplateRepository } from "@/infrastructure/repositories";
 import {
   createRequest,
   submitRequest,
@@ -16,12 +15,14 @@ import {
 const createRequestSchema = z.object({
   title: z.string().min(1, "タイトルは必須です"),
   description: z.string().optional(),
+  amount: z.coerce.number().int().nonnegative().optional(),
 });
 
 export type CreateRequestState = {
   errors?: {
     title?: string[];
     description?: string[];
+    amount?: string[];
   };
   message?: string;
 };
@@ -37,9 +38,12 @@ export async function createRequestAction(
     return { message: "認証が必要です" };
   }
 
+  const rawAmount = formData.get("amount");
   const parsed = createRequestSchema.safeParse({
     title: formData.get("title"),
     description: formData.get("description") || undefined,
+    amount:
+      rawAmount !== null && rawAmount !== "" ? rawAmount : undefined,
   });
 
   if (!parsed.success) {
@@ -48,18 +52,12 @@ export async function createRequestAction(
     };
   }
 
-  const rawTemplateId = formData.get("templateId");
-  const templateId =
-    typeof rawTemplateId === "string" && rawTemplateId.trim() !== ""
-      ? rawTemplateId.trim()
-      : undefined;
-
   const result = await createRequest({
     title: parsed.data.title,
     description: parsed.data.description ?? null,
+    amount: parsed.data.amount ?? null,
     organizationId: session.user.organizationId,
     creatorId: session.user.id,
-    templateId,
   });
 
   if (!result.ok) {
@@ -102,7 +100,7 @@ export async function approveRequestAction(
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
   }
-  if (session.user.role !== "admin") {
+  if (session.user.role === "member") {
     return { success: false, message: "権限がありません" };
   }
 
@@ -130,7 +128,7 @@ export async function rejectRequestAction(
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
   }
-  if (session.user.role !== "admin") {
+  if (session.user.role === "member") {
     return { success: false, message: "権限がありません" };
   }
 
@@ -178,19 +176,6 @@ export async function resubmitRequestAction(
   revalidatePath(`/requests/${requestId}`);
   revalidatePath("/requests");
   return { success: true };
-}
-
-export async function listApprovalTemplatesAction() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, message: "認証が必要です", templates: [] };
-  }
-
-  const templates = await approvalTemplateRepository.findByOrganization(
-    session.user.organizationId
-  );
-
-  return { success: true, templates };
 }
 
 export async function getApprovalStepsAction(requestId: string) {

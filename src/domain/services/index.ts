@@ -5,3 +5,4 @@ export {
   getStepsToReset,
   canApprove,
 } from "./approvalStepService";
+export { selectTemplate } from "./templateSelectionService";

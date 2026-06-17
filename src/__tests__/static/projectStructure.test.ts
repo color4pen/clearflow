@@ -415,22 +415,20 @@ describe("Multi-stage approval UI", () => {
   });
 
   /**
-   * TC-054: テンプレート選択セレクトボックスが申請作成画面に表示される
-   * The new request page must render a template selection <select> element
-   * showing all organization templates, with an empty-value option for "no template".
+   * TC-054: 申請作成画面にテンプレート選択UIがなく、金額入力フィールドがある
+   * テンプレート手動選択が廃止され、金額入力による自動選択に変更された。
+   * The new request page must have an amount input field and must NOT have
+   * a template selection <select> or listApprovalTemplatesAction import.
    */
-  it("TC-054: new request page shows template selection select box", async () => {
+  it("TC-054: new request page shows amount input instead of template selection", async () => {
     const content = await readSrc("app/(dashboard)/requests/new/page.tsx");
-    // Must import listApprovalTemplatesAction to fetch templates
-    expect(content).toContain("listApprovalTemplatesAction");
-    // Must have a <select> element for template selection
-    expect(content).toContain("<select");
-    // The select must use name="templateId"
-    expect(content).toContain('name="templateId"');
-    // Must list templates
-    expect(content).toContain("templates");
-    // Must have an empty-value option (no template selected)
-    expect(content).toContain('value=""');
+    // Must NOT import listApprovalTemplatesAction (template selection removed)
+    expect(content).not.toContain("listApprovalTemplatesAction");
+    // Must NOT have a <select> element for template selection
+    expect(content).not.toContain('name="templateId"');
+    // Must have an amount input field
+    expect(content).toContain('name="amount"');
+    expect(content).toContain('type="number"');
   });
 
   /**
@@ -464,6 +462,7 @@ describe("Build and lint", () => {
       "domain/models/approvalStep.ts",
       "domain/models/approvalTemplate.ts",
       "domain/services/approvalStepService.ts",
+      "domain/services/templateSelectionService.ts",
       "infrastructure/repositories/approvalStepRepository.ts",
       "infrastructure/repositories/approvalTemplateRepository.ts",
       "application/usecases/resubmitRequest.ts",
@@ -474,6 +473,20 @@ describe("Build and lint", () => {
       const exists = await fileExists(`src/${file}`);
       expect(exists).toBe(true);
     }
+  });
+
+  /**
+   * TC-057b: templateSelectionService.ts が src/domain/services/ に存在する
+   */
+  it("TC-057b: templateSelectionService.ts exists in src/domain/services/", async () => {
+    const exists = await fileExists("src/domain/services/templateSelectionService.ts");
+    expect(exists).toBe(true);
+    // Must export selectTemplate function
+    const content = await readSrc("domain/services/templateSelectionService.ts");
+    expect(content).toContain("export function selectTemplate");
+    // Must be a pure function (no DB access)
+    expect(content).not.toContain("import { db }");
+    expect(content).not.toContain('from "@/infrastructure');
   });
 
   /**

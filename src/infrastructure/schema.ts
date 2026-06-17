@@ -11,7 +11,7 @@ import {
 import { relations } from "drizzle-orm";
 
 // Enums
-export const roleEnum = pgEnum("role", ["admin", "member"]);
+export const roleEnum = pgEnum("role", ["admin", "member", "manager", "finance"]);
 export const requestStatusEnum = pgEnum("request_status", [
   "draft",
   "pending",
@@ -53,6 +53,7 @@ export const requests = pgTable("requests", {
   title: text("title").notNull(),
   description: text("description"),
   status: requestStatusEnum("status").notNull().default("draft"),
+  amount: integer("amount"),
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id),
@@ -104,6 +105,8 @@ export const approvalTemplates = pgTable("approval_templates", {
     .notNull()
     .references(() => organizations.id),
   steps: jsonb("steps").notNull(),
+  minAmount: integer("min_amount"),
+  maxAmount: integer("max_amount"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

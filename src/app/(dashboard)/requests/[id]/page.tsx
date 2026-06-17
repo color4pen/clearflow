@@ -185,6 +185,14 @@ export default async function RequestDetailPage({
               })}
             </p>
           </div>
+          <div>
+            <span className="text-gray-500">金額</span>
+            <p className="text-gray-900 mt-1">
+              {request.amount !== null
+                ? request.amount.toLocaleString("ja-JP") + "円"
+                : "-"}
+            </p>
+          </div>
         </div>
 
         {/* Approval steps progress */}

@@ -172,37 +172,37 @@ describe("Authorization in Server Actions", () => {
   });
 
   /**
-   * TC-018: admin が申請を承認できる
+   * TC-018: manager/finance が申請を承認できる
    * TC-019: member が申請を承認しようとすると拒否される
    */
-  it("TC-018 TC-019: approveRequestAction checks role=admin", async () => {
+  it("TC-018 TC-019: approveRequestAction rejects member role", async () => {
     const src = await readSrc("app/actions/requests.ts");
     // approveRequestAction must check role before calling usecase
-    expect(src).toContain('session.user.role !== "admin"');
+    expect(src).toContain('session.user.role === "member"');
   });
 
   /**
    * TC-020: member が申請を却下しようとすると拒否される
    */
-  it("TC-020: rejectRequestAction checks role=admin", async () => {
+  it("TC-020: rejectRequestAction rejects member role", async () => {
     const src = await readSrc("app/actions/requests.ts");
-    expect(src).toContain('session.user.role !== "admin"');
+    expect(src).toContain('session.user.role === "member"');
     // rejectRequest usecase should only be called after the role check
-    const roleCheckIdx = src.lastIndexOf('role !== "admin"');
+    const roleCheckIdx = src.lastIndexOf('role === "member"');
     const rejectIdx = src.indexOf("rejectRequest(");
     expect(roleCheckIdx).toBeLessThan(rejectIdx);
   });
 
   /**
-   * TC-023: approveRequestAction と rejectRequestAction で role=admin チェックが行われる
+   * TC-023: approveRequestAction と rejectRequestAction で member ロールの拒否チェックが行われる
    */
-  it("TC-023: admin role check present in approveRequestAction and rejectRequestAction", async () => {
+  it("TC-023: member role rejection check present in approveRequestAction and rejectRequestAction", async () => {
     const src = await readSrc("app/actions/requests.ts");
     expect(src).toContain("approveRequestAction");
     expect(src).toContain("rejectRequestAction");
-    // Both actions reference role check
-    const adminCheckCount = (src.match(/role !== "admin"/g) || []).length;
-    expect(adminCheckCount).toBeGreaterThanOrEqual(2);
+    // Both actions reference the member role check
+    const memberCheckCount = (src.match(/role === "member"/g) || []).length;
+    expect(memberCheckCount).toBeGreaterThanOrEqual(2);
   });
 });
 
@@ -261,6 +261,25 @@ describe("Request creation", () => {
     const createFnIdx = src.indexOf("export async function create");
     const draftIdx = src.indexOf('"draft"', createFnIdx);
     expect(draftIdx).toBeGreaterThan(-1);
+  });
+
+  /**
+   * TC-024b: createRequest usecase が templateId ではなく amount を受け取る
+   * createRequest は金額に基づくテンプレート自動選択を行う
+   */
+  it("TC-024b: createRequest usecase uses amount-based template selection instead of templateId", async () => {
+    const src = await readSrc("application/usecases/createRequest.ts");
+    // Must accept amount
+    expect(src).toContain("amount");
+    // Must NOT accept templateId in the data argument
+    expect(src).not.toContain("templateId?: string");
+    // Must call findByOrganizationForAmount for template selection
+    expect(src).toContain("findByOrganizationForAmount");
+    // Must use selectTemplate domain service
+    expect(src).toContain("selectTemplate");
+    // Must include templateId and amount in audit log metadata
+    expect(src).toContain("templateId: selectedTemplate.id");
+    expect(src).toContain("templateName: selectedTemplate.name");
   });
 });
 
@@ -329,29 +348,17 @@ describe("Resubmit partial step reset", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Server Action: listApprovalTemplatesAction — TC-047
+// Server Action: listApprovalTemplatesAction removed — TC-047
 // ---------------------------------------------------------------------------
 
-describe("Server Action: listApprovalTemplatesAction", () => {
+describe("Server Action: listApprovalTemplatesAction removed", () => {
   /**
-   * TC-047: listApprovalTemplatesAction が認証チェック後にテンプレート一覧を返す
-   * The action must take organizationId from the session (not URL params)
-   * and call approvalTemplateRepository.findByOrganization.
+   * TC-047: listApprovalTemplatesAction はテンプレート手動選択の廃止に伴い削除された。
+   * requests.ts に listApprovalTemplatesAction が存在しないことを確認する。
    */
-  it("TC-047: listApprovalTemplatesAction uses session.user.organizationId and calls findByOrganization", async () => {
+  it("TC-047: listApprovalTemplatesAction does not exist in requests.ts (removed with template auto-selection)", async () => {
     const src = await readSrc("app/actions/requests.ts");
-    // listApprovalTemplatesAction must exist
-    expect(src).toContain("listApprovalTemplatesAction");
-    const fnIdx = src.indexOf("async function listApprovalTemplatesAction");
-    expect(fnIdx).toBeGreaterThan(-1);
-    const fnBody = src.slice(fnIdx);
-    // Must use auth() for session
-    expect(fnBody).toContain("auth()");
-    // Must read organizationId from session (not URL/formData)
-    expect(fnBody).toContain("session.user.organizationId");
-    // Must NOT read from formData or URL params
-    expect(fnBody).not.toContain('formData.get("organizationId")');
-    // Must call findByOrganization
-    expect(fnBody).toContain("findByOrganization");
+    // listApprovalTemplatesAction must NOT exist after template selection UI removal
+    expect(src).not.toContain("listApprovalTemplatesAction");
   });
 });

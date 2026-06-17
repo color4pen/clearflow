@@ -8,5 +8,7 @@ export type ApprovalTemplate = {
   name: string;
   organizationId: string;
   steps: ApprovalTemplateStep[];
+  minAmount: number | null;
+  maxAmount: number | null;
   createdAt: Date;
 };

@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs";
 import { db } from "./db";
 import { users, accounts, sessions, verificationTokens } from "./schema";
 import { findByEmailForAuth } from "./repositories/userRepository";
+import type { Role } from "@/domain/models/user";
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
   adapter: DrizzleAdapter(db, {
@@ -57,14 +58,14 @@ export const { auth, signIn, signOut, handlers } = NextAuth({
       if (user) {
         token.userId = user.id!;
         token.organizationId = (user as { organizationId: string }).organizationId;
-        token.role = (user as { role: "admin" | "member" }).role;
+        token.role = (user as { role: Role }).role;
       }
       return token;
     },
     async session({ session, token }) {
       session.user.id = token.userId as string;
       session.user.organizationId = token.organizationId as string;
-      session.user.role = token.role as "admin" | "member";
+      session.user.role = token.role as Role;
       return session;
     },
   },
