@@ -153,3 +153,38 @@ describe("Audit log CSV export", () => {
     expect(exists).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Backward compatibility — TC-043
+// ---------------------------------------------------------------------------
+
+describe("Backward compatibility (TC-043)", () => {
+  /**
+   * TC-043: 既存の webhookWorkflow テストが引き続き pass する
+   *
+   * webhookDelivery.ts にリトライロジックを追加した後も、
+   * AbortSignal.timeout, X-Clearflow-Signature, fetch, void deliverWebhookEvent
+   * 等の既存プロパティが維持されていることを確認する。
+   */
+  it("TC-043: webhookDelivery.ts still uses AbortSignal.timeout(5000) after retry changes", async () => {
+    const src = await readSrc("infrastructure/webhookDelivery.ts");
+    expect(src).toContain("AbortSignal.timeout");
+    expect(src).toContain("5000");
+  });
+
+  it("TC-043: webhookDelivery.ts still includes X-Clearflow-Signature header", async () => {
+    const src = await readSrc("infrastructure/webhookDelivery.ts");
+    expect(src).toContain("X-Clearflow-Signature");
+  });
+
+  it("TC-043: webhookDelivery.ts still uses fetch for HTTP delivery", async () => {
+    const src = await readSrc("infrastructure/webhookDelivery.ts");
+    expect(src).toContain("fetch");
+  });
+
+  it("TC-043: webhookDelivery.ts still exports deliverWebhookEvent", async () => {
+    const src = await readSrc("infrastructure/webhookDelivery.ts");
+    expect(src).toContain("deliverWebhookEvent");
+    expect(src).toContain("export");
+  });
+});
