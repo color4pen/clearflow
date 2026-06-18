@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f9372fed-9233-412f-b743-f5f9d5dec551",
   "createdAt": "2026-06-18T01:51:42.316Z",
-  "updatedAt": "2026-06-18T01:51:43.885Z",
+  "updatedAt": "2026-06-18T01:57:35.304Z",
   "request": {
     "title": "代理承認",
     "type": "new-feature",
@@ -33,8 +33,11 @@
       ]
     }
   ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 6,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }

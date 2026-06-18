@@ -21,16 +21,18 @@
 ## 要件
 
 1. **approval_delegations テーブル追加**: カラム: id (uuid), fromUserId (FK to users), toUserId (FK to users), organizationId (FK), startDate (timestamp), endDate (timestamp), isActive (boolean, default true), createdAt。`fromUserId` と `toUserId` は同一 organizationId に属さなければならない（クロスオーグ委譲の禁止）
-2. **ApprovalDelegation ドメインモデル追加**: `src/domain/models/approvalDelegation.ts` に型定義
-3. **approvalDelegationRepository 追加**: `findActiveByToUserId(toUserId, organizationId, now, tx?)` — 委譲先ユーザーのアクティブな委譲を取得。`findByOrganization(organizationId)` — 管理画面用。`findOverlapping(fromUserId, toUserId, organizationId, startDate, endDate)` — 重複委譲チェック。`create(data, tx?)` / `update(id, organizationId, data)`
+2. **ApprovalDelegation ドメインモデル追加**: `src/domain/models/approvalDelegation.ts` に型定義。フィールド: id, fromUserId, toUserId, fromUserRole (string — repository が users テーブルと JOIN して取得), organizationId, startDate, endDate, isActive, createdAt
+3. **approvalDelegationRepository 追加**: `findActiveByToUserId(toUserId, organizationId, now, tx?)` — users テーブルと JOIN して `fromUserRole` を含む `ApprovalDelegation[]` を返す。`findByOrganization(organizationId)` — 管理画面用。`findOverlapping(fromUserId, toUserId, organizationId, startDate, endDate)` — 重複委譲チェック。`create(data, tx?)` / `update(id, organizationId, data)`
 4. **canApprove の拡張**: `approvalStepService.canApprove` を拡張する。引数に `delegations: ApprovalDelegation[]` を追加する。直接のロール一致に加え、アクティブな委譲の中で委譲元のロールが step の approverRole と一致する場合は承認可能とする。複数委譲がマッチする場合は startDate が最も新しいものを採用する
-5. **usecase の統合**: `approveRequest` でトランザクション内で `approvalDelegationRepository.findActiveByToUserId` を呼び出し、最新の委譲データで `canApprove` を判定する（TOCTOU 防止）。`rejectRequest` も同様
-6. **代理承認の監査ログ**: 代理承認で操作した場合、audit_logs の metadata に `{ delegatedFrom: userId }` を記録する。通常承認では記録しない
-7. **重複委譲の禁止**: 同一 fromUser→toUser に対して期間が重複するアクティブな委譲を作成できない
-8. **自己委譲の禁止**: `fromUserId === toUserId` の委譲を拒否する
-9. **代理承認管理 UI**: admin ロールのユーザーが委譲の設定（委譲元→委譲先、期間）を管理できるページ。追加・無効化が可能。`/settings/delegations` に配置
-10. **インデックス追加**: `approval_delegations` テーブルに `(to_user_id, organization_id, is_active)` の複合インデックスを追加
-11. **シードデータ**: manager ユーザーから admin ユーザーへの委譲を1件追加（startDate: 本日、endDate: 7日後）
+5. **usecase の統合**: `approveRequest` でトランザクション内で `approvalDelegationRepository.findActiveByToUserId` を呼び出し、最新の委譲データで `canApprove` を判定する（TOCTOU 防止）。`rejectRequest` には canApprove チェックを追加しない（却下は現在ロールチェックなしで動作しているため、スコープを維持する）
+6. **createDelegation usecase 新設**: 入力: fromUserId, toUserId, organizationId, startDate, endDate。バリデーション（自己委譲禁止、クロスオーグ禁止、期間重複チェック）は usecase 層で実行する。成功時に audit_logs に記録する
+7. **deactivateDelegation usecase 新設**: 入力: delegationId, organizationId。isActive を false に更新する。audit_logs に記録する
+8. **代理承認の監査ログ**: 代理承認で操作した場合、audit_logs の metadata に `{ delegatedFrom: userId }` を記録する。通常承認では記録しない。「最新を採用する」は監査ログに記録する委譲を1件特定するため（最新 startDate の委譲を使用する）
+9. **重複委譲の禁止**: 同一 fromUser→toUser に対して期間が重複するアクティブな委譲を作成できない
+10. **自己委譲の禁止**: `fromUserId === toUserId` の委譲を拒否する
+11. **代理承認管理 UI**: admin ロールのユーザーが委譲の設定（委譲元→委譲先、期間）を管理できるページ。追加・無効化が可能。`/settings/delegations` に配置。Server Actions: `createDelegationAction`, `deactivateDelegationAction`, `listDelegationsAction`
+12. **インデックス追加**: `approval_delegations` テーブルに `(to_user_id, organization_id, is_active)` の複合インデックスを追加
+13. **シードデータ**: manager ユーザーから admin ユーザーへの委譲を1件追加（startDate: 本日、endDate: 7日後）。seed.ts のテーブル削除順に `approval_delegations` を `users` より先に追加する
 
 ## スコープ外
 
