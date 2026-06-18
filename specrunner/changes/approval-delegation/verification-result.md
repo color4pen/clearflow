@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 8.0s | 0 |
+| 1 | build | passed | 8.5s | 0 |
 | 2 | typecheck | skipped | — | — |
 | 3 | test | skipped | — | — |
-| 4 | lint | passed | 2.7s | 0 |
+| 4 | lint | passed | 1.9s | 0 |
 | 5 | security | skipped | — | — |
 | 6 | test-coverage | passed | 0.0s | 0 |
 
@@ -19,7 +19,7 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 4.4s
+✓ Compiled successfully in 4.8s
   Running TypeScript ...
   Finished TypeScript in 2.2s ...
   Collecting page data using 7 workers ...
@@ -27,7 +27,7 @@
   Generating static pages using 7 workers (3/12) 
   Generating static pages using 7 workers (6/12) 
   Generating static pages using 7 workers (9/12) 
-✓ Generating static pages using 7 workers (12/12) in 161ms
+✓ Generating static pages using 7 workers (12/12) in 149ms
   Finalizing page optimization ...
 
 Route (app)
@@ -74,13 +74,6 @@ _(skipped — script not found in package.json)_
 ## Phase: lint
 
 ```
-
-src/application/usecases/approveRequest.ts
-  11:3  warning  'canApprove' is defined but never used  @typescript-eslint/no-unused-vars
-
-✖ 1 problem (0 errors, 1 warning)
-
-
 $ eslint
 
 ```
