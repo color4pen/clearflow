@@ -3,6 +3,7 @@ import {
   userRepository,
   auditLogRepository,
 } from "@/infrastructure/repositories";
+import { db } from "@/infrastructure/db";
 import type { ApprovalDelegation } from "@/domain/models/approvalDelegation";
 
 export type CreateDelegationResult =
@@ -68,28 +69,37 @@ export async function createDelegation(data: {
     };
   }
 
-  // 5. Create delegation
-  const delegation = await approvalDelegationRepository.create({
-    fromUserId: data.fromUserId,
-    toUserId: data.toUserId,
-    organizationId: data.organizationId,
-    startDate: data.startDate,
-    endDate: data.endDate,
-  });
+  // 5. Create delegation and audit log atomically
+  const delegation = await db.transaction(async (tx) => {
+    const created = await approvalDelegationRepository.create(
+      {
+        fromUserId: data.fromUserId,
+        toUserId: data.toUserId,
+        organizationId: data.organizationId,
+        startDate: data.startDate,
+        endDate: data.endDate,
+      },
+      tx
+    );
 
-  // 6. Audit log
-  await auditLogRepository.create({
-    action: "delegation.create",
-    targetType: "delegation",
-    targetId: delegation.id,
-    actorId: data.actorId,
-    organizationId: data.organizationId,
-    metadata: {
-      fromUserId: data.fromUserId,
-      toUserId: data.toUserId,
-      startDate: data.startDate.toISOString(),
-      endDate: data.endDate.toISOString(),
-    },
+    await auditLogRepository.create(
+      {
+        action: "delegation.create",
+        targetType: "delegation",
+        targetId: created.id,
+        actorId: data.actorId,
+        organizationId: data.organizationId,
+        metadata: {
+          fromUserId: data.fromUserId,
+          toUserId: data.toUserId,
+          startDate: data.startDate.toISOString(),
+          endDate: data.endDate.toISOString(),
+        },
+      },
+      tx
+    );
+
+    return created;
   });
 
   return { ok: true, delegation };

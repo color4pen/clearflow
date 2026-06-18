@@ -130,8 +130,8 @@ export async function create(
     })
     .returning();
   const row = result[0];
-  // Fetch fromUserRole by looking up the fromUser
-  const fromUserResult = await db
+  // Fetch fromUserRole within the same queryRunner to honour the transaction
+  const fromUserResult = await queryRunner
     .select({ role: users.role })
     .from(users)
     .where(eq(users.id, data.fromUserId))
@@ -147,9 +147,11 @@ export async function create(
 export async function update(
   id: string,
   organizationId: string,
-  data: Partial<{ isActive: boolean }>
+  data: Partial<{ isActive: boolean }>,
+  tx?: Transaction
 ): Promise<ApprovalDelegation | null> {
-  const result = await db
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
     .update(approvalDelegations)
     .set(data)
     .where(
@@ -161,8 +163,8 @@ export async function update(
     .returning();
   if (!result[0]) return null;
   const row = result[0];
-  // Fetch fromUserRole
-  const fromUserResult = await db
+  // Fetch fromUserRole within the same queryRunner to honour the transaction
+  const fromUserResult = await queryRunner
     .select({ role: users.role })
     .from(users)
     .where(eq(users.id, row.fromUserId))
