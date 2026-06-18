@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "fee2d456-f84b-4514-b4fa-a785eae5e3a7",
   "createdAt": "2026-06-18T03:17:29.675Z",
-  "updatedAt": "2026-06-18T04:09:27.052Z",
+  "updatedAt": "2026-06-18T04:10:59.768Z",
   "request": {
     "title": "一括承認",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/bulk-approval-fee2d456",
   "error": null,
   "pipelineId": "standard",
@@ -39,7 +39,7 @@
     "createdAt": "2026-06-18T04:09:27.034Z"
   },
   "_journal": {
-    "historyCount": 60,
+    "historyCount": 61,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
