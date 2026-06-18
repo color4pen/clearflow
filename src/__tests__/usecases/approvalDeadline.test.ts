@@ -116,6 +116,9 @@ mock.module("@/infrastructure/repositories", () => ({
     findByOrganizationForAmount: async () =>
       state.template !== null ? [state.template] : [],
   },
+  approvalDelegationRepository: {
+    findActiveByToUserId: async () => [],
+  },
 }));
 
 mock.module("@/infrastructure/webhookDelivery", () => ({

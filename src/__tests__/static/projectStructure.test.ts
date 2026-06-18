@@ -529,6 +529,61 @@ describe("Tenant isolation — admin panel", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Approval delegation structure — T-14
+// ---------------------------------------------------------------------------
+
+describe("Approval delegation structure", () => {
+  it("schema.ts contains approval_delegations table definition", async () => {
+    const content = await readSrc("infrastructure/schema.ts");
+    expect(content).toContain("approval_delegations");
+    expect(content).toContain("approvalDelegations");
+    // Required columns
+    expect(content).toContain("from_user_id");
+    expect(content).toContain("to_user_id");
+    expect(content).toContain("organization_id");
+    expect(content).toContain("start_date");
+    expect(content).toContain("end_date");
+    expect(content).toContain("is_active");
+    // Composite index
+    expect(content).toContain("approval_delegations_to_user_org_active_idx");
+  });
+
+  it("approvalDelegation domain model file exists", async () => {
+    const exists = await fileExists("src/domain/models/approvalDelegation.ts");
+    expect(exists).toBe(true);
+  });
+
+  it("approvalDelegation domain model exports ApprovalDelegation type", async () => {
+    const content = await readSrc("domain/models/approvalDelegation.ts");
+    expect(content).toContain("ApprovalDelegation");
+    expect(content).toContain("fromUserId");
+    expect(content).toContain("toUserId");
+    expect(content).toContain("fromUserRole");
+    expect(content).toContain("organizationId");
+    expect(content).toContain("startDate");
+    expect(content).toContain("endDate");
+    expect(content).toContain("isActive");
+  });
+
+  it("approvalDelegationRepository.ts exists", async () => {
+    const exists = await fileExists(
+      "src/infrastructure/repositories/approvalDelegationRepository.ts"
+    );
+    expect(exists).toBe(true);
+  });
+
+  it("repositories/index.ts exports approvalDelegationRepository", async () => {
+    const content = await readSrc("infrastructure/repositories/index.ts");
+    expect(content).toContain("approvalDelegationRepository");
+  });
+
+  it("domain/models/index.ts exports ApprovalDelegation", async () => {
+    const content = await readSrc("domain/models/index.ts");
+    expect(content).toContain("ApprovalDelegation");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Build and lint — TC-057, TC-058, TC-059
 // ---------------------------------------------------------------------------
 

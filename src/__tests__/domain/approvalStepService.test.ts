@@ -5,8 +5,10 @@ import {
   getStepsToReset,
   canApprove,
   isStepExpired,
+  canApproveWithDelegation,
 } from "@/domain/services/approvalStepService";
 import type { ApprovalStep } from "@/domain/models/approvalStep";
+import type { ApprovalDelegation } from "@/domain/models/approvalDelegation";
 
 function makeStep(
   overrides: Partial<ApprovalStep> & {
@@ -222,5 +224,114 @@ describe("approvalStepService — isStepExpired", () => {
   it("returns false for null deadline without explicit now", () => {
     const step = makeStep({ stepOrder: 1, status: "pending", deadline: null });
     expect(isStepExpired(step)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// canApproveWithDelegation
+// ---------------------------------------------------------------------------
+
+function makeDelegation(
+  overrides: Partial<ApprovalDelegation> & {
+    fromUserRole: string;
+  }
+): ApprovalDelegation {
+  return {
+    id: "delegation-1",
+    fromUserId: "user-a",
+    toUserId: "user-b",
+    fromUserRole: overrides.fromUserRole,
+    organizationId: "org-1",
+    startDate: new Date("2024-01-01T00:00:00.000Z"),
+    endDate: new Date("2024-12-31T23:59:59.000Z"),
+    isActive: true,
+    createdAt: new Date("2024-01-01T00:00:00.000Z"),
+    ...overrides,
+  };
+}
+
+describe("approvalStepService — canApproveWithDelegation", () => {
+  it("returns { allowed: true, delegation: undefined } on direct role match", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "manager" });
+    const result = canApproveWithDelegation(step, "manager", []);
+    expect(result.allowed).toBe(true);
+    expect(result.delegation).toBeUndefined();
+  });
+
+  it("returns { allowed: true, delegation } when delegation fromUserRole matches step approverRole", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "manager" });
+    const delegation = makeDelegation({ fromUserRole: "manager", toUserId: "user-b" });
+    const result = canApproveWithDelegation(step, "admin", [delegation]);
+    expect(result.allowed).toBe(true);
+    expect(result.delegation).toBe(delegation);
+  });
+
+  it("returns { allowed: false } when no role match and no delegation match", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "manager" });
+    const delegation = makeDelegation({ fromUserRole: "finance" });
+    const result = canApproveWithDelegation(step, "admin", [delegation]);
+    expect(result.allowed).toBe(false);
+    expect(result.delegation).toBeUndefined();
+  });
+
+  it("returns { allowed: false } when delegations array is empty and role does not match", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "manager" });
+    const result = canApproveWithDelegation(step, "member", []);
+    expect(result.allowed).toBe(false);
+  });
+
+  it("adopts the delegation with the most recent startDate when multiple match", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "manager" });
+    const older = makeDelegation({
+      id: "delegation-old",
+      fromUserRole: "manager",
+      startDate: new Date("2024-01-01T00:00:00.000Z"),
+    });
+    const newer = makeDelegation({
+      id: "delegation-new",
+      fromUserRole: "manager",
+      startDate: new Date("2024-06-01T00:00:00.000Z"),
+    });
+    // Pass older first to confirm selection is not order-dependent
+    const result = canApproveWithDelegation(step, "admin", [older, newer]);
+    expect(result.allowed).toBe(true);
+    expect(result.delegation?.id).toBe("delegation-new");
+  });
+
+  it("existing canApprove still works without delegation (backward compat)", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "admin" });
+    expect(canApprove(step, "admin")).toBe(true);
+    expect(canApprove(step, "member")).toBe(false);
+  });
+
+  // TC-003: Inactive delegation is ignored
+  it("TC-003: ignores a delegation with isActive: false even when fromUserRole matches", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "manager" });
+    const inactiveDelegation = makeDelegation({
+      fromUserRole: "manager",
+      isActive: false,
+    });
+    const result = canApproveWithDelegation(step, "admin", [inactiveDelegation]);
+    expect(result.allowed).toBe(false);
+    expect(result.delegation).toBeUndefined();
+  });
+
+  it("TC-003: selects only active delegations when both active and inactive ones match", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "manager" });
+    const inactive = makeDelegation({
+      id: "inactive-delegation",
+      fromUserRole: "manager",
+      isActive: false,
+      startDate: new Date("2024-06-01T00:00:00.000Z"),
+    });
+    const active = makeDelegation({
+      id: "active-delegation",
+      fromUserRole: "manager",
+      isActive: true,
+      startDate: new Date("2024-01-01T00:00:00.000Z"),
+    });
+    const result = canApproveWithDelegation(step, "admin", [inactive, active]);
+    expect(result.allowed).toBe(true);
+    expect(result.delegation?.id).toBe("active-delegation");
   });
 });

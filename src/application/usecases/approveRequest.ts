@@ -2,12 +2,13 @@ import {
   requestRepository,
   auditLogRepository,
   approvalStepRepository,
+  approvalDelegationRepository,
 } from "@/infrastructure/repositories";
 import { validateTransition } from "@/domain/services/requestTransition";
 import {
   getCurrentStep,
   isAllApproved,
-  canApprove,
+  canApproveWithDelegation,
   isStepExpired,
 } from "@/domain/services/approvalStepService";
 import { db } from "@/infrastructure/db";
@@ -103,7 +104,14 @@ export async function approveRequest(data: {
     return { ok: false, reason: "All approval steps are already completed." };
   }
 
-  if (!canApprove(currentStep, data.actorRole)) {
+  // Fetch delegations for pre-TX fast-fail check
+  const preTxDelegations = await approvalDelegationRepository.findActiveByToUserId(
+    data.actorId,
+    data.organizationId,
+    new Date()
+  );
+  const preTxCheck = canApproveWithDelegation(currentStep, data.actorRole, preTxDelegations);
+  if (!preTxCheck.allowed) {
     return {
       ok: false,
       reason: `Unauthorized: role "${data.actorRole}" cannot approve this step (requires "${currentStep.approverRole}").`,
@@ -129,11 +137,20 @@ export async function approveRequest(data: {
         throw new Error("All approval steps are already completed.");
       }
 
+      // Re-fetch delegations inside the transaction (TOCTOU防止)
+      const freshDelegations = await approvalDelegationRepository.findActiveByToUserId(
+        data.actorId,
+        data.organizationId,
+        new Date(),
+        tx
+      );
+
       // Re-validate role against the fresh step inside the transaction.
-      // The outer canApprove check used the pre-TX snapshot; if another
+      // The outer canApproveWithDelegation check used the pre-TX snapshot; if another
       // transaction approved Step N between then and now, freshCurrentStep
       // may be Step N+1 with a different approverRole requirement.
-      if (!canApprove(freshCurrentStep, data.actorRole)) {
+      const txCheck = canApproveWithDelegation(freshCurrentStep, data.actorRole, freshDelegations);
+      if (!txCheck.allowed) {
         throw new Error(
           `Unauthorized: role "${data.actorRole}" cannot approve this step (requires "${freshCurrentStep.approverRole}").`
         );
@@ -159,6 +176,16 @@ export async function approveRequest(data: {
         throw new Error(OPTIMISTIC_LOCK_ERROR);
       }
 
+      // Build audit metadata — include delegatedFrom if approval was delegated
+      const auditMetadata: Record<string, unknown> = {
+        stepId: freshCurrentStep.id,
+        stepOrder: freshCurrentStep.stepOrder,
+        approverRole: freshCurrentStep.approverRole,
+      };
+      if (txCheck.delegation) {
+        auditMetadata.delegatedFrom = txCheck.delegation.fromUserId;
+      }
+
       await auditLogRepository.create(
         {
           action: "approval_step.approve",
@@ -166,11 +193,7 @@ export async function approveRequest(data: {
           targetId: data.requestId,
           actorId: data.actorId,
           organizationId: data.organizationId,
-          metadata: {
-            stepId: freshCurrentStep.id,
-            stepOrder: freshCurrentStep.stepOrder,
-            approverRole: freshCurrentStep.approverRole,
-          },
+          metadata: auditMetadata,
         },
         tx
       );

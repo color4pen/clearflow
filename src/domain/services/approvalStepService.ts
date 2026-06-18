@@ -1,4 +1,5 @@
 import type { ApprovalStep } from "../models/approvalStep";
+import type { ApprovalDelegation } from "../models/approvalDelegation";
 
 /**
  * Returns the active (pending) step with the smallest stepOrder.
@@ -42,4 +43,45 @@ export function isStepExpired(step: ApprovalStep, now?: Date): boolean {
   if (step.deadline === null) return false;
   const reference = now ?? new Date();
   return step.deadline < reference;
+}
+
+/**
+ * Returns { allowed, delegation } for an approval action.
+ *
+ * - Direct role match: { allowed: true, delegation: undefined }
+ * - Delegated match: { allowed: true, delegation: <the matched delegation> }
+ *   When multiple delegations match (same fromUserRole → step.approverRole),
+ *   the one with the most recent startDate is adopted.
+ * - No match: { allowed: false }
+ *
+ * The delegations array should already be filtered to active and in-period
+ * records (i.e. returned by findActiveByToUserId). As a defensive guard this
+ * function additionally skips any delegation where isActive is false so that
+ * an unfiltered list can never silently grant access.
+ */
+export function canApproveWithDelegation(
+  step: ApprovalStep,
+  actorRole: string,
+  delegations: ApprovalDelegation[]
+): { allowed: boolean; delegation?: ApprovalDelegation } {
+  // Direct role match — no delegation needed
+  if (step.approverRole === actorRole) {
+    return { allowed: true, delegation: undefined };
+  }
+
+  // Find delegations where fromUserRole matches the required approverRole.
+  // Defensive guard: skip inactive delegations even if callers failed to
+  // pre-filter them.
+  const matching = delegations.filter(
+    (d) => d.isActive && d.fromUserRole === step.approverRole
+  );
+  if (matching.length === 0) {
+    return { allowed: false };
+  }
+
+  // Adopt the delegation with the most recent startDate
+  const best = matching.reduce((a, b) =>
+    b.startDate > a.startDate ? b : a
+  );
+  return { allowed: true, delegation: best };
 }

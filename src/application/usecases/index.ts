@@ -11,3 +11,7 @@ export { createTemplate } from "./createTemplate";
 export { updateTemplate } from "./updateTemplate";
 export { deleteTemplate } from "./deleteTemplate";
 export { updateUserRole } from "./updateUserRole";
+export { createDelegation } from "./createDelegation";
+export { deactivateDelegation } from "./deactivateDelegation";
+export { listDelegations } from "./listDelegations";
+export { listOrganizationUsers } from "./listOrganizationUsers";
