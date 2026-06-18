@@ -15,12 +15,12 @@ export function statusLabel(status: RequestStatus): string {
 
 export function statusClass(status: RequestStatus): string {
   const classes: Record<RequestStatus, string> = {
-    draft: "text-gray-500 font-medium",
-    pending: "text-amber-700 font-bold",
-    approved: "text-emerald-700 font-medium",
-    rejected: "text-red-700 font-medium",
-    revision: "text-orange-600 font-bold",
-    expired: "text-gray-400 font-medium",
+    draft: "text-[#2980b9]",
+    pending: "text-[#d4880f] font-bold",
+    approved: "text-[#1a8a4a]",
+    rejected: "text-[#c0392b]",
+    revision: "text-[#d35400] font-bold",
+    expired: "text-[#999999]",
   };
   return classes[status];
 }

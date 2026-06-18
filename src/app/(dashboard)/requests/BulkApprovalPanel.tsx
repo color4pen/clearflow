@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import type { BulkApproveActionResult } from "@/app/actions/requests";
-import { BTN_SUCCESS } from "../styles";
 
 type ApprovalStepItem = {
   approverRole: string;
@@ -19,6 +18,7 @@ type RequestItem = {
   statusClass: string;
   statusRowClass: string;
   amount: number | null;
+  creatorId: string;
   createdAt: Date;
   approvalSteps: ApprovalStepItem[];
   currentDeadline: Date | null;
@@ -53,17 +53,17 @@ function formatDeadline(deadline: Date | null): { text: string; urgent: boolean 
 }
 
 function ApprovalProgress({ steps }: { steps: ApprovalStepItem[] }) {
-  if (steps.length === 0) return <span className="text-gray-400 text-xs">-</span>;
+  if (steps.length === 0) return <span className="text-[#dcdde1] text-xs">-</span>;
 
   return (
-    <span className="text-xs text-gray-600 whitespace-nowrap">
+    <span className="text-xs font-sans whitespace-nowrap">
       {steps.map((step, i) => (
         <span key={i}>
-          {i > 0 && <span className="text-gray-400 mx-0.5">→</span>}
-          <span className={step.status === "approved" ? "text-emerald-700" : step.status === "rejected" ? "text-red-600" : "text-gray-400"}>
-            {step.status === "approved" ? "●" : "○"}
+          {i > 0 && <span className="text-[#7f8c8d] mx-0.5">{"→"}</span>}
+          <span className={step.status === "approved" ? "text-[#1a8a4a]" : step.status === "rejected" ? "text-[#c0392b]" : "text-[#7f8c8d]"}>
+            {step.status === "approved" ? "■" : step.status === "rejected" ? "✕" : "□"}
           </span>
-          <span className="ml-0.5">{step.approverRole}</span>
+          <span className="ml-0.5 text-[#7f8c8d]">{step.approverRole}</span>
         </span>
       ))}
     </span>
@@ -178,64 +178,49 @@ export function BulkApprovalPanel({
         </div>
       )}
 
-      {showBulkApproval && (
-        <div className="mb-2 flex justify-end">
-          <button
-            onClick={handleBulkApprove}
-            disabled={selectedCount === 0 || isPending}
-            className={`${BTN_SUCCESS} disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            {isPending ? "処理中..." : `一括承認（${selectedCount}件）`}
-          </button>
-        </div>
-      )}
-
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-slate-50">
-            <tr>
+      <div className="overflow-hidden border-t-0">
+        <table className="min-w-full border-collapse">
+          <thead>
+            <tr className="bg-[#dcdde1] border border-[#bdc3c7]">
               {showBulkApproval && (
-                <th className="px-3 py-1 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">
-                  選択
-                </th>
+                <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-center w-6">☐</th>
               )}
-              <th className="px-3 py-1 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">
-                タイトル
-              </th>
-              <th className="px-3 py-1 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">
-                ステータス
-              </th>
-              <th className="px-3 py-1 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">
-                進捗
-              </th>
-              <th className="px-3 py-1 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">
-                期限
-              </th>
-              <th className="px-3 py-1 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">
-                金額
-              </th>
-              <th className="px-3 py-1 text-left text-xs text-slate-500 font-medium uppercase tracking-wider">
-                作成日時
-              </th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left w-8">No.</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">件名</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-right w-20">金額</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-center w-14">状態</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-center w-32">承認経路</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left w-16">申請者</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left w-12 font-sans">申請日</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-center w-12">期限</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-center w-28">操作</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {requests.map((request) => {
+          <tbody>
+            {requests.map((request, idx) => {
               const deadlineInfo = formatDeadline(request.currentDeadline);
+              const isActionable = request.status === "pending" || request.status === "revision" || request.status === "draft";
+              const rowBg = request.status === "pending"
+                ? "bg-[#fdf6e3] border-[#e8d5a3]"
+                : request.status === "revision"
+                  ? "bg-[#fef0e5] border-[#f0d0b0]"
+                  : idx % 2 === 0
+                    ? "bg-white border-[#e0e0e0]"
+                    : "bg-[#f9f9f9] border-[#e0e0e0]";
+              const textColor = isActionable ? "text-[#2c3e50]" : "text-[#95a5a6]";
+              const idColor = isActionable ? "text-[#7f8c8d]" : "text-[#bdc3c7]";
+
               return (
-                <tr
-                  key={request.id}
-                  className={`hover:bg-gray-50 cursor-pointer ${request.statusRowClass}`}
-                >
+                <tr key={request.id} className={`${rowBg} border hover:bg-[#eef2f7]`}>
                   {showBulkApproval && (
-                    <td className="px-3 py-0.5">
+                    <td className="px-1 py-1 text-center">
                       {request.status === "pending" ? (
                         <input
                           type="checkbox"
                           checked={selected.has(request.id)}
                           onChange={() => toggleSelect(request.id)}
                           disabled={isPending}
-                          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          className="h-3 w-3"
                           aria-label={`${request.title}を選択`}
                         />
                       ) : (
@@ -243,42 +228,48 @@ export function BulkApprovalPanel({
                       )}
                     </td>
                   )}
-                  <td className="px-3 py-0.5">
+                  <td className={`px-1 py-1 text-xs ${idColor}`}>
+                    {request.id.slice(0, 4)}
+                  </td>
+                  <td className={`px-1 py-1 text-xs ${textColor}`}>
                     <Link
                       href={`/requests/${request.id}`}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                      className={isActionable ? "text-[#2c3e50] underline hover:text-[#2980b9]" : "text-[#95a5a6] hover:text-[#7f8c8d]"}
                     >
                       {request.title}
                     </Link>
                   </td>
-                  <td className="px-3 py-0.5">
+                  <td className="px-1 py-1 text-right font-sans text-xs">
+                    <span className={textColor}>
+                      {request.amount !== null ? request.amount.toLocaleString("ja-JP") : "-"}
+                    </span>
+                  </td>
+                  <td className="px-1 py-1 text-center">
                     <span className={`text-xs ${request.statusClass}`}>
                       {request.statusText}
                     </span>
                   </td>
-                  <td className="px-3 py-0.5">
+                  <td className="px-1 py-1 text-center">
                     <ApprovalProgress steps={request.approvalSteps} />
                   </td>
-                  <td className="px-3 py-0.5">
-                    <span
-                      className={
-                        deadlineInfo.urgent
-                          ? "text-red-600 font-bold text-xs"
-                          : "text-gray-500 text-xs"
-                      }
-                    >
-                      {deadlineInfo.text}
+                  <td className={`px-1 py-1 text-xs ${isActionable ? "text-[#555555]" : "text-[#95a5a6]"}`}>
+                    {request.creatorId.slice(0, 8)}
+                  </td>
+                  <td className={`px-1 py-1 text-xs font-sans ${idColor}`}>
+                    {String(request.createdAt.getMonth() + 1).padStart(2, "0")}/{String(request.createdAt.getDate()).padStart(2, "0")}
+                  </td>
+                  <td className="px-1 py-1 text-center">
+                    <span className={deadlineInfo.urgent ? "text-[#c0392b] font-bold text-xs" : "text-[#7f8c8d] text-xs"}>
+                      {deadlineInfo.text === "-" ? <span className="text-[#dcdde1]">-</span> : deadlineInfo.urgent ? `残${deadlineInfo.text}` : `残${deadlineInfo.text}`}
                     </span>
                   </td>
-                  <td className="px-3 py-0.5 text-xs text-gray-500">
-                    {formatAmount(request.amount)}
-                  </td>
-                  <td className="px-3 py-0.5 text-xs text-gray-500">
-                    {request.createdAt.toLocaleDateString("ja-JP", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
+                  <td className="px-1 py-1 text-center">
+                    {request.status === "pending" && (
+                      <span className="text-xs text-[#2980b9] underline">承認 | 却下 | 差戻</span>
+                    )}
+                    {request.status === "revision" && (
+                      <span className="text-xs text-[#2980b9] underline">再申請</span>
+                    )}
                   </td>
                 </tr>
               );
@@ -287,8 +278,22 @@ export function BulkApprovalPanel({
         </table>
       </div>
 
-      <div className="mt-2 text-xs text-slate-400">
-        {total}件中 1-{total}件表示 | 承認待: {pendingCount}件 承認済: {approvedCount}件 却下: {rejectedCount}件
+      {showBulkApproval && selectedCount > 0 && (
+        <div className="bg-[#f5f5f5] border border-[#cccccc] border-t-0 px-2 py-1 flex justify-end">
+          <button
+            onClick={handleBulkApprove}
+            disabled={isPending}
+            className="text-xs text-[#2980b9] underline disabled:text-[#bdc3c7] disabled:no-underline"
+          >
+            {isPending ? "処理中..." : `[${selectedCount}件を一括承認]`}
+          </button>
+        </div>
+      )}
+
+      <div className="bg-[#f5f5f5] border border-[#cccccc] border-t-0 px-2 py-1.5">
+        <span className="text-xs text-[#7f8c8d]">
+          全{total}件 (承認待:{pendingCount}  承認済:{approvedCount}  却下:{rejectedCount})
+        </span>
       </div>
     </div>
   );
