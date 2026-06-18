@@ -5,6 +5,7 @@ import {
   createDelegationAction,
   deactivateDelegationAction,
 } from "@/app/actions/delegations";
+import { listOrganizationUsers } from "@/application/usecases";
 
 export default async function DelegationsSettingsPage() {
   const session = await auth();
@@ -12,8 +13,13 @@ export default async function DelegationsSettingsPage() {
     redirect("/requests");
   }
 
-  const result = await listDelegationsAction();
-  const delegations = result.success ? result.delegations ?? [] : [];
+  const [delegationsResult, orgUsers] = await Promise.all([
+    listDelegationsAction(),
+    listOrganizationUsers({ organizationId: session.user.organizationId }),
+  ]);
+  const delegations = delegationsResult.success
+    ? delegationsResult.delegations ?? []
+    : [];
 
   return (
     <div className="space-y-8">
@@ -118,32 +124,42 @@ export default async function DelegationsSettingsPage() {
                   htmlFor="fromUserId"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  委譲元ユーザーID
+                  委譲元ユーザー
                 </label>
-                <input
-                  type="text"
+                <select
                   id="fromUserId"
                   name="fromUserId"
-                  placeholder="UUID"
                   required
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
+                >
+                  <option value="">選択してください</option>
+                  {orgUsers.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name}（{user.role}）
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label
                   htmlFor="toUserId"
                   className="block text-sm font-medium text-gray-700"
                 >
-                  委譲先ユーザーID
+                  委譲先ユーザー
                 </label>
-                <input
-                  type="text"
+                <select
                   id="toUserId"
                   name="toUserId"
-                  placeholder="UUID"
                   required
                   className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                />
+                >
+                  <option value="">選択してください</option>
+                  {orgUsers.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.name}（{user.role}）
+                    </option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label
