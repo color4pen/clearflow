@@ -109,6 +109,8 @@
   - `text-xs text-slate-400` で `{total}件中 1-{total}件表示 | 承認待: {pending}件 承認済: {approved}件 却下: {rejected}件` 形式
   - ページネーション未実装のため、現時点では全件表示を前提とする
 
+> **スコープ外（T-05）**: 要件3「アクション（承認/却下）はインラインのテキストリンク（`text-blue-600 text-xs underline`）にする」は今回のスコープ外とする。一覧からの個別承認は詳細画面（`/requests/[id]`）へのリンク経由で行う。一覧テーブルには一括承認チェックボックスを代替として実装済み。
+
 **Acceptance Criteria**:
 - テーブル行のパディングが `py-0.5` で高密度
 - テーブルヘッダーが `bg-slate-50 text-xs text-slate-500 font-medium uppercase`

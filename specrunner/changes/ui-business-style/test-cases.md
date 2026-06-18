@@ -58,7 +58,7 @@ Result section MUST appear at the very end as a YAML code block:
 - **Total**: 38 cases
 - **Automated** (unit/integration): 7
 - **Manual**: 31
-- **Priority**: must: 27, should: 10, could: 1
+- **Priority**: must: 27, should: 9, could: 2
 
 ---
 
@@ -229,8 +229,10 @@ Result section MUST appear at the very end as a YAML code block:
 ### TC-020: アクションがインラインテキストリンク形式
 
 - **Category**: manual
-- **Priority**: should
+- **Priority**: could
 - **Source**: tasks.md > T-05
+
+> **スコープ外**: 一覧テーブルへの行単位インラインアクションリンクは今回のスコープ外。個別承認は詳細画面（`/requests/[id]`）へのリンク経由で実施。一括承認チェックボックスを代替として実装済み。tasks.md T-05 スコープ外注記参照。
 
 **GIVEN** 申請一覧テーブルに承認可能な申請が存在する  
 **WHEN** アクション列を確認する  
@@ -422,7 +424,7 @@ total: 38
 automated: 7
 manual: 31
 must: 27
-should: 10
-could: 1
+should: 9
+could: 2
 blocked_reasons: []
 ```
