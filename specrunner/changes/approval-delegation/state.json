@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f9372fed-9233-412f-b743-f5f9d5dec551",
   "createdAt": "2026-06-18T01:51:42.316Z",
-  "updatedAt": "2026-06-18T02:58:15.909Z",
+  "updatedAt": "2026-06-18T03:00:28.373Z",
   "request": {
     "title": "代理承認",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-fixer",
+  "step": "conformance",
   "status": "running",
   "branch": "feat/approval-delegation-f9372fed",
   "error": null,
@@ -35,7 +35,7 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 63,
+    "historyCount": 67,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -45,7 +45,7 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 1,
-      "code-fixer": 2,
+      "code-fixer": 3,
       "domain-invariants": 1,
       "regression-gate": 1
     }
