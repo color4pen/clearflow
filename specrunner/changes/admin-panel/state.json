@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "ed98ea59-a36d-482b-a71b-1336e4909362",
   "createdAt": "2026-06-18T01:51:46.241Z",
-  "updatedAt": "2026-06-18T02:26:27.167Z",
+  "updatedAt": "2026-06-18T02:27:29.615Z",
   "request": {
     "title": "管理画面（テンプレートCRUD・ユーザー管理）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-fixer",
+  "step": "domain-invariants",
   "status": "running",
   "branch": "feat/admin-panel-ed98ea59",
   "error": null,
@@ -34,7 +34,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 29,
+    "historyCount": 33,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -42,7 +42,8 @@
       "test-case-gen": 1,
       "implementer": 1,
       "verification": 1,
-      "code-review": 1
+      "code-review": 1,
+      "code-fixer": 1
     }
   }
 }
