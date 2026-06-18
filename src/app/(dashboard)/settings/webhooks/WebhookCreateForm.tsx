@@ -53,20 +53,20 @@ export function WebhookCreateForm() {
               {state.endpoint.secret}
             </code>
           </p>
-          <p className="mt-1 text-xs text-[#7f8c8d]">
+          <p className="mt-1 text-xs text-text-muted">
             ※ Secret はこのページのリロード後に確認できなくなります。今すぐ保存してください。
           </p>
         </div>
       )}
       {state?.success === false && (
         <div className="mb-4 p-4 bg-red-50 border border-red-200">
-          <p className="text-xs text-[#c0392b]">{state.message}</p>
+          <p className="text-xs text-danger">{state.message}</p>
         </div>
       )}
 
       <form action={formAction} className="space-y-4">
         <div>
-          <label htmlFor="url" className="block text-xs font-bold text-[#2c3e50] mb-1">
+          <label htmlFor="url" className="block text-xs font-bold text-text mb-1">
             URL <span className="text-red-500">*</span>
           </label>
           <input
@@ -79,7 +79,7 @@ export function WebhookCreateForm() {
           />
         </div>
         <div>
-          <p className="block text-xs font-bold text-[#2c3e50] mb-2">
+          <p className="block text-xs font-bold text-text mb-2">
             購読するイベント <span className="text-red-500">*</span>
           </p>
           <div className="grid grid-cols-2 gap-2">
@@ -89,7 +89,7 @@ export function WebhookCreateForm() {
                   type="checkbox"
                   name="events"
                   value={eventType}
-                  className="border-[#cccccc]"
+                  className="border-border"
                 />
                 <span className="text-xs">{eventType}</span>
               </label>
@@ -103,7 +103,7 @@ export function WebhookCreateForm() {
         >
           {pending ? "作成中..." : "エンドポイントを追加"}
         </button>
-        <p className="text-xs text-[#7f8c8d]">
+        <p className="text-xs text-text-muted">
           ※ Secret は作成時のみ全文が表示されます。ページをリロードすると確認できなくなります。
         </p>
       </form>

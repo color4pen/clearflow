@@ -13,24 +13,24 @@ export default function LoginPage() {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#e8e8e8]">
+    <div className="min-h-screen flex items-center justify-center bg-bg-page">
       <div className="max-w-md w-full space-y-4 px-4">
         <div>
-          <h1 className="text-sm font-bold text-center text-[#2c3e50]">
+          <h1 className="text-sm font-bold text-center text-text">
             Clearflow
           </h1>
-          <h2 className="mt-1 text-center text-xs text-[#7f8c8d]">
+          <h2 className="mt-1 text-center text-xs text-text-muted">
             承認ワークフローシステム
           </h2>
         </div>
 
-        <div className="bg-white border border-[#e0e0e0] py-4 px-4">
-          <h3 className="text-sm font-bold text-[#2c3e50] mb-4">
+        <div className="bg-bg-surface border border-border-light py-4 px-4">
+          <h3 className="text-sm font-bold text-text mb-4">
             ログイン
           </h3>
 
           {state.message && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-[#c0392b] text-xs">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-danger text-xs">
               {state.message}
             </div>
           )}
@@ -39,7 +39,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-xs font-bold text-[#2c3e50] mb-1"
+                className="block text-xs font-bold text-text mb-1"
               >
                 メールアドレス
               </label>
@@ -49,11 +49,11 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full border border-[#cccccc] rounded-none px-2 py-1 text-xs focus:border-[#2980b9] focus:outline-none"
+                className="w-full border border-border rounded-none px-2 py-1 text-xs focus:border-primary focus:outline-none"
                 placeholder="admin@example.com"
               />
               {state.errors?.email && (
-                <p className="mt-1 text-xs text-[#c0392b]">
+                <p className="mt-1 text-xs text-danger">
                   {state.errors.email[0]}
                 </p>
               )}
@@ -62,7 +62,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-xs font-bold text-[#2c3e50] mb-1"
+                className="block text-xs font-bold text-text mb-1"
               >
                 パスワード
               </label>
@@ -72,10 +72,10 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="w-full border border-[#cccccc] rounded-none px-2 py-1 text-xs focus:border-[#2980b9] focus:outline-none"
+                className="w-full border border-border rounded-none px-2 py-1 text-xs focus:border-primary focus:outline-none"
               />
               {state.errors?.password && (
-                <p className="mt-1 text-xs text-[#c0392b]">
+                <p className="mt-1 text-xs text-danger">
                   {state.errors.password[0]}
                 </p>
               )}

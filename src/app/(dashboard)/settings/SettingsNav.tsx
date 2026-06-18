@@ -15,7 +15,7 @@ export function SettingsNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="bg-[#f5f5f5] border border-[#cccccc]">
+    <nav className="bg-bg-toolbar border border-border">
       <div className="flex gap-0">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname.startsWith(item.href);
@@ -25,8 +25,8 @@ export function SettingsNav() {
               href={item.href}
               className={`px-4 py-2 text-xs transition-colors ${
                 isActive
-                  ? "text-[#2c3e50] font-bold bg-white border-b-0"
-                  : "text-[#7f8c8d] hover:text-[#2c3e50]"
+                  ? "text-text font-bold bg-bg-surface border-b-0"
+                  : "text-text-muted hover:text-text"
               }`}
             >
               {item.label}

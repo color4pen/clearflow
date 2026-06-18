@@ -25,11 +25,11 @@ export default async function EditTemplatePage({
 
   return (
     <div>
-      <div className="bg-[#f5f5f5] border border-[#cccccc] px-2 py-1 mb-0">
+      <div className="bg-bg-toolbar border border-border px-2 py-1 mb-0">
         <span className="text-sm font-bold text-[#333333]">テンプレートを編集</span>
       </div>
 
-      <div className="bg-white border border-[#e0e0e0] p-4">
+      <div className="bg-bg-surface border border-border-light p-4">
         <TemplateForm
           mode="edit"
           templateId={template.id}

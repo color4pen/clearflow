@@ -53,17 +53,17 @@ function formatDeadline(deadline: Date | null): { text: string; urgent: boolean 
 }
 
 function ApprovalProgress({ steps }: { steps: ApprovalStepItem[] }) {
-  if (steps.length === 0) return <span className="text-[#dcdde1] text-xs">-</span>;
+  if (steps.length === 0) return <span className="text-bg-table-head text-xs">-</span>;
 
   return (
     <span className="text-xs font-sans whitespace-nowrap">
       {steps.map((step, i) => (
         <span key={i}>
-          {i > 0 && <span className="text-[#7f8c8d] mx-0.5">{"→"}</span>}
-          <span className={step.status === "approved" ? "text-[#1a8a4a]" : step.status === "rejected" ? "text-[#c0392b]" : "text-[#7f8c8d]"}>
+          {i > 0 && <span className="text-text-muted mx-0.5">{"→"}</span>}
+          <span className={step.status === "approved" ? "text-success" : step.status === "rejected" ? "text-danger" : "text-text-muted"}>
             {step.status === "approved" ? "■" : step.status === "rejected" ? "✕" : "□"}
           </span>
-          <span className="ml-0.5 text-[#7f8c8d]">{step.approverRole}</span>
+          <span className="ml-0.5 text-text-muted">{step.approverRole}</span>
         </span>
       ))}
     </span>
@@ -181,19 +181,19 @@ export function BulkApprovalPanel({
       <div className="overflow-hidden border-t-0">
         <table className="min-w-full border-collapse">
           <thead>
-            <tr className="bg-[#dcdde1] border border-[#bdc3c7]">
+            <tr className="bg-bg-table-head border border-border-table-head">
               {showBulkApproval && (
-                <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-center w-6">☐</th>
+                <th className="px-1 py-1.5 text-xs text-text font-bold text-center w-6">☐</th>
               )}
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left w-8">No.</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">件名</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-right w-20">金額</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-center w-14">状態</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-center w-32">承認経路</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left w-16">申請者</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left w-12 font-sans">申請日</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-center w-12">期限</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-center w-28">操作</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-left w-8">No.</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">件名</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-right w-20">金額</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-center w-14">状態</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-center w-32">承認経路</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-left w-16">申請者</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-left w-12 font-sans">申請日</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-center w-12">期限</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-center w-28">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -201,14 +201,14 @@ export function BulkApprovalPanel({
               const deadlineInfo = formatDeadline(request.currentDeadline);
               const isActionable = request.status === "pending" || request.status === "revision" || request.status === "draft";
               const rowBg = request.status === "pending"
-                ? "bg-[#fdf6e3] border-[#e8d5a3]"
+                ? "bg-bg-row-pending border-border-row-pending"
                 : request.status === "revision"
-                  ? "bg-[#fef0e5] border-[#f0d0b0]"
+                  ? "bg-bg-row-revision border-border-row-revision"
                   : idx % 2 === 0
-                    ? "bg-white border-[#e0e0e0]"
-                    : "bg-[#f9f9f9] border-[#e0e0e0]";
-              const textColor = isActionable ? "text-[#2c3e50]" : "text-[#95a5a6]";
-              const idColor = isActionable ? "text-[#7f8c8d]" : "text-[#bdc3c7]";
+                    ? "bg-bg-surface border-border-light"
+                    : "bg-bg-surface-alt border-border-light";
+              const textColor = isActionable ? "text-text" : "text-text-disabled";
+              const idColor = isActionable ? "text-text-muted" : "text-text-on-dark-secondary";
 
               return (
                 <tr key={request.id} className={`${rowBg} border hover:bg-[#eef2f7]`}>
@@ -234,7 +234,7 @@ export function BulkApprovalPanel({
                   <td className={`px-1 py-1 text-xs ${textColor}`}>
                     <Link
                       href={`/requests/${request.id}`}
-                      className={isActionable ? "text-[#2c3e50] underline hover:text-[#2980b9]" : "text-[#95a5a6] hover:text-[#7f8c8d]"}
+                      className={isActionable ? "text-text underline hover:text-primary" : "text-text-disabled hover:text-text-muted"}
                     >
                       {request.title}
                     </Link>
@@ -252,23 +252,23 @@ export function BulkApprovalPanel({
                   <td className="px-1 py-1 text-center">
                     <ApprovalProgress steps={request.approvalSteps} />
                   </td>
-                  <td className={`px-1 py-1 text-xs ${isActionable ? "text-[#555555]" : "text-[#95a5a6]"}`}>
+                  <td className={`px-1 py-1 text-xs ${isActionable ? "text-text-secondary" : "text-text-disabled"}`}>
                     {request.creatorId.slice(0, 8)}
                   </td>
                   <td className={`px-1 py-1 text-xs font-sans ${idColor}`}>
                     {String(request.createdAt.getMonth() + 1).padStart(2, "0")}/{String(request.createdAt.getDate()).padStart(2, "0")}
                   </td>
                   <td className="px-1 py-1 text-center">
-                    <span className={deadlineInfo.urgent ? "text-[#c0392b] font-bold text-xs" : "text-[#7f8c8d] text-xs"}>
-                      {deadlineInfo.text === "-" ? <span className="text-[#dcdde1]">-</span> : deadlineInfo.urgent ? `残${deadlineInfo.text}` : `残${deadlineInfo.text}`}
+                    <span className={deadlineInfo.urgent ? "text-danger font-bold text-xs" : "text-text-muted text-xs"}>
+                      {deadlineInfo.text === "-" ? <span className="text-bg-table-head">-</span> : deadlineInfo.urgent ? `残${deadlineInfo.text}` : `残${deadlineInfo.text}`}
                     </span>
                   </td>
                   <td className="px-1 py-1 text-center">
                     {request.status === "pending" && (
-                      <span className="text-xs text-[#2980b9] underline">承認 | 却下 | 差戻</span>
+                      <span className="text-xs text-primary underline">承認 | 却下 | 差戻</span>
                     )}
                     {request.status === "revision" && (
-                      <span className="text-xs text-[#2980b9] underline">再申請</span>
+                      <span className="text-xs text-primary underline">再申請</span>
                     )}
                   </td>
                 </tr>
@@ -279,19 +279,19 @@ export function BulkApprovalPanel({
       </div>
 
       {showBulkApproval && selectedCount > 0 && (
-        <div className="bg-[#f5f5f5] border border-[#cccccc] border-t-0 px-2 py-1 flex justify-end">
+        <div className="bg-bg-toolbar border border-border border-t-0 px-2 py-1 flex justify-end">
           <button
             onClick={handleBulkApprove}
             disabled={isPending}
-            className="text-xs text-[#2980b9] underline disabled:text-[#bdc3c7] disabled:no-underline"
+            className="text-xs text-primary underline disabled:text-text-on-dark-secondary disabled:no-underline"
           >
             {isPending ? "処理中..." : `[${selectedCount}件を一括承認]`}
           </button>
         </div>
       )}
 
-      <div className="bg-[#f5f5f5] border border-[#cccccc] border-t-0 px-2 py-1.5">
-        <span className="text-xs text-[#7f8c8d]">
+      <div className="bg-bg-toolbar border border-border border-t-0 px-2 py-1.5">
+        <span className="text-xs text-text-muted">
           全{total}件 (承認待:{pendingCount}  承認済:{approvedCount}  却下:{rejectedCount})
         </span>
       </div>

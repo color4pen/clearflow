@@ -52,7 +52,7 @@ export function UserRoleSelect({ userId, currentRole, disabled = false }: Props)
         defaultValue={currentRole}
         onChange={handleChange}
         disabled={disabled || pending}
-        className={`${SELECT_BASE} disabled:bg-[#f5f5f5] disabled:cursor-not-allowed`}
+        className={`${SELECT_BASE} disabled:bg-bg-toolbar disabled:cursor-not-allowed`}
       >
         {ROLE_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>
@@ -60,7 +60,7 @@ export function UserRoleSelect({ userId, currentRole, disabled = false }: Props)
           </option>
         ))}
       </select>
-      {error && <p className="mt-1 text-xs text-[#c0392b]">{error}</p>}
+      {error && <p className="mt-1 text-xs text-danger">{error}</p>}
     </div>
   );
 }

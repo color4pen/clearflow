@@ -1,26 +1,115 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-page: #e8e8e8;
+  --bg-surface: #ffffff;
+  --bg-surface-alt: #f9f9f9;
+  --bg-toolbar: #f5f5f5;
+  --bg-header: #2c3e50;
+  --bg-table-head: #dcdde1;
+  --bg-row-pending: #fdf6e3;
+  --bg-row-revision: #fef0e5;
+
+  --border: #cccccc;
+  --border-light: #e0e0e0;
+  --border-table-head: #bdc3c7;
+  --border-row-pending: #e8d5a3;
+  --border-row-revision: #f0d0b0;
+
+  --text: #2c3e50;
+  --text-secondary: #555555;
+  --text-muted: #7f8c8d;
+  --text-disabled: #95a5a6;
+  --text-placeholder: #aab2b8;
+  --text-on-dark: #ecf0f1;
+  --text-on-dark-secondary: #bdc3c7;
+  --text-on-dark-muted: #7f8c8d;
+  --text-on-dark-disabled: #95a5a6;
+
+  --color-primary: #2980b9;
+  --color-success: #1a8a4a;
+  --color-warning: #d4880f;
+  --color-danger: #c0392b;
+  --color-revision: #d35400;
+  --color-draft: #2980b9;
+  --color-expired: #999999;
+}
+
+.dark {
+  --bg-page: #1a1a2e;
+  --bg-surface: #2c2c3e;
+  --bg-surface-alt: #333346;
+  --bg-toolbar: #252538;
+  --bg-header: #16162a;
+  --bg-table-head: #3a3a50;
+  --bg-row-pending: #3d3520;
+  --bg-row-revision: #3d2e20;
+
+  --border: #4a4a5e;
+  --border-light: #3a3a50;
+  --border-table-head: #4a4a5e;
+  --border-row-pending: #5a4a20;
+  --border-row-revision: #5a3a20;
+
+  --text: #e0e0e8;
+  --text-secondary: #b0b0c0;
+  --text-muted: #8888a0;
+  --text-disabled: #606078;
+  --text-placeholder: #555570;
+  --text-on-dark: #e0e0e8;
+  --text-on-dark-secondary: #b0b0c0;
+  --text-on-dark-muted: #8888a0;
+  --text-on-dark-disabled: #606078;
+
+  --color-primary: #5ba3d9;
+  --color-success: #3cb371;
+  --color-warning: #e6a530;
+  --color-danger: #e74c3c;
+  --color-revision: #e67e22;
+  --color-draft: #5ba3d9;
+  --color-expired: #707088;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-bg-page: var(--bg-page);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-surface-alt: var(--bg-surface-alt);
+  --color-bg-toolbar: var(--bg-toolbar);
+  --color-bg-header: var(--bg-header);
+  --color-bg-table-head: var(--bg-table-head);
+  --color-bg-row-pending: var(--bg-row-pending);
+  --color-bg-row-revision: var(--bg-row-revision);
+
+  --color-border: var(--border);
+  --color-border-light: var(--border-light);
+  --color-border-table-head: var(--border-table-head);
+  --color-border-row-pending: var(--border-row-pending);
+  --color-border-row-revision: var(--border-row-revision);
+
+  --color-text: var(--text);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-placeholder: var(--text-placeholder);
+  --color-text-on-dark: var(--text-on-dark);
+  --color-text-on-dark-secondary: var(--text-on-dark-secondary);
+  --color-text-on-dark-muted: var(--text-on-dark-muted);
+  --color-text-on-dark-disabled: var(--text-on-dark-disabled);
+
+  --color-primary: var(--color-primary);
+  --color-success: var(--color-success);
+  --color-warning: var(--color-warning);
+  --color-danger: var(--color-danger);
+  --color-revision: var(--color-revision);
+  --color-draft: var(--color-draft);
+  --color-expired: var(--color-expired);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-page);
+  color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
 }

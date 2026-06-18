@@ -31,11 +31,11 @@ function DeadlineDisplay({ deadline }: { deadline: Date | null }) {
   const isExpired = deadline < now;
   if (isExpired) {
     return (
-      <span className="text-xs text-[#c0392b] font-bold">期限切れ</span>
+      <span className="text-xs text-danger font-bold">期限切れ</span>
     );
   }
   return (
-    <span className="text-xs text-[#7f8c8d]">{formatRemainingTime(deadline, now)}</span>
+    <span className="text-xs text-text-muted">{formatRemainingTime(deadline, now)}</span>
   );
 }
 
@@ -44,35 +44,35 @@ function ApprovalStepsSection({ steps }: { steps: ApprovalStep[] }) {
 
   return (
     <div className="mb-4">
-      <h3 className="text-xs font-bold text-[#2c3e50] mb-2">承認ステップ</h3>
+      <h3 className="text-xs font-bold text-text mb-2">承認ステップ</h3>
       <div className="overflow-x-auto">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-[#dcdde1] border border-[#bdc3c7]">
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">No.</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">承認者ロール</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">ステータス</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">承認者名</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">処理日時</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">期限</th>
-              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">コメント</th>
+            <tr className="bg-bg-table-head border border-border-table-head">
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">No.</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">承認者ロール</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">ステータス</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">承認者名</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">処理日時</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">期限</th>
+              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">コメント</th>
             </tr>
           </thead>
           <tbody>
             {steps.map((step, index) => (
               <tr
                 key={step.id}
-                className={`border border-[#e0e0e0] ${index % 2 === 0 ? "bg-white" : "bg-[#f9f9f9]"}`}
+                className={`border border-border-light ${index % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt"}`}
               >
-                <td className="px-1 py-1 text-xs text-[#2c3e50]">{step.stepOrder}</td>
-                <td className="px-1 py-1 text-xs text-[#2c3e50]">{step.approverRole}</td>
+                <td className="px-1 py-1 text-xs text-text">{step.stepOrder}</td>
+                <td className="px-1 py-1 text-xs text-text">{step.approverRole}</td>
                 <td className={`px-1 py-1 text-xs ${stepStatusClass(step.status)}`}>
                   {stepStatusLabel(step.status)}
                 </td>
-                <td className="px-1 py-1 text-xs text-[#2c3e50]">
+                <td className="px-1 py-1 text-xs text-text">
                   {step.approvedByName ?? "—"}
                 </td>
-                <td className="px-1 py-1 text-xs text-[#7f8c8d]">
+                <td className="px-1 py-1 text-xs text-text-muted">
                   {step.approvedAt
                     ? step.approvedAt.toLocaleDateString("ja-JP", {
                         year: "numeric",
@@ -86,7 +86,7 @@ function ApprovalStepsSection({ steps }: { steps: ApprovalStep[] }) {
                 <td className="px-1 py-1 text-xs">
                   <DeadlineDisplay deadline={step.deadline} />
                 </td>
-                <td className="px-1 py-1 text-xs text-[#d35400]">
+                <td className="px-1 py-1 text-xs text-revision">
                   {step.comment ?? ""}
                 </td>
               </tr>
@@ -124,15 +124,15 @@ export default async function RequestDetailPage({
       <div className="mb-2">
         <Link
           href="/requests"
-          className="text-xs text-[#2980b9] underline"
+          className="text-xs text-primary underline"
         >
           ← 申請一覧に戻る
         </Link>
       </div>
 
-      <div className="bg-white border border-[#e0e0e0]">
+      <div className="bg-bg-surface border border-border-light">
         {/* Toolbar */}
-        <div className="bg-[#f5f5f5] border border-[#cccccc] px-2 py-1 flex items-center justify-between">
+        <div className="bg-bg-toolbar border border-border px-2 py-1 flex items-center justify-between">
           <h2 className="text-sm font-bold text-[#333333]">{request.title}</h2>
           <span className={`text-xs ${statusClass(request.status)}`}>
             {statusLabel(request.status)}
@@ -142,8 +142,8 @@ export default async function RequestDetailPage({
         <div className="p-4">
           {request.description && (
             <div className="mb-4">
-              <h3 className="text-xs font-bold text-[#2c3e50] mb-1">説明</h3>
-              <p className="text-xs text-[#2c3e50] whitespace-pre-wrap">
+              <h3 className="text-xs font-bold text-text mb-1">説明</h3>
+              <p className="text-xs text-text whitespace-pre-wrap">
                 {request.description}
               </p>
             </div>
@@ -151,8 +151,8 @@ export default async function RequestDetailPage({
 
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
-              <span className="text-xs text-[#7f8c8d]">作成日時</span>
-              <p className="text-xs text-[#2c3e50] mt-0.5">
+              <span className="text-xs text-text-muted">作成日時</span>
+              <p className="text-xs text-text mt-0.5">
                 {request.createdAt.toLocaleDateString("ja-JP", {
                   year: "numeric",
                   month: "long",
@@ -163,8 +163,8 @@ export default async function RequestDetailPage({
               </p>
             </div>
             <div>
-              <span className="text-xs text-[#7f8c8d]">更新日時</span>
-              <p className="text-xs text-[#2c3e50] mt-0.5">
+              <span className="text-xs text-text-muted">更新日時</span>
+              <p className="text-xs text-text mt-0.5">
                 {request.updatedAt.toLocaleDateString("ja-JP", {
                   year: "numeric",
                   month: "long",
@@ -175,8 +175,8 @@ export default async function RequestDetailPage({
               </p>
             </div>
             <div>
-              <span className="text-xs text-[#7f8c8d]">金額</span>
-              <p className="text-xs text-[#2c3e50] mt-0.5">
+              <span className="text-xs text-text-muted">金額</span>
+              <p className="text-xs text-text mt-0.5">
                 {request.amount !== null
                   ? request.amount.toLocaleString("ja-JP") + "円"
                   : "-"}
