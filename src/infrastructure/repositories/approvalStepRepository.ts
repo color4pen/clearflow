@@ -1,4 +1,4 @@
-import { eq, and, gte, lt, sql } from "drizzle-orm";
+import { eq, and, gte, sql } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { approvalSteps, requests, users } from "../schema";
@@ -137,7 +137,6 @@ export async function findOverdueRequestIds(
   tx?: Transaction
 ): Promise<Array<{ requestId: string; organizationId: string }>> {
   const queryRunner = tx ?? db;
-  const now = new Date();
   const result = await queryRunner
     .selectDistinct({
       requestId: approvalSteps.requestId,
@@ -148,7 +147,7 @@ export async function findOverdueRequestIds(
     .where(
       and(
         eq(approvalSteps.status, "pending"),
-        lt(approvalSteps.deadline, now),
+        sql`${approvalSteps.deadline} < NOW()`,
         eq(requests.status, "pending")
       )
     );

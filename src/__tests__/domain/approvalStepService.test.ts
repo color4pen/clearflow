@@ -201,7 +201,7 @@ describe("approvalStepService — isStepExpired", () => {
     expect(isStepExpired(step, now)).toBe(true);
   });
 
-  it("returns true when deadline equals now (boundary: not strictly future)", () => {
+  it("returns false when deadline equals now (strict less-than boundary)", () => {
     const step = makeStep({ stepOrder: 1, status: "pending", deadline: now });
     // deadline < now is false when equal, so should return false at exact boundary
     expect(isStepExpired(step, now)).toBe(false);

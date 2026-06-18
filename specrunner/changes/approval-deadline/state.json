@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "1235d237-b652-4f0a-9b99-7f9473be1efe",
   "createdAt": "2026-06-18T00:40:14.239Z",
-  "updatedAt": "2026-06-18T01:37:18.704Z",
+  "updatedAt": "2026-06-18T01:39:47.295Z",
   "request": {
     "title": "承認期限",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "regression-gate",
+  "step": "code-fixer",
   "status": "running",
   "branch": "feat/approval-deadline-1235d237",
   "error": null,
@@ -34,7 +34,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 38,
+    "historyCount": 42,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -44,7 +44,8 @@
       "verification": 1,
       "code-review": 1,
       "code-fixer": 1,
-      "domain-invariants": 1
+      "domain-invariants": 1,
+      "regression-gate": 1
     }
   }
 }
