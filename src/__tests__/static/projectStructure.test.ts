@@ -460,6 +460,75 @@ describe("Multi-stage approval UI", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Tenant isolation — admin panel repositories and actions
+// ---------------------------------------------------------------------------
+
+describe("Tenant isolation — admin panel", () => {
+  /**
+   * approvalTemplateRepository の新規メソッドに organizationId 条件が含まれる
+   */
+  it("approvalTemplateRepository.create includes organizationId", async () => {
+    const content = await readSrc(
+      "infrastructure/repositories/approvalTemplateRepository.ts"
+    );
+    const createIdx = content.indexOf("export async function create(");
+    expect(createIdx).toBeGreaterThan(-1);
+    const createBody = content.slice(createIdx, createIdx + 500);
+    expect(createBody).toContain("organizationId");
+  });
+
+  it("approvalTemplateRepository.updateById includes organizationId condition", async () => {
+    const content = await readSrc(
+      "infrastructure/repositories/approvalTemplateRepository.ts"
+    );
+    const updateIdx = content.indexOf("export async function updateById(");
+    expect(updateIdx).toBeGreaterThan(-1);
+    const updateBody = content.slice(updateIdx, updateIdx + 600);
+    expect(updateBody).toContain("organizationId");
+  });
+
+  it("approvalTemplateRepository.deleteById includes organizationId condition", async () => {
+    const content = await readSrc(
+      "infrastructure/repositories/approvalTemplateRepository.ts"
+    );
+    const deleteIdx = content.indexOf("export async function deleteById(");
+    expect(deleteIdx).toBeGreaterThan(-1);
+    const deleteBody = content.slice(deleteIdx, deleteIdx + 400);
+    expect(deleteBody).toContain("organizationId");
+  });
+
+  it("userRepository.findByOrganization includes organizationId condition", async () => {
+    const content = await readSrc(
+      "infrastructure/repositories/userRepository.ts"
+    );
+    const findIdx = content.indexOf("export async function findByOrganization(");
+    expect(findIdx).toBeGreaterThan(-1);
+    const findBody = content.slice(findIdx, findIdx + 400);
+    expect(findBody).toContain("organizationId");
+  });
+
+  it("userRepository.updateRole includes organizationId condition", async () => {
+    const content = await readSrc(
+      "infrastructure/repositories/userRepository.ts"
+    );
+    const updateIdx = content.indexOf("export async function updateRole(");
+    expect(updateIdx).toBeGreaterThan(-1);
+    const updateBody = content.slice(updateIdx, updateIdx + 500);
+    expect(updateBody).toContain("organizationId");
+  });
+
+  it("templates action uses session.user.organizationId", async () => {
+    const content = await readSrc("app/actions/templates.ts");
+    expect(content).toContain("session.user.organizationId");
+  });
+
+  it("users action uses session.user.organizationId", async () => {
+    const content = await readSrc("app/actions/users.ts");
+    expect(content).toContain("session.user.organizationId");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Build and lint — TC-057, TC-058, TC-059
 // ---------------------------------------------------------------------------
 

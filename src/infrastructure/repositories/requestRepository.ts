@@ -1,7 +1,7 @@
 import { eq, and, sql } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
-import { requests } from "../schema";
+import { requests, auditLogs } from "../schema";
 import type { Request, RequestStatus } from "@/domain/models/request";
 
 
@@ -43,6 +43,39 @@ export async function create(
     })
     .returning();
   return mapRow(result[0]);
+}
+
+/**
+ * Returns true if there is at least one pending request that was created
+ * using the given template. This is determined by joining audit_logs
+ * (action = 'request.create', metadata.templateId = templateId) with requests
+ * (status = 'pending'). Both tables are filtered by organizationId for
+ * tenant isolation.
+ *
+ * @note Depends on audit_logs.metadata having a `templateId` field set by
+ *       the createRequest usecase.
+ */
+export async function existsPendingByTemplateId(
+  templateId: string,
+  organizationId: string
+): Promise<boolean> {
+  const result = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(auditLogs)
+    .innerJoin(
+      requests,
+      sql`${requests.id}::text = ${auditLogs.targetId}`
+    )
+    .where(
+      and(
+        eq(auditLogs.action, "request.create"),
+        sql`${auditLogs.metadata}->>'templateId' = ${templateId}`,
+        eq(auditLogs.organizationId, organizationId),
+        eq(requests.status, "pending"),
+        eq(requests.organizationId, organizationId)
+      )
+    );
+  return (result[0]?.count ?? 0) > 0;
 }
 
 export async function findById(
