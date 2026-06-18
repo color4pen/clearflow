@@ -17,7 +17,7 @@ export default async function TemplatesPage() {
   return (
     <div>
       {/* Toolbar */}
-      <div className="bg-[#f5f5f5] border border-[#cccccc] px-2 py-1 flex items-center justify-between mb-0">
+      <div className="bg-bg-toolbar border border-border px-2 py-1 flex items-center justify-between mb-0">
         <span className="text-sm font-bold text-[#333333]">テンプレート管理</span>
         <Link
           href="/settings/templates/new"
@@ -27,21 +27,21 @@ export default async function TemplatesPage() {
         </Link>
       </div>
 
-      <div className="bg-white border border-[#e0e0e0]">
+      <div className="bg-bg-surface border border-border-light">
         {templates.length === 0 ? (
-          <div className="text-center py-4 text-xs text-[#95a5a6]">
+          <div className="text-center py-4 text-xs text-text-disabled">
             登録済みテンプレートはありません。
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-[#dcdde1] border border-[#bdc3c7]">
-                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">テンプレート名</th>
-                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">金額条件</th>
-                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">ステップ数</th>
-                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">作成日時</th>
-                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">操作</th>
+                <tr className="bg-bg-table-head border border-border-table-head">
+                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">テンプレート名</th>
+                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">金額条件</th>
+                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">ステップ数</th>
+                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">作成日時</th>
+                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -58,23 +58,23 @@ export default async function TemplatesPage() {
                   return (
                     <tr
                       key={template.id}
-                      className={`border border-[#e0e0e0] hover:bg-[#eef2f7] ${index % 2 === 0 ? "bg-white" : "bg-[#f9f9f9]"}`}
+                      className={`border border-border-light hover:bg-[#eef2f7] ${index % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt"}`}
                     >
-                      <td className="px-1 py-1 text-xs text-[#2c3e50]">
+                      <td className="px-1 py-1 text-xs text-text">
                         {template.name}
                       </td>
-                      <td className="px-1 py-1 text-xs text-[#2c3e50]">{amountLabel}</td>
-                      <td className="px-1 py-1 text-xs text-[#2c3e50]">
+                      <td className="px-1 py-1 text-xs text-text">{amountLabel}</td>
+                      <td className="px-1 py-1 text-xs text-text">
                         {template.steps.length}
                       </td>
-                      <td className="px-1 py-1 text-xs text-[#7f8c8d]">
+                      <td className="px-1 py-1 text-xs text-text-muted">
                         {new Date(template.createdAt).toLocaleDateString("ja-JP")}
                       </td>
                       <td className="px-1 py-1 text-xs">
                         <div className="flex items-center gap-2">
                           <Link
                             href={`/settings/templates/${template.id}/edit`}
-                            className="text-[#2980b9] underline text-xs"
+                            className="text-primary underline text-xs"
                           >
                             編集
                           </Link>
@@ -90,7 +90,7 @@ export default async function TemplatesPage() {
         )}
       </div>
       {/* Footer bar */}
-      <div className="bg-[#f5f5f5] border border-[#cccccc] border-t-0 px-2 py-0.5 text-xs text-[#7f8c8d]">
+      <div className="bg-bg-toolbar border border-border border-t-0 px-2 py-0.5 text-xs text-text-muted">
         {templates.length} 件
       </div>
     </div>

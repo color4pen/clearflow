@@ -41,7 +41,7 @@ function ActionForm({
     <form onSubmit={handleSubmit} className={className}>
       {children(isPending)}
       {errorMessage && (
-        <p role="alert" className="mt-2 text-xs text-[#c0392b]">
+        <p role="alert" className="mt-2 text-xs text-danger">
           {errorMessage}
         </p>
       )}
@@ -64,8 +64,8 @@ export function ActionButtons({
 }) {
   if (requestStatus === "draft") {
     return (
-      <div className="border-t border-[#e0e0e0] pt-4">
-        <h3 className="text-xs font-bold text-[#2c3e50] mb-2">アクション</h3>
+      <div className="border-t border-border-light pt-4">
+        <h3 className="text-xs font-bold text-text mb-2">アクション</h3>
         <ActionForm action={submitAction}>
           {(isPending) => (
             <button
@@ -83,21 +83,21 @@ export function ActionButtons({
 
   if (requestStatus === "pending") {
     return (
-      <div className="border-t border-[#e0e0e0] pt-4">
-        <h3 className="text-xs font-bold text-[#2c3e50] mb-2">アクション</h3>
+      <div className="border-t border-border-light pt-4">
+        <h3 className="text-xs font-bold text-text mb-2">アクション</h3>
         <div className="flex items-center gap-2 mb-4">
           <ActionForm action={approveAction}>
             {(isPending) => (
               <button
                 type="submit"
                 disabled={isPending}
-                className="text-[#1a8a4a] underline text-xs disabled:text-[#bdc3c7] disabled:no-underline disabled:cursor-not-allowed"
+                className="text-success underline text-xs disabled:text-text-on-dark-secondary disabled:no-underline disabled:cursor-not-allowed"
               >
                 承認
               </button>
             )}
           </ActionForm>
-          <span className="text-[#7f8c8d] text-xs">|</span>
+          <span className="text-text-muted text-xs">|</span>
           <ActionForm action={rejectAction}>
             {(isPending) => (
               <>
@@ -105,14 +105,14 @@ export function ActionButtons({
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="text-[#c0392b] underline text-xs disabled:text-[#bdc3c7] disabled:no-underline disabled:cursor-not-allowed"
+                  className="text-danger underline text-xs disabled:text-text-on-dark-secondary disabled:no-underline disabled:cursor-not-allowed"
                 >
                   却下
                 </button>
               </>
             )}
           </ActionForm>
-          <span className="text-[#7f8c8d] text-xs">|</span>
+          <span className="text-text-muted text-xs">|</span>
           <ActionForm action={rejectAction} className="space-y-2">
             {(isPending) => (
               <>
@@ -120,7 +120,7 @@ export function ActionButtons({
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="text-[#d35400] underline text-xs disabled:text-[#bdc3c7] disabled:no-underline disabled:cursor-not-allowed"
+                  className="text-revision underline text-xs disabled:text-text-on-dark-secondary disabled:no-underline disabled:cursor-not-allowed"
                 >
                   差戻
                 </button>
@@ -137,7 +137,7 @@ export function ActionButtons({
                 <div>
                   <label
                     htmlFor="revision-comment"
-                    className="block text-xs font-bold text-[#2c3e50] mb-1"
+                    className="block text-xs font-bold text-text mb-1"
                   >
                     差し戻しコメント
                   </label>
@@ -166,8 +166,8 @@ export function ActionButtons({
 
   if (requestStatus === "revision") {
     return (
-      <div className="border-t border-[#e0e0e0] pt-4">
-        <h3 className="text-xs font-bold text-[#2c3e50] mb-2">アクション</h3>
+      <div className="border-t border-border-light pt-4">
+        <h3 className="text-xs font-bold text-text mb-2">アクション</h3>
         <ActionForm action={resubmitAction}>
           {(isPending) => (
             <button
