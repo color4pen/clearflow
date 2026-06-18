@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth, signOut } from "@/infrastructure/auth";
+import { ThemeToggle } from "./ThemeToggle";
 
 export default async function DashboardLayout({
   children,
@@ -46,6 +47,7 @@ export default async function DashboardLayout({
             </nav>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <span className="text-text-on-dark-disabled text-xs">
               {session.user.name} / {session.user.role}
             </span>

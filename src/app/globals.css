@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   --bg-page: #e8e8e8;
   --bg-surface: #ffffff;
@@ -26,16 +28,16 @@
   --text-on-dark-muted: #7f8c8d;
   --text-on-dark-disabled: #95a5a6;
 
-  --color-primary: #2980b9;
-  --color-success: #1a8a4a;
-  --color-warning: #d4880f;
-  --color-danger: #c0392b;
-  --color-revision: #d35400;
-  --color-draft: #2980b9;
-  --color-expired: #999999;
+  --theme-primary: #2980b9;
+  --theme-success: #1a8a4a;
+  --theme-warning: #d4880f;
+  --theme-danger: #c0392b;
+  --theme-revision: #d35400;
+  --theme-draft: #2980b9;
+  --theme-expired: #999999;
 }
 
-.dark {
+[data-theme="dark"] {
   --bg-page: #1a1a2e;
   --bg-surface: #2c2c3e;
   --bg-surface-alt: #333346;
@@ -61,13 +63,13 @@
   --text-on-dark-muted: #8888a0;
   --text-on-dark-disabled: #606078;
 
-  --color-primary: #5ba3d9;
-  --color-success: #3cb371;
-  --color-warning: #e6a530;
-  --color-danger: #e74c3c;
-  --color-revision: #e67e22;
-  --color-draft: #5ba3d9;
-  --color-expired: #707088;
+  --theme-primary: #5ba3d9;
+  --theme-success: #3cb371;
+  --theme-warning: #e6a530;
+  --theme-danger: #e74c3c;
+  --theme-revision: #e67e22;
+  --theme-draft: #5ba3d9;
+  --theme-expired: #707088;
 }
 
 @theme inline {
@@ -96,13 +98,13 @@
   --color-text-on-dark-muted: var(--text-on-dark-muted);
   --color-text-on-dark-disabled: var(--text-on-dark-disabled);
 
-  --color-primary: var(--color-primary);
-  --color-success: var(--color-success);
-  --color-warning: var(--color-warning);
-  --color-danger: var(--color-danger);
-  --color-revision: var(--color-revision);
-  --color-draft: var(--color-draft);
-  --color-expired: var(--color-expired);
+  --color-primary: var(--theme-primary);
+  --color-success: var(--theme-success);
+  --color-warning: var(--theme-warning);
+  --color-danger: var(--theme-danger);
+  --color-revision: var(--theme-revision);
+  --color-draft: var(--theme-draft);
+  --color-expired: var(--theme-expired);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
