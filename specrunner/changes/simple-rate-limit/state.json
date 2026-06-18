@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "4ac1ce1d-4246-4ac4-b79d-d958c341f57c",
   "createdAt": "2026-06-18T03:17:24.472Z",
-  "updatedAt": "2026-06-18T04:14:30.449Z",
+  "updatedAt": "2026-06-18T04:14:51.318Z",
   "request": {
     "title": "シンプルなレート制限",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/simple-rate-limit-4ac1ce1d",
   "error": null,
   "pipelineId": "standard",
@@ -33,8 +33,13 @@
       ]
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/15",
+    "number": 15,
+    "createdAt": "2026-06-18T04:14:51.309Z"
+  },
   "_journal": {
-    "historyCount": 65,
+    "historyCount": 70,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -47,7 +52,9 @@
       "code-fixer": 1,
       "domain-invariants": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
