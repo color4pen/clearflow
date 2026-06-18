@@ -40,6 +40,7 @@ export async function createRequest(data: {
 
   try {
     const result = await db.transaction(async (tx) => {
+      const now = new Date();
       const request = await requestRepository.create(
         {
           title: data.title,
@@ -57,6 +58,9 @@ export async function createRequest(data: {
           stepOrder: s.stepOrder,
           approverRole: s.approverRole,
           organizationId: data.organizationId,
+          deadline: s.deadlineHours != null
+            ? new Date(now.getTime() + s.deadlineHours * 60 * 60 * 1000)
+            : null,
         })),
         tx
       );

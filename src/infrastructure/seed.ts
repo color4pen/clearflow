@@ -103,6 +103,21 @@ async function seed() {
     .returning();
   console.log(`✅ Created finance user: ${financeUser.email}`);
 
+  // Create system user (fixed UUID for SYSTEM_USER_ID)
+  const SYSTEM_USER_ID = "00000000-0000-0000-0000-000000000000";
+  await db
+    .insert(users)
+    .values({
+      id: SYSTEM_USER_ID,
+      email: "system@clearflow.internal",
+      hashedPassword: await bcrypt.hash(crypto.randomUUID(), 12),
+      name: "System",
+      organizationId: org.id,
+      role: "member",
+    })
+    .onConflictDoNothing();
+  console.log(`✅ Created system user: system@clearflow.internal (${SYSTEM_USER_ID})`);
+
   // Create approval templates
   // Default template: no amount condition, single manager approval step
   const [defaultTemplate] = await db
@@ -137,8 +152,8 @@ async function seed() {
       name: "高額申請（上長→経理承認）",
       organizationId: org.id,
       steps: [
-        { stepOrder: 1, approverRole: "manager" },
-        { stepOrder: 2, approverRole: "finance" },
+        { stepOrder: 1, approverRole: "manager", deadlineHours: 72 },
+        { stepOrder: 2, approverRole: "finance", deadlineHours: 72 },
       ],
       minAmount: 100001,
       maxAmount: null,

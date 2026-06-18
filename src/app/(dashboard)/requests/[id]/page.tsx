@@ -20,6 +20,7 @@ function statusLabel(status: RequestStatus): string {
     approved: "承認済み",
     rejected: "却下",
     revision: "差し戻し",
+    expired: "期限切れ",
   };
   return labels[status];
 }
@@ -31,6 +32,7 @@ function statusClass(status: RequestStatus): string {
     approved: "bg-green-100 text-green-700",
     rejected: "bg-red-100 text-red-700",
     revision: "bg-orange-100 text-orange-700",
+    expired: "bg-gray-100 text-gray-500",
   };
   return classes[status];
 }
@@ -51,6 +53,32 @@ function stepStatusClass(status: ApprovalStepStatus): string {
     rejected: "bg-orange-100 text-orange-700",
   };
   return classes[status];
+}
+
+function formatRemainingTime(deadline: Date, now: Date): string {
+  const diffMs = deadline.getTime() - now.getTime();
+  if (diffMs <= 0) return "期限切れ";
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const days = Math.floor(diffHours / 24);
+  const hours = diffHours % 24;
+  if (days > 0) {
+    return `残り ${days}日 ${hours}時間`;
+  }
+  return `残り ${hours}時間`;
+}
+
+function DeadlineDisplay({ deadline }: { deadline: Date | null }) {
+  if (deadline === null) return null;
+  const now = new Date();
+  const isExpired = deadline < now;
+  if (isExpired) {
+    return (
+      <p className="text-xs text-red-600 font-medium">期限切れ</p>
+    );
+  }
+  return (
+    <p className="text-xs text-gray-500">{formatRemainingTime(deadline, now)}</p>
+  );
 }
 
 function ApprovalStepsSection({ steps }: { steps: ApprovalStep[] }) {
@@ -90,6 +118,7 @@ function ApprovalStepsSection({ steps }: { steps: ApprovalStep[] }) {
                   })}
                 </p>
               )}
+              <DeadlineDisplay deadline={step.deadline} />
               {step.comment && (
                 <p className="mt-1 text-xs text-orange-700 bg-orange-50 rounded px-2 py-1">
                   差し戻しコメント: {step.comment}

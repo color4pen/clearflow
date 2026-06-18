@@ -6,3 +6,4 @@ export { approveRequest } from "./approveRequest";
 export { rejectRequest } from "./rejectRequest";
 export { resubmitRequest } from "./resubmitRequest";
 export { getApprovalSteps } from "./getApprovalSteps";
+export { expireOverdueRequests } from "./expireOverdueRequests";

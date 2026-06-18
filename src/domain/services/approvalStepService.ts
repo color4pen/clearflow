@@ -33,3 +33,13 @@ export function getStepsToReset(
 export function canApprove(step: ApprovalStep, actorRole: string): boolean {
   return step.approverRole === actorRole;
 }
+
+/**
+ * Returns true if the step's deadline has passed.
+ * Returns false if deadline is null (no deadline = never expired).
+ */
+export function isStepExpired(step: ApprovalStep, now?: Date): boolean {
+  if (step.deadline === null) return false;
+  const reference = now ?? new Date();
+  return step.deadline < reference;
+}
