@@ -12,6 +12,7 @@ import { ActionButtons } from "./ActionButtons";
 import type { ServerAction } from "./ActionButtons";
 import type { ApprovalStep } from "@/domain/models/approvalStep";
 import { statusLabel, statusClass, stepStatusLabel, stepStatusClass } from "../statusUtils";
+import { PageToolbar, DataTable, SectionCard } from "@/app/components";
 
 function formatRemainingTime(deadline: Date, now: Date): string {
   const diffMs = deadline.getTime() - now.getTime();
@@ -46,33 +47,17 @@ function ApprovalStepsSection({ steps }: { steps: ApprovalStep[] }) {
     <div className="mb-4">
       <h3 className="text-xs font-bold text-text mb-2">承認ステップ</h3>
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-bg-table-head border border-border-table-head">
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">No.</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">承認者ロール</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">ステータス</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">承認者名</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">処理日時</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">期限</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">コメント</th>
-            </tr>
-          </thead>
-          <tbody>
-            {steps.map((step, index) => (
-              <tr
-                key={step.id}
-                className={`border border-border-light ${index % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt"}`}
-              >
-                <td className="px-1 py-1 text-xs text-text">{step.stepOrder}</td>
-                <td className="px-1 py-1 text-xs text-text">{step.approverRole}</td>
-                <td className={`px-1 py-1 text-xs ${stepStatusClass(step.status)}`}>
-                  {stepStatusLabel(step.status)}
-                </td>
-                <td className="px-1 py-1 text-xs text-text">
-                  {step.approvedByName ?? "—"}
-                </td>
-                <td className="px-1 py-1 text-xs text-text-muted">
+        <DataTable
+          columns={[
+            { key: "stepOrder", header: "No.", render: (step) => <span className="text-text">{step.stepOrder}</span> },
+            { key: "approverRole", header: "承認者ロール", render: (step) => <span className="text-text">{step.approverRole}</span> },
+            { key: "status", header: "ステータス", render: (step) => <span className={stepStatusClass(step.status)}>{stepStatusLabel(step.status)}</span> },
+            { key: "approvedByName", header: "承認者名", render: (step) => <span className="text-text">{step.approvedByName ?? "—"}</span> },
+            {
+              key: "approvedAt",
+              header: "処理日時",
+              render: (step) => (
+                <span className="text-text-muted">
                   {step.approvedAt
                     ? step.approvedAt.toLocaleDateString("ja-JP", {
                         year: "numeric",
@@ -82,17 +67,15 @@ function ApprovalStepsSection({ steps }: { steps: ApprovalStep[] }) {
                         minute: "2-digit",
                       })
                     : "—"}
-                </td>
-                <td className="px-1 py-1 text-xs">
-                  <DeadlineDisplay deadline={step.deadline} />
-                </td>
-                <td className="px-1 py-1 text-xs text-revision">
-                  {step.comment ?? ""}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </span>
+              ),
+            },
+            { key: "deadline", header: "期限", render: (step) => <DeadlineDisplay deadline={step.deadline} /> },
+            { key: "comment", header: "コメント", render: (step) => <span className="text-revision">{step.comment ?? ""}</span> },
+          ]}
+          rows={steps}
+          rowKey={(step) => step.id}
+        />
       </div>
     </div>
   );
@@ -130,14 +113,16 @@ export default async function RequestDetailPage({
         </Link>
       </div>
 
-      <div className="bg-bg-surface border border-border-light">
+      <SectionCard>
         {/* Toolbar */}
-        <div className="bg-bg-toolbar border border-border px-2 py-1 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-[#333333]">{request.title}</h2>
-          <span className={`text-xs ${statusClass(request.status)}`}>
-            {statusLabel(request.status)}
-          </span>
-        </div>
+        <PageToolbar
+          title={request.title}
+          actions={
+            <span className={`text-xs ${statusClass(request.status)}`}>
+              {statusLabel(request.status)}
+            </span>
+          }
+        />
 
         <div className="p-4">
           {request.description && (
@@ -196,7 +181,7 @@ export default async function RequestDetailPage({
             resubmitAction={resubmitAction}
           />
         </div>
-      </div>
+      </SectionCard>
     </div>
   );
 }

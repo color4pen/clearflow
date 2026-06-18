@@ -4,7 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createTemplateAction, updateTemplateAction } from "@/app/actions/templates";
 import type { ApprovalTemplate } from "@/domain/models/approvalTemplate";
-import { BTN_SUBMIT, BTN_SECONDARY, INPUT_BASE } from "../../styles";
+import { FormField, Input, Select, SubmitButton, LinkButton } from "@/app/components";
 
 type ActionState =
   | null
@@ -112,34 +112,25 @@ export function TemplateForm(props: Props) {
         )}
 
         {/* Template name */}
-        <div>
-          <label
-            htmlFor="name"
-            className="block text-xs font-bold text-text mb-1"
-          >
-            テンプレート名 <span className="text-red-500">*</span>
-          </label>
-          <input
+        <FormField
+          label={<>テンプレート名 <span className="text-red-500">*</span></>}
+          htmlFor="name"
+        >
+          <Input
             id="name"
             name="name"
             type="text"
             required
             defaultValue={props.mode === "edit" ? props.defaultValues.name : ""}
             placeholder="例: 経費申請テンプレート"
-            className={`mt-1 block ${INPUT_BASE}`}
+            className="mt-1 block"
           />
-        </div>
+        </FormField>
 
         {/* Amount conditions */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label
-              htmlFor="minAmount"
-              className="block text-xs font-bold text-text mb-1"
-            >
-              最小金額（円）
-            </label>
-            <input
+          <FormField label="最小金額（円）" htmlFor="minAmount">
+            <Input
               id="minAmount"
               name="minAmount"
               type="number"
@@ -150,17 +141,11 @@ export function TemplateForm(props: Props) {
                   : ""
               }
               placeholder="例: 10000"
-              className={`mt-1 block ${INPUT_BASE}`}
+              className="mt-1 block"
             />
-          </div>
-          <div>
-            <label
-              htmlFor="maxAmount"
-              className="block text-xs font-bold text-text mb-1"
-            >
-              最大金額（円）
-            </label>
-            <input
+          </FormField>
+          <FormField label="最大金額（円）" htmlFor="maxAmount">
+            <Input
               id="maxAmount"
               name="maxAmount"
               type="number"
@@ -171,9 +156,9 @@ export function TemplateForm(props: Props) {
                   : ""
               }
               placeholder="例: 100000"
-              className={`mt-1 block ${INPUT_BASE}`}
+              className="mt-1 block"
             />
-          </div>
+          </FormField>
         </div>
 
         {/* Approval steps */}
@@ -182,13 +167,9 @@ export function TemplateForm(props: Props) {
             <h3 className="text-xs font-bold text-text">
               承認ステップ <span className="text-red-500">*</span>
             </h3>
-            <button
-              type="button"
-              onClick={addStep}
-              className="text-xs text-primary underline"
-            >
+            <LinkButton variant="primary" onClick={addStep} type="button">
               + ステップを追加
-            </button>
+            </LinkButton>
           </div>
 
           <div className="space-y-2">
@@ -198,11 +179,10 @@ export function TemplateForm(props: Props) {
                 className="flex items-start gap-3 p-2 border border-border-light bg-bg-surface-alt"
               >
                 <div className="flex-1 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  <div>
-                    <label className="block text-xs font-bold text-text mb-1">
-                      承認者ロール <span className="text-red-500">*</span>
-                    </label>
-                    <select
+                  <FormField
+                    label={<>承認者ロール <span className="text-red-500">*</span></>}
+                  >
+                    <Select
                       value={step.approverRole}
                       onChange={(e) =>
                         updateStep(
@@ -211,20 +191,16 @@ export function TemplateForm(props: Props) {
                           e.target.value as Step["approverRole"]
                         )
                       }
-                      className="block w-full border border-border rounded-none px-2 py-1 text-xs focus:border-primary focus:outline-none"
                     >
                       {ROLE_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>
                           {opt.label}
                         </option>
                       ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-text mb-1">
-                      期限（時間）
-                    </label>
-                    <input
+                    </Select>
+                  </FormField>
+                  <FormField label="期限（時間）">
+                    <Input
                       type="number"
                       min={1}
                       value={step.deadlineHours ?? ""}
@@ -236,19 +212,18 @@ export function TemplateForm(props: Props) {
                         )
                       }
                       placeholder="例: 48"
-                      className="block w-full border border-border rounded-none px-2 py-1 text-xs focus:border-primary focus:outline-none"
                     />
-                  </div>
+                  </FormField>
                 </div>
                 <div className="pt-4">
-                  <button
-                    type="button"
-                    onClick={() => removeStep(index)}
+                  <LinkButton
+                    variant="danger"
                     disabled={steps.length <= 1}
-                    className="text-xs text-danger underline disabled:text-text-on-dark-secondary disabled:no-underline disabled:cursor-not-allowed"
+                    onClick={() => removeStep(index)}
+                    type="button"
                   >
                     削除
-                  </button>
+                  </LinkButton>
                 </div>
               </div>
             ))}
@@ -257,20 +232,12 @@ export function TemplateForm(props: Props) {
 
         {/* Submit */}
         <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            disabled={pending}
-            className={BTN_SUBMIT}
-          >
-            {pending
-              ? "保存中..."
-              : props.mode === "edit"
-              ? "更新する"
-              : "作成する"}
-          </button>
+          <SubmitButton pending={pending} pendingText="保存中...">
+            {props.mode === "edit" ? "更新する" : "作成する"}
+          </SubmitButton>
           <a
             href="/settings/templates"
-            className={BTN_SECONDARY}
+            className="text-xs text-text-muted underline"
           >
             キャンセル
           </a>

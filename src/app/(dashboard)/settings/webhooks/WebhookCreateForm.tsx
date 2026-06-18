@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { createWebhookEndpointAction } from "@/app/actions/webhooks";
 import { WEBHOOK_EVENT_TYPES } from "@/domain/models/webhookEvent";
-import { BTN_SUBMIT, INPUT_BASE } from "../../styles";
+import { FormField, Input, SubmitButton } from "@/app/components";
 
 type ActionState =
   | null
@@ -65,19 +65,19 @@ export function WebhookCreateForm() {
       )}
 
       <form action={formAction} className="space-y-4">
-        <div>
-          <label htmlFor="url" className="block text-xs font-bold text-text mb-1">
-            URL <span className="text-red-500">*</span>
-          </label>
-          <input
+        <FormField
+          label={<>URL <span className="text-red-500">*</span></>}
+          htmlFor="url"
+        >
+          <Input
             id="url"
             name="url"
             type="text"
             placeholder="https://example.com/webhook"
-            className={`mt-1 block ${INPUT_BASE}`}
+            className="mt-1 block"
             required
           />
-        </div>
+        </FormField>
         <div>
           <p className="block text-xs font-bold text-text mb-2">
             購読するイベント <span className="text-red-500">*</span>
@@ -96,13 +96,9 @@ export function WebhookCreateForm() {
             ))}
           </div>
         </div>
-        <button
-          type="submit"
-          disabled={pending}
-          className={BTN_SUBMIT}
-        >
-          {pending ? "作成中..." : "エンドポイントを追加"}
-        </button>
+        <SubmitButton pending={pending} pendingText="作成中...">
+          エンドポイントを追加
+        </SubmitButton>
         <p className="text-xs text-text-muted">
           ※ Secret は作成時のみ全文が表示されます。ページをリロードすると確認できなくなります。
         </p>

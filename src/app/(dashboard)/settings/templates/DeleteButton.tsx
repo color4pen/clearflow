@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { deleteTemplateAction } from "@/app/actions/templates";
+import { LinkButton } from "@/app/components";
 
 type State = null | { success: false; message: string } | { success: true };
 
@@ -20,13 +21,9 @@ export function DeleteButton({ templateId }: { templateId: string }) {
         <p className="text-xs text-danger mb-1">{state.message}</p>
       )}
       <form action={formAction}>
-        <button
-          type="submit"
-          disabled={pending}
-          className="text-xs text-danger underline disabled:opacity-50"
-        >
+        <LinkButton variant="danger" disabled={pending} type="submit">
           {pending ? "削除中..." : "削除"}
-        </button>
+        </LinkButton>
       </form>
     </div>
   );
