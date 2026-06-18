@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "5c9d8cac-8564-493f-9bc8-56b267875b47",
   "createdAt": "2026-06-18T09:02:41.805Z",
-  "updatedAt": "2026-06-18T09:40:51.145Z",
+  "updatedAt": "2026-06-18T09:49:28.041Z",
   "request": {
     "title": "UIを業務システムスタイルにリデザイン",
     "type": "spec-change",
@@ -35,14 +35,15 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 31,
+    "historyCount": 37,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
       "spec-review": 2,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 1,
+      "code-review": 1
     }
   }
 }
