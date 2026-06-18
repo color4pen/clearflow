@@ -13,6 +13,7 @@ import {
   approvalTemplates,
   webhookEndpoints,
   webhookDeliveries,
+  approvalDelegations,
 } from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -36,6 +37,7 @@ async function seed() {
   await db.delete(verificationTokens);
   await db.delete(webhookDeliveries);
   await db.delete(webhookEndpoints);
+  await db.delete(approvalDelegations);
   await db.delete(users);
   await db.delete(organizations);
 
@@ -304,6 +306,22 @@ async function seed() {
     organizationId: org.id,
   });
   console.log("✅ Created webhook endpoint for default organization");
+
+  // Create sample approval delegation: manager → admin
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const sevenDaysLater = new Date(today);
+  sevenDaysLater.setDate(today.getDate() + 7);
+
+  await db.insert(approvalDelegations).values({
+    fromUserId: managerUser.id,
+    toUserId: adminUser.id,
+    organizationId: org.id,
+    startDate: today,
+    endDate: sevenDaysLater,
+    isActive: true,
+  });
+  console.log(`✅ Created approval delegation: manager → admin (${today.toISOString().slice(0, 10)} ～ ${sevenDaysLater.toISOString().slice(0, 10)})`);
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");

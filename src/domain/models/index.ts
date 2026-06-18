@@ -1,4 +1,5 @@
 export type { Organization } from "./organization";
+export type { ApprovalDelegation } from "./approvalDelegation";
 export type { Role, User } from "./user";
 export type { Request, RequestStatus } from "./request";
 export type { AuditLog } from "./auditLog";

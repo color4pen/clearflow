@@ -43,3 +43,8 @@
 {"type":"transition","ts":"2026-06-18T02:25:39.828Z","step":"spec-review","status":"ok","message":"spec-review iteration 2 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-18T02:25:39.828Z","step":"step-transition","status":"ok","message":"spec-review → test-case-gen"}
 {"type":"transition","ts":"2026-06-18T02:25:39.832Z","step":"test-case-gen-started","status":"started","message":"Starting test-case-gen step"}
+{"type":"transition","ts":"2026-06-18T02:28:02.801Z","step":"test-case-gen-verdict","status":"ok","message":"test-case-gen verdict: success"}
+{"type":"step-attempt","step":"test-case-gen","sessionId":"876a52c2-d024-472b-9074-ac76afc1963b","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-18T02:25:39.847Z","endedAt":"2026-06-18T02:28:01.439Z"}
+{"type":"lineage","step":"test-case-gen","ts":"2026-06-18T02:28:01.439Z","outputs":[{"path":"specrunner/changes/approval-delegation/test-cases.md","hash":"sha256:e228334ed0d7bf3470fd91b5e7c1cc860aabf588b40b325f5af4ff717503d34a"}],"inputs":[{"path":"specrunner/changes/approval-delegation/design.md","hash":"sha256:439e6b4b3f45522c91770c7297499c107546ec85909643efccac858c85e2d76a"},{"path":"specrunner/changes/approval-delegation/tasks.md","hash":"sha256:d36d327c654d2e87656e8aa59dcd7eb1346b61ca4ac83a04d36ee7547e63e05a"}]}
+{"type":"transition","ts":"2026-06-18T02:28:02.804Z","step":"step-transition","status":"ok","message":"spec-review complete → implementer (iter 2)"}
+{"type":"transition","ts":"2026-06-18T02:28:02.806Z","step":"implementer-started","status":"started","message":"Starting implementer step"}

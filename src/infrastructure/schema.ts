@@ -9,6 +9,7 @@ import {
   boolean,
   primaryKey,
   unique,
+  index,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -168,6 +169,34 @@ export const webhookDeliveries = pgTable("webhook_deliveries", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Approval delegations table
+export const approvalDelegations = pgTable(
+  "approval_delegations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    fromUserId: uuid("from_user_id")
+      .notNull()
+      .references(() => users.id),
+    toUserId: uuid("to_user_id")
+      .notNull()
+      .references(() => users.id),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    startDate: timestamp("start_date").notNull(),
+    endDate: timestamp("end_date").notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("approval_delegations_to_user_org_active_idx").on(
+      table.toUserId,
+      table.organizationId,
+      table.isActive
+    ),
+  ]
+);
+
 // Auth.js adapter tables
 export const accounts = pgTable(
   "accounts",
@@ -216,6 +245,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   approvalTemplates: many(approvalTemplates),
   webhookEndpoints: many(webhookEndpoints),
   idempotencyKeys: many(idempotencyKeys),
+  approvalDelegations: many(approvalDelegations),
 }));
 
 export const idempotencyKeysRelations = relations(idempotencyKeys, ({ one }) => ({
@@ -234,6 +264,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   auditLogs: many(auditLogs),
   accounts: many(accounts),
   sessions: many(sessions),
+  delegationsFrom: many(approvalDelegations, { relationName: "delegationsFrom" }),
+  delegationsTo: many(approvalDelegations, { relationName: "delegationsTo" }),
 }));
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
@@ -315,6 +347,26 @@ export const webhookDeliveriesRelations = relations(
     endpoint: one(webhookEndpoints, {
       fields: [webhookDeliveries.endpointId],
       references: [webhookEndpoints.id],
+    }),
+  })
+);
+
+export const approvalDelegationsRelations = relations(
+  approvalDelegations,
+  ({ one }) => ({
+    fromUser: one(users, {
+      fields: [approvalDelegations.fromUserId],
+      references: [users.id],
+      relationName: "delegationsFrom",
+    }),
+    toUser: one(users, {
+      fields: [approvalDelegations.toUserId],
+      references: [users.id],
+      relationName: "delegationsTo",
+    }),
+    organization: one(organizations, {
+      fields: [approvalDelegations.organizationId],
+      references: [organizations.id],
     }),
   })
 );
