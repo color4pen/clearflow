@@ -7,3 +7,7 @@ export { rejectRequest } from "./rejectRequest";
 export { resubmitRequest } from "./resubmitRequest";
 export { getApprovalSteps } from "./getApprovalSteps";
 export { expireOverdueRequests } from "./expireOverdueRequests";
+export { createTemplate } from "./createTemplate";
+export { updateTemplate } from "./updateTemplate";
+export { deleteTemplate } from "./deleteTemplate";
+export { updateUserRole } from "./updateUserRole";

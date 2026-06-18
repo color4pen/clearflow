@@ -1,5 +1,6 @@
 import { eq, and, isNull, lte, gte, or, sql } from "drizzle-orm";
 import { db } from "../db";
+import type { Transaction } from "../db";
 import { approvalTemplates } from "../schema";
 import type { ApprovalTemplate, ApprovalTemplateStep } from "@/domain/models/approvalTemplate";
 
@@ -52,6 +53,77 @@ export async function findById(
  * - amount is specified: returns templates where
  *   (minAmount IS NULL OR minAmount <= amount) AND (maxAmount IS NULL OR maxAmount >= amount)
  */
+export async function create(
+  data: {
+    name: string;
+    organizationId: string;
+    steps: ApprovalTemplateStep[];
+    minAmount?: number | null;
+    maxAmount?: number | null;
+  },
+  tx?: Transaction
+): Promise<ApprovalTemplate> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
+    .insert(approvalTemplates)
+    .values({
+      name: data.name,
+      organizationId: data.organizationId,
+      steps: data.steps,
+      minAmount: data.minAmount ?? null,
+      maxAmount: data.maxAmount ?? null,
+    })
+    .returning();
+  return mapRow(result[0]);
+}
+
+export async function updateById(
+  id: string,
+  organizationId: string,
+  data: {
+    name?: string;
+    steps?: ApprovalTemplateStep[];
+    minAmount?: number | null;
+    maxAmount?: number | null;
+  },
+  tx?: Transaction
+): Promise<ApprovalTemplate | null> {
+  const queryRunner = tx ?? db;
+  const updateData: Record<string, unknown> = {};
+  if (data.name !== undefined) updateData.name = data.name;
+  if (data.steps !== undefined) updateData.steps = data.steps;
+  if (data.minAmount !== undefined) updateData.minAmount = data.minAmount;
+  if (data.maxAmount !== undefined) updateData.maxAmount = data.maxAmount;
+
+  const result = await queryRunner
+    .update(approvalTemplates)
+    .set(updateData)
+    .where(
+      and(
+        eq(approvalTemplates.id, id),
+        eq(approvalTemplates.organizationId, organizationId)
+      )
+    )
+    .returning();
+  return result[0] ? mapRow(result[0]) : null;
+}
+
+export async function deleteById(
+  id: string,
+  organizationId: string,
+  tx?: Transaction
+): Promise<void> {
+  const queryRunner = tx ?? db;
+  await queryRunner
+    .delete(approvalTemplates)
+    .where(
+      and(
+        eq(approvalTemplates.id, id),
+        eq(approvalTemplates.organizationId, organizationId)
+      )
+    );
+}
+
 export async function findByOrganizationForAmount(
   organizationId: string,
   amount: number | null
