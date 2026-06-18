@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "5c9d8cac-8564-493f-9bc8-56b267875b47",
   "createdAt": "2026-06-18T09:02:41.805Z",
-  "updatedAt": "2026-06-18T10:16:20.950Z",
+  "updatedAt": "2026-06-18T10:18:52.483Z",
   "request": {
     "title": "UIを業務システムスタイルにリデザイン",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "regression-gate",
+  "step": "conformance",
   "status": "running",
   "branch": "change/ui-business-style-5c9d8cac",
   "error": null,
@@ -35,7 +35,7 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 58,
+    "historyCount": 63,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -45,7 +45,8 @@
       "verification": 1,
       "code-review": 3,
       "code-fixer": 2,
-      "domain-invariants": 1
+      "domain-invariants": 1,
+      "regression-gate": 1
     }
   }
 }
