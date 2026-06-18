@@ -13,6 +13,7 @@ import {
   bulkApprove,
 } from "@/application/usecases";
 import { idempotencyKeyRepository } from "@/infrastructure/repositories";
+import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 
 const createRequestSchema = z.object({
   title: z.string().min(1, "タイトルは必須です"),
@@ -50,6 +51,15 @@ export async function createRequestAction(
   const session = await auth();
   if (!session?.user?.id) {
     return { message: "認証が必要です" };
+  }
+
+  const rateCheck = await checkRateLimit({
+    key: `createRequest:${session.user.id}`,
+    limit: RATE_LIMITS.createRequest.limit,
+    windowMs: RATE_LIMITS.createRequest.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
   }
 
   const rawAmount = formData.get("amount");
@@ -102,6 +112,15 @@ export async function submitRequestAction(
     }
   }
 
+  const rateCheck = await checkRateLimit({
+    key: `approveReject:${session.user.id}`,
+    limit: RATE_LIMITS.approveReject.limit,
+    windowMs: RATE_LIMITS.approveReject.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { success: false, message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
+  }
+
   const result = await submitRequest({
     requestId,
     organizationId: session.user.organizationId,
@@ -151,6 +170,15 @@ export async function approveRequestAction(
     if (cached) {
       return cached.result as ActionResult;
     }
+  }
+
+  const rateCheck = await checkRateLimit({
+    key: `approveReject:${session.user.id}`,
+    limit: RATE_LIMITS.approveReject.limit,
+    windowMs: RATE_LIMITS.approveReject.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { success: false, message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
   }
 
   const result = await approveRequest({
@@ -250,6 +278,15 @@ export async function rejectRequestAction(
     }
   }
 
+  const rateCheck = await checkRateLimit({
+    key: `approveReject:${session.user.id}`,
+    limit: RATE_LIMITS.approveReject.limit,
+    windowMs: RATE_LIMITS.approveReject.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { success: false, message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
+  }
+
   const rawTargetStatus = formData.get("targetStatus");
   const targetStatus =
     rawTargetStatus === "revision" ? "revision" : "rejected";
@@ -303,6 +340,15 @@ export async function resubmitRequestAction(
     if (cached) {
       return cached.result as ActionResult;
     }
+  }
+
+  const rateCheck = await checkRateLimit({
+    key: `approveReject:${session.user.id}`,
+    limit: RATE_LIMITS.approveReject.limit,
+    windowMs: RATE_LIMITS.approveReject.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { success: false, message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
   }
 
   const result = await resubmitRequest({

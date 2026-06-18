@@ -126,6 +126,15 @@ export const idempotencyKeys = pgTable("idempotency_keys", {
   unique("idempotency_keys_key_org_unique").on(table.key, table.organizationId),
 ]);
 
+// Rate limit records table
+export const rateLimitRecords = pgTable("rate_limit_records", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  key: text("key").notNull().unique(),
+  count: integer("count").notNull(),
+  windowStart: timestamp("window_start").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Approval templates table
 export const approvalTemplates = pgTable("approval_templates", {
   id: uuid("id").primaryKey().defaultRandom(),

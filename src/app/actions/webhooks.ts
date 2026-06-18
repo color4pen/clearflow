@@ -10,6 +10,7 @@ import {
 } from "@/infrastructure/repositories";
 import { WEBHOOK_EVENT_TYPES } from "@/domain/models/webhookEvent";
 import { deliverSingleAttempt } from "@/infrastructure/webhookDelivery";
+import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 
 const PRIVATE_IP_PATTERNS = [
   /^localhost$/i,
@@ -74,6 +75,15 @@ export async function createWebhookEndpointAction(formData: FormData) {
   if (!session?.user?.id) return { success: false, message: "認証が必要です" };
   if (session.user.role !== "admin") return { success: false, message: "権限がありません" };
 
+  const rateCheck = await checkRateLimit({
+    key: `webhookManage:${session.user.id}`,
+    limit: RATE_LIMITS.webhookManage.limit,
+    windowMs: RATE_LIMITS.webhookManage.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { success: false, message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
+  }
+
   const url = formData.get("url") as string;
   const eventsRaw = formData.getAll("events") as string[];
 
@@ -114,6 +124,15 @@ export async function deleteWebhookEndpointAction(endpointId: string) {
   if (!session?.user?.id) return { success: false, message: "認証が必要です" };
   if (session.user.role !== "admin") return { success: false, message: "権限がありません" };
 
+  const rateCheck = await checkRateLimit({
+    key: `webhookManage:${session.user.id}`,
+    limit: RATE_LIMITS.webhookManage.limit,
+    windowMs: RATE_LIMITS.webhookManage.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { success: false, message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
+  }
+
   await webhookEndpointRepository.deleteById(
     endpointId,
     session.user.organizationId
@@ -131,6 +150,15 @@ export async function toggleWebhookEndpointAction(
   const session = await auth();
   if (!session?.user?.id) return { success: false, message: "認証が必要です" };
   if (session.user.role !== "admin") return { success: false, message: "権限がありません" };
+
+  const rateCheck = await checkRateLimit({
+    key: `webhookManage:${session.user.id}`,
+    limit: RATE_LIMITS.webhookManage.limit,
+    windowMs: RATE_LIMITS.webhookManage.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { success: false, message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
+  }
 
   await webhookEndpointRepository.updateIsActive(
     endpointId,
@@ -161,6 +189,15 @@ export async function retryWebhookDeliveryAction(deliveryId: string) {
   const session = await auth();
   if (!session?.user?.id) return { success: false, message: "認証が必要です" };
   if (session.user.role !== "admin") return { success: false, message: "権限がありません" };
+
+  const rateCheck = await checkRateLimit({
+    key: `webhookManage:${session.user.id}`,
+    limit: RATE_LIMITS.webhookManage.limit,
+    windowMs: RATE_LIMITS.webhookManage.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { success: false, message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
+  }
 
   const delivery = await webhookDeliveryRepository.findById(
     deliveryId,
