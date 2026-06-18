@@ -8,6 +8,7 @@ import {
   getCurrentStep,
   isAllApproved,
   canApprove,
+  isStepExpired,
 } from "@/domain/services/approvalStepService";
 import { db } from "@/infrastructure/db";
 import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
@@ -109,6 +110,11 @@ export async function approveRequest(data: {
     };
   }
 
+  // Pre-check: deadline fast-fail (non-security-critical)
+  if (isStepExpired(currentStep)) {
+    return { ok: false, reason: "この承認ステップの期限が切れています" };
+  }
+
   try {
     const txResult = await db.transaction(async (tx): Promise<{ request: Request; approvedStep: ApprovalStep | null; allApproved: boolean }> => {
       // Re-fetch steps inside the transaction to get a consistent snapshot
@@ -131,6 +137,11 @@ export async function approveRequest(data: {
         throw new Error(
           `Unauthorized: role "${data.actorRole}" cannot approve this step (requires "${freshCurrentStep.approverRole}").`
         );
+      }
+
+      // TOCTOU防止: TX内で再チェック
+      if (isStepExpired(freshCurrentStep)) {
+        throw new Error("この承認ステップの期限が切れています");
       }
 
       const updatedStep = await approvalStepRepository.updateStatus(

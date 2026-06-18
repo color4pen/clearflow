@@ -86,4 +86,39 @@ describe("validateTransition — state transition rules", () => {
       expect(result.reason).toBeTruthy();
     }
   });
+
+  /**
+   * TC-010: pending から expired への遷移が許可される
+   */
+  it("TC-010: allows pending → expired", () => {
+    const result = validateTransition("pending", "expired");
+    expect(result.ok).toBe(true);
+  });
+
+  /**
+   * TC-011: expired から pending への遷移が拒否される（終端状態）
+   */
+  it("TC-011: rejects expired → pending (terminal state)", () => {
+    const result = validateTransition("expired", "pending");
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBeTruthy();
+    }
+  });
+
+  /**
+   * TC-012: expired から approved への遷移が拒否される
+   */
+  it("TC-012: rejects expired → approved (terminal state)", () => {
+    const result = validateTransition("expired", "approved");
+    expect(result.ok).toBe(false);
+  });
+
+  /**
+   * TC-013: expired から rejected への遷移が拒否される
+   */
+  it("TC-013: rejects expired → rejected (terminal state)", () => {
+    const result = validateTransition("expired", "rejected");
+    expect(result.ok).toBe(false);
+  });
 });

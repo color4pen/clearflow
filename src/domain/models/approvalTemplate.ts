@@ -1,6 +1,7 @@
 export type ApprovalTemplateStep = {
   stepOrder: number;
   approverRole: string;
+  deadlineHours?: number;
 };
 
 export type ApprovalTemplate = {

@@ -10,6 +10,7 @@ function statusLabel(status: RequestStatus): string {
     approved: "承認済み",
     rejected: "却下",
     revision: "差し戻し",
+    expired: "期限切れ",
   };
   return labels[status];
 }
@@ -21,6 +22,7 @@ function statusClass(status: RequestStatus): string {
     approved: "bg-green-100 text-green-700",
     rejected: "bg-red-100 text-red-700",
     revision: "bg-orange-100 text-orange-700",
+    expired: "bg-gray-100 text-gray-500",
   };
   return classes[status];
 }

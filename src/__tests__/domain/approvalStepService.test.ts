@@ -4,6 +4,7 @@ import {
   isAllApproved,
   getStepsToReset,
   canApprove,
+  isStepExpired,
 } from "@/domain/services/approvalStepService";
 import type { ApprovalStep } from "@/domain/models/approvalStep";
 
@@ -20,9 +21,12 @@ function makeStep(
     approverRole: "admin",
     status: overrides.status,
     approvedBy: null,
+    approvedByName: null,
     approvedAt: null,
     comment: null,
     organizationId: "org-1",
+    version: 1,
+    deadline: null,
     ...overrides,
   };
 }
@@ -174,5 +178,49 @@ describe("approvalStepService — canApprove", () => {
   it("returns false when finance tries to approve a manager step", () => {
     const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "manager" });
     expect(canApprove(step, "finance")).toBe(false);
+  });
+});
+
+describe("approvalStepService — isStepExpired", () => {
+  const now = new Date("2024-01-15T12:00:00.000Z");
+
+  it("returns false when deadline is null", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", deadline: null });
+    expect(isStepExpired(step, now)).toBe(false);
+  });
+
+  it("returns false when deadline is in the future", () => {
+    const futureDeadline = new Date("2024-01-16T12:00:00.000Z");
+    const step = makeStep({ stepOrder: 1, status: "pending", deadline: futureDeadline });
+    expect(isStepExpired(step, now)).toBe(false);
+  });
+
+  it("returns true when deadline is in the past", () => {
+    const pastDeadline = new Date("2024-01-14T12:00:00.000Z");
+    const step = makeStep({ stepOrder: 1, status: "pending", deadline: pastDeadline });
+    expect(isStepExpired(step, now)).toBe(true);
+  });
+
+  it("returns false when deadline equals now (strict less-than boundary)", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", deadline: now });
+    // deadline < now is false when equal, so should return false at exact boundary
+    expect(isStepExpired(step, now)).toBe(false);
+  });
+
+  it("returns true when deadline is 1ms before now", () => {
+    const justPast = new Date(now.getTime() - 1);
+    const step = makeStep({ stepOrder: 1, status: "pending", deadline: justPast });
+    expect(isStepExpired(step, now)).toBe(true);
+  });
+
+  it("uses current time as default when now is not provided", () => {
+    const pastDeadline = new Date(Date.now() - 1000);
+    const step = makeStep({ stepOrder: 1, status: "pending", deadline: pastDeadline });
+    expect(isStepExpired(step)).toBe(true);
+  });
+
+  it("returns false for null deadline without explicit now", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", deadline: null });
+    expect(isStepExpired(step)).toBe(false);
   });
 });

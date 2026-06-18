@@ -4,7 +4,7 @@ import {
   approvalStepRepository,
 } from "@/infrastructure/repositories";
 import { validateTransition } from "@/domain/services/requestTransition";
-import { getCurrentStep } from "@/domain/services/approvalStepService";
+import { getCurrentStep, isStepExpired } from "@/domain/services/approvalStepService";
 import { db } from "@/infrastructure/db";
 import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
 import type { Request } from "@/domain/models/request";
@@ -50,6 +50,10 @@ export async function rejectRequest(data: {
 
         const currentStep = getCurrentStep(steps);
         if (currentStep) {
+          // TOCTOU防止: TX内で期限チェック
+          if (isStepExpired(currentStep)) {
+            throw new Error("この承認ステップの期限が切れています");
+          }
           const updatedStep = await approvalStepRepository.updateStatus(
             currentStep.id,
             data.organizationId,
@@ -135,8 +139,29 @@ export async function rejectRequest(data: {
   }
 
   // Default: final rejection (rejected terminal state)
+  // Pre-check: deadline fast-fail for rejected path
+  const preSteps = await approvalStepRepository.findByRequestId(
+    data.requestId,
+    data.organizationId
+  );
+  const preCurrentStep = getCurrentStep(preSteps);
+  if (preCurrentStep && isStepExpired(preCurrentStep)) {
+    return { ok: false, reason: "この承認ステップの期限が切れています" };
+  }
+
   try {
     const updated = await db.transaction(async (tx) => {
+      // TOCTOU防止: TX内で再チェック
+      const freshSteps = await approvalStepRepository.findByRequestId(
+        data.requestId,
+        data.organizationId,
+        tx
+      );
+      const freshCurrentStep = getCurrentStep(freshSteps);
+      if (freshCurrentStep && isStepExpired(freshCurrentStep)) {
+        throw new Error("この承認ステップの期限が切れています");
+      }
+
       const result = await requestRepository.updateStatus(
         data.requestId,
         data.organizationId,

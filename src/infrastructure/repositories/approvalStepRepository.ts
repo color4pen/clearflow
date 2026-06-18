@@ -1,7 +1,7 @@
 import { eq, and, gte, sql } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
-import { approvalSteps, users } from "../schema";
+import { approvalSteps, requests, users } from "../schema";
 import type { ApprovalStep, ApprovalStepStatus } from "@/domain/models/approvalStep";
 
 function mapRow(row: typeof approvalSteps.$inferSelect): ApprovalStep {
@@ -17,6 +17,7 @@ function mapRow(row: typeof approvalSteps.$inferSelect): ApprovalStep {
     comment: row.comment ?? null,
     organizationId: row.organizationId,
     version: row.version,
+    deadline: row.deadline ?? null,
   };
 }
 
@@ -26,6 +27,7 @@ export async function createMany(
     stepOrder: number;
     approverRole: string;
     organizationId: string;
+    deadline?: Date | null;
   }>,
   tx?: Transaction
 ): Promise<ApprovalStep[]> {
@@ -40,6 +42,7 @@ export async function createMany(
         approverRole: s.approverRole,
         organizationId: s.organizationId,
         status: "pending" as const,
+        deadline: s.deadline ?? null,
       }))
     )
     .returning();
@@ -128,4 +131,25 @@ export async function resetSteps(
         gte(approvalSteps.stepOrder, fromStepOrder)
       )
     );
+}
+
+export async function findOverdueRequestIds(
+  tx?: Transaction
+): Promise<Array<{ requestId: string; organizationId: string }>> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
+    .selectDistinct({
+      requestId: approvalSteps.requestId,
+      organizationId: approvalSteps.organizationId,
+    })
+    .from(approvalSteps)
+    .innerJoin(requests, eq(approvalSteps.requestId, requests.id))
+    .where(
+      and(
+        eq(approvalSteps.status, "pending"),
+        sql`${approvalSteps.deadline} < NOW()`,
+        eq(requests.status, "pending")
+      )
+    );
+  return result;
 }

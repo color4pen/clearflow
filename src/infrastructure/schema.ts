@@ -25,6 +25,7 @@ export const requestStatusEnum = pgEnum("request_status", [
   "approved",
   "rejected",
   "revision",
+  "expired",
 ]);
 export const approvalStepStatusEnum = pgEnum("approval_step_status", [
   "pending",
@@ -104,6 +105,7 @@ export const approvalSteps = pgTable("approval_steps", {
     .notNull()
     .references(() => organizations.id),
   version: integer("version").notNull().default(1),
+  deadline: timestamp("deadline"),
 });
 
 // Idempotency keys table

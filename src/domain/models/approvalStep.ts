@@ -12,4 +12,5 @@ export type ApprovalStep = {
   comment: string | null;
   organizationId: string;
   version: number;
+  deadline: Date | null;
 };
