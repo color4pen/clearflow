@@ -6,7 +6,7 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 8.6s | 0 |
+| 1 | build | passed | 8.4s | 0 |
 | 2 | typecheck | skipped | — | — |
 | 3 | test | skipped | — | — |
 | 4 | lint | passed | 2.1s | 0 |
@@ -19,15 +19,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 4.9s
+✓ Compiled successfully in 4.7s
   Running TypeScript ...
-  Finished TypeScript in 2.4s ...
+  Finished TypeScript in 2.3s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/14) ...
   Generating static pages using 7 workers (3/14) 
   Generating static pages using 7 workers (6/14) 
   Generating static pages using 7 workers (10/14) 
-✓ Generating static pages using 7 workers (14/14) in 142ms
+✓ Generating static pages using 7 workers (14/14) in 139ms
   Finalizing page optimization ...
 
 Route (app)
@@ -77,6 +77,14 @@ _(skipped — script not found in package.json)_
 ## Phase: lint
 
 ```
+
+src/app/(dashboard)/settings/templates/DeleteButton.tsx
+  9:24  warning  '_prev' is defined but never used      @typescript-eslint/no-unused-vars
+  9:38  warning  '_formData' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+
+
 $ eslint
 
 ```
