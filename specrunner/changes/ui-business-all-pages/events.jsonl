@@ -41,3 +41,15 @@
 {"type":"transition","ts":"2026-06-18T12:39:29.803Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-18T12:39:29.804Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-18T12:39:29.808Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-18T12:39:59.100Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"7399279d-ada9-4682-ab95-4e8ac564ad1d","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-18T12:39:29.819Z","endedAt":"2026-06-18T12:39:57.768Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-18T12:39:57.768Z","outputs":[{"path":"specrunner/changes/ui-business-all-pages","hash":null}],"inputs":[{"path":"specrunner/changes/ui-business-all-pages/review-feedback-001.md","hash":"sha256:12e7afc462eb53117890ac8dcaf4e23a47e75a5c84963fe109b15762f1a5c2d6"}]}
+{"type":"transition","ts":"2026-06-18T12:39:59.103Z","step":"step-transition","status":"ok","message":"code-fixer → domain-invariants"}
+{"type":"transition","ts":"2026-06-18T12:39:59.104Z","step":"domain-invariants","status":"started","message":"domain-invariants iteration 1 started"}
+{"type":"transition","ts":"2026-06-18T12:39:59.105Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
+{"type":"transition","ts":"2026-06-18T12:39:59.125Z","step":"domain-invariants-skipped","status":"warning","message":"domain-invariants skipped: no changed files matched paths [src/application/**, src/infrastructure/repositories/**, src/app/actions/**, src/domain/**]"}
+{"type":"step-attempt","step":"domain-invariants","sessionId":null,"outcome":{"verdict":"skipped","findingsPath":null,"error":null,"skipReason":"no changed files matched paths [src/application/**, src/infrastructure/repositories/**, src/app/actions/**, src/domain/**]"},"startedAt":"2026-06-18T12:39:59.125Z","endedAt":"2026-06-18T12:39:59.125Z"}
+{"type":"transition","ts":"2026-06-18T12:39:59.127Z","step":"domain-invariants","status":"warning","message":"domain-invariants iteration 1 completed with verdict: skipped"}
+{"type":"transition","ts":"2026-06-18T12:39:59.127Z","step":"step-transition","status":"ok","message":"domain-invariants → regression-gate"}
+{"type":"transition","ts":"2026-06-18T12:39:59.127Z","step":"regression-gate","status":"started","message":"regression-gate iteration 1 started"}
+{"type":"transition","ts":"2026-06-18T12:39:59.128Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
