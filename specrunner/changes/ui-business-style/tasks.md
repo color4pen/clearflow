@@ -2,8 +2,8 @@
 
 ## T-01: 共通スタイル定数ファイル `styles.ts` の作成
 
-- [ ] `src/app/(dashboard)/styles.ts` を新規作成する
-- [ ] 以下の定数をエクスポートする:
+- [x] `src/app/(dashboard)/styles.ts` を新規作成する
+- [x] 以下の定数をエクスポートする:
   - `BTN_PRIMARY` = `"px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"`
   - `BTN_PRIMARY_DISABLED` = `"${BTN_PRIMARY} disabled:opacity-50 disabled:cursor-not-allowed"`（`disabled:opacity-50` を含むバリエーション）
   - `BTN_SECONDARY` = `"px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"`
@@ -19,23 +19,23 @@
 
 ## T-02: statusUtils.ts の作成と重複定義の解消
 
-- [ ] `src/app/(dashboard)/requests/statusUtils.ts` を新規作成する
-- [ ] `statusLabel(status: RequestStatus): string` を定義（既存のラベルマッピングを移植）
-- [ ] `statusClass(status: RequestStatus): string` を定義。バッジスタイルではなく色テキストのみに変更:
+- [x] `src/app/(dashboard)/requests/statusUtils.ts` を新規作成する
+- [x] `statusLabel(status: RequestStatus): string` を定義（既存のラベルマッピングを移植）
+- [x] `statusClass(status: RequestStatus): string` を定義。バッジスタイルではなく色テキストのみに変更:
   - `draft` → `"text-gray-500 font-medium"`
   - `pending` → `"text-amber-700 font-bold"`
   - `approved` → `"text-emerald-700 font-medium"`
   - `rejected` → `"text-red-700 font-medium"`
   - `revision` → `"text-orange-600 font-bold"`
   - `expired` → `"text-gray-400 font-medium"`
-- [ ] `stepStatusLabel(status: ApprovalStepStatus): string` を定義（`requests/[id]/page.tsx` から移植）
-- [ ] `stepStatusClass(status: ApprovalStepStatus): string` を定義（色テキストのみに変更）
-- [ ] `statusRowClass(status: RequestStatus): string` を定義:
+- [x] `stepStatusLabel(status: ApprovalStepStatus): string` を定義（`requests/[id]/page.tsx` から移植）
+- [x] `stepStatusClass(status: ApprovalStepStatus): string` を定義（色テキストのみに変更）
+- [x] `statusRowClass(status: RequestStatus): string` を定義:
   - `pending` → `"bg-amber-50"`
   - `revision` → `"bg-orange-50"`
   - その他 → `""`
-- [ ] `src/app/(dashboard)/requests/page.tsx` から `statusLabel` と `statusClass` の関数定義を削除し、`statusUtils.ts` からインポートに変更
-- [ ] `src/app/(dashboard)/requests/[id]/page.tsx` から `statusLabel`、`statusClass`、`stepStatusLabel`、`stepStatusClass` の関数定義を削除し、`statusUtils.ts` からインポートに変更
+- [x] `src/app/(dashboard)/requests/page.tsx` から `statusLabel` と `statusClass` の関数定義を削除し、`statusUtils.ts` からインポートに変更
+- [x] `src/app/(dashboard)/requests/[id]/page.tsx` から `statusLabel`、`statusClass`、`stepStatusLabel`、`stepStatusClass` の関数定義を削除し、`statusUtils.ts` からインポートに変更
 
 **Acceptance Criteria**:
 - `statusUtils.ts` が存在し、5つの関数がエクスポートされている
@@ -45,19 +45,19 @@
 
 ## T-03: ダッシュボードヘッダーの圧縮とリデザイン
 
-- [ ] `src/app/(dashboard)/layout.tsx` のヘッダー要素を以下に変更:
+- [x] `src/app/(dashboard)/layout.tsx` のヘッダー要素を以下に変更:
   - 背景: `bg-white border-b border-gray-200 shadow-sm` → `bg-slate-900`
   - パディング: `py-4` → `py-1`
   - コンテナ: `max-w-6xl` を維持
-- [ ] ロゴ「Clearflow」を `text-white text-[13px] font-bold` に変更。サブテキスト「承認ワークフロー」を削除
-- [ ] ナビゲーションリンクをヘッダー内に追加:
+- [x] ロゴ「Clearflow」を `text-white text-[13px] font-bold` に変更。サブテキスト「承認ワークフロー」を削除
+- [x] ナビゲーションリンクをヘッダー内に追加:
   - 「申請一覧」(`/requests`) — 全ロール表示
   - 「設定」(`/settings/templates`) — admin のみ表示（既存の settings/layout.tsx が非 admin を /requests にリダイレクトするため、全ロール表示にすると機能しないリンクになる）
   - 「監査ログ」(`/settings/audit-logs`) — admin のみ表示
   - スタイル: `text-slate-300 hover:text-white text-xs`
-- [ ] ユーザー情報を右端に配置: `text-slate-300 text-xs` でユーザー名とロールを1行に
-- [ ] ログアウトボタンのスタイルを `text-slate-400 hover:text-white text-xs border-slate-600` に変更
-- [ ] main 要素の `py-8` を `py-4` に変更（ヘッダー圧縮に合わせてコンテンツ開始位置を調整）
+- [x] ユーザー情報を右端に配置: `text-slate-300 text-xs` でユーザー名とロールを1行に
+- [x] ログアウトボタンのスタイルを `text-slate-400 hover:text-white text-xs border-slate-600` に変更
+- [x] main 要素の `py-8` を `py-4` に変更（ヘッダー圧縮に合わせてコンテンツ開始位置を調整）
 
 **Acceptance Criteria**:
 - ヘッダーが `bg-slate-900` 背景で `py-1` パディング（36px以下）
@@ -68,7 +68,7 @@
 
 ## T-04: 申請一覧のデータ取得拡張（承認ステップ情報の付加）
 
-- [ ] `src/domain/models/request.ts` に `RequestWithSteps` 型を追加:
+- [x] `src/domain/models/request.ts` に `RequestWithSteps` 型を追加:
   ```ts
   export type ApprovalStepSummary = {
     approverRole: string;
@@ -79,8 +79,8 @@
     approvalSteps: ApprovalStepSummary[];
   };
   ```
-- [ ] `src/infrastructure/repositories/requestRepository.ts` に `findAllWithStepsByOrganization(organizationId: string): Promise<RequestWithSteps[]>` を追加。単一 SQL クエリで `requests LEFT JOIN approval_steps ON approval_steps.request_id = requests.id AND approval_steps.organization_id = requests.organization_id` を実行し、結果セットをアプリケーション層で requestId ごとにグループ化して `RequestWithSteps[]` に変換する（N+1 クエリを避ける）
-- [ ] `src/application/usecases/listRequests.ts` を更新:
+- [x] `src/infrastructure/repositories/requestRepository.ts` に `findAllWithStepsByOrganization(organizationId: string): Promise<RequestWithSteps[]>` を追加。単一 SQL クエリで `requests LEFT JOIN approval_steps ON approval_steps.request_id = requests.id AND approval_steps.organization_id = requests.organization_id` を実行し、結果セットをアプリケーション層で requestId ごとにグループ化して `RequestWithSteps[]` に変換する（N+1 クエリを避ける）
+- [x] `src/application/usecases/listRequests.ts` を更新:
   - 戻り値型を `RequestWithSteps[]` に変更
   - `requestRepository.findAllWithStepsByOrganization` を呼び出すように変更
 
@@ -92,11 +92,11 @@
 
 ## T-05: 申請一覧テーブルの高密度化とステータス表示変更
 
-- [ ] `src/app/(dashboard)/requests/page.tsx` を更新:
+- [x] `src/app/(dashboard)/requests/page.tsx` を更新:
   - `listRequests` の戻り値が `RequestWithSteps[]` であることを反映
   - `BulkApprovalPanel` に渡す props を拡張（`approvalSteps`, `currentDeadline` を追加）
   - ステータス表示に `statusClass` の新しい色テキストスタイルを使用（`rounded-full` バッジ廃止）
-- [ ] `src/app/(dashboard)/requests/BulkApprovalPanel.tsx` を更新:
+- [x] `src/app/(dashboard)/requests/BulkApprovalPanel.tsx` を更新:
   - `RequestItem` 型に `approvalSteps: Array<{ approverRole: string; status: string }>` と `currentDeadline: Date | null` を追加
   - テーブルヘッダーのスタイルを `bg-slate-50 text-xs text-slate-500 font-medium uppercase` に変更
   - セルのパディングを `px-6 py-4` → `px-3 py-0.5` に圧縮。ヘッダーセルも `px-6 py-3` → `px-3 py-1` に圧縮
@@ -105,7 +105,7 @@
   - 「進捗」列を追加: `● ○ manager → finance` 形式で表示（approved=`●`, pending/rejected=`○`, ロール名をアロー `→` で連結）
   - 「期限」列を追加: 直近の pending ステップの deadline を表示。残り3日以内は `text-red-600 font-bold`、それ以外は `text-gray-500 text-xs`
   - 一括承認ボタンのスタイルを `styles.ts` の `BTN_SUCCESS` 定数に置換
-- [ ] テーブル下にフッター統計を追加:
+- [x] テーブル下にフッター統計を追加:
   - `text-xs text-slate-400` で `{total}件中 1-{total}件表示 | 承認待: {pending}件 承認済: {approved}件 却下: {rejected}件` 形式
   - ページネーション未実装のため、現時点では全件表示を前提とする
 
@@ -121,7 +121,7 @@
 
 ## T-06: 申請詳細画面のステータス表示変更
 
-- [ ] `src/app/(dashboard)/requests/[id]/page.tsx` を更新:
+- [x] `src/app/(dashboard)/requests/[id]/page.tsx` を更新:
   - ステータス表示から `rounded-full px-3 py-1` バッジスタイルを削除し、`statusClass` の色テキストのみに変更
   - `ApprovalStepsSection` 内の `stepStatusClass` もバッジスタイル（`rounded-full`）を廃止し色テキストのみに変更
 
@@ -132,7 +132,7 @@
 
 ## T-07: 設定タブの Client Component 化と active 状態スタイル
 
-- [ ] `src/app/(dashboard)/settings/SettingsNav.tsx` を新規作成（`"use client"`）:
+- [x] `src/app/(dashboard)/settings/SettingsNav.tsx` を新規作成（`"use client"`）:
   - `usePathname()` を使用して現在のパスを取得
   - NAV_ITEMS を定義（既存 + delegations 追加）:
     ```ts
@@ -147,7 +147,7 @@
   - active 判定: `pathname.startsWith(item.href)`
   - active スタイル: `border-b-2 border-blue-600 text-blue-600 font-medium`
   - 非active スタイル: `text-gray-500 hover:text-gray-700`
-- [ ] `src/app/(dashboard)/settings/layout.tsx` を更新:
+- [x] `src/app/(dashboard)/settings/layout.tsx` を更新:
   - NAV_ITEMS の定義と `<nav>` 内のリンク描画を削除
   - `SettingsNav` コンポーネントをインポートして使用
   - レイアウト本体は Server Component のまま維持
@@ -164,38 +164,38 @@
 
 対象ファイル（ダッシュボード配下、スコープ内のページ）:
 
-- [ ] `src/app/(dashboard)/requests/[id]/ActionButtons.tsx`:
+- [x] `src/app/(dashboard)/requests/[id]/ActionButtons.tsx`:
   - `"px-4 py-2 bg-blue-600 ..."` → `BTN_PRIMARY` + `disabled:opacity-50`
   - `"px-4 py-2 bg-green-600 ..."` → `BTN_SUCCESS` + `disabled:opacity-50`
   - `"px-4 py-2 bg-red-600 ..."` → `BTN_DANGER` + `disabled:opacity-50`
   - `"px-4 py-2 bg-orange-500 ..."` → `BTN_WARNING` + `disabled:opacity-50`
   - `"w-full px-3 py-2 border border-gray-300 ..."` textarea → `INPUT_BASE` ベース
   - `styles.ts` からインポートを追加
-- [ ] `src/app/(dashboard)/requests/BulkApprovalPanel.tsx`:
+- [x] `src/app/(dashboard)/requests/BulkApprovalPanel.tsx`:
   - 一括承認ボタンのクラスを `BTN_SUCCESS` + `disabled:opacity-50 disabled:cursor-not-allowed` に置換
   - `styles.ts` からインポートを追加
-- [ ] `src/app/(dashboard)/settings/templates/page.tsx`:
+- [x] `src/app/(dashboard)/settings/templates/page.tsx`:
   - 「テンプレートを追加」リンクボタンのクラスを `BTN_PRIMARY` に置換
   - `styles.ts` からインポートを追加
-- [ ] `src/app/(dashboard)/settings/templates/TemplateForm.tsx`:
+- [x] `src/app/(dashboard)/settings/templates/TemplateForm.tsx`:
   - 送信ボタンのクラスを `BTN_PRIMARY` + `disabled:opacity-50` に置換
   - キャンセルリンクのクラスを `BTN_SECONDARY` に置換
   - input 要素のクラスを `INPUT_BASE` に置換（テンプレート名、金額フィールド）
   - `styles.ts` からインポートを追加
-- [ ] `src/app/(dashboard)/settings/webhooks/WebhookCreateForm.tsx`:
+- [x] `src/app/(dashboard)/settings/webhooks/WebhookCreateForm.tsx`:
   - 送信ボタンのクラスを `BTN_PRIMARY` + `disabled:opacity-50` に置換
   - URL input のクラスを `INPUT_BASE` に置換
   - `styles.ts` からインポートを追加
-- [ ] `src/app/(dashboard)/settings/audit-logs/page.tsx`:
+- [x] `src/app/(dashboard)/settings/audit-logs/page.tsx`:
   - 「CSV ダウンロード」リンクのクラスを `BTN_PRIMARY` に置換
   - フィルタボタンのクラスを `BTN_PRIMARY` ベースまたは適切な定数に置換
   - input/select のクラスを `INPUT_BASE`/`SELECT_BASE` に置換
   - `styles.ts` からインポートを追加
-- [ ] `src/app/(dashboard)/settings/delegations/page.tsx`:
+- [x] `src/app/(dashboard)/settings/delegations/page.tsx`:
   - 「委譲を追加」ボタンのクラスを `BTN_PRIMARY` に置換
   - select/input のクラスを `SELECT_BASE`/`INPUT_BASE` に置換
   - `styles.ts` からインポートを追加
-- [ ] `src/app/(dashboard)/settings/users/UserRoleSelect.tsx`:
+- [x] `src/app/(dashboard)/settings/users/UserRoleSelect.tsx`:
   - select のクラスを `SELECT_BASE` に置換（`disabled:bg-gray-100 disabled:cursor-not-allowed` は追加で保持）
   - `styles.ts` からインポートを追加
 
@@ -208,12 +208,12 @@
 
 ## T-09: 最終検証
 
-- [ ] `bun run build` が成功する
-- [ ] `bun test` が全件 green
-- [ ] `bun run lint` がエラーなし（型チェック含む）
-- [ ] ステータス表示に `rounded-full` が使われていないことを grep で確認（ダッシュボード配下）
-- [ ] `statusLabel` と `statusClass` が `requests/page.tsx` と `requests/[id]/page.tsx` に関数定義として存在しないことを確認
-- [ ] 設定ナビゲーションに「代理承認」リンクが存在することを確認
+- [x] `bun run build` が成功する
+- [x] `bun test` が全件 green
+- [x] `bun run lint` がエラーなし（型チェック含む）
+- [x] ステータス表示に `rounded-full` が使われていないことを grep で確認（ダッシュボード配下）
+- [x] `statusLabel` と `statusClass` が `requests/page.tsx` と `requests/[id]/page.tsx` に関数定義として存在しないことを確認
+- [x] 設定ナビゲーションに「代理承認」リンクが存在することを確認
 
 **Acceptance Criteria**:
 - すべてのビルド・テスト・lint が green

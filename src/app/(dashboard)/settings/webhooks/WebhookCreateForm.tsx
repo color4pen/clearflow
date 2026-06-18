@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { createWebhookEndpointAction } from "@/app/actions/webhooks";
 import { WEBHOOK_EVENT_TYPES } from "@/domain/models/webhookEvent";
+import { BTN_PRIMARY, INPUT_BASE } from "../../styles";
 
 type ActionState =
   | null
@@ -73,7 +74,7 @@ export function WebhookCreateForm() {
             name="url"
             type="text"
             placeholder="https://example.com/webhook"
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`mt-1 block ${INPUT_BASE}`}
             required
           />
         </div>
@@ -98,7 +99,7 @@ export function WebhookCreateForm() {
         <button
           type="submit"
           disabled={pending}
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+          className={`${BTN_PRIMARY} disabled:opacity-50`}
         >
           {pending ? "作成中..." : "エンドポイントを追加"}
         </button>

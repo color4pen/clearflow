@@ -1,6 +1,6 @@
 import { requestRepository } from "@/infrastructure/repositories";
-import type { Request } from "@/domain/models/request";
+import type { RequestWithSteps } from "@/domain/models/request";
 
-export async function listRequests(organizationId: string): Promise<Request[]> {
-  return requestRepository.findAllByOrganization(organizationId);
+export async function listRequests(organizationId: string): Promise<RequestWithSteps[]> {
+  return requestRepository.findAllWithStepsByOrganization(organizationId);
 }

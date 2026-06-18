@@ -10,50 +10,8 @@ import {
 } from "@/app/actions/requests";
 import { ActionButtons } from "./ActionButtons";
 import type { ServerAction } from "./ActionButtons";
-import type { RequestStatus } from "@/domain/models/request";
-import type { ApprovalStep, ApprovalStepStatus } from "@/domain/models/approvalStep";
-
-function statusLabel(status: RequestStatus): string {
-  const labels: Record<RequestStatus, string> = {
-    draft: "下書き",
-    pending: "審査中",
-    approved: "承認済み",
-    rejected: "却下",
-    revision: "差し戻し",
-    expired: "期限切れ",
-  };
-  return labels[status];
-}
-
-function statusClass(status: RequestStatus): string {
-  const classes: Record<RequestStatus, string> = {
-    draft: "bg-gray-100 text-gray-700",
-    pending: "bg-yellow-100 text-yellow-700",
-    approved: "bg-green-100 text-green-700",
-    rejected: "bg-red-100 text-red-700",
-    revision: "bg-orange-100 text-orange-700",
-    expired: "bg-gray-100 text-gray-500",
-  };
-  return classes[status];
-}
-
-function stepStatusLabel(status: ApprovalStepStatus): string {
-  const labels: Record<ApprovalStepStatus, string> = {
-    pending: "審査中",
-    approved: "承認済み",
-    rejected: "差し戻し",
-  };
-  return labels[status];
-}
-
-function stepStatusClass(status: ApprovalStepStatus): string {
-  const classes: Record<ApprovalStepStatus, string> = {
-    pending: "bg-yellow-100 text-yellow-700",
-    approved: "bg-green-100 text-green-700",
-    rejected: "bg-orange-100 text-orange-700",
-  };
-  return classes[status];
-}
+import type { ApprovalStep } from "@/domain/models/approvalStep";
+import { statusLabel, statusClass, stepStatusLabel, stepStatusClass } from "../statusUtils";
 
 function formatRemainingTime(deadline: Date, now: Date): string {
   const diffMs = deadline.getTime() - now.getTime();
@@ -98,9 +56,7 @@ function ApprovalStepsSection({ steps }: { steps: ApprovalStep[] }) {
                 <span className="text-sm font-medium text-gray-800">
                   {step.approverRole}
                 </span>
-                <span
-                  className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${stepStatusClass(step.status)}`}
-                >
+                <span className={`text-xs ${stepStatusClass(step.status)}`}>
                   {stepStatusLabel(step.status)}
                 </span>
               </div>
@@ -167,9 +123,7 @@ export default async function RequestDetailPage({
       <div className="bg-white shadow rounded-lg p-6 max-w-2xl">
         <div className="flex items-start justify-between mb-6">
           <h2 className="text-2xl font-bold text-gray-900">{request.title}</h2>
-          <span
-            className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${statusClass(request.status)}`}
-          >
+          <span className={`text-sm ${statusClass(request.status)}`}>
             {statusLabel(request.status)}
           </span>
         </div>

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { ActionResult } from "@/app/actions/requests";
+import { BTN_PRIMARY, BTN_SUCCESS, BTN_DANGER, BTN_WARNING, INPUT_BASE } from "../../styles";
 
 export type ServerAction = (formData: FormData) => Promise<ActionResult>;
 
@@ -70,7 +71,7 @@ export function ActionButtons({
             <button
               type="submit"
               disabled={isPending}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className={`${BTN_PRIMARY} disabled:opacity-50`}
             >
               提出する（審査へ）
             </button>
@@ -90,7 +91,7 @@ export function ActionButtons({
               <button
                 type="submit"
                 disabled={isPending}
-                className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50"
+                className={`${BTN_SUCCESS} disabled:opacity-50`}
               >
                 承認する
               </button>
@@ -103,7 +104,7 @@ export function ActionButtons({
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+                  className={`${BTN_DANGER} disabled:opacity-50`}
                 >
                   却下する
                 </button>
@@ -128,14 +129,14 @@ export function ActionButtons({
                     id="revision-comment"
                     name="comment"
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    className={INPUT_BASE}
                     placeholder="差し戻し理由を入力してください"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:opacity-50"
+                  className={`${BTN_WARNING} disabled:opacity-50`}
                 >
                   差し戻す
                 </button>
@@ -156,7 +157,7 @@ export function ActionButtons({
             <button
               type="submit"
               disabled={isPending}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className={`${BTN_PRIMARY} disabled:opacity-50`}
             >
               再申請する
             </button>

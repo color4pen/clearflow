@@ -12,33 +12,43 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
+  const isAdmin = session.user.role === "admin";
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-xl font-bold text-gray-900">Clearflow</h1>
-            <span className="text-sm text-gray-500">
-              承認ワークフロー
-            </span>
-          </div>
-          <div className="flex items-center gap-4">
-            {session.user.role === "admin" && (
+      <header className="bg-slate-900">
+        <div className="max-w-6xl mx-auto px-4 py-1 flex items-center justify-between">
+          <div className="flex items-center gap-6">
+            <span className="text-white text-[13px] font-bold">Clearflow</span>
+            <nav className="flex items-center gap-4">
               <Link
-                href="/settings/webhooks"
-                className="text-sm font-medium text-gray-700 hover:text-gray-900"
+                href="/requests"
+                className="text-slate-300 hover:text-white text-xs"
               >
-                設定
+                申請一覧
               </Link>
-            )}
-            <div className="text-right">
-              <p className="text-sm font-medium text-gray-900">
-                {session.user.name}
-              </p>
-              <p className="text-xs text-gray-500">
-                {session.user.role === "admin" ? "管理者" : "メンバー"}
-              </p>
-            </div>
+              {isAdmin && (
+                <Link
+                  href="/settings/templates"
+                  className="text-slate-300 hover:text-white text-xs"
+                >
+                  設定
+                </Link>
+              )}
+              {isAdmin && (
+                <Link
+                  href="/settings/audit-logs"
+                  className="text-slate-300 hover:text-white text-xs"
+                >
+                  監査ログ
+                </Link>
+              )}
+            </nav>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-slate-300 text-xs">
+              {session.user.name}（{session.user.role === "admin" ? "管理者" : session.user.role === "manager" ? "マネージャー" : session.user.role === "finance" ? "経理" : "メンバー"}）
+            </span>
             <form
               action={async () => {
                 "use server";
@@ -47,7 +57,7 @@ export default async function DashboardLayout({
             >
               <button
                 type="submit"
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="text-slate-400 hover:text-white text-xs border border-slate-600 rounded px-2 py-0.5"
               >
                 ログアウト
               </button>
@@ -55,7 +65,7 @@ export default async function DashboardLayout({
           </div>
         </div>
       </header>
-      <main className="max-w-6xl mx-auto px-4 py-8">{children}</main>
+      <main className="max-w-6xl mx-auto px-4 py-4">{children}</main>
     </div>
   );
 }
