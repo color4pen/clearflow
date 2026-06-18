@@ -6,7 +6,7 @@ import {
   deactivateDelegationAction,
 } from "@/app/actions/delegations";
 import { listOrganizationUsers } from "@/application/usecases";
-import { BTN_SUBMIT, SELECT_BASE, INPUT_BASE } from "../../styles";
+import { PageToolbar, DataTable, SectionCard, FormField, Select, Input, SubmitButton } from "@/app/components";
 
 export default async function DelegationsSettingsPage() {
   const session = await auth();
@@ -25,33 +25,56 @@ export default async function DelegationsSettingsPage() {
   return (
     <div>
       {/* Toolbar */}
-      <div className="bg-bg-toolbar border border-border px-2 py-1 mb-0">
-        <span className="text-sm font-bold text-[#333333]">代理承認設定</span>
-      </div>
+      <PageToolbar title="代理承認設定" />
 
       {/* Delegation list */}
-      <div className="bg-bg-surface border border-border-light mb-2">
+      <div className="mb-2">
         {delegations.length === 0 ? (
-          <div className="text-center py-4 text-xs text-text-disabled">
-            登録済みの委譲はありません。
-          </div>
+          <SectionCard>
+            <div className="text-center py-4 text-xs text-text-disabled">
+              登録済みの委譲はありません。
+            </div>
+          </SectionCard>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-bg-table-head border border-border-table-head">
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">委譲元ユーザーID</th>
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">委譲先ユーザーID</th>
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">委譲元ロール</th>
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">開始日</th>
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">終了日</th>
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">状態</th>
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">操作</th>
-                </tr>
-              </thead>
-              <tbody>
-                {delegations.map((delegation, index) => {
-                  const delegationId = delegation.id;
+          <DataTable
+            columns={[
+              { key: "fromUserId", header: "委譲元ユーザーID", render: (d) => <span className="text-text-muted">{d.fromUserId}</span> },
+              { key: "toUserId", header: "委譲先ユーザーID", render: (d) => <span className="text-text-muted">{d.toUserId}</span> },
+              { key: "fromUserRole", header: "委譲元ロール", render: (d) => <span className="text-text">{d.fromUserRole}</span> },
+              {
+                key: "startDate",
+                header: "開始日",
+                render: (d) => (
+                  <span className="text-text-muted">
+                    {new Date(d.startDate).toLocaleDateString("ja-JP")}
+                  </span>
+                ),
+              },
+              {
+                key: "endDate",
+                header: "終了日",
+                render: (d) => (
+                  <span className="text-text-muted">
+                    {new Date(d.endDate).toLocaleDateString("ja-JP")}
+                  </span>
+                ),
+              },
+              {
+                key: "isActive",
+                header: "状態",
+                render: (d) =>
+                  d.isActive ? (
+                    <span className="text-success text-xs font-bold">有効</span>
+                  ) : (
+                    <span className="text-text-disabled text-xs">無効</span>
+                  ),
+              },
+              {
+                key: "actions",
+                header: "操作",
+                render: (d) => {
+                  if (!d.isActive) return null;
+                  const delegationId = d.id;
 
                   async function handleDeactivate() {
                     "use server";
@@ -59,51 +82,28 @@ export default async function DelegationsSettingsPage() {
                   }
 
                   return (
-                    <tr
-                      key={delegation.id}
-                      className={`border border-border-light hover:bg-[#eef2f7] ${index % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt"}`}
-                    >
-                      <td className="px-1 py-1 text-xs text-text-muted">{delegation.fromUserId}</td>
-                      <td className="px-1 py-1 text-xs text-text-muted">{delegation.toUserId}</td>
-                      <td className="px-1 py-1 text-xs text-text">{delegation.fromUserRole}</td>
-                      <td className="px-1 py-1 text-xs text-text-muted">
-                        {new Date(delegation.startDate).toLocaleDateString("ja-JP")}
-                      </td>
-                      <td className="px-1 py-1 text-xs text-text-muted">
-                        {new Date(delegation.endDate).toLocaleDateString("ja-JP")}
-                      </td>
-                      <td className="px-1 py-1 text-xs">
-                        {delegation.isActive ? (
-                          <span className="text-success text-xs font-bold">有効</span>
-                        ) : (
-                          <span className="text-text-disabled text-xs">無効</span>
-                        )}
-                      </td>
-                      <td className="px-1 py-1 text-xs">
-                        {delegation.isActive && (
-                          <form action={handleDeactivate}>
-                            <button
-                              type="submit"
-                              className="text-xs text-danger underline"
-                            >
-                              無効化
-                            </button>
-                          </form>
-                        )}
-                      </td>
-                    </tr>
+                    <form action={handleDeactivate}>
+                      <button
+                        type="submit"
+                        className="text-xs text-danger underline"
+                      >
+                        無効化
+                      </button>
+                    </form>
                   );
-                })}
-              </tbody>
-            </table>
-          </div>
+                },
+              },
+            ]}
+            rows={delegations}
+            rowKey={(d) => d.id}
+          />
         )}
       </div>
 
       {/* Add delegation form */}
-      <div className="bg-bg-surface border border-border-light">
+      <SectionCard>
         <div className="bg-bg-toolbar border-b border-border px-2 py-1">
-          <span className="text-sm font-bold text-[#333333]">委譲を追加</span>
+          <span className="text-sm font-bold text-text">委譲を追加</span>
         </div>
         <div className="p-4">
           <form
@@ -114,18 +114,12 @@ export default async function DelegationsSettingsPage() {
             className="space-y-4"
           >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="fromUserId"
-                  className="block text-xs font-bold text-text mb-1"
-                >
-                  委譲元ユーザー
-                </label>
-                <select
+              <FormField label="委譲元ユーザー" htmlFor="fromUserId">
+                <Select
                   id="fromUserId"
                   name="fromUserId"
                   required
-                  className={`mt-1 ${SELECT_BASE}`}
+                  className="mt-1"
                 >
                   <option value="">選択してください</option>
                   {orgUsers.map((user) => (
@@ -133,20 +127,14 @@ export default async function DelegationsSettingsPage() {
                       {user.name}（{user.role}）
                     </option>
                   ))}
-                </select>
-              </div>
-              <div>
-                <label
-                  htmlFor="toUserId"
-                  className="block text-xs font-bold text-text mb-1"
-                >
-                  委譲先ユーザー
-                </label>
-                <select
+                </Select>
+              </FormField>
+              <FormField label="委譲先ユーザー" htmlFor="toUserId">
+                <Select
                   id="toUserId"
                   name="toUserId"
                   required
-                  className={`mt-1 ${SELECT_BASE}`}
+                  className="mt-1"
                 >
                   <option value="">選択してください</option>
                   {orgUsers.map((user) => (
@@ -154,50 +142,33 @@ export default async function DelegationsSettingsPage() {
                       {user.name}（{user.role}）
                     </option>
                   ))}
-                </select>
-              </div>
-              <div>
-                <label
-                  htmlFor="startDate"
-                  className="block text-xs font-bold text-text mb-1"
-                >
-                  開始日
-                </label>
-                <input
+                </Select>
+              </FormField>
+              <FormField label="開始日" htmlFor="startDate">
+                <Input
                   type="date"
                   id="startDate"
                   name="startDate"
                   required
-                  className={`mt-1 ${INPUT_BASE}`}
+                  className="mt-1"
                 />
-              </div>
-              <div>
-                <label
-                  htmlFor="endDate"
-                  className="block text-xs font-bold text-text mb-1"
-                >
-                  終了日
-                </label>
-                <input
+              </FormField>
+              <FormField label="終了日" htmlFor="endDate">
+                <Input
                   type="date"
                   id="endDate"
                   name="endDate"
                   required
-                  className={`mt-1 ${INPUT_BASE}`}
+                  className="mt-1"
                 />
-              </div>
+              </FormField>
             </div>
             <div>
-              <button
-                type="submit"
-                className={BTN_SUBMIT}
-              >
-                委譲を追加
-              </button>
+              <SubmitButton>委譲を追加</SubmitButton>
             </div>
           </form>
         </div>
-      </div>
+      </SectionCard>
     </div>
   );
 }

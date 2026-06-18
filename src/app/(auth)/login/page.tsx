@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { loginAction, type LoginState } from "@/app/actions/auth";
-import { BTN_SUBMIT } from "@/app/(dashboard)/styles";
+import { FormField, Input, SectionCard, SubmitButton } from "@/app/components";
 
 const initialState: LoginState = {};
 
@@ -24,7 +24,7 @@ export default function LoginPage() {
           </h2>
         </div>
 
-        <div className="bg-bg-surface border border-border-light py-4 px-4">
+        <SectionCard className="py-4 px-4">
           <h3 className="text-sm font-bold text-text mb-4">
             ログイン
           </h3>
@@ -36,60 +36,40 @@ export default function LoginPage() {
           )}
 
           <form action={formAction} className="space-y-4">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-xs font-bold text-text mb-1"
-              >
-                メールアドレス
-              </label>
-              <input
+            <FormField
+              label="メールアドレス"
+              htmlFor="email"
+              error={state.errors?.email?.[0]}
+            >
+              <Input
                 id="email"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full border border-border rounded-none px-2 py-1 text-xs focus:border-primary focus:outline-none"
                 placeholder="admin@example.com"
               />
-              {state.errors?.email && (
-                <p className="mt-1 text-xs text-danger">
-                  {state.errors.email[0]}
-                </p>
-              )}
-            </div>
+            </FormField>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-xs font-bold text-text mb-1"
-              >
-                パスワード
-              </label>
-              <input
+            <FormField
+              label="パスワード"
+              htmlFor="password"
+              error={state.errors?.password?.[0]}
+            >
+              <Input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 required
-                className="w-full border border-border rounded-none px-2 py-1 text-xs focus:border-primary focus:outline-none"
               />
-              {state.errors?.password && (
-                <p className="mt-1 text-xs text-danger">
-                  {state.errors.password[0]}
-                </p>
-              )}
-            </div>
+            </FormField>
 
-            <button
-              type="submit"
-              disabled={isPending}
-              className={`w-full flex justify-center ${BTN_SUBMIT}`}
-            >
-              {isPending ? "ログイン中..." : "ログイン"}
-            </button>
+            <SubmitButton pending={isPending} pendingText="ログイン中..." className="w-full flex justify-center">
+              ログイン
+            </SubmitButton>
           </form>
-        </div>
+        </SectionCard>
       </div>
     </div>
   );

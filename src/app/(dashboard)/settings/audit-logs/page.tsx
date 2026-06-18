@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
 import { auditLogRepository } from "@/infrastructure/repositories";
-import { BTN_PRIMARY, INPUT_BASE, SELECT_BASE } from "../../styles";
+import { PageToolbar, DataTable, SectionCard, FormField, Input, Select } from "@/app/components";
 
 const LIMIT = 50;
 
@@ -82,66 +82,56 @@ export default async function AuditLogsPage({
   return (
     <div>
       {/* Toolbar */}
-      <div className="bg-bg-toolbar border border-border px-2 py-1 mb-0 flex items-center justify-between">
-        <span className="text-sm font-bold text-[#333333]">監査ログ</span>
-        <a
-          href={exportUrl}
-          download
-          className="text-xs text-primary underline"
-        >
-          CSV ダウンロード
-        </a>
-      </div>
+      <PageToolbar
+        title="監査ログ"
+        actions={
+          <a
+            href={exportUrl}
+            download
+            className="text-xs text-primary underline"
+          >
+            CSV ダウンロード
+          </a>
+        }
+      />
 
       {/* フィルタ */}
       <form method="get" className="bg-bg-toolbar border border-border border-t-0 px-2 py-1 mb-0">
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 items-end">
-          <div>
-            <label htmlFor="startDate" className="block text-xs font-bold text-text mb-1">
-              開始日
-            </label>
-            <input
+          <FormField label="開始日" htmlFor="startDate">
+            <Input
               type="date"
               id="startDate"
               name="startDate"
               defaultValue={startDateStr ?? ""}
-              className={INPUT_BASE}
             />
-          </div>
-          <div>
-            <label htmlFor="endDate" className="block text-xs font-bold text-text mb-1">
-              終了日
-            </label>
-            <input
+          </FormField>
+          <FormField label="終了日" htmlFor="endDate">
+            <Input
               type="date"
               id="endDate"
               name="endDate"
               defaultValue={endDateStr ?? ""}
-              className={INPUT_BASE}
             />
-          </div>
-          <div>
-            <label htmlFor="action" className="block text-xs font-bold text-text mb-1">
-              アクション種別
-            </label>
-            <select
+          </FormField>
+          <FormField label="アクション種別" htmlFor="action">
+            <Select
               id="action"
               name="action"
               defaultValue={actionStr ?? ""}
-              className={SELECT_BASE}
             >
               {ACTION_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
-            </select>
-          </div>
+            </Select>
+          </FormField>
         </div>
         <div className="flex justify-end mt-1">
           <button
             type="submit"
-            className={BTN_PRIMARY}
+            className="text-primary underline text-xs"
           >
             フィルタ
           </button>
@@ -149,49 +139,42 @@ export default async function AuditLogsPage({
       </form>
 
       {/* テーブル */}
-      <div className="bg-bg-surface border border-border-light border-t-0">
+      <div className="border-t-0">
         {logs.length === 0 ? (
-          <div className="text-center py-4 text-xs text-text-disabled">
-            監査ログはありません。
-          </div>
+          <SectionCard className="border-t-0">
+            <div className="text-center py-4 text-xs text-text-disabled">
+              監査ログはありません。
+            </div>
+          </SectionCard>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="bg-bg-table-head border border-border-table-head">
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">日時</th>
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">アクション</th>
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">対象種別</th>
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">対象 ID</th>
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">実行者 ID</th>
-                  <th className="px-1 py-1.5 text-xs text-text font-bold text-left">メタデータ</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log, index) => (
-                  <tr
-                    key={log.id}
-                    className={`border border-border-light hover:bg-[#eef2f7] ${index % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt"}`}
-                  >
-                    <td className="px-1 py-1 text-xs text-text-muted whitespace-nowrap">
-                      {log.createdAt.toLocaleString("ja-JP")}
-                    </td>
-                    <td className="px-1 py-1 text-xs text-text">{log.action}</td>
-                    <td className="px-1 py-1 text-xs text-text">{log.targetType}</td>
-                    <td className="px-1 py-1 text-xs text-text">
-                      {log.targetId}
-                    </td>
-                    <td className="px-1 py-1 text-xs text-text">
-                      {log.actorId}
-                    </td>
-                    <td className="px-1 py-1 text-xs text-text-muted max-w-xs truncate">
-                      {JSON.stringify(log.metadata ?? {}).slice(0, 100)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            columns={[
+              {
+                key: "createdAt",
+                header: "日時",
+                render: (log) => (
+                  <span className="text-text-muted whitespace-nowrap">
+                    {log.createdAt.toLocaleString("ja-JP")}
+                  </span>
+                ),
+              },
+              { key: "action", header: "アクション", render: (log) => <span className="text-text">{log.action}</span> },
+              { key: "targetType", header: "対象種別", render: (log) => <span className="text-text">{log.targetType}</span> },
+              { key: "targetId", header: "対象 ID", render: (log) => <span className="text-text">{log.targetId}</span> },
+              { key: "actorId", header: "実行者 ID", render: (log) => <span className="text-text">{log.actorId}</span> },
+              {
+                key: "metadata",
+                header: "メタデータ",
+                render: (log) => (
+                  <span className="text-text-muted max-w-xs truncate">
+                    {JSON.stringify(log.metadata ?? {}).slice(0, 100)}
+                  </span>
+                ),
+              },
+            ]}
+            rows={logs}
+            rowKey={(log) => log.id}
+          />
         )}
       </div>
 

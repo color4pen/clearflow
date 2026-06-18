@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { ActionResult } from "@/app/actions/requests";
-import { BTN_SUBMIT, INPUT_BASE } from "../../styles";
+import { SubmitButton, LinkButton, FormField, Textarea } from "@/app/components";
 
 export type ServerAction = (formData: FormData) => Promise<ActionResult>;
 
@@ -68,13 +68,9 @@ export function ActionButtons({
         <h3 className="text-xs font-bold text-text mb-2">アクション</h3>
         <ActionForm action={submitAction}>
           {(isPending) => (
-            <button
-              type="submit"
-              disabled={isPending}
-              className={BTN_SUBMIT}
-            >
+            <SubmitButton pending={isPending}>
               提出する（審査へ）
-            </button>
+            </SubmitButton>
           )}
         </ActionForm>
       </div>
@@ -88,13 +84,9 @@ export function ActionButtons({
         <div className="flex items-center gap-2 mb-4">
           <ActionForm action={approveAction}>
             {(isPending) => (
-              <button
-                type="submit"
-                disabled={isPending}
-                className="text-success underline text-xs disabled:text-text-on-dark-secondary disabled:no-underline disabled:cursor-not-allowed"
-              >
+              <LinkButton variant="success" disabled={isPending}>
                 承認
-              </button>
+              </LinkButton>
             )}
           </ActionForm>
           <span className="text-text-muted text-xs">|</span>
@@ -102,13 +94,9 @@ export function ActionButtons({
             {(isPending) => (
               <>
                 <input type="hidden" name="targetStatus" value="rejected" />
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="text-danger underline text-xs disabled:text-text-on-dark-secondary disabled:no-underline disabled:cursor-not-allowed"
-                >
+                <LinkButton variant="danger" disabled={isPending}>
                   却下
-                </button>
+                </LinkButton>
               </>
             )}
           </ActionForm>
@@ -117,13 +105,9 @@ export function ActionButtons({
             {(isPending) => (
               <>
                 <input type="hidden" name="targetStatus" value="revision" />
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="text-revision underline text-xs disabled:text-text-on-dark-secondary disabled:no-underline disabled:cursor-not-allowed"
-                >
+                <LinkButton variant="warning" disabled={isPending}>
                   差戻
-                </button>
+                </LinkButton>
               </>
             )}
           </ActionForm>
@@ -134,28 +118,17 @@ export function ActionButtons({
             {(isPending) => (
               <>
                 <input type="hidden" name="targetStatus" value="revision" />
-                <div>
-                  <label
-                    htmlFor="revision-comment"
-                    className="block text-xs font-bold text-text mb-1"
-                  >
-                    差し戻しコメント
-                  </label>
-                  <textarea
+                <FormField label="差し戻しコメント" htmlFor="revision-comment">
+                  <Textarea
                     id="revision-comment"
                     name="comment"
                     rows={3}
-                    className={INPUT_BASE}
                     placeholder="差し戻し理由を入力してください"
                   />
-                </div>
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className={BTN_SUBMIT}
-                >
+                </FormField>
+                <SubmitButton pending={isPending}>
                   差し戻す
-                </button>
+                </SubmitButton>
               </>
             )}
           </ActionForm>
@@ -170,13 +143,9 @@ export function ActionButtons({
         <h3 className="text-xs font-bold text-text mb-2">アクション</h3>
         <ActionForm action={resubmitAction}>
           {(isPending) => (
-            <button
-              type="submit"
-              disabled={isPending}
-              className={BTN_SUBMIT}
-            >
+            <SubmitButton pending={isPending}>
               再申請する
-            </button>
+            </SubmitButton>
           )}
         </ActionForm>
       </div>
