@@ -4,6 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createTemplateAction, updateTemplateAction } from "@/app/actions/templates";
 import type { ApprovalTemplate } from "@/domain/models/approvalTemplate";
+import { BTN_PRIMARY, BTN_SECONDARY, INPUT_BASE } from "../../styles";
 
 type ActionState =
   | null
@@ -125,7 +126,7 @@ export function TemplateForm(props: Props) {
             required
             defaultValue={props.mode === "edit" ? props.defaultValues.name : ""}
             placeholder="例: 経費申請テンプレート"
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`mt-1 block ${INPUT_BASE}`}
           />
         </div>
 
@@ -149,7 +150,7 @@ export function TemplateForm(props: Props) {
                   : ""
               }
               placeholder="例: 10000"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`mt-1 block ${INPUT_BASE}`}
             />
           </div>
           <div>
@@ -170,7 +171,7 @@ export function TemplateForm(props: Props) {
                   : ""
               }
               placeholder="例: 100000"
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={`mt-1 block ${INPUT_BASE}`}
             />
           </div>
         </div>
@@ -259,7 +260,7 @@ export function TemplateForm(props: Props) {
           <button
             type="submit"
             disabled={pending}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className={`${BTN_PRIMARY} disabled:opacity-50`}
           >
             {pending
               ? "保存中..."
@@ -269,7 +270,7 @@ export function TemplateForm(props: Props) {
           </button>
           <a
             href="/settings/templates"
-            className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+            className={BTN_SECONDARY}
           >
             キャンセル
           </a>

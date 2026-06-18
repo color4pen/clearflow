@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
 import { auditLogRepository } from "@/infrastructure/repositories";
+import { BTN_PRIMARY, INPUT_BASE, SELECT_BASE } from "../../styles";
 
 const LIMIT = 50;
 
@@ -88,7 +89,7 @@ export default async function AuditLogsPage({
         <a
           href={exportUrl}
           download
-          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+          className={`inline-flex items-center ${BTN_PRIMARY}`}
         >
           CSV ダウンロード
         </a>
@@ -106,7 +107,7 @@ export default async function AuditLogsPage({
               id="startDate"
               name="startDate"
               defaultValue={startDateStr ?? ""}
-              className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={INPUT_BASE}
             />
           </div>
           <div>
@@ -118,7 +119,7 @@ export default async function AuditLogsPage({
               id="endDate"
               name="endDate"
               defaultValue={endDateStr ?? ""}
-              className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={INPUT_BASE}
             />
           </div>
           <div>
@@ -129,7 +130,7 @@ export default async function AuditLogsPage({
               id="action"
               name="action"
               defaultValue={actionStr ?? ""}
-              className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={SELECT_BASE}
             >
               {ACTION_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -142,7 +143,7 @@ export default async function AuditLogsPage({
         <div className="flex justify-end">
           <button
             type="submit"
-            className="px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-md hover:bg-gray-700"
+            className={BTN_PRIMARY}
           >
             フィルタ
           </button>

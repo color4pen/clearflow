@@ -605,14 +605,17 @@ describe("UI — deadline display in ApprovalStepsSection", () => {
   });
 
   it("shows expired label in statusLabel", async () => {
-    const src = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
+    // statusLabel moved to statusUtils.ts (T-02 refactoring)
+    const src = await readSrc("app/(dashboard)/requests/statusUtils.ts");
     expect(src).toContain('expired: "期限切れ"');
   });
 
   it("has expired CSS class in statusClass", async () => {
-    const src = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
+    // statusClass moved to statusUtils.ts (T-02 refactoring)
+    const src = await readSrc("app/(dashboard)/requests/statusUtils.ts");
     expect(src).toContain("expired:");
-    expect(src).toContain("bg-gray-100 text-gray-500");
+    // New style: color-text only (badge style removed per T-02)
+    expect(src).toContain("text-gray-400");
   });
 
   it("shows remaining time for future deadlines", async () => {

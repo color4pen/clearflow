@@ -12,3 +12,13 @@ export type Request = {
   updatedAt: Date;
   version: number;
 };
+
+export type ApprovalStepSummary = {
+  approverRole: string;
+  status: "pending" | "approved" | "rejected";
+  deadline: Date | null;
+};
+
+export type RequestWithSteps = Request & {
+  approvalSteps: ApprovalStepSummary[];
+};

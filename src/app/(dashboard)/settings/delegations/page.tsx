@@ -6,6 +6,7 @@ import {
   deactivateDelegationAction,
 } from "@/app/actions/delegations";
 import { listOrganizationUsers } from "@/application/usecases";
+import { BTN_PRIMARY, SELECT_BASE, INPUT_BASE } from "../../styles";
 
 export default async function DelegationsSettingsPage() {
   const session = await auth();
@@ -130,7 +131,7 @@ export default async function DelegationsSettingsPage() {
                   id="fromUserId"
                   name="fromUserId"
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className={`mt-1 ${SELECT_BASE}`}
                 >
                   <option value="">選択してください</option>
                   {orgUsers.map((user) => (
@@ -151,7 +152,7 @@ export default async function DelegationsSettingsPage() {
                   id="toUserId"
                   name="toUserId"
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className={`mt-1 ${SELECT_BASE}`}
                 >
                   <option value="">選択してください</option>
                   {orgUsers.map((user) => (
@@ -173,7 +174,7 @@ export default async function DelegationsSettingsPage() {
                   id="startDate"
                   name="startDate"
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className={`mt-1 ${INPUT_BASE}`}
                 />
               </div>
               <div>
@@ -188,14 +189,14 @@ export default async function DelegationsSettingsPage() {
                   id="endDate"
                   name="endDate"
                   required
-                  className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className={`mt-1 ${INPUT_BASE}`}
                 />
               </div>
             </div>
             <div>
               <button
                 type="submit"
-                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className={BTN_PRIMARY}
               >
                 委譲を追加
               </button>

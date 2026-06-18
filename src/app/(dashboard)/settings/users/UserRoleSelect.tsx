@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { updateUserRoleAction } from "@/app/actions/users";
+import { SELECT_BASE } from "../../styles";
 
 type Role = "admin" | "member" | "manager" | "finance";
 
@@ -51,7 +52,7 @@ export function UserRoleSelect({ userId, currentRole, disabled = false }: Props)
         defaultValue={currentRole}
         onChange={handleChange}
         disabled={disabled || pending}
-        className="block w-full border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+        className={`${SELECT_BASE} disabled:bg-gray-100 disabled:cursor-not-allowed`}
       >
         {ROLE_OPTIONS.map((opt) => (
           <option key={opt.value} value={opt.value}>

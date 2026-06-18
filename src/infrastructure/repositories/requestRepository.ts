@@ -1,8 +1,8 @@
 import { eq, and, sql } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
-import { requests, auditLogs } from "../schema";
-import type { Request, RequestStatus } from "@/domain/models/request";
+import { requests, auditLogs, approvalSteps } from "../schema";
+import type { Request, RequestStatus, RequestWithSteps } from "@/domain/models/request";
 
 
 function mapRow(row: typeof requests.$inferSelect): Request {
@@ -101,6 +101,49 @@ export async function findAllByOrganization(
     .where(eq(requests.organizationId, organizationId))
     .orderBy(requests.createdAt);
   return result.map(mapRow);
+}
+
+export async function findAllWithStepsByOrganization(
+  organizationId: string
+): Promise<RequestWithSteps[]> {
+  const rows = await db
+    .select({
+      request: requests,
+      stepApproverRole: approvalSteps.approverRole,
+      stepStatus: approvalSteps.status,
+      stepDeadline: approvalSteps.deadline,
+      stepOrder: approvalSteps.stepOrder,
+    })
+    .from(requests)
+    .leftJoin(
+      approvalSteps,
+      and(
+        eq(approvalSteps.requestId, requests.id),
+        eq(approvalSteps.organizationId, requests.organizationId)
+      )
+    )
+    .where(eq(requests.organizationId, organizationId))
+    .orderBy(requests.createdAt, approvalSteps.stepOrder);
+
+  // Group rows by requestId
+  const map = new Map<string, RequestWithSteps>();
+  for (const row of rows) {
+    const req = row.request;
+    if (!map.has(req.id)) {
+      map.set(req.id, {
+        ...mapRow(req),
+        approvalSteps: [],
+      });
+    }
+    if (row.stepApproverRole !== null && row.stepStatus !== null) {
+      map.get(req.id)!.approvalSteps.push({
+        approverRole: row.stepApproverRole,
+        status: row.stepStatus,
+        deadline: row.stepDeadline ?? null,
+      });
+    }
+  }
+  return Array.from(map.values());
 }
 
 export async function updateStatus(

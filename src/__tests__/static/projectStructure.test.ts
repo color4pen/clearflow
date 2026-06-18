@@ -449,7 +449,8 @@ describe("Multi-stage approval UI", () => {
    * displaying it as "差し戻し" with the orange badge class.
    */
   it("TC-055: requests list page displays revision status as '差し戻し' with orange badge", async () => {
-    const content = await readSrc("app/(dashboard)/requests/page.tsx");
+    // statusLabel/statusClass moved to statusUtils.ts (T-02 refactoring)
+    const content = await readSrc("app/(dashboard)/requests/statusUtils.ts");
     // Must include "revision" in the status label map
     expect(content).toContain("revision");
     // "差し戻し" must be the display label
