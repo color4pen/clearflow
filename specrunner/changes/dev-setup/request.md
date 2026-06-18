@@ -17,6 +17,9 @@
 - `.env.example` — 存在しない
 - `docker-compose.yml` — 存在しない
 - `src/infrastructure/seed.ts:19` — `process.env.DATABASE_URL` を直接参照
+- `src/infrastructure/seed.ts:108-121` — system user（固定UUID `00000000-0000-0000-0000-000000000000`）は既に実装済み
+- `src/infrastructure/seed.ts:326-331` — ログイン情報の表示は既に実装済み
+- `.gitignore:34` — `.env*` パターンで `.env.example` もマッチしてしまう（unignore 未設定）
 - `src/infrastructure/db.ts:9` — `process.env.DATABASE_URL` を直接参照
 - `drizzle.config.ts:8` — `process.env.DATABASE_URL!` を参照
 - `drizzle/` — 5つのmigration SQLファイルが存在
@@ -25,9 +28,9 @@
 
 1. **docker-compose.yml 追加**: PostgreSQL 16 のサービスを定義する。ポート 5432、DB名 `clearflow`、ユーザー `postgres`、パスワード `postgres`。ボリュームでデータを永続化する
 2. **.env.example 追加**: 全ての必要な環境変数をコメント付きで記載する。`DATABASE_URL=postgresql://postgres:postgres@localhost:5432/clearflow`、`AUTH_SECRET=`（ランダム値を生成するコマンドをコメントで記載）、`CRON_SECRET=`、`SYSTEM_USER_ID=`
-3. **package.json scripts 追加**: `db:push`（`bunx drizzle-kit push`）、`db:generate`（`bunx drizzle-kit generate`）、`db:seed`（`bun src/infrastructure/seed.ts`）、`db:reset`（drop + push + seed）、`typecheck`（`tsc --noEmit`）、`test`（`bun test`）
-4. **seed.ts の改善**: SYSTEM_USER_ID 用の system user を固定 UUID で作成する。シード完了後にログイン情報（email/password）をコンソールに表示する
-5. **.gitignore 更新**: `.env.local` が含まれていることを確認する（既に含まれているはず）
+3. **package.json scripts 追加**: `db:push`（`bunx drizzle-kit push`）、`db:generate`（`bunx drizzle-kit generate`）、`db:seed`（`bun src/infrastructure/seed.ts`）、`db:reset`（`bun src/infrastructure/reset.ts` — カスタムスクリプトで全テーブルを DROP CASCADE し、push + seed を実行する）、`typecheck`（`tsc --noEmit`）、`test`（`bun test`）
+4. **reset.ts 新設**: `src/infrastructure/reset.ts` を作成する。SQL で `DROP SCHEMA public CASCADE; CREATE SCHEMA public;` を実行した後、`db:push` と `db:seed` を子プロセスで実行する
+5. **.gitignore 更新**: `.env.example` が git で追跡されるように `!.env.example` を追加する
 
 ## スコープ外
 
@@ -45,6 +48,7 @@
 - [ ] `bun run db:seed` でシードデータが投入される
 - [ ] `bun run test` でテストが実行される
 - [ ] `bun run typecheck` で型チェックが実行される
+- [ ] `.env.example` が git で追跡されている（`.gitignore` に `!.env.example` が記載）
 - [ ] `typecheck` が green
 
 ## architect 評価済みの設計判断
