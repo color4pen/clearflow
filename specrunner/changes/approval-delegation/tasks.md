@@ -24,6 +24,7 @@
     id: string;
     fromUserId: string;
     toUserId: string;
+    fromUserRole: string;
     organizationId: string;
     startDate: Date;
     endDate: Date;
@@ -149,20 +150,11 @@
 - 既存のゼロステップフローが影響を受けない
 - `typecheck` が green
 
-## T-10: Usecase — `rejectRequest` への代理承認統合
+## T-10: rejectRequest はスコープ外（代理承認チェック追加なし）
 
-- [ ] `src/application/usecases/rejectRequest.ts` を修正する
-- [ ] `approvalDelegationRepository` と `canApproveWithDelegation` を import する
-- [ ] revision フロー: TX 内で委譲データを取得し、`canApproveWithDelegation` で権限チェックを追加する（現在は currentStep のロールチェックがない）
-- [ ] rejected フロー: TX 内で委譲データを取得し、`canApproveWithDelegation` で権限チェックを追加する
-- [ ] 代理承認時の監査ログに `delegatedFrom` を記録する
+request.md 要件 5 に従い、`rejectRequest` には canApprove チェックを追加しない。却下は現在ロールチェックなしで動作しており、本 request ではスコープを維持する。将来のセキュリティ強化 request で対応する。
 
-**Acceptance Criteria**:
-- 委譲先ユーザーが代理で差し戻し・却下を実行できる
-- 権限のないユーザーが差し戻し・却下できない
-- TX 内で委譲データを取得している
-- 代理操作時の audit_log metadata に `delegatedFrom` が含まれる
-- `typecheck` が green
+**このタスクは作業なし（スキップ）。**
 
 ## T-11: Server Action — 委譲管理用アクション
 
@@ -197,13 +189,13 @@
 - [ ] `src/__tests__/usecases/approvalDelegation.test.ts` を作成する
 - [ ] ソースコードの静的解析テスト（既存テストパターンに準拠）:
   - `createDelegation.ts` に自己委譲チェック (`fromUserId === toUserId` or equivalent) が存在する
+  - `createDelegation.ts` にクロスオーグチェック（`userRepository.findById` の呼び出しと organizationId の一致確認）が存在する
   - `createDelegation.ts` に `findOverlapping` 呼び出しが存在する
   - `approveRequest.ts` に `findActiveByToUserId` 呼び出しが存在する
   - `approveRequest.ts` の TX 内（`db.transaction` コールバック内）に `findActiveByToUserId` 呼び出しが存在する
   - `approveRequest.ts` に `canApproveWithDelegation` 呼び出しが存在する
   - `approveRequest.ts` に `delegatedFrom` を含む metadata 記録が存在する
-  - `rejectRequest.ts` に `findActiveByToUserId` 呼び出しが存在する
-  - `rejectRequest.ts` に `canApproveWithDelegation` 呼び出しが存在する
+  - 注: `rejectRequest.ts` への代理承認統合は本 request のスコープ外（T-10 参照）
 
 **Acceptance Criteria**:
 - `bun test src/__tests__/usecases/approvalDelegation.test.ts` が全件 green
