@@ -8,7 +8,6 @@ import { validateTransition } from "@/domain/services/requestTransition";
 import {
   getCurrentStep,
   isAllApproved,
-  canApprove,
   canApproveWithDelegation,
   isStepExpired,
 } from "@/domain/services/approvalStepService";

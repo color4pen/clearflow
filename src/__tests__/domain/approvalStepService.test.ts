@@ -303,4 +303,35 @@ describe("approvalStepService — canApproveWithDelegation", () => {
     expect(canApprove(step, "admin")).toBe(true);
     expect(canApprove(step, "member")).toBe(false);
   });
+
+  // TC-003: Inactive delegation is ignored
+  it("TC-003: ignores a delegation with isActive: false even when fromUserRole matches", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "manager" });
+    const inactiveDelegation = makeDelegation({
+      fromUserRole: "manager",
+      isActive: false,
+    });
+    const result = canApproveWithDelegation(step, "admin", [inactiveDelegation]);
+    expect(result.allowed).toBe(false);
+    expect(result.delegation).toBeUndefined();
+  });
+
+  it("TC-003: selects only active delegations when both active and inactive ones match", () => {
+    const step = makeStep({ stepOrder: 1, status: "pending", approverRole: "manager" });
+    const inactive = makeDelegation({
+      id: "inactive-delegation",
+      fromUserRole: "manager",
+      isActive: false,
+      startDate: new Date("2024-06-01T00:00:00.000Z"),
+    });
+    const active = makeDelegation({
+      id: "active-delegation",
+      fromUserRole: "manager",
+      isActive: true,
+      startDate: new Date("2024-01-01T00:00:00.000Z"),
+    });
+    const result = canApproveWithDelegation(step, "admin", [inactive, active]);
+    expect(result.allowed).toBe(true);
+    expect(result.delegation?.id).toBe("active-delegation");
+  });
 });

@@ -55,8 +55,9 @@ export function isStepExpired(step: ApprovalStep, now?: Date): boolean {
  * - No match: { allowed: false }
  *
  * The delegations array should already be filtered to active and in-period
- * records (i.e. returned by findActiveByToUserId). This function does not
- * re-apply date or isActive filtering.
+ * records (i.e. returned by findActiveByToUserId). As a defensive guard this
+ * function additionally skips any delegation where isActive is false so that
+ * an unfiltered list can never silently grant access.
  */
 export function canApproveWithDelegation(
   step: ApprovalStep,
@@ -68,9 +69,11 @@ export function canApproveWithDelegation(
     return { allowed: true, delegation: undefined };
   }
 
-  // Find delegations where fromUserRole matches the required approverRole
+  // Find delegations where fromUserRole matches the required approverRole.
+  // Defensive guard: skip inactive delegations even if callers failed to
+  // pre-filter them.
   const matching = delegations.filter(
-    (d) => d.fromUserRole === step.approverRole
+    (d) => d.isActive && d.fromUserRole === step.approverRole
   );
   if (matching.length === 0) {
     return { allowed: false };
