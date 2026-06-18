@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f5e14d22-974b-441d-b074-9958c09d62fd",
   "createdAt": "2026-06-18T12:01:56.108Z",
-  "updatedAt": "2026-06-18T12:47:18.337Z",
+  "updatedAt": "2026-06-18T12:47:41.291Z",
   "request": {
     "title": "業務システムUIを全ページに展開",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/ui-business-all-pages-f5e14d22",
   "error": null,
   "pipelineId": "standard",
@@ -33,8 +33,13 @@
       ]
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/19",
+    "number": 19,
+    "createdAt": "2026-06-18T12:47:41.283Z"
+  },
   "_journal": {
-    "historyCount": 60,
+    "historyCount": 65,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -46,7 +51,9 @@
       "code-fixer": 2,
       "domain-invariants": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
