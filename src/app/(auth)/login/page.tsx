@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { loginAction, type LoginState } from "@/app/actions/auth";
+import { BTN_SUBMIT } from "@/app/(dashboard)/styles";
 
 const initialState: LoginState = {};
 
@@ -12,33 +13,33 @@ export default function LoginPage() {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#e8e8e8]">
+      <div className="max-w-md w-full space-y-4 px-4">
         <div>
-          <h1 className="text-3xl font-bold text-center text-gray-900">
+          <h1 className="text-sm font-bold text-center text-[#2c3e50]">
             Clearflow
           </h1>
-          <h2 className="mt-2 text-center text-gray-600">
+          <h2 className="mt-1 text-center text-xs text-[#7f8c8d]">
             承認ワークフローシステム
           </h2>
         </div>
 
-        <div className="bg-white py-8 px-6 shadow rounded-lg">
-          <h3 className="text-xl font-semibold text-gray-900 mb-6">
+        <div className="bg-white border border-[#e0e0e0] py-4 px-4">
+          <h3 className="text-sm font-bold text-[#2c3e50] mb-4">
             ログイン
           </h3>
 
           {state.message && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-[#c0392b] text-xs">
               {state.message}
             </div>
           )}
 
-          <form action={formAction} className="space-y-5">
+          <form action={formAction} className="space-y-4">
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-xs font-bold text-[#2c3e50] mb-1"
               >
                 メールアドレス
               </label>
@@ -48,11 +49,11 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full border border-[#cccccc] rounded-none px-2 py-1 text-xs focus:border-[#2980b9] focus:outline-none"
                 placeholder="admin@example.com"
               />
               {state.errors?.email && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="mt-1 text-xs text-[#c0392b]">
                   {state.errors.email[0]}
                 </p>
               )}
@@ -61,7 +62,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-xs font-bold text-[#2c3e50] mb-1"
               >
                 パスワード
               </label>
@@ -71,10 +72,10 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full border border-[#cccccc] rounded-none px-2 py-1 text-xs focus:border-[#2980b9] focus:outline-none"
               />
               {state.errors?.password && (
-                <p className="mt-1 text-sm text-red-600">
+                <p className="mt-1 text-xs text-[#c0392b]">
                   {state.errors.password[0]}
                 </p>
               )}
@@ -83,7 +84,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isPending}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`w-full flex justify-center ${BTN_SUBMIT}`}
             >
               {isPending ? "ログイン中..." : "ログイン"}
             </button>

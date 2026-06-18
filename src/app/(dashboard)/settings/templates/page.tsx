@@ -15,41 +15,37 @@ export default async function TemplatesPage() {
   const templates = result.success ? result.templates ?? [] : [];
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">テンプレート管理</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            承認テンプレートの作成・編集・削除を行います。
-          </p>
-        </div>
+    <div>
+      {/* Toolbar */}
+      <div className="bg-[#f5f5f5] border border-[#cccccc] px-2 py-1 flex items-center justify-between mb-0">
+        <span className="text-sm font-bold text-[#333333]">テンプレート管理</span>
         <Link
           href="/settings/templates/new"
-          className={`inline-flex items-center ${BTN_PRIMARY}`}
+          className={BTN_PRIMARY}
         >
-          テンプレートを追加
+          [テンプレートを追加]
         </Link>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="bg-white border border-[#e0e0e0]">
         {templates.length === 0 ? (
-          <div className="px-6 py-8 text-center text-sm text-gray-500">
+          <div className="text-center py-4 text-xs text-[#95a5a6]">
             登録済みテンプレートはありません。
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-500 uppercase bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3">テンプレート名</th>
-                  <th className="px-6 py-3">金額条件</th>
-                  <th className="px-6 py-3">ステップ数</th>
-                  <th className="px-6 py-3">作成日時</th>
-                  <th className="px-6 py-3">操作</th>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-[#dcdde1] border border-[#bdc3c7]">
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">テンプレート名</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">金額条件</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">ステップ数</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">作成日時</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {templates.map((template) => {
+              <tbody>
+                {templates.map((template, index) => {
                   const amountLabel =
                     template.minAmount != null && template.maxAmount != null
                       ? `${template.minAmount.toLocaleString()}〜${template.maxAmount.toLocaleString()}円`
@@ -60,22 +56,25 @@ export default async function TemplatesPage() {
                       : "制限なし";
 
                   return (
-                    <tr key={template.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 font-medium text-gray-900">
+                    <tr
+                      key={template.id}
+                      className={`border border-[#e0e0e0] hover:bg-[#eef2f7] ${index % 2 === 0 ? "bg-white" : "bg-[#f9f9f9]"}`}
+                    >
+                      <td className="px-1 py-1 text-xs text-[#2c3e50]">
                         {template.name}
                       </td>
-                      <td className="px-6 py-4 text-gray-600">{amountLabel}</td>
-                      <td className="px-6 py-4 text-gray-600">
+                      <td className="px-1 py-1 text-xs text-[#2c3e50]">{amountLabel}</td>
+                      <td className="px-1 py-1 text-xs text-[#2c3e50]">
                         {template.steps.length}
                       </td>
-                      <td className="px-6 py-4 text-gray-500">
+                      <td className="px-1 py-1 text-xs text-[#7f8c8d]">
                         {new Date(template.createdAt).toLocaleDateString("ja-JP")}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-1 py-1 text-xs">
                         <div className="flex items-center gap-2">
                           <Link
                             href={`/settings/templates/${template.id}/edit`}
-                            className="text-blue-600 hover:underline text-xs"
+                            className="text-[#2980b9] underline text-xs"
                           >
                             編集
                           </Link>
@@ -89,6 +88,10 @@ export default async function TemplatesPage() {
             </table>
           </div>
         )}
+      </div>
+      {/* Footer bar */}
+      <div className="bg-[#f5f5f5] border border-[#cccccc] border-t-0 px-2 py-0.5 text-xs text-[#7f8c8d]">
+        {templates.length} 件
       </div>
     </div>
   );

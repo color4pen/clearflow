@@ -24,15 +24,12 @@ export default async function EditTemplatePage({
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">テンプレートを編集</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          承認テンプレートの内容を変更します。
-        </p>
+    <div>
+      <div className="bg-[#f5f5f5] border border-[#cccccc] px-2 py-1 mb-0">
+        <span className="text-sm font-bold text-[#333333]">テンプレートを編集</span>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+      <div className="bg-white border border-[#e0e0e0] p-4">
         <TemplateForm
           mode="edit"
           templateId={template.id}

@@ -136,24 +136,23 @@ describe("findAllWithStepsByOrganization grouping logic — TC-022", () => {
 describe("styles.ts constants — TC-032 and TC-033", () => {
   /**
    * TC-032: BTN_PRIMARY_DISABLED が定義されており
-   *         disabled:opacity-50 disabled:cursor-not-allowed を含む
+   *         disabled:cursor-not-allowed を含む
    */
-  it("TC-032: styles.ts exports BTN_PRIMARY_DISABLED containing disabled:opacity-50 and disabled:cursor-not-allowed", async () => {
+  it("TC-032: styles.ts exports BTN_PRIMARY_DISABLED containing disabled:cursor-not-allowed", async () => {
     const content = await readSrc("app/(dashboard)/styles.ts");
     expect(content).toContain("BTN_PRIMARY_DISABLED");
-    expect(content).toContain("disabled:opacity-50");
     expect(content).toContain("disabled:cursor-not-allowed");
   });
 
   /**
    * TC-033: SELECT_BASE が定義されており
-   *         block w-full border border-gray-300 rounded-md を含む
+   *         block w-full border border-[#cccccc] rounded-none を含む
    */
-  it("TC-033: styles.ts exports SELECT_BASE containing block w-full border border-gray-300 rounded-md", async () => {
+  it("TC-033: styles.ts exports SELECT_BASE containing block w-full border border-[#cccccc] rounded-none", async () => {
     const content = await readSrc("app/(dashboard)/styles.ts");
     expect(content).toContain("SELECT_BASE");
     expect(content).toContain("block w-full");
-    expect(content).toContain("border border-gray-300");
-    expect(content).toContain("rounded-md");
+    expect(content).toContain("border border-[#cccccc]");
+    expect(content).toContain("rounded-none");
   });
 });

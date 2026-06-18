@@ -20,47 +20,48 @@ export default async function UsersPage() {
   const users = result.success ? result.users ?? [] : [];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">ユーザー管理</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          組織メンバーのロールを管理します。
-        </p>
+    <div>
+      {/* Toolbar */}
+      <div className="bg-[#f5f5f5] border border-[#cccccc] px-2 py-1 mb-0">
+        <span className="text-sm font-bold text-[#333333]">ユーザー管理</span>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="bg-white border border-[#e0e0e0]">
         {users.length === 0 ? (
-          <div className="px-6 py-8 text-center text-sm text-gray-500">
+          <div className="text-center py-4 text-xs text-[#95a5a6]">
             ユーザーが見つかりません。
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-500 uppercase bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3">名前</th>
-                  <th className="px-6 py-3">メールアドレス</th>
-                  <th className="px-6 py-3">ロール</th>
-                  <th className="px-6 py-3">作成日時</th>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-[#dcdde1] border border-[#bdc3c7]">
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">名前</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">メールアドレス</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">ロール</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">作成日時</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {users.map((user) => {
+              <tbody>
+                {users.map((user, index) => {
                   const isSelf = user.id === session.user?.id;
                   return (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 font-medium text-gray-900">
+                    <tr
+                      key={user.id}
+                      className={`border border-[#e0e0e0] hover:bg-[#eef2f7] ${index % 2 === 0 ? "bg-white" : "bg-[#f9f9f9]"}`}
+                    >
+                      <td className="px-1 py-1 text-xs text-[#2c3e50]">
                         {user.name}
                         {isSelf && (
-                          <span className="ml-2 text-xs text-gray-400">（自分）</span>
+                          <span className="ml-2 text-xs text-[#95a5a6]">（自分）</span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-gray-600">{user.email}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-1 py-1 text-xs text-[#2c3e50]">{user.email}</td>
+                      <td className="px-1 py-1 text-xs">
                         {isSelf ? (
-                          <span className="text-sm text-gray-600">
+                          <span className="text-xs text-[#2c3e50]">
                             {ROLE_LABELS[user.role] ?? user.role}
-                            <span className="ml-2 text-xs text-gray-400">（変更不可）</span>
+                            <span className="ml-2 text-xs text-[#95a5a6]">（変更不可）</span>
                           </span>
                         ) : (
                           <UserRoleSelect
@@ -69,7 +70,7 @@ export default async function UsersPage() {
                           />
                         )}
                       </td>
-                      <td className="px-6 py-4 text-gray-500">
+                      <td className="px-1 py-1 text-xs text-[#7f8c8d]">
                         {new Date(user.createdAt).toLocaleDateString("ja-JP")}
                       </td>
                     </tr>

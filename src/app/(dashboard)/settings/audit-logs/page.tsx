@@ -80,26 +80,24 @@ export default async function AuditLogsPage({
   const hasNext = logs.length === LIMIT;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">監査ログ</h1>
-          <p className="mt-1 text-sm text-gray-500">組織の操作履歴を表示します。</p>
-        </div>
+    <div>
+      {/* Toolbar */}
+      <div className="bg-[#f5f5f5] border border-[#cccccc] px-2 py-1 mb-0 flex items-center justify-between">
+        <span className="text-sm font-bold text-[#333333]">監査ログ</span>
         <a
           href={exportUrl}
           download
-          className={`inline-flex items-center ${BTN_PRIMARY}`}
+          className="text-xs text-[#2980b9] underline"
         >
           CSV ダウンロード
         </a>
       </div>
 
       {/* フィルタ */}
-      <form method="get" className="bg-white border border-gray-200 rounded-lg p-4 space-y-4">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <form method="get" className="bg-[#f5f5f5] border border-[#cccccc] border-t-0 px-2 py-1 mb-0">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 items-end">
           <div>
-            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="startDate" className="block text-xs font-bold text-[#2c3e50] mb-1">
               開始日
             </label>
             <input
@@ -111,7 +109,7 @@ export default async function AuditLogsPage({
             />
           </div>
           <div>
-            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="endDate" className="block text-xs font-bold text-[#2c3e50] mb-1">
               終了日
             </label>
             <input
@@ -123,7 +121,7 @@ export default async function AuditLogsPage({
             />
           </div>
           <div>
-            <label htmlFor="action" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="action" className="block text-xs font-bold text-[#2c3e50] mb-1">
               アクション種別
             </label>
             <select
@@ -140,7 +138,7 @@ export default async function AuditLogsPage({
             </select>
           </div>
         </div>
-        <div className="flex justify-end">
+        <div className="flex justify-end mt-1">
           <button
             type="submit"
             className={BTN_PRIMARY}
@@ -151,39 +149,42 @@ export default async function AuditLogsPage({
       </form>
 
       {/* テーブル */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="bg-white border border-[#e0e0e0] border-t-0">
         {logs.length === 0 ? (
-          <div className="px-6 py-8 text-center text-sm text-gray-500">
+          <div className="text-center py-4 text-xs text-[#95a5a6]">
             監査ログはありません。
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-500 uppercase bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3">日時</th>
-                  <th className="px-6 py-3">アクション</th>
-                  <th className="px-6 py-3">対象種別</th>
-                  <th className="px-6 py-3">対象 ID</th>
-                  <th className="px-6 py-3">実行者 ID</th>
-                  <th className="px-6 py-3">メタデータ</th>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-[#dcdde1] border border-[#bdc3c7]">
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">日時</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">アクション</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">対象種別</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">対象 ID</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">実行者 ID</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">メタデータ</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
+              <tbody>
+                {logs.map((log, index) => (
+                  <tr
+                    key={log.id}
+                    className={`border border-[#e0e0e0] hover:bg-[#eef2f7] ${index % 2 === 0 ? "bg-white" : "bg-[#f9f9f9]"}`}
+                  >
+                    <td className="px-1 py-1 text-xs text-[#7f8c8d] whitespace-nowrap">
                       {log.createdAt.toLocaleString("ja-JP")}
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs">{log.action}</td>
-                    <td className="px-6 py-4 text-gray-600">{log.targetType}</td>
-                    <td className="px-6 py-4 font-mono text-xs text-gray-600">
+                    <td className="px-1 py-1 text-xs text-[#2c3e50]">{log.action}</td>
+                    <td className="px-1 py-1 text-xs text-[#2c3e50]">{log.targetType}</td>
+                    <td className="px-1 py-1 text-xs text-[#2c3e50]">
                       {log.targetId}
                     </td>
-                    <td className="px-6 py-4 font-mono text-xs text-gray-600">
+                    <td className="px-1 py-1 text-xs text-[#2c3e50]">
                       {log.actorId}
                     </td>
-                    <td className="px-6 py-4 text-xs text-gray-500 max-w-xs truncate">
+                    <td className="px-1 py-1 text-xs text-[#7f8c8d] max-w-xs truncate">
                       {JSON.stringify(log.metadata ?? {}).slice(0, 100)}
                     </td>
                   </tr>
@@ -195,23 +196,23 @@ export default async function AuditLogsPage({
       </div>
 
       {/* ページネーション */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mt-2">
         <div>
           {page > 1 && (
             <a
               href={`/settings/audit-logs?${prevFilterParams.toString()}`}
-              className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="text-xs text-[#2980b9] underline"
             >
               ← 前へ
             </a>
           )}
         </div>
-        <div className="text-sm text-gray-500">ページ {page}</div>
+        <div className="text-xs text-[#7f8c8d]">ページ {page}</div>
         <div>
           {hasNext && (
             <a
               href={`/settings/audit-logs?${nextFilterParams.toString()}`}
-              className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="text-xs text-[#2980b9] underline"
             >
               次へ →
             </a>

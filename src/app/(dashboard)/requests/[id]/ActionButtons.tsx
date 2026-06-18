@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { ActionResult } from "@/app/actions/requests";
-import { BTN_PRIMARY, BTN_SUCCESS, BTN_DANGER, BTN_WARNING, INPUT_BASE } from "../../styles";
+import { BTN_SUBMIT, INPUT_BASE } from "../../styles";
 
 export type ServerAction = (formData: FormData) => Promise<ActionResult>;
 
@@ -41,7 +41,7 @@ function ActionForm({
     <form onSubmit={handleSubmit} className={className}>
       {children(isPending)}
       {errorMessage && (
-        <p role="alert" className="mt-2 text-sm text-red-600">
+        <p role="alert" className="mt-2 text-xs text-[#c0392b]">
           {errorMessage}
         </p>
       )}
@@ -64,14 +64,14 @@ export function ActionButtons({
 }) {
   if (requestStatus === "draft") {
     return (
-      <div className="border-t border-gray-200 pt-6">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">アクション</h3>
+      <div className="border-t border-[#e0e0e0] pt-4">
+        <h3 className="text-xs font-bold text-[#2c3e50] mb-2">アクション</h3>
         <ActionForm action={submitAction}>
           {(isPending) => (
             <button
               type="submit"
               disabled={isPending}
-              className={`${BTN_PRIMARY} disabled:opacity-50`}
+              className={BTN_SUBMIT}
             >
               提出する（審査へ）
             </button>
@@ -83,20 +83,21 @@ export function ActionButtons({
 
   if (requestStatus === "pending") {
     return (
-      <div className="border-t border-gray-200 pt-6">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">アクション</h3>
-        <div className="flex gap-3 flex-wrap">
+      <div className="border-t border-[#e0e0e0] pt-4">
+        <h3 className="text-xs font-bold text-[#2c3e50] mb-2">アクション</h3>
+        <div className="flex items-center gap-2 mb-4">
           <ActionForm action={approveAction}>
             {(isPending) => (
               <button
                 type="submit"
                 disabled={isPending}
-                className={`${BTN_SUCCESS} disabled:opacity-50`}
+                className="text-[#1a8a4a] underline text-xs disabled:text-[#bdc3c7] disabled:no-underline disabled:cursor-not-allowed"
               >
-                承認する
+                承認
               </button>
             )}
           </ActionForm>
+          <span className="text-[#7f8c8d] text-xs">|</span>
           <ActionForm action={rejectAction}>
             {(isPending) => (
               <>
@@ -104,16 +105,31 @@ export function ActionButtons({
                 <button
                   type="submit"
                   disabled={isPending}
-                  className={`${BTN_DANGER} disabled:opacity-50`}
+                  className="text-[#c0392b] underline text-xs disabled:text-[#bdc3c7] disabled:no-underline disabled:cursor-not-allowed"
                 >
-                  却下する
+                  却下
+                </button>
+              </>
+            )}
+          </ActionForm>
+          <span className="text-[#7f8c8d] text-xs">|</span>
+          <ActionForm action={rejectAction} className="space-y-2">
+            {(isPending) => (
+              <>
+                <input type="hidden" name="targetStatus" value="revision" />
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="text-[#d35400] underline text-xs disabled:text-[#bdc3c7] disabled:no-underline disabled:cursor-not-allowed"
+                >
+                  差戻
                 </button>
               </>
             )}
           </ActionForm>
         </div>
         {/* 差し戻しフォーム */}
-        <div className="mt-4">
+        <div className="mt-2">
           <ActionForm action={rejectAction} className="space-y-2">
             {(isPending) => (
               <>
@@ -121,7 +137,7 @@ export function ActionButtons({
                 <div>
                   <label
                     htmlFor="revision-comment"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-xs font-bold text-[#2c3e50] mb-1"
                   >
                     差し戻しコメント
                   </label>
@@ -136,7 +152,7 @@ export function ActionButtons({
                 <button
                   type="submit"
                   disabled={isPending}
-                  className={`${BTN_WARNING} disabled:opacity-50`}
+                  className={BTN_SUBMIT}
                 >
                   差し戻す
                 </button>
@@ -150,14 +166,14 @@ export function ActionButtons({
 
   if (requestStatus === "revision") {
     return (
-      <div className="border-t border-gray-200 pt-6">
-        <h3 className="text-sm font-medium text-gray-700 mb-3">アクション</h3>
+      <div className="border-t border-[#e0e0e0] pt-4">
+        <h3 className="text-xs font-bold text-[#2c3e50] mb-2">アクション</h3>
         <ActionForm action={resubmitAction}>
           {(isPending) => (
             <button
               type="submit"
               disabled={isPending}
-              className={`${BTN_PRIMARY} disabled:opacity-50`}
+              className={BTN_SUBMIT}
             >
               再申請する
             </button>

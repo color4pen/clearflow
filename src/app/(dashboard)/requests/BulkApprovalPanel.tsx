@@ -144,7 +144,7 @@ export function BulkApprovalPanel({
     <div>
       {resultMessage && (
         <div
-          className={`mb-4 p-4 rounded-md border ${
+          className={`mb-4 p-4 border ${
             resultType === "success"
               ? "bg-green-50 border-green-300 text-green-800"
               : resultType === "error"
