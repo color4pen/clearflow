@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "ed98ea59-a36d-482b-a71b-1336e4909362",
   "createdAt": "2026-06-18T01:51:46.241Z",
-  "updatedAt": "2026-06-18T02:42:06.975Z",
+  "updatedAt": "2026-06-18T02:44:00.527Z",
   "request": {
     "title": "管理画面（テンプレートCRUD・ユーザー管理）",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/admin-panel-ed98ea59",
   "error": null,
   "pipelineId": "standard",
@@ -39,7 +39,7 @@
     "createdAt": "2026-06-18T02:42:06.969Z"
   },
   "_journal": {
-    "historyCount": 65,
+    "historyCount": 66,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
