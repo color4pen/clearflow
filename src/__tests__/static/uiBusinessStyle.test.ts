@@ -1,6 +1,8 @@
 /**
  * UI business style — static analysis tests
  *
+ * TC-003: styles.ts に BTN_DANGER が定義されている
+ * TC-004: styles.ts に BTN_SUBMIT が定義されている
  * TC-021: RequestWithSteps 型に承認ステップ情報（ApprovalStepSummary[]）が含まれる
  * TC-022: findAllWithStepsByOrganization が Map ベースグルーピングで N+1 を回避する
  * TC-032: styles.ts に BTN_PRIMARY_DISABLED が定義されている
@@ -126,6 +128,36 @@ describe("findAllWithStepsByOrganization grouping logic — TC-022", () => {
     const fnBody = content.slice(fnIdx, fnIdx + 1800);
     expect(fnBody).toContain("stepOrder");
     expect(fnBody).toContain("orderBy");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TC-003: BTN_DANGER が定義されている
+// TC-004: BTN_SUBMIT が定義されている
+// ---------------------------------------------------------------------------
+
+describe("styles.ts constants — TC-003 and TC-004", () => {
+  /**
+   * TC-003: BTN_DANGER が定義されており
+   *         text-[#c0392b] と underline を含む
+   */
+  it("TC-003: styles.ts exports BTN_DANGER containing text-[#c0392b] and underline", async () => {
+    const content = await readSrc("app/(dashboard)/styles.ts");
+    expect(content).toContain("BTN_DANGER");
+    expect(content).toContain("text-[#c0392b]");
+    expect(content).toContain("underline");
+  });
+
+  /**
+   * TC-004: BTN_SUBMIT が定義されており
+   *         bg-[#2980b9]・text-white・rounded-none を含む
+   */
+  it("TC-004: styles.ts exports BTN_SUBMIT containing bg-[#2980b9], text-white, and rounded-none", async () => {
+    const content = await readSrc("app/(dashboard)/styles.ts");
+    expect(content).toContain("BTN_SUBMIT");
+    expect(content).toContain("bg-[#2980b9]");
+    expect(content).toContain("text-white");
+    expect(content).toContain("rounded-none");
   });
 });
 
