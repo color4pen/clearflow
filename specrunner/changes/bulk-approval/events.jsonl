@@ -53,3 +53,9 @@
 {"type":"transition","ts":"2026-06-18T04:00:01.452Z","step":"domain-invariants","status":"ok","message":"domain-invariants iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-18T04:00:01.452Z","step":"step-transition","status":"ok","message":"domain-invariants → code-fixer"}
 {"type":"transition","ts":"2026-06-18T04:00:01.453Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-18T04:00:19.517Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"073e9858-023e-48d9-8f99-0a5eb39ce451","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"reason":"Both domain-invariants findings are LOW severity. Per the fixing policy, LOW severity findings are ignored. No code changes are required.","status":"success"},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-06-18T04:00:01.466Z","endedAt":"2026-06-18T04:00:18.054Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-18T04:00:18.054Z","outputs":[{"path":"specrunner/changes/bulk-approval","hash":null}],"inputs":[{"path":"specrunner/changes/bulk-approval/domain-invariants-result-001.md","hash":"sha256:06f8af860a9b50ba2f76dc80914af2a57998fdc821f89645dc6eb0c668b92b3a"}]}
+{"type":"transition","ts":"2026-06-18T04:00:19.522Z","step":"step-transition","status":"ok","message":"code-fixer → regression-gate"}
+{"type":"transition","ts":"2026-06-18T04:00:19.523Z","step":"regression-gate","status":"started","message":"regression-gate iteration 1 started"}
+{"type":"transition","ts":"2026-06-18T04:00:19.524Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
