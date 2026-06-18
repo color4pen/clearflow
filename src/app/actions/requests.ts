@@ -10,6 +10,7 @@ import {
   rejectRequest,
   resubmitRequest,
   getApprovalSteps,
+  bulkApprove,
 } from "@/application/usecases";
 import { idempotencyKeyRepository } from "@/infrastructure/repositories";
 
@@ -179,6 +180,51 @@ export async function approveRequestAction(
   revalidatePath(`/requests/${requestId}`);
   revalidatePath("/requests");
   return { success: true };
+}
+
+const BULK_APPROVE_MAX = 20;
+
+const bulkApproveSchema = z.array(z.string());
+
+export type BulkApproveActionResult = {
+  success: boolean;
+  message?: string;
+  results?: Array<{ requestId: string; success: boolean; reason?: string }>;
+};
+
+export async function bulkApproveAction(
+  requestIds: string[]
+): Promise<BulkApproveActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: "認証が必要です" };
+  }
+  if (session.user.role === "member") {
+    return { success: false, message: "権限がありません" };
+  }
+
+  if (!Array.isArray(requestIds) || requestIds.length === 0) {
+    return { success: false, message: "申請が選択されていません" };
+  }
+  if (requestIds.length > BULK_APPROVE_MAX) {
+    return { success: false, message: "一括承認は20件までです" };
+  }
+
+  const parsed = bulkApproveSchema.safeParse(requestIds);
+  if (!parsed.success) {
+    return { success: false, message: "入力が不正です" };
+  }
+
+  const result = await bulkApprove({
+    requestIds: parsed.data,
+    actorId: session.user.id,
+    actorRole: session.user.role,
+    organizationId: session.user.organizationId,
+  });
+
+  revalidatePath("/requests");
+
+  return { success: true, results: result.results };
 }
 
 export async function rejectRequestAction(

@@ -362,3 +362,44 @@ describe("Server Action: listApprovalTemplatesAction removed", () => {
     expect(src).not.toContain("listApprovalTemplatesAction");
   });
 });
+
+// ---------------------------------------------------------------------------
+// bulkApproveAction Server Action — bulk-approval feature
+// ---------------------------------------------------------------------------
+
+describe("bulkApproveAction Server Action", () => {
+  it("bulkApproveAction exists in requests.ts", async () => {
+    const src = await readSrc("app/actions/requests.ts");
+    expect(src).toContain("bulkApproveAction");
+  });
+
+  it("bulkApproveAction calls auth() for authentication", async () => {
+    const src = await readSrc("app/actions/requests.ts");
+    const bulkIdx = src.indexOf("bulkApproveAction");
+    expect(bulkIdx).toBeGreaterThan(-1);
+    const bulkBody = src.slice(bulkIdx);
+    expect(bulkBody).toContain("await auth()");
+  });
+
+  it("bulkApproveAction checks for member role", async () => {
+    const src = await readSrc("app/actions/requests.ts");
+    const bulkIdx = src.indexOf("async function bulkApproveAction");
+    expect(bulkIdx).toBeGreaterThan(-1);
+    const bulkBody = src.slice(bulkIdx);
+    expect(bulkBody).toContain('role === "member"');
+  });
+
+  it("requests.ts contains requestIds upper limit of 20", async () => {
+    const src = await readSrc("app/actions/requests.ts");
+    const bulkIdx = src.indexOf("bulkApproveAction");
+    expect(bulkIdx).toBeGreaterThan(-1);
+    // The number 20 must appear in the context of bulk approve validation
+    const bulkSection = src.slice(bulkIdx);
+    expect(bulkSection).toContain("20");
+  });
+
+  it("bulkApproveAction is exported from requests.ts", async () => {
+    const src = await readSrc("app/actions/requests.ts");
+    expect(src).toContain("export async function bulkApproveAction");
+  });
+});

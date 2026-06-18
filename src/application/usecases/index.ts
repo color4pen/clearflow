@@ -15,3 +15,4 @@ export { createDelegation } from "./createDelegation";
 export { deactivateDelegation } from "./deactivateDelegation";
 export { listDelegations } from "./listDelegations";
 export { listOrganizationUsers } from "./listOrganizationUsers";
+export { bulkApprove } from "./bulkApprove";
