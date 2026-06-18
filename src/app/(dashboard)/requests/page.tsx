@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { listRequests } from "@/application/usecases";
+import { listRequests, listOrganizationUsers } from "@/application/usecases";
 import { bulkApproveAction } from "@/app/actions/requests";
 import { BulkApprovalPanel } from "./BulkApprovalPanel";
 import { statusLabel, statusClass } from "./statusUtils";
@@ -9,7 +9,12 @@ export default async function RequestsPage() {
   const session = await auth();
   const organizationId = session!.user.organizationId;
   const role = session!.user.role;
-  const requests = await listRequests(organizationId);
+  const [requests, orgUsers] = await Promise.all([
+    listRequests(organizationId),
+    listOrganizationUsers({ organizationId }),
+  ]);
+
+  const userNameMap = new Map(orgUsers.map((u) => [u.id, u.name]));
 
   const showBulkApproval = role !== "member";
 
@@ -65,6 +70,7 @@ export default async function RequestsPage() {
               statusRowClass: "",
               amount: r.amount,
               creatorId: r.creatorId,
+              creatorName: userNameMap.get(r.creatorId) ?? r.creatorId.slice(0, 8),
               createdAt: r.createdAt,
               approvalSteps: r.approvalSteps,
               currentDeadline,

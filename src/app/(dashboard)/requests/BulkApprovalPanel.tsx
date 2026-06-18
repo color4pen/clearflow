@@ -19,6 +19,7 @@ type RequestItem = {
   statusRowClass: string;
   amount: number | null;
   creatorId: string;
+  creatorName: string;
   createdAt: Date;
   approvalSteps: ApprovalStepItem[];
   currentDeadline: Date | null;
@@ -53,19 +54,33 @@ function formatDeadline(deadline: Date | null): { text: string; urgent: boolean 
 }
 
 function ApprovalProgress({ steps }: { steps: ApprovalStepItem[] }) {
-  if (steps.length === 0) return <span className="text-bg-table-head text-xs">-</span>;
+  if (steps.length === 0) return <span className="text-text-disabled text-xs">-</span>;
+
+  const total = steps.length;
+  const done = steps.filter((s) => s.status === "approved").length;
+  const rejected = steps.find((s) => s.status === "rejected");
+  const current = steps.find((s) => s.status === "pending");
+  const tooltip = steps.map((s) => `${s.approverRole}: ${s.status}`).join("\n");
+
+  if (rejected) {
+    return (
+      <span className="text-xs text-danger" title={tooltip}>
+        ✕ {rejected.approverRole}
+      </span>
+    );
+  }
+
+  if (done === total) {
+    return (
+      <span className="text-xs text-success" title={tooltip}>
+        ✓ {done}/{total}
+      </span>
+    );
+  }
 
   return (
-    <span className="text-xs font-sans whitespace-nowrap">
-      {steps.map((step, i) => (
-        <span key={i}>
-          {i > 0 && <span className="text-text-muted mx-0.5">{"→"}</span>}
-          <span className={step.status === "approved" ? "text-success" : step.status === "rejected" ? "text-danger" : "text-text-muted"}>
-            {step.status === "approved" ? "■" : step.status === "rejected" ? "✕" : "□"}
-          </span>
-          <span className="ml-0.5 text-text-muted">{step.approverRole}</span>
-        </span>
-      ))}
+    <span className="text-xs text-text-muted" title={tooltip}>
+      {done}/{total} {current?.approverRole}
     </span>
   );
 }
@@ -253,7 +268,7 @@ export function BulkApprovalPanel({
                     <ApprovalProgress steps={request.approvalSteps} />
                   </td>
                   <td className={`px-1 py-1 text-xs ${isActionable ? "text-text-secondary" : "text-text-disabled"}`}>
-                    {request.creatorId.slice(0, 8)}
+                    {request.creatorName}
                   </td>
                   <td className={`px-1 py-1 text-xs font-sans ${idColor}`}>
                     {String(request.createdAt.getMonth() + 1).padStart(2, "0")}/{String(request.createdAt.getDate()).padStart(2, "0")}

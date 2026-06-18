@@ -22,6 +22,8 @@ export default async function DelegationsSettingsPage() {
     ? delegationsResult.delegations ?? []
     : [];
 
+  const userNameMap = new Map(orgUsers.map((u) => [u.id, u.name]));
+
   return (
     <div>
       {/* Toolbar */}
@@ -38,8 +40,8 @@ export default async function DelegationsSettingsPage() {
         ) : (
           <DataTable
             columns={[
-              { key: "fromUserId", header: "委譲元ユーザーID", render: (d) => <span className="text-text-muted">{d.fromUserId}</span> },
-              { key: "toUserId", header: "委譲先ユーザーID", render: (d) => <span className="text-text-muted">{d.toUserId}</span> },
+              { key: "fromUserId", header: "委譲元ユーザー", render: (d) => <span className="text-text-muted">{userNameMap.get(d.fromUserId) ?? d.fromUserId}</span> },
+              { key: "toUserId", header: "委譲先ユーザー", render: (d) => <span className="text-text-muted">{userNameMap.get(d.toUserId) ?? d.toUserId}</span> },
               { key: "fromUserRole", header: "委譲元ロール", render: (d) => <span className="text-text">{d.fromUserRole}</span> },
               {
                 key: "startDate",
