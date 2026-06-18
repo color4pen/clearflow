@@ -4,7 +4,7 @@
 
 ### Requirement: ダッシュボードヘッダーは36px以下の高さで濃紺背景である
 
-The dashboard header SHALL use `bg-slate-900` background with `py-1` or less padding, resulting in a height of 36px or less. The logo "Clearflow" SHALL be displayed in white text at 13px. Navigation links (申請一覧・設定・監査ログ) SHALL be placed inline within the header. User name, role, and logout MUST be positioned at the right end. The settings link SHALL be visible to all roles, while the audit log link SHALL be visible only to admin.
+The dashboard header SHALL use `bg-slate-900` background with `py-1` or less padding, resulting in a height of 36px or less. The logo "Clearflow" SHALL be displayed in white text at 13px. Navigation links (申請一覧・設定・監査ログ) SHALL be placed inline within the header. User name, role, and logout MUST be positioned at the right end. The settings link and audit log link SHALL be visible only to admin (既存の settings/layout.tsx の admin リダイレクトと整合).
 
 #### Scenario: ヘッダーの外観
 
@@ -22,7 +22,7 @@ The dashboard header SHALL use `bg-slate-900` background with `py-1` or less pad
 
 **Given** member ロールでログインしている
 **When** ヘッダーを確認する
-**Then** 「申請一覧」「設定」のリンクが表示され、「監査ログ」は表示されない
+**Then** 「申請一覧」のリンクのみが表示され、「設定」「監査ログ」は表示されない
 
 ### Requirement: ステータス表示はバッジスタイルを使わず色テキストのみで表現する
 

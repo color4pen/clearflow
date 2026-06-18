@@ -52,7 +52,7 @@
 - [ ] ロゴ「Clearflow」を `text-white text-[13px] font-bold` に変更。サブテキスト「承認ワークフロー」を削除
 - [ ] ナビゲーションリンクをヘッダー内に追加:
   - 「申請一覧」(`/requests`) — 全ロール表示
-  - 「設定」(`/settings/templates`) — 全ロール表示（各設定ページ側で admin チェック済み）
+  - 「設定」(`/settings/templates`) — admin のみ表示（既存の settings/layout.tsx が非 admin を /requests にリダイレクトするため、全ロール表示にすると機能しないリンクになる）
   - 「監査ログ」(`/settings/audit-logs`) — admin のみ表示
   - スタイル: `text-slate-300 hover:text-white text-xs`
 - [ ] ユーザー情報を右端に配置: `text-slate-300 text-xs` でユーザー名とロールを1行に
@@ -63,7 +63,7 @@
 - ヘッダーが `bg-slate-900` 背景で `py-1` パディング（36px以下）
 - ナビゲーションリンクがヘッダー内にインライン配置されている
 - admin 以外のロールで「監査ログ」リンクが表示されない
-- admin 以外のロールで「設定」リンクが表示される
+- admin 以外のロールで「設定」リンクが表示されない
 - `bun run build` が成功する
 
 ## T-04: 申請一覧のデータ取得拡張（承認ステップ情報の付加）
@@ -79,7 +79,7 @@
     approvalSteps: ApprovalStepSummary[];
   };
   ```
-- [ ] `src/infrastructure/repositories/requestRepository.ts` に `findAllWithStepsByOrganization(organizationId: string): Promise<RequestWithSteps[]>` を追加。requests を取得後、approval_steps テーブルから該当リクエストのステップを JOIN で取得し、リクエストごとにグループ化して返す
+- [ ] `src/infrastructure/repositories/requestRepository.ts` に `findAllWithStepsByOrganization(organizationId: string): Promise<RequestWithSteps[]>` を追加。単一 SQL クエリで `requests LEFT JOIN approval_steps ON approval_steps.request_id = requests.id AND approval_steps.organization_id = requests.organization_id` を実行し、結果セットをアプリケーション層で requestId ごとにグループ化して `RequestWithSteps[]` に変換する（N+1 クエリを避ける）
 - [ ] `src/application/usecases/listRequests.ts` を更新:
   - 戻り値型を `RequestWithSteps[]` に変更
   - `requestRepository.findAllWithStepsByOrganization` を呼び出すように変更
