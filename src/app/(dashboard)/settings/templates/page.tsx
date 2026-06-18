@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { listTemplatesAction, deleteTemplateAction } from "@/app/actions/templates";
+import { listTemplatesAction } from "@/app/actions/templates";
+import { DeleteButton } from "./DeleteButton";
 
 export default async function TemplatesPage() {
   const session = await auth();
@@ -48,13 +49,6 @@ export default async function TemplatesPage() {
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {templates.map((template) => {
-                  const templateId = template.id;
-
-                  async function handleDelete() {
-                    "use server";
-                    await deleteTemplateAction(templateId);
-                  }
-
                   const amountLabel =
                     template.minAmount != null && template.maxAmount != null
                       ? `${template.minAmount.toLocaleString()}〜${template.maxAmount.toLocaleString()}円`
@@ -84,14 +78,7 @@ export default async function TemplatesPage() {
                           >
                             編集
                           </Link>
-                          <form action={handleDelete}>
-                            <button
-                              type="submit"
-                              className="text-xs text-red-600 hover:text-red-800 border border-red-300 rounded px-2 py-0.5 hover:bg-red-50"
-                            >
-                              削除
-                            </button>
-                          </form>
+                          <DeleteButton templateId={template.id} />
                         </div>
                       </td>
                     </tr>

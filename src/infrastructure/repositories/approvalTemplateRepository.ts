@@ -44,14 +44,7 @@ export async function findById(
 }
 
 /**
- * Returns templates that match the given amount condition, ordered so that
- * specific templates (with minAmount or maxAmount set) come before the default
- * template (both null). This ensures selectTemplate picks the most specific
- * match when using "first found" algorithm.
- *
- * - amount is null: returns only templates where minAmount IS NULL AND maxAmount IS NULL
- * - amount is specified: returns templates where
- *   (minAmount IS NULL OR minAmount <= amount) AND (maxAmount IS NULL OR maxAmount >= amount)
+ * Creates a new approval template and returns the persisted record.
  */
 export async function create(
   data: {
@@ -124,6 +117,16 @@ export async function deleteById(
     );
 }
 
+/**
+ * Returns templates that match the given amount condition, ordered so that
+ * specific templates (with minAmount or maxAmount set) come before the default
+ * template (both null). This ensures selectTemplate picks the most specific
+ * match when using "first found" algorithm.
+ *
+ * - amount is null: returns only templates where minAmount IS NULL AND maxAmount IS NULL
+ * - amount is specified: returns templates where
+ *   (minAmount IS NULL OR minAmount <= amount) AND (maxAmount IS NULL OR maxAmount >= amount)
+ */
 export async function findByOrganizationForAmount(
   organizationId: string,
   amount: number | null
