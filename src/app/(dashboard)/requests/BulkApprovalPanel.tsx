@@ -19,6 +19,7 @@ type RequestItem = {
   statusRowClass: string;
   amount: number | null;
   creatorId: string;
+  creatorName: string;
   createdAt: Date;
   approvalSteps: ApprovalStepItem[];
   currentDeadline: Date | null;
@@ -253,7 +254,7 @@ export function BulkApprovalPanel({
                     <ApprovalProgress steps={request.approvalSteps} />
                   </td>
                   <td className={`px-1 py-1 text-xs ${isActionable ? "text-text-secondary" : "text-text-disabled"}`}>
-                    {request.creatorId.slice(0, 8)}
+                    {request.creatorName}
                   </td>
                   <td className={`px-1 py-1 text-xs font-sans ${idColor}`}>
                     {String(request.createdAt.getMonth() + 1).padStart(2, "0")}/{String(request.createdAt.getDate()).padStart(2, "0")}

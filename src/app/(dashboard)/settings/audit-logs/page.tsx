@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
 import { auditLogRepository } from "@/infrastructure/repositories";
+import { listOrganizationUsers } from "@/application/usecases";
 import { PageToolbar, DataTable, SectionCard, FormField, Input, Select } from "@/app/components";
 
 const LIMIT = 50;
@@ -50,13 +51,18 @@ export default async function AuditLogsPage({
 
   const action = actionStr || undefined;
 
-  const logs = await auditLogRepository.findByOrganization(session.user.organizationId, {
-    limit: LIMIT,
-    offset,
-    startDate,
-    endDate,
-    action,
-  });
+  const [logs, orgUsers] = await Promise.all([
+    auditLogRepository.findByOrganization(session.user.organizationId, {
+      limit: LIMIT,
+      offset,
+      startDate,
+      endDate,
+      action,
+    }),
+    listOrganizationUsers({ organizationId: session.user.organizationId }),
+  ]);
+
+  const userNameMap = new Map(orgUsers.map((u) => [u.id, u.name]));
 
   // Build export URL with current filter conditions
   const exportParams = new URLSearchParams();
@@ -161,7 +167,7 @@ export default async function AuditLogsPage({
               { key: "action", header: "アクション", render: (log) => <span className="text-text">{log.action}</span> },
               { key: "targetType", header: "対象種別", render: (log) => <span className="text-text">{log.targetType}</span> },
               { key: "targetId", header: "対象 ID", render: (log) => <span className="text-text">{log.targetId}</span> },
-              { key: "actorId", header: "実行者 ID", render: (log) => <span className="text-text">{log.actorId}</span> },
+              { key: "actorId", header: "実行者", render: (log) => <span className="text-text">{userNameMap.get(log.actorId) ?? log.actorId}</span> },
               {
                 key: "metadata",
                 header: "メタデータ",
