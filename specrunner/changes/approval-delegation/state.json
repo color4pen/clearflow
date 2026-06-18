@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f9372fed-9233-412f-b743-f5f9d5dec551",
   "createdAt": "2026-06-18T01:51:42.316Z",
-  "updatedAt": "2026-06-18T03:06:26.786Z",
+  "updatedAt": "2026-06-18T03:09:22.372Z",
   "request": {
     "title": "代理承認",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/approval-delegation-f9372fed",
   "error": null,
   "pipelineId": "standard",
@@ -34,8 +34,13 @@
     }
   ],
   "resumePoint": null,
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/13",
+    "number": 13,
+    "createdAt": "2026-06-18T03:09:22.365Z"
+  },
   "_journal": {
-    "historyCount": 76,
+    "historyCount": 81,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -48,7 +53,9 @@
       "code-fixer": 3,
       "domain-invariants": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
