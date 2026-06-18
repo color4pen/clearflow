@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { listRequests } from "@/application/usecases";
+import { bulkApproveAction } from "@/app/actions/requests";
+import { BulkApprovalPanel } from "./BulkApprovalPanel";
 import type { RequestStatus } from "@/domain/models/request";
 
 function statusLabel(status: RequestStatus): string {
@@ -27,15 +29,15 @@ function statusClass(status: RequestStatus): string {
   return classes[status];
 }
 
-function formatAmount(amount: number | null): string {
-  if (amount === null) return "-";
-  return amount.toLocaleString("ja-JP") + "円";
-}
-
 export default async function RequestsPage() {
   const session = await auth();
   const organizationId = session!.user.organizationId;
+  const role = session!.user.role;
   const requests = await listRequests(organizationId);
+
+  const showBulkApproval = role !== "member";
+
+  const boundBulkApproveAction = bulkApproveAction.bind(null);
 
   return (
     <div>
@@ -60,60 +62,19 @@ export default async function RequestsPage() {
           </Link>
         </div>
       ) : (
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  タイトル
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ステータス
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  金額
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  作成日時
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {requests.map((request) => (
-                <tr
-                  key={request.id}
-                  className="hover:bg-gray-50 cursor-pointer"
-                >
-                  <td className="px-6 py-4">
-                    <Link
-                      href={`/requests/${request.id}`}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
-                    >
-                      {request.title}
-                    </Link>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${statusClass(request.status)}`}
-                    >
-                      {statusLabel(request.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {formatAmount(request.amount)}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500">
-                    {request.createdAt.toLocaleDateString("ja-JP", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <BulkApprovalPanel
+          requests={requests.map((r) => ({
+            id: r.id,
+            title: r.title,
+            status: r.status,
+            statusText: statusLabel(r.status),
+            statusClass: statusClass(r.status),
+            amount: r.amount,
+            createdAt: r.createdAt,
+          }))}
+          bulkApproveAction={boundBulkApproveAction}
+          showBulkApproval={showBulkApproval}
+        />
       )}
     </div>
   );

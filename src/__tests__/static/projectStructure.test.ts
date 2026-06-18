@@ -817,3 +817,44 @@ describe("File structure (proxy vs middleware)", () => {
     expect(exists).toBe(false);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Bulk approval UI — one-time approval list
+// ---------------------------------------------------------------------------
+
+describe("Bulk approval UI", () => {
+  it("BulkApprovalPanel.tsx exists", async () => {
+    const exists = await fileExists(
+      "src/app/(dashboard)/requests/BulkApprovalPanel.tsx"
+    );
+    expect(exists).toBe(true);
+  });
+
+  it("BulkApprovalPanel.tsx has use client directive", async () => {
+    const content = await readSrc(
+      "app/(dashboard)/requests/BulkApprovalPanel.tsx"
+    );
+    expect(content).toContain('"use client"');
+  });
+
+  it("BulkApprovalPanel.tsx contains checkbox input", async () => {
+    const content = await readSrc(
+      "app/(dashboard)/requests/BulkApprovalPanel.tsx"
+    );
+    const hasCheckbox =
+      content.includes("checkbox") || content.includes('type="checkbox"');
+    expect(hasCheckbox).toBe(true);
+  });
+
+  it("BulkApprovalPanel.tsx contains disabled attribute for button", async () => {
+    const content = await readSrc(
+      "app/(dashboard)/requests/BulkApprovalPanel.tsx"
+    );
+    expect(content).toContain("disabled");
+  });
+
+  it("requests/page.tsx imports BulkApprovalPanel", async () => {
+    const content = await readSrc("app/(dashboard)/requests/page.tsx");
+    expect(content).toContain("BulkApprovalPanel");
+  });
+});
