@@ -1,26 +1,60 @@
 # Verification Result — simple-rate-limit — iter 1
 
-## Verdict: failed
+## Verdict: passed
 
 ## Phase Results
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | failed | 9.1s | 1 |
+| 1 | build | passed | 8.5s | 0 |
 | 2 | typecheck | skipped | — | — |
 | 3 | test | skipped | — | — |
-| 4 | lint | skipped | — | — |
+| 4 | lint | passed | 3.0s | 0 |
 | 5 | security | skipped | — | — |
-| 6 | test-coverage | skipped | — | — |
+| 6 | test-coverage | passed | 0.0s | 0 |
 
 ## Phase: build
-
-Step 'build' failed
 
 ```
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
+✓ Compiled successfully in 4.8s
+  Running TypeScript ...
+  Finished TypeScript in 2.4s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/15) ...
+  Generating static pages using 7 workers (3/15) 
+  Generating static pages using 7 workers (7/15) 
+  Generating static pages using 7 workers (11/15) 
+✓ Generating static pages using 7 workers (15/15) in 188ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /api/audit-logs/export
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/cron/expire-requests
+├ ○ /login
+├ ƒ /requests
+├ ƒ /requests/[id]
+├ ƒ /requests/new
+├ ƒ /settings/audit-logs
+├ ƒ /settings/delegations
+├ ƒ /settings/templates
+├ ƒ /settings/templates/[id]/edit
+├ ƒ /settings/templates/new
+├ ƒ /settings/users
+├ ƒ /settings/webhooks
+└ ƒ /settings/webhooks/[id]/deliveries
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
 
 $ next build
 ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
@@ -30,51 +64,6 @@ $ next build
  Detected additional lockfiles: 
    * bun.lock
 
-
-> Build error occurred
-Error: Turbopack build failed with 1 errors:
-./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/infrastructure/repositories/userRepository.ts:26:23
-the name `findByOrganization` is defined multiple times
-  [90m24 |[0m [36mtype[0m [33mUserWithPassword[0m = [33mUser[0m & { hashedPassword: string };
-  [90m25 |[0m
-[31m[1m>[0m [90m26 |[0m [36mexport[0m [36masync[0m [36mfunction[0m findByOrganization(
-  [90m   |[0m                       [31m[1m^^^^^^^^^^^^^^^^^^[0m
-  [90m27 |[0m   organizationId: string
-  [90m28 |[0m ): [33mPromise[0m<[33mUser[0m[]> {
-  [90m29 |[0m   [36mconst[0m result = [36mawait[0m db
-
-Ecmascript file had an error
-
-Import traces:
-  #1 [App Route]:
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/infrastructure/repositories/userRepository.ts
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/infrastructure/repositories/index.ts
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/app/api/audit-logs/export/route.ts
-
-  #2 [Middleware]:
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/infrastructure/repositories/userRepository.ts
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/infrastructure/auth.ts
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/proxy.ts
-
-  #3 [Server Component]:
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/infrastructure/repositories/userRepository.ts
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/application/usecases/listOrganizationUsers.ts
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/app/(dashboard)/settings/delegations/page.tsx
-
-  #4 [Server Component]:
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/infrastructure/repositories/userRepository.ts
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/infrastructure/repositories/index.ts
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/app/(dashboard)/settings/audit-logs/page.tsx
-
-  #5 [App Route]:
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/infrastructure/repositories/userRepository.ts
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/application/usecases/createDelegation.ts
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/application/usecases/index.ts
-    ./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/app/api/cron/expire-requests/route.ts
-
-
-    at <unknown> (./.git/specrunner-worktrees/simple-rate-limit-4ac1ce1d/src/infrastructure/repositories/userRepository.ts:26:23)
-error: script "build" exited with code 1
 
 ```
 
@@ -88,7 +77,18 @@ _(skipped — script not found in package.json)_
 
 ## Phase: lint
 
-_(skipped — script not found in package.json)_
+```
+
+src/app/(dashboard)/settings/templates/DeleteButton.tsx
+  9:24  warning  '_prev' is defined but never used      @typescript-eslint/no-unused-vars
+  9:38  warning  '_formData' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+
+
+$ eslint
+
+```
 
 ## Phase: security
 
@@ -96,4 +96,6 @@ _(skipped — script not found in package.json)_
 
 ## Phase: test-coverage
 
-_(skipped — script not found in package.json)_
+```
+test-coverage: 26/26 must TCs covered
+```
