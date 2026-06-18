@@ -93,3 +93,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/ui-business-all-pages/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-18T12:47:39.642Z","endedAt":"2026-06-18T12:47:41.284Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-18T12:47:41.284Z","outputs":[{"path":"specrunner/changes/ui-business-all-pages/pr-create-result.md","hash":"sha256:9e3f5334e6479b0af26c896bc45280f9cd34ec7c8e6662ba87e2cd844ec59b47"}],"inputs":[{"path":"change/ui-business-all-pages-f5e14d22","hash":null}]}
 {"type":"transition","ts":"2026-06-18T12:47:41.291Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-18T12:49:36.029Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
