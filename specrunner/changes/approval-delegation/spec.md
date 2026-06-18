@@ -64,7 +64,7 @@
 
 ### Requirement: Delegation data SHALL be fetched inside transaction
 
-`approveRequest` および `rejectRequest` usecase は、トランザクション内で `findActiveByToUserId` を呼び出し、最新の委譲データで `canApprove` を判定しなければならない（SHALL）。TOCTOU 防止。
+`approveRequest` usecase は、トランザクション内で `findActiveByToUserId` を呼び出し、最新の委譲データで `canApprove` を判定しなければならない（SHALL）。TOCTOU 防止。`rejectRequest` への委譲チェック追加は本 request のスコープ外（tasks.md T-10 参照）。
 
 #### Scenario: Delegation revoked during approval
 
@@ -87,6 +87,26 @@
 **Given** User C が manager ロールで、委譲なしで承認ステップを承認する
 **When** 承認操作を行う
 **Then** 作成される audit_log の metadata に `delegatedFrom` は含まれない
+
+### Requirement: createDelegation SHALL record audit log on success
+
+`createDelegation` usecase は、委譲の作成が成功した場合、`audit_logs` にその操作を記録しなければならない（SHALL）。失敗時（バリデーションエラー等）は記録しない。
+
+#### Scenario: Delegation creation is logged
+
+**Given** admin ユーザーが有効な委譲を作成する
+**When** `createDelegation` usecase が正常に完了する
+**Then** `audit_logs` に委譲作成を示すレコードが作成される
+
+### Requirement: deactivateDelegation SHALL record audit log
+
+`deactivateDelegation` usecase は、委譲の無効化が成功した場合、`audit_logs` にその操作を記録しなければならない（SHALL）。対象委譲が存在しない場合は記録しない。
+
+#### Scenario: Delegation deactivation is logged
+
+**Given** アクティブな委譲が存在する
+**When** `deactivateDelegation` usecase が正常に完了する
+**Then** `audit_logs` に委譲無効化を示すレコードが作成される
 
 ### Requirement: Delegation management SHALL be admin-only
 

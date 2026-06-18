@@ -38,7 +38,7 @@
 
 ### D2: トランザクション内で委譲データを取得する
 
-**採用**: `approveRequest` / `rejectRequest` の TX 内で `findActiveByToUserId` を呼び出し、最新の委譲データで `canApprove` を判定する。
+**採用**: `approveRequest` の TX 内で `findActiveByToUserId` を呼び出し、最新の委譲データで `canApprove` を判定する。
 
 **却下**: pre-TX スナップショット方式 — 承認操作中に委譲が無効化された場合、取り消し済みの委譲で承認が通る可能性がある。
 
@@ -78,7 +78,7 @@
 
 **[Risk]** 代理承認で承認チェーン（代理の代理）が発生しうる → **Mitigation**: スコープ外として明示。`findActiveByToUserId` は `toUserId` で直接検索するため、チェーンは構造的に発生しない。
 
-**[Risk]** `rejectRequest` usecase にはロールベースの `canApprove` チェックがない → **Mitigation**: `rejectRequest` でも委譲データを取得し、代理権限の検証を追加する。action 層の `role === "member"` チェックだけでなく、usecase 層で承認権限を確認する。
+**[Risk]** `rejectRequest` usecase にはロールベースの `canApprove` チェックがない → **Mitigation**: 本 request のスコープ外とする（tasks.md T-10 参照）。action 層の `role === "member"` チェックは既存のまま維持し、委譲チェックの追加は将来のセキュリティ強化 request で対応する。
 
 **[Trade-off]** `isActive` フラグと期間の二重管理 — `endDate < now` でも `isActive = true` のレコードが残る。自動期限切れ処理はスコープ外のため、クエリ時に `endDate >= now` を併用して判定する。
 
