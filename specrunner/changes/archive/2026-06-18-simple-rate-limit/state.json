@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "4ac1ce1d-4246-4ac4-b79d-d958c341f57c",
   "createdAt": "2026-06-18T03:17:24.472Z",
-  "updatedAt": "2026-06-18T04:14:51.318Z",
+  "updatedAt": "2026-06-18T04:16:19.980Z",
   "request": {
     "title": "シンプルなレート制限",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/simple-rate-limit-4ac1ce1d",
   "error": null,
   "pipelineId": "standard",
@@ -39,7 +39,7 @@
     "createdAt": "2026-06-18T04:14:51.309Z"
   },
   "_journal": {
-    "historyCount": 70,
+    "historyCount": 71,
     "stepCounts": {
       "request-review": 1,
       "design": 1,

@@ -101,3 +101,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/simple-rate-limit/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-18T04:14:49.633Z","endedAt":"2026-06-18T04:14:51.310Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-18T04:14:51.310Z","outputs":[{"path":"specrunner/changes/simple-rate-limit/pr-create-result.md","hash":"sha256:91c4be335b8916fc5da7e8a906dc26876ef5b6281573906546e260d718cbf64b"}],"inputs":[{"path":"feat/simple-rate-limit-4ac1ce1d","hash":null}]}
 {"type":"transition","ts":"2026-06-18T04:14:51.318Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-18T04:16:19.980Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
