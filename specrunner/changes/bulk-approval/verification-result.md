@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 8.3s | 0 |
+| 1 | build | passed | 9.7s | 0 |
 | 2 | typecheck | skipped | — | — |
 | 3 | test | skipped | — | — |
-| 4 | lint | passed | 2.8s | 0 |
+| 4 | lint | passed | 2.3s | 0 |
 | 5 | security | skipped | — | — |
 | 6 | test-coverage | passed | 0.0s | 0 |
 
@@ -19,15 +19,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 4.6s
+✓ Compiled successfully in 5.4s
   Running TypeScript ...
-  Finished TypeScript in 2.4s ...
+  Finished TypeScript in 2.8s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/15) ...
   Generating static pages using 7 workers (3/15) 
   Generating static pages using 7 workers (7/15) 
   Generating static pages using 7 workers (11/15) 
-✓ Generating static pages using 7 workers (15/15) in 146ms
+✓ Generating static pages using 7 workers (15/15) in 139ms
   Finalizing page optimization ...
 
 Route (app)
