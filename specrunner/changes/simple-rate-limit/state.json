@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "4ac1ce1d-4246-4ac4-b79d-d958c341f57c",
   "createdAt": "2026-06-18T03:17:24.472Z",
-  "updatedAt": "2026-06-18T04:10:53.135Z",
+  "updatedAt": "2026-06-18T04:11:30.086Z",
   "request": {
     "title": "シンプルなレート制限",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "regression-gate",
+  "step": "conformance",
   "status": "running",
   "branch": "feat/simple-rate-limit-4ac1ce1d",
   "error": null,
@@ -34,7 +34,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 51,
+    "historyCount": 56,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -45,7 +45,8 @@
       "build-fixer": 1,
       "code-review": 2,
       "code-fixer": 1,
-      "domain-invariants": 1
+      "domain-invariants": 1,
+      "regression-gate": 1
     }
   }
 }
