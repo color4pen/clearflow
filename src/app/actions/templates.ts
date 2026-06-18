@@ -51,7 +51,12 @@ export async function createTemplateAction(
   if (session.user.role !== "admin") return { success: false as const, message: "権限がありません" };
 
   const rawSteps = formData.get("steps");
-  const parsedSteps = rawSteps ? JSON.parse(rawSteps as string) : [];
+  let parsedSteps: unknown;
+  try {
+    parsedSteps = rawSteps ? JSON.parse(rawSteps as string) : [];
+  } catch {
+    return { success: false as const, message: "ステップのJSON形式が不正です" };
+  }
 
   const rawData = {
     name: formData.get("name") as string,
@@ -110,7 +115,12 @@ export async function updateTemplateAction(
   if (!id) return { success: false as const, message: "テンプレート ID が必要です" };
 
   const rawSteps = formData.get("steps");
-  const parsedSteps = rawSteps ? JSON.parse(rawSteps as string) : [];
+  let parsedSteps: unknown;
+  try {
+    parsedSteps = rawSteps ? JSON.parse(rawSteps as string) : [];
+  } catch {
+    return { success: false as const, message: "ステップのJSON形式が不正です" };
+  }
 
   const rawData = {
     name: formData.get("name") as string,

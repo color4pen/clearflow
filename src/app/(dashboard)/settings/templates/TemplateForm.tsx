@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createTemplateAction, updateTemplateAction } from "@/app/actions/templates";
 import type { ApprovalTemplate } from "@/domain/models/approvalTemplate";
@@ -61,9 +61,11 @@ export function TemplateForm(props: Props) {
   );
 
   // Redirect on success
-  if (state?.success === true) {
-    router.push("/settings/templates");
-  }
+  useEffect(() => {
+    if (state?.success === true) {
+      router.push("/settings/templates");
+    }
+  }, [state, router]);
 
   function addStep() {
     setSteps((prev) => [...prev, { approverRole: "manager" }]);
