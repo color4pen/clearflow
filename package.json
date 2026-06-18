@@ -6,7 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "db:push": "bunx drizzle-kit push",
+    "db:generate": "bunx drizzle-kit generate",
+    "db:seed": "bun src/infrastructure/seed.ts",
+    "db:reset": "bun src/infrastructure/reset.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",
