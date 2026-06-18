@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "fee2d456-f84b-4514-b4fa-a785eae5e3a7",
   "createdAt": "2026-06-18T03:17:29.675Z",
-  "updatedAt": "2026-06-18T03:36:05.161Z",
+  "updatedAt": "2026-06-18T03:50:08.957Z",
   "request": {
     "title": "一括承認",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "implementer",
+  "step": "code-review",
   "status": "running",
   "branch": "feat/bulk-approval-fee2d456",
   "error": null,
@@ -34,12 +34,14 @@
     }
   ],
   "_journal": {
-    "historyCount": 16,
+    "historyCount": 25,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
       "spec-review": 1,
-      "test-case-gen": 1
+      "test-case-gen": 1,
+      "implementer": 1,
+      "verification": 1
     }
   }
 }
