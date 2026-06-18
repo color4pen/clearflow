@@ -4,23 +4,6 @@ import type { Transaction } from "../db";
 import { users } from "../schema";
 import type { User, Role } from "@/domain/models/user";
 
-export async function findByOrganization(
-  organizationId: string
-): Promise<User[]> {
-  const rows = await db
-    .select()
-    .from(users)
-    .where(eq(users.organizationId, organizationId));
-  return rows.map((row) => ({
-    id: row.id,
-    email: row.email,
-    name: row.name,
-    organizationId: row.organizationId,
-    role: row.role,
-    createdAt: row.createdAt,
-  }));
-}
-
 type UserWithPassword = User & { hashedPassword: string };
 
 export async function findByOrganization(
