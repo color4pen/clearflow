@@ -13,7 +13,7 @@ export async function checkRateLimit(params: {
   limit: number;
   windowMs: number;
 }): Promise<{ allowed: boolean; remaining: number }> {
-  const threshold = new Date(Date.now() - params.windowMs);
+  const thresholdMs = params.windowMs;
 
   const rows = await db
     .insert(rateLimitRecords)
@@ -25,8 +25,8 @@ export async function checkRateLimit(params: {
     .onConflictDoUpdate({
       target: rateLimitRecords.key,
       set: {
-        count: sql`CASE WHEN window_start >= ${threshold} THEN count + 1 ELSE 1 END`,
-        windowStart: sql`CASE WHEN window_start >= ${threshold} THEN window_start ELSE NOW() END`,
+        count: sql`CASE WHEN "rate_limit_records"."window_start" >= NOW() - INTERVAL '1 millisecond' * ${thresholdMs} THEN "rate_limit_records"."count" + 1 ELSE 1 END`,
+        windowStart: sql`CASE WHEN "rate_limit_records"."window_start" >= NOW() - INTERVAL '1 millisecond' * ${thresholdMs} THEN "rate_limit_records"."window_start" ELSE NOW() END`,
       },
     })
     .returning({ count: rateLimitRecords.count });
