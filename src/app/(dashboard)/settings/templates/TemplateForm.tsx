@@ -4,7 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createTemplateAction, updateTemplateAction } from "@/app/actions/templates";
 import type { ApprovalTemplate } from "@/domain/models/approvalTemplate";
-import { BTN_PRIMARY, BTN_SECONDARY, INPUT_BASE } from "../../styles";
+import { BTN_SUBMIT, BTN_SECONDARY, INPUT_BASE } from "../../styles";
 
 type ActionState =
   | null
@@ -95,15 +95,15 @@ export function TemplateForm(props: Props) {
   return (
     <div>
       {state?.success === false && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-800">{state.message}</p>
+        <div className="mb-4 p-4 bg-red-50 border border-red-200">
+          <p className="text-xs text-[#c0392b]">{state.message}</p>
         </div>
       )}
 
       <form
         action={formAction}
         onSubmit={handleSubmit}
-        className="space-y-6"
+        className="space-y-4"
       >
         {/* Hidden fields */}
         <input type="hidden" name="steps" defaultValue="" />
@@ -115,7 +115,7 @@ export function TemplateForm(props: Props) {
         <div>
           <label
             htmlFor="name"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-xs font-bold text-[#2c3e50] mb-1"
           >
             テンプレート名 <span className="text-red-500">*</span>
           </label>
@@ -135,7 +135,7 @@ export function TemplateForm(props: Props) {
           <div>
             <label
               htmlFor="minAmount"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-xs font-bold text-[#2c3e50] mb-1"
             >
               最小金額（円）
             </label>
@@ -156,7 +156,7 @@ export function TemplateForm(props: Props) {
           <div>
             <label
               htmlFor="maxAmount"
-              className="block text-sm font-medium text-gray-700"
+              className="block text-xs font-bold text-[#2c3e50] mb-1"
             >
               最大金額（円）
             </label>
@@ -178,28 +178,28 @@ export function TemplateForm(props: Props) {
 
         {/* Approval steps */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-700">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-bold text-[#2c3e50]">
               承認ステップ <span className="text-red-500">*</span>
             </h3>
             <button
               type="button"
               onClick={addStep}
-              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              className="text-xs text-[#2980b9] underline"
             >
               + ステップを追加
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-2">
             {steps.map((step, index) => (
               <div
                 key={index}
-                className="flex items-start gap-3 p-3 border border-gray-200 rounded-md bg-gray-50"
+                className="flex items-start gap-3 p-2 border border-[#e0e0e0] bg-[#f9f9f9]"
               >
-                <div className="flex-1 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="flex-1 grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                    <label className="block text-xs font-bold text-[#2c3e50] mb-1">
                       承認者ロール <span className="text-red-500">*</span>
                     </label>
                     <select
@@ -211,7 +211,7 @@ export function TemplateForm(props: Props) {
                           e.target.value as Step["approverRole"]
                         )
                       }
-                      className="block w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="block w-full border border-[#cccccc] rounded-none px-2 py-1 text-xs focus:border-[#2980b9] focus:outline-none"
                     >
                       {ROLE_OPTIONS.map((opt) => (
                         <option key={opt.value} value={opt.value}>
@@ -221,7 +221,7 @@ export function TemplateForm(props: Props) {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">
+                    <label className="block text-xs font-bold text-[#2c3e50] mb-1">
                       期限（時間）
                     </label>
                     <input
@@ -236,16 +236,16 @@ export function TemplateForm(props: Props) {
                         )
                       }
                       placeholder="例: 48"
-                      className="block w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="block w-full border border-[#cccccc] rounded-none px-2 py-1 text-xs focus:border-[#2980b9] focus:outline-none"
                     />
                   </div>
                 </div>
-                <div className="pt-5">
+                <div className="pt-4">
                   <button
                     type="button"
                     onClick={() => removeStep(index)}
                     disabled={steps.length <= 1}
-                    className="text-xs text-red-500 hover:text-red-700 disabled:text-gray-300 disabled:cursor-not-allowed"
+                    className="text-xs text-[#c0392b] underline disabled:text-[#bdc3c7] disabled:no-underline disabled:cursor-not-allowed"
                   >
                     削除
                   </button>
@@ -260,7 +260,7 @@ export function TemplateForm(props: Props) {
           <button
             type="submit"
             disabled={pending}
-            className={`${BTN_PRIMARY} disabled:opacity-50`}
+            className={BTN_SUBMIT}
           >
             {pending
               ? "保存中..."

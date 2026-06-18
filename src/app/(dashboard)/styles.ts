@@ -1,22 +1,30 @@
-export const BTN_PRIMARY =
-  "px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500";
+export const BTN_PRIMARY = "text-[#2980b9] underline text-xs";
 
-export const BTN_PRIMARY_DISABLED = `${BTN_PRIMARY} disabled:opacity-50 disabled:cursor-not-allowed`;
+export const BTN_PRIMARY_DISABLED =
+  "text-[#2980b9] underline text-xs disabled:text-[#bdc3c7] disabled:no-underline disabled:cursor-not-allowed";
 
-export const BTN_SECONDARY =
-  "px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50";
+export const BTN_SECONDARY = "text-xs text-[#7f8c8d] underline";
 
-export const BTN_DANGER =
-  "px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500";
+export const BTN_DANGER = "text-[#c0392b] underline text-xs";
 
-export const BTN_SUCCESS =
-  "px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500";
+export const BTN_SUCCESS = "text-[#1a8a4a] underline text-xs";
 
-export const BTN_WARNING =
-  "px-4 py-2 bg-orange-500 text-white text-sm font-medium rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500";
+export const BTN_WARNING = "text-[#d35400] underline text-xs";
 
 export const INPUT_BASE =
-  "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
+  "w-full border border-[#cccccc] rounded-none px-2 py-1 text-xs focus:border-[#2980b9] focus:outline-none";
 
 export const SELECT_BASE =
-  "block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
+  "block w-full border border-[#cccccc] rounded-none px-2 py-1 text-xs focus:border-[#2980b9] focus:outline-none";
+
+export const BTN_SUBMIT =
+  "bg-[#2980b9] text-white text-xs px-3 py-1 rounded-none disabled:opacity-50 disabled:cursor-not-allowed";
+
+export const TOOLBAR = "bg-[#f5f5f5] border border-[#cccccc] px-2 py-1";
+
+export const SECTION_CARD = "bg-white border border-[#e0e0e0]";
+
+export const FOOTER_BAR =
+  "bg-[#f5f5f5] border border-[#cccccc] border-t-0 px-2 py-0.5 text-xs text-[#7f8c8d]";
+
+export const FORM_LABEL = "text-xs font-bold text-[#2c3e50]";

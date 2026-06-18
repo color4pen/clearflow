@@ -22,28 +22,28 @@ describe("statusUtils — statusClass", () => {
   /**
    * TC-008: 各ステータスの色クラスが正しくマッピングされている
    */
-  it("TC-008: draft returns text-gray-500 font-medium", () => {
-    expect(statusClass("draft")).toBe("text-gray-500 font-medium");
+  it("TC-008: draft returns text-[#2980b9]", () => {
+    expect(statusClass("draft")).toBe("text-[#2980b9]");
   });
 
-  it("TC-008: pending returns text-amber-700 font-bold", () => {
-    expect(statusClass("pending")).toBe("text-amber-700 font-bold");
+  it("TC-008: pending returns text-[#d4880f] font-bold", () => {
+    expect(statusClass("pending")).toBe("text-[#d4880f] font-bold");
   });
 
-  it("TC-008: approved returns text-emerald-700 font-medium", () => {
-    expect(statusClass("approved")).toBe("text-emerald-700 font-medium");
+  it("TC-008: approved returns text-[#1a8a4a]", () => {
+    expect(statusClass("approved")).toBe("text-[#1a8a4a]");
   });
 
-  it("TC-008: rejected returns text-red-700 font-medium", () => {
-    expect(statusClass("rejected")).toBe("text-red-700 font-medium");
+  it("TC-008: rejected returns text-[#c0392b]", () => {
+    expect(statusClass("rejected")).toBe("text-[#c0392b]");
   });
 
-  it("TC-008: revision returns text-orange-600 font-bold", () => {
-    expect(statusClass("revision")).toBe("text-orange-600 font-bold");
+  it("TC-008: revision returns text-[#d35400] font-bold", () => {
+    expect(statusClass("revision")).toBe("text-[#d35400] font-bold");
   });
 
-  it("TC-008: expired returns text-gray-400 font-medium", () => {
-    expect(statusClass("expired")).toBe("text-gray-400 font-medium");
+  it("TC-008: expired returns text-[#999999]", () => {
+    expect(statusClass("expired")).toBe("text-[#999999]");
   });
 });
 

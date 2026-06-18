@@ -15,18 +15,18 @@ export function SettingsNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="border-b border-gray-200">
-      <div className="flex gap-1">
+    <nav className="bg-[#f5f5f5] border border-[#cccccc]">
+      <div className="flex gap-0">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`px-4 py-2 text-sm transition-colors ${
+              className={`px-4 py-2 text-xs transition-colors ${
                 isActive
-                  ? "border-b-2 border-blue-600 text-blue-600 font-medium"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "text-[#2c3e50] font-bold bg-white border-b-0"
+                  : "text-[#7f8c8d] hover:text-[#2c3e50]"
               }`}
             >
               {item.label}

@@ -6,7 +6,7 @@ import {
   deactivateDelegationAction,
 } from "@/app/actions/delegations";
 import { listOrganizationUsers } from "@/application/usecases";
-import { BTN_PRIMARY, SELECT_BASE, INPUT_BASE } from "../../styles";
+import { BTN_SUBMIT, SELECT_BASE, INPUT_BASE } from "../../styles";
 
 export default async function DelegationsSettingsPage() {
   const session = await auth();
@@ -23,39 +23,34 @@ export default async function DelegationsSettingsPage() {
     : [];
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">代理承認設定</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          承認権限の委譲（代理承認）を管理します。
-        </p>
+    <div>
+      {/* Toolbar */}
+      <div className="bg-[#f5f5f5] border border-[#cccccc] px-2 py-1 mb-0">
+        <span className="text-sm font-bold text-[#333333]">代理承認設定</span>
       </div>
 
       {/* Delegation list */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">委譲一覧</h2>
-        </div>
+      <div className="bg-white border border-[#e0e0e0] mb-2">
         {delegations.length === 0 ? (
-          <div className="px-6 py-8 text-center text-sm text-gray-500">
+          <div className="text-center py-4 text-xs text-[#95a5a6]">
             登録済みの委譲はありません。
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-500 uppercase bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3">委譲元ユーザーID</th>
-                  <th className="px-6 py-3">委譲先ユーザーID</th>
-                  <th className="px-6 py-3">委譲元ロール</th>
-                  <th className="px-6 py-3">開始日</th>
-                  <th className="px-6 py-3">終了日</th>
-                  <th className="px-6 py-3">状態</th>
-                  <th className="px-6 py-3">操作</th>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-[#dcdde1] border border-[#bdc3c7]">
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">委譲元ユーザーID</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">委譲先ユーザーID</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">委譲元ロール</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">開始日</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">終了日</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">状態</th>
+                  <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">操作</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
-                {delegations.map((delegation) => {
+              <tbody>
+                {delegations.map((delegation, index) => {
                   const delegationId = delegation.id;
 
                   async function handleDeactivate() {
@@ -64,33 +59,32 @@ export default async function DelegationsSettingsPage() {
                   }
 
                   return (
-                    <tr key={delegation.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 font-mono text-xs">{delegation.fromUserId}</td>
-                      <td className="px-6 py-4 font-mono text-xs">{delegation.toUserId}</td>
-                      <td className="px-6 py-4">{delegation.fromUserRole}</td>
-                      <td className="px-6 py-4 text-gray-500">
+                    <tr
+                      key={delegation.id}
+                      className={`border border-[#e0e0e0] hover:bg-[#eef2f7] ${index % 2 === 0 ? "bg-white" : "bg-[#f9f9f9]"}`}
+                    >
+                      <td className="px-1 py-1 text-xs text-[#7f8c8d]">{delegation.fromUserId}</td>
+                      <td className="px-1 py-1 text-xs text-[#7f8c8d]">{delegation.toUserId}</td>
+                      <td className="px-1 py-1 text-xs text-[#2c3e50]">{delegation.fromUserRole}</td>
+                      <td className="px-1 py-1 text-xs text-[#7f8c8d]">
                         {new Date(delegation.startDate).toLocaleDateString("ja-JP")}
                       </td>
-                      <td className="px-6 py-4 text-gray-500">
+                      <td className="px-1 py-1 text-xs text-[#7f8c8d]">
                         {new Date(delegation.endDate).toLocaleDateString("ja-JP")}
                       </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                            delegation.isActive
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-600"
-                          }`}
-                        >
-                          {delegation.isActive ? "有効" : "無効"}
-                        </span>
+                      <td className="px-1 py-1 text-xs">
+                        {delegation.isActive ? (
+                          <span className="text-[#1a8a4a] text-xs font-bold">有効</span>
+                        ) : (
+                          <span className="text-[#95a5a6] text-xs">無効</span>
+                        )}
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-1 py-1 text-xs">
                         {delegation.isActive && (
                           <form action={handleDeactivate}>
                             <button
                               type="submit"
-                              className="text-xs text-red-600 hover:text-red-800 border border-red-300 rounded px-2 py-0.5 hover:bg-red-50"
+                              className="text-xs text-[#c0392b] underline"
                             >
                               無効化
                             </button>
@@ -107,11 +101,11 @@ export default async function DelegationsSettingsPage() {
       </div>
 
       {/* Add delegation form */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-medium text-gray-900">委譲を追加</h2>
+      <div className="bg-white border border-[#e0e0e0]">
+        <div className="bg-[#f5f5f5] border-b border-[#cccccc] px-2 py-1">
+          <span className="text-sm font-bold text-[#333333]">委譲を追加</span>
         </div>
-        <div className="px-6 py-4">
+        <div className="p-4">
           <form
             action={async (formData: FormData) => {
               "use server";
@@ -123,7 +117,7 @@ export default async function DelegationsSettingsPage() {
               <div>
                 <label
                   htmlFor="fromUserId"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-xs font-bold text-[#2c3e50] mb-1"
                 >
                   委譲元ユーザー
                 </label>
@@ -144,7 +138,7 @@ export default async function DelegationsSettingsPage() {
               <div>
                 <label
                   htmlFor="toUserId"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-xs font-bold text-[#2c3e50] mb-1"
                 >
                   委譲先ユーザー
                 </label>
@@ -165,7 +159,7 @@ export default async function DelegationsSettingsPage() {
               <div>
                 <label
                   htmlFor="startDate"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-xs font-bold text-[#2c3e50] mb-1"
                 >
                   開始日
                 </label>
@@ -180,7 +174,7 @@ export default async function DelegationsSettingsPage() {
               <div>
                 <label
                   htmlFor="endDate"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-xs font-bold text-[#2c3e50] mb-1"
                 >
                   終了日
                 </label>
@@ -196,7 +190,7 @@ export default async function DelegationsSettingsPage() {
             <div>
               <button
                 type="submit"
-                className={BTN_PRIMARY}
+                className={BTN_SUBMIT}
               >
                 委譲を追加
               </button>

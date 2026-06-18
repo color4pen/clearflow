@@ -9,15 +9,12 @@ export default async function NewTemplatePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">テンプレートを追加</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          新しい承認テンプレートを作成します。
-        </p>
+    <div>
+      <div className="bg-[#f5f5f5] border border-[#cccccc] px-2 py-1 mb-0">
+        <span className="text-sm font-bold text-[#333333]">テンプレートを追加</span>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+      <div className="bg-white border border-[#e0e0e0] p-4">
         <TemplateForm mode="create" />
       </div>
     </div>

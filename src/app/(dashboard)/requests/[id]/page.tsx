@@ -31,11 +31,11 @@ function DeadlineDisplay({ deadline }: { deadline: Date | null }) {
   const isExpired = deadline < now;
   if (isExpired) {
     return (
-      <p className="text-xs text-red-600 font-medium">期限切れ</p>
+      <span className="text-xs text-[#c0392b] font-bold">期限切れ</span>
     );
   }
   return (
-    <p className="text-xs text-gray-500">{formatRemainingTime(deadline, now)}</p>
+    <span className="text-xs text-[#7f8c8d]">{formatRemainingTime(deadline, now)}</span>
   );
 }
 
@@ -43,47 +43,57 @@ function ApprovalStepsSection({ steps }: { steps: ApprovalStep[] }) {
   if (steps.length === 0) return null;
 
   return (
-    <div className="mb-6">
-      <h3 className="text-sm font-medium text-gray-700 mb-3">承認ステップ</h3>
-      <ol className="space-y-3">
-        {steps.map((step) => (
-          <li key={step.id} className="flex items-start gap-3 p-3 border border-gray-200 rounded-md">
-            <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center text-xs font-semibold text-gray-600">
-              {step.stepOrder}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-sm font-medium text-gray-800">
-                  {step.approverRole}
-                </span>
-                <span className={`text-xs ${stepStatusClass(step.status)}`}>
+    <div className="mb-4">
+      <h3 className="text-xs font-bold text-[#2c3e50] mb-2">承認ステップ</h3>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-[#dcdde1] border border-[#bdc3c7]">
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">No.</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">承認者ロール</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">ステータス</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">承認者名</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">処理日時</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">期限</th>
+              <th className="px-1 py-1.5 text-xs text-[#2c3e50] font-bold text-left">コメント</th>
+            </tr>
+          </thead>
+          <tbody>
+            {steps.map((step, index) => (
+              <tr
+                key={step.id}
+                className={`border border-[#e0e0e0] ${index % 2 === 0 ? "bg-white" : "bg-[#f9f9f9]"}`}
+              >
+                <td className="px-1 py-1 text-xs text-[#2c3e50]">{step.stepOrder}</td>
+                <td className="px-1 py-1 text-xs text-[#2c3e50]">{step.approverRole}</td>
+                <td className={`px-1 py-1 text-xs ${stepStatusClass(step.status)}`}>
                   {stepStatusLabel(step.status)}
-                </span>
-              </div>
-              {step.approvedByName && (
-                <p className="text-xs text-gray-500">承認者: {step.approvedByName}</p>
-              )}
-              {step.approvedAt && (
-                <p className="text-xs text-gray-500">
-                  {step.approvedAt.toLocaleDateString("ja-JP", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              )}
-              <DeadlineDisplay deadline={step.deadline} />
-              {step.comment && (
-                <p className="mt-1 text-xs text-orange-700 bg-orange-50 rounded px-2 py-1">
-                  差し戻しコメント: {step.comment}
-                </p>
-              )}
-            </div>
-          </li>
-        ))}
-      </ol>
+                </td>
+                <td className="px-1 py-1 text-xs text-[#2c3e50]">
+                  {step.approvedByName ?? "—"}
+                </td>
+                <td className="px-1 py-1 text-xs text-[#7f8c8d]">
+                  {step.approvedAt
+                    ? step.approvedAt.toLocaleDateString("ja-JP", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "—"}
+                </td>
+                <td className="px-1 py-1 text-xs">
+                  <DeadlineDisplay deadline={step.deadline} />
+                </td>
+                <td className="px-1 py-1 text-xs text-[#d35400]">
+                  {step.comment ?? ""}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -111,78 +121,81 @@ export default async function RequestDetailPage({
 
   return (
     <div>
-      <div className="mb-6">
+      <div className="mb-2">
         <Link
           href="/requests"
-          className="text-sm text-blue-600 hover:text-blue-800"
+          className="text-xs text-[#2980b9] underline"
         >
           ← 申請一覧に戻る
         </Link>
       </div>
 
-      <div className="bg-white shadow rounded-lg p-6 max-w-2xl">
-        <div className="flex items-start justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">{request.title}</h2>
-          <span className={`text-sm ${statusClass(request.status)}`}>
+      <div className="bg-white border border-[#e0e0e0]">
+        {/* Toolbar */}
+        <div className="bg-[#f5f5f5] border border-[#cccccc] px-2 py-1 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-[#333333]">{request.title}</h2>
+          <span className={`text-xs ${statusClass(request.status)}`}>
             {statusLabel(request.status)}
           </span>
         </div>
 
-        {request.description && (
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">説明</h3>
-            <p className="text-gray-600 whitespace-pre-wrap">
-              {request.description}
-            </p>
-          </div>
-        )}
+        <div className="p-4">
+          {request.description && (
+            <div className="mb-4">
+              <h3 className="text-xs font-bold text-[#2c3e50] mb-1">説明</h3>
+              <p className="text-xs text-[#2c3e50] whitespace-pre-wrap">
+                {request.description}
+              </p>
+            </div>
+          )}
 
-        <div className="grid grid-cols-2 gap-4 mb-6 text-sm">
-          <div>
-            <span className="text-gray-500">作成日時</span>
-            <p className="text-gray-900 mt-1">
-              {request.createdAt.toLocaleDateString("ja-JP", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <span className="text-xs text-[#7f8c8d]">作成日時</span>
+              <p className="text-xs text-[#2c3e50] mt-0.5">
+                {request.createdAt.toLocaleDateString("ja-JP", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+            <div>
+              <span className="text-xs text-[#7f8c8d]">更新日時</span>
+              <p className="text-xs text-[#2c3e50] mt-0.5">
+                {request.updatedAt.toLocaleDateString("ja-JP", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+            <div>
+              <span className="text-xs text-[#7f8c8d]">金額</span>
+              <p className="text-xs text-[#2c3e50] mt-0.5">
+                {request.amount !== null
+                  ? request.amount.toLocaleString("ja-JP") + "円"
+                  : "-"}
+              </p>
+            </div>
           </div>
-          <div>
-            <span className="text-gray-500">更新日時</span>
-            <p className="text-gray-900 mt-1">
-              {request.updatedAt.toLocaleDateString("ja-JP", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
-          </div>
-          <div>
-            <span className="text-gray-500">金額</span>
-            <p className="text-gray-900 mt-1">
-              {request.amount !== null
-                ? request.amount.toLocaleString("ja-JP") + "円"
-                : "-"}
-            </p>
-          </div>
+
+          {/* Approval steps progress */}
+          <ApprovalStepsSection steps={steps} />
+
+          {/* Action buttons based on status */}
+          <ActionButtons
+            requestStatus={request.status}
+            submitAction={submitAction}
+            approveAction={approveAction}
+            rejectAction={rejectAction}
+            resubmitAction={resubmitAction}
+          />
         </div>
-
-        {/* Approval steps progress */}
-        <ApprovalStepsSection steps={steps} />
-
-        {/* Action buttons based on status */}
-        <ActionButtons
-          requestStatus={request.status}
-          submitAction={submitAction}
-          approveAction={approveAction}
-          rejectAction={rejectAction}
-          resubmitAction={resubmitAction}
-        />
       </div>
     </div>
   );

@@ -614,8 +614,8 @@ describe("UI — deadline display in ApprovalStepsSection", () => {
     // statusClass moved to statusUtils.ts (T-02 refactoring)
     const src = await readSrc("app/(dashboard)/requests/statusUtils.ts");
     expect(src).toContain("expired:");
-    // New style: color-text only (badge style removed per T-02)
-    expect(src).toContain("text-gray-400");
+    // New style: business system hex color for expired
+    expect(src).toContain("text-[#999999]");
   });
 
   it("shows remaining time for future deadlines", async () => {
