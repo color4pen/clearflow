@@ -15,6 +15,7 @@ export type Inquiry = {
   requestId: string | null;
   createdAt: Date;
   updatedAt: Date;
+  version: number;
 };
 
 export type InquiryWithClient = Inquiry & {

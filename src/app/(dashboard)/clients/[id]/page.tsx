@@ -28,18 +28,15 @@ export default async function ClientDetailPage({
   const session = await auth();
   const organizationId = session!.user.organizationId;
 
-  const [client, contacts, allInquiries] = await Promise.all([
+  const [client, contacts, relatedInquiries] = await Promise.all([
     clientRepository.findById(id, organizationId),
     clientRepository.findContactsByClientId(id),
-    inquiryRepository.findAllByOrganization(organizationId),
+    inquiryRepository.findByClientId(id, organizationId),
   ]);
 
   if (!client) {
     notFound();
   }
-
-  // 当該顧客に関連する引き合いのみ絞り込む
-  const relatedInquiries = allInquiries.filter((inq) => inq.clientId === client.id);
 
   return (
     <div>

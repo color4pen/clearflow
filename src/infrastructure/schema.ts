@@ -259,6 +259,8 @@ export const inquiries = pgTable("inquiries", {
   requestId: uuid("request_id").references(() => requests.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  // 楽観ロック: converted 遷移で重複承認リクエスト生成を防ぐ
+  version: integer("version").notNull().default(1),
 });
 
 // Auth.js adapter tables

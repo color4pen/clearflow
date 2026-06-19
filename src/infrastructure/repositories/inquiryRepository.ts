@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { inquiries, clients } from "../schema";
@@ -18,6 +18,7 @@ function mapRow(row: typeof inquiries.$inferSelect): Inquiry {
     requestId: row.requestId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    version: row.version,
   };
 }
 
@@ -121,13 +122,35 @@ export async function updateStatus(
   organizationId: string,
   status: InquiryStatus,
   requestId: string | null,
+  currentVersion: number,
   tx?: Transaction
 ): Promise<Inquiry | null> {
   const queryRunner = tx ?? db;
   const result = await queryRunner
     .update(inquiries)
-    .set({ status, requestId, updatedAt: new Date() })
-    .where(and(eq(inquiries.id, id), eq(inquiries.organizationId, organizationId)))
+    .set({ status, requestId, updatedAt: new Date(), version: sql`version + 1` })
+    .where(
+      and(
+        eq(inquiries.id, id),
+        eq(inquiries.organizationId, organizationId),
+        eq(inquiries.version, currentVersion)
+      )
+    )
     .returning();
   return result[0] ? mapRow(result[0]) : null;
+}
+
+/**
+ * 特定顧客に紐づく引き合いを organizationId でテナント分離して取得する。
+ */
+export async function findByClientId(
+  clientId: string,
+  organizationId: string
+): Promise<Inquiry[]> {
+  const result = await db
+    .select()
+    .from(inquiries)
+    .where(and(eq(inquiries.clientId, clientId), eq(inquiries.organizationId, organizationId)))
+    .orderBy(inquiries.createdAt);
+  return result.map(mapRow);
 }

@@ -80,6 +80,7 @@ export async function updateInquiryStatus(data: {
           data.organizationId,
           data.newStatus,
           newRequest.id,
+          inquiry.version,
           tx
         );
 
@@ -119,7 +120,7 @@ export async function updateInquiryStatus(data: {
       });
 
       if (!updatedInquiry) {
-        return { ok: false, reason: "引き合いのステータス更新に失敗しました" };
+        return { ok: false, reason: "この引き合いは他のユーザーによって更新されました" };
       }
       return { ok: true, inquiry: updatedInquiry };
     } catch (err) {
@@ -138,6 +139,7 @@ export async function updateInquiryStatus(data: {
         data.organizationId,
         data.newStatus,
         null,
+        inquiry.version,
         tx
       );
 
@@ -160,7 +162,7 @@ export async function updateInquiryStatus(data: {
     });
 
     if (!updatedInquiry) {
-      return { ok: false, reason: "引き合いのステータス更新に失敗しました" };
+      return { ok: false, reason: "この引き合いは他のユーザーによって更新されました" };
     }
     return { ok: true, inquiry: updatedInquiry };
   } catch (err) {

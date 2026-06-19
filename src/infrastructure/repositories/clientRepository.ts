@@ -132,6 +132,10 @@ export async function createContact(
   return mapContactRow(result[0]);
 }
 
+/**
+ * 指定顧客の担当者一覧を取得する。
+ * テナント分離の前提: 呼び出し前に findById で clientId が organizationId に属することを確認すること。
+ */
 export async function findContactsByClientId(
   clientId: string,
   tx?: Transaction
