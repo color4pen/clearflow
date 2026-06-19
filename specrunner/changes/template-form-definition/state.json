@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "3948f2fa-cf0e-4407-ad7f-c8eceb3bb057",
   "createdAt": "2026-06-19T04:29:06.617Z",
-  "updatedAt": "2026-06-19T04:29:08.665Z",
+  "updatedAt": "2026-06-19T04:36:37.315Z",
   "request": {
     "title": "テンプレートにフォーム定義を追加し、金額ベースのテンプレート選択を廃止",
     "type": "spec-change",
@@ -33,8 +33,11 @@
       ]
     }
   ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 6,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }

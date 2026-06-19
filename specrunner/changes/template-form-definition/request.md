@@ -31,16 +31,16 @@
 
 ## 要件
 
-1. **テンプレートに fields 定義を追加**: `approval_templates` テーブルの `minAmount` / `maxAmount` カラムを削除し、`fields` (jsonb) カラムを追加する。`fields` はフォーム項目の定義配列: `[{ name: string, label: string, type: "text" | "number" | "date" | "textarea" | "select", required: boolean, options?: string[] }]`。`title` フィールドは全テンプレートで暗黙に存在し、fields には含めない
-2. **テンプレートに承認条件ルールを追加**: `approval_templates` の `steps` jsonb を拡張し、各ステップに `condition?: { field: string, operator: "gt" | "gte" | "lt" | "lte" | "eq", value: number }` を追加する。条件付きステップは、フォーム入力値が条件を満たす場合のみ生成される。条件なしステップは常に生成される
-3. **requests テーブルの変更**: 固定の `description` / `amount` カラムを廃止し、`formData` (jsonb) カラムを追加する。`title` カラムは維持する。`formData` にはテンプレートの fields 定義に従って入力されたデータを格納する
+1. **テンプレートに fields 定義を追加**: `approval_templates` テーブルの `minAmount` / `maxAmount` カラムを削除し、`fields` (jsonb) カラムを追加する。`fields` はフォーム項目の定義配列: `[{ name: string, label: string, type: "text" | "number" | "date" | "textarea" | "select", required: boolean, options?: string[] }]`。`title` フィールドは全テンプレートで暗黙に存在し、fields には含めない。`type: "select"` の場合 `options` は必須とし、バリデーション時に検証する
+2. **テンプレートに承認条件ルールを追加**: `approval_templates` の `steps` jsonb を拡張し、各ステップに `condition?: { field: string, operator: "gt" | "gte" | "lt" | "lte" | "eq", value: number }` を追加する。condition は `type: "number"` のフィールドにのみ適用可能とする。条件付きステップは、フォーム入力値が条件を満たす場合のみ生成される。条件なしステップは常に生成される
+3. **requests テーブルの変更**: 固定の `description` / `amount` カラムを廃止し、`formData` (jsonb) カラムを追加する。`title` と `templateId` (FK to approval_templates, nullable) カラムは維持する。`formData` の格納形式は `{ [name]: { value: unknown, label: string } }` とし、表示時にテンプレートを参照せずにラベルを取得可能にする
 4. **Request ドメインモデル更新**: `description: string | null` と `amount: number | null` を `formData: Record<string, unknown>` に置換する
 5. **ApprovalTemplate ドメインモデル更新**: `minAmount` / `maxAmount` を削除し、`fields: TemplateField[]` を追加する。`ApprovalTemplateStep` に `condition?: StepCondition` を追加する
 6. **テンプレート選択の変更**: `templateSelectionService.ts` と `findByOrganizationForAmount` を削除する。`createRequest` usecase を変更し、`templateId` をユーザーが明示的に選択する方式に戻す。承認ステップ生成時に `condition` を評価し、条件を満たすステップのみ生成する
 7. **申請作成UIの変更**: テンプレート選択ドロップダウンを復活させる。テンプレート選択後、そのテンプレートの `fields` に基づいて動的にフォーム項目を描画する。金額入力は固定フィールドではなく、テンプレートのfields定義で `type: "number"` として定義される
 8. **申請詳細・一覧の変更**: `description` / `amount` の固定表示を `formData` のキー・値ペア表示に変更する。一覧テーブルの「金額」列は、formData 内に `type: "number"` かつ `name: "amount"` のフィールドがあればその値を表示し、なければ `-` を表示する
 9. **テンプレート管理UIの変更**: fields エディタを追加する。フィールドの追加・削除・並べ替え。ステップに条件を設定するUIを追加する。`minAmount` / `maxAmount` の入力欄を削除する
-10. **シードデータ更新**: 3つのテンプレートを更新する — 「経費申請」（fields: 金額, 用途, 支払先）、「購買申請」（fields: 金額, 品名, 数量, 納期）、「休暇申請」（fields: 開始日, 終了日, 理由）。経費・購買テンプレートの承認ステップに条件を設定（金額 > 100000 で finance ステップ追加）
+10. **シードデータ更新**: 3つのテンプレートを更新する — 「経費申請」（fields: `amount`/金額/number/required, `purpose`/用途/text/required, `vendor`/支払先/text/optional）、「購買申請」（fields: `amount`/金額/number/required, `item`/品名/text/required, `quantity`/数量/number/required, `deliveryDate`/納期/date/optional）、「休暇申請」（fields: `startDate`/開始日/date/required, `endDate`/終了日/date/required, `reason`/理由/textarea/optional）。経費・購買テンプレートの承認ステップに条件を設定（`{ field: "amount", operator: "gt", value: 100000 }` で finance ステップ追加）
 11. **既存データの互換性**: migration で既存の `description` / `amount` データを `formData` に移行する。`description` → `formData.description`、`amount` → `formData.amount`
 12. **監査ログ・Webhook**: formData の変更は既存の仕組みで自動的に対応される（Request オブジェクトが変わるだけ）
 
@@ -64,6 +64,7 @@
 - [ ] 条件付きステップが条件を満たす場合のみ生成されることをテストで確認する
 - [ ] 条件付きステップが条件を満たさない場合に生成されないことをテストで確認する
 - [ ] 既存データの migration が formData に変換されること
+- [ ] createRequest Server Action がテンプレートの fields 定義を参照し、required: true のフィールドが formData に含まれることを検証する
 - [ ] 依存方向 `actions → usecases → domain / infrastructure` を遵守
 - [ ] `typecheck` が green
 
