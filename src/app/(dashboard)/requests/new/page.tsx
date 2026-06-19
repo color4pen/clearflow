@@ -30,7 +30,10 @@ export default function NewRequestPage() {
 
   const [templates, setTemplates] = useState<ApprovalTemplate[]>([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
-  const [selectedTemplate, setSelectedTemplate] = useState<ApprovalTemplate | null>(null);
+
+  const selectedTemplate: ApprovalTemplate | null = selectedTemplateId
+    ? templates.find((t) => t.id === selectedTemplateId) ?? null
+    : null;
 
   useEffect(() => {
     listTemplatesForRequestAction().then((result) => {
@@ -39,15 +42,6 @@ export default function NewRequestPage() {
       }
     });
   }, []);
-
-  useEffect(() => {
-    if (selectedTemplateId) {
-      const tmpl = templates.find((t) => t.id === selectedTemplateId) ?? null;
-      setSelectedTemplate(tmpl);
-    } else {
-      setSelectedTemplate(null);
-    }
-  }, [selectedTemplateId, templates]);
 
   useEffect(() => {
     // Redirect on success (no errors, no message, and state has been touched)
