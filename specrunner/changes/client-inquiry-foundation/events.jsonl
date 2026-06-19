@@ -5,3 +5,11 @@
 {"type":"lineage","step":"request-review","ts":"2026-06-19T14:15:38.405Z","outputs":[{"path":"specrunner/changes/client-inquiry-foundation/request-review-result-002.md","hash":null}],"inputs":[{"path":"specrunner/changes/client-inquiry-foundation/request.md","hash":"sha256:c59198cac51dc29a1471b2ec03bda3c024ade06fce547b4c6f0561bb8999cbc3"}]}
 {"type":"transition","ts":"2026-06-19T14:15:39.928Z","step":"step-transition","status":"ok","message":"request-review → design"}
 {"type":"transition","ts":"2026-06-19T14:15:39.930Z","step":"design-started","status":"started","message":"Starting design step"}
+{"type":"transition","ts":"2026-06-19T22:15:52.987Z","step":"stale-detection","status":"ok","message":"running → awaiting-resume: Process not running"}
+{"type":"transition","ts":"2026-06-19T22:16:01.768Z","step":"resume","status":"ok","message":"awaiting-resume → running: Resuming from step 'spec-review'"}
+{"type":"transition","ts":"2026-06-19T22:16:01.808Z","step":"spec-review","status":"started","message":"spec-review iteration 1 started"}
+{"type":"transition","ts":"2026-06-19T22:16:01.810Z","step":"spec-review-started","status":"started","message":"Starting spec-review step"}
+{"type":"transition","ts":"2026-06-19T22:20:20.064Z","step":"stale-detection","status":"ok","message":"running → awaiting-resume: Process not running"}
+{"type":"transition","ts":"2026-06-19T22:20:20.067Z","step":"resume","status":"ok","message":"awaiting-resume → running: Resuming from step 'spec-review'"}
+{"type":"transition","ts":"2026-06-19T22:20:20.101Z","step":"spec-review","status":"started","message":"spec-review iteration 1 started"}
+{"type":"transition","ts":"2026-06-19T22:20:20.102Z","step":"spec-review-started","status":"started","message":"Starting spec-review step"}
