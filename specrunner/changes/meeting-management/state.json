@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "15b79b86-fe80-4434-96dd-7543c9bf10e8",
   "createdAt": "2026-06-19T23:29:51.412Z",
-  "updatedAt": "2026-06-19T23:39:26.315Z",
+  "updatedAt": "2026-06-19T23:43:21.827Z",
   "request": {
     "title": "商談管理",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "spec-review",
+  "step": "test-case-gen",
   "status": "running",
   "branch": "feat/meeting-management-15b79b86",
   "error": null,
@@ -34,10 +34,11 @@
     }
   ],
   "_journal": {
-    "historyCount": 9,
+    "historyCount": 13,
     "stepCounts": {
       "request-review": 1,
-      "design": 1
+      "design": 1,
+      "spec-review": 1
     }
   }
 }
