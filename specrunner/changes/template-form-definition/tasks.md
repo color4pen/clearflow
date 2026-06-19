@@ -6,13 +6,13 @@
 - [ ] `src/domain/models/approvalTemplate.ts` — `StepCondition` 型を追加する: `{ field: string, operator: "gt" | "gte" | "lt" | "lte" | "eq", value: number }`
 - [ ] `src/domain/models/approvalTemplate.ts` — `ApprovalTemplateStep` に `condition?: StepCondition` を追加する
 - [ ] `src/domain/models/approvalTemplate.ts` — `ApprovalTemplate` から `minAmount: number | null` と `maxAmount: number | null` を削除し、`fields: TemplateField[]` を追加する
-- [ ] `src/domain/models/request.ts` — `Request` から `description: string | null` と `amount: number | null` を削除し、`formData: Record<string, unknown>` と `templateId: string | null` を追加する
+- [ ] `src/domain/models/request.ts` — `Request` から `description: string | null` と `amount: number | null` を削除し、`formData: Record<string, { value: unknown; label: string }>` と `templateId: string | null` を追加する
 - [ ] `src/domain/models/index.ts` — `TemplateField`, `StepCondition` を export に追加する
 
 **Acceptance Criteria**:
 - `ApprovalTemplate` 型に `fields: TemplateField[]` が存在し、`minAmount` / `maxAmount` が存在しない
 - `ApprovalTemplateStep` に `condition?: StepCondition` が存在する
-- `Request` 型に `formData: Record<string, unknown>` と `templateId: string | null` が存在し、`description` / `amount` が存在しない
+- `Request` 型に `formData: Record<string, { value: unknown; label: string }>` と `templateId: string | null` が存在し、`description` / `amount` が存在しない
 - `TemplateField` と `StepCondition` が `src/domain/models/index.ts` から export されている
 
 ## T-02: スキーマ変更 — approval_templates と requests テーブル
@@ -105,7 +105,7 @@
 ## T-08: Server Action 変更 — requests.ts
 
 - [ ] `src/app/actions/requests.ts` — `createRequestSchema` を変更する: `description` / `amount` を削除し、`templateId: z.string().uuid("テンプレートを選択してください")` を追加する。formData のバリデーションは動的に行うため、スキーマには含めない
-- [ ] `src/app/actions/requests.ts` — `createRequestAction` を変更する: `formData.get("templateId")` を取得する。テンプレートを `approvalTemplateRepository.findById` で取得し、fields 定義に基づいて formData を構築・バリデーションする。required フィールドが未入力の場合はエラーを返す。number フィールドは数値変換する
+- [ ] `src/app/actions/requests.ts` — `createRequestAction` を変更する: `formData.get("templateId")` を取得する。テンプレートを `approvalTemplateRepository.findById` で取得し、fields 定義に基づいて formData を構築・バリデーションする。required フィールドが未入力の場合はエラーを返す。number フィールドは数値変換する。`type: "select"` フィールドは送信値がそのフィールドの `options` 配列に含まれるかを検証し、含まれない場合はエラーを返す
 - [ ] `src/app/actions/requests.ts` — `createRequestAction` から `createRequest` への引数を更新する: `templateId` と `formData`（`{ [name]: { value, label } }` 形式）を渡す
 - [ ] `src/app/actions/requests.ts` — `CreateRequestState` の `errors` 型を更新する: `description` / `amount` を削除し、`templateId?: string[]` と `formData?: Record<string, string[]>` を追加する
 - [ ] `src/app/actions/requests.ts` — `approvalTemplateRepository` を import する
@@ -115,6 +115,7 @@
 - テンプレートの `fields` 定義に基づいて formData が構築される
 - required フィールドの未入力時にバリデーションエラーが返される
 - number フィールドの値が数値に変換される
+- `type: "select"` フィールドの送信値がそのフィールドの `options` に含まれない場合はバリデーションエラーが返される
 - `createRequest` に `templateId` と `formData` が渡される
 
 ## T-09: Server Action 変更 — templates.ts
@@ -222,8 +223,10 @@
 - [ ] `src/__tests__/usecases/requestWorkflow.test.ts` — TC-024b を更新する: `createRequest` が `templateId` と `formData` を使用することを検証する（`amount` ベースのテンプレート自動選択の検証を削除）
 - [ ] `src/__tests__/usecases/requestWorkflow.test.ts` — TC-047 を更新する: `listApprovalTemplatesAction` の不在検証は維持しつつ、テンプレート選択方式の変更に対応する
 - [ ] `src/__tests__/usecases/templateManagement.test.ts` — テンプレート作成・更新テストを確認し、`minAmount` / `maxAmount` を参照しているアサーションがあれば `fields` ベースに更新する
-- [ ] `src/__tests__/actions/requestValidation.test.ts` — `createRequestSchema` のテストを更新する: `templateId` の必須バリデーションテストを追加する
-- [ ] `src/__tests__/static/projectStructure.test.ts` — `templateSelectionService.ts` の存在を検証するテストがある場合は「存在しないこと」の検証に変更する。新しいファイル構造のテスト（`evaluateStepCondition` が `approvalStepService.ts` に存在すること等）を追加する
+- [ ] `src/__tests__/actions/requestValidation.test.ts` — スキーマ定義を `createRequestSchema = z.object({ title: z.string().min(1, ...), templateId: z.string().uuid(...) })` に完全に書き換える: 既存の `description: z.string().optional()` を含むスキーマ定義とそれを前提としたテストを削除し、`templateId` の必須バリデーション（未入力・空文字・不正 UUID の各ケース）テストに置き換える
+- [ ] `src/__tests__/static/projectStructure.test.ts` — TC-054 を更新する: テスト名・説明を「テンプレート選択 UI があり、固定の金額入力フィールドがない」に変更する。`name="templateId"` が存在すること、`name="amount"` が存在しないことをアサートする（旧アサーション `not.toContain('name="templateId"')` と `toContain('name="amount"')` を反転・削除する）
+- [ ] `src/__tests__/static/projectStructure.test.ts` — TC-057 の `keyFiles` 配列から `"domain/services/templateSelectionService.ts"` を削除する（ファイルが削除されるため `expect(exists).toBe(true)` が失敗する）
+- [ ] `src/__tests__/static/projectStructure.test.ts` — TC-057b を更新する: `templateSelectionService.ts` が「存在しないこと」の検証に変更する（`expect(exists).toBe(false)`）。`selectTemplate` の export 検証を削除し、`approvalStepService.ts` に `evaluateStepCondition` と `filterStepsByCondition` が存在することの検証を追加する
 
 **Acceptance Criteria**:
 - `templateSelectionService.test.ts` が存在しない

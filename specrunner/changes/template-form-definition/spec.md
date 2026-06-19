@@ -71,13 +71,13 @@
 
 ### Requirement: Request ドメインモデル
 
-`Request` ドメインモデルは `formData: Record<string, unknown>` フィールドを持ち、`description` / `amount` フィールドを持たない MUST。`templateId: string | null` フィールドを持つ MUST。
+`Request` ドメインモデルは `formData: Record<string, { value: unknown; label: string }>` フィールドを持ち、`description` / `amount` フィールドを持たない MUST。`templateId: string | null` フィールドを持つ MUST。
 
 #### Scenario: Request モデルの構造
 
 **Given** `src/domain/models/request.ts` の `Request` 型
 **When** 型定義を確認する
-**Then** `formData: Record<string, unknown>` が存在し、`description` / `amount` が存在しない
+**Then** `formData: Record<string, { value: unknown; label: string }>` が存在し、`description` / `amount` が存在しない
 
 ---
 
@@ -161,7 +161,7 @@
 
 ### Requirement: formData バリデーション
 
-`createRequestAction` はテンプレートの `fields` 定義を参照し、`required: true` のフィールドが formData に含まれ、空でないことを検証する MUST。`type: "number"` のフィールドには数値変換を行う MUST。
+`createRequestAction` はテンプレートの `fields` 定義を参照し、`required: true` のフィールドが formData に含まれ、空でないことを検証する MUST。`type: "number"` のフィールドには数値変換を行う MUST。`type: "select"` のフィールドは送信値がそのフィールドの `options` 配列に含まれるかを検証する MUST。
 
 #### Scenario: 必須フィールドが未入力の場合にエラーが返される
 
@@ -174,6 +174,18 @@
 **Given** テンプレートの全 required フィールドに値が入力されている
 **When** 申請を作成する
 **Then** 申請が正常に作成される
+
+#### Scenario: select フィールドに options 外の値が送信された場合にエラーが返される
+
+**Given** テンプレートに `{ name: "category", type: "select", required: true, options: ["経費", "備品", "その他"] }` のフィールドが定義されている
+**When** `category` フィールドに `"不正な値"` を送信して申請を作成する
+**Then** バリデーションエラーが返される（options に含まれない値は拒否される）
+
+#### Scenario: select フィールドに options 内の値が送信された場合に通過する
+
+**Given** テンプレートに `{ name: "category", type: "select", required: true, options: ["経費", "備品", "その他"] }` のフィールドが定義されている
+**When** `category` フィールドに `"経費"` を送信して申請を作成する
+**Then** バリデーションを通過し、`formData.category.value` に `"経費"` が保存される
 
 ---
 

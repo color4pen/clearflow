@@ -427,20 +427,17 @@ describe("Multi-stage approval UI", () => {
   });
 
   /**
-   * TC-054: 申請作成画面にテンプレート選択UIがなく、金額入力フィールドがある
-   * テンプレート手動選択が廃止され、金額入力による自動選択に変更された。
-   * The new request page must have an amount input field and must NOT have
-   * a template selection <select> or listApprovalTemplatesAction import.
+   * TC-054: 申請作成画面にテンプレート選択UIがあり、固定の金額入力フィールドがない
+   * 金額自動選択が廃止され、ユーザーがテンプレートを手動選択する方式に変更された。
+   * The new request page must have a templateId select element and must NOT have
+   * a fixed amount input field (fields are now dynamically rendered from the template definition).
    */
-  it("TC-054: new request page shows amount input instead of template selection", async () => {
+  it("TC-054: new request page shows template selection UI without fixed amount input", async () => {
     const content = await readSrc("app/(dashboard)/requests/new/page.tsx");
-    // Must NOT import listApprovalTemplatesAction (template selection removed)
-    expect(content).not.toContain("listApprovalTemplatesAction");
-    // Must NOT have a <select> element for template selection
-    expect(content).not.toContain('name="templateId"');
-    // Must have an amount input field
-    expect(content).toContain('name="amount"');
-    expect(content).toContain('type="number"');
+    // Must have a template selection dropdown
+    expect(content).toContain('name="templateId"');
+    // Must NOT have a fixed amount input field (fields are dynamically rendered from template)
+    expect(content).not.toContain('name="amount"');
   });
 
   /**
@@ -602,7 +599,7 @@ describe("Build and lint", () => {
       "domain/models/webhookEndpoint.ts",
       "domain/models/webhookDelivery.ts",
       "domain/services/approvalStepService.ts",
-      "domain/services/templateSelectionService.ts",
+      // "domain/services/templateSelectionService.ts" は本変更で削除されるため除外
       "infrastructure/repositories/approvalStepRepository.ts",
       "infrastructure/repositories/approvalTemplateRepository.ts",
       "infrastructure/repositories/webhookEndpointRepository.ts",
@@ -620,15 +617,18 @@ describe("Build and lint", () => {
   });
 
   /**
-   * TC-057b: templateSelectionService.ts が src/domain/services/ に存在する
+   * TC-057b: templateSelectionService.ts が削除され、evaluateStepCondition が approvalStepService.ts に存在する
    */
-  it("TC-057b: templateSelectionService.ts exists in src/domain/services/", async () => {
+  it("TC-057b: templateSelectionService.ts does not exist in src/domain/services/", async () => {
     const exists = await fileExists("src/domain/services/templateSelectionService.ts");
-    expect(exists).toBe(true);
-    // Must export selectTemplate function
-    const content = await readSrc("domain/services/templateSelectionService.ts");
-    expect(content).toContain("export function selectTemplate");
-    // Must be a pure function (no DB access)
+    expect(exists).toBe(false);
+  });
+
+  it("TC-057b: evaluateStepCondition and filterStepsByCondition are defined in approvalStepService.ts", async () => {
+    const content = await readSrc("domain/services/approvalStepService.ts");
+    expect(content).toContain("evaluateStepCondition");
+    expect(content).toContain("filterStepsByCondition");
+    // Must be pure functions (no DB access)
     expect(content).not.toContain("import { db }");
     expect(content).not.toContain('from "@/infrastructure');
   });
