@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "3948f2fa-cf0e-4407-ad7f-c8eceb3bb057",
   "createdAt": "2026-06-19T04:29:06.617Z",
-  "updatedAt": "2026-06-19T05:34:33.605Z",
+  "updatedAt": "2026-06-19T05:38:08.915Z",
   "request": {
     "title": "テンプレートにフォーム定義を追加し、金額ベースのテンプレート選択を廃止",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "build-fixer",
+  "step": "code-review",
   "status": "running",
   "branch": "change/template-form-definition-3948f2fa",
   "error": null,
@@ -35,7 +35,7 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 36,
+    "historyCount": 45,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -43,7 +43,8 @@
       "spec-fixer": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 2,
+      "build-fixer": 1
     }
   }
 }
