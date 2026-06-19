@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "c3507b49-819b-4879-828e-6d0cfac2b0a9",
   "createdAt": "2026-06-19T14:08:47.419Z",
-  "updatedAt": "2026-06-19T23:16:43.964Z",
+  "updatedAt": "2026-06-19T23:20:20.975Z",
   "request": {
     "title": "顧客・引き合い管理基盤",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/client-inquiry-foundation-c3507b49",
   "error": null,
   "pipelineId": "standard",
@@ -48,8 +48,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/26",
+    "number": 26,
+    "createdAt": "2026-06-19T23:20:20.951Z"
+  },
   "_journal": {
-    "historyCount": 72,
+    "historyCount": 77,
     "stepCounts": {
       "request-review": 1,
       "spec-review": 1,
@@ -62,7 +67,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
