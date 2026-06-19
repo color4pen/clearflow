@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "c3507b49-819b-4879-828e-6d0cfac2b0a9",
   "createdAt": "2026-06-19T14:08:47.419Z",
-  "updatedAt": "2026-06-19T22:26:13.450Z",
+  "updatedAt": "2026-06-19T22:29:27.315Z",
   "request": {
     "title": "顧客・引き合い管理基盤",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "feat/client-inquiry-foundation-c3507b49",
   "error": null,
@@ -35,10 +35,11 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 17,
+    "historyCount": 20,
     "stepCounts": {
       "request-review": 1,
-      "spec-review": 1
+      "spec-review": 1,
+      "test-case-gen": 1
     }
   }
 }

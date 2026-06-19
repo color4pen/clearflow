@@ -8,3 +8,5 @@ export * as webhookEndpointRepository from "./webhookEndpointRepository";
 export * as webhookDeliveryRepository from "./webhookDeliveryRepository";
 export * as idempotencyKeyRepository from "./idempotencyKeyRepository";
 export * as approvalDelegationRepository from "./approvalDelegationRepository";
+export * as clientRepository from "./clientRepository";
+export * as inquiryRepository from "./inquiryRepository";

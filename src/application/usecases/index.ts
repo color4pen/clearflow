@@ -16,3 +16,8 @@ export { deactivateDelegation } from "./deactivateDelegation";
 export { listDelegations } from "./listDelegations";
 export { listOrganizationUsers } from "./listOrganizationUsers";
 export { bulkApprove } from "./bulkApprove";
+export { createClient } from "./createClient";
+export { createInquiry } from "./createInquiry";
+export { updateInquiryStatus } from "./updateInquiryStatus";
+export { listClients } from "./listClients";
+export { listInquiries } from "./listInquiries";

@@ -36,6 +36,13 @@
       "when": 1750291200000,
       "tag": "0006_template_form_definition",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1750377600000,
+      "tag": "0007_client_inquiry_foundation",
+      "breakpoints": true
     }
   ]
 }

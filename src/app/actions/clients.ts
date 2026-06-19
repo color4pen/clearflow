@@ -1,0 +1,113 @@
+"use server";
+
+import { z } from "zod";
+import { revalidatePath } from "next/cache";
+import { auth } from "@/infrastructure/auth";
+import { createClient, listClients } from "@/application/usecases";
+import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
+import type { Client } from "@/domain/models/client";
+
+const contactSchema = z.object({
+  name: z.string().min(1, "担当者名は必須です"),
+  department: z.string().optional(),
+  position: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  isPrimary: z.boolean().optional(),
+});
+
+const createClientSchema = z.object({
+  name: z.string().min(1, "顧客名は必須です"),
+  industry: z.string().optional(),
+  size: z.string().optional(),
+  address: z.string().optional(),
+  notes: z.string().optional(),
+  contacts: z.array(contactSchema).optional(),
+});
+
+export type CreateClientState = {
+  errors?: {
+    name?: string[];
+    industry?: string[];
+    size?: string[];
+    address?: string[];
+    notes?: string[];
+    contacts?: string[];
+  };
+  message?: string;
+};
+
+export async function createClientAction(
+  prevState: CreateClientState,
+  formData: FormData
+): Promise<CreateClientState> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { message: "認証が必要です" };
+  }
+
+  const rateCheck = await checkRateLimit({
+    key: `createClient:${session.user.id}`,
+    limit: RATE_LIMITS.createRequest.limit,
+    windowMs: RATE_LIMITS.createRequest.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
+  }
+
+  // contacts は JSON 文字列として受け取る
+  let contacts: z.infer<typeof contactSchema>[] | undefined;
+  const contactsRaw = formData.get("contacts");
+  if (contactsRaw && typeof contactsRaw === "string") {
+    try {
+      contacts = JSON.parse(contactsRaw);
+    } catch {
+      return { errors: { contacts: ["担当者情報が不正です"] } };
+    }
+  }
+
+  const parsed = createClientSchema.safeParse({
+    name: formData.get("name"),
+    industry: formData.get("industry") || undefined,
+    size: formData.get("size") || undefined,
+    address: formData.get("address") || undefined,
+    notes: formData.get("notes") || undefined,
+    contacts,
+  });
+
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors };
+  }
+
+  const result = await createClient({
+    name: parsed.data.name,
+    organizationId: session.user.organizationId,
+    actorId: session.user.id,
+    industry: parsed.data.industry ?? null,
+    size: parsed.data.size ?? null,
+    address: parsed.data.address ?? null,
+    notes: parsed.data.notes ?? null,
+    contacts: parsed.data.contacts,
+  });
+
+  if (!result.ok) {
+    return { message: result.reason };
+  }
+
+  revalidatePath("/clients");
+  return {};
+}
+
+export async function listClientsAction(): Promise<{
+  success: boolean;
+  clients?: Client[];
+  message?: string;
+}> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: "認証が必要です" };
+  }
+
+  const clients = await listClients(session.user.organizationId);
+  return { success: true, clients };
+}

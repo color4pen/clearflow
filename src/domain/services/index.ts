@@ -7,3 +7,4 @@ export {
   evaluateStepCondition,
   filterStepsByCondition,
 } from "./approvalStepService";
+export { canTransition } from "./inquiryTransition";
