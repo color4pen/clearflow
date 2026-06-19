@@ -35,11 +35,11 @@ export default async function EditTemplatePage({
           templateId={template.id}
           defaultValues={{
             name: template.name,
-            minAmount: template.minAmount,
-            maxAmount: template.maxAmount,
+            fields: template.fields,
             steps: template.steps.map((s) => ({
               approverRole: s.approverRole as "admin" | "member" | "manager" | "finance",
               deadlineHours: s.deadlineHours,
+              condition: s.condition,
             })),
           }}
         />

@@ -3,7 +3,7 @@ import {
   auditLogRepository,
 } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
-import type { ApprovalTemplate, ApprovalTemplateStep } from "@/domain/models/approvalTemplate";
+import type { ApprovalTemplate, ApprovalTemplateStep, TemplateField } from "@/domain/models/approvalTemplate";
 
 export type UpdateTemplateResult =
   | { ok: true; template: ApprovalTemplate }
@@ -13,8 +13,7 @@ export async function updateTemplate(data: {
   id: string;
   name?: string;
   steps?: ApprovalTemplateStep[];
-  minAmount?: number | null;
-  maxAmount?: number | null;
+  fields?: TemplateField[];
   organizationId: string;
   actorId: string;
 }): Promise<UpdateTemplateResult> {
@@ -26,8 +25,7 @@ export async function updateTemplate(data: {
         {
           name: data.name,
           steps: data.steps,
-          minAmount: data.minAmount,
-          maxAmount: data.maxAmount,
+          fields: data.fields,
         },
         tx
       );

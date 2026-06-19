@@ -1,5 +1,6 @@
 import type { ApprovalStep } from "../models/approvalStep";
 import type { ApprovalDelegation } from "../models/approvalDelegation";
+import type { ApprovalTemplateStep, StepCondition } from "../models/approvalTemplate";
 
 /**
  * Returns the active (pending) step with the smallest stepOrder.
@@ -84,4 +85,57 @@ export function canApproveWithDelegation(
     b.startDate > a.startDate ? b : a
   );
   return { allowed: true, delegation: best };
+}
+
+/**
+ * Evaluates whether a step condition is satisfied by the given formData.
+ *
+ * - If condition is undefined, always returns true (unconditional step).
+ * - Looks up formData[condition.field] and extracts a numeric value.
+ *   Supports both raw numbers and { value, label } format.
+ * - Returns false if the field is missing or not a valid number.
+ *
+ * This is a pure function with no side effects.
+ */
+export function evaluateStepCondition(
+  condition: StepCondition | undefined,
+  formData: Record<string, unknown>
+): boolean {
+  if (condition === undefined) return true;
+
+  const raw = formData[condition.field];
+  if (raw === undefined || raw === null) return false;
+
+  // Support { value, label } format as well as raw numbers/strings
+  let numericValue: number;
+  if (typeof raw === "object" && raw !== null && "value" in raw) {
+    const v = (raw as { value: unknown }).value;
+    numericValue = typeof v === "number" ? v : Number(v);
+  } else {
+    numericValue = typeof raw === "number" ? raw : Number(raw);
+  }
+
+  if (!isFinite(numericValue)) return false;
+
+  const { operator, value } = condition;
+  switch (operator) {
+    case "gt":  return numericValue > value;
+    case "gte": return numericValue >= value;
+    case "lt":  return numericValue < value;
+    case "lte": return numericValue <= value;
+    case "eq":  return numericValue === value;
+    default:    return false;
+  }
+}
+
+/**
+ * Filters template steps by evaluating each step's condition against formData.
+ * Steps without a condition are always included.
+ * Steps with a condition are included only if the condition is satisfied.
+ */
+export function filterStepsByCondition(
+  steps: ApprovalTemplateStep[],
+  formData: Record<string, unknown>
+): ApprovalTemplateStep[] {
+  return steps.filter((step) => evaluateStepCondition(step.condition, formData));
 }

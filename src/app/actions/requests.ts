@@ -12,20 +12,20 @@ import {
   getApprovalSteps,
   bulkApprove,
 } from "@/application/usecases";
+import { approvalTemplateRepository } from "@/infrastructure/repositories";
 import { idempotencyKeyRepository } from "@/infrastructure/repositories";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 
 const createRequestSchema = z.object({
   title: z.string().min(1, "タイトルは必須です"),
-  description: z.string().optional(),
-  amount: z.coerce.number().int().nonnegative().optional(),
+  templateId: z.string().uuid("テンプレートを選択してください"),
 });
 
 export type CreateRequestState = {
   errors?: {
     title?: string[];
-    description?: string[];
-    amount?: string[];
+    templateId?: string[];
+    formData?: Record<string, string[]>;
   };
   message?: string;
 };
@@ -62,12 +62,9 @@ export async function createRequestAction(
     return { message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
   }
 
-  const rawAmount = formData.get("amount");
   const parsed = createRequestSchema.safeParse({
     title: formData.get("title"),
-    description: formData.get("description") || undefined,
-    amount:
-      rawAmount !== null && rawAmount !== "" ? rawAmount : undefined,
+    templateId: formData.get("templateId"),
   });
 
   if (!parsed.success) {
@@ -76,10 +73,58 @@ export async function createRequestAction(
     };
   }
 
+  // Fetch the template to get field definitions
+  const template = await approvalTemplateRepository.findById(
+    parsed.data.templateId,
+    session.user.organizationId
+  );
+
+  if (!template) {
+    return { errors: { templateId: ["テンプレートが見つかりません"] } };
+  }
+
+  // Build and validate formData from template field definitions
+  const builtFormData: Record<string, { value: unknown; label: string }> = {};
+  const formErrors: Record<string, string[]> = {};
+
+  for (const field of template.fields) {
+    const rawValue = formData.get(`field_${field.name}`);
+    const strValue = rawValue !== null ? String(rawValue).trim() : "";
+
+    if (field.required && strValue === "") {
+      formErrors[field.name] = [`${field.label}は必須です`];
+      continue;
+    }
+
+    if (strValue === "") continue;
+
+    if (field.type === "number") {
+      const numValue = Number(strValue);
+      if (!isFinite(numValue)) {
+        formErrors[field.name] = [`${field.label}は数値を入力してください`];
+        continue;
+      }
+      builtFormData[field.name] = { value: numValue, label: field.label };
+    } else if (field.type === "select") {
+      const options = field.options ?? [];
+      if (!options.includes(strValue)) {
+        formErrors[field.name] = [`${field.label}の値が不正です`];
+        continue;
+      }
+      builtFormData[field.name] = { value: strValue, label: field.label };
+    } else {
+      builtFormData[field.name] = { value: strValue, label: field.label };
+    }
+  }
+
+  if (Object.keys(formErrors).length > 0) {
+    return { errors: { formData: formErrors } };
+  }
+
   const result = await createRequest({
     title: parsed.data.title,
-    description: parsed.data.description ?? null,
-    amount: parsed.data.amount ?? null,
+    templateId: parsed.data.templateId,
+    formData: builtFormData,
     organizationId: session.user.organizationId,
     creatorId: session.user.id,
   });
@@ -90,6 +135,17 @@ export async function createRequestAction(
 
   revalidatePath("/requests");
   return {};
+}
+
+export async function listTemplatesForRequestAction() {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false as const, message: "認証が必要です" };
+
+  const templates = await approvalTemplateRepository.findByOrganization(
+    session.user.organizationId
+  );
+
+  return { success: true as const, templates };
 }
 
 export async function submitRequestAction(

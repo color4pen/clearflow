@@ -6,29 +6,43 @@ import { auth } from "@/infrastructure/auth";
 import { approvalTemplateRepository } from "@/infrastructure/repositories";
 import { createTemplate, updateTemplate, deleteTemplate } from "@/application/usecases";
 
-const templateStepSchema = z.object({
-  approverRole: z.enum(["admin", "member", "manager", "finance"]),
-  deadlineHours: z.number().int().positive().optional(),
-});
-
-const templateSchema = z
+const templateFieldSchema = z
   .object({
-    name: z.string().min(1, "テンプレート名は必須です"),
-    steps: z
-      .array(templateStepSchema)
-      .min(1, "ステップを1つ以上追加してください"),
-    minAmount: z.number().int().nonnegative().nullable().optional(),
-    maxAmount: z.number().int().nonnegative().nullable().optional(),
+    name: z.string().min(1, "フィールド名は必須です"),
+    label: z.string().min(1, "ラベルは必須です"),
+    type: z.enum(["text", "number", "date", "textarea", "select"]),
+    required: z.boolean(),
+    options: z.array(z.string()).optional(),
   })
   .refine(
     (data) => {
-      if (data.minAmount != null && data.maxAmount != null) {
-        return data.minAmount <= data.maxAmount;
+      if (data.type === "select") {
+        return data.options !== undefined && data.options.length > 0;
       }
       return true;
     },
-    { message: "最小金額は最大金額以下である必要があります" }
+    { message: "selectタイプのフィールドにはoptionsが必須です" }
   );
+
+const templateStepSchema = z.object({
+  approverRole: z.enum(["admin", "member", "manager", "finance"]),
+  deadlineHours: z.number().int().positive().optional(),
+  condition: z
+    .object({
+      field: z.string(),
+      operator: z.enum(["gt", "gte", "lt", "lte", "eq"]),
+      value: z.number(),
+    })
+    .optional(),
+});
+
+const templateSchema = z.object({
+  name: z.string().min(1, "テンプレート名は必須です"),
+  steps: z
+    .array(templateStepSchema)
+    .min(1, "ステップを1つ以上追加してください"),
+  fields: z.array(templateFieldSchema).default([]),
+});
 
 export async function listTemplatesAction() {
   const session = await auth();
@@ -58,15 +72,18 @@ export async function createTemplateAction(
     return { success: false as const, message: "ステップのJSON形式が不正です" };
   }
 
+  const rawFields = formData.get("fields");
+  let parsedFields: unknown;
+  try {
+    parsedFields = rawFields ? JSON.parse(rawFields as string) : [];
+  } catch {
+    return { success: false as const, message: "フィールドのJSON形式が不正です" };
+  }
+
   const rawData = {
     name: formData.get("name") as string,
     steps: parsedSteps,
-    minAmount: formData.get("minAmount")
-      ? parseInt(formData.get("minAmount") as string, 10)
-      : null,
-    maxAmount: formData.get("maxAmount")
-      ? parseInt(formData.get("maxAmount") as string, 10)
-      : null,
+    fields: parsedFields,
   };
 
   const validation = templateSchema.safeParse(rawData);
@@ -84,13 +101,13 @@ export async function createTemplateAction(
     stepOrder: index + 1,
     approverRole: step.approverRole,
     deadlineHours: step.deadlineHours,
+    condition: step.condition,
   }));
 
   const result = await createTemplate({
     name: data.name,
     steps: stepsWithOrder,
-    minAmount: data.minAmount ?? null,
-    maxAmount: data.maxAmount ?? null,
+    fields: data.fields,
     organizationId: session.user.organizationId,
     actorId: session.user.id,
   });
@@ -122,15 +139,18 @@ export async function updateTemplateAction(
     return { success: false as const, message: "ステップのJSON形式が不正です" };
   }
 
+  const rawFields = formData.get("fields");
+  let parsedFields: unknown;
+  try {
+    parsedFields = rawFields ? JSON.parse(rawFields as string) : [];
+  } catch {
+    return { success: false as const, message: "フィールドのJSON形式が不正です" };
+  }
+
   const rawData = {
     name: formData.get("name") as string,
     steps: parsedSteps,
-    minAmount: formData.get("minAmount")
-      ? parseInt(formData.get("minAmount") as string, 10)
-      : null,
-    maxAmount: formData.get("maxAmount")
-      ? parseInt(formData.get("maxAmount") as string, 10)
-      : null,
+    fields: parsedFields,
   };
 
   const validation = templateSchema.safeParse(rawData);
@@ -148,14 +168,14 @@ export async function updateTemplateAction(
     stepOrder: index + 1,
     approverRole: step.approverRole,
     deadlineHours: step.deadlineHours,
+    condition: step.condition,
   }));
 
   const result = await updateTemplate({
     id,
     name: data.name,
     steps: stepsWithOrder,
-    minAmount: data.minAmount ?? null,
-    maxAmount: data.maxAmount ?? null,
+    fields: data.fields,
     organizationId: session.user.organizationId,
     actorId: session.user.id,
   });

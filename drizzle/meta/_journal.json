@@ -29,6 +29,13 @@
       "when": 1750204800000,
       "tag": "0005_rate_limit_records",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1750291200000,
+      "tag": "0006_template_form_definition",
+      "breakpoints": true
     }
   ]
 }

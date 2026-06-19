@@ -264,20 +264,24 @@ describe("Request creation", () => {
   });
 
   /**
-   * TC-024b: createRequest usecase が templateId ではなく amount を受け取る
-   * createRequest は金額に基づくテンプレート自動選択を行う
+   * TC-024b: createRequest usecase が templateId と formData を受け取る
+   * テンプレートはユーザーが手動選択する方式に変更された
    */
-  it("TC-024b: createRequest usecase uses amount-based template selection instead of templateId", async () => {
+  it("TC-024b: createRequest usecase uses templateId and formData instead of amount-based auto selection", async () => {
     const src = await readSrc("application/usecases/createRequest.ts");
-    // Must accept amount
-    expect(src).toContain("amount");
-    // Must NOT accept templateId in the data argument
-    expect(src).not.toContain("templateId?: string");
-    // Must call findByOrganizationForAmount for template selection
-    expect(src).toContain("findByOrganizationForAmount");
-    // Must use selectTemplate domain service
-    expect(src).toContain("selectTemplate");
-    // Must include templateId and amount in audit log metadata
+    // Must accept templateId as required field
+    expect(src).toContain("templateId: string");
+    // Must accept formData
+    expect(src).toContain("formData");
+    // Must NOT call findByOrganizationForAmount (deleted)
+    expect(src).not.toContain("findByOrganizationForAmount");
+    // Must NOT use selectTemplate domain service (deleted)
+    expect(src).not.toContain("selectTemplate");
+    // Must call filterStepsByCondition for conditional step filtering
+    expect(src).toContain("filterStepsByCondition");
+    // Must use findById to get the template
+    expect(src).toContain("findById");
+    // Must include templateId and templateName in audit log metadata
     expect(src).toContain("templateId: selectedTemplate.id");
     expect(src).toContain("templateName: selectedTemplate.name");
   });
@@ -354,12 +358,22 @@ describe("Resubmit partial step reset", () => {
 describe("Server Action: listApprovalTemplatesAction removed", () => {
   /**
    * TC-047: listApprovalTemplatesAction はテンプレート手動選択の廃止に伴い削除された。
-   * requests.ts に listApprovalTemplatesAction が存在しないことを確認する。
+   * 代わりに listTemplatesForRequestAction が追加されている（admin 権限不要）。
    */
   it("TC-047: listApprovalTemplatesAction does not exist in requests.ts (removed with template auto-selection)", async () => {
     const src = await readSrc("app/actions/requests.ts");
-    // listApprovalTemplatesAction must NOT exist after template selection UI removal
+    // listApprovalTemplatesAction must NOT exist (it was the old auto-selection related action)
     expect(src).not.toContain("listApprovalTemplatesAction");
+  });
+
+  it("TC-047b: listTemplatesForRequestAction exists in requests.ts without admin guard", async () => {
+    const src = await readSrc("app/actions/requests.ts");
+    // The new action for template listing (no admin role required) must exist
+    expect(src).toContain("listTemplatesForRequestAction");
+    // It should NOT have an admin role guard
+    const actionIdx = src.indexOf("listTemplatesForRequestAction");
+    const actionBody = src.slice(actionIdx, actionIdx + 300);
+    expect(actionBody).not.toContain('role !== "admin"');
   });
 });
 

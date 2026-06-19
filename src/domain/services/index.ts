@@ -4,5 +4,6 @@ export {
   isAllApproved,
   getStepsToReset,
   canApprove,
+  evaluateStepCondition,
+  filterStepsByCondition,
 } from "./approvalStepService";
-export { selectTemplate } from "./templateSelectionService";

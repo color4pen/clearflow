@@ -1,10 +1,11 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   createRequestAction,
+  listTemplatesForRequestAction,
   type CreateRequestState,
 } from "@/app/actions/requests";
 import {
@@ -13,8 +14,10 @@ import {
   FormField,
   Input,
   Textarea,
+  Select,
   SubmitButton,
 } from "@/app/components";
+import type { ApprovalTemplate, TemplateField } from "@/domain/models/approvalTemplate";
 
 const initialState: CreateRequestState = {};
 
@@ -24,6 +27,21 @@ export default function NewRequestPage() {
     createRequestAction,
     initialState
   );
+
+  const [templates, setTemplates] = useState<ApprovalTemplate[]>([]);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>("");
+
+  const selectedTemplate: ApprovalTemplate | null = selectedTemplateId
+    ? templates.find((t) => t.id === selectedTemplateId) ?? null
+    : null;
+
+  useEffect(() => {
+    listTemplatesForRequestAction().then((result) => {
+      if (result.success) {
+        setTemplates(result.templates);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     // Redirect on success (no errors, no message, and state has been touched)
@@ -35,6 +53,87 @@ export default function NewRequestPage() {
       router.push("/requests");
     }
   }, [state, router]);
+
+  function renderField(field: TemplateField) {
+    const fieldName = `field_${field.name}`;
+    const fieldError = state.errors?.formData?.[field.name]?.[0];
+    const label = (
+      <>
+        {field.label}
+        {field.required && <span className="text-red-500 ml-1">*</span>}
+      </>
+    );
+
+    if (field.type === "textarea") {
+      return (
+        <FormField key={field.name} label={label} htmlFor={fieldName} error={fieldError}>
+          <Textarea
+            id={fieldName}
+            name={fieldName}
+            rows={4}
+            required={field.required}
+            placeholder={field.label + "を入力"}
+          />
+        </FormField>
+      );
+    }
+
+    if (field.type === "select") {
+      return (
+        <FormField key={field.name} label={label} htmlFor={fieldName} error={fieldError}>
+          <Select id={fieldName} name={fieldName} required={field.required}>
+            <option value="">選択してください</option>
+            {(field.options ?? []).map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </Select>
+        </FormField>
+      );
+    }
+
+    if (field.type === "number") {
+      return (
+        <FormField key={field.name} label={label} htmlFor={fieldName} error={fieldError}>
+          <Input
+            id={fieldName}
+            name={fieldName}
+            type="number"
+            step="any"
+            required={field.required}
+            placeholder={field.label + "を入力"}
+          />
+        </FormField>
+      );
+    }
+
+    if (field.type === "date") {
+      return (
+        <FormField key={field.name} label={label} htmlFor={fieldName} error={fieldError}>
+          <Input
+            id={fieldName}
+            name={fieldName}
+            type="date"
+            required={field.required}
+          />
+        </FormField>
+      );
+    }
+
+    // Default: text
+    return (
+      <FormField key={field.name} label={label} htmlFor={fieldName} error={fieldError}>
+        <Input
+          id={fieldName}
+          name={fieldName}
+          type="text"
+          required={field.required}
+          placeholder={field.label + "を入力"}
+        />
+      </FormField>
+    );
+  }
 
   return (
     <div>
@@ -65,32 +164,27 @@ export default function NewRequestPage() {
           </FormField>
 
           <FormField
-            label="説明（任意）"
-            htmlFor="description"
-            error={state.errors?.description?.[0]}
+            label={<>申請種別 <span className="text-red-500">*</span></>}
+            htmlFor="templateId"
+            error={state.errors?.templateId?.[0]}
           >
-            <Textarea
-              id="description"
-              name="description"
-              rows={4}
-              placeholder="申請の詳細を入力（任意）"
-            />
+            <Select
+              id="templateId"
+              name="templateId"
+              value={selectedTemplateId}
+              onChange={(e) => setSelectedTemplateId(e.target.value)}
+              required
+            >
+              <option value="">テンプレートを選択してください</option>
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </Select>
           </FormField>
 
-          <FormField
-            label="金額（任意）"
-            htmlFor="amount"
-            error={state.errors?.amount?.[0]}
-          >
-            <Input
-              id="amount"
-              name="amount"
-              type="number"
-              min={0}
-              step={1}
-              placeholder="金額を入力（任意）"
-            />
-          </FormField>
+          {selectedTemplate && selectedTemplate.fields.map((field) => renderField(field))}
 
           <div className="flex items-center gap-3 pt-1">
             <SubmitButton pending={isPending} pendingText="作成中...">

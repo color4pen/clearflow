@@ -5,7 +5,7 @@ import {
   approvalStepRepository,
 } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
-import { selectTemplate } from "@/domain/services";
+import { filterStepsByCondition } from "@/domain/services";
 import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
 import type { Request } from "@/domain/models/request";
 
@@ -15,28 +15,26 @@ export type CreateRequestResult =
 
 export async function createRequest(data: {
   title: string;
-  description?: string | null;
-  amount?: number | null;
+  templateId: string;
+  formData: Record<string, unknown>;
   organizationId: string;
   creatorId: string;
 }): Promise<CreateRequestResult> {
-  const amount = data.amount ?? null;
-
-  // Fetch candidate templates filtered by amount condition
-  const templates = await approvalTemplateRepository.findByOrganizationForAmount(
-    data.organizationId,
-    amount
+  // Fetch the explicitly selected template
+  const selectedTemplate = await approvalTemplateRepository.findById(
+    data.templateId,
+    data.organizationId
   );
-
-  // Select the most appropriate template
-  const selectedTemplate = selectTemplate(templates, amount);
 
   if (!selectedTemplate) {
     return {
       ok: false,
-      reason: "適用可能な承認テンプレートが見つかりません。",
+      reason: "テンプレートが見つかりません。",
     };
   }
+
+  // Filter steps by condition (conditional steps only generated when condition is satisfied)
+  const filteredSteps = filterStepsByCondition(selectedTemplate.steps, data.formData);
 
   try {
     const result = await db.transaction(async (tx) => {
@@ -44,8 +42,8 @@ export async function createRequest(data: {
       const request = await requestRepository.create(
         {
           title: data.title,
-          description: data.description ?? null,
-          amount,
+          formData: data.formData,
+          templateId: data.templateId,
           organizationId: data.organizationId,
           creatorId: data.creatorId,
         },
@@ -53,7 +51,7 @@ export async function createRequest(data: {
       );
 
       await approvalStepRepository.createMany(
-        selectedTemplate.steps.map((s) => ({
+        filteredSteps.map((s) => ({
           requestId: request.id,
           stepOrder: s.stepOrder,
           approverRole: s.approverRole,
@@ -75,7 +73,6 @@ export async function createRequest(data: {
           metadata: {
             templateId: selectedTemplate.id,
             templateName: selectedTemplate.name,
-            amount,
           },
         },
         tx
