@@ -33,6 +33,12 @@ export const approvalStepStatusEnum = pgEnum("approval_step_status", [
   "approved",
   "rejected",
 ]);
+export const inquiryStatusEnum = pgEnum("inquiry_status", [
+  "new",
+  "in_progress",
+  "converted",
+  "declined",
+]);
 
 // Organizations table
 export const organizations = pgTable("organizations", {
@@ -205,6 +211,58 @@ export const approvalDelegations = pgTable(
   ]
 );
 
+// Clients table (企業顧客)
+export const clients = pgTable("clients", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+  name: text("name").notNull(),
+  industry: text("industry"),
+  size: text("size"),
+  address: text("address"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Client contacts table (顧客担当者)
+export const clientContacts = pgTable("client_contacts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id),
+  name: text("name").notNull(),
+  department: text("department"),
+  position: text("position"),
+  email: text("email"),
+  phone: text("phone"),
+  isPrimary: boolean("is_primary").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Inquiries table (引き合い)
+export const inquiries = pgTable("inquiries", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+  clientId: uuid("client_id")
+    .notNull()
+    .references(() => clients.id),
+  contactId: uuid("contact_id").references(() => clientContacts.id),
+  title: text("title").notNull(),
+  description: text("description"),
+  source: text("source").notNull(),
+  status: inquiryStatusEnum("status").notNull().default("new"),
+  assigneeId: uuid("assignee_id").references(() => users.id),
+  requestId: uuid("request_id").references(() => requests.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  // 楽観ロック: converted 遷移で重複承認リクエスト生成を防ぐ
+  version: integer("version").notNull().default(1),
+});
+
 // Auth.js adapter tables
 export const accounts = pgTable(
   "accounts",
@@ -254,6 +312,8 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   webhookEndpoints: many(webhookEndpoints),
   idempotencyKeys: many(idempotencyKeys),
   approvalDelegations: many(approvalDelegations),
+  clients: many(clients),
+  inquiries: many(inquiries),
 }));
 
 export const idempotencyKeysRelations = relations(idempotencyKeys, ({ one }) => ({
@@ -274,6 +334,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   sessions: many(sessions),
   delegationsFrom: many(approvalDelegations, { relationName: "delegationsFrom" }),
   delegationsTo: many(approvalDelegations, { relationName: "delegationsTo" }),
+  inquiries: many(inquiries),
 }));
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
@@ -382,3 +443,42 @@ export const approvalDelegationsRelations = relations(
     }),
   })
 );
+
+export const clientsRelations = relations(clients, ({ one, many }) => ({
+  organization: one(organizations, {
+    fields: [clients.organizationId],
+    references: [organizations.id],
+  }),
+  contacts: many(clientContacts),
+  inquiries: many(inquiries),
+}));
+
+export const clientContactsRelations = relations(clientContacts, ({ one }) => ({
+  client: one(clients, {
+    fields: [clientContacts.clientId],
+    references: [clients.id],
+  }),
+}));
+
+export const inquiriesRelations = relations(inquiries, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [inquiries.organizationId],
+    references: [organizations.id],
+  }),
+  client: one(clients, {
+    fields: [inquiries.clientId],
+    references: [clients.id],
+  }),
+  contact: one(clientContacts, {
+    fields: [inquiries.contactId],
+    references: [clientContacts.id],
+  }),
+  assignee: one(users, {
+    fields: [inquiries.assigneeId],
+    references: [users.id],
+  }),
+  request: one(requests, {
+    fields: [inquiries.requestId],
+    references: [requests.id],
+  }),
+}));

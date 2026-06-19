@@ -14,6 +14,9 @@ import {
   webhookEndpoints,
   webhookDeliveries,
   approvalDelegations,
+  clients,
+  clientContacts,
+  inquiries,
 } from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -30,6 +33,9 @@ async function seed() {
   // Truncate all tables (order matters for FK constraints)
   await db.delete(auditLogs);
   await db.delete(approvalSteps);
+  await db.delete(inquiries);
+  await db.delete(clientContacts);
+  await db.delete(clients);
   await db.delete(requests);
   await db.delete(approvalTemplates);
   await db.delete(accounts);
@@ -344,6 +350,111 @@ async function seed() {
     isActive: true,
   });
   console.log(`✅ Created approval delegation: manager → admin (${today.toISOString().slice(0, 10)} ～ ${sevenDaysLater.toISOString().slice(0, 10)})`);
+
+  // Create sample clients
+  const [techClient] = await db
+    .insert(clients)
+    .values({
+      name: "株式会社テック商事",
+      organizationId: org.id,
+      industry: "IT・ソフトウェア",
+      size: "中堅",
+    })
+    .returning();
+  console.log(`✅ Created client: ${techClient.name}`);
+
+  const [yamato] = await db
+    .insert(clients)
+    .values({
+      name: "大和建設株式会社",
+      organizationId: org.id,
+      industry: "建設業",
+      size: "大手",
+    })
+    .returning();
+  console.log(`✅ Created client: ${yamato.name}`);
+
+  // Create client contacts (2 per client)
+  const [techContact1] = await db
+    .insert(clientContacts)
+    .values({
+      clientId: techClient.id,
+      name: "山田 太郎",
+      department: "営業部",
+      position: "部長",
+      email: "yamada@tech-shoji.example.com",
+      phone: "03-1111-0001",
+      isPrimary: true,
+    })
+    .returning();
+
+  await db.insert(clientContacts).values({
+    clientId: techClient.id,
+    name: "鈴木 花子",
+    department: "企画部",
+    position: "主任",
+    email: "suzuki@tech-shoji.example.com",
+    phone: "03-1111-0002",
+    isPrimary: false,
+  });
+
+  const [yamatoContact1] = await db
+    .insert(clientContacts)
+    .values({
+      clientId: yamato.id,
+      name: "田中 一郎",
+      department: "調達部",
+      position: "課長",
+      email: "tanaka@yamato-kensetu.example.com",
+      phone: "06-2222-0001",
+      isPrimary: true,
+    })
+    .returning();
+
+  await db.insert(clientContacts).values({
+    clientId: yamato.id,
+    name: "佐藤 次郎",
+    department: "総務部",
+    position: "担当",
+    email: "sato@yamato-kensetu.example.com",
+    phone: "06-2222-0002",
+    isPrimary: false,
+  });
+  console.log("✅ Created client contacts (4 total)");
+
+  // Create inquiries (new, in_progress, converted)
+  await db.insert(inquiries).values({
+    organizationId: org.id,
+    clientId: techClient.id,
+    contactId: techContact1.id,
+    title: "基幹システム刷新に関する問い合わせ",
+    description: "現行システムの老朽化に伴い、クラウド移行を検討中",
+    source: "web",
+    status: "new",
+  });
+
+  await db.insert(inquiries).values({
+    organizationId: org.id,
+    clientId: yamato.id,
+    contactId: yamatoContact1.id,
+    title: "工事管理ツールの導入検討",
+    description: "工事進捗の可視化と承認フロー整備が課題",
+    source: "phone",
+    status: "in_progress",
+    assigneeId: managerUser.id,
+  });
+
+  // converted の引き合い: 既存の承認リクエスト（approvedRequest）に紐づける
+  await db.insert(inquiries).values({
+    organizationId: org.id,
+    clientId: techClient.id,
+    title: "DX推進プロジェクト受注",
+    description: "昨期より継続商談。正式受注に向けて承認済み",
+    source: "referral",
+    status: "converted",
+    requestId: approvedRequest.id,
+  });
+  console.log("✅ Created inquiries (3 total: new, in_progress, converted)");
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");

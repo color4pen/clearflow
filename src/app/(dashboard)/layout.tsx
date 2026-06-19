@@ -28,6 +28,18 @@ export default async function DashboardLayout({
               >
                 申請一覧
               </Link>
+              <Link
+                href="/clients"
+                className="text-text-on-dark-secondary hover:text-white text-sm"
+              >
+                顧客
+              </Link>
+              <Link
+                href="/inquiries"
+                className="text-text-on-dark-secondary hover:text-white text-sm"
+              >
+                引き合い
+              </Link>
               {isAdmin && (
                 <Link
                   href="/settings/templates"

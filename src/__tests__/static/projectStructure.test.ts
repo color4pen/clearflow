@@ -109,6 +109,8 @@ describe("Domain model integrity", () => {
       "domain/models/webhookEvent.ts",
       "domain/models/webhookEndpoint.ts",
       "domain/models/webhookDelivery.ts",
+      "domain/models/client.ts",
+      "domain/models/inquiry.ts",
     ];
     for (const file of modelFiles) {
       const content = await readSrc(file);
@@ -141,9 +143,12 @@ describe("Domain model integrity", () => {
       "domain/models/webhookEvent.ts",
       "domain/models/webhookEndpoint.ts",
       "domain/models/webhookDelivery.ts",
+      "domain/models/client.ts",
+      "domain/models/inquiry.ts",
       "domain/models/index.ts",
       "domain/services/requestTransition.ts",
       "domain/services/approvalStepService.ts",
+      "domain/services/inquiryTransition.ts",
       "domain/services/index.ts",
     ];
     for (const file of files) {
@@ -857,5 +862,101 @@ describe("Bulk approval UI", () => {
   it("requests/page.tsx imports BulkApprovalPanel", async () => {
     const content = await readSrc("app/(dashboard)/requests/page.tsx");
     expect(content).toContain("BulkApprovalPanel");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tenant isolation — client/inquiry
+// ---------------------------------------------------------------------------
+
+describe("Tenant isolation — client/inquiry", () => {
+  it("clientRepository.create includes organizationId", async () => {
+    const content = await readSrc("infrastructure/repositories/clientRepository.ts");
+    const idx = content.indexOf("export async function create(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 600);
+    expect(body).toContain("organizationId");
+  });
+
+  it("clientRepository.findById includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/clientRepository.ts");
+    const idx = content.indexOf("export async function findById(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("clientRepository.findAllByOrganization includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/clientRepository.ts");
+    const idx = content.indexOf("export async function findAllByOrganization(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("clientRepository.update includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/clientRepository.ts");
+    const idx = content.indexOf("export async function update(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 500);
+    expect(body).toContain("organizationId");
+  });
+
+  it("inquiryRepository.create includes organizationId", async () => {
+    const content = await readSrc("infrastructure/repositories/inquiryRepository.ts");
+    const idx = content.indexOf("export async function create(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 600);
+    expect(body).toContain("organizationId");
+  });
+
+  it("inquiryRepository.findById includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/inquiryRepository.ts");
+    const idx = content.indexOf("export async function findById(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("inquiryRepository.findAllByOrganization includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/inquiryRepository.ts");
+    const idx = content.indexOf("export async function findAllByOrganization(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("inquiryRepository.findAllWithClientByOrganization includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/inquiryRepository.ts");
+    const idx = content.indexOf("export async function findAllWithClientByOrganization(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 500);
+    expect(body).toContain("organizationId");
+  });
+
+  it("inquiryRepository.update includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/inquiryRepository.ts");
+    const idx = content.indexOf("export async function update(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 500);
+    expect(body).toContain("organizationId");
+  });
+
+  it("inquiryRepository.updateStatus includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/inquiryRepository.ts");
+    const idx = content.indexOf("export async function updateStatus(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 500);
+    expect(body).toContain("organizationId");
+  });
+
+  it("clients action uses session.user.organizationId", async () => {
+    const content = await readSrc("app/actions/clients.ts");
+    expect(content).toContain("session.user.organizationId");
+  });
+
+  it("inquiries action uses session.user.organizationId", async () => {
+    const content = await readSrc("app/actions/inquiries.ts");
+    expect(content).toContain("session.user.organizationId");
   });
 });
