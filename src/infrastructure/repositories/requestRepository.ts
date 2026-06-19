@@ -9,9 +9,9 @@ function mapRow(row: typeof requests.$inferSelect): Request {
   return {
     id: row.id,
     title: row.title,
-    description: row.description,
+    formData: (row.formData ?? {}) as Record<string, { value: unknown; label: string }>,
+    templateId: row.templateId ?? null,
     status: row.status,
-    amount: row.amount ?? null,
     organizationId: row.organizationId,
     creatorId: row.creatorId,
     createdAt: row.createdAt,
@@ -23,8 +23,8 @@ function mapRow(row: typeof requests.$inferSelect): Request {
 export async function create(
   data: {
     title: string;
-    description?: string | null;
-    amount?: number | null;
+    formData: Record<string, unknown>;
+    templateId?: string | null;
     organizationId: string;
     creatorId: string;
   },
@@ -35,8 +35,8 @@ export async function create(
     .insert(requests)
     .values({
       title: data.title,
-      description: data.description ?? null,
-      amount: data.amount ?? null,
+      formData: data.formData,
+      templateId: data.templateId ?? null,
       status: "draft",
       organizationId: data.organizationId,
       creatorId: data.creatorId,

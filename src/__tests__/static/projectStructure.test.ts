@@ -398,8 +398,8 @@ describe("Multi-stage approval UI", () => {
     const content = page + actionButtons;
     // Must check for pending status to show revision form
     expect(content).toContain('"pending"');
-    // Must have a textarea for the revision comment
-    expect(content).toContain("textarea");
+    // Must have a Textarea (React component) for the revision comment
+    expect(content).toContain("Textarea");
     // The revision comment field must have name="comment"
     expect(content).toContain('name="comment"');
     // The targetStatus hidden input must carry "revision"

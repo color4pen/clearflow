@@ -113,8 +113,7 @@ mock.module("@/infrastructure/repositories", () => ({
     },
   },
   approvalTemplateRepository: {
-    findByOrganizationForAmount: async () =>
-      state.template !== null ? [state.template] : [],
+    findById: async () => state.template,
   },
   approvalDelegationRepository: {
     findActiveByToUserId: async () => [],
@@ -146,9 +145,9 @@ function makeRequest(overrides?: Partial<Request>): Request {
   return {
     id: "req-1",
     title: "Test Request",
-    description: null,
+    formData: {},
+    templateId: null,
     status: "pending",
-    amount: null,
     organizationId: "org-1",
     creatorId: "creator-1",
     createdAt: new Date(),
@@ -543,15 +542,14 @@ describe("createRequest — deadline calculation (TC-025, TC-026)", () => {
       name: "High-Value Template",
       organizationId: "org-1",
       steps: [{ stepOrder: 1, approverRole: "manager", deadlineHours: 72 }],
-      minAmount: null,
-      maxAmount: null,
+      fields: [],
       createdAt: new Date(),
     };
 
     await createRequest({
       title: "Large Purchase",
-      description: null,
-      amount: 100_000,
+      templateId: "tmpl-1",
+      formData: {},
       organizationId: "org-1",
       creatorId: "creator-1",
     });
@@ -573,15 +571,14 @@ describe("createRequest — deadline calculation (TC-025, TC-026)", () => {
       name: "Standard Template",
       organizationId: "org-1",
       steps: [{ stepOrder: 1, approverRole: "manager" }], // no deadlineHours
-      minAmount: null,
-      maxAmount: null,
+      fields: [],
       createdAt: new Date(),
     };
 
     await createRequest({
       title: "Standard Purchase",
-      description: null,
-      amount: 1_000,
+      templateId: "tmpl-2",
+      formData: {},
       organizationId: "org-1",
       creatorId: "creator-1",
     });

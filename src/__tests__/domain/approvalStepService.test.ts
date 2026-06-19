@@ -6,7 +6,10 @@ import {
   canApprove,
   isStepExpired,
   canApproveWithDelegation,
+  evaluateStepCondition,
+  filterStepsByCondition,
 } from "@/domain/services/approvalStepService";
+import type { ApprovalTemplateStep } from "@/domain/models/approvalTemplate";
 import type { ApprovalStep } from "@/domain/models/approvalStep";
 import type { ApprovalDelegation } from "@/domain/models/approvalDelegation";
 
@@ -333,5 +336,146 @@ describe("approvalStepService — canApproveWithDelegation", () => {
     const result = canApproveWithDelegation(step, "admin", [inactive, active]);
     expect(result.allowed).toBe(true);
     expect(result.delegation?.id).toBe("active-delegation");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// evaluateStepCondition
+// ---------------------------------------------------------------------------
+
+describe("approvalStepService — evaluateStepCondition", () => {
+  it("returns true when condition is undefined", () => {
+    expect(evaluateStepCondition(undefined, {})).toBe(true);
+    expect(evaluateStepCondition(undefined, { amount: { value: 50000, label: "金額" } })).toBe(true);
+  });
+
+  it("returns true for gt operator when field value exceeds threshold", () => {
+    const condition = { field: "amount", operator: "gt" as const, value: 100000 };
+    expect(evaluateStepCondition(condition, { amount: { value: 200000, label: "金額" } })).toBe(true);
+  });
+
+  it("returns false for gt operator when field value is below threshold", () => {
+    const condition = { field: "amount", operator: "gt" as const, value: 100000 };
+    expect(evaluateStepCondition(condition, { amount: { value: 50000, label: "金額" } })).toBe(false);
+  });
+
+  it("returns false when field does not exist in formData", () => {
+    const condition = { field: "amount", operator: "gt" as const, value: 100000 };
+    expect(evaluateStepCondition(condition, {})).toBe(false);
+  });
+
+  it("returns true for gte operator when field value equals threshold", () => {
+    const condition = { field: "amount", operator: "gte" as const, value: 100000 };
+    expect(evaluateStepCondition(condition, { amount: { value: 100000, label: "金額" } })).toBe(true);
+  });
+
+  it("returns false for gte operator when field value is below threshold", () => {
+    const condition = { field: "amount", operator: "gte" as const, value: 100000 };
+    expect(evaluateStepCondition(condition, { amount: { value: 99999, label: "金額" } })).toBe(false);
+  });
+
+  it("returns true for lt operator when field value is below threshold", () => {
+    const condition = { field: "amount", operator: "lt" as const, value: 50000 };
+    expect(evaluateStepCondition(condition, { amount: { value: 30000, label: "金額" } })).toBe(true);
+  });
+
+  it("returns false for lt operator when field value equals threshold", () => {
+    const condition = { field: "amount", operator: "lt" as const, value: 50000 };
+    expect(evaluateStepCondition(condition, { amount: { value: 50000, label: "金額" } })).toBe(false);
+  });
+
+  it("returns true for lte operator when field value equals threshold", () => {
+    const condition = { field: "amount", operator: "lte" as const, value: 50000 };
+    expect(evaluateStepCondition(condition, { amount: { value: 50000, label: "金額" } })).toBe(true);
+  });
+
+  it("returns true for eq operator when field value equals threshold", () => {
+    const condition = { field: "amount", operator: "eq" as const, value: 100000 };
+    expect(evaluateStepCondition(condition, { amount: { value: 100000, label: "金額" } })).toBe(true);
+  });
+
+  it("returns false for eq operator when field value does not equal threshold", () => {
+    const condition = { field: "amount", operator: "eq" as const, value: 100000 };
+    expect(evaluateStepCondition(condition, { amount: { value: 99999, label: "金額" } })).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// filterStepsByCondition
+// ---------------------------------------------------------------------------
+
+describe("approvalStepService — filterStepsByCondition", () => {
+  function makeTemplateStep(
+    overrides: Partial<import("@/domain/models/approvalTemplate").ApprovalTemplateStep> & { stepOrder: number; approverRole: string }
+  ): import("@/domain/models/approvalTemplate").ApprovalTemplateStep {
+    return {
+      stepOrder: overrides.stepOrder,
+      approverRole: overrides.approverRole,
+      deadlineHours: overrides.deadlineHours,
+      condition: overrides.condition,
+    };
+  }
+
+  it("returns all steps when none have conditions", () => {
+    const steps = [
+      makeTemplateStep({ stepOrder: 1, approverRole: "manager" }),
+      makeTemplateStep({ stepOrder: 2, approverRole: "finance" }),
+    ];
+    const result = filterStepsByCondition(steps, {});
+    expect(result).toHaveLength(2);
+  });
+
+  it("returns conditional step when condition is satisfied", () => {
+    const steps = [
+      makeTemplateStep({ stepOrder: 1, approverRole: "manager" }),
+      makeTemplateStep({
+        stepOrder: 2,
+        approverRole: "finance",
+        condition: { field: "amount", operator: "gt", value: 100000 },
+      }),
+    ];
+    const result = filterStepsByCondition(steps, { amount: { value: 200000, label: "金額" } });
+    expect(result).toHaveLength(2);
+    expect(result.map((s) => s.approverRole)).toEqual(["manager", "finance"]);
+  });
+
+  it("excludes conditional step when condition is not satisfied", () => {
+    const steps = [
+      makeTemplateStep({ stepOrder: 1, approverRole: "manager" }),
+      makeTemplateStep({
+        stepOrder: 2,
+        approverRole: "finance",
+        condition: { field: "amount", operator: "gt", value: 100000 },
+      }),
+    ];
+    const result = filterStepsByCondition(steps, { amount: { value: 50000, label: "金額" } });
+    expect(result).toHaveLength(1);
+    expect(result[0].approverRole).toBe("manager");
+  });
+
+  it("returns only unconditional steps when condition field is missing from formData", () => {
+    const steps = [
+      makeTemplateStep({ stepOrder: 1, approverRole: "manager" }),
+      makeTemplateStep({
+        stepOrder: 2,
+        approverRole: "finance",
+        condition: { field: "amount", operator: "gt", value: 100000 },
+      }),
+    ];
+    const result = filterStepsByCondition(steps, {});
+    expect(result).toHaveLength(1);
+    expect(result[0].approverRole).toBe("manager");
+  });
+
+  it("returns empty array when all steps have unsatisfied conditions", () => {
+    const steps = [
+      makeTemplateStep({
+        stepOrder: 1,
+        approverRole: "finance",
+        condition: { field: "amount", operator: "gt", value: 100000 },
+      }),
+    ];
+    const result = filterStepsByCondition(steps, { amount: { value: 50000, label: "金額" } });
+    expect(result).toHaveLength(0);
   });
 });

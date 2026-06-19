@@ -40,19 +40,9 @@ export default async function TemplatesPage() {
           columns={[
             { key: "name", header: "テンプレート名", render: (t) => <span className="text-text">{t.name}</span> },
             {
-              key: "amount",
-              header: "金額条件",
-              render: (t) => {
-                const label =
-                  t.minAmount != null && t.maxAmount != null
-                    ? `${t.minAmount.toLocaleString()}〜${t.maxAmount.toLocaleString()}円`
-                    : t.minAmount != null
-                    ? `${t.minAmount.toLocaleString()}円以上`
-                    : t.maxAmount != null
-                    ? `${t.maxAmount.toLocaleString()}円以下`
-                    : "制限なし";
-                return <span className="text-text">{label}</span>;
-              },
+              key: "fields",
+              header: "フィールド数",
+              render: (t) => <span className="text-text">{t.fields.length}</span>,
             },
             { key: "steps", header: "ステップ数", render: (t) => <span className="text-text">{t.steps.length}</span> },
             {

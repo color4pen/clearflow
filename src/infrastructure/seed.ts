@@ -121,56 +121,75 @@ async function seed() {
   console.log(`✅ Created system user: system@clearflow.internal (${SYSTEM_USER_ID})`);
 
   // Create approval templates
-  // Default template: no amount condition, single manager approval step
-  const [defaultTemplate] = await db
+  // 経費申請テンプレート
+  const [expenseTemplate] = await db
     .insert(approvalTemplates)
     .values({
-      name: "デフォルト（上長承認）",
+      name: "経費申請",
       organizationId: org.id,
-      steps: [{ stepOrder: 1, approverRole: "manager" }],
-      minAmount: null,
-      maxAmount: null,
-    })
-    .returning();
-  console.log(`✅ Created template: ${defaultTemplate.name}`);
-
-  // Small amount template: up to 100,000 yen, single manager approval
-  const [smallTemplate] = await db
-    .insert(approvalTemplates)
-    .values({
-      name: "少額申請（上長承認）",
-      organizationId: org.id,
-      steps: [{ stepOrder: 1, approverRole: "manager" }],
-      minAmount: null,
-      maxAmount: 100000,
-    })
-    .returning();
-  console.log(`✅ Created template: ${smallTemplate.name}`);
-
-  // Large amount template: over 100,000 yen, manager then finance approval
-  const [largeTemplate] = await db
-    .insert(approvalTemplates)
-    .values({
-      name: "高額申請（上長→経理承認）",
-      organizationId: org.id,
-      steps: [
-        { stepOrder: 1, approverRole: "manager", deadlineHours: 72 },
-        { stepOrder: 2, approverRole: "finance", deadlineHours: 72 },
+      fields: [
+        { name: "amount", label: "金額", type: "number", required: true },
+        { name: "purpose", label: "用途", type: "text", required: true },
+        { name: "vendor", label: "支払先", type: "text", required: false },
       ],
-      minAmount: 100001,
-      maxAmount: null,
+      steps: [
+        { stepOrder: 1, approverRole: "manager" },
+        { stepOrder: 2, approverRole: "finance", deadlineHours: 72, condition: { field: "amount", operator: "gt", value: 100000 } },
+      ],
     })
     .returning();
-  console.log(`✅ Created template: ${largeTemplate.name}`);
+  console.log(`✅ Created template: ${expenseTemplate.name}`);
+
+  // 購買申請テンプレート
+  const [purchaseTemplate] = await db
+    .insert(approvalTemplates)
+    .values({
+      name: "購買申請",
+      organizationId: org.id,
+      fields: [
+        { name: "amount", label: "金額", type: "number", required: true },
+        { name: "item", label: "品名", type: "text", required: true },
+        { name: "quantity", label: "数量", type: "number", required: true },
+        { name: "deliveryDate", label: "納期", type: "date", required: false },
+      ],
+      steps: [
+        { stepOrder: 1, approverRole: "manager" },
+        { stepOrder: 2, approverRole: "finance", deadlineHours: 72, condition: { field: "amount", operator: "gt", value: 100000 } },
+      ],
+    })
+    .returning();
+  console.log(`✅ Created template: ${purchaseTemplate.name}`);
+
+  // 休暇申請テンプレート
+  const [leaveTemplate] = await db
+    .insert(approvalTemplates)
+    .values({
+      name: "休暇申請",
+      organizationId: org.id,
+      fields: [
+        { name: "startDate", label: "開始日", type: "date", required: true },
+        { name: "endDate", label: "終了日", type: "date", required: true },
+        { name: "reason", label: "理由", type: "textarea", required: false },
+      ],
+      steps: [
+        { stepOrder: 1, approverRole: "manager" },
+      ],
+    })
+    .returning();
+  console.log(`✅ Created template: ${leaveTemplate.name}`);
 
   // Create requests in various statuses
   const [draftRequest] = await db
     .insert(requests)
     .values({
       title: "備品購入申請",
-      description: "オフィス用の椅子を5脚購入したい",
+      formData: {
+        amount: { value: 50000, label: "金額" },
+        purpose: { value: "オフィス用の椅子を5脚購入したい", label: "用途" },
+        vendor: { value: "オフィス家具店", label: "支払先" },
+      },
+      templateId: expenseTemplate.id,
       status: "draft",
-      amount: 50000,
       organizationId: org.id,
       creatorId: memberUser.id,
     })
@@ -181,9 +200,12 @@ async function seed() {
     .insert(requests)
     .values({
       title: "出張申請 - 東京オフィス訪問",
-      description: "来週月曜日に東京オフィスへの出張を申請します",
+      formData: {
+        amount: { value: 150000, label: "金額" },
+        purpose: { value: "来週月曜日に東京オフィスへの出張", label: "用途" },
+      },
+      templateId: expenseTemplate.id,
       status: "pending",
-      amount: 150000,
       organizationId: org.id,
       creatorId: memberUser.id,
     })
@@ -194,16 +216,19 @@ async function seed() {
     .insert(requests)
     .values({
       title: "ソフトウェアライセンス購入",
-      description: "開発ツールのライセンスを購入したい",
+      formData: {
+        amount: { value: 30000, label: "金額" },
+        purpose: { value: "開発ツールのライセンスを購入", label: "用途" },
+      },
+      templateId: expenseTemplate.id,
       status: "approved",
-      amount: 30000,
       organizationId: org.id,
       creatorId: memberUser.id,
     })
     .returning();
   console.log(`✅ Created approved request: ${approvedRequest.title}`);
 
-  // Add approval steps for the pending request (using large template: manager -> finance)
+  // Add approval steps for the pending request (manager -> finance due to amount > 100000)
   const [pendingStep] = await db
     .insert(approvalSteps)
     .values({
@@ -235,9 +260,8 @@ async function seed() {
       actorId: memberUser.id,
       organizationId: org.id,
       metadata: {
-        templateId: smallTemplate.id,
-        templateName: smallTemplate.name,
-        amount: 50000,
+        templateId: expenseTemplate.id,
+        templateName: expenseTemplate.name,
       },
     },
     {
@@ -247,9 +271,8 @@ async function seed() {
       actorId: memberUser.id,
       organizationId: org.id,
       metadata: {
-        templateId: largeTemplate.id,
-        templateName: largeTemplate.name,
-        amount: 150000,
+        templateId: expenseTemplate.id,
+        templateName: expenseTemplate.name,
       },
     },
     {
@@ -266,9 +289,8 @@ async function seed() {
       actorId: memberUser.id,
       organizationId: org.id,
       metadata: {
-        templateId: smallTemplate.id,
-        templateName: smallTemplate.name,
-        amount: 30000,
+        templateId: expenseTemplate.id,
+        templateName: expenseTemplate.name,
       },
     },
     {

@@ -102,6 +102,8 @@ export default async function RequestDetailPage({
   const rejectAction = rejectRequestAction.bind(null, id) as unknown as ServerAction;
   const resubmitAction = resubmitRequestAction.bind(null, id) as unknown as ServerAction;
 
+  const formDataEntries = Object.entries(request.formData);
+
   return (
     <div>
       <div className="mb-2">
@@ -125,12 +127,18 @@ export default async function RequestDetailPage({
         />
 
         <div className="p-4">
-          {request.description && (
-            <div className="mb-4">
-              <h3 className="text-xs font-bold text-text mb-1">説明</h3>
-              <p className="text-xs text-text whitespace-pre-wrap">
-                {request.description}
-              </p>
+          {formDataEntries.length > 0 && (
+            <div className="mb-4 space-y-2">
+              {formDataEntries.map(([key, entry]) => (
+                <div key={key}>
+                  <span className="text-xs text-text-muted">{entry.label}</span>
+                  <p className="text-xs text-text mt-0.5">
+                    {typeof entry.value === "number"
+                      ? entry.value.toLocaleString("ja-JP")
+                      : String(entry.value ?? "")}
+                  </p>
+                </div>
+              ))}
             </div>
           )}
 
@@ -157,14 +165,6 @@ export default async function RequestDetailPage({
                   hour: "2-digit",
                   minute: "2-digit",
                 })}
-              </p>
-            </div>
-            <div>
-              <span className="text-xs text-text-muted">金額</span>
-              <p className="text-xs text-text mt-0.5">
-                {request.amount !== null
-                  ? request.amount.toLocaleString("ja-JP") + "円"
-                  : "-"}
               </p>
             </div>
           </div>

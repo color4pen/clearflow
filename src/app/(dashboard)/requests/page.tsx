@@ -61,6 +61,13 @@ export default async function RequestsPage() {
             const pendingStep = r.approvalSteps.find((s) => s.status === "pending");
             const currentDeadline = pendingStep?.deadline ?? null;
 
+            // Extract amount from formData if available
+            const amountEntry = r.formData["amount"];
+            const amount =
+              amountEntry && typeof amountEntry.value === "number"
+                ? amountEntry.value
+                : null;
+
             return {
               id: r.id,
               title: r.title,
@@ -68,7 +75,7 @@ export default async function RequestsPage() {
               statusText: statusLabel(r.status),
               statusClass: statusClass(r.status),
               statusRowClass: "",
-              amount: r.amount,
+              amount,
               creatorId: r.creatorId,
               creatorName: userNameMap.get(r.creatorId) ?? r.creatorId.slice(0, 8),
               createdAt: r.createdAt,

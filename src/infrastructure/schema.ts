@@ -56,13 +56,25 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Approval templates table (must be defined before requests due to FK)
+export const approvalTemplates = pgTable("approval_templates", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+  steps: jsonb("steps").notNull(),
+  fields: jsonb("fields").notNull().default([]),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Requests table
 export const requests = pgTable("requests", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
-  description: text("description"),
+  formData: jsonb("form_data").notNull().default({}),
+  templateId: uuid("template_id").references(() => approvalTemplates.id),
   status: requestStatusEnum("status").notNull().default("draft"),
-  amount: integer("amount"),
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id),
@@ -132,19 +144,6 @@ export const rateLimitRecords = pgTable("rate_limit_records", {
   key: text("key").notNull().unique(),
   count: integer("count").notNull(),
   windowStart: timestamp("window_start").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// Approval templates table
-export const approvalTemplates = pgTable("approval_templates", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  name: text("name").notNull(),
-  organizationId: uuid("organization_id")
-    .notNull()
-    .references(() => organizations.id),
-  steps: jsonb("steps").notNull(),
-  minAmount: integer("min_amount"),
-  maxAmount: integer("max_amount"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -285,6 +284,10 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
   creator: one(users, {
     fields: [requests.creatorId],
     references: [users.id],
+  }),
+  template: one(approvalTemplates, {
+    fields: [requests.templateId],
+    references: [approvalTemplates.id],
   }),
   approvalSteps: many(approvalSteps),
 }));
