@@ -73,7 +73,7 @@ export const requests = pgTable("requests", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
   formData: jsonb("form_data").notNull().default({}),
-  templateId: uuid("template_id").references(() => approvalTemplates.id),
+  templateId: uuid("template_id").references(() => approvalTemplates.id, { onDelete: "set null" }),
   status: requestStatusEnum("status").notNull().default("draft"),
   organizationId: uuid("organization_id")
     .notNull()

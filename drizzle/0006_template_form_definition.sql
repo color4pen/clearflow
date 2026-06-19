@@ -29,4 +29,4 @@ ALTER TABLE "requests" DROP COLUMN IF EXISTS "amount";
 -- Step 6: Add template_id column to requests
 ALTER TABLE "requests" ADD COLUMN "template_id" uuid;
 --> statement-breakpoint
-ALTER TABLE "requests" ADD CONSTRAINT "requests_template_id_approval_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."approval_templates"("id") ON DELETE no action ON UPDATE no action;
+ALTER TABLE "requests" ADD CONSTRAINT "requests_template_id_approval_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."approval_templates"("id") ON DELETE set null ON UPDATE no action;
