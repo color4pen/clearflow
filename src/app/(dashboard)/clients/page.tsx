@@ -10,14 +10,10 @@ export default async function ClientsPage() {
 
   const clients = await listClients(organizationId);
 
-  // 担当者数を取得
-  const contactCounts = await Promise.all(
-    clients.map(async (c) => {
-      const contacts = await clientRepository.findContactsByClientId(c.id);
-      return { clientId: c.id, count: contacts.length };
-    })
+  // 担当者数を一括取得（GROUP BY で N+1 回避）
+  const contactCountMap = await clientRepository.countContactsByClientIds(
+    clients.map((c) => c.id)
   );
-  const contactCountMap = new Map(contactCounts.map((cc) => [cc.clientId, cc.count]));
 
   return (
     <div>

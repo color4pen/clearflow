@@ -2,7 +2,6 @@ import { auth } from "@/infrastructure/auth";
 import { listClients } from "@/application/usecases";
 import { clientRepository } from "@/infrastructure/repositories";
 import { InquiryForm } from "./InquiryForm";
-import type { Client } from "@/domain/models/client";
 import type { ClientContact } from "@/domain/models/client";
 
 export default async function InquiryNewPage() {
@@ -11,14 +10,14 @@ export default async function InquiryNewPage() {
 
   const clients = await listClients(organizationId);
 
-  // 全顧客の担当者を一括取得
+  // 組織配下の全担当者を1クエリで取得してクライアント側でグループ化（N+1 回避）
+  const allContacts = await clientRepository.findAllContactsByOrganization(organizationId);
   const contactsByClientId = new Map<string, ClientContact[]>();
-  await Promise.all(
-    clients.map(async (client: Client) => {
-      const contacts = await clientRepository.findContactsByClientId(client.id);
-      contactsByClientId.set(client.id, contacts);
-    })
-  );
+  for (const contact of allContacts) {
+    const list = contactsByClientId.get(contact.clientId) ?? [];
+    list.push(contact);
+    contactsByClientId.set(contact.clientId, list);
+  }
 
   return (
     <div>

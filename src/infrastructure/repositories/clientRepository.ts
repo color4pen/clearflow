@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, inArray, count } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { clients, clientContacts } from "../schema";
@@ -142,4 +142,38 @@ export async function findContactsByClientId(
     .from(clientContacts)
     .where(eq(clientContacts.clientId, clientId));
   return result.map(mapContactRow);
+}
+
+/**
+ * 複数顧客の担当者数を1クエリで一括取得する（GROUP BY）。
+ * N+1 回避用。
+ */
+export async function countContactsByClientIds(
+  clientIds: string[]
+): Promise<Map<string, number>> {
+  if (clientIds.length === 0) return new Map();
+  const rows = await db
+    .select({
+      clientId: clientContacts.clientId,
+      total: count(),
+    })
+    .from(clientContacts)
+    .where(inArray(clientContacts.clientId, clientIds))
+    .groupBy(clientContacts.clientId);
+  return new Map(rows.map((r) => [r.clientId, r.total]));
+}
+
+/**
+ * 組織配下の全担当者を1クエリで取得する。
+ * 引き合い登録フォームでの選択肢構築用。
+ */
+export async function findAllContactsByOrganization(
+  organizationId: string
+): Promise<ClientContact[]> {
+  const rows = await db
+    .select({ contact: clientContacts })
+    .from(clientContacts)
+    .innerJoin(clients, eq(clientContacts.clientId, clients.id))
+    .where(eq(clients.organizationId, organizationId));
+  return rows.map((r) => mapContactRow(r.contact));
 }
