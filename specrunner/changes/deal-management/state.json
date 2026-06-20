@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "ec6e5d84-265c-441e-b94d-e2dd66124372",
   "createdAt": "2026-06-20T00:26:32.526Z",
-  "updatedAt": "2026-06-20T07:40:57.130Z",
+  "updatedAt": "2026-06-20T07:45:55.635Z",
   "request": {
     "title": "案件管理と見積承認フロー連携",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/deal-management-ec6e5d84",
   "error": null,
@@ -37,8 +37,8 @@
   "reviewerStatuses": [
     {
       "name": "domain-invariants",
-      "status": "pending",
-      "approvedAtCommit": null,
+      "status": "approved",
+      "approvedAtCommit": "6bd4054cc5697a13b38f4fe82a5255ff9dd19042",
       "activationPaths": [
         "src/application/**",
         "src/infrastructure/repositories/**",
@@ -49,7 +49,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 53,
+    "historyCount": 58,
     "stepCounts": {
       "request-review": 1,
       "design": 2,
@@ -59,8 +59,8 @@
       "verification": 1,
       "code-review": 2,
       "code-fixer": 3,
-      "domain-invariants": 1,
-      "custom-reviewers": 1
+      "domain-invariants": 2,
+      "custom-reviewers": 2
     }
   }
 }
