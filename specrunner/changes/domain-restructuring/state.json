@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "47543889-957e-45f6-b7a0-cef62ee26fc6",
   "createdAt": "2026-06-20T22:18:08.874Z",
-  "updatedAt": "2026-06-20T22:36:19.707Z",
+  "updatedAt": "2026-06-20T22:45:13.736Z",
   "request": {
     "title": "ドメインモデル再構築と用語統一",
     "type": "refactoring",
@@ -33,12 +33,13 @@
       ]
     }
   ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 17,
+    "historyCount": 23,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1,
+      "spec-review": 2,
       "spec-fixer": 1
     }
   }
