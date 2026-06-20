@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "47543889-957e-45f6-b7a0-cef62ee26fc6",
   "createdAt": "2026-06-20T22:18:08.874Z",
-  "updatedAt": "2026-06-20T22:45:13.736Z",
+  "updatedAt": "2026-06-20T22:48:22.434Z",
   "request": {
     "title": "ドメインモデル再構築と用語統一",
     "type": "refactoring",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "spec-review",
+  "step": "test-case-gen",
   "status": "running",
   "branch": "refactor/domain-restructuring-47543889",
   "error": null,
@@ -35,11 +35,11 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 23,
+    "historyCount": 27,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 2,
+      "spec-review": 3,
       "spec-fixer": 1
     }
   }
