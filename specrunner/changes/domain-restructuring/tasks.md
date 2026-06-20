@@ -147,6 +147,7 @@
 - `statusLabels.converted` が `"案件化済"` である
 - `phaseLabels.estimate_approval` が `"見積承認中"` である（`phaseLabels.internal_approval` は存在しない）
 - `contractTypeLabels.fixed_price` が `"請負"` である（`contractTypeLabels.contract` は存在しない）
+- `deals/page.tsx` の `allPhases` 配列に `"estimate_approval"` が含まれ `"internal_approval"` が含まれない
 - 各ページファイルにローカルのラベル定義が存在しない
 - TypeScript 型チェックが通る
 
@@ -173,12 +174,13 @@
 
 ## T-10: 案件詳細ページへの商談履歴セクション追加
 
-- [ ] `src/app/(dashboard)/deals/[id]/page.tsx` で、`meetingRepository.findAllByInquiryOrDeal(deal.inquiryId, organizationId)` を呼び出して商談一覧を取得する
+- [ ] `src/app/(dashboard)/deals/[id]/page.tsx` で商談一覧を取得する。`deal.inquiryId` が存在する場合は `meetingRepository.findAllByInquiryOrDeal(deal.inquiryId, organizationId)` を呼び出す。`deal.inquiryId` が null の場合は `meetingRepository.findAllByDeal(deal.id, organizationId)` にフォールバックする
 - [ ] 同ページに「商談履歴」セクション（`SectionCard` を使用）を追加する。各商談の type（`meetingTypeLabels` から）・date・summary を一覧表示する。商談がない場合は「商談記録がありません」と表示する
 
 **Acceptance Criteria**:
 - 案件詳細ページに「商談履歴」セクションが表示される
 - 引き合い時代の商談と案件直接紐づきの商談が統合表示される
+- `deal.inquiryId` が null の場合、型エラーなく `findAllByDeal` にフォールバックする
 
 ## T-11: 案件詳細からの商談作成ルートの追加
 
@@ -192,7 +194,7 @@
 
 ## T-12: 顧客詳細ページへの案件一覧セクション追加
 
-- [ ] `src/app/(dashboard)/clients/[id]/page.tsx` で、`inquiryRepository.findByClientId(id, organizationId)` の結果の inquiryId 一覧から案件を取得する処理を追加する。`dealRepository.findByInquiryId` が 1:1 のため、各引き合いに対して案件を取得してまとめる（または `dealRepository` に `findByClientId` を追加する方法も可。複数 inquiry からの取得は Promise.all で対応）
+- [ ] `src/app/(dashboard)/clients/[id]/page.tsx` で、`inquiryRepository.findByClientId(id, organizationId)` の結果から `inquiryId` 一覧を取り出し、`Promise.all` で `dealRepository.findByInquiryId` を並列実行して案件を取得する。取得結果を `filter(Boolean)` でまとめる（新規リポジトリメソッドは追加しない）
 - [ ] 同ページに「案件一覧」セクション（`SectionCard` を使用）を追加する。各案件の title・`phaseLabels[phase]`・assigneeName を一覧表示する。案件がない場合は「案件がありません」と表示する
 
 **Acceptance Criteria**:
