@@ -111,6 +111,7 @@ describe("Domain model integrity", () => {
       "domain/models/webhookDelivery.ts",
       "domain/models/client.ts",
       "domain/models/inquiry.ts",
+      "domain/models/meeting.ts",
     ];
     for (const file of modelFiles) {
       const content = await readSrc(file);
@@ -145,6 +146,7 @@ describe("Domain model integrity", () => {
       "domain/models/webhookDelivery.ts",
       "domain/models/client.ts",
       "domain/models/inquiry.ts",
+      "domain/models/meeting.ts",
       "domain/models/index.ts",
       "domain/services/requestTransition.ts",
       "domain/services/approvalStepService.ts",
@@ -957,6 +959,57 @@ describe("Tenant isolation — client/inquiry", () => {
 
   it("inquiries action uses session.user.organizationId", async () => {
     const content = await readSrc("app/actions/inquiries.ts");
+    expect(content).toContain("session.user.organizationId");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tenant isolation — meeting
+// ---------------------------------------------------------------------------
+
+describe("Tenant isolation — meeting", () => {
+  it("meetingRepository.create includes organizationId", async () => {
+    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    const idx = content.indexOf("export async function create(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 600);
+    expect(body).toContain("organizationId");
+  });
+
+  it("meetingRepository.findById includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    const idx = content.indexOf("export async function findById(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("meetingRepository.findAllByInquiry includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    const idx = content.indexOf("export async function findAllByInquiry(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("meetingRepository.findAllByOrganization includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    const idx = content.indexOf("export async function findAllByOrganization(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("meetingRepository.update includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    const idx = content.indexOf("export async function update(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 500);
+    expect(body).toContain("organizationId");
+  });
+
+  it("meetings action uses session.user.organizationId", async () => {
+    const content = await readSrc("app/actions/meetings.ts");
     expect(content).toContain("session.user.organizationId");
   });
 });

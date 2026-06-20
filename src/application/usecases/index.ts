@@ -21,3 +21,6 @@ export { createInquiry } from "./createInquiry";
 export { updateInquiryStatus } from "./updateInquiryStatus";
 export { listClients } from "./listClients";
 export { listInquiries } from "./listInquiries";
+export { createMeeting } from "./createMeeting";
+export { listMeetings } from "./listMeetings";
+export { updateMeeting } from "./updateMeeting";

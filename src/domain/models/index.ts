@@ -20,3 +20,4 @@ export type { WebhookEndpoint } from "./webhookEndpoint";
 export type { WebhookDeliveryStatus, WebhookDelivery } from "./webhookDelivery";
 export type { Client, ClientContact } from "./client";
 export type { InquiryStatus, InquirySource, Inquiry, InquiryWithClient } from "./inquiry";
+export type { MeetingType, HearingData, ActionItem, MeetingAttendees, Meeting } from "./meeting";

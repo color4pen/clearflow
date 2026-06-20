@@ -10,3 +10,4 @@ export * as idempotencyKeyRepository from "./idempotencyKeyRepository";
 export * as approvalDelegationRepository from "./approvalDelegationRepository";
 export * as clientRepository from "./clientRepository";
 export * as inquiryRepository from "./inquiryRepository";
+export * as meetingRepository from "./meetingRepository";

@@ -5,9 +5,11 @@ import {
   inquiryRepository,
   clientRepository,
   approvalTemplateRepository,
+  meetingRepository,
 } from "@/infrastructure/repositories";
-import { SectionCard } from "@/app/components";
+import { SectionCard, DataTable } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
+import type { Meeting } from "@/domain/models/meeting";
 
 const statusLabels: Record<string, string> = {
   new: "新規",
@@ -24,6 +26,14 @@ const sourceLabels: Record<string, string> = {
   other: "その他",
 };
 
+const meetingTypeLabels: Record<string, string> = {
+  hearing: "ヒアリング",
+  proposal: "提案",
+  negotiation: "交渉",
+  closing: "クロージング",
+  followup: "フォローアップ",
+};
+
 export default async function InquiryDetailPage({
   params,
 }: {
@@ -38,9 +48,10 @@ export default async function InquiryDetailPage({
     notFound();
   }
 
-  const [client, templates] = await Promise.all([
+  const [client, templates, meetings] = await Promise.all([
     clientRepository.findById(inquiry.clientId, organizationId),
     approvalTemplateRepository.findByOrganization(organizationId),
+    meetingRepository.findAllByInquiry(id, organizationId),
   ]);
 
   const canChangeStatus =
@@ -114,6 +125,74 @@ export default async function InquiryDetailPage({
           )}
         </SectionCard>
       </div>
+
+      {/* 商談履歴 */}
+      <SectionCard className="p-3 mb-2">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xs font-bold text-text">商談履歴</h2>
+          <Link
+            href={`/inquiries/${id}/meetings/new`}
+            className="text-xs text-primary underline"
+          >
+            商談を記録
+          </Link>
+        </div>
+        {meetings.length === 0 ? (
+          <p className="text-xs text-text-muted">商談記録はありません</p>
+        ) : (
+          <DataTable<Meeting>
+            columns={[
+              {
+                key: "type",
+                header: "種別",
+                render: (row) => meetingTypeLabels[row.type] ?? row.type,
+              },
+              {
+                key: "date",
+                header: "日時",
+                render: (row) =>
+                  row.date.toLocaleDateString("ja-JP", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  }),
+              },
+              {
+                key: "location",
+                header: "場所",
+                render: (row) => row.location ?? "-",
+              },
+              {
+                key: "attendees",
+                header: "参加者数",
+                align: "right",
+                render: (row) =>
+                  String(row.attendees.internal.length + row.attendees.external.length),
+              },
+              {
+                key: "actionItems",
+                header: "AI件数",
+                align: "right",
+                render: (row) => String(row.actionItems.length),
+              },
+              {
+                key: "link",
+                header: "",
+                render: (row) => (
+                  <Link
+                    href={`/inquiries/${id}/meetings/${row.id}`}
+                    className="text-primary underline text-xs"
+                  >
+                    詳細
+                  </Link>
+                ),
+              },
+            ]}
+            rows={meetings}
+            rowKey={(row) => row.id}
+          />
+        )}
+      </SectionCard>
 
       {/* ステータス変更 */}
       <SectionCard className="p-3">

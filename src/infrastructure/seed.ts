@@ -17,6 +17,7 @@ import {
   clients,
   clientContacts,
   inquiries,
+  meetings,
 } from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -33,6 +34,8 @@ async function seed() {
   // Truncate all tables (order matters for FK constraints)
   await db.delete(auditLogs);
   await db.delete(approvalSteps);
+  // meetings.inquiryId FK: meetings must be deleted before inquiries
+  await db.delete(meetings);
   await db.delete(inquiries);
   await db.delete(clientContacts);
   await db.delete(clients);
@@ -423,7 +426,7 @@ async function seed() {
   console.log("✅ Created client contacts (4 total)");
 
   // Create inquiries (new, in_progress, converted)
-  await db.insert(inquiries).values({
+  const [newInquiry] = await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: techClient.id,
     contactId: techContact1.id,
@@ -431,9 +434,9 @@ async function seed() {
     description: "現行システムの老朽化に伴い、クラウド移行を検討中",
     source: "web",
     status: "new",
-  });
+  }).returning();
 
-  await db.insert(inquiries).values({
+  const [inProgressInquiry] = await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: yamato.id,
     contactId: yamatoContact1.id,
@@ -442,10 +445,10 @@ async function seed() {
     source: "phone",
     status: "in_progress",
     assigneeId: managerUser.id,
-  });
+  }).returning();
 
   // converted の引き合い: 既存の承認リクエスト（approvedRequest）に紐づける
-  await db.insert(inquiries).values({
+  const [convertedInquiry] = await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: techClient.id,
     title: "DX推進プロジェクト受注",
@@ -453,8 +456,94 @@ async function seed() {
     source: "referral",
     status: "converted",
     requestId: approvedRequest.id,
-  });
+  }).returning();
   console.log("✅ Created inquiries (3 total: new, in_progress, converted)");
+
+  // Create meetings (4 total: hearing, proposal, negotiation, followup)
+  if (newInquiry) {
+    await db.insert(meetings).values({
+      organizationId: org.id,
+      inquiryId: newInquiry.id,
+      type: "hearing",
+      date: new Date("2026-05-10T14:00:00"),
+      location: "株式会社テック商事 本社会議室",
+      attendees: {
+        internal: [managerUser.name, memberUser.name],
+        external: ["山田 太郎"],
+      },
+      summary: "初回ヒアリング実施。基幹システム老朽化の課題と移行要件を確認した。",
+      actionItems: [
+        { description: "要件定義書の初稿を作成する", assignee: memberUser.name, dueDate: "2026-05-24", done: false },
+        { description: "クラウド移行費用の概算見積を提示する", assignee: managerUser.name, dueDate: "2026-05-31", done: false },
+      ],
+      hearingData: {
+        challenge: "基幹システムの老朽化",
+        budget: "3000万円程度",
+        decisionMaker: "情報システム部長",
+        timeline: "来期上期",
+        competitors: "B社、C社",
+        notes: null,
+      },
+      createdById: managerUser.id,
+    });
+  }
+
+  if (inProgressInquiry) {
+    await db.insert(meetings).values({
+      organizationId: org.id,
+      inquiryId: inProgressInquiry.id,
+      type: "proposal",
+      date: new Date("2026-05-20T10:00:00"),
+      location: "大和建設株式会社 第2会議室",
+      attendees: {
+        internal: [managerUser.name],
+        external: ["田中 一郎"],
+      },
+      summary: "工事管理ツールの提案書を提示。承認フロー機能を中心にデモを実施した。",
+      actionItems: [
+        { description: "カスタマイズ要件をまとめた提案書改訂版を提出する", assignee: managerUser.name, dueDate: "2026-06-05", done: false },
+      ],
+      hearingData: null,
+      createdById: managerUser.id,
+    });
+
+    await db.insert(meetings).values({
+      organizationId: org.id,
+      inquiryId: inProgressInquiry.id,
+      type: "negotiation",
+      date: new Date("2026-06-03T14:00:00"),
+      location: "オンライン（Zoom）",
+      attendees: {
+        internal: [managerUser.name, adminUser.name],
+        external: ["田中 一郎", "佐藤 次郎"],
+      },
+      summary: "価格交渉を実施。初期費用の割引を条件に交渉が進展した。",
+      actionItems: [
+        { description: "最終見積書を提出する", assignee: managerUser.name, dueDate: "2026-06-10", done: true },
+      ],
+      hearingData: null,
+      createdById: managerUser.id,
+    });
+  }
+
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    inquiryId: convertedInquiry.id,
+    type: "followup",
+    date: new Date("2026-06-15T11:00:00"),
+    location: "株式会社テック商事 本社",
+    attendees: {
+      internal: [adminUser.name],
+      external: ["山田 太郎"],
+    },
+    summary: "受注後のフォローアップ訪問。プロジェクト開始スケジュールを確認した。",
+    actionItems: [
+      { description: "キックオフ会議の日程を調整する", assignee: adminUser.name, dueDate: "2026-06-20", done: false },
+    ],
+    hearingData: null,
+    createdById: adminUser.id,
+  });
+  console.log("✅ Created meetings (4 total: hearing, proposal, negotiation, followup)");
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");

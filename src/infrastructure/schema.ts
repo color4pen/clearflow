@@ -39,6 +39,13 @@ export const inquiryStatusEnum = pgEnum("inquiry_status", [
   "converted",
   "declined",
 ]);
+export const meetingTypeEnum = pgEnum("meeting_type", [
+  "hearing",
+  "proposal",
+  "negotiation",
+  "closing",
+  "followup",
+]);
 
 // Organizations table
 export const organizations = pgTable("organizations", {
@@ -263,6 +270,31 @@ export const inquiries = pgTable("inquiries", {
   version: integer("version").notNull().default(1),
 });
 
+// Meetings table (商談記録)
+export const meetings = pgTable("meetings", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+  inquiryId: uuid("inquiry_id")
+    .notNull()
+    .references(() => inquiries.id),
+  type: meetingTypeEnum("type").notNull(),
+  date: timestamp("date").notNull(),
+  location: text("location"),
+  // { internal: string[], external: string[] }
+  attendees: jsonb("attendees").notNull().default({ internal: [], external: [] }),
+  summary: text("summary"),
+  // Array<{ description: string, assignee: string, dueDate: string | null, done: boolean }>
+  actionItems: jsonb("action_items").notNull().default([]),
+  hearingData: jsonb("hearing_data"),
+  createdById: uuid("created_by_id")
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Auth.js adapter tables
 export const accounts = pgTable(
   "accounts",
@@ -314,6 +346,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   approvalDelegations: many(approvalDelegations),
   clients: many(clients),
   inquiries: many(inquiries),
+  meetings: many(meetings),
 }));
 
 export const idempotencyKeysRelations = relations(idempotencyKeys, ({ one }) => ({
@@ -335,6 +368,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   delegationsFrom: many(approvalDelegations, { relationName: "delegationsFrom" }),
   delegationsTo: many(approvalDelegations, { relationName: "delegationsTo" }),
   inquiries: many(inquiries),
+  meetings: many(meetings),
 }));
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
@@ -460,7 +494,7 @@ export const clientContactsRelations = relations(clientContacts, ({ one }) => ({
   }),
 }));
 
-export const inquiriesRelations = relations(inquiries, ({ one }) => ({
+export const inquiriesRelations = relations(inquiries, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [inquiries.organizationId],
     references: [organizations.id],
@@ -480,5 +514,21 @@ export const inquiriesRelations = relations(inquiries, ({ one }) => ({
   request: one(requests, {
     fields: [inquiries.requestId],
     references: [requests.id],
+  }),
+  meetings: many(meetings),
+}));
+
+export const meetingsRelations = relations(meetings, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [meetings.organizationId],
+    references: [organizations.id],
+  }),
+  inquiry: one(inquiries, {
+    fields: [meetings.inquiryId],
+    references: [inquiries.id],
+  }),
+  createdBy: one(users, {
+    fields: [meetings.createdById],
+    references: [users.id],
   }),
 }));
