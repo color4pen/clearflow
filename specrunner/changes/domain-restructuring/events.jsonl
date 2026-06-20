@@ -73,3 +73,9 @@
 {"type":"transition","ts":"2026-06-20T23:28:01.167Z","step":"code-review","status":"warning","message":"code-review iteration 1 completed with verdict: needs-fix"}
 {"type":"transition","ts":"2026-06-20T23:28:01.167Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-20T23:28:01.168Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-20T23:32:13.346Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"0f150629-2752-4bca-901c-879c0ef0f6d0","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-20T23:28:01.179Z","endedAt":"2026-06-20T23:32:12.023Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-20T23:32:12.023Z","outputs":[{"path":"specrunner/changes/domain-restructuring","hash":null}],"inputs":[{"path":"specrunner/changes/domain-restructuring/review-feedback-001.md","hash":"sha256:afc2adb7cbc379ff5ebc8f43720871368e2b0f05bbcdb3dea901052b1bbd1f51"}]}
+{"type":"transition","ts":"2026-06-20T23:32:13.352Z","step":"step-transition","status":"ok","message":"code-fixer → code-review"}
+{"type":"transition","ts":"2026-06-20T23:32:13.353Z","step":"code-review","status":"started","message":"code-review iteration 2 started"}
+{"type":"transition","ts":"2026-06-20T23:32:13.354Z","step":"code-review-started","status":"started","message":"Starting code-review step"}
