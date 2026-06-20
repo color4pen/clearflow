@@ -71,6 +71,18 @@ describe("updateDealPhase usecase 静的検証", () => {
     // 実行・検証 - タイトルパターンがある
     expect(content).toContain("見積承認: ");
   });
+
+  // TC-008: templateId 未指定で internal_approval 遷移時のエラーガード検証
+  it("TC-008: templateId が未指定の場合に internal_approval 遷移がエラーを返すガードが含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("application/usecases/updateDealPhase.ts");
+    // 実行・検証 - templateId の未指定チェック（guard）が存在する
+    const hasTemplateIdGuard =
+      content.includes("!data.templateId") || content.includes("data.templateId == null");
+    expect(hasTemplateIdGuard).toBe(true);
+    // エラー文字列が存在する
+    expect(content).toContain("テンプレートの指定が必要");
+  });
 });
 
 describe("updateDeal usecase 静的検証", () => {

@@ -1,7 +1,8 @@
 import { eq, and, asc, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import type { Transaction } from "../db";
-import { deals, inquiries, clients } from "../schema";
+import { deals, inquiries, clients, users } from "../schema";
 import type { Deal, DealWithInquiry, DealPhase, ContractType } from "@/domain/models/deal";
 
 function mapRow(row: typeof deals.$inferSelect): Deal {
@@ -76,15 +77,20 @@ export async function findById(
 export async function findAllByOrganization(
   organizationId: string
 ): Promise<DealWithInquiry[]> {
+  // assigneeId は nullable なので LEFT JOIN で担当者名を取得する
+  const assignees = alias(users, "assignees");
+
   const rows = await db
     .select({
       deal: deals,
       inquiryTitle: inquiries.title,
       clientName: clients.name,
+      assigneeName: assignees.name,
     })
     .from(deals)
     .innerJoin(inquiries, eq(deals.inquiryId, inquiries.id))
     .innerJoin(clients, eq(inquiries.clientId, clients.id))
+    .leftJoin(assignees, eq(deals.assigneeId, assignees.id))
     .where(eq(deals.organizationId, organizationId))
     .orderBy(asc(deals.createdAt));
 
@@ -92,6 +98,7 @@ export async function findAllByOrganization(
     ...mapRow(row.deal),
     inquiryTitle: row.inquiryTitle,
     clientName: row.clientName,
+    assigneeName: row.assigneeName ?? null,
   }));
 }
 

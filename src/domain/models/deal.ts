@@ -30,4 +30,5 @@ export type Deal = {
 export type DealWithInquiry = Deal & {
   inquiryTitle: string;
   clientName: string;
+  assigneeName: string | null;
 };

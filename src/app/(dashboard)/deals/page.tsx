@@ -94,9 +94,9 @@ export default async function DealsPage({
                     : "-",
               },
               {
-                key: "assigneeId",
+                key: "assigneeName",
                 header: "担当者",
-                render: (row) => row.assigneeId ?? "-",
+                render: (row) => row.assigneeName ?? "-",
               },
             ]}
             rows={filteredDeals}

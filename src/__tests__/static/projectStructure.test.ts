@@ -1018,6 +1018,27 @@ describe("Tenant isolation — meeting", () => {
 });
 
 // ---------------------------------------------------------------------------
+// deals.estimateRequestId FK onDelete constraint — TC-030
+// ---------------------------------------------------------------------------
+
+describe("deals.estimateRequestId FK onDelete constraint", () => {
+  /**
+   * TC-030: deals.estimateRequestId FK に onDelete: 'set null' が設定されている
+   * estimateRequest が削除されても deal レコードが残るよう set null が必要。
+   */
+  it("TC-030: schema.ts defines deals.estimateRequestId with onDelete: 'set null'", async () => {
+    // 準備 - スキーマファイルを読み込む
+    const content = await readSrc("infrastructure/schema.ts");
+    // 実行・検証 - estimate_request_id カラム定義と onDelete: "set null" が近傍に存在する
+    const estimateIdx = content.indexOf("estimate_request_id");
+    expect(estimateIdx).toBeGreaterThan(-1);
+    // カラム定義の周辺 200 文字以内に set null が含まれる
+    const vicinity = content.slice(estimateIdx, estimateIdx + 200);
+    expect(vicinity).toContain("set null");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Tenant isolation — deal
 // ---------------------------------------------------------------------------
 
