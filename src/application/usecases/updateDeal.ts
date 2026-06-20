@@ -1,4 +1,4 @@
-import { dealRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { dealRepository, auditLogRepository, userRepository } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
 import type { Deal, ContractType } from "@/domain/models/deal";
 
@@ -22,6 +22,20 @@ export async function updateDeal(data: {
     return { ok: false, reason: "案件が見つかりません" };
   }
 
+  // assigneeId / technicalLeadId が同一組織のユーザーであることを検証する
+  if (data.assigneeId) {
+    const assignee = await userRepository.findById(data.assigneeId, data.organizationId);
+    if (!assignee) {
+      return { ok: false, reason: "指定された担当者はこの組織に存在しません" };
+    }
+  }
+  if (data.technicalLeadId) {
+    const technicalLead = await userRepository.findById(data.technicalLeadId, data.organizationId);
+    if (!technicalLead) {
+      return { ok: false, reason: "指定された技術担当者はこの組織に存在しません" };
+    }
+  }
+
   try {
     const updatedDeal = await db.transaction(async (tx) => {
       const updated = await dealRepository.update(
@@ -42,6 +56,18 @@ export async function updateDeal(data: {
         tx
       );
 
+      // 変更されたフィールドのみ metadata に記録する
+      const changedFields = Object.keys({
+        ...(data.title !== undefined && { title: data.title }),
+        ...(data.estimatedAmount !== undefined && { estimatedAmount: data.estimatedAmount }),
+        ...(data.estimatedStartDate !== undefined && { estimatedStartDate: data.estimatedStartDate }),
+        ...(data.estimatedEndDate !== undefined && { estimatedEndDate: data.estimatedEndDate }),
+        ...(data.contractType !== undefined && { contractType: data.contractType }),
+        ...(data.assigneeId !== undefined && { assigneeId: data.assigneeId }),
+        ...(data.technicalLeadId !== undefined && { technicalLeadId: data.technicalLeadId }),
+        ...(data.notes !== undefined && { notes: data.notes }),
+      });
+
       await auditLogRepository.create(
         {
           action: "deal.update",
@@ -49,6 +75,7 @@ export async function updateDeal(data: {
           targetId: data.dealId,
           actorId: data.actorId,
           organizationId: data.organizationId,
+          metadata: { updatedFields: changedFields },
         },
         tx
       );

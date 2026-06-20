@@ -329,7 +329,10 @@ export const deals = pgTable("deals", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   // 楽観ロック: フェーズ遷移で重複更新を防ぐ
   version: integer("version").notNull().default(1),
-});
+}, (table) => [
+  // 1つの引き合いに対して案件は1件のみ（DB レベルで TOCTOU を防止）
+  unique("deals_inquiry_id_unique").on(table.inquiryId),
+]);
 
 // Auth.js adapter tables
 export const accounts = pgTable(

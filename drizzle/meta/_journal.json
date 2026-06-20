@@ -64,6 +64,13 @@
       "when": 1750636800000,
       "tag": "0010_deal_management",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1750723200000,
+      "tag": "0011_deal_inquiry_unique",
+      "breakpoints": true
     }
   ]
 }

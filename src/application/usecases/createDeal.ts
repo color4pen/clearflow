@@ -2,6 +2,7 @@ import {
   inquiryRepository,
   dealRepository,
   auditLogRepository,
+  userRepository,
 } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
 import type { Deal } from "@/domain/models/deal";
@@ -34,6 +35,20 @@ export async function createDeal(data: {
   const existing = await dealRepository.findByInquiryId(data.inquiryId, data.organizationId);
   if (existing) {
     return { ok: false, reason: "この引き合いにはすでに案件が存在します" };
+  }
+
+  // assigneeId / technicalLeadId が同一組織のユーザーであることを検証する
+  if (data.assigneeId) {
+    const assignee = await userRepository.findById(data.assigneeId, data.organizationId);
+    if (!assignee) {
+      return { ok: false, reason: "指定された担当者はこの組織に存在しません" };
+    }
+  }
+  if (data.technicalLeadId) {
+    const technicalLead = await userRepository.findById(data.technicalLeadId, data.organizationId);
+    if (!technicalLead) {
+      return { ok: false, reason: "指定された技術担当者はこの組織に存在しません" };
+    }
   }
 
   try {

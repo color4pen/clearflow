@@ -88,6 +88,11 @@ export async function updateDealPhase(data: {
           tx
         );
 
+        // バージョン不一致時はトランザクションをロールバックして承認リクエストの孤立を防ぐ
+        if (!updated) {
+          throw new Error("この案件は他のユーザーによって更新されました");
+        }
+
         await auditLogRepository.create(
           {
             action: "deal.updatePhase",
