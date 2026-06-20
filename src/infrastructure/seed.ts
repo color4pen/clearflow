@@ -18,6 +18,7 @@ import {
   clientContacts,
   inquiries,
   meetings,
+  deals,
 } from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -34,6 +35,8 @@ async function seed() {
   // Truncate all tables (order matters for FK constraints)
   await db.delete(auditLogs);
   await db.delete(approvalSteps);
+  // deals.inquiryId FK: deals must be deleted before inquiries
+  await db.delete(deals);
   // meetings.inquiryId FK: meetings must be deleted before inquiries
   await db.delete(meetings);
   await db.delete(inquiries);
@@ -443,7 +446,7 @@ async function seed() {
     title: "工事管理ツールの導入検討",
     description: "工事進捗の可視化と承認フロー整備が課題",
     source: "phone",
-    status: "in_progress",
+    status: "converted",
     assigneeId: managerUser.id,
   }).returning();
 
@@ -457,7 +460,7 @@ async function seed() {
     status: "converted",
     requestId: approvedRequest.id,
   }).returning();
-  console.log("✅ Created inquiries (3 total: new, in_progress, converted)");
+  console.log("✅ Created inquiries (3 total: new, converted×2)");
 
   // Create meetings (4 total: hearing, proposal, negotiation, followup)
   if (newInquiry) {
@@ -544,6 +547,27 @@ async function seed() {
     createdById: adminUser.id,
   });
   console.log("✅ Created meetings (4 total: hearing, proposal, negotiation, followup)");
+
+  // Create deals (2 total)
+  await db.insert(deals).values({
+    organizationId: org.id,
+    inquiryId: convertedInquiry.id,
+    title: "DX推進プロジェクト",
+    phase: "won",
+    estimatedAmount: 30000000,
+    estimateRequestId: approvedRequest.id,
+    assigneeId: managerUser.id,
+  });
+
+  await db.insert(deals).values({
+    organizationId: org.id,
+    inquiryId: inProgressInquiry.id,
+    title: "工事管理ツール導入",
+    phase: "proposed",
+    estimatedAmount: 15000000,
+    assigneeId: managerUser.id,
+  });
+  console.log("✅ Created deals (2 total: won, proposed)");
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");

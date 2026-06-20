@@ -6,6 +6,7 @@ import {
   clientRepository,
   approvalTemplateRepository,
   meetingRepository,
+  dealRepository,
 } from "@/infrastructure/repositories";
 import { SectionCard, DataTable } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
@@ -48,10 +49,11 @@ export default async function InquiryDetailPage({
     notFound();
   }
 
-  const [client, templates, meetings] = await Promise.all([
+  const [client, templates, meetings, deal] = await Promise.all([
     clientRepository.findById(inquiry.clientId, organizationId),
     approvalTemplateRepository.findByOrganization(organizationId),
     meetingRepository.findAllByInquiry(id, organizationId),
+    dealRepository.findByInquiryId(id, organizationId),
   ]);
 
   const canChangeStatus =
@@ -125,6 +127,54 @@ export default async function InquiryDetailPage({
           )}
         </SectionCard>
       </div>
+
+      {/* 案件 */}
+      <SectionCard className="p-3 mb-2">
+        <h2 className="text-xs font-bold text-text mb-2">案件</h2>
+        {deal ? (
+          <div className="text-xs space-y-1">
+            <div className="flex gap-2">
+              <span className="text-text-muted w-20 shrink-0">案件名</span>
+              <Link href={`/deals/${deal.id}`} className="text-primary underline">
+                {deal.title}
+              </Link>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-text-muted w-20 shrink-0">フェーズ</span>
+              <span className="text-text">
+                {
+                  {
+                    proposal_prep: "提案準備",
+                    proposed: "提案済",
+                    negotiation: "交渉中",
+                    internal_approval: "内示",
+                    won: "受注",
+                    lost: "失注",
+                  }[deal.phase] ?? deal.phase
+                }
+              </span>
+            </div>
+            {deal.estimatedAmount != null && (
+              <div className="flex gap-2">
+                <span className="text-text-muted w-20 shrink-0">想定金額</span>
+                <span className="text-text">¥{deal.estimatedAmount.toLocaleString("ja-JP")}</span>
+              </div>
+            )}
+          </div>
+        ) : inquiry.status === "converted" ? (
+          <div>
+            <p className="text-xs text-text-muted mb-2">この引き合いに紐づく案件はありません</p>
+            <Link
+              href={`/deals/new?inquiryId=${id}`}
+              className="text-xs text-primary underline"
+            >
+              案件を作成
+            </Link>
+          </div>
+        ) : (
+          <p className="text-xs text-text-muted">案件はありません</p>
+        )}
+      </SectionCard>
 
       {/* 商談履歴 */}
       <SectionCard className="p-3 mb-2">
