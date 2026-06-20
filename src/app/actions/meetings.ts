@@ -184,6 +184,15 @@ export async function updateMeetingAction(
     return { message: "認証が必要です" };
   }
 
+  const rateCheck = await checkRateLimit({
+    key: `updateMeeting:${session.user.id}`,
+    limit: RATE_LIMITS.createRequest.limit,
+    windowMs: RATE_LIMITS.createRequest.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
+  }
+
   let internalAttendees: string[] | undefined;
   let externalAttendees: string[] | undefined;
   let actionItems: z.infer<typeof actionItemSchema>[] | undefined;
