@@ -169,7 +169,7 @@ export async function createMeetingAction(
 
 const updateMeetingSchema = z.object({
   meetingId: z.string().uuid("商談IDが不正です"),
-  inquiryId: z.string().uuid("引き合いIDが不正です"),
+  inquiryId: z.string().uuid("引き合いIDが不正です").optional(),
   type: z.enum(["hearing", "proposal", "negotiation", "closing", "followup"]).optional(),
   date: z.string().optional(),
   location: z.string().nullable().optional(),

@@ -316,7 +316,7 @@ export const deals = pgTable("deals", {
   estimatedAmount: integer("estimated_amount"),
   estimatedStartDate: timestamp("estimated_start_date"),
   estimatedEndDate: timestamp("estimated_end_date"),
-  // ドメインモデルで型制約（"quasi_delegation" | "contract" | "ses"）、DB は text で柔軟性を持たせる
+  // ドメインモデルで型制約（"quasi_delegation" | "fixed_price" | "ses"）、DB は text で柔軟性を持たせる
   contractType: text("contract_type"),
   assigneeId: uuid("assignee_id").references(() => users.id),
   technicalLeadId: uuid("technical_lead_id").references(() => users.id),
