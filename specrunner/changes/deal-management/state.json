@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "ec6e5d84-265c-441e-b94d-e2dd66124372",
   "createdAt": "2026-06-20T00:26:32.526Z",
-  "updatedAt": "2026-06-20T06:43:36.380Z",
+  "updatedAt": "2026-06-20T06:50:51.624Z",
   "request": {
     "title": "案件管理と見積承認フロー連携",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "spec-review",
+  "step": "test-case-gen",
   "status": "running",
   "branch": "feat/deal-management-ec6e5d84",
   "error": null,
@@ -35,10 +35,11 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 13,
+    "historyCount": 17,
     "stepCounts": {
       "request-review": 1,
-      "design": 2
+      "design": 2,
+      "spec-review": 1
     }
   }
 }
