@@ -114,3 +114,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/deal-management/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-20T07:56:52.080Z","endedAt":"2026-06-20T07:56:53.733Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-20T07:56:53.733Z","outputs":[{"path":"specrunner/changes/deal-management/pr-create-result.md","hash":"sha256:d448d2f1e9617c69acf8f73352bce64fb9a5745ff29b833ae6d3c3134909badb"}],"inputs":[{"path":"feat/deal-management-ec6e5d84","hash":null}]}
 {"type":"transition","ts":"2026-06-20T07:56:53.737Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-20T07:58:44.011Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
