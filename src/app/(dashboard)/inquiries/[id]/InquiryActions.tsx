@@ -28,7 +28,7 @@ export function InquiryActions({ inquiry, templates, canChangeStatus }: Props) {
   }
 
   if (!canChangeStatus && inquiry.status === "in_progress") {
-    // 商談化ボタンが非表示になる可能性があるが、対応中→見送りは可能
+    // 案件化ボタンが非表示になる可能性があるが、対応中→見送りは可能
   }
 
   async function handleTransition(newStatus: InquiryStatus, templateId?: string) {

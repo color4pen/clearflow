@@ -1,7 +1,7 @@
 import { eq, and } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
-import { dealContacts, clientContacts } from "../schema";
+import { dealContacts, clientContacts, clients } from "../schema";
 import type { DealContact, DealContactRole } from "@/domain/models/deal";
 
 function mapRow(row: typeof dealContacts.$inferSelect): DealContact {
@@ -36,21 +36,21 @@ export async function create(
 
 /**
  * 指定案件の担当者一覧を取得する。
- * organizationId は deals テーブルを経由して検証済みである前提。
+ * clientContacts → clients.organizationId を経由してテナント分離を保証する。
  */
 export async function findByDeal(
   dealId: string,
   organizationId: string
 ): Promise<DealContact[]> {
-  // organizationId は join せずに呼び出し元が deal の所有確認済みであることを前提とするが、
-  // テナント分離のため clientContacts → clients → organizationId を経由して絞り込む
   const rows = await db
     .select({ dealContact: dealContacts })
     .from(dealContacts)
     .innerJoin(clientContacts, eq(dealContacts.contactId, clientContacts.id))
+    .innerJoin(clients, eq(clientContacts.clientId, clients.id))
     .where(
       and(
-        eq(dealContacts.dealId, dealId)
+        eq(dealContacts.dealId, dealId),
+        eq(clients.organizationId, organizationId)
       )
     );
   return rows.map((r) => mapRow(r.dealContact));

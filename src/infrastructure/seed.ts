@@ -207,6 +207,23 @@ async function seed() {
     .returning();
   console.log(`✅ Created template: ${conversionTemplate.name}`);
 
+  // 見積承認テンプレート
+  const [estimateTemplate] = await db
+    .insert(approvalTemplates)
+    .values({
+      name: "見積承認",
+      organizationId: org.id,
+      fields: [
+        { name: "amount", label: "想定金額", type: "number", required: true },
+      ],
+      steps: [
+        { stepOrder: 1, approverRole: "manager" },
+        { stepOrder: 2, approverRole: "finance", deadlineHours: 72, condition: { field: "amount", operator: "gt", value: 10000000 } },
+      ],
+    })
+    .returning();
+  console.log(`✅ Created template: ${estimateTemplate.name}`);
+
   // Create requests in various statuses
   const [draftRequest] = await db
     .insert(requests)
@@ -601,6 +618,22 @@ async function seed() {
   });
   console.log("✅ Created meetings (4 total: hearing, proposal, negotiation, followup)");
 
+  // Create estimate approval request for the won deal (DX推進プロジェクト)
+  const [estimateApprovalRequest] = await db
+    .insert(requests)
+    .values({
+      title: "見積承認: DX推進プロジェクト",
+      formData: {
+        amount: { value: 30000000, label: "想定金額" },
+      },
+      templateId: estimateTemplate.id,
+      status: "approved",
+      organizationId: org.id,
+      creatorId: adminUser.id,
+    })
+    .returning();
+  console.log(`✅ Created estimate approval request: ${estimateApprovalRequest.title}`);
+
   // Create deals (2 total: won, proposed)
   const [wonDeal] = await db.insert(deals).values({
     organizationId: org.id,
@@ -608,7 +641,7 @@ async function seed() {
     title: "DX推進プロジェクト",
     phase: "won",
     estimatedAmount: 30000000,
-    estimateRequestId: approvedRequest.id,
+    estimateRequestId: estimateApprovalRequest.id,
     assigneeId: managerUser.id,
   }).returning();
 
