@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "ec6e5d84-265c-441e-b94d-e2dd66124372",
   "createdAt": "2026-06-20T00:26:32.526Z",
-  "updatedAt": "2026-06-20T07:52:43.756Z",
+  "updatedAt": "2026-06-20T07:56:53.737Z",
   "request": {
     "title": "案件管理と見積承認フロー連携",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/deal-management-ec6e5d84",
   "error": null,
   "pipelineId": "standard",
@@ -48,8 +48,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/28",
+    "number": 28,
+    "createdAt": "2026-06-20T07:56:53.732Z"
+  },
   "_journal": {
-    "historyCount": 72,
+    "historyCount": 77,
     "stepCounts": {
       "request-review": 1,
       "design": 2,
@@ -62,7 +67,9 @@
       "domain-invariants": 2,
       "custom-reviewers": 2,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
