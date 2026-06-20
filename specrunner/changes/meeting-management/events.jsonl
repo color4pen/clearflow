@@ -41,3 +41,9 @@
 {"type":"transition","ts":"2026-06-20T00:05:20.389Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-20T00:05:20.389Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-20T00:05:20.391Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-20T00:06:08.919Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"f2bceb47-f367-4d5f-9e55-6e58debf0cef","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-20T00:05:20.403Z","endedAt":"2026-06-20T00:06:07.341Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-20T00:06:07.341Z","outputs":[{"path":"specrunner/changes/meeting-management","hash":null}],"inputs":[{"path":"specrunner/changes/meeting-management/review-feedback-001.md","hash":"sha256:f01fc38635d5fb9739048f693170add98b874d30d6534170693f73c746660f9e"}]}
+{"type":"transition","ts":"2026-06-20T00:06:08.924Z","step":"step-transition","status":"ok","message":"code-fixer → custom-reviewers"}
+{"type":"transition","ts":"2026-06-20T00:06:08.926Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 1 started"}
+{"type":"transition","ts":"2026-06-20T00:06:08.939Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
