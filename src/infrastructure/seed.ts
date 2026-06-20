@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { drizzle } from "drizzle-orm/pg-core";
+import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import {
   organizations,
