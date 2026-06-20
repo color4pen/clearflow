@@ -83,7 +83,7 @@ export function InquiryActions({ inquiry, templates, canChangeStatus }: Props) {
                 onClick={() => setShowTemplateSelector(true)}
                 className="text-xs text-success underline cursor-pointer disabled:opacity-50"
               >
-                商談化
+                案件化
               </button>
             )}
             <button
@@ -98,7 +98,7 @@ export function InquiryActions({ inquiry, templates, canChangeStatus }: Props) {
         )}
       </div>
 
-      {/* 商談化テンプレート選択 */}
+      {/* 案件化テンプレート選択 */}
       {showTemplateSelector && (
         <div className="border border-border-light p-3 bg-bg-surface-alt">
           <p className="text-xs font-bold text-text mb-2">承認テンプレートを選択</p>
@@ -126,7 +126,7 @@ export function InquiryActions({ inquiry, templates, canChangeStatus }: Props) {
               }}
               className="bg-primary text-white text-xs px-3 py-1 rounded-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "処理中..." : "商談化する"}
+              {isSubmitting ? "処理中..." : "案件化する"}
             </button>
             <button
               type="button"

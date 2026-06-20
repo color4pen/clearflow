@@ -2,11 +2,21 @@ export type DealPhase =
   | "proposal_prep"
   | "proposed"
   | "negotiation"
-  | "internal_approval"
+  | "estimate_approval"
   | "won"
   | "lost";
 
-export type ContractType = "quasi_delegation" | "contract" | "ses";
+export type ContractType = "quasi_delegation" | "fixed_price" | "ses";
+
+export type DealContactRole = "key_person" | "decision_maker" | "technical" | "other";
+
+export type DealContact = {
+  id: string;
+  dealId: string;
+  contactId: string;
+  role: DealContactRole;
+  createdAt: Date;
+};
 
 export type Deal = {
   id: string;

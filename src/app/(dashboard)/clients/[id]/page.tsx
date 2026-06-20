@@ -1,23 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { clientRepository, inquiryRepository } from "@/infrastructure/repositories";
+import { clientRepository, inquiryRepository, dealRepository } from "@/infrastructure/repositories";
 import { SectionCard, DataTable } from "@/app/components";
-
-const statusLabels: Record<string, string> = {
-  new: "新規",
-  in_progress: "対応中",
-  converted: "商談化済",
-  declined: "見送り",
-};
-
-const sourceLabels: Record<string, string> = {
-  web: "Web",
-  phone: "電話",
-  referral: "紹介",
-  exhibition: "展示会",
-  other: "その他",
-};
+import { statusLabels, sourceLabels, phaseLabels } from "@/app/(dashboard)/labels";
 
 export default async function ClientDetailPage({
   params,
@@ -33,6 +19,15 @@ export default async function ClientDetailPage({
     clientRepository.findContactsByClientId(id),
     inquiryRepository.findByClientId(id, organizationId),
   ]);
+
+  // 引き合い経由で関連する案件を並列取得（N+1 を Promise.all で解消）
+  const relatedDeals = client
+    ? (
+        await Promise.all(
+          relatedInquiries.map((inq) => dealRepository.findByInquiryId(inq.id, organizationId))
+        )
+      ).filter((d): d is NonNullable<typeof d> => d !== null)
+    : [];
 
   if (!client) {
     notFound();
@@ -128,6 +123,43 @@ export default async function ClientDetailPage({
               },
             ]}
             rows={relatedInquiries}
+            rowKey={(row) => row.id}
+          />
+        )}
+      </SectionCard>
+
+      <SectionCard className="mt-3">
+        <h2 className="text-xs font-bold text-text px-2 py-1 border-b border-border-light">案件一覧</h2>
+        {relatedDeals.length === 0 ? (
+          <p className="text-xs text-text-muted px-2 py-3">案件がありません</p>
+        ) : (
+          <DataTable
+            columns={[
+              {
+                key: "title",
+                header: "案件名",
+                render: (row) => (
+                  <Link href={`/deals/${row.id}`} className="text-primary underline">
+                    {row.title}
+                  </Link>
+                ),
+              },
+              {
+                key: "phase",
+                header: "フェーズ",
+                render: (row) => phaseLabels[row.phase] ?? row.phase,
+              },
+              {
+                key: "estimatedAmount",
+                header: "想定金額",
+                align: "right",
+                render: (row) =>
+                  row.estimatedAmount != null
+                    ? `¥${row.estimatedAmount.toLocaleString("ja-JP")}`
+                    : "-",
+              },
+            ]}
+            rows={relatedDeals}
             rowKey={(row) => row.id}
           />
         )}

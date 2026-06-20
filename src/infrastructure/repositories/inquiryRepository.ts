@@ -8,14 +8,13 @@ function mapRow(row: typeof inquiries.$inferSelect): Inquiry {
   return {
     id: row.id,
     organizationId: row.organizationId,
-    clientId: row.clientId,
-    contactId: row.contactId ?? null,
+    clientId: row.clientId ?? null,
     title: row.title,
     description: row.description ?? null,
     source: row.source as InquirySource,
     status: row.status,
     assigneeId: row.assigneeId ?? null,
-    requestId: row.requestId ?? null,
+    conversionRequestId: row.conversionRequestId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     version: row.version,
@@ -25,8 +24,7 @@ function mapRow(row: typeof inquiries.$inferSelect): Inquiry {
 export async function create(
   data: {
     organizationId: string;
-    clientId: string;
-    contactId?: string | null;
+    clientId?: string | null;
     title: string;
     description?: string | null;
     source: string;
@@ -39,14 +37,13 @@ export async function create(
     .insert(inquiries)
     .values({
       organizationId: data.organizationId,
-      clientId: data.clientId,
-      contactId: data.contactId ?? null,
+      clientId: data.clientId ?? null,
       title: data.title,
       description: data.description ?? null,
       source: data.source,
       status: "new",
       assigneeId: data.assigneeId ?? null,
-      requestId: null,
+      conversionRequestId: null,
     })
     .returning();
   return mapRow(result[0]);
@@ -92,7 +89,7 @@ export async function findAllWithClientByOrganization(
 
   return rows.map((row) => ({
     ...mapRow(row.inquiry),
-    clientName: row.clientName ?? "",
+    clientName: row.clientName ?? null,
   }));
 }
 
@@ -103,7 +100,6 @@ export async function update(
     title: string;
     description: string | null;
     source: string;
-    contactId: string | null;
     assigneeId: string | null;
   }>,
   tx?: Transaction
@@ -121,14 +117,14 @@ export async function updateStatus(
   id: string,
   organizationId: string,
   status: InquiryStatus,
-  requestId: string | null,
+  conversionRequestId: string | null,
   currentVersion: number,
   tx?: Transaction
 ): Promise<Inquiry | null> {
   const queryRunner = tx ?? db;
   const result = await queryRunner
     .update(inquiries)
-    .set({ status, requestId, updatedAt: new Date(), version: sql`version + 1` })
+    .set({ status, conversionRequestId, updatedAt: new Date(), version: sql`version + 1` })
     .where(
       and(
         eq(inquiries.id, id),

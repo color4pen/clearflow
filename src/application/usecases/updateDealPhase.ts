@@ -30,10 +30,10 @@ export async function updateDealPhase(data: {
     };
   }
 
-  // internal_approval への遷移時は見積承認リクエストを自動作成する
-  if (data.newPhase === "internal_approval") {
+  // estimate_approval への遷移時は見積承認リクエストを自動作成する
+  if (data.newPhase === "estimate_approval") {
     if (!data.templateId) {
-      return { ok: false, reason: "内示フェーズへの遷移にはテンプレートの指定が必要です" };
+      return { ok: false, reason: "見積承認フェーズへの遷移にはテンプレートの指定が必要です" };
     }
 
     const template = await approvalTemplateRepository.findById(
@@ -140,7 +140,7 @@ export async function updateDealPhase(data: {
     }
   }
 
-  // internal_approval 以外の遷移
+  // estimate_approval 以外の遷移
   try {
     const updatedDeal = await db.transaction(async (tx) => {
       const updated = await dealRepository.updatePhase(

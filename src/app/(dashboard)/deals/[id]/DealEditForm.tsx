@@ -87,7 +87,7 @@ export function DealEditForm({ deal }: Props) {
         <Select name="contractType" defaultValue={deal.contractType ?? ""}>
           <option value="">未設定</option>
           <option value="quasi_delegation">準委任</option>
-          <option value="contract">請負</option>
+          <option value="fixed_price">請負</option>
           <option value="ses">SES</option>
         </Select>
       </FormField>

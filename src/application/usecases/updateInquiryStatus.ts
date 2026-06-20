@@ -32,10 +32,10 @@ export async function updateInquiryStatus(data: {
     };
   }
 
-  // 商談化への遷移
+  // 案件化への遷移
   if (data.newStatus === "converted") {
     if (!data.templateId) {
-      return { ok: false, reason: "商談化にはテンプレートの指定が必要です" };
+      return { ok: false, reason: "案件化にはテンプレートの指定が必要です" };
     }
 
     const template = await approvalTemplateRepository.findById(data.templateId, data.organizationId);
@@ -52,7 +52,7 @@ export async function updateInquiryStatus(data: {
 
         const newRequest = await requestRepository.create(
           {
-            title: `商談化承認: ${inquiry.title}`,
+            title: `案件化承認: ${inquiry.title}`,
             formData: {},
             templateId: data.templateId,
             organizationId: data.organizationId,
@@ -94,7 +94,7 @@ export async function updateInquiryStatus(data: {
             metadata: {
               fromStatus: inquiry.status,
               toStatus: data.newStatus,
-              requestId: newRequest.id,
+              conversionRequestId: newRequest.id,
             },
           },
           tx
@@ -131,7 +131,7 @@ export async function updateInquiryStatus(data: {
     }
   }
 
-  // converted 以外の遷移
+  // converted 以外の遷移（conversionRequestId は null のまま）
   try {
     const updatedInquiry = await db.transaction(async (tx) => {
       const updated = await inquiryRepository.updateStatus(

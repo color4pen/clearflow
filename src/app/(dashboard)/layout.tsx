@@ -23,12 +23,6 @@ export default async function DashboardLayout({
             <span className="text-text-on-dark text-sm font-bold tracking-wide">Clearflow</span>
             <nav className="flex items-center gap-3">
               <Link
-                href="/requests"
-                className="text-text-on-dark-secondary hover:text-white text-sm"
-              >
-                申請一覧
-              </Link>
-              <Link
                 href="/clients"
                 className="text-text-on-dark-secondary hover:text-white text-sm"
               >
@@ -45,6 +39,12 @@ export default async function DashboardLayout({
                 className="text-text-on-dark-secondary hover:text-white text-sm"
               >
                 案件
+              </Link>
+              <Link
+                href="/requests"
+                className="text-text-on-dark-secondary hover:text-white text-sm"
+              >
+                申請一覧
               </Link>
               {isAdmin && (
                 <Link

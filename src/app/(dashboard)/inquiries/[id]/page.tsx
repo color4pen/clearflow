@@ -10,30 +10,8 @@ import {
 } from "@/infrastructure/repositories";
 import { SectionCard, DataTable } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
+import { statusLabels, sourceLabels, meetingTypeLabels, phaseLabels } from "@/app/(dashboard)/labels";
 import type { Meeting } from "@/domain/models/meeting";
-
-const statusLabels: Record<string, string> = {
-  new: "新規",
-  in_progress: "対応中",
-  converted: "商談化済",
-  declined: "見送り",
-};
-
-const sourceLabels: Record<string, string> = {
-  web: "Web",
-  phone: "電話",
-  referral: "紹介",
-  exhibition: "展示会",
-  other: "その他",
-};
-
-const meetingTypeLabels: Record<string, string> = {
-  hearing: "ヒアリング",
-  proposal: "提案",
-  negotiation: "交渉",
-  closing: "クロージング",
-  followup: "フォローアップ",
-};
 
 export default async function InquiryDetailPage({
   params,
@@ -50,7 +28,9 @@ export default async function InquiryDetailPage({
   }
 
   const [client, templates, meetings, deal] = await Promise.all([
-    clientRepository.findById(inquiry.clientId, organizationId),
+    inquiry.clientId
+      ? clientRepository.findById(inquiry.clientId, organizationId)
+      : Promise.resolve(null),
     approvalTemplateRepository.findByOrganization(organizationId),
     meetingRepository.findAllByInquiry(id, organizationId),
     dealRepository.findByInquiryId(id, organizationId),
@@ -112,11 +92,11 @@ export default async function InquiryDetailPage({
 
         <SectionCard className="p-3">
           <h2 className="text-xs font-bold text-text mb-2">承認情報</h2>
-          {inquiry.requestId ? (
+          {inquiry.conversionRequestId ? (
             <div className="text-xs">
-              <p className="text-text-muted mb-1">関連する承認リクエスト</p>
+              <p className="text-text-muted mb-1">案件化承認リクエスト</p>
               <Link
-                href={`/requests/${inquiry.requestId}`}
+                href={`/requests/${inquiry.conversionRequestId}`}
                 className="text-primary underline"
               >
                 承認リクエストを表示
@@ -142,16 +122,7 @@ export default async function InquiryDetailPage({
             <div className="flex gap-2">
               <span className="text-text-muted w-20 shrink-0">フェーズ</span>
               <span className="text-text">
-                {
-                  {
-                    proposal_prep: "提案準備",
-                    proposed: "提案済",
-                    negotiation: "交渉中",
-                    internal_approval: "内示",
-                    won: "受注",
-                    lost: "失注",
-                  }[deal.phase] ?? deal.phase
-                }
+                {phaseLabels[deal.phase] ?? deal.phase}
               </span>
             </div>
             {deal.estimatedAmount != null && (

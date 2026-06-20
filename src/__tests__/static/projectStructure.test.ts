@@ -955,6 +955,20 @@ describe("Tenant isolation — client/inquiry", () => {
     expect(body).toContain("organizationId");
   });
 
+  it("inquiryRepository.updateStatus uses conversionRequestId (not requestId)", async () => {
+    const content = await readSrc("infrastructure/repositories/inquiryRepository.ts");
+    const idx = content.indexOf("export async function updateStatus(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 600);
+    expect(body).toContain("conversionRequestId");
+    expect(body).not.toContain("requestId:");
+  });
+
+  it("inquiryRepository does not reference contactId", async () => {
+    const content = await readSrc("infrastructure/repositories/inquiryRepository.ts");
+    expect(content).not.toContain("contactId");
+  });
+
   it("clients action uses session.user.organizationId", async () => {
     const content = await readSrc("app/actions/clients.ts");
     expect(content).toContain("session.user.organizationId");
@@ -1000,6 +1014,22 @@ describe("Tenant isolation — meeting", () => {
     const idx = content.indexOf("export async function findAllByOrganization(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("meetingRepository.findAllByDeal includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    const idx = content.indexOf("export async function findAllByDeal(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("meetingRepository.findAllByInquiryOrDeal includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    const idx = content.indexOf("export async function findAllByInquiryOrDeal(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 500);
     expect(body).toContain("organizationId");
   });
 
@@ -1094,5 +1124,26 @@ describe("Tenant isolation — deal", () => {
   it("deals action uses session.user.organizationId", async () => {
     const content = await readSrc("app/actions/deals.ts");
     expect(content).toContain("session.user.organizationId");
+  });
+
+  it("dealContactRepository.ts exists", async () => {
+    const exists = await fileExists(
+      "src/infrastructure/repositories/dealContactRepository.ts"
+    );
+    expect(exists).toBe(true);
+  });
+
+  it("dealContactRepository.findByDeal includes organizationId parameter", async () => {
+    const content = await readSrc("infrastructure/repositories/dealContactRepository.ts");
+    const idx = content.indexOf("export async function findByDeal(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    // organizationId はシグネチャに必須
+    expect(body).toContain("organizationId");
+  });
+
+  it("repositories/index.ts exports dealContactRepository", async () => {
+    const content = await readSrc("infrastructure/repositories/index.ts");
+    expect(content).toContain("dealContactRepository");
   });
 });

@@ -1,4 +1,4 @@
-import { inquiryRepository, meetingRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { inquiryRepository, meetingRepository, dealRepository, auditLogRepository } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
 import type { Meeting, MeetingType, HearingData, ActionItem, MeetingAttendees } from "@/domain/models/meeting";
 
@@ -9,7 +9,8 @@ export type CreateMeetingResult =
 export async function createMeeting(data: {
   organizationId: string;
   actorId: string;
-  inquiryId: string;
+  inquiryId?: string | null;
+  dealId?: string | null;
   type: MeetingType;
   date: Date;
   location?: string | null;
@@ -18,10 +19,25 @@ export async function createMeeting(data: {
   actionItems: ActionItem[];
   hearingData?: HearingData | null;
 }): Promise<CreateMeetingResult> {
-  // 引き合いの存在確認
-  const inquiry = await inquiryRepository.findById(data.inquiryId, data.organizationId);
-  if (!inquiry) {
-    return { ok: false, reason: "引き合いが見つかりません" };
+  // inquiryId と dealId のどちらか一方は必須
+  if (!data.inquiryId && !data.dealId) {
+    return { ok: false, reason: "引き合いまたは案件のどちらかを指定してください" };
+  }
+
+  // 引き合いの存在確認（inquiryId が指定された場合のみ）
+  if (data.inquiryId) {
+    const inquiry = await inquiryRepository.findById(data.inquiryId, data.organizationId);
+    if (!inquiry) {
+      return { ok: false, reason: "引き合いが見つかりません" };
+    }
+  }
+
+  // 案件の存在確認（dealId が指定された場合のみ）
+  if (data.dealId) {
+    const deal = await dealRepository.findById(data.dealId, data.organizationId);
+    if (!deal) {
+      return { ok: false, reason: "案件が見つかりません" };
+    }
   }
 
   // hearing 以外の type では hearingData を null に強制する
@@ -32,7 +48,8 @@ export async function createMeeting(data: {
       const newMeeting = await meetingRepository.create(
         {
           organizationId: data.organizationId,
-          inquiryId: data.inquiryId,
+          inquiryId: data.inquiryId ?? null,
+          dealId: data.dealId ?? null,
           type: data.type,
           date: data.date,
           location: data.location,

@@ -14,6 +14,29 @@ async function readSrc(relPath: string): Promise<string> {
 }
 
 describe("createMeeting usecase 静的検証", () => {
+  it("T-01: inquiryId と dealId の両方が null の場合にエラーを返すバリデーションが含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("application/usecases/createMeeting.ts");
+    // 実行・検証 - 両方 null のガード節がある
+    expect(content).toContain("inquiryId");
+    expect(content).toContain("dealId");
+    expect(content).toContain("引き合いまたは案件のどちらかを指定してください");
+  });
+
+  it("T-02: dealId のみ指定の場合に dealRepository.findById で案件存在確認するコードが含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("application/usecases/createMeeting.ts");
+    // 実行・検証 - 案件存在確認がある
+    expect(content).toContain("dealRepository.findById");
+  });
+
+  it("T-03: meetingRepository.create 呼び出しに dealId が含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("application/usecases/createMeeting.ts");
+    // 実行・検証 - dealId が create に渡される
+    expect(content).toContain("dealId: data.dealId");
+  });
+
   it("inquiryRepository.findById の呼び出しが含まれる（引き合い存在確認）", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createMeeting.ts");

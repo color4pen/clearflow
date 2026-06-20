@@ -4,8 +4,8 @@ import type { DealPhase } from "../models/deal";
 const VALID_TRANSITIONS: Partial<Record<DealPhase, DealPhase[]>> = {
   proposal_prep: ["proposed", "lost"],
   proposed: ["negotiation", "lost"],
-  negotiation: ["internal_approval", "lost"],
-  internal_approval: ["won", "lost"],
+  negotiation: ["estimate_approval", "lost"],
+  estimate_approval: ["won", "lost"],
 };
 
 /**
