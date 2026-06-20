@@ -23,6 +23,8 @@ export function MeetingDetail({ meeting, inquiryId }: Props) {
   const router = useRouter();
   const [actionItems, setActionItems] = useState<ActionItem[]>(meeting.actionItems);
   const [editMode, setEditMode] = useState(false);
+  // フォーム上で種別が変更された場合に即時反映するための state
+  const [selectedType, setSelectedType] = useState(meeting.type);
 
   const [updateState, updateAction, isUpdating] = useActionState(
     async (prev: Parameters<typeof updateMeetingAction>[0], formData: FormData) => {
@@ -57,9 +59,11 @@ export function MeetingDetail({ meeting, inquiryId }: Props) {
   );
 
   function toggleActionItemDone(idx: number) {
+    const previous = actionItems;
     const updated = actionItems.map((item, i) =>
       i === idx ? { ...item, done: !item.done } : item
     );
+    // 楽観更新
     setActionItems(updated);
 
     // done 状態のみ更新（updateMeetingAction を直接呼び出す）
@@ -67,9 +71,19 @@ export function MeetingDetail({ meeting, inquiryId }: Props) {
     formData.set("meetingId", meeting.id);
     formData.set("inquiryId", inquiryId);
     formData.set("actionItems", JSON.stringify(updated));
-    updateMeetingAction({}, formData).then(() => {
-      router.refresh();
-    });
+    updateMeetingAction({}, formData)
+      .then((result) => {
+        if (result.errors || result.message) {
+          // サーバー側バリデーションエラー時もロールバック
+          setActionItems(previous);
+        } else {
+          router.refresh();
+        }
+      })
+      .catch(() => {
+        // サーバーエラー時は楽観更新を元に戻す
+        setActionItems(previous);
+      });
   }
 
   return (
@@ -130,7 +144,12 @@ export function MeetingDetail({ meeting, inquiryId }: Props) {
 
             <div className="grid grid-cols-2 gap-3">
               <FormField label="種別" htmlFor="edit-type">
-                <Select id="edit-type" name="type" defaultValue={meeting.type}>
+                <Select
+                  id="edit-type"
+                  name="type"
+                  defaultValue={meeting.type}
+                  onChange={(e) => setSelectedType(e.target.value as typeof meeting.type)}
+                >
                   {typeOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                       {opt.label}
@@ -170,8 +189,8 @@ export function MeetingDetail({ meeting, inquiryId }: Props) {
               </FormField>
             </div>
 
-            {/* hearing の場合はヒアリング項目編集フォームを表示 */}
-            {meeting.type === "hearing" && (
+            {/* hearing の場合はヒアリング項目編集フォームを表示（フォーム上の選択値で判定） */}
+            {selectedType === "hearing" && (
               <div className="mt-3 border border-border-light p-2 bg-bg-surface">
                 <p className="text-xs font-bold text-text mb-2">ヒアリング項目</p>
                 <div className="grid grid-cols-2 gap-3">
@@ -228,7 +247,10 @@ export function MeetingDetail({ meeting, inquiryId }: Props) {
               <SubmitButton pending={isUpdating}>更新する</SubmitButton>
               <button
                 type="button"
-                onClick={() => setEditMode(false)}
+                onClick={() => {
+                  setEditMode(false);
+                  setSelectedType(meeting.type);
+                }}
                 className="text-xs text-text-muted underline"
               >
                 キャンセル

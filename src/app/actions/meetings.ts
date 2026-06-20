@@ -40,6 +40,8 @@ export type CreateMeetingState = {
     type?: string[];
     date?: string[];
     location?: string[];
+    internalAttendees?: string[];
+    externalAttendees?: string[];
     summary?: string[];
     actionItems?: string[];
     hearingData?: string[];
@@ -76,7 +78,7 @@ export async function createMeetingAction(
     try {
       internalAttendees = JSON.parse(internalAttendeesRaw);
     } catch {
-      return { errors: {} };
+      return { errors: { internalAttendees: ["社内参加者の形式が不正です"] } };
     }
   }
 
@@ -85,7 +87,7 @@ export async function createMeetingAction(
     try {
       externalAttendees = JSON.parse(externalAttendeesRaw);
     } catch {
-      return { errors: {} };
+      return { errors: { externalAttendees: ["社外参加者の形式が不正です"] } };
     }
   }
 
@@ -168,6 +170,8 @@ export type UpdateMeetingState = {
     type?: string[];
     date?: string[];
     location?: string[];
+    internalAttendees?: string[];
+    externalAttendees?: string[];
     summary?: string[];
     actionItems?: string[];
     hearingData?: string[];
@@ -203,7 +207,7 @@ export async function updateMeetingAction(
     try {
       internalAttendees = JSON.parse(internalAttendeesRaw);
     } catch {
-      return { errors: {} };
+      return { errors: { internalAttendees: ["社内参加者の形式が不正です"] } };
     }
   }
 
@@ -212,7 +216,7 @@ export async function updateMeetingAction(
     try {
       externalAttendees = JSON.parse(externalAttendeesRaw);
     } catch {
-      return { errors: {} };
+      return { errors: { externalAttendees: ["社外参加者の形式が不正です"] } };
     }
   }
 
