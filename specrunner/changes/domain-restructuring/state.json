@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "47543889-957e-45f6-b7a0-cef62ee26fc6",
   "createdAt": "2026-06-20T22:18:08.874Z",
-  "updatedAt": "2026-06-20T23:42:50.338Z",
+  "updatedAt": "2026-06-20T23:48:07.771Z",
   "request": {
     "title": "ドメインモデル再構築と用語統一",
     "type": "refactoring",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "refactor/domain-restructuring-47543889",
   "error": null,
@@ -34,8 +34,22 @@
     }
   ],
   "resumePoint": null,
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "a1dc2505a9715e3c7d646afb056d44bafea2d717",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 63,
+    "historyCount": 68,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -46,7 +60,9 @@
       "verification": 2,
       "build-fixer": 1,
       "code-review": 2,
-      "code-fixer": 2
+      "code-fixer": 2,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
