@@ -14,15 +14,32 @@ function mapRow(row: typeof dealContacts.$inferSelect): DealContact {
   };
 }
 
+/**
+ * 案件担当者を作成する。
+ * deals.organizationId を事前確認してテナント分離を保証する。
+ */
 export async function create(
   data: {
     dealId: string;
     contactId: string;
     role: DealContactRole;
+    organizationId: string;
   },
   tx?: Transaction
 ): Promise<DealContact> {
   const queryRunner = tx ?? db;
+
+  // テナント検証: dealId が organizationId に属するかを確認する
+  const owningDeal = await queryRunner
+    .select({ id: deals.id })
+    .from(deals)
+    .where(and(eq(deals.id, data.dealId), eq(deals.organizationId, data.organizationId)))
+    .limit(1);
+
+  if (owningDeal.length === 0) {
+    throw new Error("指定された案件が見つからないか、アクセス権限がありません");
+  }
+
   const result = await queryRunner
     .insert(dealContacts)
     .values({

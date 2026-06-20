@@ -1142,6 +1142,19 @@ describe("Tenant isolation — deal", () => {
     expect(body).toContain("organizationId");
   });
 
+  it("dealContactRepository.create includes organizationId tenant verification", async () => {
+    const content = await readSrc("infrastructure/repositories/dealContactRepository.ts");
+    const idx = content.indexOf("export async function create(");
+    expect(idx).toBeGreaterThan(-1);
+    // organizationId がシグネチャに含まれる
+    const signature = content.slice(idx, idx + 200);
+    expect(signature).toContain("organizationId");
+    // INSERT 前に deals テーブルで所有確認している
+    const body = content.slice(idx, idx + 700);
+    expect(body).toContain("deals");
+    expect(body).toContain("deals.organizationId");
+  });
+
   it("repositories/index.ts exports dealContactRepository", async () => {
     const content = await readSrc("infrastructure/repositories/index.ts");
     expect(content).toContain("dealContactRepository");
