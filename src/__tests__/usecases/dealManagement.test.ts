@@ -83,6 +83,28 @@ describe("updateDealPhase usecase 静的検証", () => {
     // エラー文字列が存在する
     expect(content).toContain("テンプレートの指定が必要");
   });
+
+  // TC-027: internal_approval 遷移時の formData に "想定金額" ラベルが含まれる
+  it('TC-027: 承認リクエストに渡す formData に "想定金額" ラベルが含まれる', async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("application/usecases/updateDealPhase.ts");
+    // 実行・検証 - filterStepsByCondition に渡す formData の label が存在する
+    expect(content).toContain('"想定金額"');
+  });
+});
+
+describe("dealRepository 静的検証", () => {
+  // TC-044: findAllByOrganization が inquiries・clients を JOIN して DealWithInquiry を返す
+  it("TC-044: findAllByOrganization の結果に inquiryTitle と clientName が含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("infrastructure/repositories/dealRepository.ts");
+    // 実行・検証 - inquiries JOIN と clients JOIN および返却フィールドが存在する
+    expect(content).toContain("inquiryTitle");
+    expect(content).toContain("clientName");
+    // 両テーブルへの JOIN が存在する
+    expect(content).toContain("inquiries");
+    expect(content).toContain("clients");
+  });
 });
 
 describe("updateDeal usecase 静的検証", () => {

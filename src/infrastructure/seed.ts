@@ -460,7 +460,7 @@ async function seed() {
     status: "converted",
     requestId: approvedRequest.id,
   }).returning();
-  console.log("✅ Created inquiries (3 total: new, in_progress, converted)");
+  console.log("✅ Created inquiries (3 total: new, converted×2)");
 
   // Create meetings (4 total: hearing, proposal, negotiation, followup)
   if (newInquiry) {
