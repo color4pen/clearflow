@@ -194,7 +194,7 @@
 
 ## T-12: 顧客詳細ページへの案件一覧セクション追加
 
-- [ ] `src/app/(dashboard)/clients/[id]/page.tsx` で、`inquiryRepository.findByClientId(id, organizationId)` の結果から `inquiryId` 一覧を取り出し、`Promise.all` で `dealRepository.findByInquiryId` を並列実行して案件を取得する。取得結果を `filter(Boolean)` でまとめる（新規リポジトリメソッドは追加しない）
+- [ ] `src/app/(dashboard)/clients/[id]/page.tsx` で、`inquiryRepository.findByClientId(id, organizationId)` の結果から `inquiryId` 一覧を取り出し、`Promise.all` で `dealRepository.findByInquiryId` を並列実行して案件を取得する。取得結果を `filter(Boolean)` でまとめる（`dealRepository.findByInquiryId` は既存メソッド — `createDeal.ts:35` で使用済み。新規リポジトリメソッドは追加しない）
 - [ ] 同ページに「案件一覧」セクション（`SectionCard` を使用）を追加する。各案件の title・`phaseLabels[phase]`・assigneeName を一覧表示する。案件がない場合は「案件がありません」と表示する
 
 **Acceptance Criteria**:
