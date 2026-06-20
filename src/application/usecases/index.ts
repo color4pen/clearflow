@@ -24,3 +24,8 @@ export { listInquiries } from "./listInquiries";
 export { createMeeting } from "./createMeeting";
 export { listMeetings } from "./listMeetings";
 export { updateMeeting } from "./updateMeeting";
+export { createDeal } from "./createDeal";
+export { listDeals } from "./listDeals";
+export { getDeal } from "./getDeal";
+export { updateDealPhase } from "./updateDealPhase";
+export { updateDeal } from "./updateDeal";

@@ -112,6 +112,7 @@ describe("Domain model integrity", () => {
       "domain/models/client.ts",
       "domain/models/inquiry.ts",
       "domain/models/meeting.ts",
+      "domain/models/deal.ts",
     ];
     for (const file of modelFiles) {
       const content = await readSrc(file);
@@ -147,10 +148,12 @@ describe("Domain model integrity", () => {
       "domain/models/client.ts",
       "domain/models/inquiry.ts",
       "domain/models/meeting.ts",
+      "domain/models/deal.ts",
       "domain/models/index.ts",
       "domain/services/requestTransition.ts",
       "domain/services/approvalStepService.ts",
       "domain/services/inquiryTransition.ts",
+      "domain/services/dealTransition.ts",
       "domain/services/index.ts",
     ];
     for (const file of files) {
@@ -1010,6 +1013,65 @@ describe("Tenant isolation — meeting", () => {
 
   it("meetings action uses session.user.organizationId", async () => {
     const content = await readSrc("app/actions/meetings.ts");
+    expect(content).toContain("session.user.organizationId");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tenant isolation — deal
+// ---------------------------------------------------------------------------
+
+describe("Tenant isolation — deal", () => {
+  it("dealRepository.create includes organizationId", async () => {
+    const content = await readSrc("infrastructure/repositories/dealRepository.ts");
+    const idx = content.indexOf("export async function create(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 600);
+    expect(body).toContain("organizationId");
+  });
+
+  it("dealRepository.findById includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/dealRepository.ts");
+    const idx = content.indexOf("export async function findById(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("dealRepository.findAllByOrganization includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/dealRepository.ts");
+    const idx = content.indexOf("export async function findAllByOrganization(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("dealRepository.findByInquiryId includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/dealRepository.ts");
+    const idx = content.indexOf("export async function findByInquiryId(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("dealRepository.update includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/dealRepository.ts");
+    const idx = content.indexOf("export async function update(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 500);
+    expect(body).toContain("organizationId");
+  });
+
+  it("dealRepository.updatePhase includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/dealRepository.ts");
+    const idx = content.indexOf("export async function updatePhase(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 500);
+    expect(body).toContain("organizationId");
+  });
+
+  it("deals action uses session.user.organizationId", async () => {
+    const content = await readSrc("app/actions/deals.ts");
     expect(content).toContain("session.user.organizationId");
   });
 });

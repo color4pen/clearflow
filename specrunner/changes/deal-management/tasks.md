@@ -2,8 +2,8 @@
 
 ## T-01: schema.ts に dealPhaseEnum と deals テーブルを追加する
 
-- [ ] `src/infrastructure/schema.ts` の `meetingTypeEnum`（L42-48）の直後に `dealPhaseEnum` を追加する: `pgEnum("deal_phase", ["proposal_prep", "proposed", "negotiation", "internal_approval", "won", "lost"])`
-- [ ] `meetings` テーブル（L274-296）の直後、Auth.js adapter テーブルの前に `deals` テーブルを追加する。カラム:
+- [x] `src/infrastructure/schema.ts` の `meetingTypeEnum`（L42-48）の直後に `dealPhaseEnum` を追加する: `pgEnum("deal_phase", ["proposal_prep", "proposed", "negotiation", "internal_approval", "won", "lost"])`
+- [x] `meetings` テーブル（L274-296）の直後、Auth.js adapter テーブルの前に `deals` テーブルを追加する。カラム:
   - `id` (uuid PK defaultRandom)
   - `organizationId` (uuid FK to organizations, notNull)
   - `inquiryId` (uuid FK to inquiries, notNull)
@@ -32,10 +32,10 @@
 
 ## T-02: schema.ts に deals の Relations 定義を追加する
 
-- [ ] ファイル末尾に `dealsRelations` を追加する: `organization` (one → organizations), `inquiry` (one → inquiries), `assignee` (one → users, relationName: "dealsAsAssignee"), `technicalLead` (one → users, relationName: "dealsAsTechnicalLead"), `estimateRequest` (one → requests)
-- [ ] `organizationsRelations`（L338-350）の `many()` に `deals: many(deals)` を追記する
-- [ ] `usersRelations`（L359-372）に `dealsAsAssignee: many(deals, { relationName: "dealsAsAssignee" })` と `dealsAsTechnicalLead: many(deals, { relationName: "dealsAsTechnicalLead" })` の 2 つの `many()` を追記する
-- [ ] `inquiriesRelations`（L497-519）に `deals: many(deals)` を追記する
+- [x] ファイル末尾に `dealsRelations` を追加する: `organization` (one → organizations), `inquiry` (one → inquiries), `assignee` (one → users, relationName: "dealsAsAssignee"), `technicalLead` (one → users, relationName: "dealsAsTechnicalLead"), `estimateRequest` (one → requests)
+- [x] `organizationsRelations`（L338-350）の `many()` に `deals: many(deals)` を追記する
+- [x] `usersRelations`（L359-372）に `dealsAsAssignee: many(deals, { relationName: "dealsAsAssignee" })` と `dealsAsTechnicalLead: many(deals, { relationName: "dealsAsTechnicalLead" })` の 2 つの `many()` を追記する
+- [x] `inquiriesRelations`（L497-519）に `deals: many(deals)` を追記する
 
 **Acceptance Criteria**:
 - `dealsRelations` が export されている
@@ -49,12 +49,12 @@
 
 ## T-03: ドメインモデル（deal.ts）を追加する
 
-- [ ] `src/domain/models/deal.ts` を作成する
-- [ ] `DealPhase` 型を定義する: `"proposal_prep" | "proposed" | "negotiation" | "internal_approval" | "won" | "lost"`
-- [ ] `ContractType` 型を定義する: `"quasi_delegation" | "contract" | "ses"`
-- [ ] `Deal` 型を定義する: `{ id, organizationId, inquiryId, title, phase, estimatedAmount, estimatedStartDate, estimatedEndDate, contractType, assigneeId, technicalLeadId, estimateRequestId, notes, createdAt, updatedAt, version }` — nullable フィールドは `型 | null`、日付は `Date`、`version` は `number`、`contractType` は `ContractType | null`
-- [ ] `DealWithInquiry` 型を定義する: `Deal & { inquiryTitle: string; clientName: string }`
-- [ ] `src/domain/models/index.ts` に `export type { DealPhase, ContractType, Deal, DealWithInquiry } from "./deal"` を追記する
+- [x] `src/domain/models/deal.ts` を作成する
+- [x] `DealPhase` 型を定義する: `"proposal_prep" | "proposed" | "negotiation" | "internal_approval" | "won" | "lost"`
+- [x] `ContractType` 型を定義する: `"quasi_delegation" | "contract" | "ses"`
+- [x] `Deal` 型を定義する: `{ id, organizationId, inquiryId, title, phase, estimatedAmount, estimatedStartDate, estimatedEndDate, contractType, assigneeId, technicalLeadId, estimateRequestId, notes, createdAt, updatedAt, version }` — nullable フィールドは `型 | null`、日付は `Date`、`version` は `number`、`contractType` は `ContractType | null`
+- [x] `DealWithInquiry` 型を定義する: `Deal & { inquiryTitle: string; clientName: string }`
+- [x] `src/domain/models/index.ts` に `export type { DealPhase, ContractType, Deal, DealWithInquiry } from "./deal"` を追記する
 
 **Acceptance Criteria**:
 - `deal.ts` に ORM / infrastructure への import がない（純粋な type エイリアス）
@@ -65,11 +65,11 @@
 
 ## T-04: ドメインサービス（dealTransition.ts）を追加する
 
-- [ ] `src/domain/services/dealTransition.ts` を作成する
-- [ ] `DealPhase` 型を `../models/deal` から import する
-- [ ] 遷移マップを定義する: `proposal_prep → [proposed, lost]`, `proposed → [negotiation, lost]`, `negotiation → [internal_approval, lost]`, `internal_approval → [won, lost]`。`won` と `lost` は終端状態（マップに含めない）
-- [ ] `canTransition(from: DealPhase, to: DealPhase): boolean` を export する。遷移マップに `from` が存在し、`to` が許可リストに含まれる場合に `true` を返す
-- [ ] `src/domain/services/index.ts` に export を追記する。`inquiryTransition.ts` の `canTransition` と名前が衝突するため、名前付き export で区別する: `export { canTransition as canDealTransition } from "./dealTransition"`
+- [x] `src/domain/services/dealTransition.ts` を作成する
+- [x] `DealPhase` 型を `../models/deal` から import する
+- [x] 遷移マップを定義する: `proposal_prep → [proposed, lost]`, `proposed → [negotiation, lost]`, `negotiation → [internal_approval, lost]`, `internal_approval → [won, lost]`。`won` と `lost` は終端状態（マップに含めない）
+- [x] `canTransition(from: DealPhase, to: DealPhase): boolean` を export する。遷移マップに `from` が存在し、`to` が許可リストに含まれる場合に `true` を返す
+- [x] `src/domain/services/index.ts` に export を追記する。`inquiryTransition.ts` の `canTransition` と名前が衝突するため、名前付き export で区別する: `export { canTransition as canDealTransition } from "./dealTransition"`
 
 **Acceptance Criteria**:
 - `canTransition("proposal_prep", "proposed")` → `true`
@@ -93,16 +93,16 @@
 
 ## T-05: dealRepository を追加する
 
-- [ ] `src/infrastructure/repositories/dealRepository.ts` を作成する
-- [ ] `db`, `Transaction`, `deals`, `inquiries`, `clients` を import する。`Deal`, `DealWithInquiry`, `DealPhase`, `ContractType` を domain models から import する
-- [ ] `mapRow()` 内部関数で `deals.$inferSelect` → `Deal` 変換を実装する。`contractType` は `as ContractType | null` でキャスト
-- [ ] `create(data: { organizationId, inquiryId, title, estimatedAmount?, estimatedStartDate?, estimatedEndDate?, contractType?, assigneeId?, technicalLeadId?, notes? }, tx?): Promise<Deal>` — `.returning()` で `mapRow` 適用
-- [ ] `findById(id, organizationId, tx?): Promise<Deal | null>` — `and(eq(id), eq(organizationId))` で条件
-- [ ] `findAllByOrganization(organizationId): Promise<DealWithInquiry[]>` — `deals` と `inquiries` を JOIN し、さらに `clients` を JOIN して `inquiryTitle` と `clientName` を取得。`eq(deals.organizationId)` で条件。`createdAt` 順
-- [ ] `findByInquiryId(inquiryId, organizationId, tx?): Promise<Deal | null>` — `and(eq(inquiryId), eq(organizationId))` で条件。1:1 制約チェックに使用
-- [ ] `update(id, organizationId, data: Partial<{ title, estimatedAmount, estimatedStartDate, estimatedEndDate, contractType, assigneeId, technicalLeadId, notes }>, tx?): Promise<Deal | null>` — `updatedAt: new Date()` を含めて更新。`.returning()` で返却
-- [ ] `updatePhase(id, organizationId, phase: DealPhase, estimateRequestId: string | null, currentVersion: number, tx?): Promise<Deal | null>` — 楽観ロック付き。`phase`, `estimateRequestId`, `updatedAt`, `version: sql\`version + 1\`` を更新。`and(eq(id), eq(organizationId), eq(version, currentVersion))` で条件。`.returning()` で返却
-- [ ] `src/infrastructure/repositories/index.ts` に `export * as dealRepository from "./dealRepository"` を追記する
+- [x] `src/infrastructure/repositories/dealRepository.ts` を作成する
+- [x] `db`, `Transaction`, `deals`, `inquiries`, `clients` を import する。`Deal`, `DealWithInquiry`, `DealPhase`, `ContractType` を domain models から import する
+- [x] `mapRow()` 内部関数で `deals.$inferSelect` → `Deal` 変換を実装する。`contractType` は `as ContractType | null` でキャスト
+- [x] `create(data: { organizationId, inquiryId, title, estimatedAmount?, estimatedStartDate?, estimatedEndDate?, contractType?, assigneeId?, technicalLeadId?, notes? }, tx?): Promise<Deal>` — `.returning()` で `mapRow` 適用
+- [x] `findById(id, organizationId, tx?): Promise<Deal | null>` — `and(eq(id), eq(organizationId))` で条件
+- [x] `findAllByOrganization(organizationId): Promise<DealWithInquiry[]>` — `deals` と `inquiries` を JOIN し、さらに `clients` を JOIN して `inquiryTitle` と `clientName` を取得。`eq(deals.organizationId)` で条件。`createdAt` 順
+- [x] `findByInquiryId(inquiryId, organizationId, tx?): Promise<Deal | null>` — `and(eq(inquiryId), eq(organizationId))` で条件。1:1 制約チェックに使用
+- [x] `update(id, organizationId, data: Partial<{ title, estimatedAmount, estimatedStartDate, estimatedEndDate, contractType, assigneeId, technicalLeadId, notes }>, tx?): Promise<Deal | null>` — `updatedAt: new Date()` を含めて更新。`.returning()` で返却
+- [x] `updatePhase(id, organizationId, phase: DealPhase, estimateRequestId: string | null, currentVersion: number, tx?): Promise<Deal | null>` — 楽観ロック付き。`phase`, `estimateRequestId`, `updatedAt`, `version: sql\`version + 1\`` を更新。`and(eq(id), eq(organizationId), eq(version, currentVersion))` で条件。`.returning()` で返却
+- [x] `src/infrastructure/repositories/index.ts` に `export * as dealRepository from "./dealRepository"` を追記する
 
 **Acceptance Criteria**:
 - `create`, `findById`, `findAllByOrganization`, `findByInquiryId`, `update`, `updatePhase` が export されている
@@ -117,14 +117,14 @@
 
 ## T-06: createDeal usecase を追加する
 
-- [ ] `src/application/usecases/createDeal.ts` を作成する
-- [ ] `CreateDealResult` 型を定義する: `{ ok: true; deal: Deal } | { ok: false; reason: string }`
-- [ ] `createDeal(data: { organizationId, actorId, inquiryId, title, estimatedAmount?, estimatedStartDate?, estimatedEndDate?, contractType?, assigneeId?, technicalLeadId?, notes? }): Promise<CreateDealResult>` を export する
-- [ ] `inquiryRepository.findById(inquiryId, organizationId)` で引き合いの存在を確認する。見つからなければ `{ ok: false, reason: "引き合いが見つかりません" }`
-- [ ] `inquiry.status !== "converted"` の場合は `{ ok: false, reason: "商談化済みの引き合いにのみ案件を作成できます" }`
-- [ ] `dealRepository.findByInquiryId(inquiryId, organizationId)` で重複チェック。既に案件がある場合は `{ ok: false, reason: "この引き合いにはすでに案件が存在します" }`
-- [ ] `db.transaction()` 内で `dealRepository.create()` + `auditLogRepository.create()`（action: `deal.create`, targetType: `deal`, targetId: 新案件ID）を実行する
-- [ ] `src/application/usecases/index.ts` に `export { createDeal } from "./createDeal"` を追記する
+- [x] `src/application/usecases/createDeal.ts` を作成する
+- [x] `CreateDealResult` 型を定義する: `{ ok: true; deal: Deal } | { ok: false; reason: string }`
+- [x] `createDeal(data: { organizationId, actorId, inquiryId, title, estimatedAmount?, estimatedStartDate?, estimatedEndDate?, contractType?, assigneeId?, technicalLeadId?, notes? }): Promise<CreateDealResult>` を export する
+- [x] `inquiryRepository.findById(inquiryId, organizationId)` で引き合いの存在を確認する。見つからなければ `{ ok: false, reason: "引き合いが見つかりません" }`
+- [x] `inquiry.status !== "converted"` の場合は `{ ok: false, reason: "商談化済みの引き合いにのみ案件を作成できます" }`
+- [x] `dealRepository.findByInquiryId(inquiryId, organizationId)` で重複チェック。既に案件がある場合は `{ ok: false, reason: "この引き合いにはすでに案件が存在します" }`
+- [x] `db.transaction()` 内で `dealRepository.create()` + `auditLogRepository.create()`（action: `deal.create`, targetType: `deal`, targetId: 新案件ID）を実行する
+- [x] `src/application/usecases/index.ts` に `export { createDeal } from "./createDeal"` を追記する
 
 **Acceptance Criteria**:
 - 引き合いが存在しない場合にエラーを返す
@@ -138,9 +138,9 @@
 
 ## T-07: listDeals / getDeal usecase を追加する
 
-- [ ] `src/application/usecases/listDeals.ts` を作成する。`listDeals(organizationId): Promise<DealWithInquiry[]>` — `dealRepository.findAllByOrganization()` を呼び出す
-- [ ] `src/application/usecases/getDeal.ts` を作成する。`getDeal(id, organizationId): Promise<Deal | null>` — `dealRepository.findById()` を呼び出す
-- [ ] `src/application/usecases/index.ts` に両方を re-export する
+- [x] `src/application/usecases/listDeals.ts` を作成する。`listDeals(organizationId): Promise<DealWithInquiry[]>` — `dealRepository.findAllByOrganization()` を呼び出す
+- [x] `src/application/usecases/getDeal.ts` を作成する。`getDeal(id, organizationId): Promise<Deal | null>` — `dealRepository.findById()` を呼び出す
+- [x] `src/application/usecases/index.ts` に両方を re-export する
 
 **Acceptance Criteria**:
 - `listDeals` が `DealWithInquiry[]` を返す
@@ -152,12 +152,12 @@
 
 ## T-08: updateDealPhase usecase を追加する
 
-- [ ] `src/application/usecases/updateDealPhase.ts` を作成する
-- [ ] `UpdateDealPhaseResult` 型を定義する: `{ ok: true; deal: Deal } | { ok: false; reason: string }`
-- [ ] `updateDealPhase(data: { dealId, organizationId, actorId, newPhase: DealPhase, templateId?: string }): Promise<UpdateDealPhaseResult>` を export する
-- [ ] `dealRepository.findById()` で案件を取得。見つからなければエラー
-- [ ] `canDealTransition(currentPhase, newPhase)` で遷移バリデーション。不可なら `{ ok: false, reason }` を返す
-- [ ] `internal_approval` 遷移時の処理（`updateInquiryStatus.ts` L36-132 のパターンを踏襲）:
+- [x] `src/application/usecases/updateDealPhase.ts` を作成する
+- [x] `UpdateDealPhaseResult` 型を定義する: `{ ok: true; deal: Deal } | { ok: false; reason: string }`
+- [x] `updateDealPhase(data: { dealId, organizationId, actorId, newPhase: DealPhase, templateId?: string }): Promise<UpdateDealPhaseResult>` を export する
+- [x] `dealRepository.findById()` で案件を取得。見つからなければエラー
+- [x] `canDealTransition(currentPhase, newPhase)` で遷移バリデーション。不可なら `{ ok: false, reason }` を返す
+- [x] `internal_approval` 遷移時の処理（`updateInquiryStatus.ts` L36-132 のパターンを踏襲）:
   - `templateId` が未指定なら `{ ok: false, reason: "内示フェーズへの遷移にはテンプレートの指定が必要です" }` を返す
   - `approvalTemplateRepository.findById(templateId, organizationId)` でテンプレートを取得。見つからなければエラー
   - `filterStepsByCondition()` でテンプレートのステップをフィルタリングする。フォームデータとして `{ amount: { value: deal.estimatedAmount, label: "想定金額" } }` を渡す
@@ -167,9 +167,9 @@
     3. `dealRepository.updatePhase()` で案件のフェーズと `estimateRequestId` を更新する（楽観ロック付き）
     4. `auditLogRepository.create()` でフェーズ変更の監査ログを記録する（action: `deal.updatePhase`, targetType: `deal`, metadata: `{ fromPhase, toPhase, requestId }`）
     5. `auditLogRepository.create()` で Request 作成の監査ログも記録する（action: `request.create`, targetType: `request`, targetId: newRequestId, metadata: `{ templateId, templateName, dealId }`）
-- [ ] `internal_approval` 以外の遷移時: `db.transaction()` 内で `dealRepository.updatePhase(id, organizationId, newPhase, null, deal.version, tx)` + `auditLogRepository.create()`（metadata: `{ fromPhase, toPhase }`）を実行する
-- [ ] 楽観ロック失敗時（`updatePhase` が null を返した場合）: `{ ok: false, reason: "この案件は他のユーザーによって更新されました" }` を返す
-- [ ] `src/application/usecases/index.ts` に re-export を追記する
+- [x] `internal_approval` 以外の遷移時: `db.transaction()` 内で `dealRepository.updatePhase(id, organizationId, newPhase, null, deal.version, tx)` + `auditLogRepository.create()`（metadata: `{ fromPhase, toPhase }`）を実行する
+- [x] 楽観ロック失敗時（`updatePhase` が null を返した場合）: `{ ok: false, reason: "この案件は他のユーザーによって更新されました" }` を返す
+- [x] `src/application/usecases/index.ts` に re-export を追記する
 
 **Acceptance Criteria**:
 - 遷移ルール違反時にエラーを返す
@@ -187,12 +187,12 @@
 
 ## T-09: updateDeal usecase を追加する
 
-- [ ] `src/application/usecases/updateDeal.ts` を作成する
-- [ ] `UpdateDealResult` 型を定義する: `{ ok: true; deal: Deal } | { ok: false; reason: string }`
-- [ ] `updateDeal(data: { dealId, organizationId, actorId, title?, estimatedAmount?, estimatedStartDate?, estimatedEndDate?, contractType?, assigneeId?, technicalLeadId?, notes? }): Promise<UpdateDealResult>` を export する
-- [ ] `dealRepository.findById()` で案件を取得。見つからなければエラー
-- [ ] `db.transaction()` 内で `dealRepository.update()` + `auditLogRepository.create()`（action: `deal.update`, targetType: `deal`, targetId: dealId）を実行する
-- [ ] `src/application/usecases/index.ts` に re-export を追記する
+- [x] `src/application/usecases/updateDeal.ts` を作成する
+- [x] `UpdateDealResult` 型を定義する: `{ ok: true; deal: Deal } | { ok: false; reason: string }`
+- [x] `updateDeal(data: { dealId, organizationId, actorId, title?, estimatedAmount?, estimatedStartDate?, estimatedEndDate?, contractType?, assigneeId?, technicalLeadId?, notes? }): Promise<UpdateDealResult>` を export する
+- [x] `dealRepository.findById()` で案件を取得。見つからなければエラー
+- [x] `db.transaction()` 内で `dealRepository.update()` + `auditLogRepository.create()`（action: `deal.update`, targetType: `deal`, targetId: dealId）を実行する
+- [x] `src/application/usecases/index.ts` に re-export を追記する
 
 **Acceptance Criteria**:
 - 案件が存在しない場合にエラーを返す
@@ -205,26 +205,26 @@
 
 ## T-10: Server Actions（deals.ts）を追加する
 
-- [ ] `src/app/actions/deals.ts` を作成する。`"use server"` 宣言
-- [ ] `createDealAction(prevState, formData): Promise<CreateDealState>` を実装する:
+- [x] `src/app/actions/deals.ts` を作成する。`"use server"` 宣言
+- [x] `createDealAction(prevState, formData): Promise<CreateDealState>` を実装する:
   - `auth()` で認証チェック
   - ロールチェック: `session.user.role` が `admin` または `manager` でなければ `{ message: "権限がありません" }`
   - `checkRateLimit()` でレート制限
   - Zod バリデーション: `inquiryId` (UUID 必須), `title` (必須 1 文字以上), `estimatedAmount` (integer optional), `estimatedStartDate` (string optional), `estimatedEndDate` (string optional), `contractType` (enum optional: `"quasi_delegation" | "contract" | "ses"`), `assigneeId` (UUID optional), `technicalLeadId` (UUID optional), `notes` (optional)
   - `createDeal` usecase を呼び出す
   - `revalidatePath("/deals")` + `revalidatePath("/inquiries/${inquiryId}")`
-- [ ] `updateDealPhaseAction(dealId, formData): Promise<ActionResult>` を実装する:
+- [x] `updateDealPhaseAction(dealId, formData): Promise<ActionResult>` を実装する:
   - `auth()` で認証チェック
   - ロールチェック: `admin` または `manager`
   - formData から `newPhase` と `templateId`（optional）を取得
   - `updateDealPhase` usecase を呼び出す
   - `revalidatePath("/deals")` + `revalidatePath("/deals/${dealId}")`
-- [ ] `updateDealAction(dealId, formData): Promise<ActionResult>` を実装する:
+- [x] `updateDealAction(dealId, formData): Promise<ActionResult>` を実装する:
   - `auth()` で認証チェック（全ロール許可）
   - Zod バリデーション
   - `updateDeal` usecase を呼び出す
   - `revalidatePath("/deals/${dealId}")`
-- [ ] `listDealsAction()` を実装する: 認証チェック → `listDeals(organizationId)` を呼び出す
+- [x] `listDealsAction()` を実装する: 認証チェック → `listDeals(organizationId)` を呼び出す
 
 **Acceptance Criteria**:
 - 全アクションに認証チェックがある
@@ -238,14 +238,14 @@
 
 ## T-11: UI — 案件一覧ページ（/deals）
 
-- [ ] `src/app/(dashboard)/deals/page.tsx` を作成する（Server Component）
-- [ ] `auth()` でセッションを取得する
-- [ ] `listDeals(organizationId)` で案件一覧（DealWithInquiry）を取得する
-- [ ] `PageToolbar` で「案件管理」タイトルを表示する（案件作成は引き合い詳細ページから行うため、一覧ページに「新規登録」ボタンは不要）
-- [ ] フェーズフィルタ: 全て / 提案準備 / 提案済 / 交渉中 / 内示 / 受注 / 失注のフィルタ（URL パラメータ `?phase=xxx` またはクライアントサイドフィルタ）
-- [ ] `DataTable` でフェーズ・案件名・顧客名・想定金額・担当者を表示する。各行は `/deals/[id]` へのリンクとする
-- [ ] フェーズのラベル: `proposal_prep` → 提案準備, `proposed` → 提案済, `negotiation` → 交渉中, `internal_approval` → 内示, `won` → 受注, `lost` → 失注
-- [ ] 案件が 0 件の場合は空状態メッセージを表示する
+- [x] `src/app/(dashboard)/deals/page.tsx` を作成する（Server Component）
+- [x] `auth()` でセッションを取得する
+- [x] `listDeals(organizationId)` で案件一覧（DealWithInquiry）を取得する
+- [x] `PageToolbar` で「案件管理」タイトルを表示する（案件作成は引き合い詳細ページから行うため、一覧ページに「新規登録」ボタンは不要）
+- [x] フェーズフィルタ: 全て / 提案準備 / 提案済 / 交渉中 / 内示 / 受注 / 失注のフィルタ（URL パラメータ `?phase=xxx` またはクライアントサイドフィルタ）
+- [x] `DataTable` でフェーズ・案件名・顧客名・想定金額・担当者を表示する。各行は `/deals/[id]` へのリンクとする
+- [x] フェーズのラベル: `proposal_prep` → 提案準備, `proposed` → 提案済, `negotiation` → 交渉中, `internal_approval` → 内示, `won` → 受注, `lost` → 失注
+- [x] 案件が 0 件の場合は空状態メッセージを表示する
 
 **Acceptance Criteria**:
 - `/deals` にアクセスすると案件一覧が表示される
@@ -257,24 +257,24 @@
 
 ## T-12: UI — 案件詳細ページ（/deals/[id]）
 
-- [ ] `src/app/(dashboard)/deals/[id]/page.tsx` を作成する（Server Component）
-- [ ] `auth()` でセッションを取得し、`dealRepository.findById(id, organizationId)` で案件を取得する。見つからない場合は `notFound()`
-- [ ] `inquiryRepository.findById(deal.inquiryId, organizationId)` で関連する引き合い情報を取得する
-- [ ] `clientRepository.findById(inquiry.clientId, organizationId)` で顧客情報を取得する
-- [ ] `approvalTemplateRepository.findByOrganization(organizationId)` でテンプレート一覧を取得する（フェーズ変更時のテンプレート選択用）
-- [ ] 案件情報を `SectionCard` で表示する（案件名、フェーズ、想定金額、想定開始日、想定終了日、契約種別、営業担当、技術担当、備考）
-- [ ] フェーズ変更ボタンを配置する:
+- [x] `src/app/(dashboard)/deals/[id]/page.tsx` を作成する（Server Component）
+- [x] `auth()` でセッションを取得し、`dealRepository.findById(id, organizationId)` で案件を取得する。見つからない場合は `notFound()`
+- [x] `inquiryRepository.findById(deal.inquiryId, organizationId)` で関連する引き合い情報を取得する
+- [x] `clientRepository.findById(inquiry.clientId, organizationId)` で顧客情報を取得する
+- [x] `approvalTemplateRepository.findByOrganization(organizationId)` でテンプレート一覧を取得する（フェーズ変更時のテンプレート選択用）
+- [x] 案件情報を `SectionCard` で表示する（案件名、フェーズ、想定金額、想定開始日、想定終了日、契約種別、営業担当、技術担当、備考）
+- [x] フェーズ変更ボタンを配置する:
   - `proposal_prep` 状態: 「提案済に変更」（→ proposed）、「失注」（→ lost）
   - `proposed` 状態: 「交渉開始」（→ negotiation）、「失注」（→ lost）
   - `negotiation` 状態: 「内示に変更」（→ internal_approval）、「失注」（→ lost）
   - `internal_approval` 状態: 「受注」（→ won）、「失注」（→ lost）
   - `won` / `lost` 状態: ボタンなし（終端状態）
-- [ ] 「内示に変更」ボタン押下時にテンプレート選択 UI を表示する（引き合い詳細の「商談化」ボタンと同じパターン）
-- [ ] フェーズ変更時に `updateDealPhaseAction` を呼び出す
-- [ ] 関連する引き合いへのリンク（`/inquiries/${deal.inquiryId}`）を表示する
-- [ ] 関連する顧客へのリンク（`/clients/${inquiry.clientId}`）を表示する
-- [ ] `deal.estimateRequestId` が存在する場合、見積承認リクエストへのリンク（`/requests/${estimateRequestId}`）を表示する
-- [ ] 案件情報の編集フォーム（Client Component）を配置する。`updateDealAction` を呼び出す。編集可能フィールド: title, estimatedAmount, estimatedStartDate, estimatedEndDate, contractType, assigneeId, technicalLeadId, notes
+- [x] 「内示に変更」ボタン押下時にテンプレート選択 UI を表示する（引き合い詳細の「商談化」ボタンと同じパターン）
+- [x] フェーズ変更時に `updateDealPhaseAction` を呼び出す
+- [x] 関連する引き合いへのリンク（`/inquiries/${deal.inquiryId}`）を表示する
+- [x] 関連する顧客へのリンク（`/clients/${inquiry.clientId}`）を表示する
+- [x] `deal.estimateRequestId` が存在する場合、見積承認リクエストへのリンク（`/requests/${estimateRequestId}`）を表示する
+- [x] 案件情報の編集フォーム（Client Component）を配置する。`updateDealAction` を呼び出す。編集可能フィールド: title, estimatedAmount, estimatedStartDate, estimatedEndDate, contractType, assigneeId, technicalLeadId, notes
 
 **Acceptance Criteria**:
 - `/deals/:id` にアクセスすると案件詳細が表示される
@@ -289,9 +289,9 @@
 
 ## T-13: UI — 引き合い詳細ページに案件セクションを追加する
 
-- [ ] `src/app/(dashboard)/inquiries/[id]/page.tsx` を修正する
-- [ ] `dealRepository.findByInquiryId(id, organizationId)` で関連する案件を取得する
-- [ ] 承認情報セクション（L111-127）の下、商談履歴セクションの前に「案件」セクションを追加する:
+- [x] `src/app/(dashboard)/inquiries/[id]/page.tsx` を修正する
+- [x] `dealRepository.findByInquiryId(id, organizationId)` で関連する案件を取得する
+- [x] 承認情報セクション（L111-127）の下、商談履歴セクションの前に「案件」セクションを追加する:
   - 案件が存在する場合: 案件名、フェーズ、想定金額を表示し、`/deals/${deal.id}` へのリンクを表示する
   - `inquiry.status === "converted"` かつ案件が存在しない場合: 「案件を作成」ボタンを表示する。クリック時に案件作成フォームを表示するか、`/deals/new?inquiryId=${id}` へ遷移する
   - それ以外の場合（converted でなく案件もない場合）: 「案件はありません」メッセージを表示する
@@ -306,9 +306,9 @@
 
 ## T-14: ダッシュボードヘッダーにナビゲーションを追加する
 
-- [ ] `src/app/(dashboard)/layout.tsx` のヘッダーナビ（L24-59 付近）の「引き合い」リンクの直後に「案件」（`/deals`）のリンクを追加する
-- [ ] `isAdmin` 条件なしで全ロールに表示する
-- [ ] スタイルは「引き合い」と同じ `text-text-on-dark-secondary hover:text-white text-sm` を使用する
+- [x] `src/app/(dashboard)/layout.tsx` のヘッダーナビ（L24-59 付近）の「引き合い」リンクの直後に「案件」（`/deals`）のリンクを追加する
+- [x] `isAdmin` 条件なしで全ロールに表示する
+- [x] スタイルは「引き合い」と同じ `text-text-on-dark-secondary hover:text-white text-sm` を使用する
 
 **Acceptance Criteria**:
 - ダッシュボードヘッダーに「案件」のリンクが表示される
@@ -321,12 +321,12 @@
 
 ## T-15: シードデータを追加する
 
-- [ ] `src/infrastructure/seed.ts` に `deals` の import を追加する（schema から）
-- [ ] テーブル truncation 順序に `deals` を追加する。`deals.inquiryId` FK があるため、`meetings` の前（`meetings` より先に削除）に配置する: `await db.delete(deals)` を `await db.delete(meetings)` の前に追加する
-- [ ] 案件 2 件を作成する:
+- [x] `src/infrastructure/seed.ts` に `deals` の import を追加する（schema から）
+- [x] テーブル truncation 順序に `deals` を追加する。`deals.inquiryId` FK があるため、`meetings` の前（`meetings` より先に削除）に配置する: `await db.delete(deals)` を `await db.delete(meetings)` の前に追加する
+- [x] 案件 2 件を作成する:
   - 1 件目: `won` フェーズ。`convertedInquiry` に紐づく。title: "DX推進プロジェクト"。`estimatedAmount: 30000000`。`estimateRequestId: approvedRequest.id`。`assigneeId: managerUser.id`
   - 2 件目: `proposed` フェーズ。このためにもう 1 件 `converted` の引き合いが必要。既存の `inProgressInquiry`（工事管理ツールの導入検討、大和建設）を `converted` に変更するか、新しい converted 引き合いを追加する。最もシンプルな方法: `inProgressInquiry` のステータスを `converted` に変更する。title: "工事管理ツール導入"。`estimatedAmount: 15000000`。`assigneeId: managerUser.id`
-- [ ] シードデータの整合性を確認する: 案件に紐づく引き合いが全て `converted` ステータスである
+- [x] シードデータの整合性を確認する: 案件に紐づく引き合いが全て `converted` ステータスである
 
 **Acceptance Criteria**:
 - シード実行後に案件 2 件が作成される
@@ -339,9 +339,9 @@
 
 ## T-16: テスト — ドメインモデルと dealTransition の検証
 
-- [ ] `src/__tests__/static/projectStructure.test.ts` の TC-031（domain/models files have no ORM imports）のモデルファイル一覧に `"domain/models/deal.ts"` を追加する
-- [ ] 同テストの TC-034（domain 層に infrastructure import がない）のファイル一覧に `"domain/models/deal.ts"` と `"domain/services/dealTransition.ts"` を追加する
-- [ ] `src/__tests__/domain/dealTransition.test.ts` を作成する:
+- [x] `src/__tests__/static/projectStructure.test.ts` の TC-031（domain/models files have no ORM imports）のモデルファイル一覧に `"domain/models/deal.ts"` を追加する
+- [x] 同テストの TC-034（domain 層に infrastructure import がない）のファイル一覧に `"domain/models/deal.ts"` と `"domain/services/dealTransition.ts"` を追加する
+- [x] `src/__tests__/domain/dealTransition.test.ts` を作成する:
   - テスト: `canTransition("proposal_prep", "proposed")` → `true`
   - テスト: `canTransition("proposal_prep", "lost")` → `true`
   - テスト: `canTransition("proposed", "negotiation")` → `true`
@@ -367,7 +367,7 @@
 
 ## T-17: テスト — テナント分離と usecase の検証
 
-- [ ] `src/__tests__/static/projectStructure.test.ts` に「Tenant isolation — deal」セクションを追加する（meeting セクション L970-1015 の後に配置）:
+- [x] `src/__tests__/static/projectStructure.test.ts` に「Tenant isolation — deal」セクションを追加する（meeting セクション L970-1015 の後に配置）:
   - テスト: `dealRepository.ts` の `create` に `organizationId` が含まれる
   - テスト: `dealRepository.ts` の `findById` に `organizationId` が含まれる
   - テスト: `dealRepository.ts` の `findAllByOrganization` に `organizationId` が含まれる
@@ -375,7 +375,7 @@
   - テスト: `dealRepository.ts` の `update` に `organizationId` が含まれる
   - テスト: `dealRepository.ts` の `updatePhase` に `organizationId` が含まれる
   - テスト: `src/app/actions/deals.ts` が `session.user.organizationId` を使用している
-- [ ] `src/__tests__/usecases/dealManagement.test.ts` を作成する:
+- [x] `src/__tests__/usecases/dealManagement.test.ts` を作成する:
   - テスト: `createDeal.ts` のソースに `inquiryRepository.findById` の呼び出しが含まれる（引き合い存在確認）
   - テスト: `createDeal.ts` のソースに `status` 文字列比較（converted チェック）が含まれる
   - テスト: `createDeal.ts` のソースに `dealRepository.findByInquiryId` の呼び出しが含まれる（重複チェック）
@@ -398,8 +398,8 @@
 
 ## T-18: Drizzle マイグレーション生成
 
-- [ ] `bunx drizzle-kit generate` を実行してマイグレーションファイルを生成する
-- [ ] 生成されたマイグレーションを確認し、`deal_phase` enum と `deals` テーブルの CREATE 文が含まれることを確認する
+- [x] `bunx drizzle-kit generate` を実行してマイグレーションファイルを生成する
+- [x] 生成されたマイグレーションを確認し、`deal_phase` enum と `deals` テーブルの CREATE 文が含まれることを確認する
 
 **Acceptance Criteria**:
 - `drizzle/` にマイグレーションファイルが生成されている
@@ -410,10 +410,10 @@
 
 ## T-19: 最終確認 — ビルド・型チェック・テスト
 
-- [ ] `bun run build` を実行し、ビルドが成功することを確認する
-- [ ] `bunx tsc --noEmit` を実行し、型チェックが通ることを確認する
-- [ ] `bun test` を実行し、全テストが green であることを確認する
-- [ ] `bun run lint` を実行し、lint エラーがないことを確認する（新規追加ファイルに起因する errors はゼロ）
+- [x] `bun run build` を実行し、ビルドが成功することを確認する
+- [x] `bunx tsc --noEmit` を実行し、型チェックが通ることを確認する
+- [x] `bun test` を実行し、全テストが green であることを確認する
+- [x] `bun run lint` を実行し、lint エラーがないことを確認する（新規追加ファイルに起因する errors はゼロ）
 
 **Acceptance Criteria**:
 - `bun run build` 成功

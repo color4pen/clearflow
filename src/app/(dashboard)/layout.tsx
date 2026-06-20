@@ -40,6 +40,12 @@ export default async function DashboardLayout({
               >
                 引き合い
               </Link>
+              <Link
+                href="/deals"
+                className="text-text-on-dark-secondary hover:text-white text-sm"
+              >
+                案件
+              </Link>
               {isAdmin && (
                 <Link
                   href="/settings/templates"

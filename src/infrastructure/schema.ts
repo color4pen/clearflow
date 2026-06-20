@@ -46,6 +46,14 @@ export const meetingTypeEnum = pgEnum("meeting_type", [
   "closing",
   "followup",
 ]);
+export const dealPhaseEnum = pgEnum("deal_phase", [
+  "proposal_prep",
+  "proposed",
+  "negotiation",
+  "internal_approval",
+  "won",
+  "lost",
+]);
 
 // Organizations table
 export const organizations = pgTable("organizations", {
@@ -295,6 +303,34 @@ export const meetings = pgTable("meetings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Deals table (案件)
+export const deals = pgTable("deals", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+  inquiryId: uuid("inquiry_id")
+    .notNull()
+    .references(() => inquiries.id),
+  title: text("title").notNull(),
+  phase: dealPhaseEnum("phase").notNull().default("proposal_prep"),
+  estimatedAmount: integer("estimated_amount"),
+  estimatedStartDate: timestamp("estimated_start_date"),
+  estimatedEndDate: timestamp("estimated_end_date"),
+  // ドメインモデルで型制約（"quasi_delegation" | "contract" | "ses"）、DB は text で柔軟性を持たせる
+  contractType: text("contract_type"),
+  assigneeId: uuid("assignee_id").references(() => users.id),
+  technicalLeadId: uuid("technical_lead_id").references(() => users.id),
+  estimateRequestId: uuid("estimate_request_id").references(() => requests.id, {
+    onDelete: "set null",
+  }),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  // 楽観ロック: フェーズ遷移で重複更新を防ぐ
+  version: integer("version").notNull().default(1),
+});
+
 // Auth.js adapter tables
 export const accounts = pgTable(
   "accounts",
@@ -347,6 +383,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   clients: many(clients),
   inquiries: many(inquiries),
   meetings: many(meetings),
+  deals: many(deals),
 }));
 
 export const idempotencyKeysRelations = relations(idempotencyKeys, ({ one }) => ({
@@ -369,6 +406,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   delegationsTo: many(approvalDelegations, { relationName: "delegationsTo" }),
   inquiries: many(inquiries),
   meetings: many(meetings),
+  dealsAsAssignee: many(deals, { relationName: "dealsAsAssignee" }),
+  dealsAsTechnicalLead: many(deals, { relationName: "dealsAsTechnicalLead" }),
 }));
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
@@ -516,6 +555,7 @@ export const inquiriesRelations = relations(inquiries, ({ one, many }) => ({
     references: [requests.id],
   }),
   meetings: many(meetings),
+  deals: many(deals),
 }));
 
 export const meetingsRelations = relations(meetings, ({ one }) => ({
@@ -530,5 +570,30 @@ export const meetingsRelations = relations(meetings, ({ one }) => ({
   createdBy: one(users, {
     fields: [meetings.createdById],
     references: [users.id],
+  }),
+}));
+
+export const dealsRelations = relations(deals, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [deals.organizationId],
+    references: [organizations.id],
+  }),
+  inquiry: one(inquiries, {
+    fields: [deals.inquiryId],
+    references: [inquiries.id],
+  }),
+  assignee: one(users, {
+    fields: [deals.assigneeId],
+    references: [users.id],
+    relationName: "dealsAsAssignee",
+  }),
+  technicalLead: one(users, {
+    fields: [deals.technicalLeadId],
+    references: [users.id],
+    relationName: "dealsAsTechnicalLead",
+  }),
+  estimateRequest: one(requests, {
+    fields: [deals.estimateRequestId],
+    references: [requests.id],
   }),
 }));

@@ -8,3 +8,4 @@ export {
   filterStepsByCondition,
 } from "./approvalStepService";
 export { canTransition } from "./inquiryTransition";
+export { canTransition as canDealTransition } from "./dealTransition";
