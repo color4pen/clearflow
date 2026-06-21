@@ -46,9 +46,9 @@
    - `updateInquiryStatus` の converted 遷移で Request 作成時に `sourceType: "inquiry"`, `sourceId: data.inquiryId` をセットする
    - `updateDealPhase` の estimate_approval 遷移で Request 作成時に `sourceType: "deal"`, `sourceId: data.dealId` をセットする
    - 通常の承認リクエスト（`createRequest` UC 経由）では `sourceType` と `sourceId` は null のまま
-5. **案件化承認完了 → Deal 自動作成**: `approveRequest` の全ステップ承認後、`sourceType === "inquiry"` の場合に `createDeal` ユースケースを呼び出して案件を自動作成する。Deal のタイトルは引き合いのタイトルをそのまま使用する。`createDeal` が失敗した場合（既に案件が存在する等）はエラーを握り潰さず audit log に記録するが、承認自体は成功させる（承認のロールバックはしない）
-6. **見積承認完了 → Deal フェーズ自動進行**: `approveRequest` の全ステップ承認後、`sourceType === "deal"` の場合に `dealRepository.updatePhase` を呼び出して案件のフェーズを `"won"` に自動遷移する。楽観ロック失敗（他ユーザーが先にフェーズ変更）の場合は audit log に記録するが承認自体は成功させる
-7. **Request の requests テーブルに sourceType, sourceId を追加**: `src/infrastructure/schema.ts` の `requests` テーブルに `sourceType: text("source_type")` と `sourceId: uuid("source_id")` を追加する（両方 nullable）。`Request` ドメインモデル型にも `sourceType: string | null` と `sourceId: string | null` を追加する
+5. **案件化承認完了 → Deal 自動作成**: `approveRequest` の全ステップ承認後、承認済み Request の `sourceType === "inquiry"` の場合に、`approveRequest` 内でリポジトリ層を直接呼び出して案件を作成する（UC→UC 呼び出しは依存方向違反のため行わない）。具体的には `inquiryRepository.findById(sourceId)` で引き合いを取得し、`dealRepository.create` で Deal を作成し、`auditLogRepository.create` で audit log を記録する。Deal のタイトルは引き合いのタイトルをそのまま使用する。Deal 作成が失敗した場合（既に案件が存在する等）はエラーを audit log に記録するが、承認自体は成功させる（承認のロールバックはしない）。この連動処理はトランザクション外で実行する
+6. **見積承認完了 → Deal フェーズ自動進行**: `approveRequest` の全ステップ承認後、承認済み Request の `sourceType === "deal"` の場合に、`approveRequest` 内で `dealRepository.findById(sourceId)` で案件を取得し、`dealRepository.updatePhase` で案件のフェーズを `"won"` に遷移する。`estimateRequestId` は既存値を引き継ぐ。楽観ロック失敗（他ユーザーが先にフェーズ変更）の場合は audit log に記録するが承認自体は成功させる。この連動処理はトランザクション外で実行する
+7. **Request の requests テーブルに sourceType, sourceId を追加**: `src/infrastructure/schema.ts` の `requests` テーブルに `sourceType: text("source_type")` と `sourceId: uuid("source_id")` を追加する（両方 nullable）。`Request` ドメインモデル型にも `sourceType: string | null` と `sourceId: string | null` を追加する。`requestRepository.ts` の `mapRow` 関数を更新して `sourceType` と `sourceId` を返すようにする。`requestRepository.create` のシグネチャに `sourceType?: string | null` と `sourceId?: string | null` を追加する。マイグレーションファイルは `bunx drizzle-kit generate` で生成する
 8. **テスト追加**: 以下をテストする
    - 案件化承認リクエストが `pending` で作成されることを確認する
    - 見積承認リクエストが `pending` で作成されることを確認する
@@ -90,4 +90,4 @@
 1. **requests テーブルに sourceType/sourceId を追加を採用、audit log の metadata から逆引きを却下** — audit log は append-only の記録であり、状態遷移のトリガーに使うべきではない。Request 自体が「どこから来たか」を知っている方が、連動処理の実装がシンプルで信頼性が高い
 2. **案件化承認・見積承認を pending で直接作成を採用、draft で作成して submitRequest を自動呼び出しを却下** — submitRequest は webhook 配信と audit log を含むため、createRequest 内で呼ぶとトランザクション外の副作用が二重になる。requestRepository.create に status パラメータを追加して直接 pending で INSERT するのが最もシンプル
 3. **連動処理の失敗を承認に影響させないを採用、トランザクション内で連動を却下** — 承認は承認として完了すべき。案件作成やフェーズ進行が失敗したからといって承認をロールバックすると、承認者が同じ操作を繰り返す必要があり UX が悪い。失敗は audit log に記録して後から対処する
-4. **approveRequest 内で直接連動処理を実行を採用、イベントバスやキューを却下** — プロジェクト規模ではイベント駆動は過剰。approveRequest 内で sourceType を判定して直接ユースケースを呼ぶのが最もシンプル。将来的にイベント駆動に移行する場合は sourceType/sourceId の仕組みがそのまま使える
+4. **approveRequest 内でリポジトリ層を直接呼び出して連動処理を実行を採用、UC→UC 呼び出しを却下** — UC→UC 呼び出しは依存方向（actions → usecases → domain / infrastructure）に違反する。approveRequest 内で sourceType を判定し、dealRepository / inquiryRepository を直接呼ぶことで依存方向を遵守する。イベントバスやキューはプロジェクト規模では過剰
