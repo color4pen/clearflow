@@ -140,3 +140,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/domain-restructuring/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-21T00:07:01.467Z","endedAt":"2026-06-21T00:07:03.159Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-21T00:07:03.159Z","outputs":[{"path":"specrunner/changes/domain-restructuring/pr-create-result.md","hash":"sha256:a032310823a322a0acaa5a0ccdfe838d4b8db933386d84f77f76fa9320dcac06"}],"inputs":[{"path":"refactor/domain-restructuring-47543889","hash":null}]}
 {"type":"transition","ts":"2026-06-21T00:07:03.167Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-21T00:08:38.298Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}

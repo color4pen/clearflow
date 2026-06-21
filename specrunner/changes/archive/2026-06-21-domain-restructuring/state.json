@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "47543889-957e-45f6-b7a0-cef62ee26fc6",
   "createdAt": "2026-06-20T22:18:08.874Z",
-  "updatedAt": "2026-06-21T00:07:03.167Z",
+  "updatedAt": "2026-06-21T00:08:38.298Z",
   "request": {
     "title": "ドメインモデル再構築と用語統一",
     "type": "refactoring",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "refactor/domain-restructuring-47543889",
   "error": null,
   "pipelineId": "standard",
@@ -54,7 +54,7 @@
     "createdAt": "2026-06-21T00:07:03.158Z"
   },
   "_journal": {
-    "historyCount": 95,
+    "historyCount": 96,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
