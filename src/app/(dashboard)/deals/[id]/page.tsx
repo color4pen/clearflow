@@ -244,6 +244,11 @@ export default async function DealDetailPage({
             ]}
             rows={dealMeetings}
             rowKey={(row) => row.id}
+            rowHref={(row) =>
+              row.inquiryId
+                ? `/inquiries/${row.inquiryId}/meetings/${row.id}`
+                : `/deals/${id}/meetings/${row.id}`
+            }
           />
         )}
       </SectionCard>
