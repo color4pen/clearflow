@@ -219,6 +219,20 @@
       },
       "jobId": "e677557d-0661-4789-88a9-67a8649993ea",
       "stepName": "regression-gate"
+    },
+    {
+      "command": "job",
+      "timestamp": "2026-06-21T01:02:25.226Z",
+      "modelUsage": {
+        "claude-sonnet-4-6": {
+          "inputTokens": 7,
+          "outputTokens": 1574,
+          "cacheReadInputTokens": 266974,
+          "cacheCreationInputTokens": 2782
+        }
+      },
+      "jobId": "e677557d-0661-4789-88a9-67a8649993ea",
+      "stepName": "code-fixer"
     }
   ]
 }

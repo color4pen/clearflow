@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "e677557d-0661-4789-88a9-67a8649993ea",
   "createdAt": "2026-06-21T00:12:08.096Z",
-  "updatedAt": "2026-06-21T01:01:42.583Z",
+  "updatedAt": "2026-06-21T01:02:26.520Z",
   "request": {
     "title": "承認フロー統合",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-fixer",
+  "step": "regression-gate",
   "status": "running",
   "branch": "change/approval-flow-integration-e677557d",
   "error": null,
@@ -49,7 +49,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 51,
+    "historyCount": 55,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -58,7 +58,7 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 2,
-      "code-fixer": 1,
+      "code-fixer": 2,
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1
