@@ -3,13 +3,14 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
-import { createInquiry, updateInquiryStatus, listInquiries } from "@/application/usecases";
+import { createInquiry, updateInquiryStatus, listInquiries, createClient } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import type { InquiryWithClient } from "@/domain/models/inquiry";
 import type { ActionResult } from "./requests";
 
 const createInquirySchema = z.object({
   clientId: z.string().uuid().optional(),
+  newClientName: z.string().min(1).optional(),
   title: z.string().min(1, "件名は必須です"),
   description: z.string().optional(),
   source: z.enum(["web", "phone", "referral", "exhibition", "other"]),
@@ -19,6 +20,7 @@ const createInquirySchema = z.object({
 export type CreateInquiryState = {
   errors?: {
     clientId?: string[];
+    newClientName?: string[];
     title?: string[];
     description?: string[];
     source?: string[];
@@ -47,9 +49,11 @@ export async function createInquiryAction(
 
   const clientIdRaw = formData.get("clientId");
   const assigneeIdRaw = formData.get("assigneeId");
+  const newClientNameRaw = formData.get("newClientName");
 
   const parsed = createInquirySchema.safeParse({
-    clientId: clientIdRaw && clientIdRaw !== "" ? clientIdRaw : undefined,
+    clientId: clientIdRaw && clientIdRaw !== "" && clientIdRaw !== "__new__" ? clientIdRaw : undefined,
+    newClientName: newClientNameRaw && newClientNameRaw !== "" ? newClientNameRaw : undefined,
     title: formData.get("title"),
     description: formData.get("description") || undefined,
     source: formData.get("source"),
@@ -60,10 +64,24 @@ export async function createInquiryAction(
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
+  // 新規顧客名が指定されており clientId が未指定の場合、顧客を先に作成する
+  let resolvedClientId: string | null = parsed.data.clientId ?? null;
+  if (parsed.data.newClientName && !parsed.data.clientId) {
+    const clientResult = await createClient({
+      name: parsed.data.newClientName,
+      organizationId: session.user.organizationId,
+      actorId: session.user.id,
+    });
+    if (!clientResult.ok) {
+      return { message: clientResult.reason };
+    }
+    resolvedClientId = clientResult.client.id;
+  }
+
   const result = await createInquiry({
     organizationId: session.user.organizationId,
     actorId: session.user.id,
-    clientId: parsed.data.clientId ?? null,
+    clientId: resolvedClientId,
     title: parsed.data.title,
     description: parsed.data.description ?? null,
     source: parsed.data.source,

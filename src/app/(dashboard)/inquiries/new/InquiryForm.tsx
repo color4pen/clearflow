@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createInquiryAction } from "@/app/actions/inquiries";
@@ -22,6 +22,8 @@ const sourceOptions = [
 
 export function InquiryForm({ clients }: Props) {
   const router = useRouter();
+  const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
+
   const [state, formAction, isPending] = useActionState(
     async (prev: Parameters<typeof createInquiryAction>[0], formData: FormData) => {
       const result = await createInquiryAction(prev, formData);
@@ -32,6 +34,14 @@ export function InquiryForm({ clients }: Props) {
     },
     {}
   );
+
+  function handleClientSelectChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    if (e.target.value === "__new__") {
+      setClientMode("new");
+    } else {
+      setClientMode("existing");
+    }
+  }
 
   return (
     <form action={formAction} className="bg-bg-surface border border-border border-t-0 p-4">
@@ -48,8 +58,10 @@ export function InquiryForm({ clients }: Props) {
           <Select
             id="clientId"
             name="clientId"
+            onChange={handleClientSelectChange}
           >
             <option value="">未定</option>
+            <option value="__new__">新規登録</option>
             {clients.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
@@ -57,6 +69,22 @@ export function InquiryForm({ clients }: Props) {
             ))}
           </Select>
         </FormField>
+
+        {/* 新規顧客名入力フィールド（「新規登録」選択時のみ表示） */}
+        {clientMode === "new" && (
+          <FormField
+            label="企業名"
+            htmlFor="newClientName"
+            error={state.errors?.newClientName?.[0]}
+          >
+            <Input
+              id="newClientName"
+              name="newClientName"
+              placeholder="企業名"
+              required
+            />
+          </FormField>
+        )}
 
         <FormField
           label={<>件名 <span className="text-danger">*</span></>}

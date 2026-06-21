@@ -29,3 +29,6 @@ export { listDeals } from "./listDeals";
 export { getDeal } from "./getDeal";
 export { updateDealPhase } from "./updateDealPhase";
 export { updateDeal } from "./updateDeal";
+export { addDealContact } from "./addDealContact";
+export { removeDealContact } from "./removeDealContact";
+export { createClientContact } from "./createClientContact";

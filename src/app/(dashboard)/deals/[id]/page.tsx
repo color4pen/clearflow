@@ -7,10 +7,12 @@ import {
   clientRepository,
   approvalTemplateRepository,
   meetingRepository,
+  dealContactRepository,
 } from "@/infrastructure/repositories";
 import { SectionCard, DataTable } from "@/app/components";
 import { DealPhaseActions } from "./DealPhaseActions";
 import { DealEditForm } from "./DealEditForm";
+import { DealContactsSection } from "./DealContactsSection";
 import { phaseLabels, contractTypeLabels, meetingTypeLabels } from "@/app/(dashboard)/labels";
 import type { Meeting } from "@/domain/models/meeting";
 
@@ -28,18 +30,23 @@ export default async function DealDetailPage({
     notFound();
   }
 
-  const [inquiry, templates, dealMeetings] = await Promise.all([
+  const [inquiry, templates, dealMeetings, dealContacts] = await Promise.all([
     inquiryRepository.findById(deal.inquiryId, organizationId),
     approvalTemplateRepository.findByOrganization(organizationId),
     deal.inquiryId
       ? meetingRepository.findAllByInquiryOrDeal(deal.inquiryId, organizationId)
       : meetingRepository.findAllByDeal(deal.id, organizationId),
+    dealContactRepository.findByDeal(deal.id, organizationId),
   ]);
 
   const client =
     inquiry?.clientId
       ? await clientRepository.findById(inquiry.clientId, organizationId)
       : null;
+
+  const clientContacts = inquiry?.clientId
+    ? await clientRepository.findContactsByClientId(inquiry.clientId)
+    : [];
 
   const canChangePhase =
     session!.user.role === "admin" || session!.user.role === "manager";
@@ -158,6 +165,17 @@ export default async function DealDetailPage({
         />
       </SectionCard>
 
+      {/* 担当者 */}
+      <SectionCard className="p-3 mb-2">
+        <h2 className="text-xs font-bold text-text mb-2">担当者</h2>
+        <DealContactsSection
+          dealId={deal.id}
+          dealContacts={dealContacts}
+          clientContacts={clientContacts}
+          clientId={inquiry?.clientId ?? null}
+        />
+      </SectionCard>
+
       {/* 商談履歴 */}
       <SectionCard className="p-3 mb-2">
         <div className="flex items-center justify-between mb-2">
@@ -190,9 +208,38 @@ export default async function DealDetailPage({
                   }),
               },
               {
-                key: "summary",
-                header: "概要",
-                render: (row) => row.summary ?? "-",
+                key: "location",
+                header: "場所",
+                render: (row) => row.location ?? "-",
+              },
+              {
+                key: "attendees",
+                header: "参加者数",
+                align: "right",
+                render: (row) =>
+                  String(row.attendees.internal.length + row.attendees.external.length),
+              },
+              {
+                key: "actionItems",
+                header: "AI件数",
+                align: "right",
+                render: (row) => String(row.actionItems.length),
+              },
+              {
+                key: "link",
+                header: "",
+                render: (row) => (
+                  <Link
+                    href={
+                      row.inquiryId
+                        ? `/inquiries/${row.inquiryId}/meetings/${row.id}`
+                        : `/deals/${id}/meetings/${row.id}`
+                    }
+                    className="text-primary underline text-xs"
+                  >
+                    詳細
+                  </Link>
+                ),
               },
             ]}
             rows={dealMeetings}

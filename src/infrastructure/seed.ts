@@ -428,15 +428,18 @@ async function seed() {
     })
     .returning();
 
-  await db.insert(clientContacts).values({
-    clientId: techClient.id,
-    name: "鈴木 花子",
-    department: "企画部",
-    position: "主任",
-    email: "suzuki@tech-shoji.example.com",
-    phone: "03-1111-0002",
-    isPrimary: false,
-  });
+  const [techContact2] = await db
+    .insert(clientContacts)
+    .values({
+      clientId: techClient.id,
+      name: "鈴木 花子",
+      department: "企画部",
+      position: "主任",
+      email: "suzuki@tech-shoji.example.com",
+      phone: "03-1111-0002",
+      isPrimary: false,
+    })
+    .returning();
 
   const [yamatoContact1] = await db
     .insert(clientContacts)
@@ -681,11 +684,17 @@ async function seed() {
   });
 
   await db.insert(dealContacts).values({
+    dealId: wonDeal.id,
+    contactId: techContact2.id,
+    role: "technical",
+  });
+
+  await db.insert(dealContacts).values({
     dealId: proposedDeal.id,
     contactId: yamatoContact1.id,
     role: "decision_maker",
   });
-  console.log("✅ Created deal contacts (2 total)");
+  console.log("✅ Created deal contacts (3 total)");
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");

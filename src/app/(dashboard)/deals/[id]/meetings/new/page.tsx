@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { dealRepository } from "@/infrastructure/repositories";
+import { dealRepository, inquiryRepository } from "@/infrastructure/repositories";
 import { DealMeetingForm } from "./DealMeetingForm";
 
 export default async function DealMeetingNewPage({
@@ -18,6 +18,12 @@ export default async function DealMeetingNewPage({
     notFound();
   }
 
+  // 引き合いの clientId を取得して DealMeetingForm に渡す
+  const inquiry = deal.inquiryId
+    ? await inquiryRepository.findById(deal.inquiryId, organizationId)
+    : null;
+  const clientId = inquiry?.clientId ?? null;
+
   return (
     <div>
       <div className="bg-bg-toolbar border border-border px-2 py-1 mb-0">
@@ -29,7 +35,7 @@ export default async function DealMeetingNewPage({
           {" > "}商談記録
         </span>
       </div>
-      <DealMeetingForm dealId={id} />
+      <DealMeetingForm dealId={id} clientId={clientId} />
     </div>
   );
 }

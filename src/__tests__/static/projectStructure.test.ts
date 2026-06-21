@@ -1160,3 +1160,44 @@ describe("Tenant isolation — deal", () => {
     expect(content).toContain("dealContactRepository");
   });
 });
+
+// ---------------------------------------------------------------------------
+// UI動線改善 — T-13
+// ---------------------------------------------------------------------------
+
+describe("UI動線改善 — tenant isolation, audit log, and label tests", () => {
+  it("dealContacts action uses session.user.organizationId", async () => {
+    const content = await readSrc("app/actions/dealContacts.ts");
+    expect(content).toContain("session.user.organizationId");
+  });
+
+  it("addDealContact usecase calls auditLogRepository", async () => {
+    const content = await readSrc("application/usecases/addDealContact.ts");
+    expect(content).toContain("auditLogRepository");
+  });
+
+  it("removeDealContact usecase calls auditLogRepository", async () => {
+    const content = await readSrc("application/usecases/removeDealContact.ts");
+    expect(content).toContain("auditLogRepository");
+  });
+
+  it("createClientContact usecase calls findById and createContact", async () => {
+    const content = await readSrc("application/usecases/createClientContact.ts");
+    expect(content).toContain("findById");
+    expect(content).toContain("createContact");
+  });
+
+  it("inquiries action imports createClient usecase for concurrent client creation", async () => {
+    const content = await readSrc("app/actions/inquiries.ts");
+    expect(content).toContain("createClient");
+  });
+
+  it("labels.ts defines dealContactRoleLabels with all four roles", async () => {
+    const content = await readSrc("app/(dashboard)/labels.ts");
+    expect(content).toContain("dealContactRoleLabels");
+    expect(content).toContain("key_person");
+    expect(content).toContain("decision_maker");
+    expect(content).toContain("technical");
+    expect(content).toContain("other");
+  });
+});

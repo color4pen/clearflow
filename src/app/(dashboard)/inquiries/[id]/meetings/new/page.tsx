@@ -29,7 +29,7 @@ export default async function MeetingNewPage({
           {" > "}商談記録
         </span>
       </div>
-      <MeetingForm inquiryId={id} />
+      <MeetingForm inquiryId={id} clientId={inquiry.clientId} />
     </div>
   );
 }

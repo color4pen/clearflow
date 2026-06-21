@@ -16,7 +16,7 @@ function mapRow(row: typeof dealContacts.$inferSelect): DealContact {
 
 /**
  * 案件担当者を作成する。
- * deals.organizationId を事前確認してテナント分離を保証する。
+ * deals.organizationId と clientContacts → clients.organizationId の両方を事前確認してテナント分離を保証する。
  */
 export async function create(
   data: {
@@ -38,6 +38,23 @@ export async function create(
 
   if (owningDeal.length === 0) {
     throw new Error("指定された案件が見つからないか、アクセス権限がありません");
+  }
+
+  // テナント検証: contactId が同一組織の担当者であるかを確認する
+  const owningContact = await queryRunner
+    .select({ id: clientContacts.id })
+    .from(clientContacts)
+    .innerJoin(clients, eq(clientContacts.clientId, clients.id))
+    .where(
+      and(
+        eq(clientContacts.id, data.contactId),
+        eq(clients.organizationId, data.organizationId)
+      )
+    )
+    .limit(1);
+
+  if (owningContact.length === 0) {
+    throw new Error("指定された担当者が見つからないか、アクセス権限がありません");
   }
 
   const result = await queryRunner

@@ -35,3 +35,10 @@ export const contractTypeLabels: Record<string, string> = {
   fixed_price: "請負",
   ses: "SES",
 };
+
+export const dealContactRoleLabels: Record<string, string> = {
+  key_person: "キーマン",
+  decision_maker: "決裁者",
+  technical: "技術担当",
+  other: "その他",
+};
