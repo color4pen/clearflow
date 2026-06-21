@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "c51c79b7-67e5-427a-b132-f321ddb2375c",
   "createdAt": "2026-06-21T08:52:46.536Z",
-  "updatedAt": "2026-06-21T09:47:02.033Z",
+  "updatedAt": "2026-06-21T09:47:36.222Z",
   "request": {
     "title": "契約管理",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/contract-management-c51c79b7",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/50",
+    "number": 50,
+    "createdAt": "2026-06-21T09:47:36.210Z"
+  },
   "_journal": {
-    "historyCount": 60,
+    "historyCount": 65,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -61,7 +66,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
