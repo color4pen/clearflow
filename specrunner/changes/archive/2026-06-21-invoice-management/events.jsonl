@@ -115,3 +115,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/invoice-management/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-21T11:11:00.074Z","endedAt":"2026-06-21T11:11:01.725Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-21T11:11:01.725Z","outputs":[{"path":"specrunner/changes/invoice-management/pr-create-result.md","hash":"sha256:c81de0b12660267e992fade53d2365223c16c4159e84c05330319f1689de9a01"}],"inputs":[{"path":"feat/invoice-management-9c9ca4cd","hash":null}]}
 {"type":"transition","ts":"2026-06-21T11:11:01.736Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-21T11:12:50.521Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
