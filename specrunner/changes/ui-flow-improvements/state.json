@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "511b0ffc-3327-4058-a7de-f27cb13dd77f",
   "createdAt": "2026-06-21T01:13:52.978Z",
-  "updatedAt": "2026-06-21T01:13:54.706Z",
+  "updatedAt": "2026-06-21T01:19:14.461Z",
   "request": {
     "title": "UI動線改善",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "request-review",
+  "step": "design",
   "status": "running",
   "branch": "change/ui-flow-improvements-511b0ffc",
   "error": null,
@@ -34,7 +34,9 @@
     }
   ],
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 5,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
