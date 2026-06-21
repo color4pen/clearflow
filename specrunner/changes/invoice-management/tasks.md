@@ -76,6 +76,7 @@
   - `paid`: `[]`（終端状態）
   - `overdue`: `[]`（終端状態）
 - [ ] `validateInvoiceTransition(from: InvoiceStatus, to: InvoiceStatus): { ok: true } | { ok: false; reason: string }` 関数をエクスポートする
+- [ ] `src/domain/services/index.ts` に `export { validateInvoiceTransition } from "./invoiceTransition"` を追記する（既存の `contractTransition`・`inquiryTransition`・`dealTransition` と同じパターン）
 
 **Acceptance Criteria**:
 - `validateInvoiceTransition("scheduled", "invoiced")` が `{ ok: true }` を返す
@@ -84,6 +85,7 @@
 - `validateInvoiceTransition("paid", "invoiced")` が `{ ok: false }` を返す
 - `validateInvoiceTransition("scheduled", "paid")` が `{ ok: false }` を返す
 - `validateInvoiceTransition("overdue", "invoiced")` が `{ ok: false }` を返す
+- `src/domain/services/index.ts` から `validateInvoiceTransition` がエクスポートされる
 
 ## T-06: createInvoice ユースケースを追加
 
@@ -93,10 +95,12 @@
 - [ ] 処理フロー:
   1. `contractRepository.findById` で契約を取得。存在しなければエラー
   2. 契約ステータスが `active` でなければエラー
-  3. one_time 契約かつ `contract.amount` が null でない場合:
-     - `invoiceRepository.sumAmountByContract` で既存合計を取得
-     - 既存合計 + 新規 amount > contract.amount ならエラー
-  4. トランザクション内で `invoiceRepository.create` + `auditLogRepository.create`（action: `"invoice.create"`, targetType: `"invoice"`）
+  3. トランザクション内で:
+     - one_time 契約かつ `contract.amount` が null でない場合:
+       - `invoiceRepository.sumAmountByContract(contractId, organizationId, tx)` で既存合計をトランザクション内で取得（TOCTOU 防止のため合計取得とレコード作成を同一 tx に含める）
+       - 既存合計 + 新規 amount > contract.amount ならエラー（ロールバック）
+     - `invoiceRepository.create` でレコードを作成
+     - `auditLogRepository.create`（action: `"invoice.create"`, targetType: `"invoice"`）
 - [ ] `src/application/usecases/index.ts` に `export { createInvoice } from "./createInvoice"` を追記する
 
 **Acceptance Criteria**:
@@ -160,12 +164,13 @@
   - 認証チェック（`auth()`）
   - 権限チェック（admin / manager のみ）
   - レート制限チェック
-  - Zod バリデーション: `contractId`（uuid 必須）、`title`（文字列必須）、`amount`（正整数必須）、`dueDate`（文字列 optional）、`notes`（文字列 optional）
+  - Zod バリデーション: `contractId`（uuid 必須）、`title`（文字列必須、最大255文字、`z.string().min(1).max(255)`）、`amount`（正の整数必須、`z.coerce.number().int().positive()`、0 は不可）、`dueDate`（文字列 optional）、`notes`（文字列 optional、最大1000文字、`z.string().max(1000).optional()`）
   - `createInvoice` ユースケースを呼び出す
   - `revalidatePath` で契約詳細ページを再検証
-- [ ] `updateInvoiceStatusAction(invoiceId: string, newStatus: InvoiceStatus)`:
+- [ ] `updateInvoiceStatusAction(invoiceId: string, newStatus: string)`:
   - 認証チェック
   - 権限チェック（admin / manager のみ）
+  - Zod バリデーション: `invoiceId`（uuid 必須）、`newStatus`（`z.enum(["scheduled", "invoiced", "paid", "overdue"])` 必須。TypeScript 型はランタイムで保証されないため列挙型として検証する）
   - `updateInvoiceStatus` ユースケースを呼び出す
   - `revalidatePath` で契約詳細ページを再検証
 - [ ] `listInvoicesByContractAction(contractId: string)`:
@@ -176,7 +181,10 @@
 - 全 action に `"use server"` 宣言がある
 - 全 action に認証チェックがある
 - 作成・ステータス変更 action に admin / manager 権限チェックがある
-- Zod バリデーションが適用されている
+- `createInvoiceAction` の `amount` が `z.coerce.number().int().positive()` で検証され、0 は拒否される
+- `createInvoiceAction` の `title` が `z.string().min(1).max(255)` で検証される
+- `createInvoiceAction` の `notes` が `z.string().max(1000).optional()` で検証される
+- `updateInvoiceStatusAction` の `newStatus` が `z.enum(["scheduled", "invoiced", "paid", "overdue"])` で検証される
 - レート制限が適用されている
 - `typecheck` が green
 

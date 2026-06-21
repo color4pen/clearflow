@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "9c9ca4cd-01b9-461f-be8f-dc6bdd1f98bd",
   "createdAt": "2026-06-21T09:52:21.183Z",
-  "updatedAt": "2026-06-21T10:01:46.971Z",
+  "updatedAt": "2026-06-21T10:06:44.689Z",
   "request": {
     "title": "請求管理",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "spec-review",
+  "step": "spec-fixer",
   "status": "running",
   "branch": "feat/invoice-management-9c9ca4cd",
   "error": null,
@@ -34,10 +34,11 @@
     }
   ],
   "_journal": {
-    "historyCount": 9,
+    "historyCount": 13,
     "stepCounts": {
       "request-review": 1,
-      "design": 1
+      "design": 1,
+      "spec-review": 1
     }
   }
 }

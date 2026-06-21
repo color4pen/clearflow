@@ -30,6 +30,12 @@
 **When** ステータスを `invoiced` に変更する
 **Then** 遷移が拒否され、エラーが返される
 
+#### Scenario: overdue からの遷移が拒否される
+
+**Given** 請求のステータスが `overdue` である
+**When** ステータスを `invoiced` に変更する
+**Then** 遷移が拒否され、エラーが返される
+
 #### Scenario: scheduled から paid への直接遷移が拒否される
 
 **Given** 請求のステータスが `scheduled` である
