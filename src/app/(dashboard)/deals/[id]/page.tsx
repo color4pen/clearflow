@@ -158,14 +158,6 @@ export default async function DealDetailPage({
         </SectionCard>
       </div>
 
-      {/* フェーズ変更 */}
-      <SectionCard className="p-3 mb-2">
-        <h2 className="text-xs font-bold text-text mb-2">フェーズ変更</h2>
-        <DealPhaseActions
-          deal={{ id: deal.id, phase: deal.phase }}
-          canChangePhase={canChangePhase}
-        />
-      </SectionCard>
 
       {/* 契約 */}
       {deal.phase === "won" && (

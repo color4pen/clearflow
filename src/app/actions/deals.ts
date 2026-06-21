@@ -47,6 +47,7 @@ export type CreateDealState = {
     notes?: string[];
   };
   message?: string;
+  dealId?: string;
 };
 
 export async function createDealAction(
@@ -98,8 +99,28 @@ export async function createDealAction(
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
+  // 新規顧客の作成
+  const newClientName = formData.get("newClientName");
+  let resolvedClientId = parsed.data.clientId;
+  if (!parsed.data.inquiryId && typeof newClientName === "string" && newClientName.trim() && (!resolvedClientId || resolvedClientId === "__new__")) {
+    const { createClient } = await import("@/application/usecases");
+    const clientResult = await createClient({
+      name: newClientName.trim(),
+      organizationId: session.user.organizationId,
+      actorId: session.user.id,
+    });
+    if (!clientResult.ok) {
+      return { message: clientResult.reason };
+    }
+    resolvedClientId = clientResult.client.id;
+  }
+
+  if (resolvedClientId === "__new__") {
+    resolvedClientId = undefined;
+  }
+
   // inquiryId も clientId もない場合はエラー
-  if (!parsed.data.inquiryId && !parsed.data.clientId) {
+  if (!parsed.data.inquiryId && !resolvedClientId) {
     return { errors: { clientId: ["顧客または引き合いの指定が必要です"] } };
   }
 
@@ -107,7 +128,7 @@ export async function createDealAction(
     organizationId: session.user.organizationId,
     actorId: session.user.id,
     inquiryId: parsed.data.inquiryId,
-    clientId: parsed.data.clientId,
+    clientId: resolvedClientId,
     title: parsed.data.title,
     estimatedAmount: parsed.data.estimatedAmount ?? null,
     estimatedStartDate: parsed.data.estimatedStartDate
@@ -127,11 +148,10 @@ export async function createDealAction(
   }
 
   revalidatePath("/deals");
-  // inquiryId がある場合のみ引き合いページをリバリデートする
   if (parsed.data.inquiryId) {
     revalidatePath(`/inquiries/${parsed.data.inquiryId}`);
   }
-  return {};
+  return { dealId: result.deal.id };
 }
 
 export async function updateDealPhaseAction(
@@ -204,6 +224,19 @@ export async function updateDealAction(
   if (!parsed.success) {
     const firstError = parsed.error.issues[0];
     return { success: false, message: firstError?.message ?? "入力が無効です" };
+  }
+
+  const phaseRaw = formData.get("phase");
+  if (typeof phaseRaw === "string" && phaseRaw !== "") {
+    const phaseResult = await updateDealPhase({
+      dealId,
+      organizationId: session.user.organizationId,
+      actorId: session.user.id,
+      newPhase: phaseRaw as DealPhase,
+    });
+    if (!phaseResult.ok) {
+      return { success: false, message: phaseResult.reason };
+    }
   }
 
   const result = await updateDeal({
