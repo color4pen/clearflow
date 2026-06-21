@@ -10,7 +10,7 @@ import {
 import { SectionCard } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
 import { MeetingTable } from "./MeetingTable";
-import { statusLabels, sourceLabels } from "@/app/(dashboard)/labels";
+import { statusLabels, sourceLabels, phaseLabels } from "@/app/(dashboard)/labels";
 
 export default async function InquiryDetailPage({
   params,
@@ -87,16 +87,6 @@ export default async function InquiryDetailPage({
             <dt className="text-text-muted w-20 shrink-0">作成日</dt>
             <dd className="text-text">{inquiry.createdAt.toLocaleDateString("ja-JP")}</dd>
           </div>
-          {deal && (
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-20 shrink-0">案件</dt>
-              <dd>
-                <Link href={`/deals/${deal.id}`} className="text-primary underline">
-                  {deal.title}
-                </Link>
-              </dd>
-            </div>
-          )}
         </dl>
       </SectionCard>
 
@@ -108,11 +98,26 @@ export default async function InquiryDetailPage({
       )}
 
       <SectionCard className="p-3 mb-2">
-        <h2 className="text-xs font-bold text-text mb-2">ステータス変更</h2>
-        <InquiryActions
-          inquiry={{ id: inquiry.id, status: inquiry.status }}
-          canChangeStatus={canChangeStatus}
-        />
+        <h2 className="text-xs font-bold text-text mb-2">
+          {inquiry.status === "converted" ? "案件" : inquiry.status === "declined" ? "ステータス" : "ステータス変更"}
+        </h2>
+        {inquiry.status === "converted" && deal ? (
+          <div className="text-xs">
+            <Link href={`/deals/${deal.id}`} className="text-primary underline font-bold">
+              {deal.title}
+            </Link>
+            <span className="text-text-muted ml-2">{phaseLabels[deal.phase] ?? deal.phase}</span>
+          </div>
+        ) : inquiry.status === "converted" && !deal ? (
+          <p className="text-xs text-text-muted">案件化済み（案件データなし）</p>
+        ) : inquiry.status === "declined" ? (
+          <p className="text-xs text-text-muted">見送り済み</p>
+        ) : (
+          <InquiryActions
+            inquiry={{ id: inquiry.id, status: inquiry.status }}
+            canChangeStatus={canChangeStatus}
+          />
+        )}
       </SectionCard>
 
       <SectionCard className="p-3">
