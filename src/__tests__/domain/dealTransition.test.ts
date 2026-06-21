@@ -56,7 +56,7 @@ describe("canTransition — 案件フェーズ遷移ルール", () => {
     // 準備 - estimate_approval は DealPhase から削除されたため型アサーションを使用
     // 実行 - canTransition を呼び出す
     const result = canTransition("negotiation", "estimate_approval" as DealPhase);
-    // 検証 - false が返る（VALID_TRANSITIONS に含まれない）
+    // 検証 - false が返る（ALL_PHASES に含まれない廃止フェーズへの遷移は拒否）
     expect(result).toBe(false);
   });
 
@@ -64,7 +64,7 @@ describe("canTransition — 案件フェーズ遷移ルール", () => {
     // 準備 - estimate_approval は DealPhase から削除されたため型アサーションを使用
     // 実行 - canTransition を呼び出す
     const result = canTransition("estimate_approval" as DealPhase, "won");
-    // 検証 - false が返る（VALID_TRANSITIONS に estimate_approval エントリが存在しない）
+    // 検証 - false が返る（ALL_PHASES に含まれない廃止フェーズからの遷移は拒否）
     expect(result).toBe(false);
   });
 
@@ -101,12 +101,12 @@ describe("canTransition — 案件フェーズ遷移ルール", () => {
     expect(result).toBe(false);
   });
 
-  it("T-13: proposal_prep → negotiation が拒否される（飛び越し禁止）", () => {
+  it("T-13: proposal_prep → negotiation が許可される（スキップ可）", () => {
     // 準備 - なし
     // 実行 - canTransition を呼び出す
     const result = canTransition("proposal_prep", "negotiation");
-    // 検証 - false が返る
-    expect(result).toBe(false);
+    // 検証 - true が返る（終端チェックのみ。スキップ・巻き戻しは全て許可）
+    expect(result).toBe(true);
   });
 
   it("T-15: 全フェーズ（proposal_prep, proposed, negotiation）から lost への遷移が許可される", () => {
@@ -115,5 +115,21 @@ describe("canTransition — 案件フェーズ遷移ルール", () => {
     expect(canTransition("proposal_prep", "lost")).toBe(true);
     expect(canTransition("proposed", "lost")).toBe(true);
     expect(canTransition("negotiation", "lost")).toBe(true);
+  });
+
+  it("T-16: proposed → proposal_prep が許可される（巻き戻し可）", () => {
+    // 準備 - なし
+    // 実行 - canTransition を呼び出す
+    const result = canTransition("proposed", "proposal_prep");
+    // 検証 - true が返る（終端チェックのみ。巻き戻しも許可）
+    expect(result).toBe(true);
+  });
+
+  it("T-17: 同一フェーズへの遷移が拒否される", () => {
+    // 準備 - なし
+    // 実行・検証 - 各フェーズから同一フェーズへの遷移が拒否される
+    expect(canTransition("proposal_prep", "proposal_prep")).toBe(false);
+    expect(canTransition("proposed", "proposed")).toBe(false);
+    expect(canTransition("negotiation", "negotiation")).toBe(false);
   });
 });

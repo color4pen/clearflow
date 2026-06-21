@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { listDeals } from "@/application/usecases";
-import { PageToolbar, DataTable, SectionCard } from "@/app/components";
+import { PageToolbar, ToolbarActions, DataTable, SectionCard } from "@/app/components";
 import { phaseLabels } from "@/app/(dashboard)/labels";
-import type { DealWithInquiry } from "@/domain/models/deal";
+import type { DealWithDetails } from "@/domain/models/deal";
 
 const allPhases = [
   "proposal_prep",
@@ -30,7 +30,16 @@ export default async function DealsPage({
 
   return (
     <div>
-      <PageToolbar title="案件管理" />
+      <PageToolbar
+        title="案件管理"
+        actions={
+          <ToolbarActions>
+            <Link href="/deals/new" className="text-xs text-primary underline">
+              [新規作成]
+            </Link>
+          </ToolbarActions>
+        }
+      />
 
       <div className="mt-2 mb-2 flex gap-2 flex-wrap">
         <Link
@@ -54,7 +63,7 @@ export default async function DealsPage({
         {filteredDeals.length === 0 ? (
           <p className="text-xs text-text-muted py-4 text-center">案件はありません</p>
         ) : (
-          <DataTable<DealWithInquiry>
+          <DataTable<DealWithDetails>
             columns={[
               {
                 key: "phase",

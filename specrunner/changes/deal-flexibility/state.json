@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "ce2c75f3-b0fd-4c01-b096-c4f8a5b6de4b",
   "createdAt": "2026-06-21T07:45:03.734Z",
-  "updatedAt": "2026-06-21T08:10:32.565Z",
+  "updatedAt": "2026-06-21T08:17:29.747Z",
   "request": {
     "title": "Deal の柔軟化",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "change/deal-flexibility-ce2c75f3",
   "error": null,
@@ -35,11 +35,12 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 19,
+    "historyCount": 22,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 2
+      "spec-review": 2,
+      "test-case-gen": 1
     }
   }
 }
