@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
-import { createMeeting, updateMeeting } from "@/application/usecases";
+import { createMeeting, updateMeeting, createClientContact } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 
 const hearingDataSchema = z.object({
@@ -22,9 +22,15 @@ const actionItemSchema = z.object({
   done: z.boolean(),
 });
 
+const contactRegistrationSchema = z.object({
+  name: z.string(),
+  register: z.boolean(),
+});
+
 const createMeetingSchema = z.object({
   inquiryId: z.string().uuid("引き合いIDが不正です").optional(),
   dealId: z.string().uuid("案件IDが不正です").optional(),
+  clientId: z.string().uuid().optional(),
   type: z.enum(["hearing", "proposal", "negotiation", "closing", "followup"]),
   date: z.string().min(1, "日時は必須です"),
   location: z.string().optional(),
@@ -33,6 +39,7 @@ const createMeetingSchema = z.object({
   summary: z.string().optional(),
   actionItems: z.array(actionItemSchema).optional().default([]),
   hearingData: hearingDataSchema.optional(),
+  contactRegistrations: z.array(contactRegistrationSchema).optional().default([]),
 });
 
 export type CreateMeetingState = {
@@ -74,6 +81,7 @@ export async function createMeetingAction(
   let externalAttendees: string[] = [];
   let actionItems: z.infer<typeof actionItemSchema>[] = [];
   let hearingData: z.infer<typeof hearingDataSchema> | undefined;
+  let contactRegistrations: z.infer<typeof contactRegistrationSchema>[] = [];
 
   const internalAttendeesRaw = formData.get("internalAttendees");
   if (internalAttendeesRaw && typeof internalAttendeesRaw === "string") {
@@ -111,12 +119,23 @@ export async function createMeetingAction(
     }
   }
 
+  const contactRegistrationsRaw = formData.get("contactRegistrations");
+  if (contactRegistrationsRaw && typeof contactRegistrationsRaw === "string") {
+    try {
+      contactRegistrations = JSON.parse(contactRegistrationsRaw);
+    } catch {
+      // contactRegistrations のパース失敗は best-effort なので無視する
+    }
+  }
+
   const inquiryIdRaw = formData.get("inquiryId");
   const dealIdRaw = formData.get("dealId");
+  const clientIdRaw = formData.get("clientId");
 
   const parsed = createMeetingSchema.safeParse({
     inquiryId: inquiryIdRaw && inquiryIdRaw !== "" ? inquiryIdRaw : undefined,
     dealId: dealIdRaw && dealIdRaw !== "" ? dealIdRaw : undefined,
+    clientId: clientIdRaw && clientIdRaw !== "" ? clientIdRaw : undefined,
     type: formData.get("type"),
     date: formData.get("date"),
     location: formData.get("location") || undefined,
@@ -125,6 +144,7 @@ export async function createMeetingAction(
     summary: formData.get("summary") || undefined,
     actionItems,
     hearingData,
+    contactRegistrations,
   });
 
   if (!parsed.success) {
@@ -155,6 +175,20 @@ export async function createMeetingAction(
 
   if (!result.ok) {
     return { message: result.reason };
+  }
+
+  // チェックされた外部参加者を顧客担当者として登録する（best-effort）
+  if (parsed.data.clientId && parsed.data.contactRegistrations.length > 0) {
+    for (const entry of parsed.data.contactRegistrations) {
+      if (entry.register && entry.name.trim()) {
+        await createClientContact({
+          clientId: parsed.data.clientId,
+          name: entry.name.trim(),
+          organizationId: session.user.organizationId,
+          actorId: session.user.id,
+        });
+      }
+    }
   }
 
   if (parsed.data.inquiryId) {

@@ -3,10 +3,9 @@ import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { meetingRepository } from "@/infrastructure/repositories";
 import { SectionCard } from "@/app/components";
-import { MeetingDetail } from "./MeetingDetail";
 import { meetingTypeLabels } from "@/app/(dashboard)/labels";
 
-export default async function MeetingDetailPage({
+export default async function DealMeetingDetailPage({
   params,
 }: {
   params: Promise<{ id: string; meetingId: string }>;
@@ -20,6 +19,11 @@ export default async function MeetingDetailPage({
     notFound();
   }
 
+  // URL の dealId と商談の紐づけが一致しない場合はリソース帰属検証でリジェクト
+  if (meeting.dealId !== id) {
+    notFound();
+  }
+
   return (
     <div>
       <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2">
@@ -27,9 +31,9 @@ export default async function MeetingDetailPage({
           {meetingTypeLabels[meeting.type] ?? meeting.type}
         </span>
         <span className="text-text-muted text-xs ml-2">
-          <Link href="/inquiries" className="text-primary underline">引き合い一覧</Link>
+          <Link href="/deals" className="text-primary underline">案件一覧</Link>
           {" > "}
-          <Link href={`/inquiries/${id}`} className="text-primary underline">引き合い詳細</Link>
+          <Link href={`/deals/${id}`} className="text-primary underline">案件詳細</Link>
           {" > "}商談詳細
         </span>
       </div>
@@ -135,8 +139,24 @@ export default async function MeetingDetailPage({
       )}
 
       <SectionCard className="p-3">
-        <h2 className="text-xs font-bold text-text mb-2">アクションアイテム / 編集</h2>
-        <MeetingDetail meeting={meeting} inquiryId={id} />
+        <h2 className="text-xs font-bold text-text mb-2">アクションアイテム</h2>
+        {meeting.actionItems.length === 0 ? (
+          <p className="text-xs text-text-muted">アクションアイテムはありません</p>
+        ) : (
+          <ul className="text-xs space-y-1">
+            {meeting.actionItems.map((item, idx) => (
+              <li key={idx} className="flex gap-2 items-start">
+                <span className={item.done ? "text-text-muted line-through" : "text-text"}>
+                  {item.description}
+                </span>
+                <span className="text-text-muted">（{item.assignee}）</span>
+                {item.dueDate && (
+                  <span className="text-text-muted">{item.dueDate}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
       </SectionCard>
     </div>
   );
