@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 9.0s | 0 |
-| 2 | typecheck | passed | 2.9s | 0 |
+| 1 | build | passed | 11.3s | 0 |
+| 2 | typecheck | passed | 2.4s | 0 |
 | 3 | test | passed | 0.1s | 0 |
-| 4 | lint | passed | 3.7s | 0 |
+| 4 | lint | passed | 3.2s | 0 |
 
 ## Phase: build
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 4.8s
+✓ Compiled successfully in 5.8s
   Running TypeScript ...
-  Finished TypeScript in 2.9s ...
+  Finished TypeScript in 3.7s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/21) ...
   Generating static pages using 7 workers (5/21) 
   Generating static pages using 7 workers (10/21) 
   Generating static pages using 7 workers (15/21) 
-✓ Generating static pages using 7 workers (21/21) in 156ms
+✓ Generating static pages using 7 workers (21/21) in 162ms
   Finalizing page optimization ...
 
 Route (app)
@@ -91,10 +91,10 @@ bun test v1.3.12 (700fc117)
 
 $ bun test
 
- 502 pass
+ 503 pass
  0 fail
- 999 expect() calls
-Ran 502 tests across 24 files. [107.00ms]
+ 1003 expect() calls
+Ran 503 tests across 24 files. [101.00ms]
 
 ```
 
@@ -109,10 +109,7 @@ src/app/(dashboard)/settings/templates/DeleteButton.tsx
   10:24  warning  '_prev' is defined but never used      @typescript-eslint/no-unused-vars
   10:38  warning  '_formData' is defined but never used  @typescript-eslint/no-unused-vars
 
-src/infrastructure/repositories/dealContactRepository.ts
-  43:3  warning  'organizationId' is defined but never used  @typescript-eslint/no-unused-vars
-
-✖ 4 problems (0 errors, 4 warnings)
+✖ 3 problems (0 errors, 3 warnings)
 
 
 $ eslint
