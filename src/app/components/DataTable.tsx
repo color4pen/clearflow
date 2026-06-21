@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 
 type Column<T> = {
   key: string;
@@ -14,10 +15,11 @@ type Props<T> = {
   rowKey: (row: T) => string;
   rowClass?: (row: T, index: number) => string;
   onRowClick?: (row: T) => void;
+  rowHref?: (row: T) => string;
   footer?: ReactNode;
 };
 
-export function DataTable<T>({ columns, rows, rowKey, rowClass, onRowClick, footer }: Props<T>) {
+export function DataTable<T>({ columns, rows, rowKey, rowClass, onRowClick, rowHref, footer }: Props<T>) {
   const alignClass = (align?: string) =>
     align === "center" ? "text-center" : align === "right" ? "text-right" : "text-left";
 
@@ -37,19 +39,29 @@ export function DataTable<T>({ columns, rows, rowKey, rowClass, onRowClick, foot
           </tr>
         </thead>
         <tbody>
-          {rows.map((row, idx) => (
-            <tr
-              key={rowKey(row)}
-              className={`border border-border-light hover:bg-bg-surface-alt ${onRowClick ? "cursor-pointer" : ""} ${rowClass?.(row, idx) ?? (idx % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt")}`}
-              onClick={onRowClick ? () => onRowClick(row) : undefined}
-            >
-              {columns.map((col) => (
-                <td key={col.key} className={`px-1 py-1 text-xs ${alignClass(col.align)}`}>
-                  {col.render(row, idx)}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {rows.map((row, idx) => {
+            const href = rowHref?.(row);
+            const clickable = onRowClick || href;
+            return (
+              <tr
+                key={rowKey(row)}
+                className={`border border-border-light hover:bg-bg-surface-alt ${clickable ? "cursor-pointer" : ""} ${rowClass?.(row, idx) ?? (idx % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt")}`}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+              >
+                {columns.map((col) => (
+                  <td key={col.key} className={`px-1 py-1 text-xs ${alignClass(col.align)}`}>
+                    {href ? (
+                      <Link href={href} className="block text-inherit no-underline">
+                        {col.render(row, idx)}
+                      </Link>
+                    ) : (
+                      col.render(row, idx)
+                    )}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       {footer && (

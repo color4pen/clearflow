@@ -99,6 +99,7 @@ export default async function InquiriesPage({
           ]}
           rows={filtered}
           rowKey={(row) => row.id}
+          rowHref={(row) => `/inquiries/${row.id}`}
           footer={`${filtered.length} 件`}
         />
       )}

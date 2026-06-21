@@ -92,6 +92,7 @@ export default async function DealsPage({
             ]}
             rows={filteredDeals}
             rowKey={(row) => row.id}
+            rowHref={(row) => `/deals/${row.id}`}
           />
         )}
       </SectionCard>

@@ -74,6 +74,7 @@ export default async function ClientsPage() {
           ]}
           rows={clients}
           rowKey={(row) => row.id}
+          rowHref={(row) => `/clients/${row.id}`}
           footer={`${clients.length} 件`}
         />
       )}
