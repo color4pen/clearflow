@@ -3,73 +3,10 @@
   "dialect": "postgresql",
   "entries": [
     {
-      "idx": 2,
+      "idx": 0,
       "version": "7",
-      "when": 1781713452721,
-      "tag": "0002_webhook_retry_audit_export",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1781744938003,
-      "tag": "0003_approval_deadline",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1781750292219,
-      "tag": "0004_far_young_avengers",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1750204800000,
-      "tag": "0005_rate_limit_records",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1750291200000,
-      "tag": "0006_template_form_definition",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1750377600000,
-      "tag": "0007_client_inquiry_foundation",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1750464000000,
-      "tag": "0008_inquiries_version",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1750550400000,
-      "tag": "0009_meeting_management",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1750636800000,
-      "tag": "0010_deal_management",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1750723200000,
-      "tag": "0011_deal_inquiry_unique",
+      "when": 1781950511322,
+      "tag": "0000_naive_juggernaut",
       "breakpoints": true
     },
     {

@@ -19,16 +19,16 @@ async function reset() {
   await client.end();
   console.log("✅ Database connection closed");
 
-  console.log("📦 Running drizzle-kit push...");
-  const push = spawnSync("bunx", ["drizzle-kit", "push"], {
+  console.log("📦 Running drizzle-kit migrate...");
+  const migrate = spawnSync("bunx", ["drizzle-kit", "migrate"], {
     stdio: "inherit",
     env: process.env,
   });
-  if (push.status !== 0) {
-    console.error("❌ drizzle-kit push failed");
+  if (migrate.status !== 0) {
+    console.error("❌ drizzle-kit migrate failed");
     process.exit(1);
   }
-  console.log("✅ Schema pushed successfully");
+  console.log("✅ Migrations applied successfully");
 
   console.log("🌱 Running seed...");
   const seed = spawnSync("bun", ["src/infrastructure/seed.ts"], {
