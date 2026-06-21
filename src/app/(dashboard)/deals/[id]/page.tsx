@@ -61,7 +61,10 @@ export default async function DealDetailPage({
 
       <div className="grid grid-cols-2 gap-2 mb-3">
         <SectionCard className="p-3">
-          <h2 className="text-xs font-bold text-text mb-2">案件情報</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-xs font-bold text-text">案件情報</h2>
+            <Link href={`/deals/${id}/edit`} className="text-xs text-primary underline">編集</Link>
+          </div>
           <dl className="text-xs space-y-1">
             <div className="flex gap-2">
               <dt className="text-text-muted w-24 shrink-0">案件名</dt>
@@ -245,11 +248,6 @@ export default async function DealDetailPage({
         )}
       </SectionCard>
 
-      {/* 案件情報編集 */}
-      <SectionCard className="p-3">
-        <h2 className="text-xs font-bold text-text mb-2">案件情報の編集</h2>
-        <DealEditForm deal={deal} />
-      </SectionCard>
     </div>
   );
 }

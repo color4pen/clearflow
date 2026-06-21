@@ -51,23 +51,12 @@ export default async function InquiryDetailPage({
 
   return (
     <div>
-      <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2 flex items-center justify-between">
-        <div>
-          <span className="text-sm font-bold text-text">{inquiry.title}</span>
-          <span className="text-text-muted text-xs ml-2">
-            <Link href="/inquiries" className="text-primary underline">引き合い一覧</Link>
-            {" > "}詳細
-          </span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs px-2 py-0.5 border border-border-light bg-bg-surface">
-            {statusLabels[inquiry.status] ?? inquiry.status}
-          </span>
-          <InquiryActions
-            inquiry={{ id: inquiry.id, status: inquiry.status }}
-            canChangeStatus={canChangeStatus}
-          />
-        </div>
+      <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2">
+        <span className="text-sm font-bold text-text">{inquiry.title}</span>
+        <span className="text-text-muted text-xs ml-2">
+          <Link href="/inquiries" className="text-primary underline">引き合い一覧</Link>
+          {" > "}詳細
+        </span>
       </div>
 
       <SectionCard className="p-3 mb-2">
@@ -76,6 +65,10 @@ export default async function InquiryDetailPage({
           <Link href={`/inquiries/${id}/edit`} className="text-xs text-primary underline">編集</Link>
         </div>
         <dl className="text-xs space-y-1">
+          <div className="flex gap-2">
+            <dt className="text-text-muted w-20 shrink-0">ステータス</dt>
+            <dd className="text-text">{statusLabels[inquiry.status] ?? inquiry.status}</dd>
+          </div>
           <div className="flex gap-2">
             <dt className="text-text-muted w-20 shrink-0">顧客</dt>
             <dd className="text-text">
@@ -98,10 +91,7 @@ export default async function InquiryDetailPage({
             <div className="flex gap-2">
               <dt className="text-text-muted w-20 shrink-0">案件</dt>
               <dd>
-                <Link
-                  href={`/deals/${deal.id}`}
-                  className="text-primary underline"
-                >
+                <Link href={`/deals/${deal.id}`} className="text-primary underline">
                   {deal.title}
                 </Link>
               </dd>
@@ -116,6 +106,14 @@ export default async function InquiryDetailPage({
           <p className="text-xs text-text whitespace-pre-wrap">{inquiry.description}</p>
         </SectionCard>
       )}
+
+      <SectionCard className="p-3 mb-2">
+        <h2 className="text-xs font-bold text-text mb-2">ステータス変更</h2>
+        <InquiryActions
+          inquiry={{ id: inquiry.id, status: inquiry.status }}
+          canChangeStatus={canChangeStatus}
+        />
+      </SectionCard>
 
       <SectionCard className="p-3">
         <div className="flex items-center justify-between mb-2">

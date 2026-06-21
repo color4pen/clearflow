@@ -20,7 +20,7 @@ export function InquiryActions({ inquiry, canChangeStatus }: Props) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (inquiry.status === "converted" || inquiry.status === "declined") {
-    return null;
+    return <p className="text-xs text-text-muted">このステータスはこれ以上変更できません</p>;
   }
 
   async function handleTransition(newStatus: InquiryStatus) {
@@ -38,52 +38,54 @@ export function InquiryActions({ inquiry, canChangeStatus }: Props) {
   }
 
   return (
-    <>
+    <div className="space-y-2">
       {errorMessage && (
-        <span className="text-danger text-xs mr-2">{errorMessage}</span>
+        <p className="text-danger text-xs">{errorMessage}</p>
       )}
 
-      {inquiry.status === "new" && (
+      <div className="flex gap-2 flex-wrap">
+        {inquiry.status === "new" && (
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => handleTransition("in_progress")}
+            className="bg-primary text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
+          >
+            対応開始
+          </button>
+        )}
+
+        {inquiry.status === "in_progress" && canChangeStatus && (
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => setShowConvertConfirm(true)}
+            className="bg-green-600 text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
+          >
+            案件化
+          </button>
+        )}
+
         <button
           type="button"
           disabled={isSubmitting}
-          onClick={() => handleTransition("in_progress")}
-          className="bg-primary text-white text-xs px-2 py-0.5 cursor-pointer disabled:opacity-50"
+          onClick={() => handleTransition("declined")}
+          className="border border-danger text-danger text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50 hover:bg-danger hover:text-white"
         >
-          対応開始
+          見送り
         </button>
-      )}
-
-      {inquiry.status === "in_progress" && canChangeStatus && !showConvertConfirm && (
-        <button
-          type="button"
-          disabled={isSubmitting}
-          onClick={() => setShowConvertConfirm(true)}
-          className="bg-primary text-white text-xs px-2 py-0.5 cursor-pointer disabled:opacity-50"
-        >
-          案件化
-        </button>
-      )}
-
-      <button
-        type="button"
-        disabled={isSubmitting}
-        onClick={() => handleTransition("declined")}
-        className="text-xs text-danger underline cursor-pointer disabled:opacity-50"
-      >
-        見送り
-      </button>
+      </div>
 
       {showConvertConfirm && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-bg-surface border border-border p-4 max-w-sm w-full">
             <p className="text-sm font-bold text-text mb-3">案件化</p>
-            <p className="text-xs text-text-muted mb-3">この引き合いを案件化しますか？</p>
-            <div className="flex gap-2 mt-3 justify-end">
+            <p className="text-xs text-text-muted mb-4">この引き合いを案件化しますか？案件が作成され、ステータスが「案件化済」に変わります。</p>
+            <div className="flex gap-2 justify-end">
               <button
                 type="button"
                 onClick={() => setShowConvertConfirm(false)}
-                className="text-xs text-text-muted underline cursor-pointer"
+                className="border border-border text-text text-xs px-3 py-1.5 cursor-pointer"
               >
                 キャンセル
               </button>
@@ -91,7 +93,7 @@ export function InquiryActions({ inquiry, canChangeStatus }: Props) {
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => handleTransition("converted")}
-                className="bg-primary text-white text-xs px-3 py-1 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-green-600 text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting ? "処理中..." : "案件化する"}
               </button>
@@ -99,6 +101,6 @@ export function InquiryActions({ inquiry, canChangeStatus }: Props) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
