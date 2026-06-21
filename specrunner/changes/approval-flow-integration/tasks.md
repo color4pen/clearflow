@@ -2,8 +2,8 @@
 
 ## T-01: requests テーブルに sourceType/sourceId カラムを追加
 
-- [ ] `src/infrastructure/schema.ts` の `requests` テーブル定義に `sourceType: text("source_type")` と `sourceId: uuid("source_id")` を追加する（両方 nullable）
-- [ ] `bunx drizzle-kit generate` でマイグレーションファイルを生成する
+- [x] `src/infrastructure/schema.ts` の `requests` テーブル定義に `sourceType: text("source_type")` と `sourceId: uuid("source_id")` を追加する（両方 nullable）
+- [x] `bunx drizzle-kit generate` でマイグレーションファイルを生成する
 
 **Acceptance Criteria**:
 - `requests` テーブル定義に `source_type`（text, nullable）と `source_id`（uuid, nullable）が存在する
@@ -12,8 +12,8 @@
 
 ## T-02: Request ドメインモデルに sourceType/sourceId を追加
 
-- [ ] `src/domain/models/request.ts` の `Request` 型に `sourceType: string | null` と `sourceId: string | null` を追加する
-- [ ] `src/infrastructure/repositories/requestRepository.ts` の `mapRow` 関数に `sourceType: row.sourceType ?? null` と `sourceId: row.sourceId ?? null` を追加する
+- [x] `src/domain/models/request.ts` の `Request` 型に `sourceType: string | null` と `sourceId: string | null` を追加する
+- [x] `src/infrastructure/repositories/requestRepository.ts` の `mapRow` 関数に `sourceType: row.sourceType ?? null` と `sourceId: row.sourceId ?? null` を追加する
 
 **Acceptance Criteria**:
 - `Request` 型に `sourceType` と `sourceId` フィールドが存在する
@@ -22,10 +22,10 @@
 
 ## T-03: requestRepository.create に status/sourceType/sourceId パラメータを追加
 
-- [ ] `src/infrastructure/repositories/requestRepository.ts` の `create` メソッドの `data` 引数に `status?: RequestStatus`, `sourceType?: string | null`, `sourceId?: string | null` を追加する
-- [ ] `.values()` 内の `status: "draft"` を `status: data.status ?? "draft"` に変更する
-- [ ] `.values()` に `sourceType: data.sourceType ?? null` と `sourceId: data.sourceId ?? null` を追加する
-- [ ] `RequestStatus` 型の import を確認する（既に import 済み）
+- [x] `src/infrastructure/repositories/requestRepository.ts` の `create` メソッドの `data` 引数に `status?: RequestStatus`, `sourceType?: string | null`, `sourceId?: string | null` を追加する
+- [x] `.values()` 内の `status: "draft"` を `status: data.status ?? "draft"` に変更する
+- [x] `.values()` に `sourceType: data.sourceType ?? null` と `sourceId: data.sourceId ?? null` を追加する
+- [x] `RequestStatus` 型の import を確認する（既に import 済み）
 
 **Acceptance Criteria**:
 - `create` メソッドが `status`, `sourceType`, `sourceId` のオプショナルパラメータを受け付ける
@@ -35,7 +35,7 @@
 
 ## T-04: updateInquiryStatus の converted 遷移で pending/source metadata を渡す
 
-- [ ] `src/application/usecases/updateInquiryStatus.ts` の converted 遷移ブロック内の `requestRepository.create` 呼び出しに以下を追加する:
+- [x] `src/application/usecases/updateInquiryStatus.ts` の converted 遷移ブロック内の `requestRepository.create` 呼び出しに以下を追加する:
   - `status: "pending" as const`
   - `sourceType: "inquiry"`
   - `sourceId: data.inquiryId`
@@ -48,7 +48,7 @@
 
 ## T-05: updateDealPhase の estimate_approval 遷移で pending/source metadata を渡す
 
-- [ ] `src/application/usecases/updateDealPhase.ts` の estimate_approval 遷移ブロック内の `requestRepository.create` 呼び出しに以下を追加する:
+- [x] `src/application/usecases/updateDealPhase.ts` の estimate_approval 遷移ブロック内の `requestRepository.create` 呼び出しに以下を追加する:
   - `status: "pending" as const`
   - `sourceType: "deal"`
   - `sourceId: data.dealId`
@@ -61,8 +61,8 @@
 
 ## T-06: approveRequest に承認完了後の連動処理を追加
 
-- [ ] `src/application/usecases/approveRequest.ts` の import に `inquiryRepository`, `dealRepository` を追加する
-- [ ] 全ステップ承認後の webhook 配信前（`txResult.allApproved` ブロック内、`return` 前）に連動処理を追加する:
+- [x] `src/application/usecases/approveRequest.ts` の import に `inquiryRepository`, `dealRepository` を追加する
+- [x] 全ステップ承認後の webhook 配信前（`txResult.allApproved` ブロック内、`return` 前）に連動処理を追加する:
   - `txResult.request` の `sourceType` と `sourceId` を参照する
   - **sourceType === "inquiry"** の場合:
     - `inquiryRepository.findById(txResult.request.sourceId, data.organizationId)` で引き合いを取得
@@ -74,9 +74,9 @@
     - `dealRepository.updatePhase(sourceId, organizationId, "won", deal.estimateRequestId, deal.version)` でフェーズを `won` に遷移
     - `auditLogRepository.create({ action: "deal.updatePhase", targetType: "deal", targetId: sourceId, actorId, organizationId, metadata: { fromPhase: deal.phase, toPhase: "won" } })` で audit log を記録
     - エラー発生時は同様に `approval.linkage_failed` として audit log に記録
-- [ ] 連動処理は try-catch で囲み、失敗しても `return { ok: true, request: txResult.request }` を返す
-- [ ] 連動処理は `txResult.allApproved` ブロック内かつ webhook 配信と同じレベル（トランザクション外）で実行する
-- [ ] no-steps フロー（steps.length === 0）側にも同様の連動処理を追加する。この場合は `updated`（updateStatus の戻り値）の `sourceType`/`sourceId` を参照する
+- [x] 連動処理は try-catch で囲み、失敗しても `return { ok: true, request: txResult.request }` を返す
+- [x] 連動処理は `txResult.allApproved` ブロック内かつ webhook 配信と同じレベル（トランザクション外）で実行する
+- [x] no-steps フロー（steps.length === 0）側にも同様の連動処理を追加する。この場合は `updated`（updateStatus の戻り値）の `sourceType`/`sourceId` を参照する
 
 **Acceptance Criteria**:
 - 案件化承認の全ステップ承認後に Deal が自動作成される
@@ -89,8 +89,8 @@
 
 ## T-07: テスト追加
 
-- [ ] `src/__tests__/usecases/approvalFlowIntegration.test.ts` を作成する（静的検証テスト）
-- [ ] 以下のテストケースを実装する（プロジェクトの既存テストパターンに従い、ソースコードの静的解析で検証する）:
+- [x] `src/__tests__/usecases/approvalFlowIntegration.test.ts` を作成する（静的検証テスト）
+- [x] 以下のテストケースを実装する（プロジェクトの既存テストパターンに従い、ソースコードの静的解析で検証する）:
   - `updateInquiryStatus` の converted 遷移で `status: "pending"` が渡されることを確認
   - `updateInquiryStatus` の converted 遷移で `sourceType: "inquiry"` が渡されることを確認
   - `updateDealPhase` の estimate_approval 遷移で `status: "pending"` が渡されることを確認
@@ -119,8 +119,8 @@
 
 ## T-08: ビルド・型チェック・全テスト通過確認
 
-- [ ] `bun run build` を実行し成功を確認する
-- [ ] `bun test` を実行し全件 green を確認する
+- [x] `bun run build` を実行し成功を確認する
+- [x] `bun test` を実行し全件 green を確認する
 
 **Acceptance Criteria**:
 - `bun run build` が成功する

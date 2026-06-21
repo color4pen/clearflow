@@ -105,6 +105,9 @@ export const requests = pgTable("requests", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   version: integer("version").notNull().default(1),
+  // 承認リクエストの発生元（"inquiry" | "deal" | null）とその ID
+  sourceType: text("source_type"),
+  sourceId: uuid("source_id"),
 });
 
 // Audit logs table

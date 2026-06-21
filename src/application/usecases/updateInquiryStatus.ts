@@ -57,6 +57,9 @@ export async function updateInquiryStatus(data: {
             templateId: data.templateId,
             organizationId: data.organizationId,
             creatorId: data.actorId,
+            status: "pending" as const,
+            sourceType: "inquiry",
+            sourceId: data.inquiryId,
           },
           tx
         );

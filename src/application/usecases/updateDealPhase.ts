@@ -61,6 +61,9 @@ export async function updateDealPhase(data: {
             templateId: data.templateId,
             organizationId: data.organizationId,
             creatorId: data.actorId,
+            status: "pending" as const,
+            sourceType: "deal",
+            sourceId: data.dealId,
           },
           tx
         );
