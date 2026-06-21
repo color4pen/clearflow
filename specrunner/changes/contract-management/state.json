@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "c51c79b7-67e5-427a-b132-f321ddb2375c",
   "createdAt": "2026-06-21T08:52:46.536Z",
-  "updatedAt": "2026-06-21T09:16:51.815Z",
+  "updatedAt": "2026-06-21T09:28:09.137Z",
   "request": {
     "title": "契約管理",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "implementer",
+  "step": "code-review",
   "status": "running",
   "branch": "feat/contract-management-c51c79b7",
   "error": null,
@@ -34,12 +34,14 @@
     }
   ],
   "_journal": {
-    "historyCount": 16,
+    "historyCount": 25,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
       "spec-review": 1,
-      "test-case-gen": 1
+      "test-case-gen": 1,
+      "implementer": 1,
+      "verification": 1
     }
   }
 }
