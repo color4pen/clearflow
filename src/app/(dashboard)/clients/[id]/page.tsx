@@ -124,6 +124,7 @@ export default async function ClientDetailPage({
             ]}
             rows={relatedInquiries}
             rowKey={(row) => row.id}
+            rowHref={(row) => `/inquiries/${row.id}`}
           />
         )}
       </SectionCard>
@@ -161,6 +162,7 @@ export default async function ClientDetailPage({
             ]}
             rows={relatedDeals}
             rowKey={(row) => row.id}
+            rowHref={(row) => `/deals/${row.id}`}
           />
         )}
       </SectionCard>
