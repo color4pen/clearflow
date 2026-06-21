@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "e677557d-0661-4789-88a9-67a8649993ea",
   "createdAt": "2026-06-21T00:12:08.096Z",
-  "updatedAt": "2026-06-21T01:08:15.912Z",
+  "updatedAt": "2026-06-21T01:11:06.032Z",
   "request": {
     "title": "承認フロー統合",
     "type": "spec-change",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "change/approval-flow-integration-e677557d",
   "error": null,
   "pipelineId": "standard",
@@ -54,7 +54,7 @@
     "createdAt": "2026-06-21T01:08:15.903Z"
   },
   "_journal": {
-    "historyCount": 74,
+    "historyCount": 75,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
