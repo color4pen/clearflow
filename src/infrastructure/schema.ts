@@ -59,6 +59,7 @@ export const contractStatusEnum = pgEnum("contract_status", [
   "cancelled",
 ]);
 export const renewalTypeEnum = pgEnum("renewal_type", ["one_time", "recurring"]);
+export const invoiceStatusEnum = pgEnum("invoice_status", ["scheduled", "invoiced", "paid", "overdue"]);
 
 // Organizations table
 export const organizations = pgTable("organizations", {
@@ -384,6 +385,26 @@ export const contracts = pgTable(
   (table) => [unique("contracts_deal_id_unique").on(table.dealId)]
 );
 
+// Invoices table (請求)
+export const invoices = pgTable("invoices", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+  contractId: uuid("contract_id")
+    .notNull()
+    .references(() => contracts.id),
+  title: text("title").notNull(),
+  amount: integer("amount").notNull(),
+  dueDate: timestamp("due_date"),
+  status: invoiceStatusEnum("status").notNull().default("scheduled"),
+  invoicedAt: timestamp("invoiced_at"),
+  paidAt: timestamp("paid_at"),
+  notes: text("notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Auth.js adapter tables
 export const accounts = pgTable(
   "accounts",
@@ -439,6 +460,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   deals: many(deals),
   dealContacts: many(dealContacts),
   contracts: many(contracts),
+  invoices: many(invoices),
 }));
 
 export const idempotencyKeysRelations = relations(idempotencyKeys, ({ one }) => ({
@@ -664,7 +686,7 @@ export const dealContactsRelations = relations(dealContacts, ({ one }) => ({
   }),
 }));
 
-export const contractsRelations = relations(contracts, ({ one }) => ({
+export const contractsRelations = relations(contracts, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [contracts.organizationId],
     references: [organizations.id],
@@ -676,5 +698,17 @@ export const contractsRelations = relations(contracts, ({ one }) => ({
   client: one(clients, {
     fields: [contracts.clientId],
     references: [clients.id],
+  }),
+  invoices: many(invoices),
+}));
+
+export const invoicesRelations = relations(invoices, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [invoices.organizationId],
+    references: [organizations.id],
+  }),
+  contract: one(contracts, {
+    fields: [invoices.contractId],
+    references: [contracts.id],
   }),
 }));
