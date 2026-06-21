@@ -13,10 +13,11 @@ type Props<T> = {
   rows: T[];
   rowKey: (row: T) => string;
   rowClass?: (row: T, index: number) => string;
+  onRowClick?: (row: T) => void;
   footer?: ReactNode;
 };
 
-export function DataTable<T>({ columns, rows, rowKey, rowClass, footer }: Props<T>) {
+export function DataTable<T>({ columns, rows, rowKey, rowClass, onRowClick, footer }: Props<T>) {
   const alignClass = (align?: string) =>
     align === "center" ? "text-center" : align === "right" ? "text-right" : "text-left";
 
@@ -39,7 +40,8 @@ export function DataTable<T>({ columns, rows, rowKey, rowClass, footer }: Props<
           {rows.map((row, idx) => (
             <tr
               key={rowKey(row)}
-              className={`border border-border-light hover:bg-bg-surface-alt ${rowClass?.(row, idx) ?? (idx % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt")}`}
+              className={`border border-border-light hover:bg-bg-surface-alt ${onRowClick ? "cursor-pointer" : ""} ${rowClass?.(row, idx) ?? (idx % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt")}`}
+              onClick={onRowClick ? () => onRowClick(row) : undefined}
             >
               {columns.map((col) => (
                 <td key={col.key} className={`px-1 py-1 text-xs ${alignClass(col.align)}`}>
