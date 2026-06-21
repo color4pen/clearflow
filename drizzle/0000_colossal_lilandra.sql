@@ -1,5 +1,5 @@
 CREATE TYPE "public"."approval_step_status" AS ENUM('pending', 'approved', 'rejected');--> statement-breakpoint
-CREATE TYPE "public"."deal_phase" AS ENUM('proposal_prep', 'proposed', 'negotiation', 'internal_approval', 'won', 'lost');--> statement-breakpoint
+CREATE TYPE "public"."deal_phase" AS ENUM('proposal_prep', 'proposed', 'negotiation', 'estimate_approval', 'won', 'lost');--> statement-breakpoint
 CREATE TYPE "public"."inquiry_status" AS ENUM('new', 'in_progress', 'converted', 'declined');--> statement-breakpoint
 CREATE TYPE "public"."meeting_type" AS ENUM('hearing', 'proposal', 'negotiation', 'closing', 'followup');--> statement-breakpoint
 CREATE TYPE "public"."request_status" AS ENUM('draft', 'pending', 'approved', 'rejected', 'revision', 'expired');--> statement-breakpoint
@@ -89,6 +89,15 @@ CREATE TABLE "clients" (
 	"updated_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "deal_contacts" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"deal_id" uuid NOT NULL,
+	"contact_id" uuid NOT NULL,
+	"role" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "deal_contacts_deal_contact_unique" UNIQUE("deal_id","contact_id")
+);
+--> statement-breakpoint
 CREATE TABLE "deals" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
@@ -122,14 +131,13 @@ CREATE TABLE "idempotency_keys" (
 CREATE TABLE "inquiries" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
-	"client_id" uuid NOT NULL,
-	"contact_id" uuid,
+	"client_id" uuid,
 	"title" text NOT NULL,
 	"description" text,
 	"source" text NOT NULL,
 	"status" "inquiry_status" DEFAULT 'new' NOT NULL,
 	"assignee_id" uuid,
-	"request_id" uuid,
+	"conversion_request_id" uuid,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
 	"version" integer DEFAULT 1 NOT NULL
@@ -138,7 +146,8 @@ CREATE TABLE "inquiries" (
 CREATE TABLE "meetings" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" uuid NOT NULL,
-	"inquiry_id" uuid NOT NULL,
+	"inquiry_id" uuid,
+	"deal_id" uuid,
 	"type" "meeting_type" NOT NULL,
 	"date" timestamp NOT NULL,
 	"location" text,
@@ -176,7 +185,9 @@ CREATE TABLE "requests" (
 	"creator_id" uuid NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
-	"version" integer DEFAULT 1 NOT NULL
+	"version" integer DEFAULT 1 NOT NULL,
+	"source_type" text,
+	"source_id" uuid
 );
 --> statement-breakpoint
 CREATE TABLE "sessions" (
@@ -241,6 +252,8 @@ ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_actor_id_users_id_fk" FOREIG
 ALTER TABLE "audit_logs" ADD CONSTRAINT "audit_logs_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "client_contacts" ADD CONSTRAINT "client_contacts_client_id_clients_id_fk" FOREIGN KEY ("client_id") REFERENCES "public"."clients"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "clients" ADD CONSTRAINT "clients_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "deal_contacts" ADD CONSTRAINT "deal_contacts_deal_id_deals_id_fk" FOREIGN KEY ("deal_id") REFERENCES "public"."deals"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "deal_contacts" ADD CONSTRAINT "deal_contacts_contact_id_client_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."client_contacts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "deals" ADD CONSTRAINT "deals_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "deals" ADD CONSTRAINT "deals_inquiry_id_inquiries_id_fk" FOREIGN KEY ("inquiry_id") REFERENCES "public"."inquiries"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "deals" ADD CONSTRAINT "deals_assignee_id_users_id_fk" FOREIGN KEY ("assignee_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -249,11 +262,11 @@ ALTER TABLE "deals" ADD CONSTRAINT "deals_estimate_request_id_requests_id_fk" FO
 ALTER TABLE "idempotency_keys" ADD CONSTRAINT "idempotency_keys_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "inquiries" ADD CONSTRAINT "inquiries_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "inquiries" ADD CONSTRAINT "inquiries_client_id_clients_id_fk" FOREIGN KEY ("client_id") REFERENCES "public"."clients"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inquiries" ADD CONSTRAINT "inquiries_contact_id_client_contacts_id_fk" FOREIGN KEY ("contact_id") REFERENCES "public"."client_contacts"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "inquiries" ADD CONSTRAINT "inquiries_assignee_id_users_id_fk" FOREIGN KEY ("assignee_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "inquiries" ADD CONSTRAINT "inquiries_request_id_requests_id_fk" FOREIGN KEY ("request_id") REFERENCES "public"."requests"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "inquiries" ADD CONSTRAINT "inquiries_conversion_request_id_requests_id_fk" FOREIGN KEY ("conversion_request_id") REFERENCES "public"."requests"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "meetings" ADD CONSTRAINT "meetings_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "meetings" ADD CONSTRAINT "meetings_inquiry_id_inquiries_id_fk" FOREIGN KEY ("inquiry_id") REFERENCES "public"."inquiries"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "meetings" ADD CONSTRAINT "meetings_deal_id_deals_id_fk" FOREIGN KEY ("deal_id") REFERENCES "public"."deals"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "meetings" ADD CONSTRAINT "meetings_created_by_id_users_id_fk" FOREIGN KEY ("created_by_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "requests" ADD CONSTRAINT "requests_template_id_approval_templates_id_fk" FOREIGN KEY ("template_id") REFERENCES "public"."approval_templates"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "requests" ADD CONSTRAINT "requests_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organizations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
