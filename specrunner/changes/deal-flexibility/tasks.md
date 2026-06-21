@@ -71,7 +71,7 @@
 - [ ] `src/application/usecases/createDeal.ts` — `createDeal` の `data` パラメータで `inquiryId` を optional（`inquiryId?: string`）に変更する
 - [ ] `src/application/usecases/createDeal.ts` — `data` パラメータに `clientId?: string` を追加する
 - [ ] `src/application/usecases/createDeal.ts` — パターン (a) `inquiryId` 指定あり: 既存の引き合い存在確認 + converted チェック + 重複チェックを維持。`inquiry.clientId` が null の場合は `{ ok: false, reason: "案件化するには顧客の登録が必要です" }` を返す。`clientId` を `inquiry.clientId` にセット
-- [ ] `src/application/usecases/createDeal.ts` — パターン (b) `inquiryId` 指定なし: `clientId` が未指定の場合はエラーを返す。引き合いチェックをスキップ
+- [ ] `src/application/usecases/createDeal.ts` — パターン (b) `inquiryId` 指定なし: `clientId` が未指定の場合はエラーを返す。`clientRepository.findById(data.clientId, data.organizationId)` でテナント所属確認を行い、null の場合は `{ ok: false, reason: "指定された顧客はこの組織に存在しません" }` を返す。引き合いチェックをスキップ
 - [ ] `src/application/usecases/createDeal.ts` — 両パターンとも `dealRepository.create` に `clientId` を渡す
 
 **Acceptance Criteria**:
@@ -171,10 +171,22 @@
 - `drizzle/` ディレクトリにマイグレーションファイルが生成されている
 - マイグレーション SQL に `client_id` カラム追加、`inquiry_id` の NOT NULL 削除、`deals_inquiry_id_unique` 制約削除が含まれる
 
-## T-15: 既存テストの追従修正
+## T-15: DealPhaseActions の動的フェーズ生成
+
+- [ ] `src/app/(dashboard)/deals/[id]/DealPhaseActions.tsx` — `nextPhaseOptions` のハードコードを廃止する。現在のフェーズから遷移可能な全フェーズ（終端状態 `won`/`lost` と自フェーズを除いた全 `DealPhase`）を動的に生成する
+- [ ] 各フェーズのラベルは `phaseLabels`（`labels.ts`）から取得する。variant は `won` なら `"success"`、`lost` なら `"danger"`、それ以外は `"primary"` とする
+- [ ] `phaseLabels` を `@/app/(dashboard)/labels` から import する
+
+**Acceptance Criteria**:
+- `proposal_prep` から `negotiation` へのスキップボタンが表示される
+- `proposed` から `proposal_prep` への巻き戻しボタンが表示される
+- `won` / `lost` のフェーズではボタンが表示されない
+- `bun run build` が通る
+
+## T-16: 既存テストの追従修正
 
 - [ ] `src/__tests__/usecases/dealManagement.test.ts` — `DealWithInquiry` → `DealWithDetails` の型名参照があれば更新する
-- [ ] `src/__tests__/usecases/dealManagement.test.ts` — dealTransition 関連のテスト（`canDealTransition` / `canTransition`）を終端チェックのみのロジックに合わせて更新する
+- [ ] `src/__tests__/usecases/dealManagement.test.ts` — dealTransition 関連のテスト: T-13（`canTransition("proposal_prep", "negotiation")` → `false`）の期待値を `true` に変更する。T-07・T-08（`estimate_approval` 関連）は `DealPhase` 型に含まれないため引き続き `false`、コメントを新ロジックに合わせて更新する
 - [ ] `src/__tests__/usecases/dealManagement.test.ts` — createDeal テストに引き合いなし作成パターン（`clientId` のみ指定）の静的検証を追加する
 - [ ] `src/__tests__/static/projectStructure.test.ts` — deal テナント分離テストに `clientId` 関連のアサーションが必要か確認し、必要であれば追加する
 
