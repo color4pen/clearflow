@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createDealAction } from "@/app/actions/deals";
-import { FormField, Input, SectionCard } from "@/app/components";
+import { FormField, Input, Select, Textarea, SectionCard } from "@/app/components";
 import Link from "next/link";
 import type { CreateDealState } from "@/app/actions/deals";
 import type { Client } from "@/domain/models/client";
@@ -72,6 +72,27 @@ export function NewDealForm({ inquiryId, clients }: Props) {
 
         <FormField label="想定金額" error={state.errors?.estimatedAmount?.[0]}>
           <Input name="estimatedAmount" type="number" />
+        </FormField>
+
+        <FormField label="想定開始日" error={state.errors?.estimatedStartDate?.[0]}>
+          <Input name="estimatedStartDate" type="date" />
+        </FormField>
+
+        <FormField label="想定終了日" error={state.errors?.estimatedEndDate?.[0]}>
+          <Input name="estimatedEndDate" type="date" />
+        </FormField>
+
+        <FormField label="契約種別" error={state.errors?.contractType?.[0]}>
+          <Select name="contractType" defaultValue="">
+            <option value="">未設定</option>
+            <option value="quasi_delegation">準委任</option>
+            <option value="fixed_price">請負</option>
+            <option value="ses">SES</option>
+          </Select>
+        </FormField>
+
+        <FormField label="備考" error={state.errors?.notes?.[0]}>
+          <Textarea name="notes" rows={4} />
         </FormField>
 
         <div className="flex gap-2 mt-4">

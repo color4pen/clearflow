@@ -98,6 +98,70 @@ export async function createClientAction(
   return {};
 }
 
+const updateClientSchema = z.object({
+  name: z.string().min(1, "顧客名は必須です"),
+  industry: z.string().optional(),
+  size: z.string().optional(),
+  address: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+export type UpdateClientState = {
+  errors?: {
+    name?: string[];
+    industry?: string[];
+    size?: string[];
+    address?: string[];
+    notes?: string[];
+  };
+  message?: string;
+  success?: boolean;
+};
+
+export async function updateClientAction(
+  clientId: string,
+  _prevState: UpdateClientState,
+  formData: FormData
+): Promise<UpdateClientState> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { message: "認証が必要です" };
+  }
+
+  const parsed = updateClientSchema.safeParse({
+    name: formData.get("name"),
+    industry: formData.get("industry") || undefined,
+    size: formData.get("size") || undefined,
+    address: formData.get("address") || undefined,
+    notes: formData.get("notes") || undefined,
+  });
+
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors };
+  }
+
+  const { clientRepository } = await import("@/infrastructure/repositories");
+  const updated = await clientRepository.update(
+    clientId,
+    session.user.organizationId,
+    {
+      name: parsed.data.name,
+      industry: parsed.data.industry ?? null,
+      size: parsed.data.size ?? null,
+      address: parsed.data.address ?? null,
+      notes: parsed.data.notes ?? null,
+    }
+  );
+
+  if (!updated) {
+    return { message: "顧客が見つかりません" };
+  }
+
+  revalidatePath("/clients");
+  revalidatePath(`/clients/${clientId}`);
+  return { success: true };
+}
+
 export async function listClientsAction(): Promise<{
   success: boolean;
   clients?: Client[];

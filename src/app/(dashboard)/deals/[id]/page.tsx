@@ -12,7 +12,6 @@ import {
 import { SectionCard, DataTable } from "@/app/components";
 import { DealEditForm } from "./DealEditForm";
 import { DealContactsSection } from "./DealContactsSection";
-import { CreateContractButton } from "./CreateContractButton";
 import { phaseLabels, contractTypeLabels, meetingTypeLabels, contractStatusLabels } from "@/app/(dashboard)/labels";
 import type { Meeting } from "@/domain/models/meeting";
 import type { Contract } from "@/domain/models/contract";
@@ -105,10 +104,6 @@ export default async function DealDetailPage({
               </dd>
             </div>
             <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">備考</dt>
-              <dd className="text-text">{deal.notes ?? "-"}</dd>
-            </div>
-            <div className="flex gap-2">
               <dt className="text-text-muted w-24 shrink-0">作成日</dt>
               <dd className="text-text">{deal.createdAt.toLocaleDateString("ja-JP")}</dd>
             </div>
@@ -158,13 +153,26 @@ export default async function DealDetailPage({
         </SectionCard>
       </div>
 
+      {deal.notes && (
+        <SectionCard className="p-3 mb-3">
+          <h2 className="text-xs font-bold text-text mb-2">備考</h2>
+          <p className="text-xs text-text whitespace-pre-wrap">{deal.notes}</p>
+        </SectionCard>
+      )}
 
       {/* 契約 */}
       {deal.phase === "won" && (
         <SectionCard className="p-3 mb-2">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xs font-bold text-text">契約</h2>
-            {canChangePhase && <CreateContractButton dealId={deal.id} />}
+            {canChangePhase && (
+              <Link
+                href={`/contracts/new?dealId=${deal.id}`}
+                className="text-xs bg-primary text-white font-bold px-4 py-1.5"
+              >
+                契約を作成
+              </Link>
+            )}
           </div>
           {dealContracts.length === 0 ? (
             <p className="text-xs text-text-muted">契約がありません</p>

@@ -22,9 +22,21 @@ export function DealEditForm({ deal }: Props) {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const selectedPhase = formData.get("phase");
+
+    if (selectedPhase === "won") {
+      if (!window.confirm("受注に変更すると元に戻せません。続行しますか？")) {
+        return;
+      }
+    } else if (selectedPhase === "lost") {
+      if (!window.confirm("失注に変更すると元に戻せません。続行しますか？")) {
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     setMessage(null);
-    const formData = new FormData(e.currentTarget);
     const result = await updateDealAction(deal.id, formData);
     setIsSubmitting(false);
     if (!result.success) {
