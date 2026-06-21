@@ -72,7 +72,10 @@ export default async function InquiryDetailPage({
       </div>
 
       <SectionCard className="p-3 mb-2">
-        <h2 className="text-xs font-bold text-text mb-2">引き合い情報</h2>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xs font-bold text-text">引き合い情報</h2>
+          <Link href={`/inquiries/${id}/edit`} className="text-xs text-primary underline">編集</Link>
+        </div>
         <dl className="text-xs space-y-1">
           <div className="flex gap-2">
             <dt className="text-text-muted w-20 shrink-0">顧客</dt>
