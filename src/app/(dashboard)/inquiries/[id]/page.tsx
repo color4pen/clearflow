@@ -6,6 +6,7 @@ import {
   clientRepository,
   approvalTemplateRepository,
   meetingRepository,
+  dealRepository,
 } from "@/infrastructure/repositories";
 import { SectionCard } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
@@ -26,12 +27,13 @@ export default async function InquiryDetailPage({
     notFound();
   }
 
-  const [client, templates, meetings] = await Promise.all([
+  const [client, templates, meetings, deal] = await Promise.all([
     inquiry.clientId
       ? clientRepository.findById(inquiry.clientId, organizationId)
       : Promise.resolve(null),
     approvalTemplateRepository.findByOrganization(organizationId),
     meetingRepository.findAllByInquiry(id, organizationId),
+    dealRepository.findByInquiryId(id, organizationId),
   ]);
 
   const canChangeStatus =
@@ -95,6 +97,19 @@ export default async function InquiryDetailPage({
             <dt className="text-text-muted w-20 shrink-0">作成日</dt>
             <dd className="text-text">{inquiry.createdAt.toLocaleDateString("ja-JP")}</dd>
           </div>
+          {deal && (
+            <div className="flex gap-2">
+              <dt className="text-text-muted w-20 shrink-0">案件</dt>
+              <dd>
+                <Link
+                  href={`/deals/${deal.id}`}
+                  className="text-primary underline"
+                >
+                  {deal.title}
+                </Link>
+              </dd>
+            </div>
+          )}
           {inquiry.conversionRequestId && (
             <div className="flex gap-2">
               <dt className="text-text-muted w-20 shrink-0">案件化承認</dt>
