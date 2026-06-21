@@ -592,6 +592,35 @@ async function seed() {
     status: "converted",
   }).returning();
 
+  const [convertedInquiry3] = await db.insert(inquiries).values({
+    organizationId: org.id,
+    clientId: sakuraLogistics.id,
+    title: "配送ルート最適化システム",
+    description: "配送コスト削減のためルート最適化を検討。案件化済み",
+    source: "exhibition",
+    status: "converted",
+    assigneeId: adminUser.id,
+  }).returning();
+
+  const [convertedInquiry4] = await db.insert(inquiries).values({
+    organizationId: org.id,
+    clientId: nihonFinance.id,
+    title: "リスク管理ダッシュボード案件化",
+    description: "ヒアリングを経て案件化。提案準備中",
+    source: "referral",
+    status: "converted",
+    assigneeId: adminUser.id,
+  }).returning();
+
+  const [convertedInquiry5] = await db.insert(inquiries).values({
+    organizationId: org.id,
+    clientId: greenEnergy.id,
+    title: "発電量モニタリングシステム",
+    description: "IoTセンサーデータの収集・可視化。交渉中だったが失注",
+    source: "phone",
+    status: "converted",
+  }).returning();
+
   await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: greenEnergy.id,
@@ -600,7 +629,7 @@ async function seed() {
     source: "web",
     status: "declined",
   });
-  console.log("✅ Created inquiries (7 total: new×2, in_progress×2, converted×2, declined×1)");
+  console.log("✅ Created inquiries (10 total: new×2, in_progress×2, converted×5, declined×1)");
 
   // Create meetings (引き合いフェーズの商談)
   await db.insert(meetings).values({
@@ -743,7 +772,39 @@ async function seed() {
     contractType: "fixed_price",
     assigneeId: managerUser.id,
   }).returning();
-  console.log("✅ Created deals (2 total: won, proposed)");
+
+  const [prepDeal] = await db.insert(deals).values({
+    organizationId: org.id,
+    inquiryId: convertedInquiry4.id,
+    title: "リスク管理ダッシュボード",
+    phase: "proposal_prep",
+    estimatedAmount: 50000000,
+    assigneeId: adminUser.id,
+    technicalLeadId: memberUser.id,
+    notes: "大型案件。セキュリティ要件の調査が必要",
+  }).returning();
+
+  const [negotiationDeal] = await db.insert(deals).values({
+    organizationId: org.id,
+    inquiryId: convertedInquiry3.id,
+    title: "配送ルート最適化システム",
+    phase: "negotiation",
+    estimatedAmount: 8000000,
+    estimatedStartDate: new Date("2026-10-01"),
+    estimatedEndDate: new Date("2027-01-31"),
+    contractType: "ses",
+    assigneeId: adminUser.id,
+  }).returning();
+
+  await db.insert(deals).values({
+    organizationId: org.id,
+    inquiryId: convertedInquiry5.id,
+    title: "発電量モニタリングシステム",
+    phase: "lost",
+    estimatedAmount: 5000000,
+    notes: "競合に価格で負けた",
+  });
+  console.log("✅ Created deals (5 total: proposal_prep, proposed, negotiation, won, lost)");
 
   // Create deal meetings (案件直紐づきの商談)
   await db.insert(meetings).values({
@@ -803,14 +864,38 @@ async function seed() {
   });
   console.log("✅ Created deal meetings (3 total)");
 
+  // Create deal meetings for new deals
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    dealId: negotiationDeal.id,
+    type: "negotiation",
+    date: new Date("2026-07-10T13:00:00"),
+    location: "さくら物流株式会社 本社",
+    attendees: {
+      internal: [adminUser.name],
+      external: ["高橋 美咲", "中村 健太"],
+    },
+    summary: "配送ルート最適化の価格交渉。SES契約での提案を検討中。",
+    actionItems: [
+      { description: "SES単価の最終提示", assignee: adminUser.name, dueDate: "2026-07-15", done: false },
+    ],
+    hearingData: null,
+    createdById: adminUser.id,
+  });
+  console.log("✅ Created deal meetings (4 total)");
+
   // Create deal contacts
   await db.insert(dealContacts).values([
     { dealId: wonDeal.id, contactId: techContact1.id, role: "key_person" },
     { dealId: wonDeal.id, contactId: techContact2.id, role: "technical" },
     { dealId: proposedDeal.id, contactId: yamatoContact1.id, role: "decision_maker" },
     { dealId: proposedDeal.id, contactId: yamatoContact2.id, role: "other" },
+    { dealId: prepDeal.id, contactId: financeContact1.id, role: "key_person" },
+    { dealId: prepDeal.id, contactId: financeContact2.id, role: "technical" },
+    { dealId: negotiationDeal.id, contactId: sakuraContact1.id, role: "decision_maker" },
+    { dealId: negotiationDeal.id, contactId: sakuraContact2.id, role: "technical" },
   ]);
-  console.log("✅ Created deal contacts (4 total)");
+  console.log("✅ Created deal contacts (8 total)");
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");
