@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "05980a48-7f66-4529-bd21-b0ffd5a19e09",
   "createdAt": "2026-06-21T05:16:56.013Z",
-  "updatedAt": "2026-06-21T06:10:35.248Z",
+  "updatedAt": "2026-06-21T06:12:31.110Z",
   "request": {
     "title": "承認連携の撤去と直接遷移への移行",
     "type": "refactoring",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "refactor/remove-approval-coupling-05980a48",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-21T06:10:35.232Z"
   },
   "_journal": {
-    "historyCount": 65,
+    "historyCount": 66,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
