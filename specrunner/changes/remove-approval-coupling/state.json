@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "05980a48-7f66-4529-bd21-b0ffd5a19e09",
   "createdAt": "2026-06-21T05:16:56.013Z",
-  "updatedAt": "2026-06-21T05:31:52.590Z",
+  "updatedAt": "2026-06-21T05:34:24.773Z",
   "request": {
     "title": "承認連携の撤去と直接遷移への移行",
     "type": "refactoring",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "refactor/remove-approval-coupling-05980a48",
   "error": null,
@@ -34,11 +34,12 @@
     }
   ],
   "_journal": {
-    "historyCount": 13,
+    "historyCount": 16,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1
+      "spec-review": 1,
+      "test-case-gen": 1
     }
   }
 }

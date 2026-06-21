@@ -17,8 +17,6 @@ function mapRow(row: typeof requests.$inferSelect): Request {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     version: row.version,
-    sourceType: row.sourceType ?? null,
-    sourceId: row.sourceId ?? null,
   };
 }
 
@@ -30,8 +28,6 @@ export async function create(
     organizationId: string;
     creatorId: string;
     status?: RequestStatus;
-    sourceType?: string | null;
-    sourceId?: string | null;
   },
   tx?: Transaction
 ): Promise<Request> {
@@ -45,8 +41,6 @@ export async function create(
       status: data.status ?? "draft",
       organizationId: data.organizationId,
       creatorId: data.creatorId,
-      sourceType: data.sourceType ?? null,
-      sourceId: data.sourceId ?? null,
     })
     .returning();
   return mapRow(result[0]);

@@ -193,37 +193,6 @@ async function seed() {
     .returning();
   console.log(`✅ Created template: ${leaveTemplate.name}`);
 
-  // 案件化承認テンプレート
-  const [conversionTemplate] = await db
-    .insert(approvalTemplates)
-    .values({
-      name: "案件化承認",
-      organizationId: org.id,
-      fields: [],
-      steps: [
-        { stepOrder: 1, approverRole: "manager" },
-      ],
-    })
-    .returning();
-  console.log(`✅ Created template: ${conversionTemplate.name}`);
-
-  // 見積承認テンプレート
-  const [estimateTemplate] = await db
-    .insert(approvalTemplates)
-    .values({
-      name: "見積承認",
-      organizationId: org.id,
-      fields: [
-        { name: "amount", label: "想定金額", type: "number", required: true },
-      ],
-      steps: [
-        { stepOrder: 1, approverRole: "manager" },
-        { stepOrder: 2, approverRole: "finance", deadlineHours: 72, condition: { field: "amount", operator: "gt", value: 10000000 } },
-      ],
-    })
-    .returning();
-  console.log(`✅ Created template: ${estimateTemplate.name}`);
-
   // Create requests in various statuses
   const [draftRequest] = await db
     .insert(requests)
@@ -566,31 +535,6 @@ async function seed() {
     .returning();
   console.log("✅ Created client contacts (9 total)");
 
-  // Create case conversion requests (案件化承認リクエスト) before inquiries
-  const [inProgressConversionRequest] = await db
-    .insert(requests)
-    .values({
-      title: "案件化承認: 工事管理ツールの導入検討",
-      formData: {},
-      templateId: conversionTemplate.id,
-      status: "approved",
-      organizationId: org.id,
-      creatorId: managerUser.id,
-    })
-    .returning();
-
-  const [convertedConversionRequest] = await db
-    .insert(requests)
-    .values({
-      title: "案件化承認: DX推進プロジェクト受注",
-      formData: {},
-      templateId: conversionTemplate.id,
-      status: "approved",
-      organizationId: org.id,
-      creatorId: adminUser.id,
-    })
-    .returning();
-
   // Create inquiries (各ステータスを網羅: new×2, in_progress×2, converted×2, declined×1)
   const [newInquiry1] = await db.insert(inquiries).values({
     organizationId: org.id,
@@ -637,7 +581,6 @@ async function seed() {
     source: "phone",
     status: "converted",
     assigneeId: managerUser.id,
-    conversionRequestId: inProgressConversionRequest.id,
   }).returning();
 
   const [convertedInquiry2] = await db.insert(inquiries).values({
@@ -647,7 +590,6 @@ async function seed() {
     description: "昨期より継続商談。正式受注に向けて承認済み",
     source: "referral",
     status: "converted",
-    conversionRequestId: convertedConversionRequest.id,
   }).returning();
 
   await db.insert(inquiries).values({
@@ -775,22 +717,6 @@ async function seed() {
   });
   console.log("✅ Created inquiry meetings (5 total)");
 
-  // Create estimate approval request for the won deal (DX推進プロジェクト)
-  const [estimateApprovalRequest] = await db
-    .insert(requests)
-    .values({
-      title: "見積承認: DX推進プロジェクト",
-      formData: {
-        amount: { value: 30000000, label: "想定金額" },
-      },
-      templateId: estimateTemplate.id,
-      status: "approved",
-      organizationId: org.id,
-      creatorId: adminUser.id,
-    })
-    .returning();
-  console.log(`✅ Created estimate approval request: ${estimateApprovalRequest.title}`);
-
   // Create deals (各フェーズを網羅)
   const [wonDeal] = await db.insert(deals).values({
     organizationId: org.id,
@@ -801,7 +727,6 @@ async function seed() {
     estimatedStartDate: new Date("2026-07-01"),
     estimatedEndDate: new Date("2027-03-31"),
     contractType: "quasi_delegation",
-    estimateRequestId: estimateApprovalRequest.id,
     assigneeId: managerUser.id,
     technicalLeadId: memberUser.id,
     notes: "9ヶ月のプロジェクト。フェーズ1（要件定義・設計）3ヶ月、フェーズ2（開発・テスト）6ヶ月",

@@ -28,11 +28,11 @@ describe("updateInquiryStatus usecase 静的検証", () => {
     expect(content).toContain("auditLogRepository.create");
   });
 
-  it("requestRepository.create の呼び出しが含まれる（converted 時の承認リクエスト作成）", async () => {
+  it("dealRepository.create の呼び出しが含まれる（converted 時の案件直接作成）", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/updateInquiryStatus.ts");
-    // 実行・検証 - 承認リクエスト作成がある
-    expect(content).toContain("requestRepository.create");
+    // 実行・検証 - 案件直接作成がある
+    expect(content).toContain("dealRepository.create");
   });
 
   it("db.transaction の呼び出しが含まれる（トランザクション内処理）", async () => {

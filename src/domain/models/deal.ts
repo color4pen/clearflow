@@ -2,7 +2,6 @@ export type DealPhase =
   | "proposal_prep"
   | "proposed"
   | "negotiation"
-  | "estimate_approval"
   | "won"
   | "lost";
 

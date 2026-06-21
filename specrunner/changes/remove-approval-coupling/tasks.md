@@ -2,11 +2,11 @@
 
 ## T-01: schema.ts のスキーマ変更
 
-- [ ] `dealPhaseEnum` の値リストから `"estimate_approval"` を削除し、`["proposal_prep", "proposed", "negotiation", "won", "lost"]` の5値にする（`src/infrastructure/schema.ts:49-56`）
-- [ ] `requests` テーブルの `sourceType: text("source_type")` 定義（行109）を削除する
-- [ ] `requests` テーブルの `sourceId: uuid("source_id")` 定義（行110）を削除する
-- [ ] `inquiries` テーブルの `conversionRequestId: uuid("conversion_request_id").references(...)` 定義（行276）を削除する
-- [ ] `inquiriesRelations` の `conversionRequest: one(requests, { fields: [inquiries.conversionRequestId], ... })` エントリ（行575-578）を削除する
+- [x] `dealPhaseEnum` の値リストから `"estimate_approval"` を削除し、`["proposal_prep", "proposed", "negotiation", "won", "lost"]` の5値にする（`src/infrastructure/schema.ts:49-56`）
+- [x] `requests` テーブルの `sourceType: text("source_type")` 定義（行109）を削除する
+- [x] `requests` テーブルの `sourceId: uuid("source_id")` 定義（行110）を削除する
+- [x] `inquiries` テーブルの `conversionRequestId: uuid("conversion_request_id").references(...)` 定義（行276）を削除する
+- [x] `inquiriesRelations` の `conversionRequest: one(requests, { fields: [inquiries.conversionRequestId], ... })` エントリ（行575-578）を削除する
 
 **Acceptance Criteria**:
 - `dealPhaseEnum` の値が `["proposal_prep", "proposed", "negotiation", "won", "lost"]` の5値になっている
@@ -16,9 +16,9 @@
 
 ## T-02: マイグレーションファイルの生成
 
-- [ ] `bunx drizzle-kit generate` を実行してマイグレーション SQL を生成する
-- [ ] 対話プロンプトが出た場合、`estimate_approval` 値の削除はカラム削除として処理する（enum の truncate/rename ではなく DROP → CREATE の形式になる）
-- [ ] 生成された `drizzle/` 配下の SQL ファイルを確認し、`deal_phase` enum の再作成・`source_type`/`source_id`/`conversion_request_id` カラムの DROP が含まれることを確認する
+- [x] `bunx drizzle-kit generate` を実行してマイグレーション SQL を生成する
+- [x] 対話プロンプトが出た場合、`estimate_approval` 値の削除はカラム削除として処理する（enum の truncate/rename ではなく DROP → CREATE の形式になる）
+- [x] 生成された `drizzle/` 配下の SQL ファイルを確認し、`deal_phase` enum の再作成・`source_type`/`source_id`/`conversion_request_id` カラムの DROP が含まれることを確認する
 
 **Acceptance Criteria**:
 - `drizzle/` 配下に新しいマイグレーション SQL ファイルが生成されている
@@ -28,12 +28,12 @@
 
 ## T-03: ドメインモデルの変更
 
-- [ ] `src/domain/models/deal.ts` の `DealPhase` union 型から `"estimate_approval"` を削除し、5値 union にする（行1-7）
-- [ ] `src/domain/models/request.ts` の `Request` 型から `sourceType: string | null` フィールドを削除する（行15）
-- [ ] `src/domain/models/request.ts` の `Request` 型から `sourceId: string | null` フィールドを削除する（行16）
-- [ ] `src/domain/models/request.ts` にある `sourceType`/`sourceId` の関連コメントも削除する
-- [ ] `src/domain/models/inquiry.ts` の `Inquiry` 型から `conversionRequestId: string | null` フィールドを削除する（行15）
-- [ ] `src/domain/models/inquiry.ts` の関連コメントも削除する
+- [x] `src/domain/models/deal.ts` の `DealPhase` union 型から `"estimate_approval"` を削除し、5値 union にする（行1-7）
+- [x] `src/domain/models/request.ts` の `Request` 型から `sourceType: string | null` フィールドを削除する（行15）
+- [x] `src/domain/models/request.ts` の `Request` 型から `sourceId: string | null` フィールドを削除する（行16）
+- [x] `src/domain/models/request.ts` にある `sourceType`/`sourceId` の関連コメントも削除する
+- [x] `src/domain/models/inquiry.ts` の `Inquiry` 型から `conversionRequestId: string | null` フィールドを削除する（行15）
+- [x] `src/domain/models/inquiry.ts` の関連コメントも削除する
 
 **Acceptance Criteria**:
 - `DealPhase` 型が `"proposal_prep" | "proposed" | "negotiation" | "won" | "lost"` の5値 union になっている
@@ -43,7 +43,7 @@
 
 ## T-04: ドメインサービス（dealTransition.ts）の変更
 
-- [ ] `src/domain/services/dealTransition.ts` の `VALID_TRANSITIONS` マップを変更する
+- [x] `src/domain/services/dealTransition.ts` の `VALID_TRANSITIONS` マップを変更する
   - `negotiation: ["estimate_approval", "lost"]` を `negotiation: ["won", "lost"]` に変更する（行7）
   - `estimate_approval: ["won", "lost"]` のエントリ（行8）を削除する
 
@@ -57,16 +57,16 @@
 
 ### requestRepository.ts
 
-- [ ] `src/infrastructure/repositories/requestRepository.ts` の `mapRow` 関数から `sourceType: row.sourceType ?? null` と `sourceId: row.sourceId ?? null` のマッピング（行20-21）を削除する
-- [ ] `create` 関数の引数型から `sourceType?: string | null` と `sourceId?: string | null` を削除する（行33-34）
-- [ ] `create` 関数の `.values({...})` 内から `sourceType: data.sourceType ?? null` と `sourceId: data.sourceId ?? null` の記述（行48-49）を削除する
+- [x] `src/infrastructure/repositories/requestRepository.ts` の `mapRow` 関数から `sourceType: row.sourceType ?? null` と `sourceId: row.sourceId ?? null` のマッピング（行20-21）を削除する
+- [x] `create` 関数の引数型から `sourceType?: string | null` と `sourceId?: string | null` を削除する（行33-34）
+- [x] `create` 関数の `.values({...})` 内から `sourceType: data.sourceType ?? null` と `sourceId: data.sourceId ?? null` の記述（行48-49）を削除する
 
 ### inquiryRepository.ts
 
-- [ ] `src/infrastructure/repositories/inquiryRepository.ts` の `mapRow` 関数から `conversionRequestId: row.conversionRequestId ?? null` のマッピング（行17）を削除する
-- [ ] `create` 関数の `.values({...})` 内から `conversionRequestId: null` の記述（行46）を削除する
-- [ ] `updateStatus` 関数のシグネチャから `conversionRequestId: string | null` 引数（行122）を削除する
-- [ ] `updateStatus` 関数の `.set({...})` 内から `conversionRequestId,` を削除する（行128）
+- [x] `src/infrastructure/repositories/inquiryRepository.ts` の `mapRow` 関数から `conversionRequestId: row.conversionRequestId ?? null` のマッピング（行17）を削除する
+- [x] `create` 関数の `.values({...})` 内から `conversionRequestId: null` の記述（行46）を削除する
+- [x] `updateStatus` 関数のシグネチャから `conversionRequestId: string | null` 引数（行122）を削除する
+- [x] `updateStatus` 関数の `.set({...})` 内から `conversionRequestId,` を削除する（行128）
 
 **Acceptance Criteria**:
 - `requestRepository.create` の型定義に `sourceType`, `sourceId` パラメータが存在しない
@@ -75,15 +75,15 @@
 
 ## T-06: updateInquiryStatus.ts の簡素化
 
-- [ ] import から `approvalTemplateRepository`, `requestRepository`, `approvalStepRepository` を削除する（行4-6）
-- [ ] import の `filterStepsByCondition` を削除する（行9）
-- [ ] `dealRepository` を `@/infrastructure/repositories` からの import に追加する
-- [ ] `updateInquiryStatus` 関数のシグネチャから `templateId?: string` を削除する（行21）
-- [ ] converted 遷移ブロック全体（行36-135）を以下のロジックに置き換える:
+- [x] import から `approvalTemplateRepository`, `requestRepository`, `approvalStepRepository` を削除する（行4-6）
+- [x] import の `filterStepsByCondition` を削除する（行9）
+- [x] `dealRepository` を `@/infrastructure/repositories` からの import に追加する
+- [x] `updateInquiryStatus` 関数のシグネチャから `templateId?: string` を削除する（行21）
+- [x] converted 遷移ブロック全体（行36-135）を以下のロジックに置き換える:
   - `db.transaction` 内で `dealRepository.create({ organizationId, inquiryId: data.inquiryId, title: inquiry.title }, tx)` を呼び出す
   - `inquiryRepository.updateStatus` の呼び出しから `conversionRequestId` 引数を削除し、ステータスのみ更新する（`updateStatus(data.inquiryId, data.organizationId, data.newStatus, inquiry.version, tx)`）
   - `auditLogRepository.create` を呼び出して `inquiry.updateStatus` のログを記録する（`metadata: { fromStatus, toStatus, dealId: deal.id }` を含める）
-- [ ] converted 以外の遷移ブロック（行138-176）の `inquiryRepository.updateStatus` 呼び出しから `conversionRequestId` 引数（`null`）を削除する
+- [x] converted 以外の遷移ブロック（行138-176）の `inquiryRepository.updateStatus` 呼び出しから `conversionRequestId` 引数（`null`）を削除する
 
 **Acceptance Criteria**:
 - `updateInquiryStatus` が `approvalTemplateRepository`, `requestRepository`, `approvalStepRepository` を import しない
@@ -96,11 +96,11 @@
 
 ## T-07: updateDealPhase.ts の簡素化
 
-- [ ] import から `approvalTemplateRepository`, `requestRepository`, `approvalStepRepository` を削除する（行4-6）
-- [ ] import の `filterStepsByCondition` を削除する（行9）
-- [ ] `updateDealPhase` 関数のシグネチャから `templateId?: string` を削除する（行19）
-- [ ] estimate_approval 遷移ブロック全体（行33-144）を削除する（条件判定 `if (data.newPhase === "estimate_approval")` を含む）
-- [ ] estimate_approval 以外の遷移ブロック（行146-185）のコメント「`estimate_approval 以外の遷移`」を削除し、全遷移の共通パスとして扱う
+- [x] import から `approvalTemplateRepository`, `requestRepository`, `approvalStepRepository` を削除する（行4-6）
+- [x] import の `filterStepsByCondition` を削除する（行9）
+- [x] `updateDealPhase` 関数のシグネチャから `templateId?: string` を削除する（行19）
+- [x] estimate_approval 遷移ブロック全体（行33-144）を削除する（条件判定 `if (data.newPhase === "estimate_approval")` を含む）
+- [x] estimate_approval 以外の遷移ブロック（行146-185）のコメント「`estimate_approval 以外の遷移`」を削除し、全遷移の共通パスとして扱う
 
 **Acceptance Criteria**:
 - `updateDealPhase` が `approvalTemplateRepository`, `requestRepository`, `approvalStepRepository` を import しない
@@ -112,10 +112,10 @@
 
 ## T-08: approveRequest.ts から連動処理を撤去
 
-- [ ] `import` から `inquiryRepository`, `dealRepository` を削除する（行6-7）
-- [ ] `runPostApprovalLinkage` 関数（行28-125）を丸ごと削除する
-- [ ] no-steps フロー（行191付近）の `await runPostApprovalLinkage(updated, ...)` 呼び出しを削除する
-- [ ] multi-step フロー（行389付近）の `await runPostApprovalLinkage(txResult.request, ...)` 呼び出しと、その前後の `if (txResult.allApproved)` ブロック内の `runPostApprovalLinkage` 参照を削除する（`deliverWebhookEvent` による `request.approved` イベント配信は維持する）
+- [x] `import` から `inquiryRepository`, `dealRepository` を削除する（行6-7）
+- [x] `runPostApprovalLinkage` 関数（行28-125）を丸ごと削除する
+- [x] no-steps フロー（行191付近）の `await runPostApprovalLinkage(updated, ...)` 呼び出しを削除する
+- [x] multi-step フロー（行389付近）の `await runPostApprovalLinkage(txResult.request, ...)` 呼び出しと、その前後の `if (txResult.allApproved)` ブロック内の `runPostApprovalLinkage` 参照を削除する（`deliverWebhookEvent` による `request.approved` イベント配信は維持する）
 
 **Acceptance Criteria**:
 - `approveRequest.ts` に `runPostApprovalLinkage` 関数が存在しない
@@ -126,8 +126,8 @@
 
 ## T-09: Server Actions の変更
 
-- [ ] `src/app/actions/inquiries.ts` の `updateInquiryStatusAction` 内の `const templateId = formData.get("templateId")` を削除する（行109）
-- [ ] `updateInquiryStatus` の呼び出しから `templateId:` 引数を削除する（行127）
+- [x] `src/app/actions/inquiries.ts` の `updateInquiryStatusAction` 内の `const templateId = formData.get("templateId")` を削除する（行109）
+- [x] `updateInquiryStatus` の呼び出しから `templateId:` 引数を削除する（行127）
 
 **Acceptance Criteria**:
 - `updateInquiryStatusAction` が `templateId` を FormData から取得しない
@@ -137,26 +137,26 @@
 
 ### InquiryActions.tsx
 
-- [ ] `src/app/(dashboard)/inquiries/[id]/InquiryActions.tsx` の Props 型から `templates: Array<{ id: string; name: string }>` を削除する（行14）
-- [ ] 関数シグネチャから `templates` を削除する（行18）
-- [ ] `selectedTemplateId` の state と setter を削除する（行20）
-- [ ] `handleTransition` 関数内の `if (templateId) formData.set("templateId", templateId);` を削除する（行34）
-- [ ] `handleTransition` の `templateId?: string` 引数を削除する（行29）
-- [ ] テンプレート選択モーダル全体（行81-123）を削除する
-- [ ] 案件化ボタンのクリックハンドラを確認ダイアログ表示に変更し、確認後 `handleTransition("converted")` を直接呼ぶ形にする（確認ダイアログは「この引き合いを案件化しますか？」のシンプルな confirm または modal）
-- [ ] `Select` コンポーネントの import が不要になった場合は削除する
+- [x] `src/app/(dashboard)/inquiries/[id]/InquiryActions.tsx` の Props 型から `templates: Array<{ id: string; name: string }>` を削除する（行14）
+- [x] 関数シグネチャから `templates` を削除する（行18）
+- [x] `selectedTemplateId` の state と setter を削除する（行20）
+- [x] `handleTransition` 関数内の `if (templateId) formData.set("templateId", templateId);` を削除する（行34）
+- [x] `handleTransition` の `templateId?: string` 引数を削除する（行29）
+- [x] テンプレート選択モーダル全体（行81-123）を削除する
+- [x] 案件化ボタンのクリックハンドラを確認ダイアログ表示に変更し、確認後 `handleTransition("converted")` を直接呼ぶ形にする（確認ダイアログは「この引き合いを案件化しますか？」のシンプルな confirm または modal）
+- [x] `Select` コンポーネントの import が不要になった場合は削除する
 
 ### inquiries/[id]/page.tsx
 
-- [ ] `src/app/(dashboard)/inquiries/[id]/page.tsx` の import から `approvalTemplateRepository`, `requestRepository` を削除する（行7, 10）
-- [ ] `Promise.all` の配列から `approvalTemplateRepository.findByOrganization(organizationId)` と `inquiry.conversionRequestId ? requestRepository.findById(...) : Promise.resolve(null)` を削除する（行31-41）
-- [ ] `templates` と `conversionRequest` 変数を削除する
-- [ ] `InquiryActions` への `templates={...}` props 渡しを削除する（行74）
-- [ ] 案件化承認の表示セクション（行104-119）の `conversionRequest && (...)` ブロックを削除する
+- [x] `src/app/(dashboard)/inquiries/[id]/page.tsx` の import から `approvalTemplateRepository`, `requestRepository` を削除する（行7, 10）
+- [x] `Promise.all` の配列から `approvalTemplateRepository.findByOrganization(organizationId)` と `inquiry.conversionRequestId ? requestRepository.findById(...) : Promise.resolve(null)` を削除する（行31-41）
+- [x] `templates` と `conversionRequest` 変数を削除する
+- [x] `InquiryActions` への `templates={...}` props 渡しを削除する（行74）
+- [x] 案件化承認の表示セクション（行104-119）の `conversionRequest && (...)` ブロックを削除する
 
 ### labels.ts
 
-- [ ] `src/app/(dashboard)/labels.ts` の `phaseLabels` オブジェクトから `estimate_approval: "見積承認中"` エントリ（行28）を削除する
+- [x] `src/app/(dashboard)/labels.ts` の `phaseLabels` オブジェクトから `estimate_approval: "見積承認中"` エントリ（行28）を削除する
 
 **Acceptance Criteria**:
 - `InquiryActions` コンポーネントに `templates` props が存在しない
@@ -167,14 +167,14 @@
 
 ## T-11: シードデータの修正
 
-- [ ] `src/infrastructure/seed.ts` の案件化承認テンプレート挿入ブロック（行197-208）を削除する（`conversionTemplate` 変数と `INSERT` を含む）
-- [ ] 見積承認テンプレート挿入ブロック（行211-225）を削除する（`estimateTemplate` 変数と `INSERT` を含む）
-- [ ] 案件化承認リクエスト2件の挿入ブロック（行570-593）を削除する（`inProgressConversionRequest`, `convertedConversionRequest` 変数と `INSERT` を含む）
-- [ ] 見積承認リクエストの挿入ブロック（行779-792）を削除する（`estimateApprovalRequest` 変数と `INSERT` を含む）
-- [ ] `convertedInquiry1` の `conversionRequestId: inProgressConversionRequest.id` 参照（行640）を削除する（`conversionRequestId` フィールド自体なくなる）
-- [ ] `convertedInquiry2` の `conversionRequestId: convertedConversionRequest.id` 参照（行650）を削除する
-- [ ] `wonDeal` の `estimateRequestId: estimateApprovalRequest.id` 参照（行804）を削除する（`estimateRequestId` フィールドはカラムとして残るが、シードから参照をなくす）
-- [ ] `conversionTemplate` / `estimateTemplate` を参照している箇所が他にないことを確認する
+- [x] `src/infrastructure/seed.ts` の案件化承認テンプレート挿入ブロック（行197-208）を削除する（`conversionTemplate` 変数と `INSERT` を含む）
+- [x] 見積承認テンプレート挿入ブロック（行211-225）を削除する（`estimateTemplate` 変数と `INSERT` を含む）
+- [x] 案件化承認リクエスト2件の挿入ブロック（行570-593）を削除する（`inProgressConversionRequest`, `convertedConversionRequest` 変数と `INSERT` を含む）
+- [x] 見積承認リクエストの挿入ブロック（行779-792）を削除する（`estimateApprovalRequest` 変数と `INSERT` を含む）
+- [x] `convertedInquiry1` の `conversionRequestId: inProgressConversionRequest.id` 参照（行640）を削除する（`conversionRequestId` フィールド自体なくなる）
+- [x] `convertedInquiry2` の `conversionRequestId: convertedConversionRequest.id` 参照（行650）を削除する
+- [x] `wonDeal` の `estimateRequestId: estimateApprovalRequest.id` 参照（行804）を削除する（`estimateRequestId` フィールドはカラムとして残るが、シードから参照をなくす）
+- [x] `conversionTemplate` / `estimateTemplate` を参照している箇所が他にないことを確認する
 
 **Acceptance Criteria**:
 - シードデータに案件化承認テンプレートの挿入がない
@@ -189,7 +189,7 @@
 
 ### dealTransition.test.ts の修正
 
-- [ ] `src/__tests__/domain/dealTransition.test.ts` を以下の通り変更する:
+- [x] `src/__tests__/domain/dealTransition.test.ts` を以下の通り変更する:
   - T-05「negotiation → estimate_approval が許可される」を削除する
   - T-07「estimate_approval → won が許可される」を削除する
   - T-08「estimate_approval → lost が許可される」を削除する
@@ -200,7 +200,7 @@
 
 ### approvalFlowIntegration.test.ts の修正
 
-- [ ] `src/__tests__/usecases/approvalFlowIntegration.test.ts` を以下の通り変更する:
+- [x] `src/__tests__/usecases/approvalFlowIntegration.test.ts` を以下の通り変更する:
   - describe「requestRepository.create signature」の T-03「sourceType パラメータを受け付ける」を削除する
   - describe「Request domain model fields」の T-02「sourceType フィールドが存在する」と「sourceId フィールドが存在する」を削除する
   - describe「schema.ts requests table columns」の T-01「source_type カラムが定義されている」と「source_id カラムが定義されている」を削除する
@@ -215,13 +215,13 @@
 
 ### inquiryManagement.test.ts の修正
 
-- [ ] `src/__tests__/usecases/inquiryManagement.test.ts` を以下の通り変更する:
+- [x] `src/__tests__/usecases/inquiryManagement.test.ts` を以下の通り変更する:
   - 「requestRepository.create の呼び出しが含まれる（converted 時の承認リクエスト作成）」テストを削除する
   - 「dealRepository.create の呼び出しが含まれる（converted 時の案件直接作成）」テストを追加する
 
 ### dealManagement.test.ts の修正
 
-- [ ] `src/__tests__/usecases/dealManagement.test.ts` を以下の通り変更する:
+- [x] `src/__tests__/usecases/dealManagement.test.ts` を以下の通り変更する:
   - 「requestRepository.create の呼び出しが含まれる（estimate_approval 時の見積承認リクエスト作成）」を削除する
   - 「見積承認リクエストのタイトルパターン「見積承認: 」が含まれる」を削除する
   - 「TC-008: templateId が未指定の場合に estimate_approval 遷移がエラーを返すガードが含まれる」を削除する
@@ -239,13 +239,13 @@
 
 ## T-13: 最終検証
 
-- [ ] `bun run build` が成功することを確認する
-- [ ] `bun run typecheck` が green であることを確認する
-- [ ] `bun test` が全件 green であることを確認する
-- [ ] `src/infrastructure/schema.ts` に `estimate_approval` が含まれないことを確認する
-- [ ] `src/domain/models/deal.ts` の `DealPhase` に `"estimate_approval"` が含まれないことを確認する
-- [ ] `src/domain/models/request.ts` の `Request` 型に `sourceType`, `sourceId` が存在しないことを確認する
-- [ ] `src/domain/models/inquiry.ts` の `Inquiry` 型に `conversionRequestId` が存在しないことを確認する
+- [x] `bun run build` が成功することを確認する
+- [x] `bun run typecheck` が green であることを確認する
+- [x] `bun test` が全件 green であることを確認する
+- [x] `src/infrastructure/schema.ts` に `estimate_approval` が含まれないことを確認する
+- [x] `src/domain/models/deal.ts` の `DealPhase` に `"estimate_approval"` が含まれないことを確認する
+- [x] `src/domain/models/request.ts` の `Request` 型に `sourceType`, `sourceId` が存在しないことを確認する
+- [x] `src/domain/models/inquiry.ts` の `Inquiry` 型に `conversionRequestId` が存在しないことを確認する
 
 **Acceptance Criteria**:
 - `bun run build` が exit 0 で完了する

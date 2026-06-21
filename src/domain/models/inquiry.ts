@@ -12,7 +12,6 @@ export type Inquiry = {
   source: InquirySource;
   status: InquiryStatus;
   assigneeId: string | null;
-  conversionRequestId: string | null;
   createdAt: Date;
   updatedAt: Date;
   version: number;

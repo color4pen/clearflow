@@ -3,8 +3,6 @@ import {
   auditLogRepository,
   approvalStepRepository,
   approvalDelegationRepository,
-  inquiryRepository,
-  dealRepository,
 } from "@/infrastructure/repositories";
 import { validateTransition } from "@/domain/services/requestTransition";
 import {
@@ -19,110 +17,6 @@ import type { Request } from "@/domain/models/request";
 import type { ApprovalStep } from "@/domain/models/approvalStep";
 
 const OPTIMISTIC_LOCK_ERROR = "この申請は他のユーザーによって更新されました。画面を更新してください";
-
-/**
- * 全ステップ承認後の連動処理。
- * sourceType に応じて Deal 作成または Deal フェーズ進行を行う。
- * 失敗しても承認自体には影響しない（エラーは audit log に記録）。
- */
-async function runPostApprovalLinkage(
-  request: Request,
-  actorId: string,
-  organizationId: string
-): Promise<void> {
-  const { sourceType, sourceId } = request;
-  if (!sourceType || !sourceId) return;
-
-  if (sourceType === "inquiry") {
-    try {
-      const inquiry = await inquiryRepository.findById(sourceId, organizationId);
-      if (!inquiry) throw new Error(`引き合いが見つかりません: ${sourceId}`);
-
-      const deal = await dealRepository.create({
-        organizationId,
-        inquiryId: sourceId,
-        title: inquiry.title,
-      });
-
-      await auditLogRepository.create({
-        action: "deal.create",
-        targetType: "deal",
-        targetId: deal.id,
-        actorId,
-        organizationId,
-        metadata: { sourceRequestId: request.id, inquiryId: sourceId },
-      });
-    } catch (err) {
-      // Audit log write is best-effort: if it fails, swallow silently so that
-      // the catch block itself cannot propagate an exception back to approveRequest.
-      // The approval transaction is already committed; D3 requires linkage failures
-      // to never affect the approval result.
-      try {
-        await auditLogRepository.create({
-          action: "approval.linkage_failed",
-          targetType: "request",
-          targetId: request.id,
-          actorId,
-          organizationId,
-          metadata: {
-            sourceType,
-            sourceId,
-            error: err instanceof Error ? err.message : String(err),
-          },
-        });
-      } catch {
-        // Discard: audit log write failure must not reach the caller.
-      }
-    }
-    return;
-  }
-
-  if (sourceType === "deal") {
-    try {
-      const deal = await dealRepository.findById(sourceId, organizationId);
-      if (!deal) throw new Error(`案件が見つかりません: ${sourceId}`);
-
-      const updated = await dealRepository.updatePhase(
-        sourceId,
-        organizationId,
-        "won",
-        deal.estimateRequestId,
-        deal.version
-      );
-      if (!updated) throw new Error("楽観ロック失敗: 案件フェーズの更新に競合が発生しました");
-
-      await auditLogRepository.create({
-        action: "deal.updatePhase",
-        targetType: "deal",
-        targetId: sourceId,
-        actorId,
-        organizationId,
-        metadata: { fromPhase: deal.phase, toPhase: "won", sourceRequestId: request.id },
-      });
-    } catch (err) {
-      // Audit log write is best-effort: if it fails, swallow silently so that
-      // the catch block itself cannot propagate an exception back to approveRequest.
-      // The approval transaction is already committed; D3 requires linkage failures
-      // to never affect the approval result.
-      try {
-        await auditLogRepository.create({
-          action: "approval.linkage_failed",
-          targetType: "request",
-          targetId: request.id,
-          actorId,
-          organizationId,
-          metadata: {
-            sourceType,
-            sourceId,
-            error: err instanceof Error ? err.message : String(err),
-          },
-        });
-      } catch {
-        // Discard: audit log write failure must not reach the caller.
-      }
-    }
-  }
-}
 
 export type ApproveRequestResult =
   | { ok: true; request: Request }
@@ -187,8 +81,6 @@ export async function approveRequest(data: {
         event: "request.approved",
         data: { requestId: updated.id, requestTitle: updated.title, actorId: data.actorId, status: "approved" },
       });
-
-      await runPostApprovalLinkage(updated, data.actorId, data.organizationId);
 
       return { ok: true, request: updated };
     } catch (err) {
@@ -373,7 +265,7 @@ export async function approveRequest(data: {
       },
     });
 
-    // If all steps are approved, also deliver request.approved and run linkage
+    // If all steps are approved, also deliver request.approved
     if (txResult.allApproved) {
       void deliverWebhookEvent({
         organizationId: data.organizationId,
@@ -385,8 +277,6 @@ export async function approveRequest(data: {
           status: "approved",
         },
       });
-
-      await runPostApprovalLinkage(txResult.request, data.actorId, data.organizationId);
     }
 
     return { ok: true, request: txResult.request };

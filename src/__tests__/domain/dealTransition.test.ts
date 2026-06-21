@@ -1,5 +1,6 @@
 import { describe, it, expect } from "bun:test";
 import { canTransition } from "@/domain/services/dealTransition";
+import type { DealPhase } from "@/domain/models/deal";
 
 describe("canTransition — 案件フェーズ遷移ルール", () => {
   // 許可される遷移
@@ -35,10 +36,10 @@ describe("canTransition — 案件フェーズ遷移ルール", () => {
     expect(result).toBe(true);
   });
 
-  it("T-05: negotiation → estimate_approval が許可される", () => {
+  it("T-05: negotiation → won が許可される", () => {
     // 準備 - なし
     // 実行 - canTransition を呼び出す
-    const result = canTransition("negotiation", "estimate_approval");
+    const result = canTransition("negotiation", "won");
     // 検証 - true が返る
     expect(result).toBe(true);
   });
@@ -51,20 +52,12 @@ describe("canTransition — 案件フェーズ遷移ルール", () => {
     expect(result).toBe(true);
   });
 
-  it("T-07: estimate_approval → won が許可される", () => {
-    // 準備 - なし
+  it("negotiation → estimate_approval が拒否される（フェーズ削除）", () => {
+    // 準備 - estimate_approval は DealPhase から削除されたため型アサーションを使用
     // 実行 - canTransition を呼び出す
-    const result = canTransition("estimate_approval", "won");
-    // 検証 - true が返る
-    expect(result).toBe(true);
-  });
-
-  it("T-08: estimate_approval → lost が許可される", () => {
-    // 準備 - なし
-    // 実行 - canTransition を呼び出す
-    const result = canTransition("estimate_approval", "lost");
-    // 検証 - true が返る
-    expect(result).toBe(true);
+    const result = canTransition("negotiation", "estimate_approval" as DealPhase);
+    // 検証 - false が返る（VALID_TRANSITIONS に含まれない）
+    expect(result).toBe(false);
   });
 
   // 拒否される遷移（終端状態からの遷移）
@@ -108,20 +101,11 @@ describe("canTransition — 案件フェーズ遷移ルール", () => {
     expect(result).toBe(false);
   });
 
-  it("T-14: proposal_prep → estimate_approval が拒否される（飛び越し禁止）", () => {
-    // 準備 - なし
-    // 実行 - canTransition を呼び出す
-    const result = canTransition("proposal_prep", "estimate_approval");
-    // 検証 - false が返る
-    expect(result).toBe(false);
-  });
-
-  it("T-15: 全フェーズ（proposal_prep, proposed, negotiation, estimate_approval）から lost への遷移が許可される", () => {
+  it("T-15: 全フェーズ（proposal_prep, proposed, negotiation）から lost への遷移が許可される", () => {
     // 準備 - なし
     // 実行・検証 - 各フェーズから lost への遷移が可能
     expect(canTransition("proposal_prep", "lost")).toBe(true);
     expect(canTransition("proposed", "lost")).toBe(true);
     expect(canTransition("negotiation", "lost")).toBe(true);
-    expect(canTransition("estimate_approval", "lost")).toBe(true);
   });
 });

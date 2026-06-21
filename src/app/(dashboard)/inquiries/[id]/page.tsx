@@ -4,10 +4,8 @@ import { auth } from "@/infrastructure/auth";
 import {
   inquiryRepository,
   clientRepository,
-  approvalTemplateRepository,
   meetingRepository,
   dealRepository,
-  requestRepository,
 } from "@/infrastructure/repositories";
 import { SectionCard } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
@@ -28,16 +26,12 @@ export default async function InquiryDetailPage({
     notFound();
   }
 
-  const [client, templates, meetings, deal, conversionRequest] = await Promise.all([
+  const [client, meetings, deal] = await Promise.all([
     inquiry.clientId
       ? clientRepository.findById(inquiry.clientId, organizationId)
       : Promise.resolve(null),
-    approvalTemplateRepository.findByOrganization(organizationId),
     meetingRepository.findAllByInquiry(id, organizationId),
     dealRepository.findByInquiryId(id, organizationId),
-    inquiry.conversionRequestId
-      ? requestRepository.findById(inquiry.conversionRequestId, organizationId)
-      : Promise.resolve(null),
   ]);
 
   const canChangeStatus =
@@ -71,7 +65,6 @@ export default async function InquiryDetailPage({
           </span>
           <InquiryActions
             inquiry={{ id: inquiry.id, status: inquiry.status }}
-            templates={templates.map((t) => ({ id: t.id, name: t.name }))}
             canChangeStatus={canChangeStatus}
           />
         </div>
@@ -101,23 +94,6 @@ export default async function InquiryDetailPage({
             <dt className="text-text-muted w-20 shrink-0">作成日</dt>
             <dd className="text-text">{inquiry.createdAt.toLocaleDateString("ja-JP")}</dd>
           </div>
-          {conversionRequest && (
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-20 shrink-0">案件化承認</dt>
-              <dd>
-                <Link
-                  href={`/requests/${conversionRequest.id}`}
-                  className="text-primary underline"
-                >
-                  {conversionRequest.status === "approved" ? "承認済み"
-                    : conversionRequest.status === "pending" ? "承認待ち"
-                    : conversionRequest.status === "rejected" ? "却下"
-                    : conversionRequest.status === "draft" ? "下書き"
-                    : conversionRequest.status}
-                </Link>
-              </dd>
-            </div>
-          )}
           {deal && (
             <div className="flex gap-2">
               <dt className="text-text-muted w-20 shrink-0">案件</dt>
