@@ -80,3 +80,10 @@
 {"type":"transition","ts":"2026-06-21T03:12:58.970Z","step":"step-transition","status":"ok","message":"code-fixer → regression-gate"}
 {"type":"transition","ts":"2026-06-21T03:12:58.972Z","step":"regression-gate","status":"started","message":"regression-gate iteration 2 started"}
 {"type":"transition","ts":"2026-06-21T03:12:58.974Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
+{"type":"transition","ts":"2026-06-21T03:14:01.115Z","step":"regression-gate-verdict","status":"ok","message":"regression-gate verdict: approved"}
+{"type":"step-attempt","step":"regression-gate","sessionId":"f5783c35-b094-41bb-8992-127d8050f17a","outcome":{"verdict":"approved","findingsPath":"specrunner/changes/ui-flow-improvements/regression-gate-result-002.md","error":null,"toolResult":{"ok":true,"approved":true,"findings":[]},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-21T03:12:58.986Z","endedAt":"2026-06-21T03:13:59.629Z"}
+{"type":"lineage","step":"regression-gate","ts":"2026-06-21T03:13:59.629Z","outputs":[{"path":"specrunner/changes/ui-flow-improvements/regression-gate-result-003.md","hash":null}],"inputs":[{"path":".","hash":null}]}
+{"type":"transition","ts":"2026-06-21T03:14:01.123Z","step":"regression-gate","status":"ok","message":"regression-gate iteration 2 completed with verdict: approved"}
+{"type":"transition","ts":"2026-06-21T03:14:01.123Z","step":"step-transition","status":"ok","message":"regression-gate → conformance"}
+{"type":"transition","ts":"2026-06-21T03:14:01.125Z","step":"conformance","status":"started","message":"conformance iteration 1 started"}
+{"type":"transition","ts":"2026-06-21T03:14:01.126Z","step":"conformance-started","status":"started","message":"Starting conformance step"}
