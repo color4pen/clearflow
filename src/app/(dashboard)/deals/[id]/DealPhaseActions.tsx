@@ -56,7 +56,7 @@ export function DealPhaseActions({ deal, canChangePhase }: Props) {
     }
   }
 
-  // 終端状態と現在のフェーズを除いた全フェーズを遷移先候補として生成する
+  // 現在のフェーズを除いた全フェーズを遷移先候補として生成する（won/lost を含む）
   const options = ALL_PHASES.filter((p) => p !== deal.phase).map((phase) => ({
     phase,
     label: phaseLabels[phase] ?? phase,
