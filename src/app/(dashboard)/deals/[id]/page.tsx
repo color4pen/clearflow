@@ -12,6 +12,7 @@ import {
 import { SectionCard, DataTable } from "@/app/components";
 import { DealEditForm } from "./DealEditForm";
 import { DealContactsSection } from "./DealContactsSection";
+import { DealNotesSection } from "./DealNotesSection";
 import { phaseLabels, contractTypeLabels, meetingTypeLabels, contractStatusLabels } from "@/app/(dashboard)/labels";
 import type { Meeting } from "@/domain/models/meeting";
 import type { Contract } from "@/domain/models/contract";
@@ -153,17 +154,7 @@ export default async function DealDetailPage({
         </SectionCard>
       </div>
 
-      <SectionCard className="p-3 mb-3">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xs font-bold text-text">備考</h2>
-          <Link href={`/deals/${id}/edit`} className="text-xs text-primary underline">編集</Link>
-        </div>
-        {deal.notes ? (
-          <p className="text-xs text-text whitespace-pre-wrap">{deal.notes}</p>
-        ) : (
-          <p className="text-xs text-text-muted">備考はありません</p>
-        )}
-      </SectionCard>
+      <DealNotesSection dealId={deal.id} notes={deal.notes} />
 
       {/* 契約 */}
       {deal.phase === "won" && (
