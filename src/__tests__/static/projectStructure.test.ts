@@ -152,12 +152,14 @@ describe("Domain model integrity", () => {
       "domain/models/meeting.ts",
       "domain/models/deal.ts",
       "domain/models/contract.ts",
+      "domain/models/invoice.ts",
       "domain/models/index.ts",
       "domain/services/requestTransition.ts",
       "domain/services/approvalStepService.ts",
       "domain/services/inquiryTransition.ts",
       "domain/services/dealTransition.ts",
       "domain/services/contractTransition.ts",
+      "domain/services/invoiceTransition.ts",
       "domain/services/index.ts",
     ];
     for (const file of files) {

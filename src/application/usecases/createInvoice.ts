@@ -27,6 +27,7 @@ export async function createInvoice(data: {
   }
 
   try {
+    // SERIALIZABLE 分離レベルで SUM → INSERT を原子的に実行し、ファントムリードを防止する
     const invoice = await db.transaction(async (tx) => {
       // one_time 契約かつ契約金額が設定されている場合に合計金額を検証する
       if (contract.renewalType === "one_time" && contract.amount !== null) {
@@ -66,7 +67,7 @@ export async function createInvoice(data: {
       );
 
       return newInvoice;
-    });
+    }, { isolationLevel: 'serializable' });
 
     return { ok: true, invoice };
   } catch (err) {

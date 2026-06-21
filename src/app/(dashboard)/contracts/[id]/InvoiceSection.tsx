@@ -66,7 +66,7 @@ export async function InvoiceSection({ contractId, organizationId, contractStatu
       header: "",
       render: (row: Invoice) =>
         canManage ? (
-          <InvoiceStatusButtons invoiceId={row.id} status={row.status} />
+          <InvoiceStatusButtons invoiceId={row.id} status={row.status} contractId={contractId} />
         ) : null,
     },
   ];

@@ -8,9 +8,10 @@ import type { InvoiceStatus } from "@/domain/models/invoice";
 type Props = {
   invoiceId: string;
   status: InvoiceStatus;
+  contractId: string;
 };
 
-export function InvoiceStatusButtons({ invoiceId, status }: Props) {
+export function InvoiceStatusButtons({ invoiceId, status, contractId }: Props) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +19,7 @@ export function InvoiceStatusButtons({ invoiceId, status }: Props) {
   async function handleTransition(newStatus: InvoiceStatus) {
     setIsSubmitting(true);
     setError(null);
-    const result = await updateInvoiceStatusAction(invoiceId, newStatus);
+    const result = await updateInvoiceStatusAction(invoiceId, newStatus, contractId);
     setIsSubmitting(false);
     if (!result.success) {
       setError(result.message ?? "エラーが発生しました");

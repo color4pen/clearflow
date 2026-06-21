@@ -80,7 +80,8 @@ export async function createInvoiceAction(formData: FormData): Promise<ActionRes
 
 export async function updateInvoiceStatusAction(
   invoiceId: string,
-  newStatus: string
+  newStatus: string,
+  contractId: string
 ): Promise<ActionResult> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -108,7 +109,7 @@ export async function updateInvoiceStatusAction(
     return { success: false, message: result.reason };
   }
 
-  revalidatePath(`/contracts`);
+  revalidatePath(`/contracts/${contractId}`);
   return { success: true };
 }
 
