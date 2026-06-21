@@ -9,7 +9,6 @@ const allPhases = [
   "proposal_prep",
   "proposed",
   "negotiation",
-  "estimate_approval",
   "won",
   "lost",
 ] as const;

@@ -25,7 +25,6 @@ export const phaseLabels: Record<string, string> = {
   proposal_prep: "提案準備",
   proposed: "提案済",
   negotiation: "交渉中",
-  estimate_approval: "見積承認中",
   won: "受注",
   lost: "失注",
 };

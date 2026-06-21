@@ -5,7 +5,6 @@ import {
   dealRepository,
   inquiryRepository,
   clientRepository,
-  approvalTemplateRepository,
   meetingRepository,
   dealContactRepository,
 } from "@/infrastructure/repositories";
@@ -30,9 +29,8 @@ export default async function DealDetailPage({
     notFound();
   }
 
-  const [inquiry, templates, dealMeetings, dealContacts] = await Promise.all([
+  const [inquiry, dealMeetings, dealContacts] = await Promise.all([
     inquiryRepository.findById(deal.inquiryId, organizationId),
-    approvalTemplateRepository.findByOrganization(organizationId),
     deal.inquiryId
       ? meetingRepository.findAllByInquiryOrDeal(deal.inquiryId, organizationId)
       : meetingRepository.findAllByDeal(deal.id, organizationId),
@@ -160,7 +158,6 @@ export default async function DealDetailPage({
         <h2 className="text-xs font-bold text-text mb-2">フェーズ変更</h2>
         <DealPhaseActions
           deal={{ id: deal.id, phase: deal.phase }}
-          templates={templates.map((t) => ({ id: t.id, name: t.name }))}
           canChangePhase={canChangePhase}
         />
       </SectionCard>

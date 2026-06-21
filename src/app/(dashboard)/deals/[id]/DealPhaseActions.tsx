@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateDealPhaseAction } from "@/app/actions/deals";
-import { Select } from "@/app/components";
 import type { DealPhase } from "@/domain/models/deal";
 
 type Props = {
@@ -11,7 +10,6 @@ type Props = {
     id: string;
     phase: DealPhase;
   };
-  templates: Array<{ id: string; name: string }>;
   canChangePhase: boolean;
 };
 
@@ -27,19 +25,13 @@ const nextPhaseOptions: Partial<
     { phase: "lost", label: "失注", variant: "danger" },
   ],
   negotiation: [
-    { phase: "estimate_approval", label: "見積承認中に変更", variant: "primary" },
-    { phase: "lost", label: "失注", variant: "danger" },
-  ],
-  estimate_approval: [
     { phase: "won", label: "受注", variant: "primary" },
     { phase: "lost", label: "失注", variant: "danger" },
   ],
 };
 
-export function DealPhaseActions({ deal, templates, canChangePhase }: Props) {
+export function DealPhaseActions({ deal, canChangePhase }: Props) {
   const router = useRouter();
-  const [selectedTemplateId, setSelectedTemplateId] = useState("");
-  const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -52,12 +44,11 @@ export function DealPhaseActions({ deal, templates, canChangePhase }: Props) {
     return <p className="text-xs text-text-muted">フェーズの変更は管理者またはマネージャーのみ実行できます</p>;
   }
 
-  async function handleTransition(newPhase: DealPhase, templateId?: string) {
+  async function handleTransition(newPhase: DealPhase) {
     setIsSubmitting(true);
     setErrorMessage(null);
     const formData = new FormData();
     formData.set("newPhase", newPhase);
-    if (templateId) formData.set("templateId", templateId);
     const result = await updateDealPhaseAction(deal.id, formData);
     setIsSubmitting(false);
     if (!result.success) {
@@ -81,13 +72,7 @@ export function DealPhaseActions({ deal, templates, canChangePhase }: Props) {
             key={option.phase}
             type="button"
             disabled={isSubmitting}
-            onClick={() => {
-              if (option.phase === "estimate_approval") {
-                setShowTemplateSelector(true);
-              } else {
-                handleTransition(option.phase);
-              }
-            }}
+            onClick={() => handleTransition(option.phase)}
             className={`text-xs underline cursor-pointer disabled:opacity-50 ${
               option.variant === "danger" ? "text-danger" : "text-primary"
             }`}
@@ -96,47 +81,6 @@ export function DealPhaseActions({ deal, templates, canChangePhase }: Props) {
           </button>
         ))}
       </div>
-
-      {/* 見積承認フェーズ遷移時のテンプレート選択 */}
-      {showTemplateSelector && (
-        <div className="border border-border-light p-3 bg-bg-surface-alt">
-          <p className="text-xs font-bold text-text mb-2">承認テンプレートを選択</p>
-          <div className="flex gap-2 items-end">
-            <div className="flex-1">
-              <Select
-                value={selectedTemplateId}
-                onChange={(e) => setSelectedTemplateId(e.target.value)}
-              >
-                <option value="">選択してください</option>
-                {templates.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </Select>
-            </div>
-            <button
-              type="button"
-              disabled={isSubmitting || !selectedTemplateId}
-              onClick={() => {
-                if (selectedTemplateId) {
-                  handleTransition("estimate_approval", selectedTemplateId);
-                }
-              }}
-              className="bg-primary text-white text-xs px-3 py-1 rounded-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? "処理中..." : "見積承認中に変更する"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowTemplateSelector(false)}
-              className="text-xs text-text-muted underline"
-            >
-              キャンセル
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

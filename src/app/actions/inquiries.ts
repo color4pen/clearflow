@@ -106,7 +106,6 @@ export async function updateInquiryStatusAction(
   }
 
   const newStatus = formData.get("newStatus");
-  const templateId = formData.get("templateId");
 
   if (typeof newStatus !== "string") {
     return { success: false, message: "ステータスが指定されていません" };
@@ -124,7 +123,6 @@ export async function updateInquiryStatusAction(
     organizationId: session.user.organizationId,
     actorId: session.user.id,
     newStatus: newStatus as "new" | "in_progress" | "converted" | "declined",
-    templateId: typeof templateId === "string" && templateId !== "" ? templateId : undefined,
   });
 
   if (!result.ok) {

@@ -955,13 +955,15 @@ describe("Tenant isolation — client/inquiry", () => {
     expect(body).toContain("organizationId");
   });
 
-  it("inquiryRepository.updateStatus uses conversionRequestId (not requestId)", async () => {
+  it("inquiryRepository.updateStatus updates status only (conversionRequestId removed)", async () => {
     const content = await readSrc("infrastructure/repositories/inquiryRepository.ts");
     const idx = content.indexOf("export async function updateStatus(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 600);
-    expect(body).toContain("conversionRequestId");
-    expect(body).not.toContain("requestId:");
+    // ステータス更新が含まれる
+    expect(body).toContain("status");
+    // conversionRequestId は撤去済み
+    expect(body).not.toContain("conversionRequestId");
   });
 
   it("inquiryRepository does not reference contactId", async () => {

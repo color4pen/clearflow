@@ -11,9 +11,6 @@ export type Request = {
   createdAt: Date;
   updatedAt: Date;
   version: number;
-  // 承認リクエストの発生元
-  sourceType: string | null;
-  sourceId: string | null;
 };
 
 export type ApprovalStepSummary = {

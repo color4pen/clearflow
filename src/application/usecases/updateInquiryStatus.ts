@@ -1,12 +1,10 @@
 import {
   inquiryRepository,
   auditLogRepository,
-  approvalTemplateRepository,
-  requestRepository,
-  approvalStepRepository,
+  dealRepository,
 } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
-import { canTransition, filterStepsByCondition } from "@/domain/services";
+import { canTransition } from "@/domain/services";
 import type { Inquiry, InquiryStatus } from "@/domain/models/inquiry";
 
 export type UpdateInquiryStatusResult =
@@ -18,7 +16,6 @@ export async function updateInquiryStatus(data: {
   organizationId: string;
   actorId: string;
   newStatus: InquiryStatus;
-  templateId?: string;
 }): Promise<UpdateInquiryStatusResult> {
   const inquiry = await inquiryRepository.findById(data.inquiryId, data.organizationId);
   if (!inquiry) {
@@ -32,49 +29,16 @@ export async function updateInquiryStatus(data: {
     };
   }
 
-  // 案件化への遷移
+  // 案件化への遷移: Deal を直接作成する
   if (data.newStatus === "converted") {
-    if (!data.templateId) {
-      return { ok: false, reason: "案件化にはテンプレートの指定が必要です" };
-    }
-
-    const template = await approvalTemplateRepository.findById(data.templateId, data.organizationId);
-    if (!template) {
-      return { ok: false, reason: "テンプレートが見つかりません" };
-    }
-
-    // 条件付きステップのフィルタリング（引き合いには formData がないため空オブジェクト）
-    const filteredSteps = filterStepsByCondition(template.steps, {});
-
     try {
       const updatedInquiry = await db.transaction(async (tx) => {
-        const now = new Date();
-
-        const newRequest = await requestRepository.create(
+        const deal = await dealRepository.create(
           {
-            title: `案件化承認: ${inquiry.title}`,
-            formData: {},
-            templateId: data.templateId,
             organizationId: data.organizationId,
-            creatorId: data.actorId,
-            status: "pending" as const,
-            sourceType: "inquiry",
-            sourceId: data.inquiryId,
+            inquiryId: data.inquiryId,
+            title: inquiry.title,
           },
-          tx
-        );
-
-        await approvalStepRepository.createMany(
-          filteredSteps.map((s) => ({
-            requestId: newRequest.id,
-            stepOrder: s.stepOrder,
-            approverRole: s.approverRole,
-            organizationId: data.organizationId,
-            deadline:
-              s.deadlineHours != null
-                ? new Date(now.getTime() + s.deadlineHours * 60 * 60 * 1000)
-                : null,
-          })),
           tx
         );
 
@@ -82,7 +46,6 @@ export async function updateInquiryStatus(data: {
           data.inquiryId,
           data.organizationId,
           data.newStatus,
-          newRequest.id,
           inquiry.version,
           tx
         );
@@ -97,23 +60,7 @@ export async function updateInquiryStatus(data: {
             metadata: {
               fromStatus: inquiry.status,
               toStatus: data.newStatus,
-              conversionRequestId: newRequest.id,
-            },
-          },
-          tx
-        );
-
-        await auditLogRepository.create(
-          {
-            action: "request.create",
-            targetType: "request",
-            targetId: newRequest.id,
-            actorId: data.actorId,
-            organizationId: data.organizationId,
-            metadata: {
-              templateId: template.id,
-              templateName: template.name,
-              inquiryId: data.inquiryId,
+              dealId: deal.id,
             },
           },
           tx
@@ -134,14 +81,13 @@ export async function updateInquiryStatus(data: {
     }
   }
 
-  // converted 以外の遷移（conversionRequestId は null のまま）
+  // converted 以外の遷移
   try {
     const updatedInquiry = await db.transaction(async (tx) => {
       const updated = await inquiryRepository.updateStatus(
         data.inquiryId,
         data.organizationId,
         data.newStatus,
-        null,
         inquiry.version,
         tx
       );

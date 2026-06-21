@@ -14,7 +14,6 @@ function mapRow(row: typeof inquiries.$inferSelect): Inquiry {
     source: row.source as InquirySource,
     status: row.status,
     assigneeId: row.assigneeId ?? null,
-    conversionRequestId: row.conversionRequestId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     version: row.version,
@@ -43,7 +42,6 @@ export async function create(
       source: data.source,
       status: "new",
       assigneeId: data.assigneeId ?? null,
-      conversionRequestId: null,
     })
     .returning();
   return mapRow(result[0]);
@@ -118,14 +116,13 @@ export async function updateStatus(
   id: string,
   organizationId: string,
   status: InquiryStatus,
-  conversionRequestId: string | null,
   currentVersion: number,
   tx?: Transaction
 ): Promise<Inquiry | null> {
   const queryRunner = tx ?? db;
   const result = await queryRunner
     .update(inquiries)
-    .set({ status, conversionRequestId, updatedAt: new Date(), version: sql`version + 1` })
+    .set({ status, updatedAt: new Date(), version: sql`version + 1` })
     .where(
       and(
         eq(inquiries.id, id),

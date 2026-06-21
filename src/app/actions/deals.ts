@@ -136,7 +136,6 @@ export async function updateDealPhaseAction(
   }
 
   const newPhase = formData.get("newPhase");
-  const templateId = formData.get("templateId");
 
   if (typeof newPhase !== "string") {
     return { success: false, message: "フェーズが指定されていません" };
@@ -147,8 +146,6 @@ export async function updateDealPhaseAction(
     organizationId: session.user.organizationId,
     actorId: session.user.id,
     newPhase: newPhase as DealPhase,
-    templateId:
-      typeof templateId === "string" && templateId !== "" ? templateId : undefined,
   });
 
   if (!result.ok) {

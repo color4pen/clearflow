@@ -50,7 +50,6 @@ export const dealPhaseEnum = pgEnum("deal_phase", [
   "proposal_prep",
   "proposed",
   "negotiation",
-  "estimate_approval",
   "won",
   "lost",
 ]);
@@ -105,9 +104,6 @@ export const requests = pgTable("requests", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   version: integer("version").notNull().default(1),
-  // 承認リクエストの発生元（"inquiry" | "deal" | null）とその ID
-  sourceType: text("source_type"),
-  sourceId: uuid("source_id"),
 });
 
 // Audit logs table
@@ -272,11 +268,9 @@ export const inquiries = pgTable("inquiries", {
   source: text("source").notNull(),
   status: inquiryStatusEnum("status").notNull().default("new"),
   assigneeId: uuid("assignee_id").references(() => users.id),
-  // 案件化承認リクエスト（converted 遷移時に生成）
-  conversionRequestId: uuid("conversion_request_id").references(() => requests.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  // 楽観ロック: converted 遷移で重複承認リクエスト生成を防ぐ
+  // 楽観ロック: converted 遷移で重複 Deal 作成を防ぐ
   version: integer("version").notNull().default(1),
 });
 
@@ -571,10 +565,6 @@ export const inquiriesRelations = relations(inquiries, ({ one, many }) => ({
   assignee: one(users, {
     fields: [inquiries.assigneeId],
     references: [users.id],
-  }),
-  conversionRequest: one(requests, {
-    fields: [inquiries.conversionRequestId],
-    references: [requests.id],
   }),
   meetings: many(meetings),
   deals: many(deals),
