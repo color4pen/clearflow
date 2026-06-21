@@ -20,7 +20,8 @@ export type DealContact = {
 export type Deal = {
   id: string;
   organizationId: string;
-  inquiryId: string;
+  inquiryId: string | null;
+  clientId: string;
   title: string;
   phase: DealPhase;
   estimatedAmount: number | null;
@@ -36,8 +37,8 @@ export type Deal = {
   version: number;
 };
 
-export type DealWithInquiry = Deal & {
-  inquiryTitle: string;
+export type DealWithDetails = Deal & {
+  inquiryTitle: string | null;
   clientName: string;
   assigneeName: string | null;
 };

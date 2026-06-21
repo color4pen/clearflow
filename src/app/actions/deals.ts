@@ -5,12 +5,13 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
 import { createDeal, listDeals, updateDealPhase, updateDeal } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
-import type { DealWithInquiry, ContractType } from "@/domain/models/deal";
+import type { DealWithDetails, ContractType } from "@/domain/models/deal";
 import type { DealPhase } from "@/domain/models/deal";
 import type { ActionResult } from "./requests";
 
 const createDealSchema = z.object({
-  inquiryId: z.string().uuid("引き合いを選択してください"),
+  inquiryId: z.string().uuid().optional(),
+  clientId: z.string().uuid().optional(),
   title: z.string().min(1, "案件名は必須です"),
   estimatedAmount: z.coerce.number().int().optional(),
   estimatedStartDate: z.string().optional(),
@@ -35,6 +36,7 @@ const updateDealSchema = z.object({
 export type CreateDealState = {
   errors?: {
     inquiryId?: string[];
+    clientId?: string[];
     title?: string[];
     estimatedAmount?: string[];
     estimatedStartDate?: string[];
@@ -73,9 +75,12 @@ export async function createDealAction(
   const technicalLeadIdRaw = formData.get("technicalLeadId");
   const contractTypeRaw = formData.get("contractType");
   const estimatedAmountRaw = formData.get("estimatedAmount");
+  const inquiryIdRaw = formData.get("inquiryId");
+  const clientIdRaw = formData.get("clientId");
 
   const parsed = createDealSchema.safeParse({
-    inquiryId: formData.get("inquiryId"),
+    inquiryId: inquiryIdRaw && inquiryIdRaw !== "" ? inquiryIdRaw : undefined,
+    clientId: clientIdRaw && clientIdRaw !== "" ? clientIdRaw : undefined,
     title: formData.get("title"),
     estimatedAmount:
       estimatedAmountRaw && estimatedAmountRaw !== "" ? estimatedAmountRaw : undefined,
@@ -93,12 +98,16 @@ export async function createDealAction(
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
-  const inquiryId = parsed.data.inquiryId;
+  // inquiryId も clientId もない場合はエラー
+  if (!parsed.data.inquiryId && !parsed.data.clientId) {
+    return { errors: { clientId: ["顧客または引き合いの指定が必要です"] } };
+  }
 
   const result = await createDeal({
     organizationId: session.user.organizationId,
     actorId: session.user.id,
-    inquiryId,
+    inquiryId: parsed.data.inquiryId,
+    clientId: parsed.data.clientId,
     title: parsed.data.title,
     estimatedAmount: parsed.data.estimatedAmount ?? null,
     estimatedStartDate: parsed.data.estimatedStartDate
@@ -118,7 +127,10 @@ export async function createDealAction(
   }
 
   revalidatePath("/deals");
-  revalidatePath(`/inquiries/${inquiryId}`);
+  // inquiryId がある場合のみ引き合いページをリバリデートする
+  if (parsed.data.inquiryId) {
+    revalidatePath(`/inquiries/${parsed.data.inquiryId}`);
+  }
   return {};
 }
 
@@ -222,7 +234,7 @@ export async function updateDealAction(
 
 export async function listDealsAction(): Promise<{
   success: boolean;
-  deals?: DealWithInquiry[];
+  deals?: DealWithDetails[];
   message?: string;
 }> {
   const session = await auth();

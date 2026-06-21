@@ -31,12 +31,17 @@ export async function updateInquiryStatus(data: {
 
   // 案件化への遷移: Deal を直接作成する
   if (data.newStatus === "converted") {
+    if (!inquiry.clientId) {
+      return { ok: false, reason: "案件化するには顧客の登録が必要です" };
+    }
+
     try {
       const updatedInquiry = await db.transaction(async (tx) => {
         const deal = await dealRepository.create(
           {
             organizationId: data.organizationId,
             inquiryId: data.inquiryId,
+            clientId: inquiry.clientId!,
             title: inquiry.title,
           },
           tx

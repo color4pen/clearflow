@@ -41,6 +41,14 @@ describe("createDeal usecase 静的検証", () => {
     // 実行・検証 - 監査ログ記録がある
     expect(content).toContain("auditLogRepository.create");
   });
+
+  it("clientId なし（inquiryId なし）の場合にエラーを返す分岐がある", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("application/usecases/createDeal.ts");
+    // 実行・検証 - clientId 必須チェックがある（直接作成パターン）
+    expect(content).toContain("clientId");
+    expect(content).toContain("clientRepository.findById");
+  });
 });
 
 describe("updateDealPhase usecase 静的検証", () => {
@@ -67,8 +75,7 @@ describe("updateDealPhase usecase 静的検証", () => {
 });
 
 describe("dealRepository 静的検証", () => {
-  // TC-044: findAllByOrganization が inquiries・clients を JOIN して DealWithInquiry を返す
-  it("TC-044: findAllByOrganization の結果に inquiryTitle と clientName が含まれる", async () => {
+  it("findAllByOrganization の結果に inquiryTitle と clientName が含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("infrastructure/repositories/dealRepository.ts");
     // 実行・検証 - inquiries JOIN と clients JOIN および返却フィールドが存在する
@@ -77,6 +84,41 @@ describe("dealRepository 静的検証", () => {
     // 両テーブルへの JOIN が存在する
     expect(content).toContain("inquiries");
     expect(content).toContain("clients");
+  });
+
+  it("create に clientId が必須パラメータとして存在する", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("infrastructure/repositories/dealRepository.ts");
+    // 実行・検証 - clientId が create シグネチャに含まれる
+    const createIdx = content.indexOf("export async function create(");
+    expect(createIdx).toBeGreaterThan(-1);
+    const createBody = content.slice(createIdx, createIdx + 400);
+    expect(createBody).toContain("clientId");
+  });
+
+  it("findAllByOrganization が DealWithDetails を返す（DealWithInquiry を使用しない）", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("infrastructure/repositories/dealRepository.ts");
+    // 実行・検証 - DealWithDetails 型が使用されている
+    expect(content).toContain("DealWithDetails");
+    expect(content).not.toContain("DealWithInquiry");
+  });
+});
+
+describe("dealTransition 静的検証", () => {
+  it("canTransition が終端チェックのみを行う（VALID_TRANSITIONS マップなし）", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("domain/services/dealTransition.ts");
+    // 実行・検証 - VALID_TRANSITIONS マップが存在しない
+    expect(content).not.toContain("VALID_TRANSITIONS");
+  });
+
+  it("canTransition が won/lost からの遷移を拒否する（TERMINAL_PHASES チェックあり）", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("domain/services/dealTransition.ts");
+    // 実行・検証 - 終端状態チェックがある
+    expect(content).toContain("won");
+    expect(content).toContain("lost");
   });
 });
 
@@ -113,5 +155,24 @@ describe("deals Server Action ロールチェック静的検証", () => {
     const phaseActionBody = content.slice(phaseActionIdx, phaseActionIdx + 600);
     expect(phaseActionBody).toContain('"admin"');
     expect(phaseActionBody).toContain('"manager"');
+  });
+
+  it("createDealAction スキーマで inquiryId が optional である", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("app/actions/deals.ts");
+    // 実行・検証 - inquiryId が optional スキーマになっている
+    expect(content).toContain("inquiryId");
+    // .optional() が含まれる
+    const schemaIdx = content.indexOf("const createDealSchema");
+    const schemaBody = content.slice(schemaIdx, schemaIdx + 600);
+    expect(schemaBody).toContain("optional()");
+  });
+
+  it("createDealAction で clientId が DealWithDetails 型で返却される", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("app/actions/deals.ts");
+    // 実行・検証 - DealWithDetails 型が使用されている
+    expect(content).toContain("DealWithDetails");
+    expect(content).not.toContain("DealWithInquiry");
   });
 });

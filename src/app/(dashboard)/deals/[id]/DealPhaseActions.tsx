@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateDealPhaseAction } from "@/app/actions/deals";
+import { phaseLabels } from "@/app/(dashboard)/labels";
 import type { DealPhase } from "@/domain/models/deal";
 
 type Props = {
@@ -13,22 +14,14 @@ type Props = {
   canChangePhase: boolean;
 };
 
-const nextPhaseOptions: Partial<
-  Record<DealPhase, Array<{ phase: DealPhase; label: string; variant: "primary" | "success" | "danger" }>>
-> = {
-  proposal_prep: [
-    { phase: "proposed", label: "提案済に変更", variant: "primary" },
-    { phase: "lost", label: "失注", variant: "danger" },
-  ],
-  proposed: [
-    { phase: "negotiation", label: "交渉開始", variant: "primary" },
-    { phase: "lost", label: "失注", variant: "danger" },
-  ],
-  negotiation: [
-    { phase: "won", label: "受注", variant: "success" },
-    { phase: "lost", label: "失注", variant: "danger" },
-  ],
-};
+const ALL_PHASES: DealPhase[] = ["proposal_prep", "proposed", "negotiation", "won", "lost"];
+const TERMINAL_PHASES: DealPhase[] = ["won", "lost"];
+
+function getVariant(phase: DealPhase): "primary" | "success" | "danger" {
+  if (phase === "won") return "success";
+  if (phase === "lost") return "danger";
+  return "primary";
+}
 
 const variantStyles = {
   primary: "bg-primary text-white",
@@ -41,7 +34,7 @@ export function DealPhaseActions({ deal, canChangePhase }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  if (deal.phase === "won" || deal.phase === "lost") {
+  if (TERMINAL_PHASES.includes(deal.phase)) {
     return <p className="text-xs text-text-muted">このフェーズはこれ以上変更できません</p>;
   }
 
@@ -63,7 +56,12 @@ export function DealPhaseActions({ deal, canChangePhase }: Props) {
     }
   }
 
-  const options = nextPhaseOptions[deal.phase] ?? [];
+  // 現在のフェーズを除いた全フェーズを遷移先候補として生成する（won/lost を含む）
+  const options = ALL_PHASES.filter((p) => p !== deal.phase).map((phase) => ({
+    phase,
+    label: phaseLabels[phase] ?? phase,
+    variant: getVariant(phase),
+  }));
 
   return (
     <div className="space-y-2">

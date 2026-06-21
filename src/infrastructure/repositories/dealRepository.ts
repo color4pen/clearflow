@@ -3,13 +3,14 @@ import { alias } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { deals, inquiries, clients, users } from "../schema";
-import type { Deal, DealWithInquiry, DealPhase, ContractType } from "@/domain/models/deal";
+import type { Deal, DealWithDetails, DealPhase, ContractType } from "@/domain/models/deal";
 
 function mapRow(row: typeof deals.$inferSelect): Deal {
   return {
     id: row.id,
     organizationId: row.organizationId,
-    inquiryId: row.inquiryId,
+    inquiryId: row.inquiryId ?? null,
+    clientId: row.clientId,
     title: row.title,
     phase: row.phase,
     estimatedAmount: row.estimatedAmount ?? null,
@@ -29,7 +30,8 @@ function mapRow(row: typeof deals.$inferSelect): Deal {
 export async function create(
   data: {
     organizationId: string;
-    inquiryId: string;
+    clientId: string;
+    inquiryId?: string;
     title: string;
     estimatedAmount?: number | null;
     estimatedStartDate?: Date | null;
@@ -46,7 +48,8 @@ export async function create(
     .insert(deals)
     .values({
       organizationId: data.organizationId,
-      inquiryId: data.inquiryId,
+      clientId: data.clientId,
+      inquiryId: data.inquiryId ?? null,
       title: data.title,
       estimatedAmount: data.estimatedAmount ?? null,
       estimatedStartDate: data.estimatedStartDate ?? null,
@@ -76,7 +79,7 @@ export async function findById(
 
 export async function findAllByOrganization(
   organizationId: string
-): Promise<DealWithInquiry[]> {
+): Promise<DealWithDetails[]> {
   // assigneeId は nullable なので LEFT JOIN で担当者名を取得する
   const assignees = alias(users, "assignees");
 
@@ -88,15 +91,15 @@ export async function findAllByOrganization(
       assigneeName: assignees.name,
     })
     .from(deals)
-    .innerJoin(inquiries, eq(deals.inquiryId, inquiries.id))
-    .innerJoin(clients, eq(inquiries.clientId, clients.id))
+    .innerJoin(clients, eq(deals.clientId, clients.id))
+    .leftJoin(inquiries, eq(deals.inquiryId, inquiries.id))
     .leftJoin(assignees, eq(deals.assigneeId, assignees.id))
     .where(eq(deals.organizationId, organizationId))
     .orderBy(asc(deals.createdAt));
 
   return rows.map((row) => ({
     ...mapRow(row.deal),
-    inquiryTitle: row.inquiryTitle,
+    inquiryTitle: row.inquiryTitle ?? null,
     clientName: row.clientName,
     assigneeName: row.assigneeName ?? null,
   }));

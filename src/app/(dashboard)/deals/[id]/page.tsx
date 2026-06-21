@@ -29,22 +29,19 @@ export default async function DealDetailPage({
     notFound();
   }
 
+  // 引き合いは inquiryId がある場合のみ取得する
   const [inquiry, dealMeetings, dealContacts] = await Promise.all([
-    inquiryRepository.findById(deal.inquiryId, organizationId),
+    deal.inquiryId ? inquiryRepository.findById(deal.inquiryId, organizationId) : null,
     deal.inquiryId
       ? meetingRepository.findAllByInquiryOrDeal(deal.inquiryId, organizationId)
       : meetingRepository.findAllByDeal(deal.id, organizationId),
     dealContactRepository.findByDeal(deal.id, organizationId),
   ]);
 
-  const client =
-    inquiry?.clientId
-      ? await clientRepository.findById(inquiry.clientId, organizationId)
-      : null;
+  // 顧客情報は deal.clientId で直接取得する
+  const client = await clientRepository.findById(deal.clientId, organizationId);
 
-  const clientContacts = inquiry?.clientId
-    ? await clientRepository.findContactsByClientId(inquiry.clientId)
-    : [];
+  const clientContacts = await clientRepository.findContactsByClientId(deal.clientId);
 
   const canChangePhase =
     session!.user.role === "admin" || session!.user.role === "manager";
@@ -118,17 +115,19 @@ export default async function DealDetailPage({
         <SectionCard className="p-3">
           <h2 className="text-xs font-bold text-text mb-2">関連情報</h2>
           <dl className="text-xs space-y-1">
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">引き合い</dt>
-              <dd className="text-text">
-                <Link
-                  href={`/inquiries/${deal.inquiryId}`}
-                  className="text-primary underline"
-                >
-                  {inquiry?.title ?? deal.inquiryId}
-                </Link>
-              </dd>
-            </div>
+            {deal.inquiryId && (
+              <div className="flex gap-2">
+                <dt className="text-text-muted w-24 shrink-0">引き合い</dt>
+                <dd className="text-text">
+                  <Link
+                    href={`/inquiries/${deal.inquiryId}`}
+                    className="text-primary underline"
+                  >
+                    {inquiry?.title ?? deal.inquiryId}
+                  </Link>
+                </dd>
+              </div>
+            )}
             <div className="flex gap-2">
               <dt className="text-text-muted w-24 shrink-0">顧客</dt>
               <dd className="text-text">
@@ -172,7 +171,7 @@ export default async function DealDetailPage({
           dealId={deal.id}
           dealContacts={dealContacts}
           clientContacts={clientContacts}
-          clientId={inquiry?.clientId ?? null}
+          clientId={deal.clientId}
         />
       </SectionCard>
 

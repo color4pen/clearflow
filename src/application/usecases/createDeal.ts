@@ -3,6 +3,7 @@ import {
   dealRepository,
   auditLogRepository,
   userRepository,
+  clientRepository,
 } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
 import type { Deal } from "@/domain/models/deal";
@@ -13,7 +14,8 @@ export type CreateDealResult = { ok: true; deal: Deal } | { ok: false; reason: s
 export async function createDeal(data: {
   organizationId: string;
   actorId: string;
-  inquiryId: string;
+  inquiryId?: string;
+  clientId?: string;
   title: string;
   estimatedAmount?: number | null;
   estimatedStartDate?: Date | null;
@@ -23,18 +25,41 @@ export async function createDeal(data: {
   technicalLeadId?: string | null;
   notes?: string | null;
 }): Promise<CreateDealResult> {
-  const inquiry = await inquiryRepository.findById(data.inquiryId, data.organizationId);
-  if (!inquiry) {
-    return { ok: false, reason: "引き合いが見つかりません" };
-  }
+  let resolvedClientId: string;
 
-  if (inquiry.status !== "converted") {
-    return { ok: false, reason: "案件化済みの引き合いにのみ案件を作成できます" };
-  }
+  if (data.inquiryId) {
+    // パターン (a): inquiryId 指定あり — 既存の引き合い存在確認 + converted チェック + 重複チェック
+    const inquiry = await inquiryRepository.findById(data.inquiryId, data.organizationId);
+    if (!inquiry) {
+      return { ok: false, reason: "引き合いが見つかりません" };
+    }
 
-  const existing = await dealRepository.findByInquiryId(data.inquiryId, data.organizationId);
-  if (existing) {
-    return { ok: false, reason: "この引き合いにはすでに案件が存在します" };
+    if (inquiry.status !== "converted") {
+      return { ok: false, reason: "案件化済みの引き合いにのみ案件を作成できます" };
+    }
+
+    const existing = await dealRepository.findByInquiryId(data.inquiryId, data.organizationId);
+    if (existing) {
+      return { ok: false, reason: "この引き合いにはすでに案件が存在します" };
+    }
+
+    if (!inquiry.clientId) {
+      return { ok: false, reason: "案件化するには顧客の登録が必要です" };
+    }
+
+    resolvedClientId = inquiry.clientId;
+  } else {
+    // パターン (b): inquiryId 指定なし — clientId 必須
+    if (!data.clientId) {
+      return { ok: false, reason: "顧客の指定が必要です" };
+    }
+
+    const client = await clientRepository.findById(data.clientId, data.organizationId);
+    if (!client) {
+      return { ok: false, reason: "指定された顧客はこの組織に存在しません" };
+    }
+
+    resolvedClientId = data.clientId;
   }
 
   // assigneeId / technicalLeadId が同一組織のユーザーであることを検証する
@@ -56,6 +81,7 @@ export async function createDeal(data: {
       const newDeal = await dealRepository.create(
         {
           organizationId: data.organizationId,
+          clientId: resolvedClientId,
           inquiryId: data.inquiryId,
           title: data.title,
           estimatedAmount: data.estimatedAmount ?? null,

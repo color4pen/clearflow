@@ -750,6 +750,7 @@ async function seed() {
   const [wonDeal] = await db.insert(deals).values({
     organizationId: org.id,
     inquiryId: convertedInquiry2.id,
+    clientId: techClient.id,
     title: "DX推進プロジェクト",
     phase: "won",
     estimatedAmount: 30000000,
@@ -764,6 +765,7 @@ async function seed() {
   const [proposedDeal] = await db.insert(deals).values({
     organizationId: org.id,
     inquiryId: convertedInquiry1.id,
+    clientId: yamato.id,
     title: "工事管理ツール導入",
     phase: "proposed",
     estimatedAmount: 15000000,
@@ -776,6 +778,7 @@ async function seed() {
   const [prepDeal] = await db.insert(deals).values({
     organizationId: org.id,
     inquiryId: convertedInquiry4.id,
+    clientId: nihonFinance.id,
     title: "リスク管理ダッシュボード",
     phase: "proposal_prep",
     estimatedAmount: 50000000,
@@ -787,6 +790,7 @@ async function seed() {
   const [negotiationDeal] = await db.insert(deals).values({
     organizationId: org.id,
     inquiryId: convertedInquiry3.id,
+    clientId: sakuraLogistics.id,
     title: "配送ルート最適化システム",
     phase: "negotiation",
     estimatedAmount: 8000000,
@@ -799,12 +803,23 @@ async function seed() {
   await db.insert(deals).values({
     organizationId: org.id,
     inquiryId: convertedInquiry5.id,
+    clientId: greenEnergy.id,
     title: "発電量モニタリングシステム",
     phase: "lost",
     estimatedAmount: 5000000,
     notes: "競合に価格で負けた",
   });
-  console.log("✅ Created deals (5 total: proposal_prep, proposed, negotiation, won, lost)");
+
+  // 引き合いなし案件（直接作成パターン）
+  await db.insert(deals).values({
+    organizationId: org.id,
+    clientId: techClient.id,
+    title: "株式会社テック商事 追加開発案件",
+    phase: "proposal_prep",
+    estimatedAmount: 3000000,
+    notes: "既存顧客からの口頭依頼。引き合いなしで直接案件化",
+  });
+  console.log("✅ Created deals (6 total: proposal_prep×2, proposed, negotiation, won, lost)");
 
   // Create deal meetings (案件直紐づきの商談)
   await db.insert(meetings).values({
