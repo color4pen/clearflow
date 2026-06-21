@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "511b0ffc-3327-4058-a7de-f27cb13dd77f",
   "createdAt": "2026-06-21T01:13:52.978Z",
-  "updatedAt": "2026-06-21T03:17:28.892Z",
+  "updatedAt": "2026-06-21T03:17:53.709Z",
   "request": {
     "title": "UI動線改善",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/ui-flow-improvements-511b0ffc",
   "error": null,
   "pipelineId": "standard",
@@ -48,8 +48,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/31",
+    "number": 31,
+    "createdAt": "2026-06-21T03:17:53.703Z"
+  },
   "_journal": {
-    "historyCount": 70,
+    "historyCount": 75,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -62,7 +67,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
