@@ -52,12 +52,12 @@ describe("canTransition — 引き合いステータス遷移ルール", () => {
     expect(result).toBe(false);
   });
 
-  it("T-07: declined → in_progress が拒否される（終端状態）", () => {
+  it("T-07: declined → in_progress が許可される（対応再開）", () => {
     // 準備 - なし
     // 実行 - canTransition を呼び出す
     const result = canTransition("declined", "in_progress");
-    // 検証 - false が返る
-    expect(result).toBe(false);
+    // 検証 - true が返る
+    expect(result).toBe(true);
   });
 
   it("T-08: declined → new が拒否される（終端状態）", () => {

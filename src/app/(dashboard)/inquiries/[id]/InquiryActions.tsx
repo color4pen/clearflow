@@ -19,8 +19,8 @@ export function InquiryActions({ inquiry, canChangeStatus }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  if (inquiry.status === "converted" || inquiry.status === "declined") {
-    return <p className="text-xs text-text-muted">このステータスはこれ以上変更できません</p>;
+  if (inquiry.status === "converted") {
+    return null;
   }
 
   async function handleTransition(newStatus: InquiryStatus) {
@@ -66,14 +66,27 @@ export function InquiryActions({ inquiry, canChangeStatus }: Props) {
           </button>
         )}
 
-        <button
-          type="button"
-          disabled={isSubmitting}
-          onClick={() => handleTransition("declined")}
-          className="border border-danger text-danger text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50 hover:bg-danger hover:text-white"
-        >
-          見送り
-        </button>
+        {inquiry.status === "declined" && (
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => handleTransition("in_progress")}
+            className="bg-primary text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
+          >
+            対応再開
+          </button>
+        )}
+
+        {inquiry.status !== "declined" && (
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={() => handleTransition("declined")}
+            className="border border-danger text-danger text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50 hover:bg-danger hover:text-white"
+          >
+            見送り
+          </button>
+        )}
       </div>
 
       {showConvertConfirm && (
