@@ -153,12 +153,17 @@ export default async function DealDetailPage({
         </SectionCard>
       </div>
 
-      {deal.notes && (
-        <SectionCard className="p-3 mb-3">
-          <h2 className="text-xs font-bold text-text mb-2">備考</h2>
+      <SectionCard className="p-3 mb-3">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xs font-bold text-text">備考</h2>
+          <Link href={`/deals/${id}/edit`} className="text-xs text-primary underline">編集</Link>
+        </div>
+        {deal.notes ? (
           <p className="text-xs text-text whitespace-pre-wrap">{deal.notes}</p>
-        </SectionCard>
-      )}
+        ) : (
+          <p className="text-xs text-text-muted">備考はありません</p>
+        )}
+      </SectionCard>
 
       {/* 契約 */}
       {deal.phase === "won" && (
