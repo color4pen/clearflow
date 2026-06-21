@@ -21,6 +21,7 @@ import {
   deals,
   dealContacts,
   contracts,
+  invoices,
 } from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -39,6 +40,8 @@ async function seed() {
   await db.delete(approvalSteps);
   // deal_contacts must be deleted before deals
   await db.delete(dealContacts);
+  // invoices must be deleted before contracts (FK: contractId)
+  await db.delete(invoices);
   // contracts must be deleted before deals (FK: dealId)
   await db.delete(contracts);
   // deals.inquiryId FK: deals must be deleted before inquiries
@@ -916,7 +919,7 @@ async function seed() {
   console.log("✅ Created deal contacts (8 total)");
 
   // Create contract for won deal (DX推進プロジェクト)
-  await db.insert(contracts).values({
+  const [dxContract] = await db.insert(contracts).values({
     organizationId: org.id,
     dealId: wonDeal.id,
     clientId: techClient.id,
@@ -927,8 +930,37 @@ async function seed() {
     endDate: new Date("2027-03-31"),
     renewalType: "one_time",
     status: "active",
-  });
+  }).returning();
   console.log("✅ Created contract for won deal (DX推進プロジェクト)");
+
+  // Create invoices for DX推進プロジェクト contract (total: 30,000,000)
+  await db.insert(invoices).values([
+    {
+      organizationId: org.id,
+      contractId: dxContract.id,
+      title: "着手金",
+      amount: 9000000,
+      status: "paid",
+      invoicedAt: new Date("2026-07-10"),
+      paidAt: new Date("2026-07-31"),
+    },
+    {
+      organizationId: org.id,
+      contractId: dxContract.id,
+      title: "中間金",
+      amount: 9000000,
+      status: "invoiced",
+      invoicedAt: new Date("2026-10-01"),
+    },
+    {
+      organizationId: org.id,
+      contractId: dxContract.id,
+      title: "残金",
+      amount: 12000000,
+      status: "scheduled",
+    },
+  ]);
+  console.log("✅ Created invoices for DX推進プロジェクト contract (3 total)");
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");

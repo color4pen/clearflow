@@ -52,3 +52,10 @@ export const renewalTypeLabels: Record<string, string> = {
   one_time: "スポット",
   recurring: "定期",
 };
+
+export const invoiceStatusLabels: Record<string, string> = {
+  scheduled: "予定",
+  invoiced: "請求済",
+  paid: "入金済",
+  overdue: "期日超過",
+};

@@ -4,6 +4,7 @@ import { auth } from "@/infrastructure/auth";
 import { contractRepository } from "@/infrastructure/repositories";
 import { SectionCard } from "@/app/components";
 import { ContractStatusActions } from "./ContractStatusActions";
+import { InvoiceSection } from "./InvoiceSection";
 import {
   contractStatusLabels,
   contractTypeLabels,
@@ -140,6 +141,15 @@ export default async function ContractDetailPage({
           />
         </SectionCard>
       )}
+
+      <div className="mb-2">
+        <InvoiceSection
+          contractId={contract.id}
+          organizationId={organizationId}
+          contractStatus={contract.status}
+          canManage={canManage}
+        />
+      </div>
     </div>
   );
 }

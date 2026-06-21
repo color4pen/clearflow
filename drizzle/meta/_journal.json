@@ -29,6 +29,13 @@
       "when": 1782033891281,
       "tag": "0003_magenta_red_ghost",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782037543104,
+      "tag": "0004_fixed_lorna_dane",
+      "breakpoints": true
     }
   ]
 }

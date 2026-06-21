@@ -37,3 +37,6 @@ export { updateContract } from "./updateContract";
 export { updateContractStatus } from "./updateContractStatus";
 export { listContracts } from "./listContracts";
 export { getContract } from "./getContract";
+export { createInvoice } from "./createInvoice";
+export { updateInvoiceStatus } from "./updateInvoiceStatus";
+export { listInvoicesByContract } from "./listInvoicesByContract";

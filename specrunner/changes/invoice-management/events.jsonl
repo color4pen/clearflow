@@ -29,3 +29,8 @@
 {"type":"transition","ts":"2026-06-21T10:14:38.331Z","step":"spec-review","status":"ok","message":"spec-review iteration 2 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-21T10:14:38.331Z","step":"step-transition","status":"ok","message":"spec-review → test-case-gen"}
 {"type":"transition","ts":"2026-06-21T10:14:38.333Z","step":"test-case-gen-started","status":"started","message":"Starting test-case-gen step"}
+{"type":"transition","ts":"2026-06-21T10:19:02.952Z","step":"test-case-gen-verdict","status":"ok","message":"test-case-gen verdict: success"}
+{"type":"step-attempt","step":"test-case-gen","sessionId":"0ddb390f-0fc8-4aba-aaf4-9b1fe35decef","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-21T10:14:38.343Z","endedAt":"2026-06-21T10:19:01.427Z"}
+{"type":"lineage","step":"test-case-gen","ts":"2026-06-21T10:19:01.427Z","outputs":[{"path":"specrunner/changes/invoice-management/test-cases.md","hash":"sha256:55a9895a5d254c364fea00840d4c22bb9de4405ad84fd86442db23f62fcfc2be"}],"inputs":[{"path":"specrunner/changes/invoice-management/design.md","hash":"sha256:f9bf99978ab6ee76368c39431b3d2fbe31280dc6c5fefab4d23f3869ba8b27bc"},{"path":"specrunner/changes/invoice-management/tasks.md","hash":"sha256:3ee8bceabf046df42cf26d22bd72ec1789efa93878e98aee1ce4ee7fd43b1f26"}]}
+{"type":"transition","ts":"2026-06-21T10:19:02.959Z","step":"step-transition","status":"ok","message":"spec-review complete → implementer (iter 2)"}
+{"type":"transition","ts":"2026-06-21T10:19:02.960Z","step":"implementer-started","status":"started","message":"Starting implementer step"}

@@ -114,6 +114,7 @@ describe("Domain model integrity", () => {
       "domain/models/meeting.ts",
       "domain/models/deal.ts",
       "domain/models/contract.ts",
+      "domain/models/invoice.ts",
     ];
     for (const file of modelFiles) {
       const content = await readSrc(file);
@@ -1254,6 +1255,65 @@ describe("Tenant isolation — contract", () => {
 
   it("contracts action uses session.user.organizationId", async () => {
     const content = await readSrc("app/actions/contracts.ts");
+    expect(content).toContain("session.user.organizationId");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tenant isolation — invoice
+// ---------------------------------------------------------------------------
+
+describe("Tenant isolation — invoice", () => {
+  it("invoiceRepository.create includes organizationId", async () => {
+    const content = await readSrc("infrastructure/repositories/invoiceRepository.ts");
+    const idx = content.indexOf("export async function create(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 600);
+    expect(body).toContain("organizationId");
+  });
+
+  it("invoiceRepository.findById includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/invoiceRepository.ts");
+    const idx = content.indexOf("export async function findById(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("invoiceRepository.findAllByContract includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/invoiceRepository.ts");
+    const idx = content.indexOf("export async function findAllByContract(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("invoiceRepository.update includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/invoiceRepository.ts");
+    const idx = content.indexOf("export async function update(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 500);
+    expect(body).toContain("organizationId");
+  });
+
+  it("invoiceRepository.updateStatus includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/invoiceRepository.ts");
+    const idx = content.indexOf("export async function updateStatus(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 500);
+    expect(body).toContain("organizationId");
+  });
+
+  it("invoiceRepository.sumAmountByContract includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/invoiceRepository.ts");
+    const idx = content.indexOf("export async function sumAmountByContract(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 500);
+    expect(body).toContain("organizationId");
+  });
+
+  it("invoices action uses session.user.organizationId", async () => {
+    const content = await readSrc("app/actions/invoices.ts");
     expect(content).toContain("session.user.organizationId");
   });
 });
