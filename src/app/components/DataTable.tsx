@@ -1,6 +1,5 @@
-"use client";
-
 import type { ReactNode } from "react";
+import { RowClickHandler } from "./RowClickHandler";
 
 type Column<T> = {
   key: string;
@@ -26,6 +25,7 @@ export function DataTable<T>({ columns, rows, rowKey, rowClass, onRowClick, rowH
 
   return (
     <div>
+      {rowHref && <RowClickHandler />}
       <table className="min-w-full border-collapse">
         <thead>
           <tr className="bg-bg-table-head border border-border-table-head">
@@ -48,16 +48,7 @@ export function DataTable<T>({ columns, rows, rowKey, rowClass, onRowClick, rowH
                 key={rowKey(row)}
                 className={`border border-border-light hover:bg-bg-surface-alt ${clickable ? "cursor-pointer" : ""} ${rowClass?.(row, idx) ?? (idx % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt")}`}
                 data-href={href ?? undefined}
-                onClick={
-                  onRowClick
-                    ? () => onRowClick(row)
-                    : href
-                      ? (e) => {
-                          if ((e.target as HTMLElement).closest("a,button")) return;
-                          window.location.href = href;
-                        }
-                      : undefined
-                }
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
               >
                 {columns.map((col) => (
                   <td key={col.key} className={`px-1 py-1 text-xs ${alignClass(col.align)}`}>
