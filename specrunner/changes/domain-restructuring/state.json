@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "47543889-957e-45f6-b7a0-cef62ee26fc6",
   "createdAt": "2026-06-20T22:18:08.874Z",
-  "updatedAt": "2026-06-21T00:01:37.404Z",
+  "updatedAt": "2026-06-21T00:07:03.167Z",
   "request": {
     "title": "ドメインモデル再構築と用語統一",
     "type": "refactoring",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "refactor/domain-restructuring-47543889",
   "error": null,
   "pipelineId": "standard",
@@ -48,8 +48,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/29",
+    "number": 29,
+    "createdAt": "2026-06-21T00:07:03.158Z"
+  },
   "_journal": {
-    "historyCount": 90,
+    "historyCount": 95,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -64,7 +69,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
