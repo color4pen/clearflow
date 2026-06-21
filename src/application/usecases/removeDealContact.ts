@@ -1,4 +1,5 @@
 import { dealContactRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { db } from "@/infrastructure/db";
 
 export type RemoveDealContactResult =
   | { ok: true }
@@ -11,18 +12,24 @@ export async function removeDealContact(data: {
   actorId: string;
 }): Promise<RemoveDealContactResult> {
   try {
-    await dealContactRepository.deleteByDealAndContact(
-      data.dealId,
-      data.contactId,
-      data.organizationId
-    );
+    await db.transaction(async (tx) => {
+      await dealContactRepository.deleteByDealAndContact(
+        data.dealId,
+        data.contactId,
+        data.organizationId,
+        tx
+      );
 
-    await auditLogRepository.create({
-      action: "deal_contact.delete",
-      targetType: "deal_contact",
-      targetId: `${data.dealId}:${data.contactId}`,
-      actorId: data.actorId,
-      organizationId: data.organizationId,
+      await auditLogRepository.create(
+        {
+          action: "deal_contact.delete",
+          targetType: "deal_contact",
+          targetId: `${data.dealId}:${data.contactId}`,
+          actorId: data.actorId,
+          organizationId: data.organizationId,
+        },
+        tx
+      );
     });
 
     return { ok: true };
