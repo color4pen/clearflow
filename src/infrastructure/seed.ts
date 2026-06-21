@@ -391,7 +391,7 @@ async function seed() {
   });
   console.log(`✅ Created approval delegation: manager → admin (${today.toISOString().slice(0, 10)} ～ ${sevenDaysLater.toISOString().slice(0, 10)})`);
 
-  // Create sample clients
+  // Create sample clients (5社)
   const [techClient] = await db
     .insert(clients)
     .values({
@@ -399,9 +399,9 @@ async function seed() {
       organizationId: org.id,
       industry: "IT・ソフトウェア",
       size: "中堅",
+      address: "東京都千代田区丸の内1-1-1",
     })
     .returning();
-  console.log(`✅ Created client: ${techClient.name}`);
 
   const [yamato] = await db
     .insert(clients)
@@ -410,11 +410,44 @@ async function seed() {
       organizationId: org.id,
       industry: "建設業",
       size: "大手",
+      address: "大阪府大阪市北区梅田2-2-2",
     })
     .returning();
-  console.log(`✅ Created client: ${yamato.name}`);
 
-  // Create client contacts (2 per client)
+  const [sakuraLogistics] = await db
+    .insert(clients)
+    .values({
+      name: "さくら物流株式会社",
+      organizationId: org.id,
+      industry: "物流・運輸",
+      size: "中小",
+      address: "愛知県名古屋市中村区3-3-3",
+    })
+    .returning();
+
+  const [greenEnergy] = await db
+    .insert(clients)
+    .values({
+      name: "グリーンエナジー合同会社",
+      organizationId: org.id,
+      industry: "エネルギー",
+      size: "スタートアップ",
+    })
+    .returning();
+
+  const [nihonFinance] = await db
+    .insert(clients)
+    .values({
+      name: "日本ファイナンス株式会社",
+      organizationId: org.id,
+      industry: "金融・保険",
+      size: "大手",
+      address: "東京都中央区日本橋5-5-5",
+    })
+    .returning();
+  console.log(`✅ Created clients (5 total)`);
+
+  // Create client contacts (2-3 per client)
   const [techContact1] = await db
     .insert(clientContacts)
     .values({
@@ -454,16 +487,84 @@ async function seed() {
     })
     .returning();
 
-  await db.insert(clientContacts).values({
-    clientId: yamato.id,
-    name: "佐藤 次郎",
-    department: "総務部",
-    position: "担当",
-    email: "sato@yamato-kensetu.example.com",
-    phone: "06-2222-0002",
-    isPrimary: false,
-  });
-  console.log("✅ Created client contacts (4 total)");
+  const [yamatoContact2] = await db
+    .insert(clientContacts)
+    .values({
+      clientId: yamato.id,
+      name: "佐藤 次郎",
+      department: "総務部",
+      position: "担当",
+      email: "sato@yamato-kensetu.example.com",
+      phone: "06-2222-0002",
+      isPrimary: false,
+    })
+    .returning();
+
+  const [sakuraContact1] = await db
+    .insert(clientContacts)
+    .values({
+      clientId: sakuraLogistics.id,
+      name: "高橋 美咲",
+      department: "情報システム部",
+      position: "部長",
+      email: "takahashi@sakura-logistics.example.com",
+      phone: "052-3333-0001",
+      isPrimary: true,
+    })
+    .returning();
+
+  const [sakuraContact2] = await db
+    .insert(clientContacts)
+    .values({
+      clientId: sakuraLogistics.id,
+      name: "中村 健太",
+      department: "情報システム部",
+      position: "主任",
+      email: "nakamura@sakura-logistics.example.com",
+      phone: "052-3333-0002",
+      isPrimary: false,
+    })
+    .returning();
+
+  const [greenContact1] = await db
+    .insert(clientContacts)
+    .values({
+      clientId: greenEnergy.id,
+      name: "木村 翔太",
+      department: null,
+      position: "CEO",
+      email: "kimura@green-energy.example.com",
+      phone: "080-4444-0001",
+      isPrimary: true,
+    })
+    .returning();
+
+  const [financeContact1] = await db
+    .insert(clientContacts)
+    .values({
+      clientId: nihonFinance.id,
+      name: "渡辺 浩二",
+      department: "IT戦略部",
+      position: "次長",
+      email: "watanabe@nihon-finance.example.com",
+      phone: "03-5555-0001",
+      isPrimary: true,
+    })
+    .returning();
+
+  const [financeContact2] = await db
+    .insert(clientContacts)
+    .values({
+      clientId: nihonFinance.id,
+      name: "伊藤 恵",
+      department: "IT戦略部",
+      position: "課長",
+      email: "ito@nihon-finance.example.com",
+      phone: "03-5555-0002",
+      isPrimary: false,
+    })
+    .returning();
+  console.log("✅ Created client contacts (9 total)");
 
   // Create case conversion requests (案件化承認リクエスト) before inquiries
   const [inProgressConversionRequest] = await db
@@ -490,8 +591,8 @@ async function seed() {
     })
     .returning();
 
-  // Create inquiries (new, in_progress, converted×2)
-  const [newInquiry] = await db.insert(inquiries).values({
+  // Create inquiries (各ステータスを網羅: new×2, in_progress×2, converted×2, declined×1)
+  const [newInquiry1] = await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: techClient.id,
     title: "基幹システム刷新に関する問い合わせ",
@@ -500,8 +601,15 @@ async function seed() {
     status: "new",
   }).returning();
 
-  // inProgressInquiry: status が in_progress（変数名と一致）
-  const [inProgressInquiry] = await db.insert(inquiries).values({
+  const [newInquiry2] = await db.insert(inquiries).values({
+    organizationId: org.id,
+    title: "配送管理システムの相談",
+    description: "展示会ブースで名刺交換。配送ルート最適化に興味",
+    source: "exhibition",
+    status: "new",
+  }).returning();
+
+  const [inProgressInquiry1] = await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: yamato.id,
     title: "工事管理ツールの導入検討",
@@ -511,8 +619,17 @@ async function seed() {
     assigneeId: managerUser.id,
   }).returning();
 
-  // convertedInquiry: 案件化済み（案件化承認リクエストに紐づける）
-  const [convertedInquiry] = await db.insert(inquiries).values({
+  const [inProgressInquiry2] = await db.insert(inquiries).values({
+    organizationId: org.id,
+    clientId: nihonFinance.id,
+    title: "リスク管理ダッシュボード構築",
+    description: "ポートフォリオのリスク指標をリアルタイム可視化したい",
+    source: "referral",
+    status: "in_progress",
+    assigneeId: adminUser.id,
+  }).returning();
+
+  const [convertedInquiry1] = await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: yamato.id,
     title: "工事管理ツール案件化",
@@ -523,7 +640,6 @@ async function seed() {
     conversionRequestId: inProgressConversionRequest.id,
   }).returning();
 
-  // convertedInquiry2: DX推進プロジェクト
   const [convertedInquiry2] = await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: techClient.id,
@@ -533,74 +649,112 @@ async function seed() {
     status: "converted",
     conversionRequestId: convertedConversionRequest.id,
   }).returning();
-  console.log("✅ Created inquiries (4 total: new, in_progress, converted×2)");
 
-  // Create meetings
-  if (newInquiry) {
-    await db.insert(meetings).values({
-      organizationId: org.id,
-      inquiryId: newInquiry.id,
-      type: "hearing",
-      date: new Date("2026-05-10T14:00:00"),
-      location: "株式会社テック商事 本社会議室",
-      attendees: {
-        internal: [managerUser.name, memberUser.name],
-        external: ["山田 太郎"],
-      },
-      summary: "初回ヒアリング実施。基幹システム老朽化の課題と移行要件を確認した。",
-      actionItems: [
-        { description: "要件定義書の初稿を作成する", assignee: memberUser.name, dueDate: "2026-05-24", done: false },
-        { description: "クラウド移行費用の概算見積を提示する", assignee: managerUser.name, dueDate: "2026-05-31", done: false },
-      ],
-      hearingData: {
-        challenge: "基幹システムの老朽化",
-        budget: "3000万円程度",
-        decisionMaker: "情報システム部長",
-        timeline: "来期上期",
-        competitors: "B社、C社",
-        notes: null,
-      },
-      createdById: managerUser.id,
-    });
-  }
+  await db.insert(inquiries).values({
+    organizationId: org.id,
+    clientId: greenEnergy.id,
+    title: "発電量予測AIの共同研究",
+    description: "太陽光発電の発電量をAIで予測したいとの相談。技術的に見送り",
+    source: "web",
+    status: "declined",
+  });
+  console.log("✅ Created inquiries (7 total: new×2, in_progress×2, converted×2, declined×1)");
 
-  if (inProgressInquiry) {
-    await db.insert(meetings).values({
-      organizationId: org.id,
-      inquiryId: inProgressInquiry.id,
-      type: "proposal",
-      date: new Date("2026-05-20T10:00:00"),
-      location: "大和建設株式会社 第2会議室",
-      attendees: {
-        internal: [managerUser.name],
-        external: ["田中 一郎"],
-      },
-      summary: "工事管理ツールの提案書を提示。承認フロー機能を中心にデモを実施した。",
-      actionItems: [
-        { description: "カスタマイズ要件をまとめた提案書改訂版を提出する", assignee: managerUser.name, dueDate: "2026-06-05", done: false },
-      ],
-      hearingData: null,
-      createdById: managerUser.id,
-    });
+  // Create meetings (引き合いフェーズの商談)
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    inquiryId: newInquiry1.id,
+    type: "hearing",
+    date: new Date("2026-05-10T14:00:00"),
+    location: "株式会社テック商事 本社会議室",
+    attendees: {
+      internal: [managerUser.name, memberUser.name],
+      external: ["山田 太郎"],
+    },
+    summary: "初回ヒアリング実施。基幹システム老朽化の課題と移行要件を確認した。",
+    actionItems: [
+      { description: "要件定義書の初稿を作成する", assignee: memberUser.name, dueDate: "2026-05-24", done: false },
+      { description: "クラウド移行費用の概算見積を提示する", assignee: managerUser.name, dueDate: "2026-05-31", done: false },
+    ],
+    hearingData: {
+      challenge: "基幹システムの老朽化により保守コストが増大",
+      budget: "3000万円程度",
+      decisionMaker: "情報システム部長",
+      timeline: "来期上期（2027年4月〜）",
+      competitors: "B社、C社が提案予定",
+      notes: null,
+    },
+    createdById: managerUser.id,
+  });
 
-    await db.insert(meetings).values({
-      organizationId: org.id,
-      inquiryId: inProgressInquiry.id,
-      type: "negotiation",
-      date: new Date("2026-06-03T14:00:00"),
-      location: "オンライン（Zoom）",
-      attendees: {
-        internal: [managerUser.name, adminUser.name],
-        external: ["田中 一郎", "佐藤 次郎"],
-      },
-      summary: "価格交渉を実施。初期費用の割引を条件に交渉が進展した。",
-      actionItems: [
-        { description: "最終見積書を提出する", assignee: managerUser.name, dueDate: "2026-06-10", done: true },
-      ],
-      hearingData: null,
-      createdById: managerUser.id,
-    });
-  }
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    inquiryId: inProgressInquiry1.id,
+    type: "hearing",
+    date: new Date("2026-04-15T10:00:00"),
+    location: "大和建設株式会社 第1会議室",
+    attendees: {
+      internal: [managerUser.name],
+      external: ["田中 一郎"],
+    },
+    summary: "初回ヒアリング。工事進捗管理の現状課題をヒアリングした。",
+    actionItems: [
+      { description: "他社事例をまとめて次回提示する", assignee: managerUser.name, dueDate: "2026-04-30", done: true },
+    ],
+    hearingData: {
+      challenge: "工事進捗の可視化と承認フロー整備が課題",
+      budget: "1500万円〜2000万円",
+      decisionMaker: "取締役 工事本部長",
+      timeline: "今期中（2026年度内）",
+      competitors: "現状なし",
+      notes: "既存のExcel管理から脱却したい",
+    },
+    createdById: managerUser.id,
+  });
+
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    inquiryId: inProgressInquiry1.id,
+    type: "proposal",
+    date: new Date("2026-05-20T10:00:00"),
+    location: "大和建設株式会社 第2会議室",
+    attendees: {
+      internal: [managerUser.name, memberUser.name],
+      external: ["田中 一郎", "佐藤 次郎"],
+    },
+    summary: "工事管理ツールの提案書を提示。承認フロー機能を中心にデモを実施した。",
+    actionItems: [
+      { description: "カスタマイズ要件をまとめた提案書改訂版を提出する", assignee: managerUser.name, dueDate: "2026-06-05", done: false },
+    ],
+    hearingData: null,
+    createdById: managerUser.id,
+  });
+
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    inquiryId: inProgressInquiry2.id,
+    type: "hearing",
+    date: new Date("2026-05-25T15:00:00"),
+    location: "オンライン（Teams）",
+    attendees: {
+      internal: [adminUser.name, memberUser.name],
+      external: ["渡辺 浩二", "伊藤 恵"],
+    },
+    summary: "リスク管理ダッシュボードの要件ヒアリング。リアルタイム性と可視化の粒度を確認。",
+    actionItems: [
+      { description: "技術検証の結果レポートを提出する", assignee: memberUser.name, dueDate: "2026-06-08", done: false },
+      { description: "概算見積を作成する", assignee: adminUser.name, dueDate: "2026-06-15", done: false },
+    ],
+    hearingData: {
+      challenge: "リスク指標のリアルタイム監視ができていない",
+      budget: "5000万円〜1億円",
+      decisionMaker: "CTO",
+      timeline: "来期（2027年4月〜）",
+      competitors: "外資系コンサル1社が提案中",
+      notes: "セキュリティ要件が厳格。オンプレミス or プライベートクラウドが条件",
+    },
+    createdById: adminUser.id,
+  });
 
   await db.insert(meetings).values({
     organizationId: org.id,
@@ -619,7 +773,7 @@ async function seed() {
     hearingData: null,
     createdById: adminUser.id,
   });
-  console.log("✅ Created meetings (4 total: hearing, proposal, negotiation, followup)");
+  console.log("✅ Created inquiry meetings (5 total)");
 
   // Create estimate approval request for the won deal (DX推進プロジェクト)
   const [estimateApprovalRequest] = await db
@@ -637,23 +791,31 @@ async function seed() {
     .returning();
   console.log(`✅ Created estimate approval request: ${estimateApprovalRequest.title}`);
 
-  // Create deals (2 total: won, proposed)
+  // Create deals (各フェーズを網羅)
   const [wonDeal] = await db.insert(deals).values({
     organizationId: org.id,
     inquiryId: convertedInquiry2.id,
     title: "DX推進プロジェクト",
     phase: "won",
     estimatedAmount: 30000000,
+    estimatedStartDate: new Date("2026-07-01"),
+    estimatedEndDate: new Date("2027-03-31"),
+    contractType: "quasi_delegation",
     estimateRequestId: estimateApprovalRequest.id,
     assigneeId: managerUser.id,
+    technicalLeadId: memberUser.id,
+    notes: "9ヶ月のプロジェクト。フェーズ1（要件定義・設計）3ヶ月、フェーズ2（開発・テスト）6ヶ月",
   }).returning();
 
   const [proposedDeal] = await db.insert(deals).values({
     organizationId: org.id,
-    inquiryId: convertedInquiry.id,
+    inquiryId: convertedInquiry1.id,
     title: "工事管理ツール導入",
     phase: "proposed",
     estimatedAmount: 15000000,
+    estimatedStartDate: new Date("2026-09-01"),
+    estimatedEndDate: new Date("2027-02-28"),
+    contractType: "fixed_price",
     assigneeId: managerUser.id,
   }).returning();
   console.log("✅ Created deals (2 total: won, proposed)");
@@ -666,35 +828,64 @@ async function seed() {
     date: new Date("2026-06-20T14:00:00"),
     location: "大和建設株式会社 会議室",
     attendees: {
-      internal: [managerUser.name],
+      internal: [managerUser.name, memberUser.name],
       external: ["田中 一郎"],
     },
     summary: "案件化後の提案会議。詳細スコープと費用感を確認した。",
-    actionItems: [],
+    actionItems: [
+      { description: "詳細見積書を作成する", assignee: managerUser.name, dueDate: "2026-07-05", done: false },
+      { description: "技術要件を整理する", assignee: memberUser.name, dueDate: "2026-07-05", done: false },
+    ],
     hearingData: null,
     createdById: managerUser.id,
   });
-  console.log("✅ Created deal meeting (1 total: proposal for proposedDeal)");
+
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    dealId: wonDeal.id,
+    type: "closing",
+    date: new Date("2026-06-10T10:00:00"),
+    location: "株式会社テック商事 応接室",
+    attendees: {
+      internal: [adminUser.name, managerUser.name],
+      external: ["山田 太郎", "鈴木 花子"],
+    },
+    summary: "契約条件の最終確認。準委任契約で合意。7月1日キックオフ予定。",
+    actionItems: [
+      { description: "契約書のドラフトを送付する", assignee: adminUser.name, dueDate: "2026-06-15", done: true },
+      { description: "プロジェクト体制図を作成する", assignee: managerUser.name, dueDate: "2026-06-25", done: true },
+    ],
+    hearingData: null,
+    createdById: adminUser.id,
+  });
+
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    dealId: wonDeal.id,
+    type: "followup",
+    date: new Date("2026-06-28T14:00:00"),
+    location: "オンライン（Zoom）",
+    attendees: {
+      internal: [managerUser.name, memberUser.name],
+      external: ["山田 太郎"],
+    },
+    summary: "キックオフ前の最終打ち合わせ。開発環境のセットアップ手順を共有。",
+    actionItems: [
+      { description: "VPN接続情報を提供する", assignee: "山田 太郎", dueDate: "2026-06-30", done: false },
+    ],
+    hearingData: null,
+    createdById: managerUser.id,
+  });
+  console.log("✅ Created deal meetings (3 total)");
 
   // Create deal contacts
-  await db.insert(dealContacts).values({
-    dealId: wonDeal.id,
-    contactId: techContact1.id,
-    role: "key_person",
-  });
-
-  await db.insert(dealContacts).values({
-    dealId: wonDeal.id,
-    contactId: techContact2.id,
-    role: "technical",
-  });
-
-  await db.insert(dealContacts).values({
-    dealId: proposedDeal.id,
-    contactId: yamatoContact1.id,
-    role: "decision_maker",
-  });
-  console.log("✅ Created deal contacts (3 total)");
+  await db.insert(dealContacts).values([
+    { dealId: wonDeal.id, contactId: techContact1.id, role: "key_person" },
+    { dealId: wonDeal.id, contactId: techContact2.id, role: "technical" },
+    { dealId: proposedDeal.id, contactId: yamatoContact1.id, role: "decision_maker" },
+    { dealId: proposedDeal.id, contactId: yamatoContact2.id, role: "other" },
+  ]);
+  console.log("✅ Created deal contacts (4 total)");
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");
