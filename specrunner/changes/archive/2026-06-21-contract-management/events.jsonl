@@ -95,3 +95,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/contract-management/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-21T09:47:28.964Z","endedAt":"2026-06-21T09:47:36.211Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-21T09:47:36.211Z","outputs":[{"path":"specrunner/changes/contract-management/pr-create-result.md","hash":"sha256:e4b2b3a8c75c0a80ad310a4637bcf4ce0f4fb9f0321969c72bcb70346cd117f3"}],"inputs":[{"path":"feat/contract-management-c51c79b7","hash":null}]}
 {"type":"transition","ts":"2026-06-21T09:47:36.222Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-21T09:49:22.608Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}

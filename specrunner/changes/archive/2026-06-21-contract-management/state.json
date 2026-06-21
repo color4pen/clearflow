@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "c51c79b7-67e5-427a-b132-f321ddb2375c",
   "createdAt": "2026-06-21T08:52:46.536Z",
-  "updatedAt": "2026-06-21T09:47:36.222Z",
+  "updatedAt": "2026-06-21T09:49:22.608Z",
   "request": {
     "title": "契約管理",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/contract-management-c51c79b7",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-21T09:47:36.210Z"
   },
   "_journal": {
-    "historyCount": 65,
+    "historyCount": 66,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
