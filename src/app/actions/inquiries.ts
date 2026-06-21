@@ -136,6 +136,67 @@ export async function updateInquiryStatusAction(
   return { success: true };
 }
 
+const updateInquirySchema = z.object({
+  title: z.string().min(1, "件名は必須です"),
+  description: z.string().optional(),
+  source: z.enum(["web", "phone", "referral", "exhibition", "other"]),
+  clientId: z.string().uuid().optional(),
+});
+
+export type UpdateInquiryState = {
+  errors?: {
+    title?: string[];
+    description?: string[];
+    source?: string[];
+    clientId?: string[];
+  };
+  message?: string;
+  success?: boolean;
+};
+
+export async function updateInquiryAction(
+  inquiryId: string,
+  _prevState: UpdateInquiryState,
+  formData: FormData
+): Promise<UpdateInquiryState> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { message: "認証が必要です" };
+  }
+
+  const raw = {
+    title: formData.get("title"),
+    description: formData.get("description") || undefined,
+    source: formData.get("source"),
+    clientId: formData.get("clientId") || undefined,
+  };
+
+  const parsed = updateInquirySchema.safeParse(raw);
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors };
+  }
+
+  const { inquiryRepository } = await import("@/infrastructure/repositories");
+  const updated = await inquiryRepository.update(
+    inquiryId,
+    session.user.organizationId,
+    {
+      title: parsed.data.title,
+      description: parsed.data.description ?? null,
+      source: parsed.data.source,
+      clientId: parsed.data.clientId ?? null,
+    }
+  );
+
+  if (!updated) {
+    return { message: "引き合いが見つかりません" };
+  }
+
+  revalidatePath("/inquiries");
+  revalidatePath(`/inquiries/${inquiryId}`);
+  return { success: true };
+}
+
 export async function listInquiriesAction(): Promise<{
   success: boolean;
   inquiries?: InquiryWithClient[];

@@ -100,6 +100,7 @@ export async function update(
     title: string;
     description: string | null;
     source: string;
+    clientId: string | null;
     assigneeId: string | null;
   }>,
   tx?: Transaction
