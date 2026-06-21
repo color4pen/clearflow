@@ -768,17 +768,18 @@ async function seed() {
     notes: "9ヶ月のプロジェクト。フェーズ1（要件定義・設計）3ヶ月、フェーズ2（開発・テスト）6ヶ月",
   }).returning();
 
-  const [proposedDeal] = await db.insert(deals).values({
+  const [wonDeal2] = await db.insert(deals).values({
     organizationId: org.id,
     inquiryId: convertedInquiry1.id,
     clientId: yamato.id,
     title: "工事管理ツール導入",
-    phase: "proposed",
+    phase: "won",
     estimatedAmount: 15000000,
     estimatedStartDate: new Date("2026-09-01"),
     estimatedEndDate: new Date("2027-02-28"),
     contractType: "fixed_price",
     assigneeId: managerUser.id,
+    technicalLeadId: memberUser.id,
   }).returning();
 
   const [prepDeal] = await db.insert(deals).values({
@@ -793,12 +794,12 @@ async function seed() {
     notes: "大型案件。セキュリティ要件の調査が必要",
   }).returning();
 
-  const [negotiationDeal] = await db.insert(deals).values({
+  const [wonDeal3] = await db.insert(deals).values({
     organizationId: org.id,
     inquiryId: convertedInquiry3.id,
     clientId: sakuraLogistics.id,
     title: "配送ルート最適化システム",
-    phase: "negotiation",
+    phase: "won",
     estimatedAmount: 8000000,
     estimatedStartDate: new Date("2026-10-01"),
     estimatedEndDate: new Date("2027-01-31"),
@@ -825,12 +826,12 @@ async function seed() {
     estimatedAmount: 3000000,
     notes: "既存顧客からの口頭依頼。引き合いなしで直接案件化",
   });
-  console.log("✅ Created deals (6 total: proposal_prep×2, proposed, negotiation, won, lost)");
+  console.log("✅ Created deals (6 total: proposal_prep×2, won×3, lost)");
 
   // Create deal meetings (案件直紐づきの商談)
   await db.insert(meetings).values({
     organizationId: org.id,
-    dealId: proposedDeal.id,
+    dealId: wonDeal2.id,
     type: "proposal",
     date: new Date("2026-06-20T14:00:00"),
     location: "大和建設株式会社 会議室",
@@ -888,7 +889,7 @@ async function seed() {
   // Create deal meetings for new deals
   await db.insert(meetings).values({
     organizationId: org.id,
-    dealId: negotiationDeal.id,
+    dealId: wonDeal3.id,
     type: "negotiation",
     date: new Date("2026-07-10T13:00:00"),
     location: "さくら物流株式会社 本社",
@@ -909,12 +910,12 @@ async function seed() {
   await db.insert(dealContacts).values([
     { dealId: wonDeal.id, contactId: techContact1.id, role: "key_person" },
     { dealId: wonDeal.id, contactId: techContact2.id, role: "technical" },
-    { dealId: proposedDeal.id, contactId: yamatoContact1.id, role: "decision_maker" },
-    { dealId: proposedDeal.id, contactId: yamatoContact2.id, role: "other" },
+    { dealId: wonDeal2.id, contactId: yamatoContact1.id, role: "decision_maker" },
+    { dealId: wonDeal2.id, contactId: yamatoContact2.id, role: "other" },
     { dealId: prepDeal.id, contactId: financeContact1.id, role: "key_person" },
     { dealId: prepDeal.id, contactId: financeContact2.id, role: "technical" },
-    { dealId: negotiationDeal.id, contactId: sakuraContact1.id, role: "decision_maker" },
-    { dealId: negotiationDeal.id, contactId: sakuraContact2.id, role: "technical" },
+    { dealId: wonDeal3.id, contactId: sakuraContact1.id, role: "decision_maker" },
+    { dealId: wonDeal3.id, contactId: sakuraContact2.id, role: "technical" },
   ]);
   console.log("✅ Created deal contacts (8 total)");
 
@@ -961,6 +962,98 @@ async function seed() {
     },
   ]);
   console.log("✅ Created invoices for DX推進プロジェクト contract (3 total)");
+
+  // Contract for 工事管理ツール導入 (請負・one_time)
+  const [constructionContract] = await db.insert(contracts).values({
+    organizationId: org.id,
+    dealId: wonDeal2.id,
+    clientId: yamato.id,
+    title: "工事管理ツール導入",
+    contractType: "fixed_price",
+    amount: 15000000,
+    startDate: new Date("2026-09-01"),
+    endDate: new Date("2027-02-28"),
+    paymentTerms: "月末締め翌月末払い",
+    renewalType: "one_time",
+    status: "active",
+  }).returning();
+
+  await db.insert(invoices).values([
+    {
+      organizationId: org.id,
+      contractId: constructionContract.id,
+      title: "着手金（30%）",
+      amount: 4500000,
+      dueDate: new Date("2026-09-30"),
+      status: "paid",
+      invoicedAt: new Date("2026-09-05"),
+      paidAt: new Date("2026-09-25"),
+    },
+    {
+      organizationId: org.id,
+      contractId: constructionContract.id,
+      title: "中間金（30%）",
+      amount: 4500000,
+      dueDate: new Date("2026-12-31"),
+      status: "scheduled",
+    },
+    {
+      organizationId: org.id,
+      contractId: constructionContract.id,
+      title: "納品時残金（40%）",
+      amount: 6000000,
+      dueDate: new Date("2027-03-31"),
+      status: "scheduled",
+    },
+  ]);
+  console.log("✅ Created contract + invoices for 工事管理ツール導入 (3 invoices)");
+
+  // Contract for 配送ルート最適化システム (SES・recurring)
+  const [logisticsContract] = await db.insert(contracts).values({
+    organizationId: org.id,
+    dealId: wonDeal3.id,
+    clientId: sakuraLogistics.id,
+    title: "配送ルート最適化 SES契約",
+    contractType: "ses",
+    amount: 800000,
+    startDate: new Date("2026-10-01"),
+    endDate: new Date("2027-03-31"),
+    paymentTerms: "月末締め翌月末払い",
+    renewalType: "recurring",
+    renewalCycle: "monthly",
+    status: "active",
+  }).returning();
+
+  await db.insert(invoices).values([
+    {
+      organizationId: org.id,
+      contractId: logisticsContract.id,
+      title: "2026年10月分稼働",
+      amount: 800000,
+      dueDate: new Date("2026-11-30"),
+      status: "paid",
+      invoicedAt: new Date("2026-11-01"),
+      paidAt: new Date("2026-11-28"),
+    },
+    {
+      organizationId: org.id,
+      contractId: logisticsContract.id,
+      title: "2026年11月分稼働",
+      amount: 800000,
+      dueDate: new Date("2026-12-31"),
+      status: "invoiced",
+      invoicedAt: new Date("2026-12-01"),
+    },
+    {
+      organizationId: org.id,
+      contractId: logisticsContract.id,
+      title: "2026年12月分稼働",
+      amount: 800000,
+      dueDate: new Date("2027-01-31"),
+      status: "scheduled",
+    },
+  ]);
+  console.log("✅ Created contract + invoices for 配送ルート最適化 SES (3 invoices)");
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");
