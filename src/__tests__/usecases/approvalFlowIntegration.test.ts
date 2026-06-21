@@ -233,6 +233,42 @@ describe("approveRequest 連動処理", () => {
 });
 
 // ---------------------------------------------------------------------------
+// runPostApprovalLinkage のスキップ条件検証（TC-014, TC-016）
+// ---------------------------------------------------------------------------
+
+describe("runPostApprovalLinkage 連動スキップ条件", () => {
+  it("TC-014: sourceType が null の場合に先頭ガードで即時 return する", async () => {
+    // 準備 - approveRequest ユースケースを読み込む
+    const src = await readSrc("application/usecases/approveRequest.ts");
+    // 実行・検証 - runPostApprovalLinkage の先頭に null ガードが存在する
+    const fnIdx = src.indexOf("async function runPostApprovalLinkage(");
+    expect(fnIdx).toBeGreaterThan(-1);
+    // 関数冒頭 300 文字以内にガードが存在する
+    const fnHead = src.slice(fnIdx, fnIdx + 300);
+    expect(fnHead).toContain("if (!sourceType || !sourceId) return");
+  });
+
+  it("TC-016: 不明な sourceType の場合に dealRepository も inquiryRepository も呼ばれない（else 分岐なし）", async () => {
+    // 準備 - approveRequest ユースケースを読み込む
+    const src = await readSrc("application/usecases/approveRequest.ts");
+    // 実行・検証 - runPostApprovalLinkage 内で "inquiry" / "deal" 以外を処理する
+    // else 分岐または default 分岐が存在しないことを確認する
+    const fnIdx = src.indexOf("async function runPostApprovalLinkage(");
+    expect(fnIdx).toBeGreaterThan(-1);
+    // 関数の終端（export の直前）を探して関数本体を切り出す
+    const exportIdx = src.indexOf("\nexport type ApproveRequestResult");
+    expect(exportIdx).toBeGreaterThan(fnIdx);
+    const fnBody = src.slice(fnIdx, exportIdx);
+    // "inquiry" と "deal" の if 分岐が存在する
+    expect(fnBody).toContain('"inquiry"');
+    expect(fnBody).toContain('"deal"');
+    // else 分岐（else { や } else）が存在しない → 未知の sourceType は何もせず終了
+    expect(fnBody).not.toContain("} else {");
+    expect(fnBody).not.toContain("else if");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // requestRepository.mapRow の sourceType/sourceId マッピング検証（TC-005）
 // ---------------------------------------------------------------------------
 
