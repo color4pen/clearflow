@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "ce2c75f3-b0fd-4c01-b096-c4f8a5b6de4b",
   "createdAt": "2026-06-21T07:45:03.734Z",
-  "updatedAt": "2026-06-21T08:47:46.961Z",
+  "updatedAt": "2026-06-21T08:48:11.101Z",
   "request": {
     "title": "Deal の柔軟化",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/deal-flexibility-ce2c75f3",
   "error": null,
   "pipelineId": "standard",
@@ -48,8 +48,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/49",
+    "number": 49,
+    "createdAt": "2026-06-21T08:48:11.092Z"
+  },
   "_journal": {
-    "historyCount": 66,
+    "historyCount": 71,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -62,7 +67,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
