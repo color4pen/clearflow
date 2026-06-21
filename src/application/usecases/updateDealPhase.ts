@@ -32,7 +32,6 @@ export async function updateDealPhase(data: {
         data.dealId,
         data.organizationId,
         data.newPhase,
-        null,
         deal.version,
         tx
       );

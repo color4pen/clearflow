@@ -144,16 +144,15 @@ export async function updatePhase(
   id: string,
   organizationId: string,
   phase: DealPhase,
-  estimateRequestId: string | null,
   currentVersion: number,
   tx?: Transaction
 ): Promise<Deal | null> {
   const queryRunner = tx ?? db;
+  // estimateRequestId は将来の手動紐づけ用に deals テーブルに残すが、フェーズ更新では変更しない
   const result = await queryRunner
     .update(deals)
     .set({
       phase,
-      estimateRequestId,
       updatedAt: new Date(),
       version: sql`version + 1`,
     })
