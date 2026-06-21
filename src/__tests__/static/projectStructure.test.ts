@@ -1231,9 +1231,9 @@ describe("Tenant isolation — contract", () => {
     expect(body).toContain("organizationId");
   });
 
-  it("contractRepository.findByDealId includes organizationId condition", async () => {
+  it("contractRepository.findAllByDealId includes organizationId condition", async () => {
     const content = await readSrc("infrastructure/repositories/contractRepository.ts");
-    const idx = content.indexOf("export async function findByDealId(");
+    const idx = content.indexOf("export async function findAllByDealId(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 400);
     expect(body).toContain("organizationId");

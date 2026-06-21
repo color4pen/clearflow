@@ -30,11 +30,6 @@ export async function createContract(data: {
     return { ok: false, reason: "受注済みの案件にのみ契約を作成できます" };
   }
 
-  const existing = await contractRepository.findByDealId(data.dealId, data.organizationId);
-  if (existing) {
-    return { ok: false, reason: "この案件にはすでに契約が存在します" };
-  }
-
   // Deal の情報を初期値として使用し、明示的に渡された値で上書きする
   const title = data.title ?? deal.title;
   const contractType = data.contractType !== undefined ? data.contractType : deal.contractType;
