@@ -50,7 +50,7 @@ export const dealPhaseEnum = pgEnum("deal_phase", [
   "proposal_prep",
   "proposed",
   "negotiation",
-  "internal_approval",
+  "estimate_approval",
   "won",
   "lost",
 ]);
@@ -262,16 +262,15 @@ export const inquiries = pgTable("inquiries", {
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id),
-  clientId: uuid("client_id")
-    .notNull()
-    .references(() => clients.id),
-  contactId: uuid("contact_id").references(() => clientContacts.id),
+  // 引き合い受付時点では顧客が未確定でもよいため nullable
+  clientId: uuid("client_id").references(() => clients.id),
   title: text("title").notNull(),
   description: text("description"),
   source: text("source").notNull(),
   status: inquiryStatusEnum("status").notNull().default("new"),
   assigneeId: uuid("assignee_id").references(() => users.id),
-  requestId: uuid("request_id").references(() => requests.id, { onDelete: "set null" }),
+  // 案件化承認リクエスト（converted 遷移時に生成）
+  conversionRequestId: uuid("conversion_request_id").references(() => requests.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   // 楽観ロック: converted 遷移で重複承認リクエスト生成を防ぐ
@@ -284,9 +283,9 @@ export const meetings = pgTable("meetings", {
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id),
-  inquiryId: uuid("inquiry_id")
-    .notNull()
-    .references(() => inquiries.id),
+  // inquiryId と dealId のどちらか一方は必須（アプリケーション層で検証）
+  inquiryId: uuid("inquiry_id").references(() => inquiries.id),
+  dealId: uuid("deal_id").references(() => deals.id),
   type: meetingTypeEnum("type").notNull(),
   date: timestamp("date").notNull(),
   location: text("location"),
@@ -317,7 +316,7 @@ export const deals = pgTable("deals", {
   estimatedAmount: integer("estimated_amount"),
   estimatedStartDate: timestamp("estimated_start_date"),
   estimatedEndDate: timestamp("estimated_end_date"),
-  // ドメインモデルで型制約（"quasi_delegation" | "contract" | "ses"）、DB は text で柔軟性を持たせる
+  // ドメインモデルで型制約（"quasi_delegation" | "fixed_price" | "ses"）、DB は text で柔軟性を持たせる
   contractType: text("contract_type"),
   assigneeId: uuid("assignee_id").references(() => users.id),
   technicalLeadId: uuid("technical_lead_id").references(() => users.id),
@@ -333,6 +332,26 @@ export const deals = pgTable("deals", {
   // 1つの引き合いに対して案件は1件のみ（DB レベルで TOCTOU を防止）
   unique("deals_inquiry_id_unique").on(table.inquiryId),
 ]);
+
+// Deal contacts table (案件ごとの顧客担当者と役割)
+export const dealContacts = pgTable(
+  "deal_contacts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    dealId: uuid("deal_id")
+      .notNull()
+      .references(() => deals.id),
+    contactId: uuid("contact_id")
+      .notNull()
+      .references(() => clientContacts.id),
+    // "key_person" | "decision_maker" | "technical" | "other"
+    role: text("role").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("deal_contacts_deal_contact_unique").on(table.dealId, table.contactId),
+  ]
+);
 
 // Auth.js adapter tables
 export const accounts = pgTable(
@@ -387,6 +406,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   inquiries: many(inquiries),
   meetings: many(meetings),
   deals: many(deals),
+  dealContacts: many(dealContacts),
 }));
 
 export const idempotencyKeysRelations = relations(idempotencyKeys, ({ one }) => ({
@@ -545,16 +565,12 @@ export const inquiriesRelations = relations(inquiries, ({ one, many }) => ({
     fields: [inquiries.clientId],
     references: [clients.id],
   }),
-  contact: one(clientContacts, {
-    fields: [inquiries.contactId],
-    references: [clientContacts.id],
-  }),
   assignee: one(users, {
     fields: [inquiries.assigneeId],
     references: [users.id],
   }),
-  request: one(requests, {
-    fields: [inquiries.requestId],
+  conversionRequest: one(requests, {
+    fields: [inquiries.conversionRequestId],
     references: [requests.id],
   }),
   meetings: many(meetings),
@@ -570,13 +586,17 @@ export const meetingsRelations = relations(meetings, ({ one }) => ({
     fields: [meetings.inquiryId],
     references: [inquiries.id],
   }),
+  deal: one(deals, {
+    fields: [meetings.dealId],
+    references: [deals.id],
+  }),
   createdBy: one(users, {
     fields: [meetings.createdById],
     references: [users.id],
   }),
 }));
 
-export const dealsRelations = relations(deals, ({ one }) => ({
+export const dealsRelations = relations(deals, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [deals.organizationId],
     references: [organizations.id],
@@ -598,5 +618,18 @@ export const dealsRelations = relations(deals, ({ one }) => ({
   estimateRequest: one(requests, {
     fields: [deals.estimateRequestId],
     references: [requests.id],
+  }),
+  meetings: many(meetings),
+  dealContacts: many(dealContacts),
+}));
+
+export const dealContactsRelations = relations(dealContacts, ({ one }) => ({
+  deal: one(deals, {
+    fields: [dealContacts.dealId],
+    references: [deals.id],
+  }),
+  contact: one(clientContacts, {
+    fields: [dealContacts.contactId],
+    references: [clientContacts.id],
   }),
 }));

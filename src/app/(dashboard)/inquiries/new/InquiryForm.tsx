@@ -1,15 +1,14 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createInquiryAction } from "@/app/actions/inquiries";
 import { FormField, Input, Select, Textarea, SubmitButton } from "@/app/components";
-import type { Client, ClientContact } from "@/domain/models/client";
+import type { Client } from "@/domain/models/client";
 
 type Props = {
   clients: Client[];
-  contactsByClientId: Record<string, ClientContact[]>;
 };
 
 const sourceOptions = [
@@ -21,9 +20,8 @@ const sourceOptions = [
   { value: "other", label: "その他" },
 ];
 
-export function InquiryForm({ clients, contactsByClientId }: Props) {
+export function InquiryForm({ clients }: Props) {
   const router = useRouter();
-  const [selectedClientId, setSelectedClientId] = useState("");
   const [state, formAction, isPending] = useActionState(
     async (prev: Parameters<typeof createInquiryAction>[0], formData: FormData) => {
       const result = await createInquiryAction(prev, formData);
@@ -35,8 +33,6 @@ export function InquiryForm({ clients, contactsByClientId }: Props) {
     {}
   );
 
-  const contacts = selectedClientId ? (contactsByClientId[selectedClientId] ?? []) : [];
-
   return (
     <form action={formAction} className="bg-bg-surface border border-border border-t-0 p-4">
       {state.message && (
@@ -45,38 +41,18 @@ export function InquiryForm({ clients, contactsByClientId }: Props) {
 
       <div className="grid grid-cols-2 gap-3">
         <FormField
-          label={<>顧客 <span className="text-danger">*</span></>}
+          label="顧客"
           htmlFor="clientId"
           error={state.errors?.clientId?.[0]}
         >
           <Select
             id="clientId"
             name="clientId"
-            value={selectedClientId}
-            onChange={(e) => setSelectedClientId(e.target.value)}
-            required
           >
-            <option value="">選択してください</option>
+            <option value="">未定</option>
             {clients.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
-              </option>
-            ))}
-          </Select>
-        </FormField>
-
-        <FormField
-          label="担当者"
-          htmlFor="contactId"
-          error={state.errors?.contactId?.[0]}
-        >
-          <Select id="contactId" name="contactId" disabled={contacts.length === 0}>
-            <option value="">
-              {contacts.length === 0 ? "（顧客を選択してください）" : "選択してください（任意）"}
-            </option>
-            {contacts.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}{c.isPrimary ? " [主]" : ""}
               </option>
             ))}
           </Select>

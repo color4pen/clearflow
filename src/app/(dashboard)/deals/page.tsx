@@ -2,22 +2,14 @@ import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { listDeals } from "@/application/usecases";
 import { PageToolbar, DataTable, SectionCard } from "@/app/components";
+import { phaseLabels } from "@/app/(dashboard)/labels";
 import type { DealWithInquiry } from "@/domain/models/deal";
-
-const phaseLabels: Record<string, string> = {
-  proposal_prep: "提案準備",
-  proposed: "提案済",
-  negotiation: "交渉中",
-  internal_approval: "内示",
-  won: "受注",
-  lost: "失注",
-};
 
 const allPhases = [
   "proposal_prep",
   "proposed",
   "negotiation",
-  "internal_approval",
+  "estimate_approval",
   "won",
   "lost",
 ] as const;

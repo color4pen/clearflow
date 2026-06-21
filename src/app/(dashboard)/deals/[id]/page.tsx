@@ -6,25 +6,13 @@ import {
   inquiryRepository,
   clientRepository,
   approvalTemplateRepository,
+  meetingRepository,
 } from "@/infrastructure/repositories";
-import { SectionCard } from "@/app/components";
+import { SectionCard, DataTable } from "@/app/components";
 import { DealPhaseActions } from "./DealPhaseActions";
 import { DealEditForm } from "./DealEditForm";
-
-const phaseLabels: Record<string, string> = {
-  proposal_prep: "提案準備",
-  proposed: "提案済",
-  negotiation: "交渉中",
-  internal_approval: "内示",
-  won: "受注",
-  lost: "失注",
-};
-
-const contractTypeLabels: Record<string, string> = {
-  quasi_delegation: "準委任",
-  contract: "請負",
-  ses: "SES",
-};
+import { phaseLabels, contractTypeLabels, meetingTypeLabels } from "@/app/(dashboard)/labels";
+import type { Meeting } from "@/domain/models/meeting";
 
 export default async function DealDetailPage({
   params,
@@ -40,14 +28,18 @@ export default async function DealDetailPage({
     notFound();
   }
 
-  const [inquiry, templates] = await Promise.all([
+  const [inquiry, templates, dealMeetings] = await Promise.all([
     inquiryRepository.findById(deal.inquiryId, organizationId),
     approvalTemplateRepository.findByOrganization(organizationId),
+    deal.inquiryId
+      ? meetingRepository.findAllByInquiryOrDeal(deal.inquiryId, organizationId)
+      : meetingRepository.findAllByDeal(deal.id, organizationId),
   ]);
 
-  const client = inquiry
-    ? await clientRepository.findById(inquiry.clientId, organizationId)
-    : null;
+  const client =
+    inquiry?.clientId
+      ? await clientRepository.findById(inquiry.clientId, organizationId)
+      : null;
 
   const canChangePhase =
     session!.user.role === "admin" || session!.user.role === "manager";
@@ -164,6 +156,49 @@ export default async function DealDetailPage({
           templates={templates.map((t) => ({ id: t.id, name: t.name }))}
           canChangePhase={canChangePhase}
         />
+      </SectionCard>
+
+      {/* 商談履歴 */}
+      <SectionCard className="p-3 mb-2">
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xs font-bold text-text">商談履歴</h2>
+          <Link
+            href={`/deals/${id}/meetings/new`}
+            className="text-xs text-primary underline"
+          >
+            商談を追加
+          </Link>
+        </div>
+        {dealMeetings.length === 0 ? (
+          <p className="text-xs text-text-muted">商談記録がありません</p>
+        ) : (
+          <DataTable<Meeting>
+            columns={[
+              {
+                key: "type",
+                header: "種別",
+                render: (row) => meetingTypeLabels[row.type] ?? row.type,
+              },
+              {
+                key: "date",
+                header: "日時",
+                render: (row) =>
+                  row.date.toLocaleDateString("ja-JP", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                  }),
+              },
+              {
+                key: "summary",
+                header: "概要",
+                render: (row) => row.summary ?? "-",
+              },
+            ]}
+            rows={dealMeetings}
+            rowKey={(row) => row.id}
+          />
+        )}
       </SectionCard>
 
       {/* 案件情報編集 */}

@@ -58,7 +58,7 @@ describe("updateDealPhase usecase 静的検証", () => {
     expect(content).toContain("auditLogRepository.create");
   });
 
-  it("requestRepository.create の呼び出しが含まれる（internal_approval 時の見積承認リクエスト作成）", async () => {
+  it("requestRepository.create の呼び出しが含まれる（estimate_approval 時の見積承認リクエスト作成）", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/updateDealPhase.ts");
     // 実行・検証 - 承認リクエスト作成がある
@@ -72,8 +72,8 @@ describe("updateDealPhase usecase 静的検証", () => {
     expect(content).toContain("見積承認: ");
   });
 
-  // TC-008: templateId 未指定で internal_approval 遷移時のエラーガード検証
-  it("TC-008: templateId が未指定の場合に internal_approval 遷移がエラーを返すガードが含まれる", async () => {
+  // TC-008: templateId 未指定で estimate_approval 遷移時のエラーガード検証
+  it("TC-008: templateId が未指定の場合に estimate_approval 遷移がエラーを返すガードが含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/updateDealPhase.ts");
     // 実行・検証 - templateId の未指定チェック（guard）が存在する
@@ -84,7 +84,7 @@ describe("updateDealPhase usecase 静的検証", () => {
     expect(content).toContain("テンプレートの指定が必要");
   });
 
-  // TC-027: internal_approval 遷移時の formData に "想定金額" ラベルが含まれる
+  // TC-027: estimate_approval 遷移時の formData に "想定金額" ラベルが含まれる
   it('TC-027: 承認リクエストに渡す formData に "想定金額" ラベルが含まれる', async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/updateDealPhase.ts");

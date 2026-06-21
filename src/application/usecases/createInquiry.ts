@@ -9,17 +9,18 @@ export type CreateInquiryResult =
 export async function createInquiry(data: {
   organizationId: string;
   actorId: string;
-  clientId: string;
-  contactId?: string | null;
+  clientId?: string | null;
   title: string;
   description?: string | null;
   source: string;
   assigneeId?: string | null;
 }): Promise<CreateInquiryResult> {
-  // 顧客の存在確認
-  const client = await clientRepository.findById(data.clientId, data.organizationId);
-  if (!client) {
-    return { ok: false, reason: "顧客が見つかりません" };
+  // 顧客が指定された場合のみ存在確認
+  if (data.clientId) {
+    const client = await clientRepository.findById(data.clientId, data.organizationId);
+    if (!client) {
+      return { ok: false, reason: "顧客が見つかりません" };
+    }
   }
 
   try {
@@ -27,8 +28,7 @@ export async function createInquiry(data: {
       const newInquiry = await inquiryRepository.create(
         {
           organizationId: data.organizationId,
-          clientId: data.clientId,
-          contactId: data.contactId,
+          clientId: data.clientId ?? null,
           title: data.title,
           description: data.description,
           source: data.source,

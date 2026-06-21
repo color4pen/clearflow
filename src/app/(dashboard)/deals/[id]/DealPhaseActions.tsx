@@ -27,10 +27,10 @@ const nextPhaseOptions: Partial<
     { phase: "lost", label: "失注", variant: "danger" },
   ],
   negotiation: [
-    { phase: "internal_approval", label: "内示に変更", variant: "primary" },
+    { phase: "estimate_approval", label: "見積承認中に変更", variant: "primary" },
     { phase: "lost", label: "失注", variant: "danger" },
   ],
-  internal_approval: [
+  estimate_approval: [
     { phase: "won", label: "受注", variant: "primary" },
     { phase: "lost", label: "失注", variant: "danger" },
   ],
@@ -82,7 +82,7 @@ export function DealPhaseActions({ deal, templates, canChangePhase }: Props) {
             type="button"
             disabled={isSubmitting}
             onClick={() => {
-              if (option.phase === "internal_approval") {
+              if (option.phase === "estimate_approval") {
                 setShowTemplateSelector(true);
               } else {
                 handleTransition(option.phase);
@@ -97,7 +97,7 @@ export function DealPhaseActions({ deal, templates, canChangePhase }: Props) {
         ))}
       </div>
 
-      {/* 内示フェーズ遷移時のテンプレート選択 */}
+      {/* 見積承認フェーズ遷移時のテンプレート選択 */}
       {showTemplateSelector && (
         <div className="border border-border-light p-3 bg-bg-surface-alt">
           <p className="text-xs font-bold text-text mb-2">承認テンプレートを選択</p>
@@ -120,12 +120,12 @@ export function DealPhaseActions({ deal, templates, canChangePhase }: Props) {
               disabled={isSubmitting || !selectedTemplateId}
               onClick={() => {
                 if (selectedTemplateId) {
-                  handleTransition("internal_approval", selectedTemplateId);
+                  handleTransition("estimate_approval", selectedTemplateId);
                 }
               }}
               className="bg-primary text-white text-xs px-3 py-1 rounded-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "処理中..." : "内示に変更する"}
+              {isSubmitting ? "処理中..." : "見積承認中に変更する"}
             </button>
             <button
               type="button"

@@ -1,14 +1,15 @@
-import { eq, and, asc, desc } from "drizzle-orm";
+import { eq, and, asc, desc, or, inArray } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
-import { meetings } from "../schema";
+import { meetings, deals } from "../schema";
 import type { Meeting, MeetingType, HearingData, ActionItem, MeetingAttendees } from "@/domain/models/meeting";
 
 function mapRow(row: typeof meetings.$inferSelect): Meeting {
   return {
     id: row.id,
     organizationId: row.organizationId,
-    inquiryId: row.inquiryId,
+    inquiryId: row.inquiryId ?? null,
+    dealId: row.dealId ?? null,
     type: row.type as MeetingType,
     date: row.date,
     location: row.location ?? null,
@@ -25,7 +26,8 @@ function mapRow(row: typeof meetings.$inferSelect): Meeting {
 export async function create(
   data: {
     organizationId: string;
-    inquiryId: string;
+    inquiryId?: string | null;
+    dealId?: string | null;
     type: MeetingType;
     date: Date;
     location?: string | null;
@@ -42,7 +44,8 @@ export async function create(
     .insert(meetings)
     .values({
       organizationId: data.organizationId,
-      inquiryId: data.inquiryId,
+      inquiryId: data.inquiryId ?? null,
+      dealId: data.dealId ?? null,
       type: data.type,
       date: data.date,
       location: data.location ?? null,
@@ -78,6 +81,50 @@ export async function findAllByInquiry(
     .select()
     .from(meetings)
     .where(and(eq(meetings.inquiryId, inquiryId), eq(meetings.organizationId, organizationId)))
+    .orderBy(asc(meetings.date));
+  return result.map(mapRow);
+}
+
+/**
+ * 指定案件に直接紐づく商談を取得する。organizationId でテナント分離。
+ */
+export async function findAllByDeal(
+  dealId: string,
+  organizationId: string
+): Promise<Meeting[]> {
+  const result = await db
+    .select()
+    .from(meetings)
+    .where(and(eq(meetings.dealId, dealId), eq(meetings.organizationId, organizationId)))
+    .orderBy(asc(meetings.date));
+  return result.map(mapRow);
+}
+
+/**
+ * 引き合いに直接紐づく商談 + 引き合いから生まれた案件に紐づく商談を統合取得する。
+ * organizationId でテナント分離。
+ */
+export async function findAllByInquiryOrDeal(
+  inquiryId: string,
+  organizationId: string
+): Promise<Meeting[]> {
+  const dealSubquery = db
+    .select({ id: deals.id })
+    .from(deals)
+    .where(eq(deals.inquiryId, inquiryId));
+
+  const result = await db
+    .select()
+    .from(meetings)
+    .where(
+      and(
+        eq(meetings.organizationId, organizationId),
+        or(
+          eq(meetings.inquiryId, inquiryId),
+          inArray(meetings.dealId, dealSubquery)
+        )
+      )
+    )
     .orderBy(asc(meetings.date));
   return result.map(mapRow);
 }

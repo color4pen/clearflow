@@ -9,8 +9,7 @@ import type { InquiryWithClient } from "@/domain/models/inquiry";
 import type { ActionResult } from "./requests";
 
 const createInquirySchema = z.object({
-  clientId: z.string().uuid("顧客を選択してください"),
-  contactId: z.string().uuid().optional(),
+  clientId: z.string().uuid().optional(),
   title: z.string().min(1, "件名は必須です"),
   description: z.string().optional(),
   source: z.enum(["web", "phone", "referral", "exhibition", "other"]),
@@ -20,7 +19,6 @@ const createInquirySchema = z.object({
 export type CreateInquiryState = {
   errors?: {
     clientId?: string[];
-    contactId?: string[];
     title?: string[];
     description?: string[];
     source?: string[];
@@ -47,12 +45,11 @@ export async function createInquiryAction(
     return { message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
   }
 
-  const contactIdRaw = formData.get("contactId");
+  const clientIdRaw = formData.get("clientId");
   const assigneeIdRaw = formData.get("assigneeId");
 
   const parsed = createInquirySchema.safeParse({
-    clientId: formData.get("clientId"),
-    contactId: contactIdRaw && contactIdRaw !== "" ? contactIdRaw : undefined,
+    clientId: clientIdRaw && clientIdRaw !== "" ? clientIdRaw : undefined,
     title: formData.get("title"),
     description: formData.get("description") || undefined,
     source: formData.get("source"),
@@ -66,8 +63,7 @@ export async function createInquiryAction(
   const result = await createInquiry({
     organizationId: session.user.organizationId,
     actorId: session.user.id,
-    clientId: parsed.data.clientId,
-    contactId: parsed.data.contactId ?? null,
+    clientId: parsed.data.clientId ?? null,
     title: parsed.data.title,
     description: parsed.data.description ?? null,
     source: parsed.data.source,

@@ -35,10 +35,10 @@ describe("canTransition — 案件フェーズ遷移ルール", () => {
     expect(result).toBe(true);
   });
 
-  it("T-05: negotiation → internal_approval が許可される", () => {
+  it("T-05: negotiation → estimate_approval が許可される", () => {
     // 準備 - なし
     // 実行 - canTransition を呼び出す
-    const result = canTransition("negotiation", "internal_approval");
+    const result = canTransition("negotiation", "estimate_approval");
     // 検証 - true が返る
     expect(result).toBe(true);
   });
@@ -51,18 +51,18 @@ describe("canTransition — 案件フェーズ遷移ルール", () => {
     expect(result).toBe(true);
   });
 
-  it("T-07: internal_approval → won が許可される", () => {
+  it("T-07: estimate_approval → won が許可される", () => {
     // 準備 - なし
     // 実行 - canTransition を呼び出す
-    const result = canTransition("internal_approval", "won");
+    const result = canTransition("estimate_approval", "won");
     // 検証 - true が返る
     expect(result).toBe(true);
   });
 
-  it("T-08: internal_approval → lost が許可される", () => {
+  it("T-08: estimate_approval → lost が許可される", () => {
     // 準備 - なし
     // 実行 - canTransition を呼び出す
-    const result = canTransition("internal_approval", "lost");
+    const result = canTransition("estimate_approval", "lost");
     // 検証 - true が返る
     expect(result).toBe(true);
   });
@@ -108,20 +108,20 @@ describe("canTransition — 案件フェーズ遷移ルール", () => {
     expect(result).toBe(false);
   });
 
-  it("T-14: proposal_prep → internal_approval が拒否される（飛び越し禁止）", () => {
+  it("T-14: proposal_prep → estimate_approval が拒否される（飛び越し禁止）", () => {
     // 準備 - なし
     // 実行 - canTransition を呼び出す
-    const result = canTransition("proposal_prep", "internal_approval");
+    const result = canTransition("proposal_prep", "estimate_approval");
     // 検証 - false が返る
     expect(result).toBe(false);
   });
 
-  it("T-15: 全フェーズ（proposal_prep, proposed, negotiation, internal_approval）から lost への遷移が許可される", () => {
+  it("T-15: 全フェーズ（proposal_prep, proposed, negotiation, estimate_approval）から lost への遷移が許可される", () => {
     // 準備 - なし
     // 実行・検証 - 各フェーズから lost への遷移が可能
     expect(canTransition("proposal_prep", "lost")).toBe(true);
     expect(canTransition("proposed", "lost")).toBe(true);
     expect(canTransition("negotiation", "lost")).toBe(true);
-    expect(canTransition("internal_approval", "lost")).toBe(true);
+    expect(canTransition("estimate_approval", "lost")).toBe(true);
   });
 });

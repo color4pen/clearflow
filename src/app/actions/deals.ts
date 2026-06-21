@@ -15,7 +15,7 @@ const createDealSchema = z.object({
   estimatedAmount: z.coerce.number().int().optional(),
   estimatedStartDate: z.string().optional(),
   estimatedEndDate: z.string().optional(),
-  contractType: z.enum(["quasi_delegation", "contract", "ses"]).optional(),
+  contractType: z.enum(["quasi_delegation", "fixed_price", "ses"]).optional(),
   assigneeId: z.string().uuid().optional(),
   technicalLeadId: z.string().uuid().optional(),
   notes: z.string().optional(),
@@ -26,7 +26,7 @@ const updateDealSchema = z.object({
   estimatedAmount: z.coerce.number().int().optional().nullable(),
   estimatedStartDate: z.string().optional().nullable(),
   estimatedEndDate: z.string().optional().nullable(),
-  contractType: z.enum(["quasi_delegation", "contract", "ses"]).optional().nullable(),
+  contractType: z.enum(["quasi_delegation", "fixed_price", "ses"]).optional().nullable(),
   assigneeId: z.string().uuid().optional().nullable(),
   technicalLeadId: z.string().uuid().optional().nullable(),
   notes: z.string().optional().nullable(),
@@ -167,6 +167,10 @@ export async function updateDealAction(
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
+  }
+
+  if (session.user.role !== "admin" && session.user.role !== "manager") {
+    return { success: false, message: "権限がありません" };
   }
 
   const contractTypeRaw = formData.get("contractType");

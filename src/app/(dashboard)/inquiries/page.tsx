@@ -2,21 +2,7 @@ import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { listInquiries } from "@/application/usecases";
 import { PageToolbar, ToolbarActions, DataTable } from "@/app/components";
-
-const statusLabels: Record<string, string> = {
-  new: "新規",
-  in_progress: "対応中",
-  converted: "商談化済",
-  declined: "見送り",
-};
-
-const sourceLabels: Record<string, string> = {
-  web: "Web",
-  phone: "電話",
-  referral: "紹介",
-  exhibition: "展示会",
-  other: "その他",
-};
+import { statusLabels, sourceLabels } from "@/app/(dashboard)/labels";
 
 export default async function InquiriesPage({
   searchParams,
@@ -62,7 +48,7 @@ export default async function InquiriesPage({
           {" · "}
           <Link href="?status=in_progress" className={filterLinkClass("in_progress")}>対応中 {inProgressCount}</Link>
           {" · "}
-          <Link href="?status=converted" className={filterLinkClass("converted")}>商談化済 {convertedCount}</Link>
+          <Link href="?status=converted" className={filterLinkClass("converted")}>案件化済 {convertedCount}</Link>
           {" · "}
           <Link href="?status=declined" className={filterLinkClass("declined")}>見送り {declinedCount}</Link>
         </span>

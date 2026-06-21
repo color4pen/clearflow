@@ -29,7 +29,7 @@ export async function createDeal(data: {
   }
 
   if (inquiry.status !== "converted") {
-    return { ok: false, reason: "商談化済みの引き合いにのみ案件を作成できます" };
+    return { ok: false, reason: "案件化済みの引き合いにのみ案件を作成できます" };
   }
 
   const existing = await dealRepository.findByInquiryId(data.inquiryId, data.organizationId);

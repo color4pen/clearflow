@@ -24,7 +24,9 @@ export type MeetingAttendees = {
 export type Meeting = {
   id: string;
   organizationId: string;
-  inquiryId: string;
+  // inquiryId と dealId のどちらか一方は必須（アプリケーション層で検証）
+  inquiryId: string | null;
+  dealId: string | null;
   type: MeetingType;
   date: Date;
   location: string | null;

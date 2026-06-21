@@ -19,6 +19,7 @@ import {
   inquiries,
   meetings,
   deals,
+  dealContacts,
 } from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -35,6 +36,8 @@ async function seed() {
   // Truncate all tables (order matters for FK constraints)
   await db.delete(auditLogs);
   await db.delete(approvalSteps);
+  // deal_contacts must be deleted before deals
+  await db.delete(dealContacts);
   // deals.inquiryId FK: deals must be deleted before inquiries
   await db.delete(deals);
   // meetings.inquiryId FK: meetings must be deleted before inquiries
@@ -189,6 +192,37 @@ async function seed() {
     })
     .returning();
   console.log(`✅ Created template: ${leaveTemplate.name}`);
+
+  // 案件化承認テンプレート
+  const [conversionTemplate] = await db
+    .insert(approvalTemplates)
+    .values({
+      name: "案件化承認",
+      organizationId: org.id,
+      fields: [],
+      steps: [
+        { stepOrder: 1, approverRole: "manager" },
+      ],
+    })
+    .returning();
+  console.log(`✅ Created template: ${conversionTemplate.name}`);
+
+  // 見積承認テンプレート
+  const [estimateTemplate] = await db
+    .insert(approvalTemplates)
+    .values({
+      name: "見積承認",
+      organizationId: org.id,
+      fields: [
+        { name: "amount", label: "想定金額", type: "number", required: true },
+      ],
+      steps: [
+        { stepOrder: 1, approverRole: "manager" },
+        { stepOrder: 2, approverRole: "finance", deadlineHours: 72, condition: { field: "amount", operator: "gt", value: 10000000 } },
+      ],
+    })
+    .returning();
+  console.log(`✅ Created template: ${estimateTemplate.name}`);
 
   // Create requests in various statuses
   const [draftRequest] = await db
@@ -428,41 +462,77 @@ async function seed() {
   });
   console.log("✅ Created client contacts (4 total)");
 
-  // Create inquiries (new, in_progress, converted)
+  // Create case conversion requests (案件化承認リクエスト) before inquiries
+  const [inProgressConversionRequest] = await db
+    .insert(requests)
+    .values({
+      title: "案件化承認: 工事管理ツールの導入検討",
+      formData: {},
+      templateId: conversionTemplate.id,
+      status: "approved",
+      organizationId: org.id,
+      creatorId: managerUser.id,
+    })
+    .returning();
+
+  const [convertedConversionRequest] = await db
+    .insert(requests)
+    .values({
+      title: "案件化承認: DX推進プロジェクト受注",
+      formData: {},
+      templateId: conversionTemplate.id,
+      status: "approved",
+      organizationId: org.id,
+      creatorId: adminUser.id,
+    })
+    .returning();
+
+  // Create inquiries (new, in_progress, converted×2)
   const [newInquiry] = await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: techClient.id,
-    contactId: techContact1.id,
     title: "基幹システム刷新に関する問い合わせ",
     description: "現行システムの老朽化に伴い、クラウド移行を検討中",
     source: "web",
     status: "new",
   }).returning();
 
+  // inProgressInquiry: status が in_progress（変数名と一致）
   const [inProgressInquiry] = await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: yamato.id,
-    contactId: yamatoContact1.id,
     title: "工事管理ツールの導入検討",
     description: "工事進捗の可視化と承認フロー整備が課題",
     source: "phone",
-    status: "converted",
+    status: "in_progress",
     assigneeId: managerUser.id,
   }).returning();
 
-  // converted の引き合い: 既存の承認リクエスト（approvedRequest）に紐づける
+  // convertedInquiry: 案件化済み（案件化承認リクエストに紐づける）
   const [convertedInquiry] = await db.insert(inquiries).values({
+    organizationId: org.id,
+    clientId: yamato.id,
+    title: "工事管理ツール案件化",
+    description: "提案・交渉を経て案件化",
+    source: "phone",
+    status: "converted",
+    assigneeId: managerUser.id,
+    conversionRequestId: inProgressConversionRequest.id,
+  }).returning();
+
+  // convertedInquiry2: DX推進プロジェクト
+  const [convertedInquiry2] = await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: techClient.id,
     title: "DX推進プロジェクト受注",
     description: "昨期より継続商談。正式受注に向けて承認済み",
     source: "referral",
     status: "converted",
-    requestId: approvedRequest.id,
+    conversionRequestId: convertedConversionRequest.id,
   }).returning();
-  console.log("✅ Created inquiries (3 total: new, converted×2)");
+  console.log("✅ Created inquiries (4 total: new, in_progress, converted×2)");
 
-  // Create meetings (4 total: hearing, proposal, negotiation, followup)
+  // Create meetings
   if (newInquiry) {
     await db.insert(meetings).values({
       organizationId: org.id,
@@ -531,7 +601,7 @@ async function seed() {
 
   await db.insert(meetings).values({
     organizationId: org.id,
-    inquiryId: convertedInquiry.id,
+    inquiryId: convertedInquiry2.id,
     type: "followup",
     date: new Date("2026-06-15T11:00:00"),
     location: "株式会社テック商事 本社",
@@ -548,26 +618,74 @@ async function seed() {
   });
   console.log("✅ Created meetings (4 total: hearing, proposal, negotiation, followup)");
 
-  // Create deals (2 total)
-  await db.insert(deals).values({
+  // Create estimate approval request for the won deal (DX推進プロジェクト)
+  const [estimateApprovalRequest] = await db
+    .insert(requests)
+    .values({
+      title: "見積承認: DX推進プロジェクト",
+      formData: {
+        amount: { value: 30000000, label: "想定金額" },
+      },
+      templateId: estimateTemplate.id,
+      status: "approved",
+      organizationId: org.id,
+      creatorId: adminUser.id,
+    })
+    .returning();
+  console.log(`✅ Created estimate approval request: ${estimateApprovalRequest.title}`);
+
+  // Create deals (2 total: won, proposed)
+  const [wonDeal] = await db.insert(deals).values({
     organizationId: org.id,
-    inquiryId: convertedInquiry.id,
+    inquiryId: convertedInquiry2.id,
     title: "DX推進プロジェクト",
     phase: "won",
     estimatedAmount: 30000000,
-    estimateRequestId: approvedRequest.id,
+    estimateRequestId: estimateApprovalRequest.id,
     assigneeId: managerUser.id,
-  });
+  }).returning();
 
-  await db.insert(deals).values({
+  const [proposedDeal] = await db.insert(deals).values({
     organizationId: org.id,
-    inquiryId: inProgressInquiry.id,
+    inquiryId: convertedInquiry.id,
     title: "工事管理ツール導入",
     phase: "proposed",
     estimatedAmount: 15000000,
     assigneeId: managerUser.id,
-  });
+  }).returning();
   console.log("✅ Created deals (2 total: won, proposed)");
+
+  // Create deal meetings (案件直紐づきの商談)
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    dealId: proposedDeal.id,
+    type: "proposal",
+    date: new Date("2026-06-20T14:00:00"),
+    location: "大和建設株式会社 会議室",
+    attendees: {
+      internal: [managerUser.name],
+      external: ["田中 一郎"],
+    },
+    summary: "案件化後の提案会議。詳細スコープと費用感を確認した。",
+    actionItems: [],
+    hearingData: null,
+    createdById: managerUser.id,
+  });
+  console.log("✅ Created deal meeting (1 total: proposal for proposedDeal)");
+
+  // Create deal contacts
+  await db.insert(dealContacts).values({
+    dealId: wonDeal.id,
+    contactId: techContact1.id,
+    role: "key_person",
+  });
+
+  await db.insert(dealContacts).values({
+    dealId: proposedDeal.id,
+    contactId: yamatoContact1.id,
+    role: "decision_maker",
+  });
+  console.log("✅ Created deal contacts (2 total)");
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");
