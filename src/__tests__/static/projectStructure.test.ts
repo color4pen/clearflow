@@ -113,6 +113,7 @@ describe("Domain model integrity", () => {
       "domain/models/inquiry.ts",
       "domain/models/meeting.ts",
       "domain/models/deal.ts",
+      "domain/models/contract.ts",
     ];
     for (const file of modelFiles) {
       const content = await readSrc(file);
@@ -149,11 +150,13 @@ describe("Domain model integrity", () => {
       "domain/models/inquiry.ts",
       "domain/models/meeting.ts",
       "domain/models/deal.ts",
+      "domain/models/contract.ts",
       "domain/models/index.ts",
       "domain/services/requestTransition.ts",
       "domain/services/approvalStepService.ts",
       "domain/services/inquiryTransition.ts",
       "domain/services/dealTransition.ts",
+      "domain/services/contractTransition.ts",
       "domain/services/index.ts",
     ];
     for (const file of files) {
@@ -1201,5 +1204,56 @@ describe("UI動線改善 — tenant isolation, audit log, and label tests", () =
     expect(content).toContain("decision_maker");
     expect(content).toContain("technical");
     expect(content).toContain("other");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Tenant isolation — contract
+// ---------------------------------------------------------------------------
+
+describe("Tenant isolation — contract", () => {
+  it("contractRepository.create includes organizationId", async () => {
+    const content = await readSrc("infrastructure/repositories/contractRepository.ts");
+    const idx = content.indexOf("export async function create(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 600);
+    expect(body).toContain("organizationId");
+  });
+
+  it("contractRepository.findById includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/contractRepository.ts");
+    const idx = content.indexOf("export async function findById(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("contractRepository.findByDealId includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/contractRepository.ts");
+    const idx = content.indexOf("export async function findByDealId(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("contractRepository.findAllByOrganization includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/contractRepository.ts");
+    const idx = content.indexOf("export async function findAllByOrganization(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("contractRepository.update includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/contractRepository.ts");
+    const idx = content.indexOf("export async function update(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 500);
+    expect(body).toContain("organizationId");
+  });
+
+  it("contracts action uses session.user.organizationId", async () => {
+    const content = await readSrc("app/actions/contracts.ts");
+    expect(content).toContain("session.user.organizationId");
   });
 });

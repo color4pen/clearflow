@@ -13,3 +13,4 @@ export * as inquiryRepository from "./inquiryRepository";
 export * as meetingRepository from "./meetingRepository";
 export * as dealRepository from "./dealRepository";
 export * as dealContactRepository from "./dealContactRepository";
+export * as contractRepository from "./contractRepository";

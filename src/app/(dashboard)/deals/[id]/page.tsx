@@ -7,12 +7,14 @@ import {
   clientRepository,
   meetingRepository,
   dealContactRepository,
+  contractRepository,
 } from "@/infrastructure/repositories";
 import { SectionCard, DataTable } from "@/app/components";
 import { DealPhaseActions } from "./DealPhaseActions";
 import { DealEditForm } from "./DealEditForm";
 import { DealContactsSection } from "./DealContactsSection";
-import { phaseLabels, contractTypeLabels, meetingTypeLabels } from "@/app/(dashboard)/labels";
+import { CreateContractButton } from "./CreateContractButton";
+import { phaseLabels, contractTypeLabels, meetingTypeLabels, contractStatusLabels } from "@/app/(dashboard)/labels";
 import type { Meeting } from "@/domain/models/meeting";
 
 export default async function DealDetailPage({
@@ -30,12 +32,13 @@ export default async function DealDetailPage({
   }
 
   // 引き合いは inquiryId がある場合のみ取得する
-  const [inquiry, dealMeetings, dealContacts] = await Promise.all([
+  const [inquiry, dealMeetings, dealContacts, contract] = await Promise.all([
     deal.inquiryId ? inquiryRepository.findById(deal.inquiryId, organizationId) : null,
     deal.inquiryId
       ? meetingRepository.findAllByInquiryOrDeal(deal.inquiryId, organizationId)
       : meetingRepository.findAllByDeal(deal.id, organizationId),
     dealContactRepository.findByDeal(deal.id, organizationId),
+    contractRepository.findByDealId(deal.id, organizationId),
   ]);
 
   // 顧客情報は deal.clientId で直接取得する
@@ -163,6 +166,44 @@ export default async function DealDetailPage({
           canChangePhase={canChangePhase}
         />
       </SectionCard>
+
+      {/* 契約 */}
+      {deal.phase === "won" && (
+        <SectionCard className="p-3 mb-2">
+          <h2 className="text-xs font-bold text-text mb-2">契約</h2>
+          {contract ? (
+            <dl className="text-xs space-y-1">
+              <div className="flex gap-2">
+                <dt className="text-text-muted w-24 shrink-0">契約名</dt>
+                <dd className="text-text">
+                  <Link href={`/contracts/${contract.id}`} className="text-primary underline">
+                    {contract.title}
+                  </Link>
+                </dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="text-text-muted w-24 shrink-0">ステータス</dt>
+                <dd className="text-text">{contractStatusLabels[contract.status] ?? contract.status}</dd>
+              </div>
+              <div className="flex gap-2">
+                <dt className="text-text-muted w-24 shrink-0">金額</dt>
+                <dd className="text-text">
+                  {contract.amount != null
+                    ? `¥${contract.amount.toLocaleString("ja-JP")}`
+                    : "-"}
+                </dd>
+              </div>
+            </dl>
+          ) : (
+            <div>
+              <p className="text-xs text-text-muted mb-2">契約が未作成です</p>
+              {canChangePhase && (
+                <CreateContractButton dealId={deal.id} />
+              )}
+            </div>
+          )}
+        </SectionCard>
+      )}
 
       {/* 担当者 */}
       <SectionCard className="p-3 mb-2">

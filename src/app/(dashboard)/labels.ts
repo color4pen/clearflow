@@ -41,3 +41,14 @@ export const dealContactRoleLabels: Record<string, string> = {
   technical: "技術担当",
   other: "その他",
 };
+
+export const contractStatusLabels: Record<string, string> = {
+  active: "契約中",
+  completed: "完了",
+  cancelled: "解約",
+};
+
+export const renewalTypeLabels: Record<string, string> = {
+  one_time: "スポット",
+  recurring: "定期",
+};
