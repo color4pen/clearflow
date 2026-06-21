@@ -37,7 +37,7 @@ const updateContractSchema = z.object({
   renewalCycle: z.string().optional().nullable(),
 });
 
-export async function createContractAction(formData: FormData): Promise<ActionResult> {
+export async function createContractAction(formData: FormData): Promise<ActionResult & { contractId?: string }> {
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
@@ -97,7 +97,7 @@ export async function createContractAction(formData: FormData): Promise<ActionRe
 
   revalidatePath("/contracts");
   revalidatePath(`/deals/${parsed.data.dealId}`);
-  return { success: true };
+  return { success: true, contractId: result.contract.id };
 }
 
 export async function updateContractAction(

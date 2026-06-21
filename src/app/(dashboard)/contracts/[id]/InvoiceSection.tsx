@@ -58,8 +58,21 @@ export async function InvoiceSection({ contractId, organizationId, contractStatu
     {
       key: "status",
       header: "ステータス",
-      render: (row: Invoice) =>
-        invoiceStatusLabels[row.status] ?? row.status,
+      render: (row: Invoice) => {
+        const colorClass =
+          row.status === "invoiced"
+            ? "text-primary"
+            : row.status === "paid"
+              ? "text-success"
+              : row.status === "overdue"
+                ? "text-danger"
+                : "";
+        return (
+          <span className={colorClass}>
+            {invoiceStatusLabels[row.status] ?? row.status}
+          </span>
+        );
+      },
     },
     {
       key: "actions",
