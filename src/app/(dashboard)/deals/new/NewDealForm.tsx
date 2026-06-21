@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createDealAction } from "@/app/actions/deals";
 import { FormField, Input, SectionCard } from "@/app/components";
 import Link from "next/link";
@@ -15,7 +16,15 @@ type Props = {
 const initialState: CreateDealState = {};
 
 export function NewDealForm({ inquiryId, clients }: Props) {
+  const router = useRouter();
   const [state, formAction, isPending] = useActionState(createDealAction, initialState);
+  const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
+
+  useEffect(() => {
+    if (state.dealId) {
+      router.push(`/deals/${state.dealId}`);
+    }
+  }, [state.dealId, router]);
 
   return (
     <form action={formAction}>
@@ -23,24 +32,37 @@ export function NewDealForm({ inquiryId, clients }: Props) {
         {state.message && <p className="text-danger text-xs mb-2">{state.message}</p>}
 
         {inquiryId ? (
-          // 引き合い経由: hidden フィールドで inquiryId を渡す
           <input type="hidden" name="inquiryId" value={inquiryId} />
         ) : (
-          // 直接作成: 顧客選択プルダウンを表示する
           <FormField label="顧客" error={state.errors?.clientId?.[0]}>
             <select
               name="clientId"
-              required
               className="text-xs border border-border px-2 py-1 w-full"
               defaultValue=""
+              onChange={(e) => {
+                if (e.target.value === "__new__") {
+                  setClientMode("new");
+                } else {
+                  setClientMode("existing");
+                }
+              }}
             >
               <option value="" disabled>顧客を選択してください</option>
+              <option value="__new__">新規登録</option>
               {clients.map((client) => (
                 <option key={client.id} value={client.id}>
                   {client.name}
                 </option>
               ))}
             </select>
+            {clientMode === "new" && (
+              <Input
+                name="newClientName"
+                placeholder="企業名"
+                required
+                className="mt-1"
+              />
+            )}
           </FormField>
         )}
 
@@ -56,7 +78,7 @@ export function NewDealForm({ inquiryId, clients }: Props) {
           <button
             type="submit"
             disabled={isPending}
-            className="bg-primary text-white text-xs px-4 py-1.5 rounded-none cursor-pointer disabled:opacity-50"
+            className="bg-primary text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
           >
             {isPending ? "作成中..." : "案件を作成"}
           </button>

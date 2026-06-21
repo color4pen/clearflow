@@ -4,16 +4,21 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateDealAction } from "@/app/actions/deals";
 import { SectionCard, FormField, Input, Textarea, Select } from "@/app/components";
+import { phaseLabels } from "@/app/(dashboard)/labels";
 import type { Deal } from "@/domain/models/deal";
 
 type Props = {
   deal: Deal;
 };
 
+const allPhases = ["proposal_prep", "proposed", "negotiation", "won", "lost"] as const;
+
 export function DealEditForm({ deal }: Props) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  const isTerminal = deal.phase === "won" || deal.phase === "lost";
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -33,6 +38,23 @@ export function DealEditForm({ deal }: Props) {
     <form onSubmit={handleSubmit}>
       <SectionCard className="p-3">
         {message && <p className="text-danger text-xs mb-2">{message}</p>}
+
+        <FormField label="フェーズ">
+          {isTerminal ? (
+            <p className="text-xs text-text-muted py-1">{phaseLabels[deal.phase]}（変更不可）</p>
+          ) : (
+            <Select name="phase" defaultValue="">
+              <option value="">変更しない</option>
+              {allPhases
+                .filter((p) => p !== deal.phase)
+                .map((p) => (
+                  <option key={p} value={p}>
+                    {phaseLabels[p]}
+                  </option>
+                ))}
+            </Select>
+          )}
+        </FormField>
 
         <FormField label="案件名">
           <Input name="title" defaultValue={deal.title} required />
