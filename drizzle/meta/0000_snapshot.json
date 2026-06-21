@@ -1,5 +1,5 @@
 {
-  "id": "6ee1e359-8725-43dd-a1c3-ade60fd5aa84",
+  "id": "3fc732a0-b73b-4b7e-909b-f4b7c62bf23f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -684,6 +684,87 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.deal_contacts": {
+      "name": "deal_contacts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "deal_id": {
+          "name": "deal_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "contact_id": {
+          "name": "contact_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "deal_contacts_deal_id_deals_id_fk": {
+          "name": "deal_contacts_deal_id_deals_id_fk",
+          "tableFrom": "deal_contacts",
+          "tableTo": "deals",
+          "columnsFrom": [
+            "deal_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "deal_contacts_contact_id_client_contacts_id_fk": {
+          "name": "deal_contacts_contact_id_client_contacts_id_fk",
+          "tableFrom": "deal_contacts",
+          "tableTo": "client_contacts",
+          "columnsFrom": [
+            "contact_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "deal_contacts_deal_contact_unique": {
+          "name": "deal_contacts_deal_contact_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "deal_id",
+            "contact_id"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.deals": {
       "name": "deals",
       "schema": "",
@@ -968,12 +1049,6 @@
           "name": "client_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
-        },
-        "contact_id": {
-          "name": "contact_id",
-          "type": "uuid",
-          "primaryKey": false,
           "notNull": false
         },
         "title": {
@@ -1008,8 +1083,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "request_id": {
-          "name": "request_id",
+        "conversion_request_id": {
+          "name": "conversion_request_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -1064,19 +1139,6 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "inquiries_contact_id_client_contacts_id_fk": {
-          "name": "inquiries_contact_id_client_contacts_id_fk",
-          "tableFrom": "inquiries",
-          "tableTo": "client_contacts",
-          "columnsFrom": [
-            "contact_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
         "inquiries_assignee_id_users_id_fk": {
           "name": "inquiries_assignee_id_users_id_fk",
           "tableFrom": "inquiries",
@@ -1090,12 +1152,12 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "inquiries_request_id_requests_id_fk": {
-          "name": "inquiries_request_id_requests_id_fk",
+        "inquiries_conversion_request_id_requests_id_fk": {
+          "name": "inquiries_conversion_request_id_requests_id_fk",
           "tableFrom": "inquiries",
           "tableTo": "requests",
           "columnsFrom": [
-            "request_id"
+            "conversion_request_id"
           ],
           "columnsTo": [
             "id"
@@ -1131,7 +1193,13 @@
           "name": "inquiry_id",
           "type": "uuid",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "deal_id": {
+          "name": "deal_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "type": {
           "name": "type",
@@ -1220,6 +1288,19 @@
           "tableTo": "inquiries",
           "columnsFrom": [
             "inquiry_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "meetings_deal_id_deals_id_fk": {
+          "name": "meetings_deal_id_deals_id_fk",
+          "tableFrom": "meetings",
+          "tableTo": "deals",
+          "columnsFrom": [
+            "deal_id"
           ],
           "columnsTo": [
             "id"
@@ -1403,6 +1484,18 @@
           "primaryKey": false,
           "notNull": true,
           "default": 1
+        },
+        "source_type": {
+          "name": "source_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "source_id": {
+          "name": "source_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {},
@@ -1819,7 +1912,7 @@
         "proposal_prep",
         "proposed",
         "negotiation",
-        "internal_approval",
+        "estimate_approval",
         "won",
         "lost"
       ]
