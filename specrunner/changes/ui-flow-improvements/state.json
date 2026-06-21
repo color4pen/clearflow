@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "511b0ffc-3327-4058-a7de-f27cb13dd77f",
   "createdAt": "2026-06-21T01:13:52.978Z",
-  "updatedAt": "2026-06-21T01:28:41.942Z",
+  "updatedAt": "2026-06-21T01:36:36.604Z",
   "request": {
     "title": "UI動線改善",
     "type": "spec-change",
@@ -33,11 +33,13 @@
       ]
     }
   ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 9,
+    "historyCount": 15,
     "stepCounts": {
       "request-review": 1,
-      "design": 1
+      "design": 1,
+      "spec-review": 1
     }
   }
 }
