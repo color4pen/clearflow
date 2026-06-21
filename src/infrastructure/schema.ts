@@ -382,7 +382,6 @@ export const contracts = pgTable(
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
-  (table) => [unique("contracts_deal_id_unique").on(table.dealId)]
 );
 
 // Invoices table (請求)
@@ -672,7 +671,7 @@ export const dealsRelations = relations(deals, ({ one, many }) => ({
   }),
   meetings: many(meetings),
   dealContacts: many(dealContacts),
-  contract: one(contracts),
+  contracts: many(contracts),
 }));
 
 export const dealContactsRelations = relations(dealContacts, ({ one }) => ({

@@ -74,18 +74,17 @@ export async function findById(
   return result[0] ? mapRow(result[0]) : null;
 }
 
-export async function findByDealId(
+export async function findAllByDealId(
   dealId: string,
   organizationId: string,
   tx?: Transaction
-): Promise<Contract | null> {
+): Promise<Contract[]> {
   const queryRunner = tx ?? db;
   const result = await queryRunner
     .select()
     .from(contracts)
-    .where(and(eq(contracts.dealId, dealId), eq(contracts.organizationId, organizationId)))
-    .limit(1);
-  return result[0] ? mapRow(result[0]) : null;
+    .where(and(eq(contracts.dealId, dealId), eq(contracts.organizationId, organizationId)));
+  return result.map(mapRow);
 }
 
 export async function findAllByOrganization(
