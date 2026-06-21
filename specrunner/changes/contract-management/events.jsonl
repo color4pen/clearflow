@@ -41,3 +41,9 @@
 {"type":"transition","ts":"2026-06-21T09:35:05.727Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-21T09:35:05.728Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-21T09:35:05.729Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-21T09:35:42.203Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"0adec9cf-8e93-45d0-a7a5-a7aba13e0e18","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-21T09:35:05.739Z","endedAt":"2026-06-21T09:35:40.763Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-21T09:35:40.763Z","outputs":[{"path":"specrunner/changes/contract-management","hash":null}],"inputs":[{"path":"specrunner/changes/contract-management/review-feedback-001.md","hash":"sha256:971b66459108e7681abe7053776a5e6d043afcbb389f39c895f3313f9c0d9df8"}]}
+{"type":"transition","ts":"2026-06-21T09:35:42.213Z","step":"step-transition","status":"ok","message":"code-fixer → custom-reviewers"}
+{"type":"transition","ts":"2026-06-21T09:35:42.216Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 1 started"}
+{"type":"transition","ts":"2026-06-21T09:35:42.236Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
