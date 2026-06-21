@@ -73,11 +73,12 @@
 
 - [ ] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/page.tsx` を作成する（Server Component）
 - [ ] `params` から `id`（dealId）と `meetingId` を取得する
-- [ ] `auth()` でセッションを取得し、`meetingRepository.findById(meetingId, organizationId)` で商談を取得する。見つからない場合は `notFound()`
+- [ ] `auth()` でセッションを取得し、`meetingRepository.findById(meetingId, organizationId)` で商談を取得する。見つからない場合は `notFound()`。取得した `meeting.dealId !== id` の場合も `notFound()` を返す（URL の dealId と商談の紐づけが一致しない場合のリソース帰属検証）
 - [ ] ツールバーに「商談詳細」のタイトルとパンくず（案件一覧 > 案件詳細 > 商談詳細）を表示する
 - [ ] 商談情報（種別・日時・場所）、参加者（社内・社外）、議事録、ヒアリング項目（hearing の場合のみ）、アクションアイテムを表示する
 - [ ] 表示構造は `inquiries/[id]/meetings/[meetingId]/page.tsx` に準じるが、編集機能（MeetingDetail Client Component）は含めない（表示のみ）
 - [ ] `meetingTypeLabels` は `labels.ts` から import する（引き合い側ではローカル定義されているが、共通化する）
+- [ ] `src/app/(dashboard)/inquiries/[id]/meetings/[meetingId]/page.tsx` のローカル `meetingTypeLabels` 定義を削除し、`labels.ts` からの import に統一する（既存ページとの並存を防ぐ）
 
 **Acceptance Criteria**:
 - `/deals/${dealId}/meetings/${meetingId}` にアクセスすると商談詳細が表示される
@@ -91,7 +92,7 @@
 
 ## T-06: 案件担当者のユースケースを追加（addDealContact, removeDealContact）
 
-- [ ] `src/application/usecases/addDealContact.ts` を作成する。引数: `{ dealId, contactId, role, organizationId, actorId }`。処理: `dealContactRepository.create` でテナント検証付きの担当者作成 + `auditLogRepository.create`（action: `deal_contact.create`, targetType: `deal_contact`）を同一トランザクション内で実行する。戻り値: `{ ok: true, dealContact } | { ok: false, reason: string }`
+- [ ] `src/application/usecases/addDealContact.ts` を作成する。引数: `{ dealId, contactId, role, organizationId, actorId }`。処理: `dealContactRepository.create` でテナント検証付きの担当者作成 + `auditLogRepository.create`（action: `deal_contact.create`, targetType: `deal_contact`）を同一トランザクション内で実行する。重複追加時（unique 制約違反）は `{ ok: false, reason: "この担当者はすでに登録されています" }` を返す。戻り値: `{ ok: true, dealContact } | { ok: false, reason: string }`
 - [ ] `src/application/usecases/removeDealContact.ts` を作成する。引数: `{ dealId, contactId, organizationId, actorId }`。処理: `dealContactRepository.deleteByDealAndContact` で削除 + `auditLogRepository.create`（action: `deal_contact.delete`）を実行する。`deleteByDealAndContact` は内部でテナント検証済み。戻り値: `{ ok: true } | { ok: false, reason: string }`
 - [ ] `src/application/usecases/index.ts` に両方を re-export する
 
@@ -107,13 +108,15 @@
 
 - [ ] `src/app/actions/dealContacts.ts` を新規作成する。`"use server"` ディレクティブを先頭に記述
 - [ ] `addDealContactAction(dealId: string, formData: FormData)` を追加する。セッション取得 → zod バリデーション（contactId: UUID 必須、role: `"key_person" | "decision_maker" | "technical" | "other"` の enum） → `addDealContact` UC 呼び出し → `revalidatePath(\`/deals/${dealId}\`)`。戻り値: `ActionResult`
-- [ ] `removeDealContactAction(dealId: string, formData: FormData)` を追加する。セッション取得 → `contactId` を FormData から取得 → `removeDealContact` UC 呼び出し → `revalidatePath(\`/deals/${dealId}\`)`。戻り値: `ActionResult`
+- [ ] `removeDealContactAction(dealId: string, formData: FormData)` を追加する。セッション取得 → zod バリデーション（`contactId: z.string().uuid()`）→ `checkRateLimit` → `removeDealContact` UC 呼び出し → `revalidatePath(\`/deals/${dealId}\`)`。戻り値: `ActionResult`
+- [ ] `addDealContactAction` にも `checkRateLimit` を適用する（既存 Action と同様）
 - [ ] `ActionResult` 型は `src/app/actions/requests.ts` から import する（既存パターン）
 
 **Acceptance Criteria**:
 - `addDealContactAction` と `removeDealContactAction` が export されている
 - 両 Action がセッションから organizationId を取得している
-- `addDealContactAction` に zod バリデーションが適用されている
+- `addDealContactAction` と `removeDealContactAction` の両方に zod バリデーションが適用されている
+- 両 Action に `checkRateLimit` が適用されている
 - revalidatePath で案件詳細ページが再検証される
 - `bun run build` が通る
 
