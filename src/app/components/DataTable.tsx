@@ -1,5 +1,6 @@
+"use client";
+
 import type { ReactNode } from "react";
-import Link from "next/link";
 
 type Column<T> = {
   key: string;
@@ -46,17 +47,21 @@ export function DataTable<T>({ columns, rows, rowKey, rowClass, onRowClick, rowH
               <tr
                 key={rowKey(row)}
                 className={`border border-border-light hover:bg-bg-surface-alt ${clickable ? "cursor-pointer" : ""} ${rowClass?.(row, idx) ?? (idx % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt")}`}
-                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                data-href={href ?? undefined}
+                onClick={
+                  onRowClick
+                    ? () => onRowClick(row)
+                    : href
+                      ? (e) => {
+                          if ((e.target as HTMLElement).closest("a,button")) return;
+                          window.location.href = href;
+                        }
+                      : undefined
+                }
               >
                 {columns.map((col) => (
                   <td key={col.key} className={`px-1 py-1 text-xs ${alignClass(col.align)}`}>
-                    {href ? (
-                      <Link href={href} className="block text-inherit no-underline">
-                        {col.render(row, idx)}
-                      </Link>
-                    ) : (
-                      col.render(row, idx)
-                    )}
+                    {col.render(row, idx)}
                   </td>
                 ))}
               </tr>
