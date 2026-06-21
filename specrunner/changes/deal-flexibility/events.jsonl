@@ -49,3 +49,9 @@
 {"type":"transition","ts":"2026-06-21T08:35:53.938Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-21T08:35:53.939Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-21T08:35:53.941Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-21T08:36:29.307Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"b22958e0-a2f7-4a70-9d9d-ce3c9ac776f5","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-21T08:35:53.955Z","endedAt":"2026-06-21T08:36:28.037Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-21T08:36:28.037Z","outputs":[{"path":"specrunner/changes/deal-flexibility","hash":null}],"inputs":[{"path":"specrunner/changes/deal-flexibility/review-feedback-001.md","hash":"sha256:0f9fb7f82985dd8c5da1553b80c40c83cfa9e848bc2f45608c6d006d79b7e25b"}]}
+{"type":"transition","ts":"2026-06-21T08:36:29.318Z","step":"step-transition","status":"ok","message":"code-fixer → custom-reviewers"}
+{"type":"transition","ts":"2026-06-21T08:36:29.320Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 1 started"}
+{"type":"transition","ts":"2026-06-21T08:36:29.338Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
