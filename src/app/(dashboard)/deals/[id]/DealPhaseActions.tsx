@@ -14,7 +14,7 @@ type Props = {
 };
 
 const nextPhaseOptions: Partial<
-  Record<DealPhase, Array<{ phase: DealPhase; label: string; variant: "primary" | "danger" }>>
+  Record<DealPhase, Array<{ phase: DealPhase; label: string; variant: "primary" | "success" | "danger" }>>
 > = {
   proposal_prep: [
     { phase: "proposed", label: "提案済に変更", variant: "primary" },
@@ -25,9 +25,15 @@ const nextPhaseOptions: Partial<
     { phase: "lost", label: "失注", variant: "danger" },
   ],
   negotiation: [
-    { phase: "won", label: "受注", variant: "primary" },
+    { phase: "won", label: "受注", variant: "success" },
     { phase: "lost", label: "失注", variant: "danger" },
   ],
+};
+
+const variantStyles = {
+  primary: "bg-primary text-white",
+  success: "bg-green-600 text-white",
+  danger: "border border-danger text-danger hover:bg-danger hover:text-white",
 };
 
 export function DealPhaseActions({ deal, canChangePhase }: Props) {
@@ -35,7 +41,6 @@ export function DealPhaseActions({ deal, canChangePhase }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // 終端状態ではボタンなし
   if (deal.phase === "won" || deal.phase === "lost") {
     return <p className="text-xs text-text-muted">このフェーズはこれ以上変更できません</p>;
   }
@@ -73,9 +78,7 @@ export function DealPhaseActions({ deal, canChangePhase }: Props) {
             type="button"
             disabled={isSubmitting}
             onClick={() => handleTransition(option.phase)}
-            className={`text-xs underline cursor-pointer disabled:opacity-50 ${
-              option.variant === "danger" ? "text-danger" : "text-primary"
-            }`}
+            className={`text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50 ${variantStyles[option.variant]}`}
           >
             {option.label}
           </button>
