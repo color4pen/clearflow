@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "9c9ca4cd-01b9-461f-be8f-dc6bdd1f98bd",
   "createdAt": "2026-06-21T09:52:21.183Z",
-  "updatedAt": "2026-06-21T10:28:54.474Z",
+  "updatedAt": "2026-06-21T10:39:11.084Z",
   "request": {
     "title": "請求管理",
     "type": "new-feature",
@@ -33,8 +33,9 @@
       ]
     }
   ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 33,
+    "historyCount": 39,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -42,7 +43,8 @@
       "spec-fixer": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 1,
+      "code-review": 1
     }
   }
 }
