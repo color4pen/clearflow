@@ -32,3 +32,8 @@ export { updateDeal } from "./updateDeal";
 export { addDealContact } from "./addDealContact";
 export { removeDealContact } from "./removeDealContact";
 export { createClientContact } from "./createClientContact";
+export { createContract } from "./createContract";
+export { updateContract } from "./updateContract";
+export { updateContractStatus } from "./updateContractStatus";
+export { listContracts } from "./listContracts";
+export { getContract } from "./getContract";

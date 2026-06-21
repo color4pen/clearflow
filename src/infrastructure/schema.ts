@@ -53,6 +53,12 @@ export const dealPhaseEnum = pgEnum("deal_phase", [
   "won",
   "lost",
 ]);
+export const contractStatusEnum = pgEnum("contract_status", [
+  "active",
+  "completed",
+  "cancelled",
+]);
+export const renewalTypeEnum = pgEnum("renewal_type", ["one_time", "recurring"]);
 
 // Organizations table
 export const organizations = pgTable("organizations", {
@@ -349,6 +355,35 @@ export const dealContacts = pgTable(
   ]
 );
 
+// Contracts table (契約)
+export const contracts = pgTable(
+  "contracts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    dealId: uuid("deal_id")
+      .notNull()
+      .references(() => deals.id),
+    clientId: uuid("client_id")
+      .notNull()
+      .references(() => clients.id),
+    title: text("title").notNull(),
+    contractType: text("contract_type"),
+    amount: integer("amount"),
+    startDate: timestamp("start_date"),
+    endDate: timestamp("end_date"),
+    paymentTerms: text("payment_terms"),
+    renewalType: renewalTypeEnum("renewal_type").notNull().default("one_time"),
+    renewalCycle: text("renewal_cycle"),
+    status: contractStatusEnum("status").notNull().default("active"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [unique("contracts_deal_id_unique").on(table.dealId)]
+);
+
 // Auth.js adapter tables
 export const accounts = pgTable(
   "accounts",
@@ -403,6 +438,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   meetings: many(meetings),
   deals: many(deals),
   dealContacts: many(dealContacts),
+  contracts: many(contracts),
 }));
 
 export const idempotencyKeysRelations = relations(idempotencyKeys, ({ one }) => ({
@@ -543,6 +579,7 @@ export const clientsRelations = relations(clients, ({ one, many }) => ({
   }),
   contacts: many(clientContacts),
   inquiries: many(inquiries),
+  contracts: many(contracts),
 }));
 
 export const clientContactsRelations = relations(clientContacts, ({ one }) => ({
@@ -613,6 +650,7 @@ export const dealsRelations = relations(deals, ({ one, many }) => ({
   }),
   meetings: many(meetings),
   dealContacts: many(dealContacts),
+  contract: one(contracts),
 }));
 
 export const dealContactsRelations = relations(dealContacts, ({ one }) => ({
@@ -623,5 +661,20 @@ export const dealContactsRelations = relations(dealContacts, ({ one }) => ({
   contact: one(clientContacts, {
     fields: [dealContacts.contactId],
     references: [clientContacts.id],
+  }),
+}));
+
+export const contractsRelations = relations(contracts, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [contracts.organizationId],
+    references: [organizations.id],
+  }),
+  deal: one(deals, {
+    fields: [contracts.dealId],
+    references: [deals.id],
+  }),
+  client: one(clients, {
+    fields: [contracts.clientId],
+    references: [clients.id],
   }),
 }));

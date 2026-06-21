@@ -20,6 +20,7 @@ import {
   meetings,
   deals,
   dealContacts,
+  contracts,
 } from "./schema";
 
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -38,6 +39,8 @@ async function seed() {
   await db.delete(approvalSteps);
   // deal_contacts must be deleted before deals
   await db.delete(dealContacts);
+  // contracts must be deleted before deals (FK: dealId)
+  await db.delete(contracts);
   // deals.inquiryId FK: deals must be deleted before inquiries
   await db.delete(deals);
   // meetings.inquiryId FK: meetings must be deleted before inquiries
@@ -911,6 +914,21 @@ async function seed() {
     { dealId: negotiationDeal.id, contactId: sakuraContact2.id, role: "technical" },
   ]);
   console.log("✅ Created deal contacts (8 total)");
+
+  // Create contract for won deal (DX推進プロジェクト)
+  await db.insert(contracts).values({
+    organizationId: org.id,
+    dealId: wonDeal.id,
+    clientId: techClient.id,
+    title: "DX推進プロジェクト",
+    contractType: "quasi_delegation",
+    amount: 30000000,
+    startDate: new Date("2026-07-01"),
+    endDate: new Date("2027-03-31"),
+    renewalType: "one_time",
+    status: "active",
+  });
+  console.log("✅ Created contract for won deal (DX推進プロジェクト)");
 
   console.log("\n🎉 Seed completed successfully!");
   console.log("\nLogin credentials:");
