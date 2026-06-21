@@ -52,11 +52,19 @@ describe("canTransition — 案件フェーズ遷移ルール", () => {
     expect(result).toBe(true);
   });
 
-  it("negotiation → estimate_approval が拒否される（フェーズ削除）", () => {
+  it("T-07: negotiation → estimate_approval が拒否される（フェーズ削除）", () => {
     // 準備 - estimate_approval は DealPhase から削除されたため型アサーションを使用
     // 実行 - canTransition を呼び出す
     const result = canTransition("negotiation", "estimate_approval" as DealPhase);
     // 検証 - false が返る（VALID_TRANSITIONS に含まれない）
+    expect(result).toBe(false);
+  });
+
+  it("T-08: estimate_approval → won が拒否される（フェーズ削除）", () => {
+    // 準備 - estimate_approval は DealPhase から削除されたため型アサーションを使用
+    // 実行 - canTransition を呼び出す
+    const result = canTransition("estimate_approval" as DealPhase, "won");
+    // 検証 - false が返る（VALID_TRANSITIONS に estimate_approval エントリが存在しない）
     expect(result).toBe(false);
   });
 
