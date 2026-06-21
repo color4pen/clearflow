@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "ce2c75f3-b0fd-4c01-b096-c4f8a5b6de4b",
   "createdAt": "2026-06-21T07:45:03.734Z",
-  "updatedAt": "2026-06-21T07:56:23.249Z",
+  "updatedAt": "2026-06-21T08:04:31.538Z",
   "request": {
     "title": "Deal の柔軟化",
     "type": "spec-change",
@@ -33,11 +33,13 @@
       ]
     }
   ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 9,
+    "historyCount": 15,
     "stepCounts": {
       "request-review": 1,
-      "design": 1
+      "design": 1,
+      "spec-review": 1
     }
   }
 }
