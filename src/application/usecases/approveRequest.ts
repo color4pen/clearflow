@@ -53,18 +53,26 @@ async function runPostApprovalLinkage(
         metadata: { sourceRequestId: request.id, inquiryId: sourceId },
       });
     } catch (err) {
-      await auditLogRepository.create({
-        action: "approval.linkage_failed",
-        targetType: "request",
-        targetId: request.id,
-        actorId,
-        organizationId,
-        metadata: {
-          sourceType,
-          sourceId,
-          error: err instanceof Error ? err.message : String(err),
-        },
-      });
+      // Audit log write is best-effort: if it fails, swallow silently so that
+      // the catch block itself cannot propagate an exception back to approveRequest.
+      // The approval transaction is already committed; D3 requires linkage failures
+      // to never affect the approval result.
+      try {
+        await auditLogRepository.create({
+          action: "approval.linkage_failed",
+          targetType: "request",
+          targetId: request.id,
+          actorId,
+          organizationId,
+          metadata: {
+            sourceType,
+            sourceId,
+            error: err instanceof Error ? err.message : String(err),
+          },
+        });
+      } catch {
+        // Discard: audit log write failure must not reach the caller.
+      }
     }
     return;
   }
@@ -92,18 +100,26 @@ async function runPostApprovalLinkage(
         metadata: { fromPhase: deal.phase, toPhase: "won", sourceRequestId: request.id },
       });
     } catch (err) {
-      await auditLogRepository.create({
-        action: "approval.linkage_failed",
-        targetType: "request",
-        targetId: request.id,
-        actorId,
-        organizationId,
-        metadata: {
-          sourceType,
-          sourceId,
-          error: err instanceof Error ? err.message : String(err),
-        },
-      });
+      // Audit log write is best-effort: if it fails, swallow silently so that
+      // the catch block itself cannot propagate an exception back to approveRequest.
+      // The approval transaction is already committed; D3 requires linkage failures
+      // to never affect the approval result.
+      try {
+        await auditLogRepository.create({
+          action: "approval.linkage_failed",
+          targetType: "request",
+          targetId: request.id,
+          actorId,
+          organizationId,
+          metadata: {
+            sourceType,
+            sourceId,
+            error: err instanceof Error ? err.message : String(err),
+          },
+        });
+      } catch {
+        // Discard: audit log write failure must not reach the caller.
+      }
     }
   }
 }

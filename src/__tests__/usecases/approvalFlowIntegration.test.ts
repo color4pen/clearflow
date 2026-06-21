@@ -217,4 +217,43 @@ describe("approveRequest 連動処理", () => {
     // ok: true の return が存在する
     expect(src).toContain("ok: true");
   });
+
+  it("TC-011: no-steps フローでも runPostApprovalLinkage が呼ばれる", async () => {
+    // 準備 - approveRequest ユースケースを読み込む
+    const src = await readSrc("application/usecases/approveRequest.ts");
+    // 実行・検証 - no-steps ブロック（steps.length === 0 判定以降、
+    // Multi-step コメント手前）内に runPostApprovalLinkage の呼び出しが存在する
+    const noStepsBlockIdx = src.indexOf("steps.length === 0");
+    expect(noStepsBlockIdx).toBeGreaterThan(-1);
+    const multiStepIdx = src.indexOf("// Multi-step approval flow");
+    expect(multiStepIdx).toBeGreaterThan(noStepsBlockIdx);
+    const noStepsBlock = src.slice(noStepsBlockIdx, multiStepIdx);
+    expect(noStepsBlock).toContain("runPostApprovalLinkage");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// requestRepository.mapRow の sourceType/sourceId マッピング検証（TC-005）
+// ---------------------------------------------------------------------------
+
+describe("requestRepository.mapRow sourceType/sourceId マッピング", () => {
+  it("TC-005: mapRow が sourceType を row.sourceType からマッピングする", async () => {
+    // 準備 - requestRepository.ts を読み込む
+    const src = await readSrc("infrastructure/repositories/requestRepository.ts");
+    // 実行・検証 - mapRow 関数内に sourceType: row.sourceType が存在する
+    const mapRowIdx = src.indexOf("function mapRow(");
+    expect(mapRowIdx).toBeGreaterThan(-1);
+    const mapRowBody = src.slice(mapRowIdx, mapRowIdx + 500);
+    expect(mapRowBody).toContain("sourceType: row.sourceType");
+  });
+
+  it("TC-005: mapRow が sourceId を row.sourceId からマッピングする", async () => {
+    // 準備 - requestRepository.ts を読み込む
+    const src = await readSrc("infrastructure/repositories/requestRepository.ts");
+    // 実行・検証 - mapRow 関数内に sourceId: row.sourceId が存在する
+    const mapRowIdx = src.indexOf("function mapRow(");
+    expect(mapRowIdx).toBeGreaterThan(-1);
+    const mapRowBody = src.slice(mapRowIdx, mapRowIdx + 500);
+    expect(mapRowBody).toContain("sourceId: row.sourceId");
+  });
 });
