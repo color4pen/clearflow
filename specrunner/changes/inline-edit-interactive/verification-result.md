@@ -6,8 +6,8 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 11.2s | 0 |
-| 2 | typecheck | passed | 1.1s | 0 |
+| 1 | build | passed | 12.2s | 0 |
+| 2 | typecheck | passed | 0.9s | 0 |
 | 3 | test | passed | 0.1s | 0 |
 | 4 | lint | passed | 3.9s | 0 |
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 5.9s
+✓ Compiled successfully in 7.1s
   Running TypeScript ...
-  Finished TypeScript in 3.3s ...
+  Finished TypeScript in 3.4s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/23) ...
   Generating static pages using 7 workers (5/23) 
   Generating static pages using 7 workers (11/23) 
   Generating static pages using 7 workers (17/23) 
-✓ Generating static pages using 7 workers (23/23) in 177ms
+✓ Generating static pages using 7 workers (23/23) in 187ms
   Finalizing page optimization ...
 
 Route (app)
@@ -98,24 +98,16 @@ bun test v1.3.12 (700fc117)
 
 $ bun test
 
- 546 pass
+ 550 pass
  0 fail
- 1108 expect() calls
-Ran 546 tests across 26 files. [106.00ms]
+ 1117 expect() calls
+Ran 550 tests across 27 files. [110.00ms]
 
 ```
 
 ## Phase: lint
 
 ```
-
-src/app/(dashboard)/deals/[id]/DealActionItemsSection.tsx
-  59:25  warning  'i' is defined but never used  @typescript-eslint/no-unused-vars
-
-src/app/(dashboard)/deals/[id]/page.tsx
-  13:10  warning  'DealEditForm' is defined but never used  @typescript-eslint/no-unused-vars
-  19:10  warning  'phaseLabels' is defined but never used   @typescript-eslint/no-unused-vars
-  21:15  warning  'Contract' is defined but never used      @typescript-eslint/no-unused-vars
 
 src/app/(dashboard)/inquiries/[id]/edit/page.tsx
   3:29  warning  'clientRepository' is defined but never used  @typescript-eslint/no-unused-vars
@@ -137,7 +129,7 @@ src/infrastructure/seed.ts
   562:10  warning  'inProgressInquiry1' is assigned a value but never used  @typescript-eslint/no-unused-vars
   572:10  warning  'inProgressInquiry2' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
-✖ 14 problems (0 errors, 14 warnings)
+✖ 10 problems (0 errors, 10 warnings)
 
 
 $ eslint
