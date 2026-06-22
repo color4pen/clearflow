@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createDealAction } from "@/app/actions/deals";
-import { FormField, Input, Select, Textarea, SectionCard } from "@/app/components";
+import { FormField, Input, Select, Textarea, SectionCard, preventEnterSubmit } from "@/app/components";
 import Link from "next/link";
 import type { CreateDealState } from "@/app/actions/deals";
 import type { Client } from "@/domain/models/client";
@@ -28,7 +28,7 @@ export function NewDealForm({ inquiryId, clients, users }: Props) {
   }, [state.dealId, router]);
 
   return (
-    <form action={formAction}>
+    <form action={formAction} onKeyDown={preventEnterSubmit}>
       <SectionCard className="p-4">
         {state.message && <p className="text-danger text-xs mb-2">{state.message}</p>}
 

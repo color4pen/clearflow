@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateContractAction } from "@/app/actions/contracts";
 import type { Contract } from "@/domain/models/contract";
+import { preventEnterSubmit } from "@/app/components";
 
 type Props = {
   contract: Contract;
@@ -32,7 +33,7 @@ export function ContractEditForm({ contract }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit} className="space-y-3">
       {errorMessage && (
         <p className="text-danger text-xs">{errorMessage}</p>
       )}

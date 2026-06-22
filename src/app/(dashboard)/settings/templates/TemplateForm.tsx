@@ -4,7 +4,7 @@ import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createTemplateAction, updateTemplateAction } from "@/app/actions/templates";
 import type { ApprovalTemplate, TemplateField } from "@/domain/models/approvalTemplate";
-import { FormField, Input, Select, SubmitButton, LinkButton } from "@/app/components";
+import { FormField, Input, Select, SubmitButton, LinkButton, preventEnterSubmit } from "@/app/components";
 
 type ActionState =
   | null
@@ -182,6 +182,7 @@ export function TemplateForm(props: Props) {
       <form
         action={formAction}
         onSubmit={handleSubmit}
+        onKeyDown={preventEnterSubmit}
         className="space-y-4"
       >
         {/* Hidden fields */}

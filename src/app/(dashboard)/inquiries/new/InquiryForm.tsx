@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createInquiryAction } from "@/app/actions/inquiries";
-import { FormField, Input, Select, Textarea, SubmitButton } from "@/app/components";
+import { FormField, Input, Select, Textarea, SubmitButton, preventEnterSubmit } from "@/app/components";
 import type { Client } from "@/domain/models/client";
 
 type Props = {
@@ -45,7 +45,7 @@ export function InquiryForm({ clients, users }: Props) {
   }
 
   return (
-    <form action={formAction} className="bg-bg-surface border border-border border-t-0 p-4">
+    <form action={formAction} onKeyDown={preventEnterSubmit} className="bg-bg-surface border border-border border-t-0 p-4">
       {state.message && (
         <p className="text-danger text-xs mb-3">{state.message}</p>
       )}

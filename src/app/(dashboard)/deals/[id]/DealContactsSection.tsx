@@ -2,6 +2,7 @@
 
 import { addDealContactAction, removeDealContactAction } from "@/app/actions/dealContacts";
 import { dealContactRoleLabels } from "@/app/(dashboard)/labels";
+import { preventEnterSubmit } from "@/app/components";
 import type { DealContact } from "@/domain/models/deal";
 import type { ClientContact } from "@/domain/models/client";
 
@@ -58,6 +59,7 @@ export function DealContactsSection({
                       action={async (formData: FormData) => {
                         await removeDealContactAction(dealId, formData);
                       }}
+                      onKeyDown={preventEnterSubmit}
                     >
                       <input type="hidden" name="contactId" value={dc.contactId} />
                       <button
@@ -81,6 +83,7 @@ export function DealContactsSection({
           action={async (formData: FormData) => {
             await addDealContactAction(dealId, formData);
           }}
+          onKeyDown={preventEnterSubmit}
           className="mt-3 flex gap-2 items-end"
         >
           <div className="flex flex-col gap-1">

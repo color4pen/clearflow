@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createMeetingAction } from "@/app/actions/meetings";
-import { FormField, Input, Select, Textarea, SubmitButton } from "@/app/components";
+import { FormField, Input, Select, Textarea, SubmitButton, preventEnterSubmit } from "@/app/components";
 import type { ActionItem, HearingData } from "@/domain/models/meeting";
 
 type ExternalAttendee = {
@@ -135,7 +135,7 @@ export function DealMeetingForm({ dealId, clientId }: Props) {
   }
 
   return (
-    <form action={formAction} className="bg-bg-surface border border-border border-t-0 p-4">
+    <form action={formAction} onKeyDown={preventEnterSubmit} className="bg-bg-surface border border-border border-t-0 p-4">
       <input type="hidden" name="dealId" value={dealId} />
 
       {state.message && (

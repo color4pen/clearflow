@@ -4,7 +4,7 @@ import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { updateInquiryAction } from "@/app/actions/inquiries";
 import type { UpdateInquiryState } from "@/app/actions/inquiries";
-import { SectionCard, FormField, Input, Select, Textarea, SubmitButton } from "@/app/components";
+import { SectionCard, FormField, Input, Select, Textarea, SubmitButton, preventEnterSubmit } from "@/app/components";
 import type { Client } from "@/domain/models/client";
 
 type Props = {
@@ -32,7 +32,7 @@ export function EditInquiryForm({ inquiry, clients, users }: Props) {
   }, [state.success, inquiry.id, router]);
 
   return (
-    <form action={formAction}>
+    <form action={formAction} onKeyDown={preventEnterSubmit}>
       <SectionCard className="p-3">
         {state.message && (
           <p className="text-danger text-xs mb-2">{state.message}</p>

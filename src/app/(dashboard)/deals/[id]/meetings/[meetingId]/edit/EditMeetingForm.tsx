@@ -4,12 +4,18 @@ import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { updateMeetingAction } from "@/app/actions/meetings";
-import { FormField, Input, Select, Textarea, SubmitButton } from "@/app/components";
+import { FormField, Input, Select, Textarea, SubmitButton, preventEnterSubmit } from "@/app/components";
 import type { Meeting, ActionItem, HearingData } from "@/domain/models/meeting";
+
+type ExternalAttendee = {
+  name: string;
+  registerAsContact: boolean;
+};
 
 type Props = {
   meeting: Meeting;
   dealId: string;
+  clientId: string | null;
 };
 
 const typeOptions = [
@@ -20,14 +26,16 @@ const typeOptions = [
   { value: "followup", label: "フォローアップ" },
 ];
 
-export function EditMeetingForm({ meeting, dealId }: Props) {
+export function EditMeetingForm({ meeting, dealId, clientId }: Props) {
   const router = useRouter();
   const [selectedType, setSelectedType] = useState(meeting.type);
   const [internalAttendees, setInternalAttendees] = useState<string[]>(
     meeting.attendees.internal.length > 0 ? meeting.attendees.internal : [""]
   );
-  const [externalAttendees, setExternalAttendees] = useState<string[]>(
-    meeting.attendees.external.length > 0 ? meeting.attendees.external : [""]
+  const [externalAttendees, setExternalAttendees] = useState<ExternalAttendee[]>(
+    meeting.attendees.external.length > 0
+      ? meeting.attendees.external.map((name) => ({ name, registerAsContact: false }))
+      : [{ name: "", registerAsContact: false }]
   );
   const [actionItems, setActionItems] = useState<ActionItem[]>(meeting.actionItems);
   const [hearingData, setHearingData] = useState<HearingData>(
@@ -45,7 +53,15 @@ export function EditMeetingForm({ meeting, dealId }: Props) {
     async (prev: Parameters<typeof updateMeetingAction>[0], formData: FormData) => {
       formData.set("meetingId", meeting.id);
       formData.set("internalAttendees", JSON.stringify(internalAttendees.filter((a) => a.trim())));
-      formData.set("externalAttendees", JSON.stringify(externalAttendees.filter((a) => a.trim())));
+      const filteredExternal = externalAttendees.filter((a) => a.name.trim());
+      formData.set("externalAttendees", JSON.stringify(filteredExternal.map((a) => a.name)));
+      formData.set(
+        "registerContacts",
+        JSON.stringify(filteredExternal.filter((a) => a.registerAsContact).map((a) => ({ name: a.name, register: a.registerAsContact })))
+      );
+      if (clientId) {
+        formData.set("clientId", clientId);
+      }
       formData.set("actionItems", JSON.stringify(actionItems));
 
       if (selectedType === "hearing") {
@@ -76,7 +92,7 @@ export function EditMeetingForm({ meeting, dealId }: Props) {
   }
 
   function addExternalAttendee() {
-    setExternalAttendees((prev) => [...prev, ""]);
+    setExternalAttendees((prev) => [...prev, { name: "", registerAsContact: false }]);
   }
 
   function removeExternalAttendee(idx: number) {
@@ -84,7 +100,13 @@ export function EditMeetingForm({ meeting, dealId }: Props) {
   }
 
   function updateExternalAttendee(idx: number, value: string) {
-    setExternalAttendees((prev) => prev.map((a, i) => (i === idx ? value : a)));
+    setExternalAttendees((prev) => prev.map((a, i) => (i === idx ? { ...a, name: value } : a)));
+  }
+
+  function toggleRegisterContact(idx: number) {
+    setExternalAttendees((prev) =>
+      prev.map((a, i) => (i === idx ? { ...a, registerAsContact: !a.registerAsContact } : a))
+    );
   }
 
   function addActionItem() {
@@ -112,7 +134,7 @@ export function EditMeetingForm({ meeting, dealId }: Props) {
     : "";
 
   return (
-    <form action={formAction} className="bg-bg-surface border border-border border-t-0 p-4">
+    <form action={formAction} onKeyDown={preventEnterSubmit} className="bg-bg-surface border border-border border-t-0 p-4">
       {state.message && (
         <p className="text-danger text-xs mb-3">{state.message}</p>
       )}
@@ -193,20 +215,33 @@ export function EditMeetingForm({ meeting, dealId }: Props) {
         <div>
           <p className="text-xs font-bold text-text mb-1">社外参加者</p>
           {externalAttendees.map((attendee, idx) => (
-            <div key={idx} className="flex gap-1 mb-1">
-              <Input
-                value={attendee}
-                onChange={(e) => updateExternalAttendee(idx, e.target.value)}
-                placeholder="氏名"
-              />
-              {externalAttendees.length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removeExternalAttendee(idx)}
-                  className="text-xs text-danger underline whitespace-nowrap"
-                >
-                  削除
-                </button>
+            <div key={idx} className="mb-1">
+              <div className="flex gap-1">
+                <Input
+                  value={attendee.name}
+                  onChange={(e) => updateExternalAttendee(idx, e.target.value)}
+                  placeholder="氏名"
+                />
+                {externalAttendees.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removeExternalAttendee(idx)}
+                    className="text-xs text-danger underline whitespace-nowrap"
+                  >
+                    削除
+                  </button>
+                )}
+              </div>
+              {clientId && attendee.name.trim() && (
+                <label className="flex items-center gap-1 mt-0.5 text-xs text-text-muted cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={attendee.registerAsContact}
+                    onChange={() => toggleRegisterContact(idx)}
+                    className="cursor-pointer"
+                  />
+                  顧客担当者として登録
+                </label>
               )}
             </div>
           ))}

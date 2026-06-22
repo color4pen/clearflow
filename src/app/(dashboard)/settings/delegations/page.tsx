@@ -2,11 +2,11 @@ import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
 import {
   listDelegationsAction,
-  createDelegationAction,
   deactivateDelegationAction,
 } from "@/app/actions/delegations";
 import { listOrganizationUsers } from "@/application/usecases";
-import { PageToolbar, DataTable, SectionCard, FormField, Select, Input, SubmitButton } from "@/app/components";
+import { PageToolbar, DataTable, SectionCard } from "@/app/components";
+import { AddDelegationForm } from "./AddDelegationForm";
 
 export default async function DelegationsSettingsPage() {
   const session = await auth();
@@ -108,67 +108,7 @@ export default async function DelegationsSettingsPage() {
           <span className="text-sm font-bold text-text">委譲を追加</span>
         </div>
         <div className="p-4">
-          <form
-            action={async (formData: FormData) => {
-              "use server";
-              await createDelegationAction(formData);
-            }}
-            className="space-y-4"
-          >
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <FormField label="委譲元ユーザー" htmlFor="fromUserId">
-                <Select
-                  id="fromUserId"
-                  name="fromUserId"
-                  required
-                  className="mt-1"
-                >
-                  <option value="">選択してください</option>
-                  {orgUsers.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.name}（{user.role}）
-                    </option>
-                  ))}
-                </Select>
-              </FormField>
-              <FormField label="委譲先ユーザー" htmlFor="toUserId">
-                <Select
-                  id="toUserId"
-                  name="toUserId"
-                  required
-                  className="mt-1"
-                >
-                  <option value="">選択してください</option>
-                  {orgUsers.map((user) => (
-                    <option key={user.id} value={user.id}>
-                      {user.name}（{user.role}）
-                    </option>
-                  ))}
-                </Select>
-              </FormField>
-              <FormField label="開始日" htmlFor="startDate">
-                <Input
-                  type="date"
-                  id="startDate"
-                  name="startDate"
-                  required
-                  className="mt-1"
-                />
-              </FormField>
-              <FormField label="終了日" htmlFor="endDate">
-                <Input
-                  type="date"
-                  id="endDate"
-                  name="endDate"
-                  required
-                  className="mt-1"
-                />
-              </FormField>
-            </div>
-            <div>
-              <SubmitButton>委譲を追加</SubmitButton>
-            </div>
-          </form>
+          <AddDelegationForm orgUsers={orgUsers.map((u) => ({ id: u.id, name: u.name, role: u.role }))} />
         </div>
       </SectionCard>
     </div>

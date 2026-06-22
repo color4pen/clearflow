@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createContractAction } from "@/app/actions/contracts";
-import { SectionCard, FormField, Input, Select } from "@/app/components";
+import { SectionCard, FormField, Input, Select, preventEnterSubmit } from "@/app/components";
 
 type DealInfo = {
   id: string;
@@ -43,7 +43,7 @@ export function NewContractForm({ deal }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit}>
       <SectionCard className="p-3">
         <input type="hidden" name="dealId" value={deal.id} />
 
