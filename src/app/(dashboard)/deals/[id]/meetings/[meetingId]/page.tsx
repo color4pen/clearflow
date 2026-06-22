@@ -139,7 +139,6 @@ export default async function DealMeetingDetailPage({
         {/* 右カラム: 議事録 + アクションアイテム */}
         <div className="space-y-2">
           <SectionCard className="p-3">
-            <h2 className="text-xs font-bold text-text mb-2">議事録</h2>
             <MeetingSummarySection
               meetingId={meetingId}
               dealId={id}
@@ -149,7 +148,6 @@ export default async function DealMeetingDetailPage({
           </SectionCard>
 
           <SectionCard className="p-3">
-            <h2 className="text-xs font-bold text-text mb-2">アクションアイテム</h2>
             <MeetingActionItemsSection
               meetingId={meetingId}
               dealId={id}

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { useDebouncedCallback } from "use-debounce";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { updateInquiryAction } from "@/app/actions/inquiries";
 import { Input, Select, Textarea, preventEnterSubmit } from "@/app/components";
 import { sourceLabels } from "@/app/(dashboard)/labels";
@@ -19,62 +19,66 @@ type Props = {
 };
 
 export function InquiryInfoSection({ inquiry, editable }: Props) {
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const formRef = useRef<HTMLFormElement>(null);
-  const savingRef = useRef(false);
-  const pendingRef = useRef(false);
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
 
-  const save = useCallback(async () => {
-    if (!formRef.current) return;
-    if (savingRef.current) {
-      pendingRef.current = true;
-      return;
-    }
-    savingRef.current = true;
-    setSaveStatus("saving");
-    const formData = new FormData(formRef.current);
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
     if (inquiry.clientId) formData.set("clientId", inquiry.clientId);
     if (inquiry.assigneeId) formData.set("assigneeId", inquiry.assigneeId);
 
     const result = await updateInquiryAction(inquiry.id, {}, formData);
-    savingRef.current = false;
-    if (result.success === false || result.message) {
-      setSaveStatus("error");
+    setIsSubmitting(false);
+
+    if (result.success) {
+      setIsDirty(false);
+      router.refresh();
     } else {
-      setSaveStatus("saved");
-      setTimeout(() => setSaveStatus("idle"), 2000);
+      setError(result.message ?? "保存に失敗しました");
     }
-    if (pendingRef.current) {
-      pendingRef.current = false;
-      save();
-    }
-  }, [inquiry.id, inquiry.clientId, inquiry.assigneeId]);
+  }
 
-  const debouncedSave = useDebouncedCallback(save, 800);
-
-  const handleSelectChange = useCallback(() => {
-    save();
-  }, [save]);
+  function markDirty() {
+    setIsDirty(true);
+  }
 
   return (
-    <form ref={formRef} onKeyDown={preventEnterSubmit}>
-      {saveStatus !== "idle" && (
-        <div className="flex justify-end mb-1">
-          {saveStatus === "saving" && <span className="text-text-muted text-xs">保存中...</span>}
-          {saveStatus === "saved" && <span className="text-green-600 text-xs">保存済み</span>}
-          {saveStatus === "error" && <span className="text-danger text-xs">保存に失敗しました</span>}
+    <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit}>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xs font-bold text-text">引き合い情報</h2>
+        <div className="flex items-center gap-2">
+          {error && <span className="text-danger text-xs">{error}</span>}
+          {editable && (
+            <button
+              type="submit"
+              disabled={!isDirty || isSubmitting}
+              className={`text-xs font-bold px-3 py-1 ${
+                isDirty
+                  ? "bg-green-600 text-white cursor-pointer"
+                  : "bg-bg-toolbar border border-border text-text-muted cursor-not-allowed"
+              } disabled:opacity-50`}
+            >
+              {isSubmitting ? "保存中..." : "保存"}
+            </button>
+          )}
         </div>
-      )}
+      </div>
       <div className="flex gap-2">
         <dt className="text-text-muted w-20 shrink-0">件名</dt>
         <dd className="text-text flex-1">
-          <Input name="title" defaultValue={inquiry.title} disabled={!editable} onChange={() => debouncedSave()} />
+          <Input name="title" defaultValue={inquiry.title} disabled={!editable} onChange={markDirty} />
         </dd>
       </div>
       <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-20 shrink-0">流入経路</dt>
         <dd className="text-text flex-1">
-          <Select name="source" defaultValue={inquiry.source} disabled={!editable} onChange={handleSelectChange}>
+          <Select name="source" defaultValue={inquiry.source} disabled={!editable} onChange={markDirty}>
             {Object.entries(sourceLabels).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
             ))}
@@ -89,7 +93,7 @@ export function InquiryInfoSection({ inquiry, editable }: Props) {
             defaultValue={inquiry.description ?? ""}
             disabled={!editable}
             rows={4}
-            onChange={() => debouncedSave()}
+            onChange={markDirty}
           />
         </dd>
       </div>

@@ -48,12 +48,6 @@ export default async function InquiryDetailPage({
       </div>
 
       <SectionCard className="p-3 mb-2">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xs font-bold text-text">引き合い情報</h2>
-          {canChangeStatus && !deal && (
-            <DeleteInquiryButton inquiryId={id} />
-          )}
-        </div>
         <dl className="text-xs space-y-1">
           <div className="flex gap-2">
             <dt className="text-text-muted w-20 shrink-0">ステータス</dt>
@@ -69,22 +63,29 @@ export default async function InquiryDetailPage({
               ) : "-"}
             </dd>
           </div>
-          <InquiryInfoSection
-            inquiry={{
-              id: inquiry.id,
-              title: inquiry.title,
-              source: inquiry.source,
-              description: inquiry.description,
-              clientId: inquiry.clientId,
-              assigneeId: inquiry.assigneeId ?? null,
-            }}
-            editable={editable}
-          />
+        </dl>
+        <InquiryInfoSection
+          inquiry={{
+            id: inquiry.id,
+            title: inquiry.title,
+            source: inquiry.source,
+            description: inquiry.description,
+            clientId: inquiry.clientId,
+            assigneeId: inquiry.assigneeId ?? null,
+          }}
+          editable={editable}
+        />
+        <dl className="text-xs space-y-1 mt-1">
           <div className="flex gap-2">
             <dt className="text-text-muted w-20 shrink-0">作成日</dt>
             <dd className="text-text">{inquiry.createdAt.toLocaleDateString("ja-JP")}</dd>
           </div>
         </dl>
+        {canChangeStatus && !deal && (
+          <div className="mt-2">
+            <DeleteInquiryButton inquiryId={id} />
+          </div>
+        )}
       </SectionCard>
 
       <SectionCard className="p-3 mb-2">

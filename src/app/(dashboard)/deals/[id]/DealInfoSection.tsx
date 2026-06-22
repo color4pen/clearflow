@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDebouncedCallback } from "use-debounce";
 import { updateDealAction } from "@/app/actions/deals";
 import { Input, Select, MoneyInput, preventEnterSubmit } from "@/app/components";
 import { phaseLabels, contractTypeLabels } from "@/app/(dashboard)/labels";
@@ -25,9 +24,10 @@ type Props = {
 
 export function DealInfoSection({ deal, editable }: Props) {
   const router = useRouter();
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [phase, setPhase] = useState(deal.phase);
-  const formRef = useRef<HTMLFormElement>(null);
+  const [isDirty, setIsDirty] = useState(false);
 
   const startDateStr = deal.estimatedStartDate
     ? deal.estimatedStartDate.toISOString().slice(0, 10)
@@ -35,34 +35,6 @@ export function DealInfoSection({ deal, editable }: Props) {
   const endDateStr = deal.estimatedEndDate
     ? deal.estimatedEndDate.toISOString().slice(0, 10)
     : "";
-
-  const savingRef = useRef(false);
-  const pendingRef = useRef(false);
-
-  const save = useCallback(async () => {
-    if (!formRef.current) return;
-    if (savingRef.current) {
-      pendingRef.current = true;
-      return;
-    }
-    savingRef.current = true;
-    setSaveStatus("saving");
-    const formData = new FormData(formRef.current);
-    const result = await updateDealAction(deal.id, formData);
-    savingRef.current = false;
-    if (result.success === false) {
-      setSaveStatus("error");
-    } else {
-      setSaveStatus("saved");
-      setTimeout(() => setSaveStatus("idle"), 2000);
-    }
-    if (pendingRef.current) {
-      pendingRef.current = false;
-      save();
-    }
-  }, [deal.id]);
-
-  const debouncedSave = useDebouncedCallback(save, 800);
 
   function handlePhaseChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const newValue = e.target.value;
@@ -79,27 +51,56 @@ export function DealInfoSection({ deal, editable }: Props) {
       }
     }
     setPhase(newValue);
-    save();
+    setIsDirty(true);
   }
 
-  const handleSelectChange = useCallback(() => {
-    save();
-  }, [save]);
+  function markDirty() {
+    setIsDirty(true);
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const result = await updateDealAction(deal.id, formData);
+    setIsSubmitting(false);
+
+    if (result.success) {
+      setIsDirty(false);
+      router.refresh();
+    } else {
+      setError(result.message ?? "保存に失敗しました");
+    }
+  }
 
   return (
-    <form ref={formRef} onKeyDown={preventEnterSubmit}>
-      {saveStatus !== "idle" && (
-        <div className="flex justify-end mb-1">
-          {saveStatus === "saving" && <span className="text-text-muted text-xs">保存中...</span>}
-          {saveStatus === "saved" && <span className="text-green-600 text-xs">保存済み</span>}
-          {saveStatus === "error" && <span className="text-danger text-xs">保存に失敗しました</span>}
+    <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit}>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xs font-bold text-text">案件情報</h2>
+        <div className="flex items-center gap-2">
+          {error && <span className="text-danger text-xs">{error}</span>}
+          {editable && (
+            <button
+              type="submit"
+              disabled={!isDirty || isSubmitting}
+              className={`text-xs font-bold px-3 py-1 ${
+                isDirty
+                  ? "bg-green-600 text-white cursor-pointer"
+                  : "bg-bg-toolbar border border-border text-text-muted cursor-not-allowed"
+              } disabled:opacity-50`}
+            >
+              {isSubmitting ? "保存中..." : "保存"}
+            </button>
+          )}
         </div>
-      )}
+      </div>
       <dl className="text-xs space-y-1">
         <div className="flex gap-2">
           <dt className="text-text-muted w-24 shrink-0">案件名</dt>
           <dd className="text-text flex-1">
-            <Input name="title" defaultValue={deal.title} disabled={!editable} onChange={() => debouncedSave()} />
+            <Input name="title" defaultValue={deal.title} disabled={!editable} onChange={markDirty} />
           </dd>
         </div>
         <div className="flex gap-2">
@@ -124,7 +125,7 @@ export function DealInfoSection({ deal, editable }: Props) {
               name="estimatedAmount"
               defaultValue={deal.estimatedAmount}
               disabled={!editable}
-              onBlurCapture={() => debouncedSave()}
+              onChange={markDirty}
             />
           </dd>
         </div>
@@ -136,7 +137,7 @@ export function DealInfoSection({ deal, editable }: Props) {
               name="estimatedStartDate"
               defaultValue={startDateStr}
               disabled={!editable}
-              onChange={() => debouncedSave()}
+              onChange={markDirty}
             />
           </dd>
         </div>
@@ -148,7 +149,7 @@ export function DealInfoSection({ deal, editable }: Props) {
               name="estimatedEndDate"
               defaultValue={endDateStr}
               disabled={!editable}
-              onChange={() => debouncedSave()}
+              onChange={markDirty}
             />
           </dd>
         </div>
@@ -159,7 +160,7 @@ export function DealInfoSection({ deal, editable }: Props) {
               name="contractType"
               defaultValue={deal.contractType ?? ""}
               disabled={!editable}
-              onChange={handleSelectChange}
+              onChange={markDirty}
             >
               <option value="">-</option>
               {Object.entries(contractTypeLabels).map(([value, label]) => (

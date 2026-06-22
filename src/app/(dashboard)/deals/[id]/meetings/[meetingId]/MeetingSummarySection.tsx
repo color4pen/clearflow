@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { useDebouncedCallback } from "use-debounce";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { updateMeetingAction } from "@/app/actions/meetings";
 import { Textarea } from "@/app/components";
 
@@ -13,60 +13,58 @@ type Props = {
 };
 
 export function MeetingSummarySection({ meetingId, dealId, summary, editable }: Props) {
+  const router = useRouter();
   const [value, setValue] = useState(summary ?? "");
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const savingRef = useRef(false);
-  const pendingTextRef = useRef<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
 
-  const save = useCallback(async (text: string) => {
-    if (savingRef.current) {
-      pendingTextRef.current = text;
-      return;
-    }
-    savingRef.current = true;
-    setSaveStatus("saving");
+  async function handleSave() {
+    setIsSubmitting(true);
+    setError(null);
     const formData = new FormData();
     formData.set("meetingId", meetingId);
     formData.set("dealId", dealId);
-    formData.set("summary", text);
+    formData.set("summary", value);
     const result = await updateMeetingAction({}, formData);
-    savingRef.current = false;
     const success = !result.message && !result.errors;
+    setIsSubmitting(false);
     if (success) {
-      setSaveStatus("saved");
-      setTimeout(() => setSaveStatus("idle"), 2000);
+      setIsDirty(false);
+      router.refresh();
     } else {
-      setSaveStatus("error");
+      setError(result.message ?? "保存に失敗しました");
     }
-    if (pendingTextRef.current !== null) {
-      const pending = pendingTextRef.current;
-      pendingTextRef.current = null;
-      save(pending);
-    }
-  }, [meetingId, dealId]);
-
-  const debouncedSave = useDebouncedCallback((text: string) => {
-    save(text);
-  }, 800);
-
-  function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
-    const newValue = e.target.value;
-    setValue(newValue);
-    debouncedSave(newValue);
   }
 
   return (
     <div>
-      {saveStatus !== "idle" && (
-        <div className="flex justify-end mb-1">
-          {saveStatus === "saving" && <span className="text-text-muted text-xs">保存中...</span>}
-          {saveStatus === "saved" && <span className="text-green-600 text-xs">保存済み</span>}
-          {saveStatus === "error" && <span className="text-danger text-xs">保存に失敗しました</span>}
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xs font-bold text-text">議事録</h2>
+        <div className="flex items-center gap-2">
+          {error && <span className="text-danger text-xs">{error}</span>}
+          {editable && (
+            <button
+              type="button"
+              disabled={!isDirty || isSubmitting}
+              onClick={handleSave}
+              className={`text-xs font-bold px-3 py-1 ${
+                isDirty
+                  ? "bg-green-600 text-white cursor-pointer"
+                  : "bg-bg-toolbar border border-border text-text-muted cursor-not-allowed"
+              } disabled:opacity-50`}
+            >
+              {isSubmitting ? "保存中..." : "保存"}
+            </button>
+          )}
         </div>
-      )}
+      </div>
       <Textarea
         value={value}
-        onChange={handleChange}
+        onChange={(e) => {
+          setValue(e.target.value);
+          setIsDirty(true);
+        }}
         placeholder="議事録を入力"
         rows={8}
         disabled={!editable}

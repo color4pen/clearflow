@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { useDebouncedCallback } from "use-debounce";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { updateContractAction } from "@/app/actions/contracts";
 import { Input, Select, MoneyInput, preventEnterSubmit } from "@/app/components";
 import { contractTypeLabels, renewalTypeLabels } from "@/app/(dashboard)/labels";
@@ -26,10 +26,10 @@ type Props = {
 };
 
 export function ContractInfoSection({ contract, editable }: Props) {
-  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
-  const formRef = useRef<HTMLFormElement>(null);
-  const savingRef = useRef(false);
-  const pendingRef = useRef(false);
+  const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
 
   const startDateStr = contract.startDate
     ? contract.startDate.toISOString().slice(0, 10)
@@ -38,54 +38,58 @@ export function ContractInfoSection({ contract, editable }: Props) {
     ? contract.endDate.toISOString().slice(0, 10)
     : "";
 
-  const save = useCallback(async () => {
-    if (!formRef.current) return;
-    if (savingRef.current) {
-      pendingRef.current = true;
-      return;
-    }
-    savingRef.current = true;
-    setSaveStatus("saving");
-    const formData = new FormData(formRef.current);
+  function markDirty() {
+    setIsDirty(true);
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
     const result = await updateContractAction(contract.id, formData);
-    savingRef.current = false;
-    if (result.success === false) {
-      setSaveStatus("error");
+    setIsSubmitting(false);
+
+    if (result.success) {
+      setIsDirty(false);
+      router.refresh();
     } else {
-      setSaveStatus("saved");
-      setTimeout(() => setSaveStatus("idle"), 2000);
+      setError(result.message ?? "保存に失敗しました");
     }
-    if (pendingRef.current) {
-      pendingRef.current = false;
-      save();
-    }
-  }, [contract.id]);
-
-  const debouncedSave = useDebouncedCallback(save, 800);
-
-  const handleSelectChange = useCallback(() => {
-    save();
-  }, [save]);
+  }
 
   return (
-    <form ref={formRef} onKeyDown={preventEnterSubmit}>
-      {saveStatus !== "idle" && (
-        <div className="flex justify-end mb-1">
-          {saveStatus === "saving" && <span className="text-text-muted text-xs">保存中...</span>}
-          {saveStatus === "saved" && <span className="text-green-600 text-xs">保存済み</span>}
-          {saveStatus === "error" && <span className="text-danger text-xs">保存に失敗しました</span>}
+    <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit}>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xs font-bold text-text">契約情報</h2>
+        <div className="flex items-center gap-2">
+          {error && <span className="text-danger text-xs">{error}</span>}
+          {editable && (
+            <button
+              type="submit"
+              disabled={!isDirty || isSubmitting}
+              className={`text-xs font-bold px-3 py-1 ${
+                isDirty
+                  ? "bg-green-600 text-white cursor-pointer"
+                  : "bg-bg-toolbar border border-border text-text-muted cursor-not-allowed"
+              } disabled:opacity-50`}
+            >
+              {isSubmitting ? "保存中..." : "保存"}
+            </button>
+          )}
         </div>
-      )}
+      </div>
       <div className="flex gap-2">
         <dt className="text-text-muted w-24 shrink-0">契約名</dt>
         <dd className="text-text flex-1">
-          <Input name="title" defaultValue={contract.title} disabled={!editable} placeholder="契約名を入力" onChange={() => debouncedSave()} />
+          <Input name="title" defaultValue={contract.title} disabled={!editable} placeholder="契約名を入力" onChange={markDirty} />
         </dd>
       </div>
       <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">契約種別</dt>
         <dd className="text-text flex-1">
-          <Select name="contractType" defaultValue={contract.contractType ?? ""} disabled={!editable} onChange={handleSelectChange}>
+          <Select name="contractType" defaultValue={contract.contractType ?? ""} disabled={!editable} onChange={markDirty}>
             <option value="">-</option>
             {Object.entries(contractTypeLabels).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
@@ -96,31 +100,31 @@ export function ContractInfoSection({ contract, editable }: Props) {
       <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">金額</dt>
         <dd className="text-text flex-1">
-          <MoneyInput name="amount" defaultValue={contract.amount} disabled={!editable} onBlurCapture={() => debouncedSave()} />
+          <MoneyInput name="amount" defaultValue={contract.amount} disabled={!editable} onChange={markDirty} />
         </dd>
       </div>
       <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">開始日</dt>
         <dd className="text-text flex-1">
-          <Input type="date" name="startDate" defaultValue={startDateStr} disabled={!editable} onChange={() => debouncedSave()} />
+          <Input type="date" name="startDate" defaultValue={startDateStr} disabled={!editable} onChange={markDirty} />
         </dd>
       </div>
       <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">終了日</dt>
         <dd className="text-text flex-1">
-          <Input type="date" name="endDate" defaultValue={endDateStr} disabled={!editable} onChange={() => debouncedSave()} />
+          <Input type="date" name="endDate" defaultValue={endDateStr} disabled={!editable} onChange={markDirty} />
         </dd>
       </div>
       <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">支払条件</dt>
         <dd className="text-text flex-1">
-          <Input name="paymentTerms" defaultValue={contract.paymentTerms ?? ""} disabled={!editable} placeholder="例: 月末締め翌月払い" onChange={() => debouncedSave()} />
+          <Input name="paymentTerms" defaultValue={contract.paymentTerms ?? ""} disabled={!editable} placeholder="例: 月末締め翌月払い" onChange={markDirty} />
         </dd>
       </div>
       <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">更新種別</dt>
         <dd className="text-text flex-1">
-          <Select name="renewalType" defaultValue={contract.renewalType} disabled={!editable} onChange={handleSelectChange}>
+          <Select name="renewalType" defaultValue={contract.renewalType} disabled={!editable} onChange={markDirty}>
             {Object.entries(renewalTypeLabels).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
             ))}
@@ -130,7 +134,7 @@ export function ContractInfoSection({ contract, editable }: Props) {
       <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">更新サイクル</dt>
         <dd className="text-text flex-1">
-          <Input name="renewalCycle" defaultValue={contract.renewalCycle ?? ""} disabled={!editable} placeholder="例: 1年" onChange={() => debouncedSave()} />
+          <Input name="renewalCycle" defaultValue={contract.renewalCycle ?? ""} disabled={!editable} placeholder="例: 1年" onChange={markDirty} />
         </dd>
       </div>
       <div className="flex gap-2 mt-1">

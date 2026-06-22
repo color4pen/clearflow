@@ -77,13 +77,12 @@ export default async function DealDetailPage({
 
       <div className="grid grid-cols-2 gap-2 mb-3">
         <SectionCard className="p-3">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-xs font-bold text-text">案件情報</h2>
-            {canChangePhase && dealMeetings.length === 0 && dealContracts.length === 0 && (
-              <DeleteDealButton dealId={deal.id} />
-            )}
-          </div>
           <DealInfoSection deal={deal} editable={canChangePhase} />
+          {canChangePhase && dealMeetings.length === 0 && dealContracts.length === 0 && (
+            <div className="mt-2">
+              <DeleteDealButton dealId={deal.id} />
+            </div>
+          )}
         </SectionCard>
 
         <SectionCard className="p-3">
