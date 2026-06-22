@@ -1345,8 +1345,15 @@ describe("Tenant isolation — delete operations", () => {
 
   it("deleteDeal checks for meetings and contracts before deleting", async () => {
     const content = await readSrc("application/usecases/deleteDeal.ts");
-    expect(content).toContain("findAllByDeal");
-    expect(content).toContain("findAllByDealId");
+    const findMeetingIdx = content.indexOf("findAllByDeal");
+    const findContractIdx = content.indexOf("findAllByDealId");
+    const deleteIdx = content.indexOf("deleteById");
+    expect(findMeetingIdx).toBeGreaterThan(-1);
+    expect(findContractIdx).toBeGreaterThan(-1);
+    expect(deleteIdx).toBeGreaterThan(-1);
+    // findAllByDeal / findAllByDealId（商談・契約存在チェック）が deleteById より前に呼ばれていることを確認する
+    expect(findMeetingIdx).toBeLessThan(deleteIdx);
+    expect(findContractIdx).toBeLessThan(deleteIdx);
   });
 
   it("deleteContract checks for invoices before deleting", async () => {
