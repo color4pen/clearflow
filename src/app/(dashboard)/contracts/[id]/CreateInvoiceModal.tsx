@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createInvoiceAction } from "@/app/actions/invoices";
 import { FormField, Input, Textarea, preventEnterSubmit } from "@/app/components/FormField";
+import { MoneyInput } from "@/app/components/MoneyInput";
 
 type Props = {
   contractId: string;
@@ -77,14 +78,9 @@ export function CreateInvoiceModal({ contractId }: Props) {
               </FormField>
 
               <FormField label="金額（円）" htmlFor="invoice-amount">
-                <Input
-                  id="invoice-amount"
+                <MoneyInput
                   name="amount"
-                  type="number"
-                  required
-                  min={1}
-                  step={1}
-                  placeholder="1000000"
+                  placeholder="1,000,000"
                 />
               </FormField>
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateContractAction } from "@/app/actions/contracts";
 import type { Contract } from "@/domain/models/contract";
-import { preventEnterSubmit } from "@/app/components";
+import { preventEnterSubmit, MoneyInput } from "@/app/components";
 
 type Props = {
   contract: Contract;
@@ -72,13 +72,10 @@ export function ContractEditForm({ contract }: Props) {
         <label className="text-xs text-text-muted" htmlFor="amount">
           金額（円）
         </label>
-        <input
-          id="amount"
+        <MoneyInput
           name="amount"
-          type="number"
-          defaultValue={contract.amount ?? ""}
-          min={0}
-          className="w-full border border-border px-2 py-1 text-sm text-text bg-bg-input"
+          defaultValue={contract.amount}
+          className="text-sm bg-bg-input"
         />
       </div>
 

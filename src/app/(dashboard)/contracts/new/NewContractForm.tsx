@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createContractAction } from "@/app/actions/contracts";
-import { SectionCard, FormField, Input, Select, preventEnterSubmit } from "@/app/components";
+import { SectionCard, FormField, Input, Select, preventEnterSubmit, MoneyInput } from "@/app/components";
 
 type DealInfo = {
   id: string;
@@ -65,11 +65,9 @@ export function NewContractForm({ deal }: Props) {
         </FormField>
 
         <FormField label="金額（円）">
-          <Input
+          <MoneyInput
             name="amount"
-            type="number"
-            defaultValue={deal.estimatedAmount ?? ""}
-            min={0}
+            defaultValue={deal.estimatedAmount}
           />
         </FormField>
 

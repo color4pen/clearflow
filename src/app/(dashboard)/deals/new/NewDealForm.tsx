@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createDealAction } from "@/app/actions/deals";
-import { FormField, Input, Select, Textarea, SectionCard, preventEnterSubmit } from "@/app/components";
+import { FormField, Input, Select, Textarea, SectionCard, preventEnterSubmit, MoneyInput } from "@/app/components";
 import Link from "next/link";
 import type { CreateDealState } from "@/app/actions/deals";
 import type { Client } from "@/domain/models/client";
@@ -72,7 +72,7 @@ export function NewDealForm({ inquiryId, clients, users }: Props) {
         </FormField>
 
         <FormField label="想定金額" error={state.errors?.estimatedAmount?.[0]}>
-          <Input name="estimatedAmount" type="number" />
+          <MoneyInput name="estimatedAmount" />
         </FormField>
 
         <FormField label="想定開始日" error={state.errors?.estimatedStartDate?.[0]}>

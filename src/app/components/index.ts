@@ -3,3 +3,4 @@ export { DataTable } from "./DataTable";
 export { FormField, Input, Select, Textarea, preventEnterSubmit } from "./FormField";
 export { LinkButton, SubmitButton } from "./LinkButton";
 export { SectionCard } from "./SectionCard";
+export { MoneyInput } from "./MoneyInput";
