@@ -44,13 +44,14 @@ export async function deleteDeal(data: {
       if (deal.inquiryId) {
         const inquiry = await inquiryRepository.findById(deal.inquiryId, data.organizationId, tx);
         if (inquiry) {
-          await inquiryRepository.updateStatus(
+          const updated = await inquiryRepository.updateStatus(
             deal.inquiryId,
             data.organizationId,
             "new",
             inquiry.version,
             tx
           );
+          if (!updated) throw new Error("引き合いのステータス更新に失敗しました");
         }
       }
 
