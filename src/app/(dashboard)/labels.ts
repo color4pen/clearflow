@@ -1,6 +1,5 @@
 export const statusLabels: Record<string, string> = {
   new: "新規",
-  in_progress: "対応中",
   converted: "案件化済",
   declined: "見送り",
 };

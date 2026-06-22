@@ -35,7 +35,6 @@ export const approvalStepStatusEnum = pgEnum("approval_step_status", [
 ]);
 export const inquiryStatusEnum = pgEnum("inquiry_status", [
   "new",
-  "in_progress",
   "converted",
   "declined",
 ]);
@@ -287,9 +286,7 @@ export const meetings = pgTable("meetings", {
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id),
-  // inquiryId と dealId のどちらか一方は必須（アプリケーション層で検証）
-  inquiryId: uuid("inquiry_id").references(() => inquiries.id),
-  dealId: uuid("deal_id").references(() => deals.id),
+  dealId: uuid("deal_id").notNull().references(() => deals.id),
   type: meetingTypeEnum("type").notNull(),
   date: timestamp("date").notNull(),
   location: text("location"),
@@ -623,7 +620,6 @@ export const inquiriesRelations = relations(inquiries, ({ one, many }) => ({
     fields: [inquiries.assigneeId],
     references: [users.id],
   }),
-  meetings: many(meetings),
   deals: many(deals),
 }));
 
@@ -631,10 +627,6 @@ export const meetingsRelations = relations(meetings, ({ one }) => ({
   organization: one(organizations, {
     fields: [meetings.organizationId],
     references: [organizations.id],
-  }),
-  inquiry: one(inquiries, {
-    fields: [meetings.inquiryId],
-    references: [inquiries.id],
   }),
   deal: one(deals, {
     fields: [meetings.dealId],

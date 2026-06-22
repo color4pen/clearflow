@@ -1,4 +1,4 @@
-export type InquiryStatus = "new" | "in_progress" | "converted" | "declined";
+export type InquiryStatus = "new" | "converted" | "declined";
 
 export type InquirySource = "web" | "phone" | "referral" | "exhibition" | "other";
 

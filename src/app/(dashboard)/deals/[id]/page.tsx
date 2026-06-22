@@ -34,9 +34,7 @@ export default async function DealDetailPage({
   // 引き合いは inquiryId がある場合のみ取得する
   const [inquiry, dealMeetings, dealContacts, dealContracts] = await Promise.all([
     deal.inquiryId ? inquiryRepository.findById(deal.inquiryId, organizationId) : null,
-    deal.inquiryId
-      ? meetingRepository.findAllByInquiryOrDeal(deal.inquiryId, organizationId)
-      : meetingRepository.findAllByDeal(deal.id, organizationId),
+    meetingRepository.findAllByDeal(deal.id, organizationId),
     dealContactRepository.findByDeal(deal.id, organizationId),
     contractRepository.findAllByDealId(deal.id, organizationId),
   ]);
@@ -274,11 +272,7 @@ export default async function DealDetailPage({
                 header: "",
                 render: (row) => (
                   <Link
-                    href={
-                      row.inquiryId
-                        ? `/inquiries/${row.inquiryId}/meetings/${row.id}`
-                        : `/deals/${id}/meetings/${row.id}`
-                    }
+                    href={`/deals/${id}/meetings/${row.id}`}
                     className="text-primary underline text-xs"
                   >
                     詳細
@@ -288,11 +282,7 @@ export default async function DealDetailPage({
             ]}
             rows={dealMeetings}
             rowKey={(row) => row.id}
-            rowHref={(row) =>
-              row.inquiryId
-                ? `/inquiries/${row.inquiryId}/meetings/${row.id}`
-                : `/deals/${id}/meetings/${row.id}`
-            }
+            rowHref={(row) => `/deals/${id}/meetings/${row.id}`}
           />
         )}
       </SectionCard>

@@ -122,7 +122,7 @@ export async function updateInquiryStatusAction(
     inquiryId,
     organizationId: session.user.organizationId,
     actorId: session.user.id,
-    newStatus: newStatus as "new" | "in_progress" | "converted" | "declined",
+    newStatus: newStatus as "new" | "converted" | "declined",
   });
 
   if (!result.ok) {

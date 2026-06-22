@@ -20,7 +20,6 @@ export default async function InquiriesPage({
     : allInquiries;
 
   const newCount = allInquiries.filter((i) => i.status === "new").length;
-  const inProgressCount = allInquiries.filter((i) => i.status === "in_progress").length;
   const convertedCount = allInquiries.filter((i) => i.status === "converted").length;
   const declinedCount = allInquiries.filter((i) => i.status === "declined").length;
 
@@ -45,8 +44,6 @@ export default async function InquiriesPage({
           <Link href="/inquiries" className={filterLinkClass(undefined)}>全て {allInquiries.length}</Link>
           {" · "}
           <Link href="?status=new" className={filterLinkClass("new")}>新規 {newCount}</Link>
-          {" · "}
-          <Link href="?status=in_progress" className={filterLinkClass("in_progress")}>対応中 {inProgressCount}</Link>
           {" · "}
           <Link href="?status=converted" className={filterLinkClass("converted")}>案件化済 {convertedCount}</Link>
           {" · "}

@@ -44,10 +44,10 @@ async function seed() {
   await db.delete(invoices);
   // contracts must be deleted before deals (FK: dealId)
   await db.delete(contracts);
+  // meetings.dealId FK: meetings must be deleted before deals
+  await db.delete(meetings);
   // deals.inquiryId FK: deals must be deleted before inquiries
   await db.delete(deals);
-  // meetings.inquiryId FK: meetings must be deleted before inquiries
-  await db.delete(meetings);
   await db.delete(inquiries);
   await db.delete(clientContacts);
   await db.delete(clients);
@@ -565,7 +565,7 @@ async function seed() {
     title: "工事管理ツールの導入検討",
     description: "工事進捗の可視化と承認フロー整備が課題",
     source: "phone",
-    status: "in_progress",
+    status: "new",
     assigneeId: managerUser.id,
   }).returning();
 
@@ -575,7 +575,7 @@ async function seed() {
     title: "リスク管理ダッシュボード構築",
     description: "ポートフォリオのリスク指標をリアルタイム可視化したい",
     source: "referral",
-    status: "in_progress",
+    status: "new",
     assigneeId: adminUser.id,
   }).returning();
 
@@ -635,122 +635,8 @@ async function seed() {
     source: "web",
     status: "declined",
   });
-  console.log("✅ Created inquiries (10 total: new×2, in_progress×2, converted×5, declined×1)");
+  console.log("✅ Created inquiries (10 total: new×4, converted×5, declined×1)");
 
-  // Create meetings (引き合いフェーズの商談)
-  await db.insert(meetings).values({
-    organizationId: org.id,
-    inquiryId: newInquiry1.id,
-    type: "hearing",
-    date: new Date("2026-05-10T14:00:00"),
-    location: "株式会社テック商事 本社会議室",
-    attendees: {
-      internal: [managerUser.name, memberUser.name],
-      external: ["山田 太郎"],
-    },
-    summary: "初回ヒアリング実施。基幹システム老朽化の課題と移行要件を確認した。",
-    actionItems: [
-      { description: "要件定義書の初稿を作成する", assignee: memberUser.name, dueDate: "2026-05-24", done: false },
-      { description: "クラウド移行費用の概算見積を提示する", assignee: managerUser.name, dueDate: "2026-05-31", done: false },
-    ],
-    hearingData: {
-      challenge: "基幹システムの老朽化により保守コストが増大",
-      budget: "3000万円程度",
-      decisionMaker: "情報システム部長",
-      timeline: "来期上期（2027年4月〜）",
-      competitors: "B社、C社が提案予定",
-      notes: null,
-    },
-    createdById: managerUser.id,
-  });
-
-  await db.insert(meetings).values({
-    organizationId: org.id,
-    inquiryId: inProgressInquiry1.id,
-    type: "hearing",
-    date: new Date("2026-04-15T10:00:00"),
-    location: "大和建設株式会社 第1会議室",
-    attendees: {
-      internal: [managerUser.name],
-      external: ["田中 一郎"],
-    },
-    summary: "初回ヒアリング。工事進捗管理の現状課題をヒアリングした。",
-    actionItems: [
-      { description: "他社事例をまとめて次回提示する", assignee: managerUser.name, dueDate: "2026-04-30", done: true },
-    ],
-    hearingData: {
-      challenge: "工事進捗の可視化と承認フロー整備が課題",
-      budget: "1500万円〜2000万円",
-      decisionMaker: "取締役 工事本部長",
-      timeline: "今期中（2026年度内）",
-      competitors: "現状なし",
-      notes: "既存のExcel管理から脱却したい",
-    },
-    createdById: managerUser.id,
-  });
-
-  await db.insert(meetings).values({
-    organizationId: org.id,
-    inquiryId: inProgressInquiry1.id,
-    type: "proposal",
-    date: new Date("2026-05-20T10:00:00"),
-    location: "大和建設株式会社 第2会議室",
-    attendees: {
-      internal: [managerUser.name, memberUser.name],
-      external: ["田中 一郎", "佐藤 次郎"],
-    },
-    summary: "工事管理ツールの提案書を提示。承認フロー機能を中心にデモを実施した。",
-    actionItems: [
-      { description: "カスタマイズ要件をまとめた提案書改訂版を提出する", assignee: managerUser.name, dueDate: "2026-06-05", done: false },
-    ],
-    hearingData: null,
-    createdById: managerUser.id,
-  });
-
-  await db.insert(meetings).values({
-    organizationId: org.id,
-    inquiryId: inProgressInquiry2.id,
-    type: "hearing",
-    date: new Date("2026-05-25T15:00:00"),
-    location: "オンライン（Teams）",
-    attendees: {
-      internal: [adminUser.name, memberUser.name],
-      external: ["渡辺 浩二", "伊藤 恵"],
-    },
-    summary: "リスク管理ダッシュボードの要件ヒアリング。リアルタイム性と可視化の粒度を確認。",
-    actionItems: [
-      { description: "技術検証の結果レポートを提出する", assignee: memberUser.name, dueDate: "2026-06-08", done: false },
-      { description: "概算見積を作成する", assignee: adminUser.name, dueDate: "2026-06-15", done: false },
-    ],
-    hearingData: {
-      challenge: "リスク指標のリアルタイム監視ができていない",
-      budget: "5000万円〜1億円",
-      decisionMaker: "CTO",
-      timeline: "来期（2027年4月〜）",
-      competitors: "外資系コンサル1社が提案中",
-      notes: "セキュリティ要件が厳格。オンプレミス or プライベートクラウドが条件",
-    },
-    createdById: adminUser.id,
-  });
-
-  await db.insert(meetings).values({
-    organizationId: org.id,
-    inquiryId: convertedInquiry2.id,
-    type: "followup",
-    date: new Date("2026-06-15T11:00:00"),
-    location: "株式会社テック商事 本社",
-    attendees: {
-      internal: [adminUser.name],
-      external: ["山田 太郎"],
-    },
-    summary: "受注後のフォローアップ訪問。プロジェクト開始スケジュールを確認した。",
-    actionItems: [
-      { description: "キックオフ会議の日程を調整する", assignee: adminUser.name, dueDate: "2026-06-20", done: false },
-    ],
-    hearingData: null,
-    createdById: adminUser.id,
-  });
-  console.log("✅ Created inquiry meetings (5 total)");
 
   // Create deals (各フェーズを網羅)
   const [wonDeal] = await db.insert(deals).values({
@@ -884,7 +770,7 @@ async function seed() {
     hearingData: null,
     createdById: managerUser.id,
   });
-  console.log("✅ Created deal meetings (3 total)");
+  console.log("✅ Created deal meetings (initial 3)");
 
   // Create deal meetings for new deals
   await db.insert(meetings).values({
@@ -904,7 +790,94 @@ async function seed() {
     hearingData: null,
     createdById: adminUser.id,
   });
-  console.log("✅ Created deal meetings (4 total)");
+  // 案件フェーズ前の商談（inquiryId 廃止により対応する案件に紐づけ直し）
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    dealId: wonDeal2.id,
+    type: "hearing",
+    date: new Date("2026-04-15T10:00:00"),
+    location: "大和建設株式会社 第1会議室",
+    attendees: {
+      internal: [managerUser.name],
+      external: ["田中 一郎"],
+    },
+    summary: "初回ヒアリング。工事進捗管理の現状課題をヒアリングした。",
+    actionItems: [
+      { description: "他社事例をまとめて次回提示する", assignee: managerUser.name, dueDate: "2026-04-30", done: true },
+    ],
+    hearingData: {
+      challenge: "工事進捗の可視化と承認フロー整備が課題",
+      budget: "1500万円〜2000万円",
+      decisionMaker: "取締役 工事本部長",
+      timeline: "今期中（2026年度内）",
+      competitors: "現状なし",
+      notes: "既存のExcel管理から脱却したい",
+    },
+    createdById: managerUser.id,
+  });
+
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    dealId: wonDeal2.id,
+    type: "proposal",
+    date: new Date("2026-05-20T10:00:00"),
+    location: "大和建設株式会社 第2会議室",
+    attendees: {
+      internal: [managerUser.name, memberUser.name],
+      external: ["田中 一郎", "佐藤 次郎"],
+    },
+    summary: "工事管理ツールの提案書を提示。承認フロー機能を中心にデモを実施した。",
+    actionItems: [
+      { description: "カスタマイズ要件をまとめた提案書改訂版を提出する", assignee: managerUser.name, dueDate: "2026-06-05", done: false },
+    ],
+    hearingData: null,
+    createdById: managerUser.id,
+  });
+
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    dealId: prepDeal.id,
+    type: "hearing",
+    date: new Date("2026-05-25T15:00:00"),
+    location: "オンライン（Teams）",
+    attendees: {
+      internal: [adminUser.name, memberUser.name],
+      external: ["渡辺 浩二", "伊藤 恵"],
+    },
+    summary: "リスク管理ダッシュボードの要件ヒアリング。リアルタイム性と可視化の粒度を確認。",
+    actionItems: [
+      { description: "技術検証の結果レポートを提出する", assignee: memberUser.name, dueDate: "2026-06-08", done: false },
+      { description: "概算見積を作成する", assignee: adminUser.name, dueDate: "2026-06-15", done: false },
+    ],
+    hearingData: {
+      challenge: "リスク指標のリアルタイム監視ができていない",
+      budget: "5000万円〜1億円",
+      decisionMaker: "CTO",
+      timeline: "来期（2027年4月〜）",
+      competitors: "外資系コンサル1社が提案中",
+      notes: "セキュリティ要件が厳格。オンプレミス or プライベートクラウドが条件",
+    },
+    createdById: adminUser.id,
+  });
+
+  await db.insert(meetings).values({
+    organizationId: org.id,
+    dealId: wonDeal.id,
+    type: "followup",
+    date: new Date("2026-06-15T11:00:00"),
+    location: "株式会社テック商事 本社",
+    attendees: {
+      internal: [adminUser.name],
+      external: ["山田 太郎"],
+    },
+    summary: "受注後のフォローアップ訪問。プロジェクト開始スケジュールを確認した。",
+    actionItems: [
+      { description: "キックオフ会議の日程を調整する", assignee: adminUser.name, dueDate: "2026-06-20", done: false },
+    ],
+    hearingData: null,
+    createdById: adminUser.id,
+  });
+  console.log("✅ Created deal meetings (8 total)");
 
   // Create deal contacts
   await db.insert(dealContacts).values([

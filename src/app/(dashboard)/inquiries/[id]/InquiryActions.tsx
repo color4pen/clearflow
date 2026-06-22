@@ -44,18 +44,7 @@ export function InquiryActions({ inquiry, canChangeStatus }: Props) {
       )}
 
       <div className="flex gap-2 flex-wrap">
-        {inquiry.status === "new" && (
-          <button
-            type="button"
-            disabled={isSubmitting}
-            onClick={() => handleTransition("in_progress")}
-            className="bg-primary text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
-          >
-            対応開始
-          </button>
-        )}
-
-        {inquiry.status === "in_progress" && canChangeStatus && (
+        {inquiry.status === "new" && canChangeStatus && (
           <button
             type="button"
             disabled={isSubmitting}
@@ -70,10 +59,10 @@ export function InquiryActions({ inquiry, canChangeStatus }: Props) {
           <button
             type="button"
             disabled={isSubmitting}
-            onClick={() => handleTransition("in_progress")}
+            onClick={() => handleTransition("new")}
             className="bg-primary text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
           >
-            対応再開
+            再開
           </button>
         )}
 

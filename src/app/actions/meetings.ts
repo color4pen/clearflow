@@ -28,8 +28,7 @@ const contactRegistrationSchema = z.object({
 });
 
 const createMeetingSchema = z.object({
-  inquiryId: z.string().uuid("引き合いIDが不正です").optional(),
-  dealId: z.string().uuid("案件IDが不正です").optional(),
+  dealId: z.string().uuid("案件IDが不正です"),
   clientId: z.string().uuid().optional(),
   type: z.enum(["hearing", "proposal", "negotiation", "closing", "followup"]),
   date: z.string().min(1, "日時は必須です"),
@@ -44,7 +43,6 @@ const createMeetingSchema = z.object({
 
 export type CreateMeetingState = {
   errors?: {
-    inquiryId?: string[];
     dealId?: string[];
     type?: string[];
     date?: string[];
@@ -128,13 +126,11 @@ export async function createMeetingAction(
     }
   }
 
-  const inquiryIdRaw = formData.get("inquiryId");
   const dealIdRaw = formData.get("dealId");
   const clientIdRaw = formData.get("clientId");
 
   const parsed = createMeetingSchema.safeParse({
-    inquiryId: inquiryIdRaw && inquiryIdRaw !== "" ? inquiryIdRaw : undefined,
-    dealId: dealIdRaw && dealIdRaw !== "" ? dealIdRaw : undefined,
+    dealId: dealIdRaw,
     clientId: clientIdRaw && clientIdRaw !== "" ? clientIdRaw : undefined,
     type: formData.get("type"),
     date: formData.get("date"),
@@ -151,16 +147,10 @@ export async function createMeetingAction(
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
-  // inquiryId と dealId のどちらか一方は必須
-  if (!parsed.data.inquiryId && !parsed.data.dealId) {
-    return { message: "引き合いまたは案件のどちらかを指定してください" };
-  }
-
   const result = await createMeeting({
     organizationId: session.user.organizationId,
     actorId: session.user.id,
-    inquiryId: parsed.data.inquiryId ?? null,
-    dealId: parsed.data.dealId ?? null,
+    dealId: parsed.data.dealId,
     type: parsed.data.type,
     date: new Date(parsed.data.date),
     location: parsed.data.location ?? null,
@@ -191,19 +181,12 @@ export async function createMeetingAction(
     }
   }
 
-  if (parsed.data.inquiryId) {
-    revalidatePath(`/inquiries/${parsed.data.inquiryId}`);
-    revalidatePath(`/inquiries/${parsed.data.inquiryId}/meetings`);
-  }
-  if (parsed.data.dealId) {
-    revalidatePath(`/deals/${parsed.data.dealId}`);
-  }
+  revalidatePath(`/deals/${parsed.data.dealId}`);
   return {};
 }
 
 const updateMeetingSchema = z.object({
   meetingId: z.string().uuid("商談IDが不正です"),
-  inquiryId: z.string().uuid("引き合いIDが不正です").optional(),
   type: z.enum(["hearing", "proposal", "negotiation", "closing", "followup"]).optional(),
   date: z.string().optional(),
   location: z.string().nullable().optional(),
@@ -217,7 +200,6 @@ const updateMeetingSchema = z.object({
 export type UpdateMeetingState = {
   errors?: {
     meetingId?: string[];
-    inquiryId?: string[];
     type?: string[];
     date?: string[];
     location?: string[];
@@ -291,7 +273,6 @@ export async function updateMeetingAction(
 
   const parsed = updateMeetingSchema.safeParse({
     meetingId: formData.get("meetingId"),
-    inquiryId: formData.get("inquiryId"),
     type: formData.get("type") || undefined,
     date: formData.get("date") || undefined,
     location: formData.get("location") ?? undefined,
@@ -331,7 +312,5 @@ export async function updateMeetingAction(
     return { message: result.reason };
   }
 
-  revalidatePath(`/inquiries/${parsed.data.inquiryId}`);
-  revalidatePath(`/inquiries/${parsed.data.inquiryId}/meetings/${parsed.data.meetingId}`);
   return {};
 }
