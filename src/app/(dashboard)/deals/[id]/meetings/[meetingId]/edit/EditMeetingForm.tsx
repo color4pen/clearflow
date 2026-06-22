@@ -16,6 +16,7 @@ type Props = {
   meeting: Meeting;
   dealId: string;
   clientId: string | null;
+  existingContacts: Array<{ id: string; name: string }>;
 };
 
 const typeOptions = [
@@ -26,7 +27,7 @@ const typeOptions = [
   { value: "followup", label: "フォローアップ" },
 ];
 
-export function EditMeetingForm({ meeting, dealId, clientId }: Props) {
+export function EditMeetingForm({ meeting, dealId, clientId, existingContacts }: Props) {
   const router = useRouter();
   const [selectedType, setSelectedType] = useState(meeting.type);
   const [internalAttendees, setInternalAttendees] = useState<string[]>(
@@ -214,6 +215,29 @@ export function EditMeetingForm({ meeting, dealId, clientId }: Props) {
 
         <div>
           <p className="text-xs font-bold text-text mb-1">社外参加者</p>
+          {existingContacts.length > 0 && (
+            <div className="mb-2">
+              <Select
+                value=""
+                onChange={(e) => {
+                  const contact = existingContacts.find((c) => c.id === e.target.value);
+                  if (contact && !externalAttendees.some((a) => a.name === contact.name)) {
+                    setExternalAttendees((prev) => [
+                      ...prev.filter((a) => a.name.trim()),
+                      { name: contact.name, registerAsContact: false },
+                      { name: "", registerAsContact: false },
+                    ]);
+                  }
+                  e.target.value = "";
+                }}
+              >
+                <option value="">登録済み担当者から追加...</option>
+                {existingContacts.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </Select>
+            </div>
+          )}
           {externalAttendees.map((attendee, idx) => (
             <div key={idx} className="mb-1">
               <div className="flex gap-1">
