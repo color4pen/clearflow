@@ -45,7 +45,7 @@ export default async function DealMeetingDetailPage({
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid gap-2" style={{ gridTemplateColumns: "1fr 2fr" }}>
         {/* 左カラム: 基本情報 */}
         <div className="space-y-2">
           <SectionCard className="p-3">
