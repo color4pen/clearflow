@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "98cd4cf7-0d4b-414b-9d2e-353364bd02ee",
   "createdAt": "2026-06-22T01:55:50.098Z",
-  "updatedAt": "2026-06-22T02:43:01.047Z",
+  "updatedAt": "2026-06-22T02:46:15.743Z",
   "request": {
     "title": "引き合い簡素化と商談の案件専属化",
     "type": "refactoring",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "refactor/inquiry-simplification-98cd4cf7",
   "error": null,
@@ -34,8 +34,22 @@
     }
   ],
   "resumePoint": null,
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "7b6828422b02ee9e30733c23ee58c292e5ded330",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 38,
+    "historyCount": 43,
     "stepCounts": {
       "request-review": 1,
       "design": 2,
@@ -44,7 +58,9 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 1,
-      "code-fixer": 1
+      "code-fixer": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
