@@ -93,6 +93,7 @@
 - [ ] 作成日は表示のみ（変更不可）
 - [ ] `src/app/(dashboard)/inquiries/[id]/page.tsx` を修正して、引き合い情報セクションの dl 部分を `InquiryInfoSection` に置き換える。`editable` は `session.user.role === "admin" || session.user.role === "manager"` で算出
 - [ ] 「編集」リンクは残す
+- [ ] `src/app/actions/inquiries.ts` の `updateInquiryAction` に admin/manager ロールチェックを追加する。member/finance には `{ message: "権限がありません" }` を返す
 
 **Acceptance Criteria**:
 - admin/manager で件名をクリック→Input→Enter→保存される
