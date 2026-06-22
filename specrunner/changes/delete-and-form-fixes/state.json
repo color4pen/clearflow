@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "05597fd5-53bd-4183-b791-fc663f8ddc7d",
   "createdAt": "2026-06-22T04:03:10.619Z",
-  "updatedAt": "2026-06-22T04:49:04.837Z",
+  "updatedAt": "2026-06-22T04:49:30.410Z",
   "request": {
     "title": "削除機能とフォーム整備",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/delete-and-form-fixes-05597fd5",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/61",
+    "number": 61,
+    "createdAt": "2026-06-22T04:49:30.390Z"
+  },
   "_journal": {
-    "historyCount": 60,
+    "historyCount": 65,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -61,7 +66,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
