@@ -91,6 +91,35 @@ export async function findByDeal(
 }
 
 /**
+ * 指定案件の担当者を全件削除する。
+ * deals.organizationId を経由してテナント分離を保証する（Drizzle の delete は JOIN 非対応のため select→delete の2ステップ）。
+ */
+export async function deleteAllByDeal(
+  dealId: string,
+  organizationId: string,
+  tx?: Transaction
+): Promise<void> {
+  const queryRunner = tx ?? db;
+
+  const targets = await queryRunner
+    .select({ id: dealContacts.id })
+    .from(dealContacts)
+    .innerJoin(deals, eq(dealContacts.dealId, deals.id))
+    .where(
+      and(
+        eq(dealContacts.dealId, dealId),
+        eq(deals.organizationId, organizationId)
+      )
+    );
+
+  if (targets.length === 0) return;
+
+  await queryRunner
+    .delete(dealContacts)
+    .where(inArray(dealContacts.id, targets.map((r) => r.id)));
+}
+
+/**
  * 指定案件の担当者関連を削除する。
  * deals.organizationId を経由してテナント分離を保証する（Drizzle の delete は JOIN 非対応のため select→delete の2ステップ）。
  */

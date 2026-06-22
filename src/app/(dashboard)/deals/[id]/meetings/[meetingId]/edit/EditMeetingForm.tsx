@@ -3,22 +3,16 @@
 import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { createMeetingAction } from "@/app/actions/meetings";
+import { updateMeetingAction } from "@/app/actions/meetings";
 import { FormField, Input, Select, Textarea, SubmitButton } from "@/app/components";
-import type { ActionItem, HearingData } from "@/domain/models/meeting";
-
-type ExternalAttendee = {
-  name: string;
-  registerAsContact: boolean;
-};
+import type { Meeting, ActionItem, HearingData } from "@/domain/models/meeting";
 
 type Props = {
+  meeting: Meeting;
   dealId: string;
-  clientId: string | null;
 };
 
 const typeOptions = [
-  { value: "", label: "選択してください" },
   { value: "hearing", label: "ヒアリング" },
   { value: "proposal", label: "提案" },
   { value: "negotiation", label: "交渉" },
@@ -26,57 +20,43 @@ const typeOptions = [
   { value: "followup", label: "フォローアップ" },
 ];
 
-const emptyHearingData: HearingData = {
-  challenge: null,
-  budget: null,
-  decisionMaker: null,
-  timeline: null,
-  competitors: null,
-  notes: null,
-};
-
-export function DealMeetingForm({ dealId, clientId }: Props) {
+export function EditMeetingForm({ meeting, dealId }: Props) {
   const router = useRouter();
-  const [selectedType, setSelectedType] = useState("");
-  const [internalAttendees, setInternalAttendees] = useState<string[]>([""]);
-  const [externalAttendees, setExternalAttendees] = useState<ExternalAttendee[]>([
-    { name: "", registerAsContact: false },
-  ]);
-  const [actionItems, setActionItems] = useState<ActionItem[]>([]);
-  const [hearingData, setHearingData] = useState<HearingData>({ ...emptyHearingData });
+  const [selectedType, setSelectedType] = useState(meeting.type);
+  const [internalAttendees, setInternalAttendees] = useState<string[]>(
+    meeting.attendees.internal.length > 0 ? meeting.attendees.internal : [""]
+  );
+  const [externalAttendees, setExternalAttendees] = useState<string[]>(
+    meeting.attendees.external.length > 0 ? meeting.attendees.external : [""]
+  );
+  const [actionItems, setActionItems] = useState<ActionItem[]>(meeting.actionItems);
+  const [hearingData, setHearingData] = useState<HearingData>(
+    meeting.hearingData ?? {
+      challenge: null,
+      budget: null,
+      decisionMaker: null,
+      timeline: null,
+      competitors: null,
+      notes: null,
+    }
+  );
 
   const [state, formAction, isPending] = useActionState(
-    async (prev: Parameters<typeof createMeetingAction>[0], formData: FormData) => {
+    async (prev: Parameters<typeof updateMeetingAction>[0], formData: FormData) => {
+      formData.set("meetingId", meeting.id);
       formData.set("internalAttendees", JSON.stringify(internalAttendees.filter((a) => a.trim())));
-      formData.set(
-        "externalAttendees",
-        JSON.stringify(externalAttendees.filter((a) => a.name.trim()).map((a) => a.name))
-      );
+      formData.set("externalAttendees", JSON.stringify(externalAttendees.filter((a) => a.trim())));
       formData.set("actionItems", JSON.stringify(actionItems));
 
-      // ヒアリング種別の場合のみ hearingData を送信する
       if (selectedType === "hearing") {
         formData.set("hearingData", JSON.stringify(hearingData));
+      } else {
+        formData.set("hearingData", "null");
       }
 
-      // contactRegistrations を JSON として設定する
-      formData.set(
-        "contactRegistrations",
-        JSON.stringify(
-          externalAttendees
-            .filter((a) => a.name.trim())
-            .map((a) => ({ name: a.name, register: a.registerAsContact }))
-        )
-      );
-
-      // clientId を FormData にセットする
-      if (clientId) {
-        formData.set("clientId", clientId);
-      }
-
-      const result = await createMeetingAction(prev, formData);
+      const result = await updateMeetingAction(prev, formData);
       if (!result.errors && !result.message) {
-        router.push(`/deals/${dealId}`);
+        router.push(`/deals/${dealId}/meetings/${meeting.id}`);
       }
       return result;
     },
@@ -96,25 +76,15 @@ export function DealMeetingForm({ dealId, clientId }: Props) {
   }
 
   function addExternalAttendee() {
-    setExternalAttendees((prev) => [...prev, { name: "", registerAsContact: false }]);
+    setExternalAttendees((prev) => [...prev, ""]);
   }
 
   function removeExternalAttendee(idx: number) {
     setExternalAttendees((prev) => prev.filter((_, i) => i !== idx));
   }
 
-  function updateExternalAttendeeName(idx: number, value: string) {
-    setExternalAttendees((prev) =>
-      prev.map((a, i) => (i === idx ? { ...a, name: value } : a))
-    );
-  }
-
-  function toggleRegisterAsContact(idx: number) {
-    setExternalAttendees((prev) =>
-      prev.map((a, i) =>
-        i === idx ? { ...a, registerAsContact: !a.registerAsContact } : a
-      )
-    );
+  function updateExternalAttendee(idx: number, value: string) {
+    setExternalAttendees((prev) => prev.map((a, i) => (i === idx ? value : a)));
   }
 
   function addActionItem() {
@@ -134,10 +104,15 @@ export function DealMeetingForm({ dealId, clientId }: Props) {
     );
   }
 
+  // date を datetime-local 形式に変換する
+  const dateValue = meeting.date
+    ? new Date(meeting.date.getTime() - meeting.date.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 16)
+    : "";
+
   return (
     <form action={formAction} className="bg-bg-surface border border-border border-t-0 p-4">
-      <input type="hidden" name="dealId" value={dealId} />
-
       {state.message && (
         <p className="text-danger text-xs mb-3">{state.message}</p>
       )}
@@ -152,7 +127,7 @@ export function DealMeetingForm({ dealId, clientId }: Props) {
             id="type"
             name="type"
             value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
+            onChange={(e) => setSelectedType(e.target.value as typeof selectedType)}
             required
           >
             {typeOptions.map((opt) => (
@@ -168,7 +143,7 @@ export function DealMeetingForm({ dealId, clientId }: Props) {
           htmlFor="date"
           error={state.errors?.date?.[0]}
         >
-          <Input id="date" name="date" type="datetime-local" required />
+          <Input id="date" name="date" type="datetime-local" defaultValue={dateValue} required />
         </FormField>
 
         <FormField
@@ -176,7 +151,12 @@ export function DealMeetingForm({ dealId, clientId }: Props) {
           htmlFor="location"
           error={state.errors?.location?.[0]}
         >
-          <Input id="location" name="location" placeholder="場所またはオンラインURL（任意）" />
+          <Input
+            id="location"
+            name="location"
+            defaultValue={meeting.location ?? ""}
+            placeholder="場所またはオンラインURL（任意）"
+          />
         </FormField>
       </div>
 
@@ -213,34 +193,20 @@ export function DealMeetingForm({ dealId, clientId }: Props) {
         <div>
           <p className="text-xs font-bold text-text mb-1">社外参加者</p>
           {externalAttendees.map((attendee, idx) => (
-            <div key={idx} className="mb-1">
-              <div className="flex gap-1">
-                <Input
-                  value={attendee.name}
-                  onChange={(e) => updateExternalAttendeeName(idx, e.target.value)}
-                  placeholder="氏名"
-                />
-                {externalAttendees.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeExternalAttendee(idx)}
-                    className="text-xs text-danger underline whitespace-nowrap"
-                  >
-                    削除
-                  </button>
-                )}
-              </div>
-              {/* clientId が存在する場合のみ「顧客担当者として登録」チェックボックスを表示する */}
-              {clientId && (
-                <label className="flex items-center gap-1 text-xs text-text-muted mt-0.5">
-                  <input
-                    type="checkbox"
-                    checked={attendee.registerAsContact}
-                    onChange={() => toggleRegisterAsContact(idx)}
-                    className="accent-primary"
-                  />
-                  顧客担当者として登録
-                </label>
+            <div key={idx} className="flex gap-1 mb-1">
+              <Input
+                value={attendee}
+                onChange={(e) => updateExternalAttendee(idx, e.target.value)}
+                placeholder="氏名"
+              />
+              {externalAttendees.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeExternalAttendee(idx)}
+                  className="text-xs text-danger underline whitespace-nowrap"
+                >
+                  削除
+                </button>
               )}
             </div>
           ))}
@@ -256,7 +222,13 @@ export function DealMeetingForm({ dealId, clientId }: Props) {
 
       <div className="mt-3">
         <FormField label="議事録" htmlFor="summary" error={state.errors?.summary?.[0]}>
-          <Textarea id="summary" name="summary" rows={4} placeholder="商談の要約・議事録" />
+          <Textarea
+            id="summary"
+            name="summary"
+            rows={4}
+            defaultValue={meeting.summary ?? ""}
+            placeholder="商談の要約・議事録"
+          />
         </FormField>
       </div>
 
@@ -350,13 +322,24 @@ export function DealMeetingForm({ dealId, clientId }: Props) {
                 />
               </FormField>
             </div>
-            <button
-              type="button"
-              onClick={() => removeActionItem(idx)}
-              className="text-xs text-danger underline"
-            >
-              削除
-            </button>
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-1 text-xs text-text-muted">
+                <input
+                  type="checkbox"
+                  checked={item.done}
+                  onChange={() => updateActionItem(idx, "done", !item.done)}
+                  className="accent-primary"
+                />
+                完了
+              </label>
+              <button
+                type="button"
+                onClick={() => removeActionItem(idx)}
+                className="text-xs text-danger underline"
+              >
+                削除
+              </button>
+            </div>
           </div>
         ))}
         <button
@@ -369,8 +352,11 @@ export function DealMeetingForm({ dealId, clientId }: Props) {
       </div>
 
       <div className="mt-4 flex gap-2">
-        <SubmitButton pending={isPending}>記録する</SubmitButton>
-        <Link href={`/deals/${dealId}`} className="text-xs text-text-muted underline self-center">
+        <SubmitButton pending={isPending}>保存</SubmitButton>
+        <Link
+          href={`/deals/${dealId}/meetings/${meeting.id}`}
+          className="text-xs text-text-muted underline self-center"
+        >
           キャンセル
         </Link>
       </div>

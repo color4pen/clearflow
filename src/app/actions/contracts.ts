@@ -9,6 +9,7 @@ import {
   updateContractStatus,
   listContracts,
   getContract,
+  deleteContract,
 } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import type { ContractWithClient, Contract, ContractStatus } from "@/domain/models/contract";
@@ -182,6 +183,30 @@ export async function updateContractStatusAction(
 
   revalidatePath("/contracts");
   revalidatePath(`/contracts/${contractId}`);
+  return { success: true };
+}
+
+export async function deleteContractAction(contractId: string): Promise<ActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: "認証が必要です" };
+  }
+
+  if (session.user.role !== "admin" && session.user.role !== "manager") {
+    return { success: false, message: "権限がありません" };
+  }
+
+  const result = await deleteContract({
+    id: contractId,
+    organizationId: session.user.organizationId,
+    actorId: session.user.id,
+  });
+
+  if (!result.ok) {
+    return { success: false, message: result.reason };
+  }
+
+  revalidatePath("/contracts");
   return { success: true };
 }
 

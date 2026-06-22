@@ -143,6 +143,17 @@ export async function update(
   return result[0] ? mapRow(result[0]) : null;
 }
 
+export async function deleteById(
+  id: string,
+  organizationId: string,
+  tx?: Transaction
+): Promise<void> {
+  const queryRunner = tx ?? db;
+  await queryRunner
+    .delete(deals)
+    .where(and(eq(deals.id, id), eq(deals.organizationId, organizationId)));
+}
+
 export async function updatePhase(
   id: string,
   organizationId: string,

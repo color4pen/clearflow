@@ -134,6 +134,17 @@ export async function updateStatus(
   return result[0] ? mapRow(result[0]) : null;
 }
 
+export async function deleteById(
+  id: string,
+  organizationId: string,
+  tx?: Transaction
+): Promise<void> {
+  const queryRunner = tx ?? db;
+  await queryRunner
+    .delete(inquiries)
+    .where(and(eq(inquiries.id, id), eq(inquiries.organizationId, organizationId)));
+}
+
 /**
  * 特定顧客に紐づく引き合いを organizationId でテナント分離して取得する。
  */

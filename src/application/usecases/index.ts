@@ -40,3 +40,6 @@ export { getContract } from "./getContract";
 export { createInvoice } from "./createInvoice";
 export { updateInvoiceStatus } from "./updateInvoiceStatus";
 export { listInvoicesByContract } from "./listInvoicesByContract";
+export { deleteInquiry } from "./deleteInquiry";
+export { deleteDeal } from "./deleteDeal";
+export { deleteContract } from "./deleteContract";

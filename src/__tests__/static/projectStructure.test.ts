@@ -1303,3 +1303,101 @@ describe("Tenant isolation — invoice", () => {
     expect(content).toContain("session.user.organizationId");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Tenant isolation — delete operations
+// ---------------------------------------------------------------------------
+
+describe("Tenant isolation — delete operations", () => {
+  it("inquiryRepository.deleteById includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/inquiryRepository.ts");
+    const idx = content.indexOf("export async function deleteById(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("dealRepository.deleteById includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/dealRepository.ts");
+    const idx = content.indexOf("export async function deleteById(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("contractRepository.deleteById includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/contractRepository.ts");
+    const idx = content.indexOf("export async function deleteById(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 400);
+    expect(body).toContain("organizationId");
+  });
+
+  it("deleteInquiry checks for deal before deleting", async () => {
+    const content = await readSrc("application/usecases/deleteInquiry.ts");
+    const findIdx = content.indexOf("findByInquiryId");
+    const deleteIdx = content.indexOf("deleteById");
+    expect(findIdx).toBeGreaterThan(-1);
+    expect(deleteIdx).toBeGreaterThan(-1);
+    // findByInquiryId（案件存在チェック）が deleteById より前に呼ばれていることを確認する
+    expect(findIdx).toBeLessThan(deleteIdx);
+  });
+
+  it("deleteDeal checks for meetings and contracts before deleting", async () => {
+    const content = await readSrc("application/usecases/deleteDeal.ts");
+    expect(content).toContain("findAllByDeal");
+    expect(content).toContain("findAllByDealId");
+  });
+
+  it("deleteContract checks for invoices before deleting", async () => {
+    const content = await readSrc("application/usecases/deleteContract.ts");
+    const findIdx = content.indexOf("findAllByContract");
+    const deleteIdx = content.indexOf("deleteById");
+    expect(findIdx).toBeGreaterThan(-1);
+    expect(deleteIdx).toBeGreaterThan(-1);
+    // findAllByContract（請求存在チェック）が deleteById より前に呼ばれていることを確認する
+    expect(findIdx).toBeLessThan(deleteIdx);
+  });
+
+  it("deleteInquiryAction includes admin/manager role guard", async () => {
+    const content = await readSrc("app/actions/inquiries.ts");
+    const idx = content.indexOf("export async function deleteInquiryAction");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 600);
+    expect(body).toContain("manager");
+    expect(body).toContain("admin");
+  });
+
+  it("deleteDealAction includes admin/manager role guard", async () => {
+    const content = await readSrc("app/actions/deals.ts");
+    const idx = content.indexOf("export async function deleteDealAction");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 600);
+    expect(body).toContain("manager");
+    expect(body).toContain("admin");
+  });
+
+  it("deleteContractAction includes admin/manager role guard", async () => {
+    const content = await readSrc("app/actions/contracts.ts");
+    const idx = content.indexOf("export async function deleteContractAction");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx, idx + 600);
+    expect(body).toContain("manager");
+    expect(body).toContain("admin");
+  });
+
+  it("deleteInquiry records audit log", async () => {
+    const content = await readSrc("application/usecases/deleteInquiry.ts");
+    expect(content).toContain("auditLogRepository.create");
+  });
+
+  it("deleteDeal records audit log", async () => {
+    const content = await readSrc("application/usecases/deleteDeal.ts");
+    expect(content).toContain("auditLogRepository.create");
+  });
+
+  it("deleteContract records audit log", async () => {
+    const content = await readSrc("application/usecases/deleteContract.ts");
+    expect(content).toContain("auditLogRepository.create");
+  });
+});

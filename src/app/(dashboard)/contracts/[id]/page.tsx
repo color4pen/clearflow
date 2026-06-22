@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { contractRepository } from "@/infrastructure/repositories";
+import { contractRepository, invoiceRepository } from "@/infrastructure/repositories";
 import { SectionCard } from "@/app/components";
 import { ContractStatusActions } from "./ContractStatusActions";
 import { InvoiceSection } from "./InvoiceSection";
+import { DeleteContractButton } from "./DeleteContractButton";
 import {
   contractStatusLabels,
   contractTypeLabels,
@@ -29,6 +30,8 @@ export default async function ContractDetailPage({
     session!.user.role === "admin" || session!.user.role === "manager";
   const isTerminal = contract.status === "completed" || contract.status === "cancelled";
 
+  const invoices = await invoiceRepository.findAllByContract(id, organizationId);
+
   return (
     <div>
       <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2">
@@ -44,9 +47,14 @@ export default async function ContractDetailPage({
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xs font-bold text-text">契約情報</h2>
             {canManage && (
-              <Link href={`/contracts/${id}/edit`} className="text-xs text-primary underline">
-                編集
-              </Link>
+              <div className="flex items-center gap-3">
+                {invoices.length === 0 && (
+                  <DeleteContractButton contractId={id} />
+                )}
+                <Link href={`/contracts/${id}/edit`} className="text-xs text-primary underline">
+                  編集
+                </Link>
+              </div>
             )}
           </div>
           <dl className="text-xs space-y-1">
