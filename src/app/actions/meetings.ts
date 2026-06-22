@@ -54,6 +54,7 @@ export type CreateMeetingState = {
     hearingData?: string[];
   };
   message?: string;
+  dealId?: string;
 };
 
 export async function createMeetingAction(
@@ -182,7 +183,7 @@ export async function createMeetingAction(
   }
 
   revalidatePath(`/deals/${parsed.data.dealId}`);
-  return {};
+  return { dealId: parsed.data.dealId };
 }
 
 const updateMeetingSchema = z.object({
