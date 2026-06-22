@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { addClientContactAction, deleteClientContactAction } from "@/app/actions/clients";
+import { addClientContactAction, deleteClientContactAction, updateClientContactAction } from "@/app/actions/clients";
 import { Input, preventEnterSubmit } from "@/app/components";
 import type { ClientContact } from "@/domain/models/client";
 
@@ -18,6 +18,8 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editingContact, setEditingContact] = useState<ClientContact | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -49,6 +51,24 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
       router.refresh();
     } else {
       setError(result.message ?? "削除に失敗しました");
+    }
+  }
+
+  async function handleEdit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!editingContact) return;
+    setIsEditing(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const result = await updateClientContactAction(clientId, editingContact.id, formData);
+    setIsEditing(false);
+
+    if (result.success) {
+      setEditingContact(null);
+      router.refresh();
+    } else {
+      setError(result.message ?? "更新に失敗しました");
     }
   }
 
@@ -87,7 +107,11 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
           </thead>
           <tbody>
             {contacts.map((contact) => (
-              <tr key={contact.id} className="border-b border-border-light">
+              <tr
+                key={contact.id}
+                className={`border-b border-border-light${editable ? " cursor-pointer hover:bg-bg-base" : ""}`}
+                onClick={() => editable && setEditingContact(contact)}
+              >
                 <td className="py-1 px-2 text-text">{contact.name}</td>
                 <td className="py-1 px-2 text-text">{contact.department ?? "-"}</td>
                 <td className="py-1 px-2 text-text">{contact.position ?? "-"}</td>
@@ -98,7 +122,7 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
                   <td className="py-1 px-2">
                     <button
                       type="button"
-                      onClick={() => handleDelete(contact.id)}
+                      onClick={(e) => { e.stopPropagation(); handleDelete(contact.id); }}
                       disabled={deletingId === contact.id}
                       className="text-danger underline text-xs cursor-pointer disabled:opacity-50"
                     >
@@ -159,6 +183,61 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
             </button>
           </div>
         </form>
+      )}
+
+      {editingContact && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-bg-surface border border-border p-4 max-w-md w-full">
+            <p className="text-sm font-bold text-text mb-3">担当者を編集</p>
+            <form onSubmit={handleEdit} onKeyDown={preventEnterSubmit}>
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                <div className="col-span-2">
+                  <label className="text-xs text-text-muted block mb-0.5">氏名 *</label>
+                  <Input name="name" required defaultValue={editingContact.name} />
+                </div>
+                <div>
+                  <label className="text-xs text-text-muted block mb-0.5">部署</label>
+                  <Input name="department" defaultValue={editingContact.department ?? ""} />
+                </div>
+                <div>
+                  <label className="text-xs text-text-muted block mb-0.5">役職</label>
+                  <Input name="position" defaultValue={editingContact.position ?? ""} />
+                </div>
+                <div>
+                  <label className="text-xs text-text-muted block mb-0.5">メール</label>
+                  <Input name="email" type="email" defaultValue={editingContact.email ?? ""} />
+                </div>
+                <div>
+                  <label className="text-xs text-text-muted block mb-0.5">電話</label>
+                  <Input name="phone" defaultValue={editingContact.phone ?? ""} />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-xs text-text-muted flex items-center gap-1">
+                    <input type="checkbox" name="isPrimary" defaultChecked={editingContact.isPrimary} className="accent-primary" />
+                    主担当
+                  </label>
+                </div>
+              </div>
+              {error && <p className="text-danger text-xs mb-2">{error}</p>}
+              <div className="flex gap-2 justify-end mt-3">
+                <button
+                  type="button"
+                  onClick={() => { setEditingContact(null); setError(null); }}
+                  className="border border-border text-text text-xs px-3 py-1.5 cursor-pointer"
+                >
+                  キャンセル
+                </button>
+                <button
+                  type="submit"
+                  disabled={isEditing}
+                  className="text-xs bg-primary text-white px-3 py-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {isEditing ? "保存中..." : "保存"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

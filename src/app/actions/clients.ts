@@ -233,6 +233,67 @@ export async function addClientContactAction(
   return { success: true };
 }
 
+const updateContactSchema = z.object({
+  name: z.string().min(1, "担当者名は必須です"),
+  department: z.string().optional(),
+  position: z.string().optional(),
+  email: z.string().optional(),
+  phone: z.string().optional(),
+  isPrimary: z.boolean().optional(),
+});
+
+export async function updateClientContactAction(
+  clientId: string,
+  contactId: string,
+  formData: FormData
+): Promise<ContactActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: "認証が必要です" };
+  }
+
+  if (session.user.role !== "admin" && session.user.role !== "manager") {
+    return { success: false, message: "権限がありません" };
+  }
+
+  const { clientRepository } = await import("@/infrastructure/repositories");
+
+  const client = await clientRepository.findById(clientId, session.user.organizationId);
+  if (!client) {
+    return { success: false, message: "顧客が見つかりません" };
+  }
+
+  const parsed = updateContactSchema.safeParse({
+    name: formData.get("name"),
+    department: formData.get("department") || undefined,
+    position: formData.get("position") || undefined,
+    email: formData.get("email") || undefined,
+    phone: formData.get("phone") || undefined,
+    isPrimary: formData.get("isPrimary") === "on",
+  });
+
+  if (!parsed.success) {
+    const firstError = parsed.error.issues[0];
+    return { success: false, message: firstError?.message ?? "入力が不正です" };
+  }
+
+  const updated = await clientRepository.updateContact(contactId, clientId, {
+    name: parsed.data.name,
+    department: parsed.data.department ?? null,
+    position: parsed.data.position ?? null,
+    email: parsed.data.email ?? null,
+    phone: parsed.data.phone ?? null,
+    isPrimary: parsed.data.isPrimary ?? false,
+  });
+
+  if (!updated) {
+    return { success: false, message: "担当者が見つかりません" };
+  }
+
+  revalidatePath(`/clients/${clientId}`);
+  return { success: true };
+}
+
 export async function deleteClientContactAction(
   clientId: string,
   contactId: string
