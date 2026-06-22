@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import type { ActionResult } from "@/app/actions/requests";
-import { SubmitButton, LinkButton, FormField, Textarea } from "@/app/components";
+import { SubmitButton, LinkButton, FormField, Textarea, preventEnterSubmit } from "@/app/components";
 
 export type ServerAction = (formData: FormData) => Promise<ActionResult>;
 
@@ -38,7 +38,7 @@ function ActionForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className={className}>
+    <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit} className={className}>
       {children(isPending)}
       {errorMessage && (
         <p role="alert" className="mt-2 text-xs text-danger">

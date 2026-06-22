@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { createWebhookEndpointAction } from "@/app/actions/webhooks";
 import { WEBHOOK_EVENT_TYPES } from "@/domain/models/webhookEvent";
-import { FormField, Input, SubmitButton } from "@/app/components";
+import { FormField, Input, SubmitButton, preventEnterSubmit } from "@/app/components";
 
 type ActionState =
   | null
@@ -64,7 +64,7 @@ export function WebhookCreateForm() {
         </div>
       )}
 
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} onKeyDown={preventEnterSubmit} className="space-y-4">
         <FormField
           label={<>URL <span className="text-red-500">*</span></>}
           htmlFor="url"

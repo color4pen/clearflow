@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClientAction } from "@/app/actions/clients";
-import { FormField, Input, Textarea, SubmitButton } from "@/app/components";
+import { FormField, Input, Textarea, SubmitButton, preventEnterSubmit } from "@/app/components";
 
 type Contact = {
   name: string;
@@ -55,7 +55,7 @@ export function ClientForm() {
   }
 
   return (
-    <form action={formAction} className="bg-bg-surface border border-border border-t-0 p-4">
+    <form action={formAction} onKeyDown={preventEnterSubmit} className="bg-bg-surface border border-border border-t-0 p-4">
       {state.message && (
         <p className="text-danger text-xs mb-3">{state.message}</p>
       )}

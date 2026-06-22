@@ -4,7 +4,7 @@ import { useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { updateClientAction } from "@/app/actions/clients";
 import type { UpdateClientState } from "@/app/actions/clients";
-import { SectionCard, FormField, Input, Textarea, SubmitButton } from "@/app/components";
+import { SectionCard, FormField, Input, Textarea, SubmitButton, preventEnterSubmit } from "@/app/components";
 
 type Props = {
   client: {
@@ -29,7 +29,7 @@ export function EditClientForm({ client }: Props) {
   }, [state.success, client.id, router]);
 
   return (
-    <form action={formAction}>
+    <form action={formAction} onKeyDown={preventEnterSubmit}>
       <SectionCard className="p-3">
         {state.message && (
           <p className="text-danger text-xs mb-2">{state.message}</p>

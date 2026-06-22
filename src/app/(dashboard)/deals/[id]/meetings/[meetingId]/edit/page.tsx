@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { meetingRepository } from "@/infrastructure/repositories";
+import { meetingRepository, dealRepository } from "@/infrastructure/repositories";
 import { EditMeetingForm } from "./EditMeetingForm";
 
 export default async function EditMeetingPage({
@@ -22,6 +22,8 @@ export default async function EditMeetingPage({
     notFound();
   }
 
+  const deal = await dealRepository.findById(id, organizationId);
+
   return (
     <div>
       <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2">
@@ -35,7 +37,7 @@ export default async function EditMeetingPage({
           {" > "}編集
         </span>
       </div>
-      <EditMeetingForm meeting={meeting} dealId={id} />
+      <EditMeetingForm meeting={meeting} dealId={id} clientId={deal?.clientId ?? null} />
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateDealAction } from "@/app/actions/deals";
-import { SectionCard, FormField, Input, Textarea, Select } from "@/app/components";
+import { SectionCard, FormField, Input, Textarea, Select, preventEnterSubmit } from "@/app/components";
 import { phaseLabels } from "@/app/(dashboard)/labels";
 import type { Deal } from "@/domain/models/deal";
 
@@ -48,7 +48,7 @@ export function DealEditForm({ deal, users }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit}>
       <SectionCard className="p-3">
         {message && <p className="text-danger text-xs mb-2">{message}</p>}
 

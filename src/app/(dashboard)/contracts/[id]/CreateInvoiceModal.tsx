@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createInvoiceAction } from "@/app/actions/invoices";
-import { FormField, Input, Textarea } from "@/app/components/FormField";
+import { FormField, Input, Textarea, preventEnterSubmit } from "@/app/components/FormField";
 
 type Props = {
   contractId: string;
@@ -62,7 +62,7 @@ export function CreateInvoiceModal({ contractId }: Props) {
               <p className="text-danger text-xs mb-2">{error}</p>
             )}
 
-            <form ref={formRef} onSubmit={handleSubmit} className="space-y-2">
+            <form ref={formRef} onSubmit={handleSubmit} onKeyDown={preventEnterSubmit} className="space-y-2">
               <input type="hidden" name="contractId" value={contractId} />
 
               <FormField label="タイトル" htmlFor="invoice-title">

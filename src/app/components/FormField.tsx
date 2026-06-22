@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode, FormEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
 
 type Props = {
   label: ReactNode;
@@ -23,6 +23,10 @@ export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <input
       {...props}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") e.preventDefault();
+        props.onKeyDown?.(e);
+      }}
       className={`w-full border border-border rounded-none px-2 py-1 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder ${props.className ?? ""}`}
     />
   );
@@ -32,6 +36,10 @@ export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
       {...props}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") e.preventDefault();
+        props.onKeyDown?.(e);
+      }}
       className={`block w-full border border-border rounded-none px-2 py-1 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none ${props.className ?? ""}`}
     />
   );
@@ -44,4 +52,10 @@ export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
       className={`w-full border border-border rounded-none px-2 py-1 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder ${props.className ?? ""}`}
     />
   );
+}
+
+export function preventEnterSubmit(e: ReactKeyboardEvent<HTMLFormElement>) {
+  if (e.key === "Enter" && (e.target as HTMLElement).tagName !== "TEXTAREA") {
+    e.preventDefault();
+  }
 }

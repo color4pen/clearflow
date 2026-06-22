@@ -16,6 +16,7 @@ import {
   Textarea,
   Select,
   SubmitButton,
+  preventEnterSubmit,
 } from "@/app/components";
 import type { ApprovalTemplate, TemplateField } from "@/domain/models/approvalTemplate";
 
@@ -148,7 +149,7 @@ export default function NewRequestPage() {
           </div>
         )}
 
-        <form action={formAction} className="space-y-4">
+        <form action={formAction} onKeyDown={preventEnterSubmit} className="space-y-4">
           <FormField
             label={<>タイトル <span className="text-red-500">*</span></>}
             htmlFor="title"
