@@ -89,3 +89,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/inquiry-simplification/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-22T02:54:30.974Z","endedAt":"2026-06-22T02:54:32.554Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-22T02:54:32.554Z","outputs":[{"path":"specrunner/changes/inquiry-simplification/pr-create-result.md","hash":"sha256:627dfc6dd4cf6aaff0ca5d86c7d1aeeb2d27e98f306d8026de5a24ac058bc372"}],"inputs":[{"path":"refactor/inquiry-simplification-98cd4cf7","hash":null}]}
 {"type":"transition","ts":"2026-06-22T02:54:32.562Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-22T03:59:38.087Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
