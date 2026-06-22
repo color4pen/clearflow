@@ -10,15 +10,13 @@ import {
   contractRepository,
 } from "@/infrastructure/repositories";
 import { SectionCard, DataTable } from "@/app/components";
-import { DealEditForm } from "./DealEditForm";
 import { DealContactsSection } from "./DealContactsSection";
 import { DealNotesSection } from "./DealNotesSection";
 import { DealInfoSection } from "./DealInfoSection";
 import { DealActionItemsSection } from "./DealActionItemsSection";
 import { DeleteDealButton } from "./DeleteDealButton";
-import { phaseLabels, contractTypeLabels, meetingTypeLabels, contractStatusLabels } from "@/app/(dashboard)/labels";
+import { contractTypeLabels, meetingTypeLabels, contractStatusLabels } from "@/app/(dashboard)/labels";
 import type { Meeting } from "@/domain/models/meeting";
-import type { Contract } from "@/domain/models/contract";
 
 export default async function DealDetailPage({
   params,

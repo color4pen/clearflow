@@ -56,7 +56,7 @@ export function DealActionItemsSection({ items, allMeetingActionItems, editable 
 
   return (
     <ul className="text-xs space-y-1">
-      {items.map((flat, i) => (
+      {items.map((flat) => (
         <li key={`${flat.meetingId}-${flat.index}`} className="flex gap-2 items-start">
           <input
             type="checkbox"
