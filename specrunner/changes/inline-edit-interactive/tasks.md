@@ -124,11 +124,12 @@
 - [ ] props: `items: Array<{ meetingId: string; meetingLabel: string; actionItem: ActionItem; index: number }>`, `allMeetingActionItems: Array<{ meetingId: string; actionItems: ActionItem[] }>`, `editable: boolean`
 - [ ] 各アイテムをチェックボックス付きで表示。チェックボックスの左に完了/未完了状態、右にアイテムの description、assignee、dueDate、商談名（meetingLabel）を表示
 - [ ] 完了済みアイテムは `line-through` + `text-text-muted` スタイル
-- [ ] チェックボックスクリックで `updateMeetingAction` を呼び出す。該当 meetingId の全 actionItems を取得し、対象 index の `done` を反転させた配列を FormData の `actionItems` フィールドに JSON で送信。`meetingId` も FormData にセット
+- [ ] チェックボックスクリックで `updateMeetingAction` を呼び出す。呼び出しは `startTransition` 内で FormData を組み立て直接呼ぶ（`updateMeetingAction.bind(null, {})` で部分適用）。該当 meetingId の全 actionItems を取得し、対象 index の `done` を反転させた配列を FormData の `actionItems` フィールドに JSON で送信。`meetingId` も FormData にセット
 - [ ] アイテムがない場合は「アクションアイテムはありません」を表示
 - [ ] `editable=false` のとき、チェックボックスは `disabled`
 - [ ] `src/app/(dashboard)/deals/[id]/page.tsx` を修正して、商談履歴セクションの前にアクションアイテム集約セクションを追加する
-- [ ] サーバーコンポーネント側で `dealMeetings` から actionItems を抽出し、`meetingLabel` は `meetingTypeLabels[m.type] + " " + m.date.toLocaleDateString("ja-JP")` の形式で生成する
+- [ ] サーバーコンポーネント側で `dealMeetings` から全アクションアイテム（完了・未完了とも）を抽出し、`meetingLabel` は `meetingTypeLabels[m.type] + " " + m.date.toLocaleDateString("ja-JP")` の形式で生成する
+- [ ] `src/app/actions/meetings.ts` の `updateMeetingAction` に admin/manager ロールチェックを追加する。member/finance には `{ message: "権限がありません" }` を返す
 
 **Acceptance Criteria**:
 - 案件詳細に「アクションアイテム」セクションが表示される
@@ -166,8 +167,9 @@
 - [ ] 議事録を InlineEditTextarea で編集。`onSave` で `updateMeetingAction` を呼ぶ。FormData に `meetingId` と `summary` をセット
 - [ ] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/MeetingActionItemsSection.tsx` を新規作成する（`"use client"`）
 - [ ] props: `meetingId: string`, `actionItems: ActionItem[]`, `editable: boolean`
-- [ ] 各アイテムにチェックボックスを配置。クリックで `updateMeetingAction` を呼び、対象アイテムの `done` を反転した全 actionItems を送信
+- [ ] 各アイテムにチェックボックスを配置。クリックで `updateMeetingAction` を呼ぶ（`startTransition` 内で FormData を組み立て、`updateMeetingAction.bind(null, {})` で部分適用）。対象アイテムの `done` を反転した全 actionItems を送信
 - [ ] `editable=false` のときチェックボックスは `disabled`
+- [ ] `updateMeetingAction` のロールチェック追加は T-09 で実施済みのため、ここでは追加不要
 - [ ] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/page.tsx` を修正して、議事録セクションを `MeetingSummarySection` に、アクションアイテムセクションを `MeetingActionItemsSection` に置き換える。`editable` は `session.user.role === "admin" || session.user.role === "manager"` で算出
 
 **Acceptance Criteria**:
