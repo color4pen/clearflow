@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "05597fd5-53bd-4183-b791-fc663f8ddc7d",
   "createdAt": "2026-06-22T04:03:10.619Z",
-  "updatedAt": "2026-06-22T04:49:30.410Z",
+  "updatedAt": "2026-06-22T04:54:13.717Z",
   "request": {
     "title": "削除機能とフォーム整備",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/delete-and-form-fixes-05597fd5",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-22T04:49:30.390Z"
   },
   "_journal": {
-    "historyCount": 65,
+    "historyCount": 66,
     "stepCounts": {
       "request-review": 1,
       "design": 1,

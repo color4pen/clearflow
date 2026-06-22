@@ -95,3 +95,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/delete-and-form-fixes/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-22T04:49:28.702Z","endedAt":"2026-06-22T04:49:30.391Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-22T04:49:30.391Z","outputs":[{"path":"specrunner/changes/delete-and-form-fixes/pr-create-result.md","hash":"sha256:18b73210419f352091f2ba2c9691a2e803257c96a084f75fd32157f2cbad9398"}],"inputs":[{"path":"feat/delete-and-form-fixes-05597fd5","hash":null}]}
 {"type":"transition","ts":"2026-06-22T04:49:30.410Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-22T04:54:13.717Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
