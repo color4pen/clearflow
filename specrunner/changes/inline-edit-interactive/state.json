@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d6a27e08-b324-4a61-aedb-d8c4628e94e3",
   "createdAt": "2026-06-22T09:28:11.551Z",
-  "updatedAt": "2026-06-22T10:29:14.776Z",
+  "updatedAt": "2026-06-22T10:33:38.333Z",
   "request": {
     "title": "詳細画面のインタラクティブ編集",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "code-fixer",
   "status": "running",
   "branch": "change/inline-edit-interactive-d6a27e08",
   "error": null,
@@ -34,8 +34,22 @@
     }
   ],
   "resumePoint": null,
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "pending",
+      "approvedAtCommit": null,
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 53,
+    "historyCount": 57,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -45,7 +59,9 @@
       "verification": 2,
       "build-fixer": 1,
       "code-review": 1,
-      "code-fixer": 1
+      "code-fixer": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }

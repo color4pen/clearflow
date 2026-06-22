@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
-import { createInquiry, updateInquiryStatus, listInquiries, createClient, deleteInquiry } from "@/application/usecases";
+import { createInquiry, updateInquiryStatus, updateInquiry, listInquiries, createClient, deleteInquiry } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import type { InquiryWithClient } from "@/domain/models/inquiry";
 import type { ActionResult } from "./requests";
@@ -181,21 +181,19 @@ export async function updateInquiryAction(
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
-  const { inquiryRepository } = await import("@/infrastructure/repositories");
-  const updated = await inquiryRepository.update(
+  const result = await updateInquiry({
     inquiryId,
-    session.user.organizationId,
-    {
-      title: parsed.data.title,
-      description: parsed.data.description ?? null,
-      source: parsed.data.source,
-      clientId: parsed.data.clientId ?? null,
-      assigneeId: parsed.data.assigneeId ?? null,
-    }
-  );
+    organizationId: session.user.organizationId,
+    actorId: session.user.id,
+    title: parsed.data.title,
+    description: parsed.data.description ?? null,
+    source: parsed.data.source,
+    clientId: parsed.data.clientId ?? null,
+    assigneeId: parsed.data.assigneeId ?? null,
+  });
 
-  if (!updated) {
-    return { message: "引き合いが見つかりません" };
+  if (!result.ok) {
+    return { message: result.reason };
   }
 
   revalidatePath("/inquiries");
