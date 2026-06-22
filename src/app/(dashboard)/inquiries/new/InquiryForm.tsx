@@ -9,6 +9,7 @@ import type { Client } from "@/domain/models/client";
 
 type Props = {
   clients: Client[];
+  users: { id: string; name: string }[];
 };
 
 const sourceOptions = [
@@ -20,7 +21,7 @@ const sourceOptions = [
   { value: "other", label: "その他" },
 ];
 
-export function InquiryForm({ clients }: Props) {
+export function InquiryForm({ clients, users }: Props) {
   const router = useRouter();
   const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
 
@@ -107,11 +108,26 @@ export function InquiryForm({ clients }: Props) {
             ))}
           </Select>
         </FormField>
+
+        <FormField
+          label="社内担当者"
+          htmlFor="assigneeId"
+          error={state.errors?.assigneeId?.[0]}
+        >
+          <Select id="assigneeId" name="assigneeId">
+            <option value="">未定</option>
+            {users.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name}
+              </option>
+            ))}
+          </Select>
+        </FormField>
       </div>
 
       <div className="mt-3">
-        <FormField label="概要" htmlFor="description" error={state.errors?.description?.[0]}>
-          <Textarea id="description" name="description" rows={4} placeholder="引き合いの概要を記入してください" />
+        <FormField label="内容" htmlFor="description" error={state.errors?.description?.[0]}>
+          <Textarea id="description" name="description" rows={4} placeholder="引き合いの内容を記入してください" />
         </FormField>
       </div>
 

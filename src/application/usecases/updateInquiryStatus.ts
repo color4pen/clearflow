@@ -43,6 +43,7 @@ export async function updateInquiryStatus(data: {
             inquiryId: data.inquiryId,
             clientId: inquiry.clientId!,
             title: inquiry.title,
+            notes: inquiry.description ?? null,
           },
           tx
         );

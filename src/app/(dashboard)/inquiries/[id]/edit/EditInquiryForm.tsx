@@ -14,11 +14,13 @@ type Props = {
     description: string | null;
     source: string;
     clientId: string | null;
+    assigneeId: string | null;
   };
   clients: Client[];
+  users: { id: string; name: string }[];
 };
 
-export function EditInquiryForm({ inquiry, clients }: Props) {
+export function EditInquiryForm({ inquiry, clients, users }: Props) {
   const router = useRouter();
   const boundAction = updateInquiryAction.bind(null, inquiry.id);
   const [state, formAction] = useActionState<UpdateInquiryState, FormData>(boundAction, {});
@@ -59,7 +61,16 @@ export function EditInquiryForm({ inquiry, clients }: Props) {
           </Select>
         </FormField>
 
-        <FormField label="概要" error={state.errors?.description?.[0]}>
+        <FormField label="社内担当者" error={state.errors?.assigneeId?.[0]}>
+          <Select name="assigneeId" defaultValue={inquiry.assigneeId ?? ""}>
+            <option value="">未定</option>
+            {users.map((u) => (
+              <option key={u.id} value={u.id}>{u.name}</option>
+            ))}
+          </Select>
+        </FormField>
+
+        <FormField label="内容" error={state.errors?.description?.[0]}>
           <Textarea name="description" defaultValue={inquiry.description ?? ""} rows={6} />
         </FormField>
 
