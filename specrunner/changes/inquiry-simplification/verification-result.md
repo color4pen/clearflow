@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 10.1s | 0 |
+| 1 | build | passed | 12.7s | 0 |
 | 2 | typecheck | passed | 0.9s | 0 |
 | 3 | test | passed | 0.1s | 0 |
-| 4 | lint | passed | 4.2s | 0 |
+| 4 | lint | passed | 3.5s | 0 |
 
 ## Phase: build
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 5.4s
+✓ Compiled successfully in 7.2s
   Running TypeScript ...
-  Finished TypeScript in 3.2s ...
+  Finished TypeScript in 3.9s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/23) ...
   Generating static pages using 7 workers (5/23) 
   Generating static pages using 7 workers (11/23) 
   Generating static pages using 7 workers (17/23) 
-✓ Generating static pages using 7 workers (23/23) in 168ms
+✓ Generating static pages using 7 workers (23/23) in 164ms
   Finalizing page optimization ...
 
 Route (app)
@@ -100,7 +100,7 @@ $ bun test
  534 pass
  0 fail
  1076 expect() calls
-Ran 534 tests across 26 files. [108.00ms]
+Ran 534 tests across 26 files. [109.00ms]
 
 ```
 
