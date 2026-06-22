@@ -312,5 +312,25 @@ export async function updateMeetingAction(
     return { message: result.reason };
   }
 
+  const clientIdRaw = formData.get("clientId");
+  const registerContactsRaw = formData.get("registerContacts");
+  if (clientIdRaw && typeof clientIdRaw === "string" && registerContactsRaw && typeof registerContactsRaw === "string") {
+    try {
+      const contacts = JSON.parse(registerContactsRaw) as Array<{ name: string; register: boolean }>;
+      for (const entry of contacts) {
+        if (entry.register && entry.name.trim()) {
+          await createClientContact({
+            clientId: clientIdRaw,
+            name: entry.name.trim(),
+            organizationId: session.user.organizationId,
+            actorId: session.user.id,
+          });
+        }
+      }
+    } catch {
+      // best-effort
+    }
+  }
+
   return {};
 }
