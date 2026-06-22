@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d6a27e08-b324-4a61-aedb-d8c4628e94e3",
   "createdAt": "2026-06-22T09:28:11.551Z",
-  "updatedAt": "2026-06-22T10:43:00.029Z",
+  "updatedAt": "2026-06-22T10:43:24.010Z",
   "request": {
     "title": "詳細画面のインタラクティブ編集",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/inline-edit-interactive-d6a27e08",
   "error": null,
   "pipelineId": "standard",
@@ -48,8 +48,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/69",
+    "number": 69,
+    "createdAt": "2026-06-22T10:43:23.999Z"
+  },
   "_journal": {
-    "historyCount": 80,
+    "historyCount": 85,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -63,7 +68,9 @@
       "domain-invariants": 2,
       "custom-reviewers": 2,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
