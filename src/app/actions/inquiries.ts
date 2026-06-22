@@ -164,6 +164,10 @@ export async function updateInquiryAction(
     return { message: "認証が必要です" };
   }
 
+  if (session.user.role !== "admin" && session.user.role !== "manager") {
+    return { message: "権限がありません" };
+  }
+
   const raw = {
     title: formData.get("title"),
     description: formData.get("description") || undefined,

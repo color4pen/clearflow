@@ -4,6 +4,8 @@ import { auth } from "@/infrastructure/auth";
 import { meetingRepository } from "@/infrastructure/repositories";
 import { SectionCard } from "@/app/components";
 import { meetingTypeLabels } from "@/app/(dashboard)/labels";
+import { MeetingSummarySection } from "./MeetingSummarySection";
+import { MeetingActionItemsSection } from "./MeetingActionItemsSection";
 
 export default async function DealMeetingDetailPage({
   params,
@@ -22,6 +24,9 @@ export default async function DealMeetingDetailPage({
   if (meeting.dealId !== id) {
     notFound();
   }
+
+  const editable =
+    session!.user.role === "admin" || session!.user.role === "manager";
 
   return (
     <div>
@@ -141,32 +146,22 @@ export default async function DealMeetingDetailPage({
         <div className="space-y-2">
           <SectionCard className="p-3">
             <h2 className="text-xs font-bold text-text mb-2">議事録</h2>
-            {meeting.summary ? (
-              <p className="text-xs text-text whitespace-pre-wrap">{meeting.summary}</p>
-            ) : (
-              <p className="text-xs text-text-muted">議事録はありません</p>
-            )}
+            <MeetingSummarySection
+              meetingId={meetingId}
+              dealId={id}
+              summary={meeting.summary}
+              editable={editable}
+            />
           </SectionCard>
 
           <SectionCard className="p-3">
             <h2 className="text-xs font-bold text-text mb-2">アクションアイテム</h2>
-            {meeting.actionItems.length === 0 ? (
-              <p className="text-xs text-text-muted">アクションアイテムはありません</p>
-            ) : (
-              <ul className="text-xs space-y-1">
-                {meeting.actionItems.map((item, idx) => (
-                  <li key={idx} className="flex gap-2 items-start">
-                    <span className={item.done ? "text-text-muted line-through" : "text-text"}>
-                      {item.description}
-                    </span>
-                    <span className="text-text-muted">（{item.assignee}）</span>
-                    {item.dueDate && (
-                      <span className="text-text-muted">{item.dueDate}</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
+            <MeetingActionItemsSection
+              meetingId={meetingId}
+              dealId={id}
+              actionItems={meeting.actionItems}
+              editable={editable}
+            />
           </SectionCard>
         </div>
       </div>

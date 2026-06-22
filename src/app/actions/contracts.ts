@@ -117,16 +117,36 @@ export async function updateContractAction(
   const contractTypeRaw = formData.get("contractType");
   const amountRaw = formData.get("amount");
   const renewalTypeRaw = formData.get("renewalType");
+  const startDateRaw = formData.get("startDate");
+  const endDateRaw = formData.get("endDate");
+  const paymentTermsRaw = formData.get("paymentTerms");
+  const renewalCycleRaw = formData.get("renewalCycle");
 
+  // null means the field was not present in FormData (partial update from inline edit).
+  // undefined means "don't change this field". Empty string means "clear this field".
   const parsed = updateContractSchema.safeParse({
     title: formData.get("title") || undefined,
-    contractType: contractTypeRaw && contractTypeRaw !== "" ? contractTypeRaw : null,
-    amount: amountRaw && amountRaw !== "" ? amountRaw : null,
-    startDate: formData.get("startDate") || null,
-    endDate: formData.get("endDate") || null,
-    paymentTerms: formData.get("paymentTerms") || null,
-    renewalType: renewalTypeRaw && renewalTypeRaw !== "" ? renewalTypeRaw : undefined,
-    renewalCycle: formData.get("renewalCycle") || null,
+    contractType:
+      contractTypeRaw === null ? undefined :
+        (contractTypeRaw !== "" ? contractTypeRaw : null),
+    amount:
+      amountRaw === null ? undefined :
+        (amountRaw !== "" ? amountRaw : null),
+    startDate:
+      startDateRaw === null ? undefined :
+        (startDateRaw || null),
+    endDate:
+      endDateRaw === null ? undefined :
+        (endDateRaw || null),
+    paymentTerms:
+      paymentTermsRaw === null ? undefined :
+        (paymentTermsRaw || null),
+    renewalType:
+      renewalTypeRaw === null ? undefined :
+        (renewalTypeRaw !== "" ? renewalTypeRaw : undefined),
+    renewalCycle:
+      renewalCycleRaw === null ? undefined :
+        (renewalCycleRaw || null),
   });
 
   if (!parsed.success) {

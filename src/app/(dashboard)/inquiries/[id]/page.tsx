@@ -9,7 +9,8 @@ import {
 import { SectionCard } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
 import { DeleteInquiryButton } from "./DeleteInquiryButton";
-import { statusLabels, sourceLabels, phaseLabels } from "@/app/(dashboard)/labels";
+import { InquiryInfoSection } from "./InquiryInfoSection";
+import { statusLabels, phaseLabels } from "@/app/(dashboard)/labels";
 
 export default async function InquiryDetailPage({
   params,
@@ -34,6 +35,7 @@ export default async function InquiryDetailPage({
 
   const canChangeStatus =
     session!.user.role === "admin" || session!.user.role === "manager";
+  const editable = canChangeStatus;
 
   return (
     <div>
@@ -70,23 +72,23 @@ export default async function InquiryDetailPage({
               ) : "-"}
             </dd>
           </div>
-          <div className="flex gap-2">
-            <dt className="text-text-muted w-20 shrink-0">流入経路</dt>
-            <dd className="text-text">{sourceLabels[inquiry.source] ?? inquiry.source}</dd>
-          </div>
+          <InquiryInfoSection
+            inquiry={{
+              id: inquiry.id,
+              title: inquiry.title,
+              source: inquiry.source,
+              description: inquiry.description,
+              clientId: inquiry.clientId,
+              assigneeId: inquiry.assigneeId ?? null,
+            }}
+            editable={editable}
+          />
           <div className="flex gap-2">
             <dt className="text-text-muted w-20 shrink-0">作成日</dt>
             <dd className="text-text">{inquiry.createdAt.toLocaleDateString("ja-JP")}</dd>
           </div>
         </dl>
       </SectionCard>
-
-      {inquiry.description && (
-        <SectionCard className="p-3 mb-2">
-          <h2 className="text-xs font-bold text-text mb-2">内容</h2>
-          <p className="text-xs text-text whitespace-pre-wrap">{inquiry.description}</p>
-        </SectionCard>
-      )}
 
       <SectionCard className="p-3 mb-2">
         <h2 className="text-xs font-bold text-text mb-2">

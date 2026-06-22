@@ -4,3 +4,8 @@ export { FormField, Input, Select, Textarea, preventEnterSubmit } from "./FormFi
 export { LinkButton, SubmitButton } from "./LinkButton";
 export { SectionCard } from "./SectionCard";
 export { MoneyInput } from "./MoneyInput";
+export { InlineEditText } from "./InlineEditText";
+export { InlineEditTextarea } from "./InlineEditTextarea";
+export { InlineEditSelect } from "./InlineEditSelect";
+export { InlineEditDate } from "./InlineEditDate";
+export { InlineEditMoney } from "./InlineEditMoney";
