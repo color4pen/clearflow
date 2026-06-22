@@ -36,19 +36,31 @@ export function DealInfoSection({ deal, editable }: Props) {
     ? deal.estimatedEndDate.toISOString().slice(0, 10)
     : "";
 
+  const savingRef = useRef(false);
+  const pendingRef = useRef(false);
+
   const save = useCallback(async () => {
     if (!formRef.current) return;
+    if (savingRef.current) {
+      pendingRef.current = true;
+      return;
+    }
+    savingRef.current = true;
     setSaveStatus("saving");
     const formData = new FormData(formRef.current);
     const result = await updateDealAction(deal.id, formData);
+    savingRef.current = false;
     if (result.success === false) {
       setSaveStatus("error");
     } else {
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
-      router.refresh();
     }
-  }, [deal.id, router]);
+    if (pendingRef.current) {
+      pendingRef.current = false;
+      save();
+    }
+  }, [deal.id]);
 
   const debouncedSave = useDebouncedCallback(save, 800);
 

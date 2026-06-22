@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import { updateContractAction } from "@/app/actions/contracts";
 import { Input, Select, MoneyInput, preventEnterSubmit } from "@/app/components";
@@ -27,9 +26,10 @@ type Props = {
 };
 
 export function ContractInfoSection({ contract, editable }: Props) {
-  const router = useRouter();
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const formRef = useRef<HTMLFormElement>(null);
+  const savingRef = useRef(false);
+  const pendingRef = useRef(false);
 
   const startDateStr = contract.startDate
     ? contract.startDate.toISOString().slice(0, 10)
@@ -40,17 +40,26 @@ export function ContractInfoSection({ contract, editable }: Props) {
 
   const save = useCallback(async () => {
     if (!formRef.current) return;
+    if (savingRef.current) {
+      pendingRef.current = true;
+      return;
+    }
+    savingRef.current = true;
     setSaveStatus("saving");
     const formData = new FormData(formRef.current);
     const result = await updateContractAction(contract.id, formData);
+    savingRef.current = false;
     if (result.success === false) {
       setSaveStatus("error");
     } else {
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
-      router.refresh();
     }
-  }, [contract.id, router]);
+    if (pendingRef.current) {
+      pendingRef.current = false;
+      save();
+    }
+  }, [contract.id]);
 
   const debouncedSave = useDebouncedCallback(save, 800);
 

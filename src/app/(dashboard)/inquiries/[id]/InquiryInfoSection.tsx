@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { useDebouncedCallback } from "use-debounce";
 import { updateInquiryAction } from "@/app/actions/inquiries";
 import { Input, Select, Textarea, preventEnterSubmit } from "@/app/components";
@@ -20,26 +19,36 @@ type Props = {
 };
 
 export function InquiryInfoSection({ inquiry, editable }: Props) {
-  const router = useRouter();
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const formRef = useRef<HTMLFormElement>(null);
+  const savingRef = useRef(false);
+  const pendingRef = useRef(false);
 
   const save = useCallback(async () => {
     if (!formRef.current) return;
+    if (savingRef.current) {
+      pendingRef.current = true;
+      return;
+    }
+    savingRef.current = true;
     setSaveStatus("saving");
     const formData = new FormData(formRef.current);
     if (inquiry.clientId) formData.set("clientId", inquiry.clientId);
     if (inquiry.assigneeId) formData.set("assigneeId", inquiry.assigneeId);
 
     const result = await updateInquiryAction(inquiry.id, {}, formData);
+    savingRef.current = false;
     if (result.success === false || result.message) {
       setSaveStatus("error");
     } else {
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
-      router.refresh();
     }
-  }, [inquiry.id, inquiry.clientId, inquiry.assigneeId, router]);
+    if (pendingRef.current) {
+      pendingRef.current = false;
+      save();
+    }
+  }, [inquiry.id, inquiry.clientId, inquiry.assigneeId]);
 
   const debouncedSave = useDebouncedCallback(save, 800);
 

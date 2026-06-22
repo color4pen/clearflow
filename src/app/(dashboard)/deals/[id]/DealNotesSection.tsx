@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef, useCallback } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { updateDealAction } from "@/app/actions/deals";
 import { SectionCard, Textarea } from "@/app/components";
@@ -13,23 +12,34 @@ type Props = {
 };
 
 export function DealNotesSection({ dealId, notes, editable }: Props) {
-  const router = useRouter();
   const [value, setValue] = useState(notes ?? "");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const savingRef = useRef(false);
+  const pendingTextRef = useRef<string | null>(null);
 
   const save = useCallback(async (text: string) => {
+    if (savingRef.current) {
+      pendingTextRef.current = text;
+      return;
+    }
+    savingRef.current = true;
     setSaveStatus("saving");
     const formData = new FormData();
     formData.set("notes", text);
     const result = await updateDealAction(dealId, formData);
+    savingRef.current = false;
     if (!result.success) {
       setSaveStatus("error");
     } else {
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
-      router.refresh();
     }
-  }, [dealId, router]);
+    if (pendingTextRef.current !== null) {
+      const pending = pendingTextRef.current;
+      pendingTextRef.current = null;
+      save(pending);
+    }
+  }, [dealId]);
 
   const debouncedSave = useDebouncedCallback((text: string) => {
     save(text);

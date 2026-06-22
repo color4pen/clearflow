@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useRef, useCallback } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { updateMeetingAction } from "@/app/actions/meetings";
 import { Textarea } from "@/app/components";
@@ -14,26 +13,37 @@ type Props = {
 };
 
 export function MeetingSummarySection({ meetingId, dealId, summary, editable }: Props) {
-  const router = useRouter();
   const [value, setValue] = useState(summary ?? "");
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const savingRef = useRef(false);
+  const pendingTextRef = useRef<string | null>(null);
 
   const save = useCallback(async (text: string) => {
+    if (savingRef.current) {
+      pendingTextRef.current = text;
+      return;
+    }
+    savingRef.current = true;
     setSaveStatus("saving");
     const formData = new FormData();
     formData.set("meetingId", meetingId);
     formData.set("dealId", dealId);
     formData.set("summary", text);
     const result = await updateMeetingAction({}, formData);
+    savingRef.current = false;
     const success = !result.message && !result.errors;
     if (success) {
       setSaveStatus("saved");
       setTimeout(() => setSaveStatus("idle"), 2000);
-      router.refresh();
     } else {
       setSaveStatus("error");
     }
-  }, [meetingId, dealId, router]);
+    if (pendingTextRef.current !== null) {
+      const pending = pendingTextRef.current;
+      pendingTextRef.current = null;
+      save(pending);
+    }
+  }, [meetingId, dealId]);
 
   const debouncedSave = useDebouncedCallback((text: string) => {
     save(text);
