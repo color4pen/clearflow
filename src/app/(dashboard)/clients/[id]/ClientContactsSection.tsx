@@ -109,7 +109,7 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
             {contacts.map((contact) => (
               <tr
                 key={contact.id}
-                className={`border-b border-border-light${editable ? " cursor-pointer hover:bg-bg-base" : ""}`}
+                className={`border-b border-border-light${editable ? " cursor-pointer hover:bg-primary/10" : ""}`}
                 onClick={() => editable && setEditingContact(contact)}
               >
                 <td className="py-1 px-2 text-text">{contact.name}</td>
