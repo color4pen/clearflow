@@ -110,7 +110,7 @@ export function DealInfoSection({ deal, editable }: Props) {
               name="phase"
               value={phase}
               onChange={handlePhaseChange}
-              disabled={!editable}
+              disabled={!editable || phase === "won" || phase === "lost"}
             >
               {Object.entries(phaseLabels).map(([value, label]) => (
                 <option key={value} value={value}>{label}</option>

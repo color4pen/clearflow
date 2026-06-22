@@ -45,9 +45,8 @@ export default async function DealDetailPage({
 
   const clientContacts = await clientRepository.findContactsByClientId(deal.clientId);
 
-  const isTerminal = deal.phase === "won" || deal.phase === "lost";
   const canChangePhase =
-    (session!.user.role === "admin" || session!.user.role === "manager") && !isTerminal;
+    session!.user.role === "admin" || session!.user.role === "manager";
 
   // 全商談のアクションアイテムを集約する（完了・未完了とも表示）
   const flatActionItems = dealMeetings.flatMap((m) =>
