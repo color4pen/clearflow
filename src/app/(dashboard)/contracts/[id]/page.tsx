@@ -6,11 +6,8 @@ import { SectionCard } from "@/app/components";
 import { ContractStatusActions } from "./ContractStatusActions";
 import { InvoiceSection } from "./InvoiceSection";
 import { DeleteContractButton } from "./DeleteContractButton";
-import {
-  contractStatusLabels,
-  contractTypeLabels,
-  renewalTypeLabels,
-} from "@/app/(dashboard)/labels";
+import { ContractInfoSection } from "./ContractInfoSection";
+import { contractStatusLabels } from "@/app/(dashboard)/labels";
 
 export default async function ContractDetailPage({
   params,
@@ -59,61 +56,10 @@ export default async function ContractDetailPage({
           </div>
           <dl className="text-xs space-y-1">
             <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">契約名</dt>
-              <dd className="text-text">{contract.title}</dd>
-            </div>
-            <div className="flex gap-2">
               <dt className="text-text-muted w-24 shrink-0">ステータス</dt>
               <dd className="text-text">{contractStatusLabels[contract.status] ?? contract.status}</dd>
             </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">契約種別</dt>
-              <dd className="text-text">
-                {contract.contractType
-                  ? (contractTypeLabels[contract.contractType] ?? contract.contractType)
-                  : "-"}
-              </dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">金額</dt>
-              <dd className="text-text">
-                {contract.amount != null
-                  ? `¥${contract.amount.toLocaleString("ja-JP")}`
-                  : "-"}
-              </dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">開始日</dt>
-              <dd className="text-text">
-                {contract.startDate
-                  ? contract.startDate.toLocaleDateString("ja-JP")
-                  : "-"}
-              </dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">終了日</dt>
-              <dd className="text-text">
-                {contract.endDate
-                  ? contract.endDate.toLocaleDateString("ja-JP")
-                  : "-"}
-              </dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">支払条件</dt>
-              <dd className="text-text">{contract.paymentTerms ?? "-"}</dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">更新種別</dt>
-              <dd className="text-text">{renewalTypeLabels[contract.renewalType] ?? contract.renewalType}</dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">更新サイクル</dt>
-              <dd className="text-text">{contract.renewalCycle ?? "-"}</dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">作成日</dt>
-              <dd className="text-text">{contract.createdAt.toLocaleDateString("ja-JP")}</dd>
-            </div>
+            <ContractInfoSection contract={contract} editable={canManage} />
           </dl>
         </SectionCard>
 

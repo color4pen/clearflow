@@ -10,13 +10,13 @@ import {
   contractRepository,
 } from "@/infrastructure/repositories";
 import { SectionCard, DataTable } from "@/app/components";
-import { DealEditForm } from "./DealEditForm";
 import { DealContactsSection } from "./DealContactsSection";
 import { DealNotesSection } from "./DealNotesSection";
+import { DealInfoSection } from "./DealInfoSection";
+import { DealActionItemsSection } from "./DealActionItemsSection";
 import { DeleteDealButton } from "./DeleteDealButton";
-import { phaseLabels, contractTypeLabels, meetingTypeLabels, contractStatusLabels } from "@/app/(dashboard)/labels";
+import { contractTypeLabels, meetingTypeLabels, contractStatusLabels } from "@/app/(dashboard)/labels";
 import type { Meeting } from "@/domain/models/meeting";
-import type { Contract } from "@/domain/models/contract";
 
 export default async function DealDetailPage({
   params,
@@ -48,6 +48,23 @@ export default async function DealDetailPage({
   const canChangePhase =
     session!.user.role === "admin" || session!.user.role === "manager";
 
+  // 全商談のアクションアイテムを集約する（完了・未完了とも表示）
+  const flatActionItems = dealMeetings.flatMap((m) =>
+    m.actionItems.map((item, index) => ({
+      meetingId: m.id,
+      dealId: deal.id,
+      meetingLabel: `${meetingTypeLabels[m.type] ?? m.type} ${m.date.toLocaleDateString("ja-JP")}`,
+      actionItem: item,
+      index,
+    }))
+  );
+
+  const allMeetingActionItems = dealMeetings.map((m) => ({
+    meetingId: m.id,
+    dealId: deal.id,
+    actionItems: m.actionItems,
+  }));
+
   return (
     <div>
       <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2">
@@ -70,48 +87,7 @@ export default async function DealDetailPage({
             </div>
           </div>
           <dl className="text-xs space-y-1">
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">案件名</dt>
-              <dd className="text-text">{deal.title}</dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">フェーズ</dt>
-              <dd className="text-text">{phaseLabels[deal.phase] ?? deal.phase}</dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">想定金額</dt>
-              <dd className="text-text">
-                {deal.estimatedAmount != null
-                  ? `¥${deal.estimatedAmount.toLocaleString("ja-JP")}`
-                  : "-"}
-              </dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">想定開始日</dt>
-              <dd className="text-text">
-                {deal.estimatedStartDate
-                  ? deal.estimatedStartDate.toLocaleDateString("ja-JP")
-                  : "-"}
-              </dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">想定終了日</dt>
-              <dd className="text-text">
-                {deal.estimatedEndDate
-                  ? deal.estimatedEndDate.toLocaleDateString("ja-JP")
-                  : "-"}
-              </dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">契約種別</dt>
-              <dd className="text-text">
-                {deal.contractType ? contractTypeLabels[deal.contractType] ?? deal.contractType : "-"}
-              </dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">作成日</dt>
-              <dd className="text-text">{deal.createdAt.toLocaleDateString("ja-JP")}</dd>
-            </div>
+            <DealInfoSection deal={deal} editable={canChangePhase} />
           </dl>
         </SectionCard>
 
@@ -221,6 +197,16 @@ export default async function DealDetailPage({
           dealContacts={dealContacts}
           clientContacts={clientContacts}
           clientId={deal.clientId}
+        />
+      </SectionCard>
+
+      {/* アクションアイテム */}
+      <SectionCard className="p-3 mb-2">
+        <h2 className="text-xs font-bold text-text mb-2">アクションアイテム</h2>
+        <DealActionItemsSection
+          items={flatActionItems}
+          allMeetingActionItems={allMeetingActionItems}
+          editable={canChangePhase}
         />
       </SectionCard>
 

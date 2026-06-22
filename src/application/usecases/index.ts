@@ -19,6 +19,7 @@ export { bulkApprove } from "./bulkApprove";
 export { createClient } from "./createClient";
 export { createInquiry } from "./createInquiry";
 export { updateInquiryStatus } from "./updateInquiryStatus";
+export { updateInquiry } from "./updateInquiry";
 export { listClients } from "./listClients";
 export { listInquiries } from "./listInquiries";
 export { createMeeting } from "./createMeeting";

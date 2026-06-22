@@ -206,19 +206,35 @@ export async function updateDealAction(
   const estimatedAmountRaw = formData.get("estimatedAmount");
   const assigneeIdRaw = formData.get("assigneeId");
   const technicalLeadIdRaw = formData.get("technicalLeadId");
+  const estimatedStartDateRaw = formData.get("estimatedStartDate");
+  const estimatedEndDateRaw = formData.get("estimatedEndDate");
+  const notesRaw = formData.get("notes");
 
+  // null means the field was not present in FormData (partial update from inline edit).
+  // undefined means "don't change this field". Empty string means "clear this field".
   const parsed = updateDealSchema.safeParse({
     title: formData.get("title") || undefined,
     estimatedAmount:
-      estimatedAmountRaw && estimatedAmountRaw !== "" ? estimatedAmountRaw : null,
-    estimatedStartDate: formData.get("estimatedStartDate") || null,
-    estimatedEndDate: formData.get("estimatedEndDate") || null,
+      estimatedAmountRaw === null ? undefined :
+        (estimatedAmountRaw !== "" ? estimatedAmountRaw : null),
+    estimatedStartDate:
+      estimatedStartDateRaw === null ? undefined :
+        (estimatedStartDateRaw || null),
+    estimatedEndDate:
+      estimatedEndDateRaw === null ? undefined :
+        (estimatedEndDateRaw || null),
     contractType:
-      contractTypeRaw && contractTypeRaw !== "" ? contractTypeRaw : null,
-    assigneeId: assigneeIdRaw && assigneeIdRaw !== "" ? assigneeIdRaw : null,
+      contractTypeRaw === null ? undefined :
+        (contractTypeRaw !== "" ? contractTypeRaw : null),
+    assigneeId:
+      assigneeIdRaw === null ? undefined :
+        (assigneeIdRaw !== "" ? assigneeIdRaw : null),
     technicalLeadId:
-      technicalLeadIdRaw && technicalLeadIdRaw !== "" ? technicalLeadIdRaw : null,
-    notes: formData.get("notes") || null,
+      technicalLeadIdRaw === null ? undefined :
+        (technicalLeadIdRaw !== "" ? technicalLeadIdRaw : null),
+    notes:
+      notesRaw === null ? undefined :
+        (notesRaw || null),
   });
 
   if (!parsed.success) {

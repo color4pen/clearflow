@@ -222,6 +222,10 @@ export async function updateMeetingAction(
     return { message: "認証が必要です" };
   }
 
+  if (session.user.role !== "admin" && session.user.role !== "manager") {
+    return { message: "権限がありません" };
+  }
+
   const rateCheck = await checkRateLimit({
     key: `updateMeeting:${session.user.id}`,
     limit: RATE_LIMITS.createRequest.limit,
@@ -331,6 +335,13 @@ export async function updateMeetingAction(
     } catch {
       // best-effort
     }
+  }
+
+  // dealId がある場合は関連パスを再検証する（インライン編集で FormData に含まれる）
+  const dealIdRaw = formData.get("dealId");
+  if (typeof dealIdRaw === "string" && dealIdRaw) {
+    revalidatePath(`/deals/${dealIdRaw}`);
+    revalidatePath(`/deals/${dealIdRaw}/meetings/${parsed.data.meetingId}`);
   }
 
   return {};
