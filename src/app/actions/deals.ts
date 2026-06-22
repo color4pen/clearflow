@@ -81,7 +81,7 @@ export async function createDealAction(
 
   const parsed = createDealSchema.safeParse({
     inquiryId: inquiryIdRaw && inquiryIdRaw !== "" ? inquiryIdRaw : undefined,
-    clientId: clientIdRaw && clientIdRaw !== "" ? clientIdRaw : undefined,
+    clientId: clientIdRaw && clientIdRaw !== "" && clientIdRaw !== "__new__" ? clientIdRaw : undefined,
     title: formData.get("title"),
     estimatedAmount:
       estimatedAmountRaw && estimatedAmountRaw !== "" ? estimatedAmountRaw : undefined,
