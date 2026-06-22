@@ -45,7 +45,7 @@ export default async function ContractDetailPage({
           <dl className="text-xs space-y-1 mt-1">
             <div className="flex gap-2">
               <dt className="text-text-muted w-24 shrink-0">ステータス</dt>
-              <dd className="text-text">{contractStatusLabels[contract.status] ?? contract.status}</dd>
+              <dd className="text-text px-2 py-1">{contractStatusLabels[contract.status] ?? contract.status}</dd>
             </div>
           </dl>
           {canManage && invoices.length === 0 && (
@@ -60,16 +60,16 @@ export default async function ContractDetailPage({
           <dl className="text-xs space-y-1">
             <div className="flex gap-2">
               <dt className="text-text-muted w-24 shrink-0">関連案件</dt>
-              <dd className="text-text">
-                <Link href={`/deals/${contract.dealId}`} className="text-primary underline">
+              <dd className="text-text px-2 py-1">
+                <Link href={`/deals/${contract.dealId}`} className="text-primary underline text-xs">
                   案件を表示
                 </Link>
               </dd>
             </div>
             <div className="flex gap-2">
               <dt className="text-text-muted w-24 shrink-0">顧客</dt>
-              <dd className="text-text">
-                <Link href={`/clients/${contract.clientId}`} className="text-primary underline">
+              <dd className="text-text px-2 py-1">
+                <Link href={`/clients/${contract.clientId}`} className="text-primary underline text-xs">
                   顧客を表示
                 </Link>
               </dd>

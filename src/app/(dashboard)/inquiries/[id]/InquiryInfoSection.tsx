@@ -100,7 +100,7 @@ export function InquiryInfoSection({ inquiry, editable, clients, clientName, cli
           <dt className="text-text-muted w-20 shrink-0">顧客</dt>
           <dd className="text-text flex-1">
             {inquiry.clientId && clientLinkId ? (
-              <Link href={`/clients/${clientLinkId}`} className="text-primary underline text-xs">
+              <Link href={`/clients/${clientLinkId}`} className="text-primary underline text-xs px-2 py-1 inline-block">
                 {clientName}
               </Link>
             ) : editable ? (

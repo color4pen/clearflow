@@ -91,10 +91,10 @@ export default async function DealDetailPage({
             {deal.inquiryId && (
               <div className="flex gap-2">
                 <dt className="text-text-muted w-24 shrink-0">引き合い</dt>
-                <dd className="text-text">
+                <dd className="text-text px-2 py-1">
                   <Link
                     href={`/inquiries/${deal.inquiryId}`}
-                    className="text-primary underline"
+                    className="text-primary underline text-xs"
                   >
                     {inquiry?.title ?? deal.inquiryId}
                   </Link>
@@ -103,9 +103,9 @@ export default async function DealDetailPage({
             )}
             <div className="flex gap-2">
               <dt className="text-text-muted w-24 shrink-0">顧客</dt>
-              <dd className="text-text">
+              <dd className="text-text px-2 py-1">
                 {client ? (
-                  <Link href={`/clients/${client.id}`} className="text-primary underline">
+                  <Link href={`/clients/${client.id}`} className="text-primary underline text-xs">
                     {client.name}
                   </Link>
                 ) : "-"}
@@ -114,10 +114,10 @@ export default async function DealDetailPage({
             {deal.estimateRequestId && (
               <div className="flex gap-2">
                 <dt className="text-text-muted w-24 shrink-0">見積承認</dt>
-                <dd className="text-text">
+                <dd className="text-text px-2 py-1">
                   <Link
                     href={`/requests/${deal.estimateRequestId}`}
-                    className="text-primary underline"
+                    className="text-primary underline text-xs"
                   >
                     承認リクエストを表示
                   </Link>

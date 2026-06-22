@@ -52,11 +52,11 @@ export default async function DealMeetingDetailPage({
             <dl className="text-xs space-y-1">
               <div className="flex gap-2">
                 <dt className="text-text-muted w-24 shrink-0">種別</dt>
-                <dd className="text-text">{meetingTypeLabels[meeting.type] ?? meeting.type}</dd>
+                <dd className="text-text px-2 py-1">{meetingTypeLabels[meeting.type] ?? meeting.type}</dd>
               </div>
               <div className="flex gap-2">
                 <dt className="text-text-muted w-24 shrink-0">日時</dt>
-                <dd className="text-text">
+                <dd className="text-text px-2 py-1">
                   {meeting.date.toLocaleDateString("ja-JP", {
                     year: "numeric",
                     month: "2-digit",
@@ -68,7 +68,7 @@ export default async function DealMeetingDetailPage({
               </div>
               <div className="flex gap-2">
                 <dt className="text-text-muted w-24 shrink-0">場所</dt>
-                <dd className="text-text">{meeting.location ?? "-"}</dd>
+                <dd className="text-text px-2 py-1">{meeting.location ?? "-"}</dd>
               </div>
             </dl>
           </SectionCard>
@@ -109,27 +109,27 @@ export default async function DealMeetingDetailPage({
               <dl className="text-xs space-y-1">
                 <div className="flex gap-2">
                   <dt className="text-text-muted w-24 shrink-0">課題</dt>
-                  <dd className="text-text whitespace-pre-wrap">{meeting.hearingData.challenge ?? "-"}</dd>
+                  <dd className="text-text whitespace-pre-wrap px-2 py-1">{meeting.hearingData.challenge ?? "-"}</dd>
                 </div>
                 <div className="flex gap-2">
                   <dt className="text-text-muted w-24 shrink-0">予算感</dt>
-                  <dd className="text-text">{meeting.hearingData.budget ?? "-"}</dd>
+                  <dd className="text-text px-2 py-1">{meeting.hearingData.budget ?? "-"}</dd>
                 </div>
                 <div className="flex gap-2">
                   <dt className="text-text-muted w-24 shrink-0">決裁者</dt>
-                  <dd className="text-text">{meeting.hearingData.decisionMaker ?? "-"}</dd>
+                  <dd className="text-text px-2 py-1">{meeting.hearingData.decisionMaker ?? "-"}</dd>
                 </div>
                 <div className="flex gap-2">
                   <dt className="text-text-muted w-24 shrink-0">時期</dt>
-                  <dd className="text-text">{meeting.hearingData.timeline ?? "-"}</dd>
+                  <dd className="text-text px-2 py-1">{meeting.hearingData.timeline ?? "-"}</dd>
                 </div>
                 <div className="flex gap-2">
                   <dt className="text-text-muted w-24 shrink-0">競合状況</dt>
-                  <dd className="text-text whitespace-pre-wrap">{meeting.hearingData.competitors ?? "-"}</dd>
+                  <dd className="text-text whitespace-pre-wrap px-2 py-1">{meeting.hearingData.competitors ?? "-"}</dd>
                 </div>
                 <div className="flex gap-2">
                   <dt className="text-text-muted w-24 shrink-0">備考</dt>
-                  <dd className="text-text whitespace-pre-wrap">{meeting.hearingData.notes ?? "-"}</dd>
+                  <dd className="text-text whitespace-pre-wrap px-2 py-1">{meeting.hearingData.notes ?? "-"}</dd>
                 </div>
               </dl>
             </SectionCard>

@@ -66,7 +66,7 @@ export default async function InquiryDetailPage({
         <dl className="text-xs space-y-1 mt-1">
           <div className="flex gap-2">
             <dt className="text-text-muted w-20 shrink-0">作成日</dt>
-            <dd className="text-text">{inquiry.createdAt.toLocaleDateString("ja-JP")}</dd>
+            <dd className="text-text px-2 py-1">{inquiry.createdAt.toLocaleDateString("ja-JP")}</dd>
           </div>
         </dl>
         {canChangeStatus && !deal && (

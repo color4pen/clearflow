@@ -139,7 +139,7 @@ export function ContractInfoSection({ contract, editable }: Props) {
       </div>
       <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">作成日</dt>
-        <dd className="text-text">{contract.createdAt.toLocaleDateString("ja-JP")}</dd>
+        <dd className="text-text px-2 py-1">{contract.createdAt.toLocaleDateString("ja-JP")}</dd>
       </div>
     </form>
   );

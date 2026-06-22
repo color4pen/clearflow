@@ -171,7 +171,7 @@ export function DealInfoSection({ deal, editable }: Props) {
         </div>
         <div className="flex gap-2">
           <dt className="text-text-muted w-24 shrink-0">作成日</dt>
-          <dd className="text-text">{deal.createdAt.toLocaleDateString("ja-JP")}</dd>
+          <dd className="text-text px-2 py-1">{deal.createdAt.toLocaleDateString("ja-JP")}</dd>
         </div>
       </dl>
     </form>
