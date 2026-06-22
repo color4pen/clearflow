@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d6a27e08-b324-4a61-aedb-d8c4628e94e3",
   "createdAt": "2026-06-22T09:28:11.551Z",
-  "updatedAt": "2026-06-22T09:28:13.655Z",
+  "updatedAt": "2026-06-22T09:32:47.483Z",
   "request": {
     "title": "詳細画面のインタラクティブ編集",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "request-review",
+  "step": "design",
   "status": "running",
   "branch": "change/inline-edit-interactive-d6a27e08",
   "error": null,
@@ -34,7 +34,9 @@
     }
   ],
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 5,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
