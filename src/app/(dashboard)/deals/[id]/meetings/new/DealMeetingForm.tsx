@@ -76,8 +76,9 @@ export function DealMeetingForm({ dealId, clientId, existingContacts }: Props) {
       }
 
       const result = await createMeetingAction(prev, formData);
-      if (!result.errors && !result.message) {
-        router.push(`/deals/${dealId}`);
+      if (result.dealId) {
+        router.push(`/deals/${result.dealId}`);
+        return result;
       }
       return result;
     },
