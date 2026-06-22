@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateInquiryAction } from "@/app/actions/inquiries";
-import { InlineEditText, InlineEditTextarea, InlineEditSelect } from "@/app/components";
+import { Input, Select, Textarea, preventEnterSubmit } from "@/app/components";
 import { sourceLabels } from "@/app/(dashboard)/labels";
 
 type Props = {
@@ -17,82 +18,71 @@ type Props = {
   editable: boolean;
 };
 
-const sourceOptions = Object.entries(sourceLabels).map(([value, label]) => ({ value, label }));
-
 export function InquiryInfoSection({ inquiry, editable }: Props) {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function buildBaseFormData(): FormData {
-    // updateInquiryAction requires title and source at minimum
-    const fd = new FormData();
-    fd.set("title", inquiry.title);
-    fd.set("source", inquiry.source);
-    if (inquiry.description) fd.set("description", inquiry.description);
-    if (inquiry.clientId) fd.set("clientId", inquiry.clientId);
-    if (inquiry.assigneeId) fd.set("assigneeId", inquiry.assigneeId);
-    return fd;
-  }
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
 
-  async function saveName(newValue: string) {
-    const fd = buildBaseFormData();
-    fd.set("title", newValue);
-    const result = await updateInquiryAction(inquiry.id, {}, fd);
-    if (result.success) router.refresh();
-    return { success: result.success === true, message: result.message };
-  }
+    const formData = new FormData(e.currentTarget);
+    if (inquiry.clientId) formData.set("clientId", inquiry.clientId);
+    if (inquiry.assigneeId) formData.set("assigneeId", inquiry.assigneeId);
 
-  async function saveSource(newValue: string) {
-    const fd = buildBaseFormData();
-    fd.set("source", newValue);
-    const result = await updateInquiryAction(inquiry.id, {}, fd);
-    if (result.success) router.refresh();
-    return { success: result.success === true, message: result.message };
-  }
+    const result = await updateInquiryAction(inquiry.id, {}, formData);
+    setIsSubmitting(false);
 
-  async function saveDescription(newValue: string) {
-    const fd = buildBaseFormData();
-    fd.set("description", newValue);
-    const result = await updateInquiryAction(inquiry.id, {}, fd);
-    if (result.success) router.refresh();
-    return { success: result.success === true, message: result.message };
+    if (result.success) {
+      router.refresh();
+    } else {
+      setError(result.message ?? "保存に失敗しました");
+    }
   }
 
   return (
-    <>
+    <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit}>
+      {error && <p className="text-danger text-xs mb-1">{error}</p>}
       <div className="flex gap-2">
         <dt className="text-text-muted w-20 shrink-0">件名</dt>
         <dd className="text-text flex-1">
-          <InlineEditText
-            value={inquiry.title}
-            onSave={saveName}
-            editable={editable}
-            placeholder="件名を入力"
-          />
+          <Input name="title" defaultValue={inquiry.title} disabled={!editable} />
         </dd>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-20 shrink-0">流入経路</dt>
         <dd className="text-text flex-1">
-          <InlineEditSelect
-            value={inquiry.source}
-            options={sourceOptions}
-            onSave={saveSource}
-            editable={editable}
-          />
+          <Select name="source" defaultValue={inquiry.source} disabled={!editable}>
+            {Object.entries(sourceLabels).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </Select>
         </dd>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-20 shrink-0">内容</dt>
         <dd className="text-text flex-1">
-          <InlineEditTextarea
-            value={inquiry.description}
-            onSave={saveDescription}
-            editable={editable}
-            placeholder="内容を入力"
+          <Textarea
+            name="description"
+            defaultValue={inquiry.description ?? ""}
+            disabled={!editable}
             rows={4}
           />
         </dd>
       </div>
-    </>
+      {editable && (
+        <div className="mt-2">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-primary text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
+          >
+            {isSubmitting ? "保存中..." : "保存"}
+          </button>
+        </div>
+      )}
+    </form>
   );
 }

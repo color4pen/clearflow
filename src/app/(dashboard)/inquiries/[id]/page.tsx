@@ -50,12 +50,9 @@ export default async function InquiryDetailPage({
       <SectionCard className="p-3 mb-2">
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-xs font-bold text-text">引き合い情報</h2>
-          <div className="flex items-center gap-3">
-            {canChangeStatus && !deal && (
-              <DeleteInquiryButton inquiryId={id} />
-            )}
-            <Link href={`/inquiries/${id}/edit`} className="text-xs text-primary underline">編集</Link>
-          </div>
+          {canChangeStatus && !deal && (
+            <DeleteInquiryButton inquiryId={id} />
+          )}
         </div>
         <dl className="text-xs space-y-1">
           <div className="flex gap-2">

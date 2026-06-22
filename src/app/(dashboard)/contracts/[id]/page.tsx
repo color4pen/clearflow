@@ -43,15 +43,8 @@ export default async function ContractDetailPage({
         <SectionCard className="p-3">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xs font-bold text-text">契約情報</h2>
-            {canManage && (
-              <div className="flex items-center gap-3">
-                {invoices.length === 0 && (
-                  <DeleteContractButton contractId={id} />
-                )}
-                <Link href={`/contracts/${id}/edit`} className="text-xs text-primary underline">
-                  編集
-                </Link>
-              </div>
+            {canManage && invoices.length === 0 && (
+              <DeleteContractButton contractId={id} />
             )}
           </div>
           <dl className="text-xs space-y-1">
@@ -59,8 +52,8 @@ export default async function ContractDetailPage({
               <dt className="text-text-muted w-24 shrink-0">ステータス</dt>
               <dd className="text-text">{contractStatusLabels[contract.status] ?? contract.status}</dd>
             </div>
-            <ContractInfoSection contract={contract} editable={canManage} />
           </dl>
+          <ContractInfoSection contract={contract} editable={canManage} />
         </SectionCard>
 
         <SectionCard className="p-3">

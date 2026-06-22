@@ -42,12 +42,6 @@ export default async function DealMeetingDetailPage({
             {" > "}商談詳細
           </span>
         </div>
-        <Link
-          href={`/deals/${id}/meetings/${meetingId}/edit`}
-          className="text-xs text-primary underline"
-        >
-          編集
-        </Link>
       </div>
 
       <div className="grid gap-2" style={{ gridTemplateColumns: "1fr 2fr" }}>

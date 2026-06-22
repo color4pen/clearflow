@@ -79,16 +79,11 @@ export default async function DealDetailPage({
         <SectionCard className="p-3">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xs font-bold text-text">案件情報</h2>
-            <div className="flex items-center gap-3">
-              {canChangePhase && dealMeetings.length === 0 && dealContracts.length === 0 && (
-                <DeleteDealButton dealId={deal.id} />
-              )}
-              <Link href={`/deals/${id}/edit`} className="text-xs text-primary underline">編集</Link>
-            </div>
+            {canChangePhase && dealMeetings.length === 0 && dealContracts.length === 0 && (
+              <DeleteDealButton dealId={deal.id} />
+            )}
           </div>
-          <dl className="text-xs space-y-1">
-            <DealInfoSection deal={deal} editable={canChangePhase} />
-          </dl>
+          <DealInfoSection deal={deal} editable={canChangePhase} />
         </SectionCard>
 
         <SectionCard className="p-3">
@@ -134,7 +129,7 @@ export default async function DealDetailPage({
         </SectionCard>
       </div>
 
-      <DealNotesSection dealId={deal.id} notes={deal.notes} />
+      <DealNotesSection dealId={deal.id} notes={deal.notes} editable={canChangePhase} />
 
       {/* 契約 */}
       {deal.phase === "won" && (
