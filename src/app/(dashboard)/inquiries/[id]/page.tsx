@@ -26,11 +26,12 @@ export default async function InquiryDetailPage({
     notFound();
   }
 
-  const [client, deal] = await Promise.all([
+  const [client, deal, clients] = await Promise.all([
     inquiry.clientId
       ? clientRepository.findById(inquiry.clientId, organizationId)
       : Promise.resolve(null),
     dealRepository.findByInquiryId(id, organizationId),
+    inquiry.clientId ? Promise.resolve([]) : clientRepository.findAllByOrganization(organizationId),
   ]);
 
   const canChangeStatus =
@@ -74,6 +75,7 @@ export default async function InquiryDetailPage({
             assigneeId: inquiry.assigneeId ?? null,
           }}
           editable={editable}
+          clients={clients.map((c) => ({ id: c.id, name: c.name }))}
         />
         <dl className="text-xs space-y-1 mt-1">
           <div className="flex gap-2">

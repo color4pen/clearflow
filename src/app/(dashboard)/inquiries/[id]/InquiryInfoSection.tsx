@@ -16,13 +16,15 @@ type Props = {
     assigneeId: string | null;
   };
   editable: boolean;
+  clients: Array<{ id: string; name: string }>;
 };
 
-export function InquiryInfoSection({ inquiry, editable }: Props) {
+export function InquiryInfoSection({ inquiry, editable, clients }: Props) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -32,6 +34,11 @@ export function InquiryInfoSection({ inquiry, editable }: Props) {
     const formData = new FormData(e.currentTarget);
     if (inquiry.clientId) formData.set("clientId", inquiry.clientId);
     if (inquiry.assigneeId) formData.set("assigneeId", inquiry.assigneeId);
+
+    const clientIdVal = formData.get("clientId");
+    if (clientIdVal === "__new__") {
+      formData.delete("clientId");
+    }
 
     const result = await updateInquiryAction(inquiry.id, {}, formData);
     setIsSubmitting(false);
@@ -69,34 +76,69 @@ export function InquiryInfoSection({ inquiry, editable }: Props) {
           )}
         </div>
       </div>
-      <div className="flex gap-2">
-        <dt className="text-text-muted w-20 shrink-0">件名</dt>
-        <dd className="text-text flex-1">
-          <Input name="title" defaultValue={inquiry.title} disabled={!editable} onChange={markDirty} />
-        </dd>
-      </div>
-      <div className="flex gap-2 mt-1">
-        <dt className="text-text-muted w-20 shrink-0">流入経路</dt>
-        <dd className="text-text flex-1">
-          <Select name="source" defaultValue={inquiry.source} disabled={!editable} onChange={markDirty}>
-            {Object.entries(sourceLabels).map(([value, label]) => (
-              <option key={value} value={value}>{label}</option>
-            ))}
-          </Select>
-        </dd>
-      </div>
-      <div className="flex gap-2 mt-1">
-        <dt className="text-text-muted w-20 shrink-0">内容</dt>
-        <dd className="text-text flex-1">
-          <Textarea
-            name="description"
-            defaultValue={inquiry.description ?? ""}
-            disabled={!editable}
-            rows={4}
-            onChange={markDirty}
-          />
-        </dd>
-      </div>
+      <dl className="text-xs space-y-1">
+        <div className="flex gap-2">
+          <dt className="text-text-muted w-20 shrink-0">件名</dt>
+          <dd className="text-text flex-1">
+            <Input name="title" defaultValue={inquiry.title} disabled={!editable} onChange={markDirty} />
+          </dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="text-text-muted w-20 shrink-0">流入経路</dt>
+          <dd className="text-text flex-1">
+            <Select name="source" defaultValue={inquiry.source} disabled={!editable} onChange={markDirty}>
+              {Object.entries(sourceLabels).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </Select>
+          </dd>
+        </div>
+        {!inquiry.clientId && editable && (
+          <div className="flex gap-2">
+            <dt className="text-text-muted w-20 shrink-0">顧客</dt>
+            <dd className="text-text flex-1">
+              <Select
+                name="clientId"
+                defaultValue=""
+                onChange={(e) => {
+                  if (e.target.value === "__new__") {
+                    setClientMode("new");
+                  } else {
+                    setClientMode("existing");
+                  }
+                  markDirty();
+                }}
+              >
+                <option value="">未設定</option>
+                <option value="__new__">新規登録</option>
+                {clients.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </Select>
+              {clientMode === "new" && (
+                <Input
+                  name="newClientName"
+                  placeholder="企業名"
+                  className="mt-1"
+                  onChange={markDirty}
+                />
+              )}
+            </dd>
+          </div>
+        )}
+        <div className="flex gap-2">
+          <dt className="text-text-muted w-20 shrink-0">内容</dt>
+          <dd className="text-text flex-1">
+            <Textarea
+              name="description"
+              defaultValue={inquiry.description ?? ""}
+              disabled={!editable}
+              rows={4}
+              onChange={markDirty}
+            />
+          </dd>
+        </div>
+      </dl>
     </form>
   );
 }
