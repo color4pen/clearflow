@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "05597fd5-53bd-4183-b791-fc663f8ddc7d",
   "createdAt": "2026-06-22T04:03:10.619Z",
-  "updatedAt": "2026-06-22T04:43:38.637Z",
+  "updatedAt": "2026-06-22T04:44:40.608Z",
   "request": {
     "title": "削除機能とフォーム整備",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "regression-gate",
+  "step": "conformance",
   "status": "running",
   "branch": "feat/delete-and-form-fixes-05597fd5",
   "error": null,
@@ -48,7 +48,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 46,
+    "historyCount": 51,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -60,7 +60,7 @@
       "code-fixer": 2,
       "domain-invariants": 1,
       "custom-reviewers": 1,
-      "regression-gate": 1
+      "regression-gate": 2
     }
   }
 }
