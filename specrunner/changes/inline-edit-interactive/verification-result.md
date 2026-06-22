@@ -1,15 +1,15 @@
 # Verification Result — inline-edit-interactive — iter 1
 
-## Verdict: failed
+## Verdict: passed
 
 ## Phase Results
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 10.1s | 0 |
-| 2 | typecheck | passed | 3.0s | 0 |
+| 1 | build | passed | 11.2s | 0 |
+| 2 | typecheck | passed | 1.1s | 0 |
 | 3 | test | passed | 0.1s | 0 |
-| 4 | lint | failed | 4.5s | 1 |
+| 4 | lint | passed | 3.9s | 0 |
 
 ## Phase: build
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 5.5s
+✓ Compiled successfully in 5.9s
   Running TypeScript ...
-  Finished TypeScript in 3.2s ...
+  Finished TypeScript in 3.3s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/23) ...
   Generating static pages using 7 workers (5/23) 
   Generating static pages using 7 workers (11/23) 
   Generating static pages using 7 workers (17/23) 
-✓ Generating static pages using 7 workers (23/23) in 179ms
+✓ Generating static pages using 7 workers (23/23) in 177ms
   Finalizing page optimization ...
 
 Route (app)
@@ -101,13 +101,11 @@ $ bun test
  546 pass
  0 fail
  1108 expect() calls
-Ran 546 tests across 26 files. [107.00ms]
+Ran 546 tests across 26 files. [106.00ms]
 
 ```
 
 ## Phase: lint
-
-Step 'lint' failed
 
 ```
 
@@ -132,96 +130,6 @@ src/app/(dashboard)/settings/templates/DeleteButton.tsx
 src/app/components/FormField.tsx
   1:26  warning  'FormEvent' is defined but never used  @typescript-eslint/no-unused-vars
 
-src/app/components/InlineEditDate.tsx
-  25:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-src/app/components/InlineEditDate.tsx:25:7
-  23 |   useEffect(() => {
-  24 |     if (!isEditing) {
-> 25 |       setCurrentValue(value);
-     |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  26 |     }
-  27 |   }, [value, isEditing]);
-  28 |  react-hooks/set-state-in-effect
-
-src/app/components/InlineEditMoney.tsx
-  22:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-src/app/components/InlineEditMoney.tsx:22:7
-  20 |   useEffect(() => {
-  21 |     if (!isEditing) {
-> 22 |       setCurrentValue(value);
-     |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  23 |     }
-  24 |   }, [value, isEditing]);
-  25 |  react-hooks/set-state-in-effect
-
-src/app/components/InlineEditSelect.tsx
-  24:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-src/app/components/InlineEditSelect.tsx:24:7
-  22 |   useEffect(() => {
-  23 |     if (!isEditing) {
-> 24 |       setCurrentValue(value);
-     |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  25 |     }
-  26 |   }, [value, isEditing]);
-  27 |  react-hooks/set-state-in-effect
-
-src/app/components/InlineEditText.tsx
-  26:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-src/app/components/InlineEditText.tsx:26:7
-  24 |   useEffect(() => {
-  25 |     if (!isEditing) {
-> 26 |       setCurrentValue(value);
-     |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  27 |     }
-  28 |   }, [value, isEditing]);
-  29 |  react-hooks/set-state-in-effect
-
-src/app/components/InlineEditTextarea.tsx
-  23:7  error  Error: Calling setState synchronously within an effect can trigger cascading renders
-
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
-
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
-
-src/app/components/InlineEditTextarea.tsx:23:7
-  21 |   useEffect(() => {
-  22 |     if (!isEditing) {
-> 23 |       setCurrentValue(value);
-     |       ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  24 |     }
-  25 |   }, [value, isEditing]);
-  26 |  react-hooks/set-state-in-effect
-
 src/infrastructure/seed.ts
   504:10  warning  'greenContact1' is assigned a value but never used       @typescript-eslint/no-unused-vars
   545:10  warning  'newInquiry1' is assigned a value but never used         @typescript-eslint/no-unused-vars
@@ -229,10 +137,9 @@ src/infrastructure/seed.ts
   562:10  warning  'inProgressInquiry1' is assigned a value but never used  @typescript-eslint/no-unused-vars
   572:10  warning  'inProgressInquiry2' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
-✖ 19 problems (5 errors, 14 warnings)
+✖ 14 problems (0 errors, 14 warnings)
 
 
 $ eslint
-error: script "lint" exited with code 1
 
 ```
