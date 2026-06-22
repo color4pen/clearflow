@@ -1009,14 +1009,6 @@ describe("Tenant isolation — meeting", () => {
     expect(body).toContain("organizationId");
   });
 
-  it("meetingRepository.findAllByInquiry includes organizationId condition", async () => {
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
-    const idx = content.indexOf("export async function findAllByInquiry(");
-    expect(idx).toBeGreaterThan(-1);
-    const body = content.slice(idx, idx + 400);
-    expect(body).toContain("organizationId");
-  });
-
   it("meetingRepository.findAllByOrganization includes organizationId condition", async () => {
     const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
     const idx = content.indexOf("export async function findAllByOrganization(");
@@ -1030,14 +1022,6 @@ describe("Tenant isolation — meeting", () => {
     const idx = content.indexOf("export async function findAllByDeal(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 400);
-    expect(body).toContain("organizationId");
-  });
-
-  it("meetingRepository.findAllByInquiryOrDeal includes organizationId condition", async () => {
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
-    const idx = content.indexOf("export async function findAllByInquiryOrDeal(");
-    expect(idx).toBeGreaterThan(-1);
-    const body = content.slice(idx, idx + 500);
     expect(body).toContain("organizationId");
   });
 

@@ -4,12 +4,10 @@ import { auth } from "@/infrastructure/auth";
 import {
   inquiryRepository,
   clientRepository,
-  meetingRepository,
   dealRepository,
 } from "@/infrastructure/repositories";
 import { SectionCard } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
-import { MeetingTable } from "./MeetingTable";
 import { statusLabels, sourceLabels, phaseLabels } from "@/app/(dashboard)/labels";
 
 export default async function InquiryDetailPage({
@@ -26,28 +24,15 @@ export default async function InquiryDetailPage({
     notFound();
   }
 
-  const [client, meetings, deal] = await Promise.all([
+  const [client, deal] = await Promise.all([
     inquiry.clientId
       ? clientRepository.findById(inquiry.clientId, organizationId)
       : Promise.resolve(null),
-    meetingRepository.findAllByInquiry(id, organizationId),
     dealRepository.findByInquiryId(id, organizationId),
   ]);
 
   const canChangeStatus =
     session!.user.role === "admin" || session!.user.role === "manager";
-
-  const meetingRows = meetings.map((m) => ({
-    id: m.id,
-    type: m.type,
-    date: m.date.toLocaleDateString("ja-JP", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }),
-    location: m.location,
-    summary: m.summary,
-  }));
 
   return (
     <div>
@@ -118,22 +103,6 @@ export default async function InquiryDetailPage({
         )}
       </SectionCard>
 
-      <SectionCard className="p-3">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xs font-bold text-text">商談履歴</h2>
-          <Link
-            href={`/inquiries/${id}/meetings/new`}
-            className="text-xs text-primary underline"
-          >
-            商談を記録
-          </Link>
-        </div>
-        {meetingRows.length === 0 ? (
-          <p className="text-xs text-text-muted">商談記録はありません</p>
-        ) : (
-          <MeetingTable meetings={meetingRows} basePath={`/inquiries/${id}/meetings`} />
-        )}
-      </SectionCard>
     </div>
   );
 }

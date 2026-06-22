@@ -14,16 +14,15 @@ async function readSrc(relPath: string): Promise<string> {
 }
 
 describe("createMeeting usecase 静的検証", () => {
-  it("T-01: inquiryId と dealId の両方が null の場合にエラーを返すバリデーションが含まれる", async () => {
+  it("T-01: dealId が必須パラメータとして含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createMeeting.ts");
-    // 実行・検証 - 両方 null のガード節がある
-    expect(content).toContain("inquiryId");
+    // 実行・検証 - dealId が必須
     expect(content).toContain("dealId");
-    expect(content).toContain("引き合いまたは案件のどちらかを指定してください");
+    expect(content).not.toContain("inquiryId");
   });
 
-  it("T-02: dealId のみ指定の場合に dealRepository.findById で案件存在確認するコードが含まれる", async () => {
+  it("T-02: dealId 指定時に dealRepository.findById で案件存在確認するコードが含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createMeeting.ts");
     // 実行・検証 - 案件存在確認がある
@@ -35,13 +34,6 @@ describe("createMeeting usecase 静的検証", () => {
     const content = await readSrc("application/usecases/createMeeting.ts");
     // 実行・検証 - dealId が create に渡される
     expect(content).toContain("dealId: data.dealId");
-  });
-
-  it("inquiryRepository.findById の呼び出しが含まれる（引き合い存在確認）", async () => {
-    // 準備 - ソースファイルを読み込む
-    const content = await readSrc("application/usecases/createMeeting.ts");
-    // 実行・検証 - 引き合い存在確認がある
-    expect(content).toContain("inquiryRepository.findById");
   });
 
   it("auditLogRepository.create の呼び出しが含まれる（監査ログ記録）", async () => {
@@ -99,10 +91,10 @@ describe("updateMeeting usecase 静的検証", () => {
 });
 
 describe("listMeetings usecase 静的検証", () => {
-  it("meetingRepository.findAllByInquiry の呼び出しが含まれる", async () => {
+  it("meetingRepository.findAllByDeal の呼び出しが含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/listMeetings.ts");
     // 実行・検証 - リポジトリ呼び出しがある
-    expect(content).toContain("meetingRepository.findAllByInquiry");
+    expect(content).toContain("meetingRepository.findAllByDeal");
   });
 });
