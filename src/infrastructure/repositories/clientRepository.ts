@@ -168,6 +168,54 @@ export async function countContactsByClientIds(
 }
 
 /**
+ * 担当者を更新する。
+ * テナント分離の前提: 呼び出し前に findById で clientId が organizationId に属することを確認すること。
+ */
+export async function updateContact(
+  contactId: string,
+  clientId: string,
+  data: Partial<{
+    name: string;
+    department: string | null;
+    position: string | null;
+    email: string | null;
+    phone: string | null;
+    isPrimary: boolean;
+  }>,
+  tx?: Transaction
+): Promise<ClientContact | null> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
+    .update(clientContacts)
+    .set(data)
+    .where(and(eq(clientContacts.id, contactId), eq(clientContacts.clientId, clientId)))
+    .returning();
+  return result[0] ? mapContactRow(result[0]) : null;
+}
+
+/**
+ * 担当者を削除する。
+ * テナント分離の前提: 呼び出し前に findById で clientId が organizationId に属することを確認すること。
+ */
+export async function deleteContact(
+  contactId: string,
+  clientId: string,
+  tx?: Transaction
+): Promise<boolean> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
+    .delete(clientContacts)
+    .where(
+      and(
+        eq(clientContacts.id, contactId),
+        eq(clientContacts.clientId, clientId)
+      )
+    )
+    .returning();
+  return result.length > 0;
+}
+
+/**
  * 組織配下の全担当者を1クエリで取得する。
  * 引き合い登録フォームでの選択肢構築用。
  */

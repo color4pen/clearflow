@@ -87,6 +87,25 @@ export async function findAllByDealId(
   return result.map(mapRow);
 }
 
+export async function findAllByClientId(
+  clientId: string,
+  organizationId: string,
+  tx?: Transaction
+): Promise<Contract[]> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
+    .select()
+    .from(contracts)
+    .where(
+      and(
+        eq(contracts.clientId, clientId),
+        eq(contracts.organizationId, organizationId)
+      )
+    )
+    .orderBy(asc(contracts.createdAt));
+  return result.map(mapRow);
+}
+
 export async function findAllByOrganization(
   organizationId: string
 ): Promise<ContractWithClient[]> {

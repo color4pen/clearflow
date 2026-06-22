@@ -46,7 +46,7 @@ export function DataTable<T>({ columns, rows, rowKey, rowClass, onRowClick, rowH
             return (
               <tr
                 key={rowKey(row)}
-                className={`border border-border-light hover:bg-bg-surface-alt ${clickable ? "cursor-pointer" : ""} ${rowClass?.(row, idx) ?? (idx % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt")}`}
+                className={`border border-border-light ${clickable ? "cursor-pointer hover:bg-primary/10" : "hover:bg-bg-surface-alt"} ${rowClass?.(row, idx) ?? (idx % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt")}`}
                 data-href={href ?? undefined}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
               >
