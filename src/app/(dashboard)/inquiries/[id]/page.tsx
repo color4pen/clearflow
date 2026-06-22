@@ -99,7 +99,7 @@ export default async function InquiryDetailPage({
 
       <SectionCard className="p-3 mb-2">
         <h2 className="text-xs font-bold text-text mb-2">
-          {inquiry.status === "converted" ? "案件" : inquiry.status === "declined" ? "ステータス" : "ステータス変更"}
+          {inquiry.status === "converted" ? "案件" : "ステータス変更"}
         </h2>
         {inquiry.status === "converted" && deal ? (
           <div className="text-xs">
@@ -110,8 +110,6 @@ export default async function InquiryDetailPage({
           </div>
         ) : inquiry.status === "converted" && !deal ? (
           <p className="text-xs text-text-muted">案件化済み（案件データなし）</p>
-        ) : inquiry.status === "declined" ? (
-          <p className="text-xs text-text-muted">見送り済み</p>
         ) : (
           <InquiryActions
             inquiry={{ id: inquiry.id, status: inquiry.status }}
