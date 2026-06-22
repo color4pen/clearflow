@@ -83,7 +83,7 @@ export default async function InquiryDetailPage({
 
       {inquiry.description && (
         <SectionCard className="p-3 mb-2">
-          <h2 className="text-xs font-bold text-text mb-2">概要</h2>
+          <h2 className="text-xs font-bold text-text mb-2">内容</h2>
           <p className="text-xs text-text whitespace-pre-wrap">{inquiry.description}</p>
         </SectionCard>
       )}

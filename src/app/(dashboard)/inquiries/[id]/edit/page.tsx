@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
 import { inquiryRepository, clientRepository } from "@/infrastructure/repositories";
-import { listClients } from "@/application/usecases";
+import { listClients, listOrganizationUsers } from "@/application/usecases";
 import { EditInquiryForm } from "./EditInquiryForm";
 
 export default async function EditInquiryPage({
@@ -18,7 +18,11 @@ export default async function EditInquiryPage({
     notFound();
   }
 
-  const clients = await listClients(organizationId);
+  const [clients, allUsers] = await Promise.all([
+    listClients(organizationId),
+    listOrganizationUsers({ organizationId }),
+  ]);
+  const users = allUsers.map((u) => ({ id: u.id, name: u.name }));
 
   return (
     <div>
@@ -32,8 +36,10 @@ export default async function EditInquiryPage({
           description: inquiry.description,
           source: inquiry.source,
           clientId: inquiry.clientId,
+          assigneeId: inquiry.assigneeId,
         }}
         clients={clients}
+        users={users}
       />
     </div>
   );

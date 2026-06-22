@@ -139,6 +139,7 @@ const updateInquirySchema = z.object({
   description: z.string().optional(),
   source: z.enum(["web", "phone", "referral", "exhibition", "other"]),
   clientId: z.string().uuid().optional(),
+  assigneeId: z.string().uuid().optional(),
 });
 
 export type UpdateInquiryState = {
@@ -147,6 +148,7 @@ export type UpdateInquiryState = {
     description?: string[];
     source?: string[];
     clientId?: string[];
+    assigneeId?: string[];
   };
   message?: string;
   success?: boolean;
@@ -167,6 +169,7 @@ export async function updateInquiryAction(
     description: formData.get("description") || undefined,
     source: formData.get("source"),
     clientId: formData.get("clientId") || undefined,
+    assigneeId: formData.get("assigneeId") || undefined,
   };
 
   const parsed = updateInquirySchema.safeParse(raw);
@@ -183,6 +186,7 @@ export async function updateInquiryAction(
       description: parsed.data.description ?? null,
       source: parsed.data.source,
       clientId: parsed.data.clientId ?? null,
+      assigneeId: parsed.data.assigneeId ?? null,
     }
   );
 
