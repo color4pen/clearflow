@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "98cd4cf7-0d4b-414b-9d2e-353364bd02ee",
   "createdAt": "2026-06-22T01:55:50.098Z",
-  "updatedAt": "2026-06-22T02:09:34.130Z",
+  "updatedAt": "2026-06-22T02:16:33.499Z",
   "request": {
     "title": "引き合い簡素化と商談の案件専属化",
     "type": "refactoring",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "design",
+  "step": "spec-review",
   "status": "running",
   "branch": "refactor/inquiry-simplification-98cd4cf7",
   "error": null,
@@ -35,10 +35,10 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 10,
+    "historyCount": 14,
     "stepCounts": {
       "request-review": 1,
-      "design": 1
+      "design": 2
     }
   }
 }
