@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateDealAction } from "@/app/actions/deals";
-import { SectionCard, FormField, Input, Textarea, Select, preventEnterSubmit } from "@/app/components";
+import { SectionCard, FormField, Input, Textarea, Select, preventEnterSubmit, MoneyInput } from "@/app/components";
 import { phaseLabels } from "@/app/(dashboard)/labels";
 import type { Deal } from "@/domain/models/deal";
 
@@ -74,10 +74,9 @@ export function DealEditForm({ deal, users }: Props) {
         </FormField>
 
         <FormField label="想定金額">
-          <Input
+          <MoneyInput
             name="estimatedAmount"
-            type="number"
-            defaultValue={deal.estimatedAmount ?? ""}
+            defaultValue={deal.estimatedAmount}
           />
         </FormField>
 
