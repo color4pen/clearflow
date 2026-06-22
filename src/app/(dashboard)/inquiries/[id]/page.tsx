@@ -10,7 +10,7 @@ import { SectionCard } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
 import { DeleteInquiryButton } from "./DeleteInquiryButton";
 import { InquiryInfoSection } from "./InquiryInfoSection";
-import { statusLabels, phaseLabels } from "@/app/(dashboard)/labels";
+import { phaseLabels } from "@/app/(dashboard)/labels";
 
 export default async function InquiryDetailPage({
   params,
@@ -26,11 +26,12 @@ export default async function InquiryDetailPage({
     notFound();
   }
 
-  const [client, deal] = await Promise.all([
+  const [client, deal, clients] = await Promise.all([
     inquiry.clientId
       ? clientRepository.findById(inquiry.clientId, organizationId)
       : Promise.resolve(null),
     dealRepository.findByInquiryId(id, organizationId),
+    inquiry.clientId ? Promise.resolve([]) : clientRepository.findAllByOrganization(organizationId),
   ]);
 
   const canChangeStatus =
@@ -48,46 +49,31 @@ export default async function InquiryDetailPage({
       </div>
 
       <SectionCard className="p-3 mb-2">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xs font-bold text-text">引き合い情報</h2>
-          <div className="flex items-center gap-3">
-            {canChangeStatus && !deal && (
-              <DeleteInquiryButton inquiryId={id} />
-            )}
-            <Link href={`/inquiries/${id}/edit`} className="text-xs text-primary underline">編集</Link>
-          </div>
-        </div>
-        <dl className="text-xs space-y-1">
-          <div className="flex gap-2">
-            <dt className="text-text-muted w-20 shrink-0">ステータス</dt>
-            <dd className="text-text">{statusLabels[inquiry.status] ?? inquiry.status}</dd>
-          </div>
-          <div className="flex gap-2">
-            <dt className="text-text-muted w-20 shrink-0">顧客</dt>
-            <dd className="text-text">
-              {client ? (
-                <Link href={`/clients/${client.id}`} className="text-primary underline">
-                  {client.name}
-                </Link>
-              ) : "-"}
-            </dd>
-          </div>
-          <InquiryInfoSection
-            inquiry={{
-              id: inquiry.id,
-              title: inquiry.title,
-              source: inquiry.source,
-              description: inquiry.description,
-              clientId: inquiry.clientId,
-              assigneeId: inquiry.assigneeId ?? null,
-            }}
-            editable={editable}
-          />
+        <InquiryInfoSection
+          inquiry={{
+            id: inquiry.id,
+            title: inquiry.title,
+            source: inquiry.source,
+            description: inquiry.description,
+            clientId: inquiry.clientId,
+            assigneeId: inquiry.assigneeId ?? null,
+          }}
+          editable={editable}
+          clients={clients.map((c) => ({ id: c.id, name: c.name }))}
+          clientName={client?.name ?? null}
+          clientLinkId={client?.id ?? null}
+        />
+        <dl className="text-xs space-y-1 mt-1">
           <div className="flex gap-2">
             <dt className="text-text-muted w-20 shrink-0">作成日</dt>
-            <dd className="text-text">{inquiry.createdAt.toLocaleDateString("ja-JP")}</dd>
+            <dd className="text-text px-2 py-1">{inquiry.createdAt.toLocaleDateString("ja-JP")}</dd>
           </div>
         </dl>
+        {canChangeStatus && !deal && (
+          <div className="mt-2">
+            <DeleteInquiryButton inquiryId={id} />
+          </div>
+        )}
       </SectionCard>
 
       <SectionCard className="p-3 mb-2">

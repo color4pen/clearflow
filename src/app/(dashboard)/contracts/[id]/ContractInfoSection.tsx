@@ -1,8 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateContractAction } from "@/app/actions/contracts";
-import { InlineEditText, InlineEditSelect, InlineEditDate, InlineEditMoney } from "@/app/components";
+import { Input, Select, MoneyInput, preventEnterSubmit } from "@/app/components";
 import { contractTypeLabels, renewalTypeLabels } from "@/app/(dashboard)/labels";
 import type { RenewalType } from "@/domain/models/contract";
 
@@ -24,181 +25,122 @@ type Props = {
   editable: boolean;
 };
 
-const contractTypeOptions = [
-  { value: "", label: "-" },
-  ...Object.entries(contractTypeLabels).map(([value, label]) => ({ value, label })),
-];
-
-const renewalTypeOptions = Object.entries(renewalTypeLabels).map(([value, label]) => ({
-  value,
-  label,
-}));
-
 export function ContractInfoSection({ contract, editable }: Props) {
   const router = useRouter();
-
-  async function saveTitle(newValue: string) {
-    const fd = new FormData();
-    fd.set("title", newValue);
-    const result = await updateContractAction(contract.id, fd);
-    if (result.success) router.refresh();
-    return result;
-  }
-
-  async function saveContractType(newValue: string) {
-    const fd = new FormData();
-    fd.set("contractType", newValue);
-    const result = await updateContractAction(contract.id, fd);
-    if (result.success) router.refresh();
-    return result;
-  }
-
-  async function saveAmount(newValue: string) {
-    const fd = new FormData();
-    fd.set("amount", newValue);
-    const result = await updateContractAction(contract.id, fd);
-    if (result.success) router.refresh();
-    return result;
-  }
-
-  async function saveStartDate(newValue: string) {
-    const fd = new FormData();
-    fd.set("startDate", newValue);
-    const result = await updateContractAction(contract.id, fd);
-    if (result.success) router.refresh();
-    return result;
-  }
-
-  async function saveEndDate(newValue: string) {
-    const fd = new FormData();
-    fd.set("endDate", newValue);
-    const result = await updateContractAction(contract.id, fd);
-    if (result.success) router.refresh();
-    return result;
-  }
-
-  async function savePaymentTerms(newValue: string) {
-    const fd = new FormData();
-    fd.set("paymentTerms", newValue);
-    const result = await updateContractAction(contract.id, fd);
-    if (result.success) router.refresh();
-    return result;
-  }
-
-  async function saveRenewalType(newValue: string) {
-    const fd = new FormData();
-    fd.set("renewalType", newValue);
-    const result = await updateContractAction(contract.id, fd);
-    if (result.success) router.refresh();
-    return result;
-  }
-
-  async function saveRenewalCycle(newValue: string) {
-    const fd = new FormData();
-    fd.set("renewalCycle", newValue);
-    const result = await updateContractAction(contract.id, fd);
-    if (result.success) router.refresh();
-    return result;
-  }
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isDirty, setIsDirty] = useState(false);
 
   const startDateStr = contract.startDate
     ? contract.startDate.toISOString().slice(0, 10)
-    : null;
+    : "";
   const endDateStr = contract.endDate
     ? contract.endDate.toISOString().slice(0, 10)
-    : null;
+    : "";
+
+  function markDirty() {
+    setIsDirty(true);
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+
+    const formData = new FormData(e.currentTarget);
+    const result = await updateContractAction(contract.id, formData);
+    setIsSubmitting(false);
+
+    if (result.success) {
+      setIsDirty(false);
+      router.refresh();
+    } else {
+      setError(result.message ?? "保存に失敗しました");
+    }
+  }
 
   return (
-    <>
+    <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit}>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xs font-bold text-text">契約情報</h2>
+        <div className="flex items-center gap-2">
+          {error && <span className="text-danger text-xs">{error}</span>}
+          {editable && (
+            <button
+              type="submit"
+              disabled={!isDirty || isSubmitting}
+              className={`text-xs font-bold px-3 py-1 ${
+                isDirty
+                  ? "bg-green-600 text-white cursor-pointer"
+                  : "bg-bg-toolbar border border-border text-text-muted cursor-not-allowed"
+              } disabled:opacity-50`}
+            >
+              {isSubmitting ? "保存中..." : "保存"}
+            </button>
+          )}
+        </div>
+      </div>
       <div className="flex gap-2">
         <dt className="text-text-muted w-24 shrink-0">契約名</dt>
         <dd className="text-text flex-1">
-          <InlineEditText
-            value={contract.title}
-            onSave={saveTitle}
-            editable={editable}
-            placeholder="契約名を入力"
-          />
+          <Input name="title" defaultValue={contract.title} disabled={!editable} placeholder="契約名を入力" onChange={markDirty} />
         </dd>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">契約種別</dt>
         <dd className="text-text flex-1">
-          <InlineEditSelect
-            value={contract.contractType ?? ""}
-            options={contractTypeOptions}
-            onSave={saveContractType}
-            editable={editable}
-          />
+          <Select name="contractType" defaultValue={contract.contractType ?? ""} disabled={!editable} onChange={markDirty}>
+            <option value="">-</option>
+            {Object.entries(contractTypeLabels).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </Select>
         </dd>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">金額</dt>
         <dd className="text-text flex-1">
-          <InlineEditMoney
-            value={contract.amount}
-            onSave={saveAmount}
-            editable={editable}
-          />
+          <MoneyInput name="amount" defaultValue={contract.amount} disabled={!editable} onChange={markDirty} />
         </dd>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">開始日</dt>
         <dd className="text-text flex-1">
-          <InlineEditDate
-            value={startDateStr}
-            onSave={saveStartDate}
-            editable={editable}
-          />
+          <Input type="date" name="startDate" defaultValue={startDateStr} disabled={!editable} onChange={markDirty} />
         </dd>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">終了日</dt>
         <dd className="text-text flex-1">
-          <InlineEditDate
-            value={endDateStr}
-            onSave={saveEndDate}
-            editable={editable}
-          />
+          <Input type="date" name="endDate" defaultValue={endDateStr} disabled={!editable} onChange={markDirty} />
         </dd>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">支払条件</dt>
         <dd className="text-text flex-1">
-          <InlineEditText
-            value={contract.paymentTerms ?? ""}
-            onSave={savePaymentTerms}
-            editable={editable}
-            placeholder="例: 月末締め翌月払い"
-          />
+          <Input name="paymentTerms" defaultValue={contract.paymentTerms ?? ""} disabled={!editable} placeholder="例: 月末締め翌月払い" onChange={markDirty} />
         </dd>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">更新種別</dt>
         <dd className="text-text flex-1">
-          <InlineEditSelect
-            value={contract.renewalType}
-            options={renewalTypeOptions}
-            onSave={saveRenewalType}
-            editable={editable}
-          />
+          <Select name="renewalType" defaultValue={contract.renewalType} disabled={!editable} onChange={markDirty}>
+            {Object.entries(renewalTypeLabels).map(([value, label]) => (
+              <option key={value} value={value}>{label}</option>
+            ))}
+          </Select>
         </dd>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">更新サイクル</dt>
         <dd className="text-text flex-1">
-          <InlineEditText
-            value={contract.renewalCycle ?? ""}
-            onSave={saveRenewalCycle}
-            editable={editable}
-            placeholder="例: 1年"
-          />
+          <Input name="renewalCycle" defaultValue={contract.renewalCycle ?? ""} disabled={!editable} placeholder="例: 1年" onChange={markDirty} />
         </dd>
       </div>
-      <div className="flex gap-2">
+      <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-24 shrink-0">作成日</dt>
-        <dd className="text-text">{contract.createdAt.toLocaleDateString("ja-JP")}</dd>
+        <dd className="text-text px-2 py-1">{contract.createdAt.toLocaleDateString("ja-JP")}</dd>
       </div>
-    </>
+    </form>
   );
 }

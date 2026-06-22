@@ -168,11 +168,31 @@ export async function updateInquiryAction(
     return { message: "権限がありません" };
   }
 
+  const clientIdRaw = formData.get("clientId");
+  const newClientName = formData.get("newClientName");
+
+  let resolvedClientId = clientIdRaw && clientIdRaw !== "" && clientIdRaw !== "__new__"
+    ? String(clientIdRaw)
+    : undefined;
+
+  if (!resolvedClientId && typeof newClientName === "string" && newClientName.trim()) {
+    const { createClient } = await import("@/application/usecases");
+    const clientResult = await createClient({
+      name: newClientName.trim(),
+      organizationId: session.user.organizationId,
+      actorId: session.user.id,
+    });
+    if (!clientResult.ok) {
+      return { message: clientResult.reason };
+    }
+    resolvedClientId = clientResult.client.id;
+  }
+
   const raw = {
     title: formData.get("title"),
     description: formData.get("description") || undefined,
     source: formData.get("source"),
-    clientId: formData.get("clientId") || undefined,
+    clientId: resolvedClientId,
     assigneeId: formData.get("assigneeId") || undefined,
   };
 

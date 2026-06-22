@@ -7,13 +7,15 @@ type Props = {
   defaultValue?: number | null;
   placeholder?: string;
   className?: string;
+  disabled?: boolean;
+  onChange?: () => void;
 };
 
 function formatWithComma(value: number): string {
   return `¥${value.toLocaleString("ja-JP")}`;
 }
 
-export function MoneyInput({ name, defaultValue, placeholder, className }: Props) {
+export function MoneyInput({ name, defaultValue, placeholder, className, disabled, onChange }: Props) {
   const initial = defaultValue != null ? defaultValue : null;
   const [rawValue, setRawValue] = useState<string>(initial != null ? String(initial) : "");
   const [isFocused, setIsFocused] = useState(false);
@@ -28,6 +30,7 @@ export function MoneyInput({ name, defaultValue, placeholder, className }: Props
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const digits = e.target.value.replace(/[^0-9]/g, "");
     setRawValue(digits);
+    onChange?.();
   }
 
   function handleFocus() {
@@ -58,6 +61,7 @@ export function MoneyInput({ name, defaultValue, placeholder, className }: Props
         onBlur={handleBlur}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
+        disabled={disabled}
         className={`${baseClass} ${className ?? ""}`}
       />
     </>
