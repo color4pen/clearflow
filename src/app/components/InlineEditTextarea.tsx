@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Textarea } from "./FormField";
 
 type Props = {
@@ -15,14 +15,15 @@ export function InlineEditTextarea({ value, onSave, editable, placeholder, rows 
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value ?? "");
   const [currentValue, setCurrentValue] = useState(value);
+  const [prevValueProp, setPrevValueProp] = useState(value);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!isEditing) {
-      setCurrentValue(value);
-    }
-  }, [value, isEditing]);
+  // Sync with parent when value prop changes (e.g. after router.refresh())
+  if (!isEditing && prevValueProp !== value) {
+    setPrevValueProp(value);
+    setCurrentValue(value);
+  }
 
   function startEdit() {
     if (!editable) return;

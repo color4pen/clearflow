@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Select } from "./FormField";
 
 type Option = { value: string; label: string };
@@ -16,14 +16,15 @@ type Props = {
 export function InlineEditSelect({ value, options, onSave, editable, onBeforeSave }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [currentValue, setCurrentValue] = useState(value);
+  const [prevValueProp, setPrevValueProp] = useState(value);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!isEditing) {
-      setCurrentValue(value);
-    }
-  }, [value, isEditing]);
+  // Sync with parent when value prop changes (e.g. after router.refresh())
+  if (!isEditing && prevValueProp !== value) {
+    setPrevValueProp(value);
+    setCurrentValue(value);
+  }
 
   function startEdit() {
     if (!editable) return;

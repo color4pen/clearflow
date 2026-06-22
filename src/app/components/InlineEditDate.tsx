@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 
 type Props = {
   value: string | null;
@@ -16,15 +16,16 @@ function defaultFormat(dateStr: string): string {
 export function InlineEditDate({ value, onSave, editable, displayFormat = defaultFormat }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [currentValue, setCurrentValue] = useState(value);
+  const [prevValueProp, setPrevValueProp] = useState(value);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const actionTakenRef = useRef(false);
 
-  useEffect(() => {
-    if (!isEditing) {
-      setCurrentValue(value);
-    }
-  }, [value, isEditing]);
+  // Sync with parent when value prop changes (e.g. after router.refresh())
+  if (!isEditing && prevValueProp !== value) {
+    setPrevValueProp(value);
+    setCurrentValue(value);
+  }
 
   function startEdit() {
     if (!editable) return;

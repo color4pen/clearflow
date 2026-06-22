@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Input } from "./FormField";
 
 type Props = {
@@ -15,17 +15,17 @@ export function InlineEditText({ value, onSave, editable, placeholder, className
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value);
   const [currentValue, setCurrentValue] = useState(value);
+  const [prevValueProp, setPrevValueProp] = useState(value);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // Prevents blur from double-triggering save after Enter or cancel
   const actionTakenRef = useRef(false);
 
   // Sync with parent when value prop changes (e.g. after router.refresh())
-  useEffect(() => {
-    if (!isEditing) {
-      setCurrentValue(value);
-    }
-  }, [value, isEditing]);
+  if (!isEditing && prevValueProp !== value) {
+    setPrevValueProp(value);
+    setCurrentValue(value);
+  }
 
   function startEdit() {
     if (!editable) return;

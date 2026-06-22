@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Input } from "./FormField";
 
 type Props = {
@@ -13,15 +13,16 @@ export function InlineEditMoney({ value, onSave, editable }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(value != null ? String(value) : "");
   const [currentValue, setCurrentValue] = useState(value);
+  const [prevValueProp, setPrevValueProp] = useState(value);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const actionTakenRef = useRef(false);
 
-  useEffect(() => {
-    if (!isEditing) {
-      setCurrentValue(value);
-    }
-  }, [value, isEditing]);
+  // Sync with parent when value prop changes (e.g. after router.refresh())
+  if (!isEditing && prevValueProp !== value) {
+    setPrevValueProp(value);
+    setCurrentValue(value);
+  }
 
   function startEdit() {
     if (!editable) return;
