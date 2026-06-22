@@ -168,6 +168,28 @@ export async function countContactsByClientIds(
 }
 
 /**
+ * 担当者を削除する。
+ * テナント分離の前提: 呼び出し前に findById で clientId が organizationId に属することを確認すること。
+ */
+export async function deleteContact(
+  contactId: string,
+  clientId: string,
+  tx?: Transaction
+): Promise<boolean> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
+    .delete(clientContacts)
+    .where(
+      and(
+        eq(clientContacts.id, contactId),
+        eq(clientContacts.clientId, clientId)
+      )
+    )
+    .returning();
+  return result.length > 0;
+}
+
+/**
  * 組織配下の全担当者を1クエリで取得する。
  * 引き合い登録フォームでの選択肢構築用。
  */

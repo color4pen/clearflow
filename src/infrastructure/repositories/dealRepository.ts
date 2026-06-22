@@ -105,6 +105,22 @@ export async function findAllByOrganization(
   }));
 }
 
+export async function findAllByClientId(
+  clientId: string,
+  organizationId: string,
+  tx?: Transaction
+): Promise<Deal[]> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
+    .select()
+    .from(deals)
+    .where(
+      and(eq(deals.clientId, clientId), eq(deals.organizationId, organizationId))
+    )
+    .orderBy(asc(deals.createdAt));
+  return result.map(mapRow);
+}
+
 export async function findByInquiryId(
   inquiryId: string,
   organizationId: string,
