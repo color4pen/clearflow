@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { updateInquiryAction } from "@/app/actions/inquiries";
 import { Input, Select, Textarea, preventEnterSubmit } from "@/app/components";
 import { sourceLabels } from "@/app/(dashboard)/labels";
@@ -17,9 +18,11 @@ type Props = {
   };
   editable: boolean;
   clients: Array<{ id: string; name: string }>;
+  clientName: string | null;
+  clientLinkId: string | null;
 };
 
-export function InquiryInfoSection({ inquiry, editable, clients }: Props) {
+export function InquiryInfoSection({ inquiry, editable, clients, clientName, clientLinkId }: Props) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,39 +96,47 @@ export function InquiryInfoSection({ inquiry, editable, clients }: Props) {
             </Select>
           </dd>
         </div>
-        {!inquiry.clientId && editable && (
-          <div className="flex gap-2">
-            <dt className="text-text-muted w-20 shrink-0">顧客</dt>
-            <dd className="text-text flex-1">
-              <Select
-                name="clientId"
-                defaultValue=""
-                onChange={(e) => {
-                  if (e.target.value === "__new__") {
-                    setClientMode("new");
-                  } else {
-                    setClientMode("existing");
-                  }
-                  markDirty();
-                }}
-              >
-                <option value="">未設定</option>
-                <option value="__new__">新規登録</option>
-                {clients.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </Select>
-              {clientMode === "new" && (
-                <Input
-                  name="newClientName"
-                  placeholder="企業名"
-                  className="mt-1"
-                  onChange={markDirty}
-                />
-              )}
-            </dd>
-          </div>
-        )}
+        <div className="flex gap-2">
+          <dt className="text-text-muted w-20 shrink-0">顧客</dt>
+          <dd className="text-text flex-1">
+            {inquiry.clientId && clientLinkId ? (
+              <Link href={`/clients/${clientLinkId}`} className="text-primary underline text-xs">
+                {clientName}
+              </Link>
+            ) : editable ? (
+              <>
+                <Select
+                  name="clientId"
+                  defaultValue=""
+                  onChange={(e) => {
+                    if (e.target.value === "__new__") {
+                      setClientMode("new");
+                    } else {
+                      setClientMode("existing");
+                    }
+                    markDirty();
+                  }}
+                >
+                  <option value="">未設定</option>
+                  <option value="__new__">新規登録</option>
+                  {clients.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </Select>
+                {clientMode === "new" && (
+                  <Input
+                    name="newClientName"
+                    placeholder="企業名"
+                    className="mt-1"
+                    onChange={markDirty}
+                  />
+                )}
+              </>
+            ) : (
+              <span className="text-text-muted">-</span>
+            )}
+          </dd>
+        </div>
         <div className="flex gap-2">
           <dt className="text-text-muted w-20 shrink-0">内容</dt>
           <dd className="text-text flex-1">

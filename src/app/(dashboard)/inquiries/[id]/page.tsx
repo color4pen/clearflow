@@ -10,7 +10,7 @@ import { SectionCard } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
 import { DeleteInquiryButton } from "./DeleteInquiryButton";
 import { InquiryInfoSection } from "./InquiryInfoSection";
-import { statusLabels, phaseLabels } from "@/app/(dashboard)/labels";
+import { phaseLabels } from "@/app/(dashboard)/labels";
 
 export default async function InquiryDetailPage({
   params,
@@ -49,22 +49,6 @@ export default async function InquiryDetailPage({
       </div>
 
       <SectionCard className="p-3 mb-2">
-        <dl className="text-xs space-y-1">
-          <div className="flex gap-2">
-            <dt className="text-text-muted w-20 shrink-0">ステータス</dt>
-            <dd className="text-text">{statusLabels[inquiry.status] ?? inquiry.status}</dd>
-          </div>
-          <div className="flex gap-2">
-            <dt className="text-text-muted w-20 shrink-0">顧客</dt>
-            <dd className="text-text">
-              {client ? (
-                <Link href={`/clients/${client.id}`} className="text-primary underline">
-                  {client.name}
-                </Link>
-              ) : "-"}
-            </dd>
-          </div>
-        </dl>
         <InquiryInfoSection
           inquiry={{
             id: inquiry.id,
@@ -76,6 +60,8 @@ export default async function InquiryDetailPage({
           }}
           editable={editable}
           clients={clients.map((c) => ({ id: c.id, name: c.name }))}
+          clientName={client?.name ?? null}
+          clientLinkId={client?.id ?? null}
         />
         <dl className="text-xs space-y-1 mt-1">
           <div className="flex gap-2">
