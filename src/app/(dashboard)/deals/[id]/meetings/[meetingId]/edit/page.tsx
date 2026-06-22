@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { meetingRepository, dealRepository } from "@/infrastructure/repositories";
+import { meetingRepository, dealRepository, clientRepository } from "@/infrastructure/repositories";
 import { EditMeetingForm } from "./EditMeetingForm";
 
 export default async function EditMeetingPage({
@@ -23,6 +23,9 @@ export default async function EditMeetingPage({
   }
 
   const deal = await dealRepository.findById(id, organizationId);
+  const contacts = deal?.clientId
+    ? await clientRepository.findContactsByClientId(deal.clientId)
+    : [];
 
   return (
     <div>
@@ -37,7 +40,12 @@ export default async function EditMeetingPage({
           {" > "}編集
         </span>
       </div>
-      <EditMeetingForm meeting={meeting} dealId={id} clientId={deal?.clientId ?? null} />
+      <EditMeetingForm
+        meeting={meeting}
+        dealId={id}
+        clientId={deal?.clientId ?? null}
+        existingContacts={contacts.map((c) => ({ id: c.id, name: c.name }))}
+      />
     </div>
   );
 }

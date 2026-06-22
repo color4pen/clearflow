@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { dealRepository, inquiryRepository } from "@/infrastructure/repositories";
+import { dealRepository, clientRepository } from "@/infrastructure/repositories";
 import { DealMeetingForm } from "./DealMeetingForm";
 
 export default async function DealMeetingNewPage({
@@ -18,11 +18,9 @@ export default async function DealMeetingNewPage({
     notFound();
   }
 
-  // 引き合いの clientId を取得して DealMeetingForm に渡す
-  const inquiry = deal.inquiryId
-    ? await inquiryRepository.findById(deal.inquiryId, organizationId)
-    : null;
-  const clientId = inquiry?.clientId ?? null;
+  const contacts = deal.clientId
+    ? await clientRepository.findContactsByClientId(deal.clientId)
+    : [];
 
   return (
     <div>
@@ -35,7 +33,11 @@ export default async function DealMeetingNewPage({
           {" > "}商談記録
         </span>
       </div>
-      <DealMeetingForm dealId={id} clientId={clientId} />
+      <DealMeetingForm
+        dealId={id}
+        clientId={deal.clientId}
+        existingContacts={contacts.map((c) => ({ id: c.id, name: c.name }))}
+      />
     </div>
   );
 }
