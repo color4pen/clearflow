@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useDebouncedCallback } from "use-debounce";
 import { updateInquiryAction } from "@/app/actions/inquiries";
 import { Input, Select, Textarea, preventEnterSubmit } from "@/app/components";
 import { sourceLabels } from "@/app/(dashboard)/labels";
@@ -20,41 +21,51 @@ type Props = {
 
 export function InquiryInfoSection({ inquiry, editable }: Props) {
   const router = useRouter();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const formRef = useRef<HTMLFormElement>(null);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-
-    const formData = new FormData(e.currentTarget);
+  const save = useCallback(async () => {
+    if (!formRef.current) return;
+    setSaveStatus("saving");
+    const formData = new FormData(formRef.current);
     if (inquiry.clientId) formData.set("clientId", inquiry.clientId);
     if (inquiry.assigneeId) formData.set("assigneeId", inquiry.assigneeId);
 
     const result = await updateInquiryAction(inquiry.id, {}, formData);
-    setIsSubmitting(false);
-
-    if (result.success) {
-      router.refresh();
+    if (result.success === false || result.message) {
+      setSaveStatus("error");
     } else {
-      setError(result.message ?? "保存に失敗しました");
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2000);
+      router.refresh();
     }
-  }
+  }, [inquiry.id, inquiry.clientId, inquiry.assigneeId, router]);
+
+  const debouncedSave = useDebouncedCallback(save, 800);
+
+  const handleSelectChange = useCallback(() => {
+    save();
+  }, [save]);
 
   return (
-    <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit}>
-      {error && <p className="text-danger text-xs mb-1">{error}</p>}
+    <form ref={formRef} onKeyDown={preventEnterSubmit}>
+      {saveStatus !== "idle" && (
+        <div className="flex justify-end mb-1">
+          {saveStatus === "saving" && <span className="text-text-muted text-xs">保存中...</span>}
+          {saveStatus === "saved" && <span className="text-green-600 text-xs">保存済み</span>}
+          {saveStatus === "error" && <span className="text-danger text-xs">保存に失敗しました</span>}
+        </div>
+      )}
       <div className="flex gap-2">
         <dt className="text-text-muted w-20 shrink-0">件名</dt>
         <dd className="text-text flex-1">
-          <Input name="title" defaultValue={inquiry.title} disabled={!editable} />
+          <Input name="title" defaultValue={inquiry.title} disabled={!editable} onChange={() => debouncedSave()} />
         </dd>
       </div>
       <div className="flex gap-2 mt-1">
         <dt className="text-text-muted w-20 shrink-0">流入経路</dt>
         <dd className="text-text flex-1">
-          <Select name="source" defaultValue={inquiry.source} disabled={!editable}>
+          <Select name="source" defaultValue={inquiry.source} disabled={!editable} onChange={handleSelectChange}>
             {Object.entries(sourceLabels).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>
             ))}
@@ -69,20 +80,10 @@ export function InquiryInfoSection({ inquiry, editable }: Props) {
             defaultValue={inquiry.description ?? ""}
             disabled={!editable}
             rows={4}
+            onChange={() => debouncedSave()}
           />
         </dd>
       </div>
-      {editable && (
-        <div className="mt-2">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-primary text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
-          >
-            {isSubmitting ? "保存中..." : "保存"}
-          </button>
-        </div>
-      )}
     </form>
   );
 }

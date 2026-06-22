@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useDebouncedCallback } from "use-debounce";
 import { updateDealAction } from "@/app/actions/deals";
 import { SectionCard, Textarea } from "@/app/components";
 
@@ -14,46 +15,47 @@ type Props = {
 export function DealNotesSection({ dealId, notes, editable }: Props) {
   const router = useRouter();
   const [value, setValue] = useState(notes ?? "");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
 
-  async function handleSave() {
-    setIsSubmitting(true);
-    setError(null);
+  const save = useCallback(async (text: string) => {
+    setSaveStatus("saving");
     const formData = new FormData();
-    formData.set("notes", value);
+    formData.set("notes", text);
     const result = await updateDealAction(dealId, formData);
-    setIsSubmitting(false);
     if (!result.success) {
-      setError(result.message ?? "保存に失敗しました");
+      setSaveStatus("error");
     } else {
+      setSaveStatus("saved");
+      setTimeout(() => setSaveStatus("idle"), 2000);
       router.refresh();
     }
+  }, [dealId, router]);
+
+  const debouncedSave = useDebouncedCallback((text: string) => {
+    save(text);
+  }, 800);
+
+  function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
+    const newValue = e.target.value;
+    setValue(newValue);
+    debouncedSave(newValue);
   }
 
   return (
     <SectionCard className="p-3 mb-3">
-      <h2 className="text-xs font-bold text-text mb-2">備考</h2>
-      {error && <p className="text-danger text-xs mb-1">{error}</p>}
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xs font-bold text-text">備考</h2>
+        {saveStatus === "saving" && <span className="text-text-muted text-xs">保存中...</span>}
+        {saveStatus === "saved" && <span className="text-green-600 text-xs">保存済み</span>}
+        {saveStatus === "error" && <span className="text-danger text-xs">保存に失敗しました</span>}
+      </div>
       <Textarea
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={handleChange}
         rows={6}
         placeholder="案件の状況や共有事項を記入"
         disabled={!editable}
       />
-      {editable && (
-        <div className="mt-2">
-          <button
-            type="button"
-            disabled={isSubmitting}
-            onClick={handleSave}
-            className="bg-primary text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
-          >
-            {isSubmitting ? "保存中..." : "保存"}
-          </button>
-        </div>
-      )}
     </SectionCard>
   );
 }
