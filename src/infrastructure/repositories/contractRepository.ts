@@ -106,6 +106,17 @@ export async function findAllByOrganization(
   }));
 }
 
+export async function deleteById(
+  id: string,
+  organizationId: string,
+  tx?: Transaction
+): Promise<void> {
+  const queryRunner = tx ?? db;
+  await queryRunner
+    .delete(contracts)
+    .where(and(eq(contracts.id, id), eq(contracts.organizationId, organizationId)));
+}
+
 export async function update(
   id: string,
   organizationId: string,

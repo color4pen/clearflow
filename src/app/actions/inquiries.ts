@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
-import { createInquiry, updateInquiryStatus, listInquiries, createClient } from "@/application/usecases";
+import { createInquiry, updateInquiryStatus, listInquiries, createClient, deleteInquiry } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import type { InquiryWithClient } from "@/domain/models/inquiry";
 import type { ActionResult } from "./requests";
@@ -192,6 +192,30 @@ export async function updateInquiryAction(
 
   revalidatePath("/inquiries");
   revalidatePath(`/inquiries/${inquiryId}`);
+  return { success: true };
+}
+
+export async function deleteInquiryAction(inquiryId: string): Promise<ActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: "認証が必要です" };
+  }
+
+  if (session.user.role !== "admin" && session.user.role !== "manager") {
+    return { success: false, message: "権限がありません" };
+  }
+
+  const result = await deleteInquiry({
+    id: inquiryId,
+    organizationId: session.user.organizationId,
+    actorId: session.user.id,
+  });
+
+  if (!result.ok) {
+    return { success: false, message: result.reason };
+  }
+
+  revalidatePath("/inquiries");
   return { success: true };
 }
 

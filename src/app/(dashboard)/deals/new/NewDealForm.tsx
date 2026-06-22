@@ -11,11 +11,12 @@ import type { Client } from "@/domain/models/client";
 type Props = {
   inquiryId: string | null;
   clients: Client[];
+  users: { id: string; name: string }[];
 };
 
 const initialState: CreateDealState = {};
 
-export function NewDealForm({ inquiryId, clients }: Props) {
+export function NewDealForm({ inquiryId, clients, users }: Props) {
   const router = useRouter();
   const [state, formAction, isPending] = useActionState(createDealAction, initialState);
   const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
@@ -88,6 +89,28 @@ export function NewDealForm({ inquiryId, clients }: Props) {
             <option value="quasi_delegation">準委任</option>
             <option value="fixed_price">請負</option>
             <option value="ses">SES</option>
+          </Select>
+        </FormField>
+
+        <FormField label="営業担当" error={state.errors?.assigneeId?.[0]}>
+          <Select name="assigneeId" defaultValue="">
+            <option value="">未設定</option>
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name}
+              </option>
+            ))}
+          </Select>
+        </FormField>
+
+        <FormField label="技術担当" error={state.errors?.technicalLeadId?.[0]}>
+          <Select name="technicalLeadId" defaultValue="">
+            <option value="">未設定</option>
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name}
+              </option>
+            ))}
           </Select>
         </FormField>
 

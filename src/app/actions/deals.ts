@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
-import { createDeal, listDeals, updateDealPhase, updateDeal } from "@/application/usecases";
+import { createDeal, listDeals, updateDealPhase, updateDeal, deleteDeal } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import type { DealWithDetails, ContractType } from "@/domain/models/deal";
 import type { DealPhase } from "@/domain/models/deal";
@@ -262,6 +262,30 @@ export async function updateDealAction(
   }
 
   revalidatePath(`/deals/${dealId}`);
+  return { success: true };
+}
+
+export async function deleteDealAction(dealId: string): Promise<ActionResult> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: "認証が必要です" };
+  }
+
+  if (session.user.role !== "admin" && session.user.role !== "manager") {
+    return { success: false, message: "権限がありません" };
+  }
+
+  const result = await deleteDeal({
+    id: dealId,
+    organizationId: session.user.organizationId,
+    actorId: session.user.id,
+  });
+
+  if (!result.ok) {
+    return { success: false, message: result.reason };
+  }
+
+  revalidatePath("/deals");
   return { success: true };
 }
 

@@ -1,5 +1,6 @@
 import { auth } from "@/infrastructure/auth";
 import { clientRepository } from "@/infrastructure/repositories";
+import { listOrganizationUsers } from "@/application/usecases";
 import { NewDealForm } from "./NewDealForm";
 import { PageToolbar } from "@/app/components";
 import type { Client } from "@/domain/models/client";
@@ -19,11 +20,14 @@ export default async function NewDealPage({
     clients = await clientRepository.findAllByOrganization(organizationId);
   }
 
+  const allUsers = await listOrganizationUsers({ organizationId });
+  const users = allUsers.map((u) => ({ id: u.id, name: u.name }));
+
   return (
     <div>
       <PageToolbar title="案件を作成" />
       <div className="mt-2">
-        <NewDealForm inquiryId={inquiryId ?? null} clients={clients} />
+        <NewDealForm inquiryId={inquiryId ?? null} clients={clients} users={users} />
       </div>
     </div>
   );

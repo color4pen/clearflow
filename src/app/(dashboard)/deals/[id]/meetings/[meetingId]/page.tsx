@@ -26,16 +26,24 @@ export default async function DealMeetingDetailPage({
 
   return (
     <div>
-      <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2">
-        <span className="text-sm font-bold text-text">
-          {meetingTypeLabels[meeting.type] ?? meeting.type}
-        </span>
-        <span className="text-text-muted text-xs ml-2">
-          <Link href="/deals" className="text-primary underline">案件一覧</Link>
-          {" > "}
-          <Link href={`/deals/${id}`} className="text-primary underline">案件詳細</Link>
-          {" > "}商談詳細
-        </span>
+      <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2 flex items-center justify-between">
+        <div>
+          <span className="text-sm font-bold text-text">
+            {meetingTypeLabels[meeting.type] ?? meeting.type}
+          </span>
+          <span className="text-text-muted text-xs ml-2">
+            <Link href="/deals" className="text-primary underline">案件一覧</Link>
+            {" > "}
+            <Link href={`/deals/${id}`} className="text-primary underline">案件詳細</Link>
+            {" > "}商談詳細
+          </span>
+        </div>
+        <Link
+          href={`/deals/${id}/meetings/${meetingId}/edit`}
+          className="text-xs text-primary underline"
+        >
+          編集
+        </Link>
       </div>
 
       <div className="grid grid-cols-2 gap-2 mb-2">

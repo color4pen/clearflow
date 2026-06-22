@@ -13,6 +13,7 @@ import { SectionCard, DataTable } from "@/app/components";
 import { DealEditForm } from "./DealEditForm";
 import { DealContactsSection } from "./DealContactsSection";
 import { DealNotesSection } from "./DealNotesSection";
+import { DeleteDealButton } from "./DeleteDealButton";
 import { phaseLabels, contractTypeLabels, meetingTypeLabels, contractStatusLabels } from "@/app/(dashboard)/labels";
 import type { Meeting } from "@/domain/models/meeting";
 import type { Contract } from "@/domain/models/contract";
@@ -61,7 +62,12 @@ export default async function DealDetailPage({
         <SectionCard className="p-3">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-xs font-bold text-text">案件情報</h2>
-            <Link href={`/deals/${id}/edit`} className="text-xs text-primary underline">編集</Link>
+            <div className="flex items-center gap-3">
+              {canChangePhase && dealMeetings.length === 0 && dealContracts.length === 0 && (
+                <DeleteDealButton dealId={deal.id} />
+              )}
+              <Link href={`/deals/${id}/edit`} className="text-xs text-primary underline">編集</Link>
+            </div>
           </div>
           <dl className="text-xs space-y-1">
             <div className="flex gap-2">

@@ -9,11 +9,12 @@ import type { Deal } from "@/domain/models/deal";
 
 type Props = {
   deal: Deal;
+  users: { id: string; name: string }[];
 };
 
 const allPhases = ["proposal_prep", "proposed", "negotiation", "won", "lost"] as const;
 
-export function DealEditForm({ deal }: Props) {
+export function DealEditForm({ deal, users }: Props) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -110,6 +111,28 @@ export function DealEditForm({ deal }: Props) {
             <option value="quasi_delegation">準委任</option>
             <option value="fixed_price">請負</option>
             <option value="ses">SES</option>
+          </Select>
+        </FormField>
+
+        <FormField label="営業担当">
+          <Select name="assigneeId" defaultValue={deal.assigneeId ?? ""}>
+            <option value="">未設定</option>
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name}
+              </option>
+            ))}
+          </Select>
+        </FormField>
+
+        <FormField label="技術担当">
+          <Select name="technicalLeadId" defaultValue={deal.technicalLeadId ?? ""}>
+            <option value="">未設定</option>
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name}
+              </option>
+            ))}
           </Select>
         </FormField>
 
