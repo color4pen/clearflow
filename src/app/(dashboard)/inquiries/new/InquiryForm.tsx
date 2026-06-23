@@ -127,7 +127,7 @@ export function InquiryForm({ clients, users }: Props) {
 
       <div className="mt-3">
         <FormField label="内容" htmlFor="description" error={state.errors?.description?.[0]}>
-          <Textarea id="description" name="description" rows={4} placeholder="引き合いの内容を記入してください" />
+          <Textarea id="description" name="description" rows={8} placeholder="引き合いの内容を記入してください" />
         </FormField>
       </div>
 

@@ -281,7 +281,7 @@ export function DealMeetingForm({ dealId, clientId, existingContacts }: Props) {
 
       <div className="mt-3">
         <FormField label="議事録" htmlFor="summary" error={state.errors?.summary?.[0]}>
-          <Textarea id="summary" name="summary" rows={4} placeholder="商談の要約・議事録" />
+          <Textarea id="summary" name="summary" rows={8} placeholder="商談の要約・議事録" />
         </FormField>
       </div>
 

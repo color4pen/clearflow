@@ -115,7 +115,7 @@ export function NewDealForm({ inquiryId, clients, users }: Props) {
         </FormField>
 
         <FormField label="備考" error={state.errors?.notes?.[0]}>
-          <Textarea name="notes" rows={4} />
+          <Textarea name="notes" rows={8} />
         </FormField>
 
         <div className="flex gap-2 mt-4">

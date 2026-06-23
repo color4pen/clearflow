@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateMeetingAction } from "@/app/actions/meetings";
-import { Textarea } from "@/app/components";
+import { MarkdownTextarea } from "@/app/components";
 
 type Props = {
   meetingId: string;
@@ -59,14 +59,14 @@ export function MeetingSummarySection({ meetingId, dealId, summary, editable }: 
           )}
         </div>
       </div>
-      <Textarea
+      <MarkdownTextarea
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
           setIsDirty(true);
         }}
         placeholder="議事録を入力"
-        rows={8}
+        rows={10}
         disabled={!editable}
       />
     </div>

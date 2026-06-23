@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateDealAction } from "@/app/actions/deals";
-import { SectionCard, Textarea } from "@/app/components";
+import { SectionCard, MarkdownTextarea } from "@/app/components";
 
 type Props = {
   dealId: string;
@@ -55,13 +55,13 @@ export function DealNotesSection({ dealId, notes, editable }: Props) {
           )}
         </div>
       </div>
-      <Textarea
+      <MarkdownTextarea
         value={value}
         onChange={(e) => {
           setValue(e.target.value);
           setIsDirty(true);
         }}
-        rows={6}
+        rows={8}
         placeholder="案件の状況や共有事項を記入"
         disabled={!editable}
       />
