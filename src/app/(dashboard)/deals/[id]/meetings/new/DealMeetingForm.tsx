@@ -254,7 +254,7 @@ export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers =
                   e.target.value = "";
                 }}
               >
-                <option value="">登録済み担当者から追加...</option>
+                <option value="">顧客担当者から追加...</option>
                 {existingContacts.map((c) => (
                   <option key={c.id} value={c.id}>{c.name}</option>
                 ))}
