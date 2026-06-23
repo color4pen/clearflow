@@ -29,7 +29,7 @@ export default async function DealMeetingDetailPage({
 
   const deal = await dealRepository.findById(id, organizationId);
   const [users, contacts] = await Promise.all([
-    listOrganizationUsers(organizationId),
+    listOrganizationUsers({ organizationId }),
     deal?.clientId ? clientRepository.findContactsByClientId(deal.clientId) : Promise.resolve([]),
   ]);
 
