@@ -68,6 +68,7 @@ export default async function DealMeetingDetailPage({
             editable={editable}
             orgUsers={users.map((u) => ({ id: u.id, name: u.name }))}
             existingContacts={contacts.map((c) => ({ id: c.id, name: c.name }))}
+            clientId={deal?.clientId ?? null}
           />
         </div>
 

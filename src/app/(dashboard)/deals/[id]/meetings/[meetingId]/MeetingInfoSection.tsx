@@ -25,6 +25,7 @@ type Props = {
   editable: boolean;
   orgUsers?: Array<{ id: string; name: string }>;
   existingContacts?: Array<{ id: string; name: string }>;
+  clientId?: string | null;
 };
 
 function toDatetimeLocalValue(date: Date): string {
@@ -33,7 +34,7 @@ function toDatetimeLocalValue(date: Date): string {
     .slice(0, 16);
 }
 
-export function MeetingInfoSection({ meetingId, dealId, meeting, editable, orgUsers = [], existingContacts = [] }: Props) {
+export function MeetingInfoSection({ meetingId, dealId, meeting, editable, orgUsers = [], existingContacts = [], clientId }: Props) {
   const router = useRouter();
 
   const [type, setType] = useState(meeting.type);
@@ -42,8 +43,10 @@ export function MeetingInfoSection({ meetingId, dealId, meeting, editable, orgUs
   const [internalAttendees, setInternalAttendees] = useState<string[]>(
     meeting.attendees.internal.length > 0 ? [...meeting.attendees.internal] : [""]
   );
-  const [externalAttendees, setExternalAttendees] = useState<string[]>(
-    meeting.attendees.external.length > 0 ? [...meeting.attendees.external] : [""]
+  const [externalAttendees, setExternalAttendees] = useState<Array<{ name: string; registerAsContact: boolean }>>(
+    meeting.attendees.external.length > 0
+      ? meeting.attendees.external.map((name) => ({ name, registerAsContact: false }))
+      : [{ name: "", registerAsContact: false }]
   );
   const [hearingData, setHearingData] = useState<HearingData>(
     meeting.hearingData ?? {
@@ -78,10 +81,18 @@ export function MeetingInfoSection({ meetingId, dealId, meeting, editable, orgUs
       "internalAttendees",
       JSON.stringify(internalAttendees.filter((a) => a.trim()))
     );
+    const filteredExternal = externalAttendees.filter((a) => a.name.trim());
     formData.set(
       "externalAttendees",
-      JSON.stringify(externalAttendees.filter((a) => a.trim()))
+      JSON.stringify(filteredExternal.map((a) => a.name))
     );
+    formData.set(
+      "registerContacts",
+      JSON.stringify(filteredExternal.filter((a) => a.registerAsContact).map((a) => ({ name: a.name, register: a.registerAsContact })))
+    );
+    if (clientId) {
+      formData.set("clientId", clientId);
+    }
 
     if (type === "hearing") {
       formData.set("hearingData", JSON.stringify(hearingData));
@@ -112,7 +123,7 @@ export function MeetingInfoSection({ meetingId, dealId, meeting, editable, orgUs
   }
 
   function addExternalAttendee() {
-    setExternalAttendees((prev) => [...prev, ""]);
+    setExternalAttendees((prev) => [...prev, { name: "", registerAsContact: false }]);
     markDirty();
   }
 
@@ -268,11 +279,11 @@ export function MeetingInfoSection({ meetingId, dealId, meeting, editable, orgUs
                   value=""
                   onChange={(e) => {
                     const contact = existingContacts.find((c) => c.id === e.target.value);
-                    if (contact && !externalAttendees.includes(contact.name)) {
+                    if (contact && !externalAttendees.some((a) => a.name === contact.name)) {
                       setExternalAttendees((prev) => [
-                        ...prev.filter((a) => a.trim()),
-                        contact.name,
-                        "",
+                        ...prev.filter((a) => a.name.trim()),
+                        { name: contact.name, registerAsContact: false },
+                        { name: "", registerAsContact: false },
                       ]);
                       markDirty();
                     }
@@ -287,26 +298,44 @@ export function MeetingInfoSection({ meetingId, dealId, meeting, editable, orgUs
               </div>
             )}
             {externalAttendees.map((attendee, idx) => (
-              <div key={idx} className="flex gap-1 mb-1">
-                <Input
-                  value={attendee}
-                  onChange={(e) => {
-                    setExternalAttendees((prev) =>
-                      prev.map((a, i) => (i === idx ? e.target.value : a))
-                    );
-                    markDirty();
-                  }}
-                  placeholder="氏名"
-                  disabled={!editable}
-                />
-                {editable && externalAttendees.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeExternalAttendee(idx)}
-                    className="text-xs text-danger underline whitespace-nowrap"
-                  >
-                    削除
-                  </button>
+              <div key={idx} className="mb-1">
+                <div className="flex gap-1">
+                  <Input
+                    value={attendee.name}
+                    onChange={(e) => {
+                      setExternalAttendees((prev) =>
+                        prev.map((a, i) => (i === idx ? { ...a, name: e.target.value } : a))
+                      );
+                      markDirty();
+                    }}
+                    placeholder="氏名"
+                    disabled={!editable}
+                  />
+                  {editable && externalAttendees.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeExternalAttendee(idx)}
+                      className="text-xs text-danger underline whitespace-nowrap"
+                    >
+                      削除
+                    </button>
+                  )}
+                </div>
+                {editable && clientId && attendee.name.trim() && (
+                  <label className="flex items-center gap-1 mt-0.5 text-xs text-text-muted cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={attendee.registerAsContact}
+                      onChange={() => {
+                        setExternalAttendees((prev) =>
+                          prev.map((a, i) => (i === idx ? { ...a, registerAsContact: !a.registerAsContact } : a))
+                        );
+                        markDirty();
+                      }}
+                      className="cursor-pointer"
+                    />
+                    顧客担当者として登録
+                  </label>
                 )}
               </div>
             ))}
