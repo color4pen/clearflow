@@ -96,14 +96,14 @@ function MarkdownPreview({
 }) {
   if (!value) {
     return (
-      <div className="w-full border border-border px-2 py-1 text-xs text-text-placeholder min-h-[4rem]">
+      <div className="w-full px-2 py-1 text-xs text-text-placeholder min-h-[4rem]">
         {placeholder ?? ""}
       </div>
     );
   }
 
   return (
-    <div className="w-full border border-border px-2 py-1 text-xs text-text space-y-2 min-h-[4rem] [&_h1]:text-sm [&_h1]:font-bold [&_h2]:text-xs [&_h2]:font-bold [&_h3]:text-xs [&_h3]:font-bold [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_code]:bg-bg-surface-alt [&_code]:px-1 [&_code]:text-xs [&_pre]:bg-bg-surface-alt [&_pre]:p-2 [&_pre]:overflow-x-auto [&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-2 [&_blockquote]:text-text-muted [&_a]:text-primary [&_a]:underline">
+    <div className="w-full px-2 py-1 text-xs text-text space-y-2 min-h-[4rem] [&_h1]:text-sm [&_h1]:font-bold [&_h2]:text-xs [&_h2]:font-bold [&_h3]:text-xs [&_h3]:font-bold [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_code]:bg-bg-surface-alt [&_code]:px-1 [&_code]:text-xs [&_pre]:bg-bg-surface-alt [&_pre]:p-2 [&_pre]:overflow-x-auto [&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-2 [&_blockquote]:text-text-muted [&_a]:text-primary [&_a]:underline">
       <ReactMarkdown remarkPlugins={[remarkBreaks]}>{value}</ReactMarkdown>
     </div>
   );
