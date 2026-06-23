@@ -23,6 +23,8 @@ type Props = {
     hearingData: HearingData | null;
   };
   editable: boolean;
+  orgUsers?: Array<{ id: string; name: string }>;
+  existingContacts?: Array<{ id: string; name: string }>;
 };
 
 function toDatetimeLocalValue(date: Date): string {
@@ -31,7 +33,7 @@ function toDatetimeLocalValue(date: Date): string {
     .slice(0, 16);
 }
 
-export function MeetingInfoSection({ meetingId, dealId, meeting, editable }: Props) {
+export function MeetingInfoSection({ meetingId, dealId, meeting, editable, orgUsers = [], existingContacts = [] }: Props) {
   const router = useRouter();
 
   const [type, setType] = useState(meeting.type);
@@ -200,6 +202,30 @@ export function MeetingInfoSection({ meetingId, dealId, meeting, editable }: Pro
         <div className="text-xs space-y-2">
           <div>
             <p className="text-text-muted font-bold mb-0.5">社内</p>
+            {editable && orgUsers.length > 0 && (
+              <div className="mb-1">
+                <Select
+                  value=""
+                  onChange={(e) => {
+                    const user = orgUsers.find((u) => u.id === e.target.value);
+                    if (user && !internalAttendees.includes(user.name)) {
+                      setInternalAttendees((prev) => [
+                        ...prev.filter((a) => a.trim()),
+                        user.name,
+                        "",
+                      ]);
+                      markDirty();
+                    }
+                    e.target.value = "";
+                  }}
+                >
+                  <option value="">ユーザーから追加...</option>
+                  {orgUsers.map((u) => (
+                    <option key={u.id} value={u.id}>{u.name}</option>
+                  ))}
+                </Select>
+              </div>
+            )}
             {internalAttendees.map((attendee, idx) => (
               <div key={idx} className="flex gap-1 mb-1">
                 <Input
@@ -236,6 +262,30 @@ export function MeetingInfoSection({ meetingId, dealId, meeting, editable }: Pro
           </div>
           <div>
             <p className="text-text-muted font-bold mb-0.5">社外</p>
+            {editable && existingContacts.length > 0 && (
+              <div className="mb-1">
+                <Select
+                  value=""
+                  onChange={(e) => {
+                    const contact = existingContacts.find((c) => c.id === e.target.value);
+                    if (contact && !externalAttendees.includes(contact.name)) {
+                      setExternalAttendees((prev) => [
+                        ...prev.filter((a) => a.trim()),
+                        contact.name,
+                        "",
+                      ]);
+                      markDirty();
+                    }
+                    e.target.value = "";
+                  }}
+                >
+                  <option value="">登録済み担当者から追加...</option>
+                  {existingContacts.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </Select>
+              </div>
+            )}
             {externalAttendees.map((attendee, idx) => (
               <div key={idx} className="flex gap-1 mb-1">
                 <Input

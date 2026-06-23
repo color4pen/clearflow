@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { meetingRepository } from "@/infrastructure/repositories";
+import { meetingRepository, dealRepository, clientRepository } from "@/infrastructure/repositories";
+import { listOrganizationUsers } from "@/application/usecases";
 import { SectionCard } from "@/app/components";
 import { meetingTypeLabels } from "@/app/(dashboard)/labels";
 import { MeetingInfoSection } from "./MeetingInfoSection";
@@ -25,6 +26,12 @@ export default async function DealMeetingDetailPage({
   if (meeting.dealId !== id) {
     notFound();
   }
+
+  const deal = await dealRepository.findById(id, organizationId);
+  const [users, contacts] = await Promise.all([
+    listOrganizationUsers(organizationId),
+    deal?.clientId ? clientRepository.findContactsByClientId(deal.clientId) : Promise.resolve([]),
+  ]);
 
   const editable =
     session!.user.role === "admin" || session!.user.role === "manager";
@@ -59,6 +66,8 @@ export default async function DealMeetingDetailPage({
               hearingData: meeting.hearingData,
             }}
             editable={editable}
+            orgUsers={users.map((u) => ({ id: u.id, name: u.name }))}
+            existingContacts={contacts.map((c) => ({ id: c.id, name: c.name }))}
           />
         </div>
 
