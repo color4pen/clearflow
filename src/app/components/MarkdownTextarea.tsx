@@ -103,8 +103,27 @@ function MarkdownPreview({
   }
 
   return (
-    <div className="w-full px-2 py-1 text-xs text-text space-y-1.5 min-h-[4rem] [&_h1]:text-sm [&_h1]:font-bold [&_h1]:mt-2 [&_h1]:mb-1 [&_h2]:text-xs [&_h2]:font-bold [&_h2]:mt-2 [&_h2]:mb-0.5 [&_h3]:text-xs [&_h3]:font-bold [&_h3]:mt-1 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:leading-relaxed [&_code]:bg-bg-surface-alt [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-xs [&_code]:rounded [&_pre]:bg-bg-surface-alt [&_pre]:p-2 [&_pre]:overflow-x-auto [&_pre]:rounded [&_blockquote]:border-l-2 [&_blockquote]:border-border [&_blockquote]:pl-2 [&_blockquote]:text-text-muted [&_a]:text-primary [&_a]:underline [&_strong]:font-bold [&_hr]:border-border [&_hr]:my-2">
-      <ReactMarkdown remarkPlugins={[remarkBreaks]}>{value}</ReactMarkdown>
+    <div className="w-full px-2 py-1 text-xs text-text min-h-[4rem]">
+      <ReactMarkdown
+        remarkPlugins={[remarkBreaks]}
+        components={{
+          h1: ({ children }) => <h1 className="text-base font-bold mt-3 mb-1">{children}</h1>,
+          h2: ({ children }) => <h2 className="text-sm font-bold mt-2 mb-1">{children}</h2>,
+          h3: ({ children }) => <h3 className="text-xs font-bold mt-2 mb-0.5">{children}</h3>,
+          p: ({ children }) => <p className="leading-relaxed mb-1">{children}</p>,
+          ul: ({ children }) => <ul className="list-disc pl-4 mb-1">{children}</ul>,
+          ol: ({ children }) => <ol className="list-decimal pl-4 mb-1">{children}</ol>,
+          li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+          code: ({ children }) => <code className="bg-bg-surface-alt px-1 py-0.5 text-xs rounded">{children}</code>,
+          pre: ({ children }) => <pre className="bg-bg-surface-alt p-2 overflow-x-auto rounded mb-1">{children}</pre>,
+          blockquote: ({ children }) => <blockquote className="border-l-2 border-border pl-2 text-text-muted mb-1">{children}</blockquote>,
+          a: ({ href, children }) => <a href={href} className="text-primary underline">{children}</a>,
+          strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+          hr: () => <hr className="border-border my-2" />,
+        }}
+      >
+        {value}
+      </ReactMarkdown>
     </div>
   );
 }
