@@ -57,6 +57,7 @@ export default async function InquiryDetailPage({
             description: inquiry.description,
             clientId: inquiry.clientId,
             assigneeId: inquiry.assigneeId ?? null,
+            status: inquiry.status,
           }}
           editable={editable}
           clients={clients.map((c) => ({ id: c.id, name: c.name }))}

@@ -15,6 +15,7 @@ type Props = {
     description: string | null;
     clientId: string | null;
     assigneeId: string | null;
+    status: string;
   };
   editable: boolean;
   clients: Array<{ id: string; name: string }>;
@@ -146,6 +147,7 @@ export function InquiryInfoSection({ inquiry, editable, clients, clientName, cli
               disabled={!editable}
               rows={8}
               onChange={markDirty}
+              defaultTab={inquiry.status === "converted" ? "preview" : "edit"}
             />
           </dd>
         </div>

@@ -13,6 +13,7 @@ type Props = {
   disabled?: boolean;
   rows?: number;
   placeholder?: string;
+  defaultTab?: "edit" | "preview";
 };
 
 export function MarkdownTextarea({
@@ -23,8 +24,9 @@ export function MarkdownTextarea({
   disabled,
   rows = 8,
   placeholder,
+  defaultTab = "edit",
 }: Props) {
-  const [activeTab, setActiveTab] = useState<"edit" | "preview">("edit");
+  const [activeTab, setActiveTab] = useState<"edit" | "preview">(defaultTab);
   const [internalValue, setInternalValue] = useState(defaultValue ?? "");
 
   const displayValue = value !== undefined ? value : internalValue;
@@ -64,8 +66,8 @@ export function MarkdownTextarea({
           onClick={() => setActiveTab("edit")}
           className={`text-xs px-3 py-1 cursor-pointer ${
             activeTab === "edit"
-              ? "bg-bg-surface text-text font-bold border border-border border-b-0 -mb-px"
-              : "bg-bg-surface-alt text-text-muted border border-transparent"
+              ? "bg-bg-surface text-text font-bold border border-border border-b-0 rounded-t -mb-px"
+              : "bg-bg-surface-alt text-text-muted border border-transparent rounded-t"
           }`}
         >
           編集
@@ -75,8 +77,8 @@ export function MarkdownTextarea({
           onClick={() => setActiveTab("preview")}
           className={`text-xs px-3 py-1 cursor-pointer ${
             activeTab === "preview"
-              ? "bg-bg-surface text-text font-bold border border-border border-b-0 -mb-px"
-              : "bg-bg-surface-alt text-text-muted border border-transparent"
+              ? "bg-bg-surface text-text font-bold border border-border border-b-0 rounded-t -mb-px"
+              : "bg-bg-surface-alt text-text-muted border border-transparent rounded-t"
           }`}
         >
           プレビュー
