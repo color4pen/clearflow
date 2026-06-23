@@ -16,6 +16,7 @@ type Props = {
   dealId: string;
   clientId: string | null;
   existingContacts: Array<{ id: string; name: string }>;
+  orgUsers?: Array<{ id: string; name: string }>;
 };
 
 const typeOptions = [
@@ -36,7 +37,7 @@ const emptyHearingData: HearingData = {
   notes: null,
 };
 
-export function DealMeetingForm({ dealId, clientId, existingContacts }: Props) {
+export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers = [] }: Props) {
   const router = useRouter();
   const [selectedType, setSelectedType] = useState("");
   const [internalAttendees, setInternalAttendees] = useState<string[]>([""]);
@@ -185,6 +186,29 @@ export function DealMeetingForm({ dealId, clientId, existingContacts }: Props) {
       <div className="mt-3 grid grid-cols-2 gap-3">
         <div>
           <p className="text-xs font-bold text-text mb-1">社内参加者</p>
+          {orgUsers.length > 0 && (
+            <div className="mb-1">
+              <Select
+                value=""
+                onChange={(e) => {
+                  const user = orgUsers.find((u) => u.id === e.target.value);
+                  if (user && !internalAttendees.includes(user.name)) {
+                    setInternalAttendees((prev) => [
+                      ...prev.filter((a) => a.trim()),
+                      user.name,
+                      "",
+                    ]);
+                  }
+                  e.target.value = "";
+                }}
+              >
+                <option value="">ユーザーから追加...</option>
+                {orgUsers.map((u) => (
+                  <option key={u.id} value={u.id}>{u.name}</option>
+                ))}
+              </Select>
+            </div>
+          )}
           {internalAttendees.map((attendee, idx) => (
             <div key={idx} className="flex gap-1 mb-1">
               <Input
