@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { dealRepository, clientRepository } from "@/infrastructure/repositories";
+import { listOrganizationUsers } from "@/application/usecases";
 import { DealMeetingForm } from "./DealMeetingForm";
 
 export default async function DealMeetingNewPage({
@@ -18,9 +19,10 @@ export default async function DealMeetingNewPage({
     notFound();
   }
 
-  const contacts = deal.clientId
-    ? await clientRepository.findContactsByClientId(deal.clientId)
-    : [];
+  const [contacts, users] = await Promise.all([
+    deal.clientId ? clientRepository.findContactsByClientId(deal.clientId) : Promise.resolve([]),
+    listOrganizationUsers({ organizationId }),
+  ]);
 
   return (
     <div>
@@ -37,6 +39,7 @@ export default async function DealMeetingNewPage({
         dealId={id}
         clientId={deal.clientId}
         existingContacts={contacts.map((c) => ({ id: c.id, name: c.name }))}
+        orgUsers={users.map((u) => ({ id: u.id, name: u.name }))}
       />
     </div>
   );

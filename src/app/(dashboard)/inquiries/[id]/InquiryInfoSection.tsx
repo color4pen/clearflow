@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { updateInquiryAction } from "@/app/actions/inquiries";
-import { Input, Select, Textarea, preventEnterSubmit } from "@/app/components";
+import { Input, Select, MarkdownTextarea, preventEnterSubmit } from "@/app/components";
 import { sourceLabels } from "@/app/(dashboard)/labels";
 
 type Props = {
@@ -15,6 +15,7 @@ type Props = {
     description: string | null;
     clientId: string | null;
     assigneeId: string | null;
+    status: string;
   };
   editable: boolean;
   clients: Array<{ id: string; name: string }>;
@@ -140,12 +141,13 @@ export function InquiryInfoSection({ inquiry, editable, clients, clientName, cli
         <div className="flex gap-2">
           <dt className="text-text-muted w-20 shrink-0">内容</dt>
           <dd className="text-text flex-1">
-            <Textarea
+            <MarkdownTextarea
               name="description"
               defaultValue={inquiry.description ?? ""}
               disabled={!editable}
-              rows={4}
+              rows={8}
               onChange={markDirty}
+              defaultTab={inquiry.status === "converted" ? "preview" : "edit"}
             />
           </dd>
         </div>
