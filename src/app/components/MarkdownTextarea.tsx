@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
 import { Textarea } from "./FormField";
@@ -29,11 +29,25 @@ export function MarkdownTextarea({
 
   const displayValue = value !== undefined ? value : internalValue;
 
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const autoResize = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+  }, []);
+
+  useEffect(() => {
+    autoResize();
+  }, [activeTab, autoResize]);
+
   function handleChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     if (value === undefined) {
       setInternalValue(e.target.value);
     }
     onChange?.(e);
+    autoResize();
   }
 
   if (disabled) {
@@ -69,13 +83,22 @@ export function MarkdownTextarea({
         </button>
       </div>
       {activeTab === "edit" ? (
-        <Textarea
+        <textarea
+          ref={(el) => {
+            textareaRef.current = el;
+            if (el) {
+              el.style.height = "auto";
+              el.style.height = `${el.scrollHeight}px`;
+            }
+          }}
           name={name}
           value={value}
           defaultValue={value === undefined ? internalValue : undefined}
           onChange={handleChange}
           rows={rows}
           placeholder={placeholder}
+          className="w-full border border-border rounded-none px-2 py-1 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder resize-none overflow-hidden"
+          style={{ minHeight: `${rows * 1.5}rem` }}
         />
       ) : (
         <>
