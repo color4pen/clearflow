@@ -58,14 +58,14 @@ export function MarkdownTextarea({
 
   return (
     <div>
-      <div className="flex gap-3 mb-1">
+      <div className="flex border-b border-border mb-0">
         <button
           type="button"
           onClick={() => setActiveTab("edit")}
-          className={`text-xs pb-0.5 cursor-pointer ${
+          className={`text-xs px-3 py-1 cursor-pointer ${
             activeTab === "edit"
-              ? "text-text font-bold border-b border-text"
-              : "text-text-muted"
+              ? "bg-bg-surface text-text font-bold border border-border border-b-0 -mb-px"
+              : "bg-bg-surface-alt text-text-muted border border-transparent"
           }`}
         >
           編集
@@ -73,10 +73,10 @@ export function MarkdownTextarea({
         <button
           type="button"
           onClick={() => setActiveTab("preview")}
-          className={`text-xs pb-0.5 cursor-pointer ${
+          className={`text-xs px-3 py-1 cursor-pointer ${
             activeTab === "preview"
-              ? "text-text font-bold border-b border-text"
-              : "text-text-muted"
+              ? "bg-bg-surface text-text font-bold border border-border border-b-0 -mb-px"
+              : "bg-bg-surface-alt text-text-muted border border-transparent"
           }`}
         >
           プレビュー
@@ -97,7 +97,7 @@ export function MarkdownTextarea({
           onChange={handleChange}
           rows={rows}
           placeholder={placeholder}
-          className="w-full border border-border rounded-none px-2 py-1 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder resize-none overflow-hidden"
+          className="w-full border border-border border-t-0 rounded-none px-2 py-1 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder resize-none overflow-hidden"
           style={{ minHeight: `${rows * 1.5}rem` }}
         />
       ) : (
