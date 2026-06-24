@@ -53,3 +53,7 @@ export { updateRevenueTarget } from "./updateRevenueTarget";
 export { deleteRevenueTarget } from "./deleteRevenueTarget";
 export { getRevenueForecast } from "./getRevenueForecast";
 export { getInvoice } from "./getInvoice";
+export { listInvoicesByOrganization } from "./listInvoicesByOrganization";
+export { getDashboardActions } from "./getDashboardActions";
+export { getPipelineSummary } from "./getPipelineSummary";
+export { getRecentActivities } from "./getRecentActivities";
