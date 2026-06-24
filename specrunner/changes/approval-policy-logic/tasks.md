@@ -37,7 +37,7 @@
 
 - [ ] `src/application/usecases/evaluatePolicies.ts` を新規作成
 - [ ] `evaluatePolicies(organizationId: string, triggerAction: string, context: Record<string, unknown>): Promise<ApprovalPolicy[]>` を実装
-  - `approvalPolicyRepository.findActiveByTriggerAction(organizationId, triggerAction)` でアクティブポリシーを取得
+  - `approvalPolicyRepository.findActiveByTriggerAction(organizationId, triggerAction)` でアクティブポリシーを取得（ORDER BY created_at ASC で決定的な順序を保証）
   - 各ポリシーに対して: `conditionField` が null → 無条件合致（リストに含める）
   - `conditionField` が非 null → `evaluateCondition(conditionField, conditionOperator!, conditionValue!, context)` で評価し、`true` のみリストに含める
   - 合致するポリシーのリストを返す
@@ -83,8 +83,10 @@
     - テンプレートが見つからなければ従来フローにフォールバック
     - `requestRepository.create` で承認リクエストを生成: `{ title: "承認: " + inquiry.title, formData: {}, templateId: template.id, organizationId, creatorId: actorId, status: "pending", originType: "system", originPolicyId: policy.id, originTriggerAction: "inquiry.convert", originTriggerEntityId: inquiryId }`
     - `approvalStepRepository.createMany` でテンプレートの全 steps から承認ステップを生成（deadlineHours 対応含む）
+    - `auditLogRepository.create` でシステム生成リクエストの監査ログを記録（action: "request.create", targetType: "request", metadata: { originType: "system", policyId: policy.id }）。existsPendingByTemplateId がテンプレート利用中を検出するために必要
     - `dispatcher.dispatch` で `request.submitted` イベントを発行（Webhook 連携用）
     - Deal は生成せず、引合のステータスは変更しない
+    - **重複防止**: ポリシー評価前に `requestRepository.findByOriginTriggerEntity(organizationId, "inquiry.convert", inquiryId)` で既存の pending system リクエストが存在しないことを確認する。存在する場合は「承認待ちの申請があります」を返す
     - `{ ok: true, inquiry: <元の inquiry>, pendingApproval: { requestId } }` を返す
 - [ ] import を追加: `evaluatePolicies`, `approvalTemplateRepository`, `approvalStepRepository`, `requestRepository`（必要に応じて）
 
