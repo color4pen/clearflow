@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "59115298-9bd8-4ed2-9291-3a8189d7f96a",
   "createdAt": "2026-06-24T01:48:28.593Z",
-  "updatedAt": "2026-06-24T03:10:47.553Z",
+  "updatedAt": "2026-06-24T03:15:39.406Z",
   "request": {
     "title": "ドメインイベント基盤の導入",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/domain-events-59115298",
   "error": null,
@@ -34,8 +34,22 @@
     }
   ],
   "resumePoint": null,
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "4788883b343b41ff82d0a24783656a348e6da7d1",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 63,
+    "historyCount": 68,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -45,7 +59,9 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 2,
-      "code-fixer": 2
+      "code-fixer": 2,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
