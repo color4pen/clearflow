@@ -1,5 +1,6 @@
 import { clientRepository, auditLogRepository } from "@/infrastructure/repositories";
 import { validateIsPrimaryUniqueness } from "@/domain/services/clientContactValidation";
+import { db } from "@/infrastructure/db";
 import type { ClientContact } from "@/domain/models/client";
 
 export type CreateClientContactResult =
@@ -33,22 +34,26 @@ export async function createClientContact(data: {
       }
     }
 
-    const contact = await clientRepository.createContact({
-      clientId: data.clientId,
-      name: data.name,
-      department: data.department,
-      position: data.position,
-      email: data.email,
-      phone: data.phone,
-      isPrimary: data.isPrimary ?? false,
-    });
+    const contact = await db.transaction(async (tx) => {
+      const created = await clientRepository.createContact({
+        clientId: data.clientId,
+        name: data.name,
+        department: data.department,
+        position: data.position,
+        email: data.email,
+        phone: data.phone,
+        isPrimary: data.isPrimary ?? false,
+      }, tx);
 
-    await auditLogRepository.create({
-      action: "client_contact.create",
-      targetType: "client_contact",
-      targetId: contact.id,
-      actorId: data.actorId,
-      organizationId: data.organizationId,
+      await auditLogRepository.create({
+        action: "client_contact.create",
+        targetType: "client_contact",
+        targetId: created.id,
+        actorId: data.actorId,
+        organizationId: data.organizationId,
+      }, tx);
+
+      return created;
     });
 
     return { ok: true, contact };

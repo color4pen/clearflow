@@ -1,4 +1,5 @@
 import { clientRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { db } from "@/infrastructure/db";
 
 export type DeleteClientContactResult =
   | { ok: true }
@@ -17,18 +18,26 @@ export async function deleteClientContact(data: {
       return { ok: false, reason: "顧客が見つかりません" };
     }
 
-    const deleted = await clientRepository.deleteContact(data.contactId, data.clientId);
+    const deleted = await db.transaction(async (tx) => {
+      const result = await clientRepository.deleteContact(data.contactId, data.clientId, tx);
+      if (!result) {
+        return false;
+      }
+
+      await auditLogRepository.create({
+        action: "client_contact.delete",
+        targetType: "client_contact",
+        targetId: data.contactId,
+        actorId: data.actorId,
+        organizationId: data.organizationId,
+      }, tx);
+
+      return true;
+    });
+
     if (!deleted) {
       return { ok: false, reason: "担当者が見つかりません" };
     }
-
-    await auditLogRepository.create({
-      action: "client_contact.delete",
-      targetType: "client_contact",
-      targetId: data.contactId,
-      actorId: data.actorId,
-      organizationId: data.organizationId,
-    });
 
     return { ok: true };
   } catch (err) {
