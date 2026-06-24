@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "71491834-06b5-4dad-a8e3-8d01e958e766",
   "createdAt": "2026-06-24T08:45:04.525Z",
-  "updatedAt": "2026-06-24T09:55:05.506Z",
+  "updatedAt": "2026-06-24T09:57:42.979Z",
   "request": {
     "title": "承認ポリシー評価と引合案件化の承認ゲート",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-fixer",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/approval-policy-logic-71491834",
   "error": null,
@@ -49,7 +49,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 62,
+    "historyCount": 66,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -58,7 +58,7 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 1,
-      "code-fixer": 2,
+      "code-fixer": 3,
       "domain-invariants": 2,
       "custom-reviewers": 2,
       "regression-gate": 1
