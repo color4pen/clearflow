@@ -16,11 +16,11 @@
 **引合 (inquiry)**: list/view=全員, create/edit=admin+manager+member, convert/decline=admin+manager, delete=admin
 **案件 (deal)**: list/view=全員, create=admin+manager, edit/changePhase/manageContacts=admin+manager+member, closePhase=admin+manager, delete=admin
 **商談記録 (meeting)**: list/view=全員, create/edit=admin+manager+member, delete=admin+manager
-**顧客 (client)**: list/view=全員, create/edit/addContact/editContact=admin+manager+member, delete=admin
+**顧客 (client)**: list/view=全員, create/edit/addContact/editContact=admin+manager+member, deleteContact=admin+manager, delete=admin
 **契約 (contract)**: list/view=全員, create/edit/changeStatus=admin+manager+finance, delete=admin
 **請求 (invoice)**: list/view=全員, create/edit/changeStatus=admin+finance, delete=admin
 **承認 (approval)**: listRequests/viewRequest/submit=全員, approve/reject=admin+manager+finance
-**承認設定 (approvalSettings)**: listPolicies/listTemplates=admin+manager, createPolicy/editPolicy/createTemplate/editTemplate=admin, listDelegations=admin+manager+finance+member, createDelegation/deactivateDelegation=admin+manager+finance
+**承認設定 (approvalSettings)**: listPolicies/listTemplates=admin+manager, createPolicy/editPolicy/createTemplate/editTemplate/deleteTemplate=admin, listDelegations=admin+manager+finance+member, createDelegation/deactivateDelegation=admin+manager+finance
 **組織管理 (organization)**: listUsers/viewAuditLog=admin+manager, changeRole/exportAuditLog/manageWebhooks=admin
 
 **Acceptance Criteria**:
@@ -89,6 +89,7 @@
 ## T-06: inquiries.ts の認可チェック置換
 
 - [ ] `canPerform` を `@/domain/authorization` から import する
+- [ ] `createInquiryAction`: 認証チェックの直後に `!canPerform(session.user.role, "inquiry", "create")` の認可チェックを追加する（finance ロールを排除）
 - [ ] `updateInquiryAction`: `session.user.role !== "admin" && session.user.role !== "manager"` を `!canPerform(session.user.role, "inquiry", "edit")` に置換する
 - [ ] `updateInquiryStatusAction`: `converted` への遷移の既存チェックを `!canPerform(session.user.role, "inquiry", "convert")` に置換する
 - [ ] `updateInquiryStatusAction`: `declined` への遷移チェックを追加する — `!canPerform(session.user.role, "inquiry", "decline")`
@@ -97,21 +98,28 @@
 
 **Acceptance Criteria**:
 - `inquiries.ts` にインラインロールチェックが存在しない
-- member ロールで引合の編集が許可される
+- member ロールで引合の作成・編集が許可される
+- finance ロールで引合の作成が拒否される
 - member ロールで引合の案件化・見送りが拒否される
 - admin のみ削除が許可される
 
 ## T-07: clients.ts の認可チェック置換
 
 - [ ] `canPerform` を `@/domain/authorization` から import する
+- [ ] `createClientAction`: 認証チェックの直後に `!canPerform(session.user.role, "client", "create")` の認可チェックを追加する（finance ロールを排除）
+- [ ] `updateClientAction`: 認証チェックの直後に `!canPerform(session.user.role, "client", "edit")` の認可チェックを追加する（finance ロールを排除）
 - [ ] `addClientContactAction`: `session.user.role !== "admin" && session.user.role !== "manager"` を `!canPerform(session.user.role, "client", "addContact")` に置換する
 - [ ] `updateClientContactAction`: 同上の条件を `!canPerform(session.user.role, "client", "editContact")` に置換する
-- [ ] `deleteClientContactAction`: 同上の条件を `!canPerform(session.user.role, "client", "delete")` に置換する（担当者削除は顧客削除と同じ admin のみ）
+- [ ] `deleteClientContactAction`: 同上の条件を `!canPerform(session.user.role, "client", "deleteContact")` に置換する（担当者削除は admin + manager — `client.delete` ではなく `client.deleteContact` を使用すること）
 - [ ] 全認可エラーメッセージを `"この操作を実行する権限がありません"` に統一する
 
 **Acceptance Criteria**:
 - `clients.ts` にインラインロールチェックが存在しない
+- member ロールで顧客の作成・編集が許可される
+- finance ロールで顧客の作成・編集が拒否される
 - member ロールで顧客担当者の追加・編集が許可される
+- admin と manager が顧客担当者を削除できる
+- member と finance は顧客担当者を削除できない
 
 ## T-08: delegations.ts の認可チェック置換
 
@@ -136,7 +144,7 @@
 - [ ] `listTemplatesAction`: `session.user.role !== "admin"` を `!canPerform(session.user.role, "approvalSettings", "listTemplates")` に置換する
 - [ ] `createTemplateAction`: `session.user.role !== "admin"` を `!canPerform(session.user.role, "approvalSettings", "createTemplate")` に置換する（admin のみのまま）
 - [ ] `updateTemplateAction`: `session.user.role !== "admin"` を `!canPerform(session.user.role, "approvalSettings", "editTemplate")` に置換する（admin のみのまま）
-- [ ] `deleteTemplateAction`: `session.user.role !== "admin"` を `!canPerform(session.user.role, "approvalSettings", "deleteTemplate")` に置換する（admin のみのまま — 設計書にはテンプレート削除の行がないが、作成・編集が admin のみなので削除も admin のみとする）
+- [ ] `deleteTemplateAction`: `session.user.role !== "admin"` を `!canPerform(session.user.role, "approvalSettings", "deleteTemplate")` に置換する（admin のみ — 設計書 3.8 のテンプレート削除行に準拠）
 - [ ] 全認可エラーメッセージを `"この操作を実行する権限がありません"` に統一する
 
 **Acceptance Criteria**:

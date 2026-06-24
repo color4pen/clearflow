@@ -184,6 +184,48 @@ member ロールは顧客 (client) の担当者追加および担当者編集を
 **When** createDelegationAction を呼び出す
 **Then** 権限エラーを返す
 
+#### Scenario: manager が自身の委任を無効化する
+
+**Given** role が "manager" であり、対象委任の fromUserId がセッションユーザーの id と一致する
+**When** deactivateDelegationAction を呼び出す
+**Then** 操作が成功する
+
+#### Scenario: manager が他ユーザーの委任を無効化しようとする
+
+**Given** role が "manager" であり、対象委任の fromUserId がセッションユーザーの id と異なる
+**When** deactivateDelegationAction を呼び出す
+**Then** 権限エラーを返す
+
+#### Scenario: finance が自身の委任を無効化する
+
+**Given** role が "finance" であり、対象委任の fromUserId がセッションユーザーの id と一致する
+**When** deactivateDelegationAction を呼び出す
+**Then** 操作が成功する
+
+#### Scenario: admin が他ユーザーの委任を無効化する
+
+**Given** role が "admin" であり、対象委任の fromUserId がセッションユーザーの id と異なる
+**When** deactivateDelegationAction を呼び出す
+**Then** 操作が成功する（admin は所有者確認なしで全委任を操作可能）
+
+#### Scenario: admin 以外が委任一覧を取得すると自身の委任のみが返される
+
+**Given** role が "manager" である
+**When** listDelegationsAction を呼び出す
+**Then** fromUserId がセッションユーザーの id と一致する委任のみが返される
+
+#### Scenario: finance が委任一覧を取得すると自身の委任のみが返される
+
+**Given** role が "finance" である
+**When** listDelegationsAction を呼び出す
+**Then** fromUserId がセッションユーザーの id と一致する委任のみが返される
+
+#### Scenario: admin が委任一覧を取得すると全委任が返される
+
+**Given** role が "admin" である
+**When** listDelegationsAction を呼び出す
+**Then** fromUserId によるフィルタが適用されず、全ユーザーの委任が返される
+
 ### Requirement: テンプレート一覧とユーザー一覧は manager にも許可される
 
 承認テンプレート一覧および組織ユーザー一覧は admin と manager が閲覧できなければならない (SHALL)。
