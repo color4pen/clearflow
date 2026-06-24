@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "59115298-9bd8-4ed2-9291-3a8189d7f96a",
   "createdAt": "2026-06-24T01:48:28.593Z",
-  "updatedAt": "2026-06-24T03:21:25.092Z",
+  "updatedAt": "2026-06-24T03:26:45.080Z",
   "request": {
     "title": "ドメインイベント基盤の導入",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/domain-events-59115298",
   "error": null,
   "pipelineId": "standard",
@@ -48,8 +48,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/77",
+    "number": 77,
+    "createdAt": "2026-06-24T03:26:45.065Z"
+  },
   "_journal": {
-    "historyCount": 82,
+    "historyCount": 87,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -63,7 +68,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
