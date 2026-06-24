@@ -54,7 +54,7 @@ export async function updateDealPhase(data: {
         );
 
         if (data.newPhase === "won") {
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "deal.won",
             organizationId: data.organizationId,
             actorId: data.actorId,
@@ -65,7 +65,7 @@ export async function updateDealPhase(data: {
             },
           });
         } else if (data.newPhase === "lost") {
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "deal.lost",
             organizationId: data.organizationId,
             actorId: data.actorId,
@@ -76,7 +76,7 @@ export async function updateDealPhase(data: {
             },
           });
         } else {
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "deal.phase_changed",
             organizationId: data.organizationId,
             actorId: data.actorId,

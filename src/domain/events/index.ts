@@ -22,4 +22,4 @@ export type {
   StepRejected,
 } from "./types";
 export { EventDispatcher, dispatcher } from "./dispatcher";
-export type { EventHandler } from "./dispatcher";
+export type { EventHandler, DispatchOptions } from "./dispatcher";

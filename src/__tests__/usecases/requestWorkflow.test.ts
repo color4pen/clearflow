@@ -121,13 +121,21 @@ describe("Tenant isolation — repository queries", () => {
 describe("Audit logs", () => {
   /**
    * TC-011: 申請提出時に監査ログが作成される
+   * 監査ログはハンドラ経由で自動記録される (auditLogHandler)
    */
-  it("TC-011: submitRequest creates audit log with action=request.submit", async () => {
-    const src = await readSrc("application/usecases/submitRequest.ts");
-    expect(src).toContain("auditLogRepository");
-    expect(src).toContain("request.submit");
-    expect(src).toContain("targetType");
-    expect(src).toContain("actorId");
+  it("TC-011: submitRequest records audit log via auditLogHandler with action=request.submit", async () => {
+    // submitRequest dispatches the event; auditLogHandler records the audit log
+    const submitSrc = await readSrc("application/usecases/submitRequest.ts");
+    expect(submitSrc).toContain("dispatcher.dispatch");
+    expect(submitSrc).toContain('"request.submitted"');
+    expect(submitSrc).not.toContain("auditLogRepository");
+
+    // auditLogHandler records action=request.submit for request.submitted events
+    const handlerSrc = await readSrc("infrastructure/handlers/auditLogHandler.ts");
+    expect(handlerSrc).toContain("auditLogRepository");
+    expect(handlerSrc).toContain("request.submit");
+    expect(handlerSrc).toContain("targetType");
+    expect(handlerSrc).toContain("actorId");
   });
 
   /**

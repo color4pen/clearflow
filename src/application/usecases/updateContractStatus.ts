@@ -55,7 +55,7 @@ export async function updateContractStatus(data: {
         );
 
         if (data.newStatus === "completed") {
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "contract.completed",
             organizationId: data.organizationId,
             actorId: data.actorId,
@@ -63,7 +63,7 @@ export async function updateContractStatus(data: {
             payload: { contractId: data.contractId },
           });
         } else if (data.newStatus === "cancelled") {
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "contract.cancelled",
             organizationId: data.organizationId,
             actorId: data.actorId,

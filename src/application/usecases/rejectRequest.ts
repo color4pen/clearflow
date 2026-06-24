@@ -99,7 +99,7 @@ export async function rejectRequest(data: {
             tx
           );
 
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "request.revised",
             organizationId: data.organizationId,
             actorId: data.actorId,
@@ -111,7 +111,7 @@ export async function rejectRequest(data: {
             },
           });
 
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "step.rejected",
             organizationId: data.organizationId,
             actorId: data.actorId,
@@ -189,7 +189,7 @@ export async function rejectRequest(data: {
           tx
         );
 
-        dispatcher.dispatch({
+        await dispatcher.dispatch({
           type: "request.rejected",
           organizationId: data.organizationId,
           actorId: data.actorId,

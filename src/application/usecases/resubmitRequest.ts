@@ -83,7 +83,7 @@ export async function resubmitRequest(data: {
           tx
         );
 
-        dispatcher.dispatch({
+        await dispatcher.dispatch({
           type: "request.resubmitted",
           organizationId: data.organizationId,
           actorId: data.actorId,

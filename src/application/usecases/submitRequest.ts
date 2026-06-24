@@ -1,4 +1,4 @@
-import { requestRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { requestRepository } from "@/infrastructure/repositories";
 import { validateTransition } from "@/domain/services/requestTransition";
 import { db } from "@/infrastructure/db";
 import { dispatcher } from "@/domain/events";
@@ -43,18 +43,7 @@ export async function submitRequest(data: {
           throw new Error(OPTIMISTIC_LOCK_ERROR);
         }
 
-        await auditLogRepository.create(
-          {
-            action: "request.submit",
-            targetType: "request",
-            targetId: data.requestId,
-            actorId: data.actorId,
-            organizationId: data.organizationId,
-          },
-          tx
-        );
-
-        dispatcher.dispatch({
+        await dispatcher.dispatch({
           type: "request.submitted",
           organizationId: data.organizationId,
           actorId: data.actorId,
@@ -64,7 +53,7 @@ export async function submitRequest(data: {
             requestTitle: result.title,
             status: "pending",
           },
-        });
+        }, { tx });
 
         return result;
       });

@@ -72,6 +72,7 @@ describe("EventDispatcher", () => {
     d.on("inquiry.converted", () => { called.push("sync"); }, "sync");
 
     await d.runInContext(async () => {
+      // intentional: not awaited — verifies sync handler runs synchronously before any await resolves
       d.dispatch(makeEvent("inquiry.converted"));
       expect(called).toEqual(["sync"]);
     });
@@ -83,7 +84,7 @@ describe("EventDispatcher", () => {
     let caughtError: Error | null = null;
     await d.runInContext(async () => {
       try {
-        d.dispatch(makeEvent("inquiry.converted"));
+        await d.dispatch(makeEvent("inquiry.converted"));
       } catch (err) {
         caughtError = err as Error;
       }
@@ -102,7 +103,7 @@ describe("EventDispatcher", () => {
 
     await d.runInContext(async () => {
       try {
-        d.dispatch(makeEvent("inquiry.converted"));
+        await d.dispatch(makeEvent("inquiry.converted"));
       } catch {
         // expected
       }
@@ -116,6 +117,19 @@ describe("EventDispatcher", () => {
     expect(asyncCalled).toEqual([]);
   });
 
+  it("TC-002: options (tx) are propagated to sync handlers", async () => {
+    let receivedOptions: { tx?: unknown } | undefined;
+    d.on("inquiry.converted", (_event, options) => {
+      receivedOptions = options;
+    }, "sync");
+
+    await d.runInContext(async () => {
+      await d.dispatch(makeEvent("inquiry.converted"), { tx: "mock-tx" });
+    });
+
+    expect(receivedOptions?.tx).toBe("mock-tx");
+  });
+
   // -------------------------------------------------------------------------
   // Async handlers
   // -------------------------------------------------------------------------
@@ -125,7 +139,7 @@ describe("EventDispatcher", () => {
     d.on("inquiry.converted", async () => { called.push("async"); }, "async");
 
     await d.runInContext(async () => {
-      d.dispatch(makeEvent("inquiry.converted"));
+      await d.dispatch(makeEvent("inquiry.converted"));
       // At this point, async handler should NOT have been called
       expect(called).toEqual([]);
     });
@@ -136,7 +150,7 @@ describe("EventDispatcher", () => {
     d.on("inquiry.converted", async () => { called.push("async"); }, "async");
 
     await d.runInContext(async () => {
-      d.dispatch(makeEvent("inquiry.converted"));
+      await d.dispatch(makeEvent("inquiry.converted"));
       d.flushAsync();
     });
 
@@ -150,7 +164,7 @@ describe("EventDispatcher", () => {
 
     let flushThrew = false;
     await d.runInContext(async () => {
-      d.dispatch(makeEvent("inquiry.converted"));
+      await d.dispatch(makeEvent("inquiry.converted"));
       try {
         d.flushAsync();
       } catch {
@@ -173,7 +187,7 @@ describe("EventDispatcher", () => {
 
     // Dispatch inside context — but do NOT call flushAsync
     await d.runInContext(async () => {
-      d.dispatch(makeEvent("inquiry.converted"));
+      await d.dispatch(makeEvent("inquiry.converted"));
       // No flushAsync — buffer should be discarded when context ends
     });
 
@@ -187,7 +201,7 @@ describe("EventDispatcher", () => {
     d.on("inquiry.converted", async () => { asyncCalled.push("async"); }, "async");
 
     await d.runInContext(async () => {
-      d.dispatch(makeEvent("inquiry.converted"));
+      await d.dispatch(makeEvent("inquiry.converted"));
       return null; // simulate null return without flush
     });
 
@@ -201,7 +215,7 @@ describe("EventDispatcher", () => {
 
     try {
       await d.runInContext(async () => {
-        d.dispatch(makeEvent("inquiry.converted"));
+        await d.dispatch(makeEvent("inquiry.converted"));
         throw new Error("callback-error");
       });
     } catch {
@@ -239,7 +253,7 @@ describe("EventDispatcher", () => {
         occurredAt: new Date(),
         payload: { inquiryId: "inq-ctx1", dealId: "deal-ctx1" },
       };
-      d.dispatch(event1);
+      await d.dispatch(event1);
       await pause(5); // yield to allow ctx2 to run
       d.flushAsync();
     });
@@ -252,7 +266,7 @@ describe("EventDispatcher", () => {
         occurredAt: new Date(),
         payload: { dealId: "deal-ctx2", fromPhase: "negotiation" },
       };
-      d.dispatch(event2);
+      await d.dispatch(event2);
       await pause(5);
       d.flushAsync();
     });
@@ -281,8 +295,8 @@ describe("EventDispatcher", () => {
     d.on("inquiry.converted", async () => { called.push("async1"); }, "async");
 
     await d.runInContext(async () => {
-      d.dispatch(makeEvent("inquiry.converted"));
-      // sync handlers called immediately
+      await d.dispatch(makeEvent("inquiry.converted"));
+      // sync handlers called immediately (all sync handlers run before dispatch resolves)
       expect(called).toContain("sync1");
       expect(called).toContain("sync2");
       d.flushAsync();
@@ -298,11 +312,11 @@ describe("EventDispatcher", () => {
     d.on("deal.won", () => { called.push("deal-sync"); }, "sync");
 
     await d.runInContext(async () => {
-      d.dispatch(makeEvent("inquiry.converted"));
+      await d.dispatch(makeEvent("inquiry.converted"));
       expect(called).toContain("inquiry-sync");
       expect(called).not.toContain("deal-sync");
 
-      d.dispatch(makeEvent("deal.won"));
+      await d.dispatch(makeEvent("deal.won"));
       expect(called).toContain("deal-sync");
     });
   });
@@ -317,7 +331,7 @@ describe("EventDispatcher", () => {
     d.reset();
 
     await d.runInContext(async () => {
-      d.dispatch(makeEvent("inquiry.converted"));
+      await d.dispatch(makeEvent("inquiry.converted"));
       d.flushAsync();
     });
 
@@ -329,10 +343,10 @@ describe("EventDispatcher", () => {
   // dispatch() outside runInContext throws
   // -------------------------------------------------------------------------
 
-  it("dispatch() outside runInContext throws an error", () => {
-    expect(() => {
-      d.dispatch(makeEvent("inquiry.converted"));
-    }).toThrow();
+  it("dispatch() outside runInContext throws an error", async () => {
+    await expect(d.dispatch(makeEvent("inquiry.converted"))).rejects.toThrow(
+      "dispatcher.dispatch() called outside of runInContext() scope"
+    );
   });
 });
 

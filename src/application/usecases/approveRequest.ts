@@ -75,7 +75,7 @@ export async function approveRequest(data: {
             tx
           );
 
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "request.approved",
             organizationId: data.organizationId,
             actorId: data.actorId,
@@ -100,7 +100,7 @@ export async function approveRequest(data: {
                 originTriggerEntityId: result.originTriggerEntityId,
               },
             };
-            dispatcher.dispatch(approvalCompletedEvent);
+            await dispatcher.dispatch(approvalCompletedEvent);
           }
 
           return result;
@@ -233,7 +233,7 @@ export async function approveRequest(data: {
         );
 
         // Dispatch step.approved event
-        dispatcher.dispatch({
+        await dispatcher.dispatch({
           type: "step.approved",
           organizationId: data.organizationId,
           actorId: data.actorId,
@@ -277,7 +277,7 @@ export async function approveRequest(data: {
           );
 
           // Dispatch request.approved event when all steps complete
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "request.approved",
             organizationId: data.organizationId,
             actorId: data.actorId,
@@ -302,7 +302,7 @@ export async function approveRequest(data: {
                 originTriggerEntityId: result.originTriggerEntityId,
               },
             };
-            dispatcher.dispatch(approvalCompletedEvent);
+            await dispatcher.dispatch(approvalCompletedEvent);
           }
 
           return { request: result, approvedStep: freshCurrentStep, allApproved: true };

@@ -77,7 +77,7 @@ export async function createContract(data: {
           tx
         );
 
-        dispatcher.dispatch({
+        await dispatcher.dispatch({
           type: "contract.created",
           organizationId: data.organizationId,
           actorId: data.actorId,
