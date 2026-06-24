@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 13.4s | 0 |
-| 2 | typecheck | passed | 3.2s | 0 |
+| 1 | build | passed | 11.7s | 0 |
+| 2 | typecheck | passed | 0.9s | 0 |
 | 3 | test | passed | 0.4s | 0 |
-| 4 | lint | passed | 4.9s | 0 |
+| 4 | lint | passed | 4.1s | 0 |
 
 ## Phase: build
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 6.5s
+✓ Compiled successfully in 6.0s
   Running TypeScript ...
-  Finished TypeScript in 3.4s ...
+  Finished TypeScript in 3.9s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/30) ...
   Generating static pages using 7 workers (7/30) 
   Generating static pages using 7 workers (14/30) 
   Generating static pages using 7 workers (22/30) 
-✓ Generating static pages using 7 workers (30/30) in 127ms
+✓ Generating static pages using 7 workers (30/30) in 148ms
   Finalizing page optimization ...
 
 Route (app)
@@ -97,29 +97,28 @@ bun test v1.3.12 (700fc117)
 $ bun test
 
 src/__tests__/domain/domainEvents.test.ts:
-[EventDispatcher] Async handler for "inquiry.converted" threw an error: 144 |     await new Promise((r) => setTimeout(r, 20));
-145 |     expect(called).toEqual(["async"]);
-146 |   });
-147 | 
-148 |   it("async handler exception does NOT propagate to flushAsync() caller", async () => {
-149 |     d.on("inquiry.converted", async () => { throw new Error("async-error"); }, "async");
+[EventDispatcher] Async handler for "inquiry.converted" threw an error: 158 |     await new Promise((r) => setTimeout(r, 20));
+159 |     expect(called).toEqual(["async"]);
+160 |   });
+161 | 
+162 |   it("async handler exception does NOT propagate to flushAsync() caller", async () => {
+163 |     d.on("inquiry.converted", async () => { throw new Error("async-error"); }, "async");
                                                             ^
 error: async-error
-      at <anonymous> (src/__tests__/domain/domainEvents.test.ts:149:55)
+      at <anonymous> (src/__tests__/domain/domainEvents.test.ts:163:55)
       at flushAsync (src/domain/events/dispatcher.ts:65:38)
-      at <anonymous> (src/__tests__/domain/domainEvents.test.ts:155:11)
-      at run (node:async_hooks:62:22)
-      at <anonymous> (src/__tests__/domain/domainEvents.test.ts:152:13)
+      at <anonymous> (src/__tests__/domain/domainEvents.test.ts:169:11)
+      at async <anonymous> (src/__tests__/domain/domainEvents.test.ts:166:13)
 
 
 src/__tests__/usecases/approvalPolicyFlow.test.ts:
 [evaluatePolicies] Policy policy-1 has conditionField set but null conditionOperator or conditionValue — skipping
 [handleApprovalCompleted] originTriggerEntityId is null for requestId: req-1
 
- 890 pass
+ 891 pass
  0 fail
- 1889 expect() calls
-Ran 890 tests across 43 files. [370.00ms]
+ 1890 expect() calls
+Ran 891 tests across 43 files. [368.00ms]
 
 ```
 
