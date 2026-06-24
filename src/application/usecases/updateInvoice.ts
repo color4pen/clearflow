@@ -37,15 +37,21 @@ export async function updateInvoice(data: {
     // SERIALIZABLE 分離レベルで合計金額チェックと更新を原子的に実行する
     const updated = await db.transaction(async (tx) => {
       if (data.amount !== undefined) {
-        const contract = await contractRepository.findById(invoice.contractId, data.organizationId, tx);
-        if (contract && contract.renewalType === "one_time") {
+        // トランザクション内で最新の invoice を取得し、stale な amount の混入を防ぐ
+        const freshInvoice = await invoiceRepository.findById(data.invoiceId, data.organizationId, tx);
+        if (!freshInvoice) {
+          throw new Error("請求が見つかりません");
+        }
+        const contract = await contractRepository.findById(freshInvoice.contractId, data.organizationId, tx);
+        // one_time 契約かつ契約金額が正値の場合に合計金額を検証する（amount=0 は移行データのため除外）
+        if (contract && contract.renewalType === "one_time" && contract.amount > 0) {
           // 全請求の合計から対象請求の現在金額を差し引き、新しい金額を加算する
           const existingTotal = await invoiceRepository.sumAmountByContract(
-            invoice.contractId,
+            freshInvoice.contractId,
             data.organizationId,
             tx
           );
-          const newTotal = existingTotal - invoice.amount + data.amount;
+          const newTotal = existingTotal - freshInvoice.amount + data.amount;
           if (newTotal > contract.amount) {
             throw new Error(
               `請求金額の合計が契約金額を超えます（契約金額: ¥${contract.amount.toLocaleString("ja-JP")}、更新後の合計: ¥${newTotal.toLocaleString("ja-JP")}）`

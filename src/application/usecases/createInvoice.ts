@@ -36,8 +36,8 @@ export async function createInvoice(data: {
   try {
     // SERIALIZABLE 分離レベルで SUM → INSERT を原子的に実行し、ファントムリードを防止する
     const invoice = await db.transaction(async (tx) => {
-      // one_time 契約かつ契約金額が設定されている場合に合計金額を検証する
-      if (contract.renewalType === "one_time") {
+      // one_time 契約かつ契約金額が正値の場合に合計金額を検証する（amount=0 は移行データのため除外）
+      if (contract.renewalType === "one_time" && contract.amount > 0) {
         const existingTotal = await invoiceRepository.sumAmountByContract(
           data.contractId,
           data.organizationId,
