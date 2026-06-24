@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "7f304af0-a9a5-4956-b620-392bf6030d62",
   "createdAt": "2026-06-24T13:16:21.740Z",
-  "updatedAt": "2026-06-24T13:21:13.108Z",
+  "updatedAt": "2026-06-24T13:27:07.681Z",
   "request": {
     "title": "Tailwind テーマ基盤の更新とサイドバーレイアウトへの移行",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "design",
+  "step": "spec-review",
   "status": "running",
   "branch": "change/design-theme-base-7f304af0",
   "error": null,
@@ -34,9 +34,10 @@
     }
   ],
   "_journal": {
-    "historyCount": 5,
+    "historyCount": 9,
     "stepCounts": {
-      "request-review": 1
+      "request-review": 1,
+      "design": 1
     }
   }
 }
