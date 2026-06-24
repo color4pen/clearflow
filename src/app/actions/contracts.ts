@@ -19,8 +19,8 @@ const createContractSchema = z.object({
   dealId: z.string().uuid("有効な案件IDが必要です"),
   title: z.string().optional(),
   contractType: z.enum(["quasi_delegation", "fixed_price", "ses"]).optional(),
-  amount: z.coerce.number().int().nonnegative().optional(),
-  startDate: z.string().optional(),
+  amount: z.coerce.number().int().positive("金額は1以上の値を入力してください"),
+  startDate: z.string().min(1, "開始日は必須です"),
   endDate: z.string().optional(),
   paymentTerms: z.string().optional(),
   renewalType: z.enum(["one_time", "recurring"]).optional(),
@@ -30,8 +30,8 @@ const createContractSchema = z.object({
 const updateContractSchema = z.object({
   title: z.string().min(1).optional(),
   contractType: z.enum(["quasi_delegation", "fixed_price", "ses"]).optional().nullable(),
-  amount: z.coerce.number().int().nonnegative().optional().nullable(),
-  startDate: z.string().optional().nullable(),
+  amount: z.coerce.number().int().positive("金額は1以上の値を入力してください").optional(),
+  startDate: z.string().optional(),
   endDate: z.string().optional().nullable(),
   paymentTerms: z.string().optional().nullable(),
   renewalType: z.enum(["one_time", "recurring"]).optional(),
@@ -65,8 +65,8 @@ export async function createContractAction(formData: FormData): Promise<ActionRe
     dealId: formData.get("dealId"),
     title: formData.get("title") || undefined,
     contractType: contractTypeRaw && contractTypeRaw !== "" ? contractTypeRaw : undefined,
-    amount: amountRaw && amountRaw !== "" ? amountRaw : undefined,
-    startDate: formData.get("startDate") || undefined,
+    amount: amountRaw,
+    startDate: formData.get("startDate"),
     endDate: formData.get("endDate") || undefined,
     paymentTerms: formData.get("paymentTerms") || undefined,
     renewalType: renewalTypeRaw && renewalTypeRaw !== "" ? renewalTypeRaw : undefined,
@@ -84,8 +84,8 @@ export async function createContractAction(formData: FormData): Promise<ActionRe
     actorId: session.user.id,
     title: parsed.data.title,
     contractType: parsed.data.contractType ?? null,
-    amount: parsed.data.amount ?? null,
-    startDate: parsed.data.startDate ? new Date(parsed.data.startDate) : null,
+    amount: parsed.data.amount,
+    startDate: new Date(parsed.data.startDate),
     endDate: parsed.data.endDate ? new Date(parsed.data.endDate) : null,
     paymentTerms: parsed.data.paymentTerms ?? null,
     renewalType: parsed.data.renewalType,
@@ -131,10 +131,10 @@ export async function updateContractAction(
         (contractTypeRaw !== "" ? contractTypeRaw : null),
     amount:
       amountRaw === null ? undefined :
-        (amountRaw !== "" ? amountRaw : null),
+        (amountRaw !== "" ? amountRaw : undefined),
     startDate:
       startDateRaw === null ? undefined :
-        (startDateRaw || null),
+        (startDateRaw || undefined),
     endDate:
       endDateRaw === null ? undefined :
         (endDateRaw || null),
@@ -161,8 +161,10 @@ export async function updateContractAction(
     title: parsed.data.title,
     contractType: parsed.data.contractType,
     amount: parsed.data.amount,
-    startDate: parsed.data.startDate ? new Date(parsed.data.startDate) : null,
-    endDate: parsed.data.endDate ? new Date(parsed.data.endDate) : null,
+    startDate: parsed.data.startDate ? new Date(parsed.data.startDate) : undefined,
+    endDate: parsed.data.endDate !== undefined
+      ? (parsed.data.endDate ? new Date(parsed.data.endDate) : null)
+      : undefined,
     paymentTerms: parsed.data.paymentTerms,
     renewalType: parsed.data.renewalType,
     renewalCycle: parsed.data.renewalCycle,

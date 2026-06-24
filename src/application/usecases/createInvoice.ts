@@ -4,6 +4,7 @@ import {
   auditLogRepository,
 } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
+import { validateInvoiceDates } from "@/domain/services/invoiceValidation";
 import type { Invoice } from "@/domain/models/invoice";
 
 export type CreateInvoiceResult = { ok: true; invoice: Invoice } | { ok: false; reason: string };
@@ -14,7 +15,8 @@ export async function createInvoice(data: {
   actorId: string;
   title: string;
   amount: number;
-  dueDate?: Date | null;
+  issueDate?: Date | null;
+  dueDate: Date;
   notes?: string | null;
 }): Promise<CreateInvoiceResult> {
   const contract = await contractRepository.findById(data.contractId, data.organizationId);
@@ -26,11 +28,16 @@ export async function createInvoice(data: {
     return { ok: false, reason: "有効な契約にのみ請求を作成できます" };
   }
 
+  const datesValidation = validateInvoiceDates(data.issueDate ?? null, data.dueDate);
+  if (!datesValidation.ok) {
+    return { ok: false, reason: datesValidation.reason };
+  }
+
   try {
     // SERIALIZABLE 分離レベルで SUM → INSERT を原子的に実行し、ファントムリードを防止する
     const invoice = await db.transaction(async (tx) => {
-      // one_time 契約かつ契約金額が設定されている場合に合計金額を検証する
-      if (contract.renewalType === "one_time" && contract.amount !== null) {
+      // one_time 契約かつ契約金額が正値の場合に合計金額を検証する（amount=0 は移行データのため除外）
+      if (contract.renewalType === "one_time" && contract.amount > 0) {
         const existingTotal = await invoiceRepository.sumAmountByContract(
           data.contractId,
           data.organizationId,
@@ -49,7 +56,8 @@ export async function createInvoice(data: {
           contractId: data.contractId,
           title: data.title,
           amount: data.amount,
-          dueDate: data.dueDate ?? null,
+          issueDate: data.issueDate ?? null,
+          dueDate: data.dueDate,
           notes: data.notes ?? null,
         },
         tx

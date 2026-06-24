@@ -11,7 +11,8 @@ function mapRow(row: typeof invoices.$inferSelect): Invoice {
     contractId: row.contractId,
     title: row.title,
     amount: row.amount,
-    dueDate: row.dueDate ?? null,
+    issueDate: row.issueDate ?? null,
+    dueDate: row.dueDate,
     status: row.status as InvoiceStatus,
     invoicedAt: row.invoicedAt ?? null,
     paidAt: row.paidAt ?? null,
@@ -27,7 +28,8 @@ export async function create(
     contractId: string;
     title: string;
     amount: number;
-    dueDate?: Date | null;
+    issueDate?: Date | null;
+    dueDate: Date;
     notes?: string | null;
   },
   tx?: Transaction
@@ -40,7 +42,8 @@ export async function create(
       contractId: data.contractId,
       title: data.title,
       amount: data.amount,
-      dueDate: data.dueDate ?? null,
+      issueDate: data.issueDate ?? null,
+      dueDate: data.dueDate,
       notes: data.notes ?? null,
     })
     .returning();
@@ -81,7 +84,8 @@ export async function update(
   data: Partial<{
     title: string;
     amount: number;
-    dueDate: Date | null;
+    issueDate: Date | null;
+    dueDate: Date;
     notes: string | null;
   }>,
   tx?: Transaction
