@@ -128,3 +128,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/domain-events/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-24T03:26:43.526Z","endedAt":"2026-06-24T03:26:45.067Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-24T03:26:45.067Z","outputs":[{"path":"specrunner/changes/domain-events/pr-create-result.md","hash":"sha256:9c84e439c834a7deac34f89896ca541e2273598c7f8a2c24b1910245bc47206a"}],"inputs":[{"path":"feat/domain-events-59115298","hash":null}]}
 {"type":"transition","ts":"2026-06-24T03:26:45.080Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-24T03:31:11.359Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}

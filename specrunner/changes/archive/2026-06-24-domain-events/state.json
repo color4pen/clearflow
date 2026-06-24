@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "59115298-9bd8-4ed2-9291-3a8189d7f96a",
   "createdAt": "2026-06-24T01:48:28.593Z",
-  "updatedAt": "2026-06-24T03:26:45.080Z",
+  "updatedAt": "2026-06-24T03:31:11.359Z",
   "request": {
     "title": "ドメインイベント基盤の導入",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/domain-events-59115298",
   "error": null,
   "pipelineId": "standard",
@@ -54,7 +54,7 @@
     "createdAt": "2026-06-24T03:26:45.065Z"
   },
   "_journal": {
-    "historyCount": 87,
+    "historyCount": 88,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
