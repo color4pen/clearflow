@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "9c7a810e-b7e9-4101-a4a5-9df60a159dc4",
   "createdAt": "2026-06-24T23:05:01.403Z",
-  "updatedAt": "2026-06-24T23:05:03.322Z",
+  "updatedAt": "2026-06-24T23:10:43.934Z",
   "request": {
     "title": "ダッシュボード画面のデザイン適用",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "request-review",
+  "step": "design",
   "status": "running",
   "branch": "change/design-dashboard-9c7a810e",
   "error": null,
@@ -34,7 +34,9 @@
     }
   ],
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 5,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
