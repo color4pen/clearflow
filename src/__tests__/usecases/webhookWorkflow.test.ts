@@ -304,6 +304,109 @@ describe("Webhook access control (T-12)", () => {
 });
 
 // ---------------------------------------------------------------------------
+// TC-027 / TC-028: webhookHandler.ts delivery function routing
+// ---------------------------------------------------------------------------
+
+describe("TC-027: new domain events route through deliverToEndpoint", () => {
+  it("webhookHandler.ts imports deliverToEndpoint but uses it only via deliverDomainEventToEndpoints", async () => {
+    const src = await readSrc("infrastructure/handlers/webhookHandler.ts");
+    expect(src).toContain("deliverToEndpoint");
+    expect(src).toContain("deliverDomainEventToEndpoints");
+  });
+
+  it("deliverDomainEventToEndpoints helper calls deliverToEndpoint, not deliverWebhookEvent or deliverSingleAttempt", async () => {
+    const src = await readSrc("infrastructure/handlers/webhookHandler.ts");
+    // Extract the helper function body (between the function declaration and the next export)
+    const helperStart = src.indexOf("async function deliverDomainEventToEndpoints");
+    const helperEnd = src.indexOf("\nexport async function handleDomainEventWebhook");
+    expect(helperStart).toBeGreaterThan(-1);
+    expect(helperEnd).toBeGreaterThan(helperStart);
+    const helperBody = src.slice(helperStart, helperEnd);
+
+    expect(helperBody).toContain("deliverToEndpoint");
+    expect(helperBody).not.toContain("deliverWebhookEvent");
+    expect(helperBody).not.toContain("deliverSingleAttempt");
+  });
+
+  const newDomainEvents = [
+    "inquiry.converted",
+    "inquiry.declined",
+    "deal.phase_changed",
+    "deal.won",
+    "deal.lost",
+    "contract.created",
+    "contract.completed",
+    "contract.cancelled",
+    "invoice.paid",
+    "invoice.overdue",
+  ] as const;
+
+  for (const eventType of newDomainEvents) {
+    it(`"${eventType}" case calls deliverDomainEventToEndpoints, not deliverWebhookEvent`, async () => {
+      const src = await readSrc("infrastructure/handlers/webhookHandler.ts");
+      // Find the case block for this event
+      const caseIdx = src.indexOf(`case "${eventType}":`);
+      expect(caseIdx).toBeGreaterThan(-1);
+      // The next case or default keyword marks the end of this case block
+      const nextCaseIdx = src.indexOf("\n    case ", caseIdx + 1);
+      const defaultIdx = src.indexOf("\n    default:", caseIdx + 1);
+      const caseEnd = nextCaseIdx !== -1 ? Math.min(
+        nextCaseIdx,
+        defaultIdx !== -1 ? defaultIdx : Infinity
+      ) : (defaultIdx !== -1 ? defaultIdx : src.length);
+      const caseBody = src.slice(caseIdx, caseEnd);
+
+      expect(caseBody).toContain("deliverDomainEventToEndpoints");
+      expect(caseBody).not.toContain("deliverWebhookEvent");
+      expect(caseBody).not.toContain("deliverSingleAttempt");
+    });
+  }
+});
+
+describe("TC-028: approval events route through deliverWebhookEvent (resolves actorName)", () => {
+  const approvalEvents = [
+    "request.created",
+    "request.submitted",
+    "request.approved",
+    "request.rejected",
+    "request.revised",
+    "request.resubmitted",
+    "step.approved",
+    "step.rejected",
+  ] as const;
+
+  for (const eventType of approvalEvents) {
+    it(`"${eventType}" case calls deliverWebhookEvent, not deliverDomainEventToEndpoints`, async () => {
+      const src = await readSrc("infrastructure/handlers/webhookHandler.ts");
+      const caseIdx = src.indexOf(`case "${eventType}":`);
+      expect(caseIdx).toBeGreaterThan(-1);
+      const nextCaseIdx = src.indexOf("\n    case ", caseIdx + 1);
+      const defaultIdx = src.indexOf("\n    default:", caseIdx + 1);
+      const caseEnd = nextCaseIdx !== -1 ? Math.min(
+        nextCaseIdx,
+        defaultIdx !== -1 ? defaultIdx : Infinity
+      ) : (defaultIdx !== -1 ? defaultIdx : src.length);
+      const caseBody = src.slice(caseIdx, caseEnd);
+
+      expect(caseBody).toContain("deliverWebhookEvent");
+      expect(caseBody).not.toContain("deliverDomainEventToEndpoints");
+    });
+  }
+
+  it("deliverWebhookEvent in webhookDelivery.ts resolves actorName via userRepository", async () => {
+    const src = await readSrc("infrastructure/webhookDelivery.ts");
+    // Locate the deliverWebhookEvent function body
+    const fnIdx = src.indexOf("export async function deliverWebhookEvent");
+    expect(fnIdx).toBeGreaterThan(-1);
+    const fnBody = src.slice(fnIdx);
+
+    expect(fnBody).toContain("userRepository");
+    expect(fnBody).toContain("actorName");
+    expect(fnBody).toContain("actorId");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Tenant isolation — repository files
 // ---------------------------------------------------------------------------
 

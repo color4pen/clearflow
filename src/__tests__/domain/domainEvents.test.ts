@@ -93,7 +93,7 @@ describe("EventDispatcher", () => {
     expect(caughtError!.message).toBe("sync-error");
   });
 
-  it("sync handler exception does NOT prevent event from being buffered for other handlers", async () => {
+  it("sync handler exception prevents buffering — async handler does not run", async () => {
     // The spec says sync exception propagates; the event is not buffered if dispatch throws.
     // This test verifies that after a sync handler throw, the buffer is NOT populated.
     d.on("inquiry.converted", () => { throw new Error("sync-error"); }, "sync");
