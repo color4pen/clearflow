@@ -38,24 +38,25 @@
 - [ ] `src/domain/events/dispatcher.ts` を新規作成し、以下を実装する:
   - `EventHandler<T extends DomainEvent>` 型 — `(event: T) => void | Promise<void>`
   - `EventDispatcher` クラス:
-    - `on<T extends DomainEvent>(eventType: T["type"], handler: EventHandler<T>, mode: "sync" | "async"): void` — ハンドラ登録メソッド
-    - `dispatch(event: DomainEvent): void` — 同期ハンドラを即座に実行し、イベントを内部バッファに蓄積。同期ハンドラの例外は呼び出し元に伝播する
-    - `flushAsync(): void` — バッファされた全イベントの非同期ハンドラを fire-and-forget で実行（`void Promise` + `console.error` でエラーログ）。実行後バッファをクリアする
-    - `discardBuffer(): void` — バッファに蓄積されたイベントをハンドラ実行なしで破棄する。トランザクション失敗時（例外 catch または楽観的ロック null リターン）にユースケースから呼び出す。ハンドラ登録は変更しない
-    - `reset(): void` — テスト用。全ハンドラ登録とバッファをクリアする
+    - 内部に `AsyncLocalStorage<DomainEvent[]>` を保持し、リクエストごとに独立したバッファを管理する。`dispatch()` および `flushAsync()` はこの ALS から現在スコープのバッファを取得して操作する
+    - `on<T extends DomainEvent>(eventType: T["type"], handler: EventHandler<T>, mode: "sync" | "async"): void` — ハンドラ登録メソッド。ハンドラ登録はシングルトン全体で共有される（ALS スコープではない）
+    - `runInContext<T>(callback: () => Promise<T>): Promise<T>` — リクエストスコープのバッファを生成し、コールバックを実行する。コールバック内で `dispatch()` されたイベントはこのスコープのバッファにのみ蓄積される。コールバックが正常終了・例外・null リターンのいずれの場合も、`runInContext` のスコープ終了時にバッファが自動破棄される（明示的なクリア操作は不要）
+    - `dispatch(event: DomainEvent): void` — 現在の ALS スコープの同期ハンドラを即座に実行し、現在スコープのバッファにイベントを蓄積する。同期ハンドラの例外は呼び出し元に伝播する。`runInContext` スコープ外で呼び出した場合はエラーをスローする
+    - `flushAsync(): void` — 現在のスコープのバッファに蓄積された全イベントの非同期ハンドラを fire-and-forget で実行（`void Promise` + `console.error` でエラーログ）。実行後バッファをクリアする
+    - `reset(): void` — テスト用。全ハンドラ登録をクリアする
   - モジュールレベルのシングルトンインスタンス `dispatcher` を export
 - [ ] `src/domain/events/index.ts` に `dispatcher` と `EventDispatcher` を追加 export する
 
 **Acceptance Criteria**:
 - `dispatcher.on("inquiry.converted", handler, "sync")` で同期ハンドラが登録できる
 - `dispatcher.on("inquiry.converted", handler, "async")` で非同期ハンドラが登録できる
+- `dispatcher.runInContext(callback)` でリクエストスコープのバッファが生成され、コールバックの完了後に自動破棄される
+- `dispatcher.runInContext()` を並行して呼び出した場合、各スコープのバッファが独立して管理される（並行リクエスト間の汚染がない）
 - `dispatcher.dispatch(event)` で同期ハンドラが即座に実行される
 - 同期ハンドラの例外が `dispatch()` 呼び出し元に伝播する
 - `dispatcher.flushAsync()` でバッファされたイベントの非同期ハンドラが実行される
 - 非同期ハンドラの例外が `flushAsync()` 呼び出し元に伝播しない
-- `dispatcher.discardBuffer()` でバッファがクリアされ、非同期ハンドラが実行されない
-- `dispatcher.discardBuffer()` 呼び出し後にハンドラ登録が維持されている
-- `dispatcher.reset()` で状態がクリアされる
+- `dispatcher.reset()` でハンドラ登録がクリアされる
 - TypeScript の型チェックが通る
 
 ## T-03: WEBHOOK_EVENT_TYPES の拡張
@@ -90,8 +91,9 @@
   - ドメインイベントの `type` を `WebhookEventType` にマッピングする関数
   - D6 の方針に従い、承認系イベントと新規ドメインイベントで配信経路を分ける:
     - **承認系イベント（`request.*`, `step.*`）**: `deliverWebhookEvent` を呼び出す。`actorName` の DB ルックアップはこの関数内で行われ、ペイロードに含まれる（既存受信側との互換性維持）
-    - **新規ドメインイベント（`inquiry.*`, `deal.*`, `contract.*`, `invoice.*`）**: `deliverWebhookEvent` を経由しない。`deliverSingleAttempt`（または等価な低レベル配信関数）を直接呼び出し、`actorName` の DB ルックアップを省略する。ペイロードはドメインイベントの `payload` フィールドから直接構築する
+    - **新規ドメインイベント（`inquiry.*`, `deal.*`, `contract.*`, `invoice.*`）**: `deliverWebhookEvent` を経由しない。`src/infrastructure/webhookDelivery.ts` の `deliverToEndpoint` 関数を使用する（`deliverSingleAttempt` は既存の `deliveryId` を必須引数とするリトライ専用関数であり、新規配信には使用できない）。`deliverToEndpoint` は配信レコードの新規作成から初回配信を担う関数であり、事前に `export` を追加する必要がある。`actorName` の DB ルックアップは不要であり、ペイロードに含めない
   - 全 18 種のドメインイベントタイプに対する非同期ハンドラを実装する
+- [ ] `src/infrastructure/webhookDelivery.ts` の `deliverToEndpoint` 関数に `export` を追加する（現在は非 export）
 - [ ] `src/infrastructure/handlers/index.ts` を新規作成し、`registerHandlers()` 関数を定義する:
   - `dispatcher` をインポートし、`webhookHandler` の非同期ハンドラを全イベントタイプに登録する
   - ハンドラ登録時の `mode` は `"async"` を指定する
@@ -99,7 +101,8 @@
 **Acceptance Criteria**:
 - 全 18 種のドメインイベントに対して Webhook 配信ハンドラが登録される
 - 承認系イベントのハンドラが `deliverWebhookEvent` 経由で `actorName` を解決し、ペイロードに含める
-- 新規ドメインイベントのハンドラが `deliverWebhookEvent` を経由せず、`actorName` の DB ルックアップを行わない
+- 新規ドメインイベントのハンドラが `deliverWebhookEvent` を経由せず、`deliverToEndpoint` を使用し `actorName` の DB ルックアップを行わない
+- `deliverSingleAttempt` が新規ドメインイベントの配信に使用されていない
 - 新規イベントのペイロードが適切なエンティティ ID と状態情報を含む
 - ハンドラは `"async"` モードで登録される
 - TypeScript の型チェックが通る
@@ -121,20 +124,20 @@
 
 - [ ] `src/application/usecases/updateInquiryStatus.ts` を修正:
   - `dispatcher` を `@/domain/events` から import する
+  - ユースケース関数本体を `dispatcher.runInContext(async () => { ... })` で囲む。これにより ALS スコープのバッファが生成され、コールバック終了時に自動破棄される（null リターン・例外のいずれの場合も明示的なバッファ破棄は不要）
   - `converted` 遷移のトランザクション内で、Deal 作成と status 更新の後に `dispatcher.dispatch()` を呼び出し、`InquiryConverted` イベントを発行する。`payload` には `inquiryId` と生成された `dealId` を含める。`occurredAt` は `new Date()` で設定する
   - `declined` 遷移のトランザクション内で `dispatcher.dispatch()` を呼び出し、`InquiryDeclined` イベントを発行する。`payload` には `inquiryId` を含める。`occurredAt` は `new Date()` で設定する
-  - `db.transaction()` の呼び出しは try-catch で囲み、D3 のパターンに従い失敗パスを処理する:
-    - 戻り値が `null`（楽観的ロック失敗）の場合: `dispatcher.discardBuffer()` を呼び出してから早期 return する
-    - 例外が発生した場合: catch ブロックで `dispatcher.discardBuffer()` を呼び出してから例外を再スローする
+  - `db.transaction()` が `null` を返した場合（楽観的ロック失敗）: バッファは `runInContext` スコープ終了時に自動破棄されるため、明示的なクリアは不要。既存の規約通り `{ ok: false, reason: "..." }` を返す
   - トランザクション成功時（`null` でない結果を受け取った後）に `dispatcher.flushAsync()` を呼び出す
+  - 例外の再スローは行わない。既存のエラーハンドリング規約（`{ ok: false, reason: ... }` を返す）を維持する
   - 既存の audit log 記録はそのまま維持する（監査ログ移行はスコープ外）
 
 **Acceptance Criteria**:
 - `converted` 遷移時に `InquiryConverted` イベントが dispatch される
 - `declined` 遷移時に `InquiryDeclined` イベントが dispatch される
-- イベント dispatch がトランザクション内で行われる
+- イベント dispatch が `dispatcher.runInContext()` コールバック内のトランザクション内で行われる
 - `flushAsync()` がトランザクション成功後にのみ呼ばれる
-- トランザクション失敗（null リターン・例外）時に `discardBuffer()` が呼ばれ、バッファが破棄される
+- トランザクション失敗（null リターン）時に明示的な `discardBuffer()` を呼ばず、`runInContext` による自動破棄に委ねる
 - 既存の Deal 作成・audit log 記録の動作が変更されない
 - TypeScript の型チェックが通る
 
@@ -142,55 +145,57 @@
 
 - [ ] `src/application/usecases/updateDealPhase.ts` を修正:
   - `dispatcher` を `@/domain/events` から import する
+  - ユースケース関数本体を `dispatcher.runInContext(async () => { ... })` で囲む
   - トランザクション内で、フェーズ更新と audit log 作成の後に `dispatcher.dispatch()` を呼び出す。`occurredAt` は `new Date()` で設定する:
     - `newPhase === "won"` → `DealWon` イベント（`payload: { dealId, fromPhase: deal.phase }`）
     - `newPhase === "lost"` → `DealLost` イベント（`payload: { dealId, fromPhase: deal.phase }`）
     - それ以外 → `DealPhaseChanged` イベント（`payload: { dealId, fromPhase: deal.phase, toPhase: data.newPhase }`）
-  - `db.transaction()` の呼び出しは try-catch で囲み、D3 のパターンに従い失敗パスを処理する:
-    - 戻り値が `null`（楽観的ロック失敗）の場合: `dispatcher.discardBuffer()` を呼び出してから早期 return する
-    - 例外が発生した場合: catch ブロックで `dispatcher.discardBuffer()` を呼び出してから例外を再スローする
+  - `db.transaction()` が `null` を返した場合: バッファは `runInContext` スコープ終了時に自動破棄される。既存の規約通り `{ ok: false, reason: "..." }` を返す
   - トランザクション成功時に `dispatcher.flushAsync()` を呼び出す
+  - 例外の再スローは行わない。既存のエラーハンドリング規約を維持する
 
 **Acceptance Criteria**:
 - `won` 遷移時に `DealWon` イベントが dispatch される
 - `lost` 遷移時に `DealLost` イベントが dispatch される
 - その他のフェーズ遷移時に `DealPhaseChanged` イベントが dispatch される
 - イベントの `payload` に `fromPhase` と `toPhase`（DealPhaseChanged の場合）が含まれる
-- トランザクション失敗（null リターン・例外）時に `discardBuffer()` が呼ばれ、バッファが破棄される
+- ユースケース本体が `dispatcher.runInContext()` で囲まれている
+- トランザクション失敗（null リターン）時に明示的な `discardBuffer()` を呼ばず `runInContext` の自動破棄に委ねる
 - 既存の audit log 記録の動作が変更されない
 - TypeScript の型チェックが通る
 
 ## T-08: 新規ユースケースへのイベント発行の組み込み — createContract, updateContractStatus, updateInvoiceStatus
 
 - [ ] `src/application/usecases/createContract.ts` を修正:
-  - `dispatcher` を import し、トランザクション内で `ContractCreated` イベントを dispatch する。`payload` に `contractId`, `dealId`, `clientId` を含める。`occurredAt` は `new Date()` で設定する
-  - `db.transaction()` の呼び出しは try-catch で囲み、D3 のパターンに従い失敗パスを処理する:
-    - 例外が発生した場合: catch ブロックで `dispatcher.discardBuffer()` を呼び出してから例外を再スローする
+  - `dispatcher` を import し、ユースケース関数本体を `dispatcher.runInContext(async () => { ... })` で囲む
+  - トランザクション内で `ContractCreated` イベントを dispatch する。`payload` に `contractId`, `dealId`, `clientId` を含める。`occurredAt` は `new Date()` で設定する
   - トランザクション成功後に `dispatcher.flushAsync()` を呼び出す
+  - 例外の再スローは行わない。既存のエラーハンドリング規約を維持する
 - [ ] `src/application/usecases/updateContractStatus.ts` を修正:
-  - `dispatcher` を import し、トランザクション内でステータスに応じたイベントを dispatch する。`occurredAt` は `new Date()` で設定する:
+  - `dispatcher` を import し、ユースケース関数本体を `dispatcher.runInContext(async () => { ... })` で囲む
+  - トランザクション内でステータスに応じたイベントを dispatch する。`occurredAt` は `new Date()` で設定する:
     - `newStatus === "completed"` → `ContractCompleted`（`payload: { contractId }`）
     - `newStatus === "cancelled"` → `ContractCancelled`（`payload: { contractId }`）
-  - `db.transaction()` の呼び出しは try-catch で囲み、D3 のパターンに従い失敗パスを処理する:
-    - 戻り値が `null`（楽観的ロック失敗）の場合: `dispatcher.discardBuffer()` を呼び出してから早期 return する
-    - 例外が発生した場合: catch ブロックで `dispatcher.discardBuffer()` を呼び出してから例外を再スローする
+  - `db.transaction()` が `null` を返した場合: バッファは `runInContext` スコープ終了時に自動破棄される。既存の規約通り `{ ok: false, reason: "..." }` を返す
   - トランザクション成功後に `dispatcher.flushAsync()` を呼び出す
+  - 例外の再スローは行わない。既存のエラーハンドリング規約を維持する
 - [ ] `src/application/usecases/updateInvoiceStatus.ts` を修正:
-  - `dispatcher` を import し、トランザクション内でステータスに応じたイベントを dispatch する。`occurredAt` は `new Date()` で設定する:
+  - `dispatcher` を import し、ユースケース関数本体を `dispatcher.runInContext(async () => { ... })` で囲む
+  - トランザクション内でステータスに応じたイベントを dispatch する。`occurredAt` は `new Date()` で設定する:
     - `newStatus === "paid"` → `InvoicePaid`（`payload: { invoiceId, contractId: invoice.contractId }`）
     - `newStatus === "overdue"` → `InvoiceOverdue`（`payload: { invoiceId, contractId: invoice.contractId }`）
     - `newStatus === "invoiced"` → イベント発行なし（中間状態のため）
-  - `db.transaction()` の呼び出しは try-catch で囲み、D3 のパターンに従い失敗パスを処理する:
-    - 戻り値が `null`（楽観的ロック失敗）の場合: `dispatcher.discardBuffer()` を呼び出してから早期 return する
-    - 例外が発生した場合: catch ブロックで `dispatcher.discardBuffer()` を呼び出してから例外を再スローする
+  - `db.transaction()` が `null` を返した場合: バッファは `runInContext` スコープ終了時に自動破棄される。既存の規約通り `{ ok: false, reason: "..." }` を返す
   - トランザクション成功後に `dispatcher.flushAsync()` を呼び出す
+  - 例外の再スローは行わない。既存のエラーハンドリング規約を維持する
 
 **Acceptance Criteria**:
 - `createContract` で `ContractCreated` イベントが dispatch される
 - `updateContractStatus` で `completed` → `ContractCompleted`、`cancelled` → `ContractCancelled` が dispatch される
 - `updateInvoiceStatus` で `paid` → `InvoicePaid`、`overdue` → `InvoiceOverdue` が dispatch される
 - `invoiced` 遷移ではイベントが発行されない
-- 全 3 ユースケースでトランザクション失敗（null リターン・例外）時に `discardBuffer()` が呼ばれ、バッファが破棄される
+- 全 3 ユースケース本体が `dispatcher.runInContext()` で囲まれている
+- トランザクション失敗（null リターン）時に明示的な `discardBuffer()` を呼ばず `runInContext` の自動破棄に委ねる
 - 既存の audit log 記録の動作が変更されない
 - TypeScript の型チェックが通る
 
@@ -199,40 +204,42 @@
 - [ ] `src/application/usecases/createRequest.ts` を修正:
   - `deliverWebhookEvent` の import を削除し、`dispatcher` を `@/domain/events` から import する
   - `void deliverWebhookEvent(...)` 呼び出し（L84）を削除する
+  - ユースケース関数本体を `dispatcher.runInContext(async () => { ... })` で囲む
   - トランザクション内で `dispatcher.dispatch()` を呼び出し、`RequestCreated` イベントを発行する。`payload` に `requestId: result.id`, `requestTitle: result.title`, `status: "draft"` を含める。`occurredAt` は `new Date()` で設定する
-  - `db.transaction()` の呼び出しは try-catch で囲み、D3 のパターンに従い失敗パスを処理する（例外時: catch で `dispatcher.discardBuffer()` を呼び出してから再スロー）
   - トランザクション成功後に `dispatcher.flushAsync()` を呼び出す
+  - 例外の再スローは行わない。既存のエラーハンドリング規約を維持する
 - [ ] `src/application/usecases/submitRequest.ts` を修正:
   - `deliverWebhookEvent` の import を削除し、`dispatcher` を import する
   - `void deliverWebhookEvent(...)` 呼び出し（L59）を削除する
+  - ユースケース関数本体を `dispatcher.runInContext(async () => { ... })` で囲む
   - トランザクション内で `RequestSubmitted` イベントを dispatch する。`occurredAt` は `new Date()` で設定する
-  - `db.transaction()` の呼び出しは try-catch で囲み、D3 のパターンに従い失敗パスを処理する
   - トランザクション成功後に `dispatcher.flushAsync()` を呼び出す
 - [ ] `src/application/usecases/approveRequest.ts` を修正:
   - `deliverWebhookEvent` の import を削除し、`dispatcher` を import する
+  - ユースケース関数本体を `dispatcher.runInContext(async () => { ... })` で囲む
   - 単一承認フロー: `void deliverWebhookEvent(...)` 呼び出し（L79）を削除。トランザクション内で `RequestApproved` イベントを dispatch（`occurredAt: new Date()`）
   - 多段階承認フロー: `void deliverWebhookEvent(...)` 呼び出し（L252, L270）を削除。トランザクション内で:
     - `StepApproved` イベントを dispatch（ステップ承認時、`occurredAt: new Date()`）
     - 全ステップ完了時は `RequestApproved` イベントも dispatch
-  - `db.transaction()` の呼び出しは try-catch で囲み、D3 のパターンに従い失敗パスを処理する
   - トランザクション成功後に `dispatcher.flushAsync()` を呼び出す
 - [ ] `src/application/usecases/rejectRequest.ts` を修正:
   - `deliverWebhookEvent` の import を削除し、`dispatcher` を import する
+  - ユースケース関数本体を `dispatcher.runInContext(async () => { ... })` で囲む
   - 差し戻しフロー: `void deliverWebhookEvent(...)` 呼び出し（L104, L115）を削除。トランザクション内で `RequestRevised` と `StepRejected` イベントを dispatch（`occurredAt: new Date()`）
   - 最終却下フロー: `void deliverWebhookEvent(...)` 呼び出し（L191）を削除。トランザクション内で `RequestRejected` イベントを dispatch（`occurredAt: new Date()`）
-  - `db.transaction()` の呼び出しは try-catch で囲み、D3 のパターンに従い失敗パスを処理する
   - トランザクション成功後に `dispatcher.flushAsync()` を呼び出す
 - [ ] `src/application/usecases/resubmitRequest.ts` を修正:
   - `deliverWebhookEvent` の import を削除し、`dispatcher` を import する
+  - ユースケース関数本体を `dispatcher.runInContext(async () => { ... })` で囲む
   - `void deliverWebhookEvent(...)` 呼び出し（L88）を削除。トランザクション内で `RequestResubmitted` イベントを dispatch（`occurredAt: new Date()`）
-  - `db.transaction()` の呼び出しは try-catch で囲み、D3 のパターンに従い失敗パスを処理する
   - トランザクション成功後に `dispatcher.flushAsync()` を呼び出す
 
 **Acceptance Criteria**:
 - 5 つのユースケースから `deliverWebhookEvent` の直接 import と `void deliverWebhookEvent(...)` 呼び出しが全て除去されている
+- 各ユースケース本体が `dispatcher.runInContext()` で囲まれている
 - 各ユースケースでトランザクション内で適切なドメインイベントが dispatch されている（`occurredAt: new Date()` 付き）
 - 各ユースケースでトランザクション成功後にのみ `dispatcher.flushAsync()` が呼び出されている
-- 各ユースケースでトランザクション失敗時（例外）に `dispatcher.discardBuffer()` が呼び出されている
+- 例外の再スローや明示的な `discardBuffer()` 呼び出しが含まれていない（バッファ管理は `runInContext` に委ねる）
 - 発行されるイベントの `payload` が既存の Webhook 配信で渡されていたデータ（`requestId`, `requestTitle`, `status`, `metadata` 等）と同等の情報を含む
 - `approveRequest` の多段階承認フローで `StepApproved` と条件付きの `RequestApproved` が正しく dispatch される
 - `rejectRequest` の差し戻しフローで `RequestRevised` と `StepRejected` の両方が dispatch される
@@ -257,18 +264,21 @@
 ## T-11: ドメインイベント基盤のテスト追加
 
 - [ ] `src/__tests__/domain/domainEvents.test.ts` を新規作成し、以下をテストする:
+  - `dispatcher.runInContext()` コールバック内で `dispatch()` されたイベントが、同一スコープの `flushAsync()` で配信されること
+  - 並行する 2 つの `runInContext()` スコープのバッファが互いに独立していること（並行リクエスト間のバッファ汚染がないこと）
+  - `runInContext()` コールバックが正常終了・null リターン・例外のいずれの場合も、スコープ終了後にバッファが空になること
   - `EventDispatcher` の同期ハンドラが `dispatch()` で即座に実行されること
   - `EventDispatcher` の非同期ハンドラが `dispatch()` では実行されず `flushAsync()` で実行されること
   - 同期ハンドラの例外が `dispatch()` 呼び出し元に伝播すること
   - 非同期ハンドラの例外が `flushAsync()` 呼び出し元に伝播しないこと
-  - `discardBuffer()` 呼び出し後に `flushAsync()` を呼んでも非同期ハンドラが実行されないこと（バッファが空になっていること）
-  - `discardBuffer()` 呼び出し後もハンドラ登録が維持されており、次回 `dispatch()` + `flushAsync()` で正常に実行されること
-  - `reset()` でハンドラとバッファがクリアされること
+  - `reset()` でハンドラ登録がクリアされること
   - 複数のハンドラが同一イベントに登録できること
   - 異なるイベントタイプのハンドラが混在して正しく動作すること
 - [ ] 新規ユースケース（`updateInquiryStatus`, `updateDealPhase`, `createContract`, `updateContractStatus`, `updateInvoiceStatus`）でドメインイベントが発行されることを静的コード解析で検証するテストを追加する（既存の `webhookWorkflow.test.ts` のパターンに準拠）
 
 **Acceptance Criteria**:
+- `runInContext()` によるリクエストスコープのバッファ分離がテストされている
+- 並行 `runInContext()` スコープ間のバッファ独立性がテストされている
 - `EventDispatcher` の同期/非同期ハンドラの動作がテストされている
 - 新規ユースケースでのイベント発行がテストされている
 - `bun test` が全テスト green で完了する
