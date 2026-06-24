@@ -79,7 +79,7 @@ CHECK (
 `requests` テーブルに以下の 4 カラムを追加する:
 
 - `origin_type` (text NOT NULL default `'manual'`) — `'manual'` | `'system'`
-- `origin_policy_id` (uuid nullable FK → approval_policies, ON DELETE SET NULL) — ポリシーが削除された場合は NULL にセット（既存の `template_id` FK と一貫した挙動）
+- `origin_policy_id` (uuid nullable FK → approval_policies, ON DELETE RESTRICT) — ポリシーは承認リクエストが参照している間は削除不可。ON DELETE SET NULL にすると system origin の CHECK 制約（origin_policy_id IS NOT NULL）に違反するため RESTRICT を使用
 - `origin_trigger_action` (text nullable) — ポリシー起動時のトリガーアクション
 - `origin_trigger_entity_id` (uuid nullable) — トリガーエンティティの ID（例: deal ID）。FK 制約なし（エンティティ型が可変のため）
 
