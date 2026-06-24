@@ -23,3 +23,9 @@
 {"type":"transition","ts":"2026-06-24T02:17:00.419Z","step":"spec-review","status":"warning","message":"spec-review iteration 1 completed with verdict: needs-fix"}
 {"type":"transition","ts":"2026-06-24T02:17:00.420Z","step":"step-transition","status":"ok","message":"spec-review → spec-fixer"}
 {"type":"transition","ts":"2026-06-24T02:17:00.423Z","step":"spec-fixer-started","status":"started","message":"Starting spec-fixer step"}
+{"type":"transition","ts":"2026-06-24T02:20:31.240Z","step":"spec-fixer-verdict","status":"ok","message":"spec-fixer verdict: approved"}
+{"type":"step-attempt","step":"spec-fixer","sessionId":"0712de15-147a-4b97-9cfe-07e1fdb809d4","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-24T02:17:00.438Z","endedAt":"2026-06-24T02:20:29.941Z"}
+{"type":"lineage","step":"spec-fixer","ts":"2026-06-24T02:20:29.941Z","outputs":[{"path":"specrunner/changes/authorization-centralize/design.md","hash":"sha256:fa62c7ee451993baefbc9cfd2eacba358906a22451d88e8949eec613c61b80b1"},{"path":"specrunner/changes/authorization-centralize/spec.md","hash":"sha256:fea3788d9dd8350ecdaa4e83e9f43e5702e2b4bedfc32c66950d2c2f50197096"}],"inputs":[{"path":"specrunner/changes/authorization-centralize/spec-review-result-001.md","hash":"sha256:e4d05064f7094464ae8787309dab96bab322108c70b04dbcbb273042c9709fa0"}]}
+{"type":"transition","ts":"2026-06-24T02:20:31.248Z","step":"step-transition","status":"ok","message":"spec-review complete → spec-review (iter 2)"}
+{"type":"transition","ts":"2026-06-24T02:20:31.251Z","step":"spec-review","status":"started","message":"spec-review iteration 2 started"}
+{"type":"transition","ts":"2026-06-24T02:20:31.252Z","step":"spec-review-started","status":"started","message":"Starting spec-review step"}
