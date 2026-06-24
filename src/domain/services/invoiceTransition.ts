@@ -10,7 +10,7 @@ const VALID_INVOICE_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
 
 /**
  * 請求ステータス遷移の妥当性を検証する。
- * 終端状態（paid / overdue）からの遷移、および定義外の遷移は不可。
+ * 終端状態（paid）からの遷移、および定義外の遷移は不可。
  */
 export function validateInvoiceTransition(
   from: InvoiceStatus,

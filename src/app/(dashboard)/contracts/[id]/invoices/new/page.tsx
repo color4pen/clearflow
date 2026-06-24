@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { contractRepository, invoiceRepository } from "@/infrastructure/repositories";
+import { canPerform } from "@/domain/authorization";
 import { SectionCard } from "@/app/components";
 import { NewInvoiceForm } from "./NewInvoiceForm";
 
@@ -13,6 +14,10 @@ export default async function NewInvoicePage({
   const { id: contractId } = await params;
   const session = await auth();
   const organizationId = session!.user.organizationId;
+
+  if (!canPerform(session!.user.role, "invoice", "create")) {
+    notFound();
+  }
 
   const contract = await contractRepository.findById(contractId, organizationId);
   if (!contract) {
