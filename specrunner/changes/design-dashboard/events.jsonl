@@ -90,3 +90,10 @@
 {"type":"transition","ts":"2026-06-24T23:48:42.076Z","step":"step-transition","status":"ok","message":"code-fixer → regression-gate"}
 {"type":"transition","ts":"2026-06-24T23:48:42.077Z","step":"regression-gate","status":"started","message":"regression-gate iteration 2 started"}
 {"type":"transition","ts":"2026-06-24T23:48:42.079Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
+{"type":"transition","ts":"2026-06-24T23:50:04.518Z","step":"regression-gate-verdict","status":"ok","message":"regression-gate verdict: approved"}
+{"type":"step-attempt","step":"regression-gate","sessionId":"b45bd7df-14fb-4c4d-ab47-74db17ebd478","outcome":{"verdict":"approved","findingsPath":"specrunner/changes/design-dashboard/regression-gate-result-002.md","error":null,"toolResult":{"ok":true,"approved":true,"findings":[],"observations":[{"severity":"low","file":"src/__tests__/dashboard/salesDashboardUtils.test.ts","title":"TC-009/TC-016 tests implemented and additional coverage added","rationale":"Test file adds TC-009 (formatRelativeTime 30分前), TC-016 (pipeline reduce for count and totalAmount), plus TC-014/TC-015/TC-010 as bonus coverage. All findings confirmed fixed."}]},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-06-24T23:48:42.094Z","endedAt":"2026-06-24T23:50:02.997Z"}
+{"type":"lineage","step":"regression-gate","ts":"2026-06-24T23:50:02.997Z","outputs":[{"path":"specrunner/changes/design-dashboard/regression-gate-result-003.md","hash":null}],"inputs":[{"path":".","hash":null}]}
+{"type":"transition","ts":"2026-06-24T23:50:04.525Z","step":"regression-gate","status":"ok","message":"regression-gate iteration 2 completed with verdict: approved"}
+{"type":"transition","ts":"2026-06-24T23:50:04.526Z","step":"step-transition","status":"ok","message":"regression-gate → conformance"}
+{"type":"transition","ts":"2026-06-24T23:50:04.529Z","step":"conformance","status":"started","message":"conformance iteration 1 started"}
+{"type":"transition","ts":"2026-06-24T23:50:04.530Z","step":"conformance-started","status":"started","message":"Starting conformance step"}
