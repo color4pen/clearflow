@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 12.8s | 0 |
-| 2 | typecheck | passed | 3.2s | 0 |
+| 1 | build | passed | 10.9s | 0 |
+| 2 | typecheck | passed | 0.9s | 0 |
 | 3 | test | passed | 0.4s | 0 |
-| 4 | lint | passed | 4.8s | 0 |
+| 4 | lint | passed | 4.2s | 0 |
 
 ## Phase: build
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 6.0s
+✓ Compiled successfully in 5.7s
   Running TypeScript ...
-  Finished TypeScript in 3.3s ...
+  Finished TypeScript in 3.6s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/28) ...
   Generating static pages using 7 workers (7/28) 
   Generating static pages using 7 workers (14/28) 
   Generating static pages using 7 workers (21/28) 
-✓ Generating static pages using 7 workers (28/28) in 126ms
+✓ Generating static pages using 7 workers (28/28) in 142ms
   Finalizing page optimization ...
 
 Route (app)
@@ -109,10 +109,14 @@ error: async-error
       at <anonymous> (src/__tests__/domain/domainEvents.test.ts:152:13)
 
 
- 849 pass
+src/__tests__/usecases/approvalPolicyFlow.test.ts:
+[evaluatePolicies] Policy policy-1 has conditionField set but null conditionOperator or conditionValue — skipping
+[handleApprovalCompleted] originTriggerEntityId is null for requestId: req-1
+
+ 860 pass
  0 fail
- 1824 expect() calls
-Ran 849 tests across 41 files. [370.00ms]
+ 1844 expect() calls
+Ran 860 tests across 41 files. [379.00ms]
 
 ```
 
