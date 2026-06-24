@@ -103,3 +103,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/approval-policy-schema/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-24T08:42:33.854Z","endedAt":"2026-06-24T08:42:35.559Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-24T08:42:35.559Z","outputs":[{"path":"specrunner/changes/approval-policy-schema/pr-create-result.md","hash":"sha256:9a05f7a90656199b89adcfdf11326c7eea86204788b0380bb7aa0c3c4243c99a"}],"inputs":[{"path":"feat/approval-policy-schema-de675cb9","hash":null}]}
 {"type":"transition","ts":"2026-06-24T08:42:35.570Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-24T08:44:04.464Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
