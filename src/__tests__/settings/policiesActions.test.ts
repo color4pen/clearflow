@@ -60,8 +60,8 @@ describe("TC-010: createPolicyAction 認可チェック", () => {
     expect(src).toContain('"createPolicy"');
   });
 
-  it("createPolicyAction が approvalPolicyRepository.create を呼び出す", async () => {
-    const src = await readSrc("app/actions/policies.ts");
+  it("createPolicy usecase が approvalPolicyRepository.create を呼び出す", async () => {
+    const src = await readSrc("application/usecases/createPolicy.ts");
     expect(src).toContain("approvalPolicyRepository.create");
   });
 });
@@ -73,8 +73,8 @@ describe("TC-011: updatePolicyAction 認可チェック", () => {
     expect(src).toContain('"editPolicy"');
   });
 
-  it("updatePolicyAction が approvalPolicyRepository.updateById を呼び出す", async () => {
-    const src = await readSrc("app/actions/policies.ts");
+  it("updatePolicy usecase が approvalPolicyRepository.updateById を呼び出す", async () => {
+    const src = await readSrc("application/usecases/updatePolicy.ts");
     expect(src).toContain("approvalPolicyRepository.updateById");
   });
 });
@@ -85,13 +85,13 @@ describe("TC-012: togglePolicyAction 認可チェック", () => {
     expect(src).toContain("togglePolicyAction");
   });
 
-  it("togglePolicyAction が approvalPolicyRepository.findById を呼び出す", async () => {
-    const src = await readSrc("app/actions/policies.ts");
+  it("togglePolicy usecase が approvalPolicyRepository.findById を呼び出す", async () => {
+    const src = await readSrc("application/usecases/togglePolicy.ts");
     expect(src).toContain("approvalPolicyRepository.findById");
   });
 
-  it("togglePolicyAction が isActive を反転させるロジックを含む", async () => {
-    const src = await readSrc("app/actions/policies.ts");
+  it("togglePolicy usecase が isActive を反転させるロジックを含む", async () => {
+    const src = await readSrc("application/usecases/togglePolicy.ts");
     expect(src).toContain("!current.isActive");
   });
 });
