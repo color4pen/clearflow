@@ -9,6 +9,7 @@ import path from "path";
 import { readFile } from "fs/promises";
 import { evaluateCondition } from "@/domain/services/conditionEvaluator";
 import type { ApprovalPolicy } from "@/domain/models/approvalPolicy";
+import type { ApprovalCompleted } from "@/domain/events/types";
 
 // ---------------------------------------------------------------------------
 // Mock state for evaluatePolicies dynamic tests
@@ -18,15 +19,39 @@ const policyState = {
   policies: [] as ApprovalPolicy[],
 };
 
-// bun:test hoists mock.module calls before static imports, so this mock is in
-// place when evaluatePolicies (imported below) resolves @/infrastructure/repositories.
+// ---------------------------------------------------------------------------
+// Mock state for handleApprovalCompleted dynamic tests
+// ---------------------------------------------------------------------------
+
+type UpdateInquiryStatusArgs = {
+  data: { inquiryId: string; organizationId: string; actorId: string; newStatus: string };
+  options: { skipPolicyCheck?: boolean } | undefined;
+};
+
+const handlerState = {
+  updateInquiryStatusCalls: [] as UpdateInquiryStatusArgs[],
+};
+
+// bun:test hoists mock.module calls before static imports, so these mocks are
+// in place when the imported modules below resolve their dependencies.
 mock.module("@/infrastructure/repositories", () => ({
   approvalPolicyRepository: {
     findActiveByTriggerAction: async () => policyState.policies,
   },
 }));
 
+mock.module("@/application/usecases/updateInquiryStatus", () => ({
+  updateInquiryStatus: async (
+    data: UpdateInquiryStatusArgs["data"],
+    options?: UpdateInquiryStatusArgs["options"]
+  ) => {
+    handlerState.updateInquiryStatusCalls.push({ data, options });
+    return { ok: true as const, inquiry: { id: data.inquiryId } };
+  },
+}));
+
 import { evaluatePolicies } from "@/application/usecases/evaluatePolicies";
+import { handleApprovalCompleted } from "@/infrastructure/handlers/approvalCompletedHandler";
 
 const ROOT = path.join(import.meta.dir, "../../..");
 
@@ -361,5 +386,75 @@ describe("evaluatePolicies — ランタイム動作検証", () => {
     expect(ids).toContain("policy-1");
     expect(ids).toContain("policy-2");
     expect(ids).not.toContain("policy-3");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// handleApprovalCompleted — TC-033 ランタイム動作検証（スパイ使用）
+// ---------------------------------------------------------------------------
+
+describe("handleApprovalCompleted — TC-033 skipPolicyCheck 無限ループ防止（動的）", () => {
+  beforeEach(() => {
+    handlerState.updateInquiryStatusCalls = [];
+  });
+
+  it("TC-033: inquiry.convert 完了時に skipPolicyCheck: true で updateInquiryStatus を呼び出す", async () => {
+    const event: ApprovalCompleted = {
+      type: "approval.completed",
+      organizationId: "org-1",
+      actorId: "actor-1",
+      occurredAt: new Date(),
+      payload: {
+        requestId: "req-1",
+        originType: "system",
+        originTriggerAction: "inquiry.convert",
+        originTriggerEntityId: "inq-1",
+      },
+    };
+
+    await handleApprovalCompleted(event);
+
+    expect(handlerState.updateInquiryStatusCalls).toHaveLength(1);
+    expect(handlerState.updateInquiryStatusCalls[0].options).toEqual({ skipPolicyCheck: true });
+    expect(handlerState.updateInquiryStatusCalls[0].data.inquiryId).toBe("inq-1");
+    expect(handlerState.updateInquiryStatusCalls[0].data.newStatus).toBe("converted");
+  });
+
+  it("TC-033: originTriggerAction が inquiry.convert 以外の場合は updateInquiryStatus を呼び出さない", async () => {
+    const event: ApprovalCompleted = {
+      type: "approval.completed",
+      organizationId: "org-1",
+      actorId: "actor-1",
+      occurredAt: new Date(),
+      payload: {
+        requestId: "req-1",
+        originType: "system",
+        originTriggerAction: "contract.create",
+        originTriggerEntityId: "entity-1",
+      },
+    };
+
+    await handleApprovalCompleted(event);
+
+    expect(handlerState.updateInquiryStatusCalls).toHaveLength(0);
+  });
+
+  it("TC-033: originTriggerEntityId が null の場合は updateInquiryStatus を呼び出さない", async () => {
+    const event: ApprovalCompleted = {
+      type: "approval.completed",
+      organizationId: "org-1",
+      actorId: "actor-1",
+      occurredAt: new Date(),
+      payload: {
+        requestId: "req-1",
+        originType: "system",
+        originTriggerAction: "inquiry.convert",
+        originTriggerEntityId: null,
+      },
+    };
+
+    await handleApprovalCompleted(event);
+
+    expect(handlerState.updateInquiryStatusCalls).toHaveLength(0);
   });
 });

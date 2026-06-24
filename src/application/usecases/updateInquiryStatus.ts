@@ -173,7 +173,10 @@ export async function updateInquiryStatus(
               };
             }
           }
-          // テンプレートが見つからない場合は従来フローにフォールバック（fall through）
+          // テンプレートが見つからない場合は従来フローにフォールバック
+          console.warn(
+            `[updateInquiryStatus] Template not found for policy ${policy.id} (templateId: ${policy.templateId}) — falling back to direct deal creation`
+          );
         }
       }
 
