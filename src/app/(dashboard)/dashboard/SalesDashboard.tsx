@@ -11,11 +11,19 @@ import { formatRelativeTime } from "./dashboardUtils";
 
 export { formatRelativeTime };
 
+const roleLabels: Record<string, string> = {
+  admin: "管理者",
+  manager: "マネージャー",
+  member: "営業",
+  finance: "経理",
+};
+
 type Props = {
   actions: DashboardActionItem[];
   pipelineSummary: PipelineSummaryItem[];
   recentActivities: AuditLog[];
   staleDeals: DealWithDetails[] | null;
+  userRole: string;
 };
 
 function getEntityLink(targetType: string, targetId: string): string | null {
@@ -72,12 +80,14 @@ export function SalesDashboard({
   pipelineSummary,
   recentActivities,
   staleDeals,
+  userRole,
 }: Props) {
   const today = new Date().toLocaleDateString("ja-JP", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   });
+  const subtitle = `${today} | ${roleLabels[userRole] ?? userRole}`;
 
   const totalCount = pipelineSummary.reduce((s, i) => s + i.count, 0);
   const totalAmount = pipelineSummary.reduce((s, i) => s + i.totalAmount, 0);
@@ -88,7 +98,7 @@ export function SalesDashboard({
     <div>
       <DashboardHeader
         title="ダッシュボード"
-        subtitle={today}
+        subtitle={subtitle}
         actions={
           <>
             <Link
@@ -114,11 +124,11 @@ export function SalesDashboard({
             パイプラインサマリ
           </h2>
           <div className="grid grid-cols-6">
-            {pipelineSummary.map((item, idx) => (
+            {pipelineSummary.map((item) => (
               <Link
                 key={item.phase}
                 href={`/deals?phase=${item.phase}`}
-                className={`block p-3 hover:bg-bg-page text-center${idx < pipelineSummary.length - 1 ? " border-r border-border" : ""}`}
+                className="block p-3 hover:bg-bg-page text-center border-r border-border"
               >
                 <div className="text-xs text-text-muted mb-1">
                   {phaseLabels[item.phase] ?? item.phase}
@@ -170,12 +180,18 @@ export function SalesDashboard({
               </p>
             ) : (
               <div>
-                {actions.map((item, idx) => {
+                {actions.map((item) => {
                   const overdue = isOverdue(item);
                   const { text: dateText } = getDateDisplay(item);
+                  const itemKey =
+                    item.type === "approval"
+                      ? item.requestId
+                      : item.type === "action_item"
+                        ? item.dealId
+                        : item.inquiryId;
                   return (
                     <div
-                      key={idx}
+                      key={itemKey}
                       className="flex items-start gap-2 border-b border-border-light py-2"
                     >
                       {/* Type label */}

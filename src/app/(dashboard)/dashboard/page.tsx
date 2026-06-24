@@ -77,6 +77,7 @@ export default async function DashboardPage() {
       pipelineSummary={pipelineSummary}
       recentActivities={recentActivities}
       staleDeals={staleDeals}
+      userRole={userRole}
     />
   );
 }
