@@ -58,3 +58,6 @@ export { listInvoicesByOrganization } from "./listInvoicesByOrganization";
 export { getDashboardActions } from "./getDashboardActions";
 export { getPipelineSummary } from "./getPipelineSummary";
 export { getRecentActivities } from "./getRecentActivities";
+export { createPolicy } from "./createPolicy";
+export { updatePolicy } from "./updatePolicy";
+export { togglePolicy } from "./togglePolicy";

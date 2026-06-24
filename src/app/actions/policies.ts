@@ -5,6 +5,7 @@ import { z } from "zod";
 import { auth } from "@/infrastructure/auth";
 import { approvalPolicyRepository } from "@/infrastructure/repositories";
 import { canPerform } from "@/domain/authorization";
+import { createPolicy, updatePolicy, togglePolicy } from "@/application/usecases";
 import type { ConditionOperator } from "@/domain/models/approvalPolicy";
 
 const CONDITION_OPERATORS = ["gt", "gte", "lt", "lte", "eq", "neq", "in"] as const;
@@ -85,8 +86,9 @@ export async function createPolicyAction(_prevState: unknown, formData: FormData
   const data = validation.data;
   const hasCondition = data.conditionField && data.conditionField.trim() !== "";
 
-  const policy = await approvalPolicyRepository.create({
+  const result = await createPolicy({
     organizationId: session.user.organizationId,
+    actorId: session.user.id,
     name: data.name,
     description: data.description ?? null,
     triggerAction: data.triggerAction,
@@ -96,8 +98,12 @@ export async function createPolicyAction(_prevState: unknown, formData: FormData
     templateId: data.templateId,
   });
 
+  if (!result.ok) {
+    return { success: false as const, message: result.reason };
+  }
+
   revalidatePath("/settings/policies");
-  return { success: true as const, policy };
+  return { success: true as const, policy: result.policy };
 }
 
 export async function updatePolicyAction(_prevState: unknown, formData: FormData) {
@@ -136,22 +142,25 @@ export async function updatePolicyAction(_prevState: unknown, formData: FormData
   const data = validation.data;
   const hasCondition = data.conditionField && data.conditionField.trim() !== "";
 
-  const policy = await approvalPolicyRepository.updateById(
+  const result = await updatePolicy({
     id,
-    session.user.organizationId,
-    {
-      name: data.name,
-      description: data.description ?? null,
-      triggerAction: data.triggerAction,
-      conditionField: hasCondition ? (data.conditionField ?? null) : null,
-      conditionOperator: hasCondition ? (data.conditionOperator as ConditionOperator) : null,
-      conditionValue: hasCondition ? (data.conditionValue ?? null) : null,
-      templateId: data.templateId,
-    }
-  );
+    organizationId: session.user.organizationId,
+    actorId: session.user.id,
+    name: data.name,
+    description: data.description ?? null,
+    triggerAction: data.triggerAction,
+    conditionField: hasCondition ? (data.conditionField ?? null) : null,
+    conditionOperator: hasCondition ? (data.conditionOperator as ConditionOperator) : null,
+    conditionValue: hasCondition ? (data.conditionValue ?? null) : null,
+    templateId: data.templateId,
+  });
+
+  if (!result.ok) {
+    return { success: false as const, message: result.reason };
+  }
 
   revalidatePath("/settings/policies");
-  return { success: true as const, policy };
+  return { success: true as const, policy: result.policy };
 }
 
 export async function togglePolicyAction(policyId: string) {
@@ -161,15 +170,15 @@ export async function togglePolicyAction(policyId: string) {
     return { success: false as const, message: "この操作を実行する権限がありません" };
   }
 
-  const current = await approvalPolicyRepository.findById(
-    policyId,
-    session.user.organizationId
-  );
-  if (!current) return { success: false as const, message: "ポリシーが見つかりません" };
-
-  await approvalPolicyRepository.updateById(policyId, session.user.organizationId, {
-    isActive: !current.isActive,
+  const result = await togglePolicy({
+    id: policyId,
+    organizationId: session.user.organizationId,
+    actorId: session.user.id,
   });
+
+  if (!result.ok) {
+    return { success: false as const, message: result.reason };
+  }
 
   revalidatePath("/settings/policies");
   return { success: true as const };

@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "c1b97d0a-b4d2-4b9f-9d5b-27ee2fcaab21",
   "createdAt": "2026-06-24T10:11:07.420Z",
-  "updatedAt": "2026-06-24T10:44:10.619Z",
+  "updatedAt": "2026-06-24T10:49:26.040Z",
   "request": {
     "title": "承認ポリシー設定画面",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "code-fixer",
   "status": "running",
   "branch": "feat/approval-policy-ui-c1b97d0a",
   "error": null,
@@ -33,8 +33,22 @@
       ]
     }
   ],
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "pending",
+      "approvedAtCommit": null,
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 33,
+    "historyCount": 37,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -43,7 +57,9 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 1,
-      "code-fixer": 1
+      "code-fixer": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
