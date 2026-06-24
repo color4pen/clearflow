@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "59115298-9bd8-4ed2-9291-3a8189d7f96a",
   "createdAt": "2026-06-24T01:48:28.593Z",
-  "updatedAt": "2026-06-24T02:54:10.635Z",
+  "updatedAt": "2026-06-24T03:01:48.661Z",
   "request": {
     "title": "ドメインイベント基盤の導入",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-review",
+  "step": "code-fixer",
   "status": "running",
   "branch": "feat/domain-events-59115298",
   "error": null,
@@ -35,7 +35,7 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 47,
+    "historyCount": 51,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -43,7 +43,8 @@
       "spec-fixer": 2,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 1,
+      "code-review": 1
     }
   }
 }

@@ -1,5 +1,6 @@
-import { registerHandlers } from "@/infrastructure/handlers";
-
-export function register(): void {
-  registerHandlers();
+export async function register(): Promise<void> {
+  if (process.env.NEXT_RUNTIME === "nodejs") {
+    const { registerHandlers } = await import("@/infrastructure/handlers");
+    registerHandlers();
+  }
 }
