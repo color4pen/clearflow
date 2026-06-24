@@ -37,7 +37,7 @@
 
 - [ ] `src/application/usecases/evaluatePolicies.ts` を新規作成
 - [ ] `evaluatePolicies(organizationId: string, triggerAction: string, context: Record<string, unknown>): Promise<ApprovalPolicy[]>` を実装
-  - `approvalPolicyRepository.findActiveByTriggerAction(organizationId, triggerAction)` でアクティブポリシーを取得（ORDER BY created_at ASC で決定的な順序を保証）
+  - `approvalPolicyRepository.findActiveByTriggerAction(organizationId, triggerAction)` でアクティブポリシーを取得。既存の repository メソッドに ORDER BY created_at ASC を追加して決定的な順序を保証する（修正は `src/infrastructure/repositories/approvalPolicyRepository.ts` の既存メソッド内で行う）
   - 各ポリシーに対して: `conditionField` が null → 無条件合致（リストに含める）
   - `conditionField` が非 null → `evaluateCondition(conditionField, conditionOperator!, conditionValue!, context)` で評価し、`true` のみリストに含める
   - 合致するポリシーのリストを返す
@@ -69,6 +69,17 @@
 - `ApprovalCompleted` 型が定義されている
 - `DomainEvent` union に含まれている
 - `DomainEventType` が `"approval.completed"` を含む
+- `typecheck` が green
+
+## T-04b: requestRepository.findByOriginTriggerEntity の追加
+
+- [ ] `src/infrastructure/repositories/requestRepository.ts` に `findByOriginTriggerEntity(organizationId, triggerAction, triggerEntityId)` メソッドを追加する
+- [ ] origin_type = 'system' かつ origin_trigger_action = triggerAction かつ origin_trigger_entity_id = triggerEntityId かつ status IN ('draft', 'pending') で検索する
+- [ ] 該当するリクエストが存在すれば返す（重複チェック用）
+
+**Acceptance Criteria**:
+- 同一引合に対する pending system リクエストが検出できる
+- 存在しない場合は null を返す
 - `typecheck` が green
 
 ## T-05: updateInquiryStatus の案件化フロー改修
