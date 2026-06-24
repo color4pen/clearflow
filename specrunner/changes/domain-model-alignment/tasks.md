@@ -21,11 +21,13 @@
 - [ ] meetings テーブルに `inquiryId: uuid("inquiry_id").references(() => inquiries.id)` を追加する（nullable）
 - [ ] `meetingsRelations` に `inquiry` リレーションを追加する: `inquiry: one(inquiries, { fields: [meetings.inquiryId], references: [inquiries.id] })`
 - [ ] `inquiriesRelations` に `meetings: many(meetings)` を追加する
+- [ ] meetings テーブルの `attendees` カラムの schema default を新配列形式に変更する: `jsonb('attendees').notNull().default([])` （旧形式 `{ internal: [], external: [] }` から変更）
 
 **Acceptance Criteria**:
 - meetings テーブルの deal_id が nullable である
 - meetings テーブルに inquiry_id (uuid, nullable, FK → inquiries.id) が存在する
 - meetingsRelations と inquiriesRelations にリレーション定義が存在する
+- meetings テーブルの attendees の schema default が `[]`（空配列）である
 - `bun run build` が通る
 
 ---
@@ -126,11 +128,13 @@
 ## T-11: リポジトリ — inquiryRepository に budget / timeline を反映する
 
 - [ ] `src/infrastructure/repositories/inquiryRepository.ts` の `mapRow` 関数に `budget` と `timeline` のマッピングを追加する
+- [ ] `mapRow` 関数の `source` フィールドの `as InquirySource` 型キャストを削除する（T-01 で source が pgEnum になると Drizzle の `$inferSelect` が自動的にユニオン型を推論するため、明示的なキャストは不要かつ型安全を低下させる）
 - [ ] `create` メソッドの data 引数に `budget?: number | null` と `timeline?: string | null` を追加し、values に含める
 - [ ] `update` メソッドの data 引数に `budget?: number | null` と `timeline?: string | null` を追加する
 
 **Acceptance Criteria**:
 - mapRow が budget と timeline を返す
+- mapRow の source フィールドに `as InquirySource` キャストが存在しない
 - create / update で budget と timeline を設定できる
 - `bun run build` が通る
 
@@ -339,11 +343,12 @@
 ## T-27: Server Action — clients action に isPrimary バリデーションを追加する
 
 - [ ] `src/app/actions/clients.ts` の `addClientContactAction` で isPrimary を createClientContact usecase に渡す（現在は usecase に isPrimary 引数がないため、T-20 完了後に対応）
-- [ ] `updateClientContactAction` に isPrimary 検証を追加する: isPrimary=true の場合、`clientRepository.findContactsByClientId(clientId)` で既存担当者を取得し、自身以外に isPrimary=true がいるかを確認する。`validatePrimaryUniqueness` を import して呼び出す。valid でない場合はエラーを返す
+- [ ] `updateClientContactAction` に isPrimary 検証を追加する: isPrimary=true の場合、`clientRepository.findContactsByClientId(clientId)` で既存担当者を取得し、自身以外に isPrimary=true がいるかを確認する。重複カウントは `contacts.filter(c => c.isPrimary && c.id !== contactId).length` で計算する（自己再設定の場合は自身を除外するため、すでに isPrimary=true の担当者を isPrimary=true のまま更新する操作は成功する）。`validatePrimaryUniqueness` を import して呼び出す。valid でない場合はエラーを返す
 
 **Acceptance Criteria**:
 - addClientContactAction が isPrimary を createClientContact usecase に渡す
 - updateClientContactAction で isPrimary=true への変更時に重複チェックが行われる
+- updateClientContactAction で自分自身（contactId が一致するレコード）は重複チェックの対象外とする
 - `bun run build` が通る
 
 ---
@@ -424,14 +429,14 @@
   - (e) attendees の JSON 変換 SQL を追加する:
     ```sql
     UPDATE meetings SET attendees = (
-      SELECT jsonb_agg(
+      SELECT COALESCE(jsonb_agg(
         jsonb_build_object(
           'userId', null,
           'contactId', null,
           'name', elem,
           'isExternal', false
         )
-      )
+      ), '[]'::jsonb)
       FROM jsonb_array_elements_text(attendees->'internal') AS elem
     ) || (
       SELECT COALESCE(jsonb_agg(
