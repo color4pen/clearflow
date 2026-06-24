@@ -4,13 +4,13 @@
 
 ### Requirement: ドメインイベント型は discriminated union として定義される
 
-`src/domain/events/` に 10 種のドメインイベント型が discriminated union として定義される。各イベントは共通のベースフィールド（`type`, `organizationId`, `actorId`, `occurredAt`）とイベント固有の `payload` を持つ。`DomainEvent` union 型により型安全なハンドリングが可能でなければならない（MUST）。
+`src/domain/events/` に 18 種のドメインイベント型が discriminated union として定義される。新規 10 種（引合・案件・契約・請求）と既存承認関連 8 種（`RequestCreated`, `RequestSubmitted`, `RequestApproved`, `RequestRejected`, `RequestRevised`, `RequestResubmitted`, `StepApproved`, `StepRejected`）。各イベントは共通のベースフィールド（`type`, `organizationId`, `actorId`, `occurredAt`）とイベント固有の `payload` を持つ。`DomainEvent` union 型により型安全なハンドリングが可能でなければならない（MUST）。
 
-#### Scenario: 全 10 種のドメインイベント型が定義されている
+#### Scenario: 全 18 種のドメインイベント型が定義されている
 
 **Given** `src/domain/events/` ディレクトリが存在する
 **When** ドメインイベントの型定義を確認する
-**Then** `InquiryConverted`, `InquiryDeclined`, `DealPhaseChanged`, `DealWon`, `DealLost`, `ContractCreated`, `ContractCompleted`, `ContractCancelled`, `InvoicePaid`, `InvoiceOverdue` の 10 型が定義されている
+**Then** 新規 10 型（`InquiryConverted`, `InquiryDeclined`, `DealPhaseChanged`, `DealWon`, `DealLost`, `ContractCreated`, `ContractCompleted`, `ContractCancelled`, `InvoicePaid`, `InvoiceOverdue`）と承認関連 8 型（`RequestCreated`, `RequestSubmitted`, `RequestApproved`, `RequestRejected`, `RequestRevised`, `RequestResubmitted`, `StepApproved`, `StepRejected`）の合計 18 型が定義されている
 
 #### Scenario: ドメインイベント型が discriminated union である
 

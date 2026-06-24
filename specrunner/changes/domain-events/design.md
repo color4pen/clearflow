@@ -66,38 +66,36 @@
 
 **バッファのライフサイクル**:
 
-ディスパッチャーはモジュールレベルのシングルトン（D8）であり、Bun プロセス内で全リクエストが共有する。バッファのクリアは `flushAsync()` （正常系）または `discardBuffer()` （失敗系）のいずれかで必ず行わなければならない。以下のいずれかのパスを通らずに関数が戻ると、バッファに蓄積されたイベントが後続リクエストの `flushAsync()` によって誤配信される:
+ディスパッチャーは `AsyncLocalStorage` を使用してリクエストごとに独立したイベントバッファを管理する。これにより並行リクエストのトランザクションが await ポイントでインターリーブしても、バッファが汚染されることはない。
+
+ディスパッチャーの `runInContext(callback)` メソッドでリクエストスコープのバッファを作成し、コールバック内で `dispatch()` されたイベントはそのスコープのバッファにのみ蓄積される。
 
 - **トランザクション成功**: コミット後に `flushAsync()` を呼び出す（バッファを消費して実行）
-- **楽観的ロック失敗（null リターン）**: `db.transaction()` が `null` を返した場合、`discardBuffer()` を呼び出してバッファを破棄してから早期 return する
-- **トランザクション例外**: `db.transaction()` が例外を投げた場合、catch ブロックで `discardBuffer()` を呼び出してバッファを破棄してから例外を再スローする
+- **楽観的ロック失敗（null リターン）**: バッファは `runInContext` のスコープ終了時に自動破棄される。明示的な破棄は不要
+- **ビジネスルール違反**: `{ ok: false, reason: ... }` を返す。既存のエラーハンドリング規約を維持し、例外は再スローしない
 
 ユースケースの呼び出しパターン:
 
 ```
-try {
+return dispatcher.runInContext(async () => {
   const result = await db.transaction(async (tx) => {
     // ... ビジネスロジック ...
     dispatcher.dispatch(event);  // 同期ハンドラ実行 + バッファ蓄積
     // ...
+    return { ok: true, data: ... };
   });
 
   if (result === null) {
-    // 楽観的ロック失敗：バッファを破棄して早期リターン
-    dispatcher.discardBuffer();
-    return null;
+    // 楽観的ロック失敗：バッファは runInContext 終了時に自動破棄
+    return { ok: false, reason: "競合が発生しました" };
   }
 
   dispatcher.flushAsync();  // 非同期ハンドラ実行（fire-and-forget）
   return result;
-} catch (e) {
-  // トランザクション例外：バッファを破棄して例外を再スロー
-  dispatcher.discardBuffer();
-  throw e;
-}
+});
 ```
 
-**Rationale**: 同期ハンドラは整合性が必要な処理（後続リクエストで実装する承認ポリシー評価など）に使用し、非同期ハンドラは外部配信（Webhook）など失敗がビジネスロジックに影響しない処理に使用する。バッファの明示的破棄を失敗パスに必須化することで、モジュールレベルシングルトンの共有バッファにおけるリクエスト間の汚染を防ぐ。
+**Rationale**: 同期ハンドラは整合性が必要な処理（後続リクエストで実装する承認ポリシー評価など）に使用し、非同期ハンドラは外部配信（Webhook）など失敗がビジネスロジックに影響しない処理に使用する。`AsyncLocalStorage` によるリクエストスコープのバッファ分離で、並行リクエスト間のイベント汚染を構造的に防止する。既存ユースケースの `{ ok: false }` エラーハンドリング規約は変更しない。
 
 ### D4: ドメインイベントの型定義方式 — Discriminated Union
 
@@ -134,7 +132,7 @@ type DomainEvent = InquiryConverted | InquiryDeclined | ... ;
 `src/infrastructure/handlers/webhookHandler.ts` に非同期イベントハンドラを実装する。ハンドラはドメインイベントの `type` を `WebhookEventType` にマッピングし、配信ロジックを呼び出す。承認系イベント（`request.*`, `step.*`）と新規ドメインイベント（`inquiry.*`, `deal.*`, `contract.*`, `invoice.*`）では配信経路を分ける:
 
 - **承認系イベント**: 既存の `deliverWebhookEvent` 関数を呼び出す。この関数は内部で `userRepository.findById(actorId)` を実行して `actorName` を解決し、ペイロードに含める。既存の Webhook 受信側が `actorName` フィールドを期待しているため、このルックアップは維持する
-- **新規ドメインイベント**: `deliverWebhookEvent` を経由せず、`deliverSingleAttempt`（または同等の低レベル配信関数）を直接呼び出して `actorName` の DB ルックアップを省略する。新規イベントの Webhook ペイロードに `actorName` は不要であり、既存受信側との後方互換も問題にならない
+- **新規ドメインイベント**: `deliverToEndpoint` を export し、新規ドメインイベントの配信に使用する。`deliverSingleAttempt` はリトライ専用関数（既存の `deliveryId` を必須引数とする）のため新規配信には使用できない。`deliverToEndpoint` は配信レコードの新規作成から初回配信までを担う。`actorName` の DB ルックアップは不要であり、ペイロードに含めない
 
 **Rationale**: `deliverWebhookEvent` の `actorName` ルックアップは承認系イベントでは必要だが、新規ドメインイベントでは不要な DB クエリとなる。配信経路を分けることで、不要なルックアップを排除しつつ既存の承認系 Webhook の互換性を維持する。
 
@@ -146,9 +144,9 @@ type DomainEvent = InquiryConverted | InquiryDeclined | ... ;
 
 ### D8: イベントディスパッチャーのシングルトン管理
 
-ディスパッチャーインスタンスはモジュールレベルのシングルトンとして `src/domain/events/dispatcher.ts` から export する。
+ディスパッチャーインスタンスはモジュールレベルのシングルトンとして `src/domain/events/dispatcher.ts` から export する。イベントバッファは `AsyncLocalStorage`（D3）でリクエストごとに分離されるため、シングルトンでも並行リクエスト間の汚染は発生しない。
 
-**Rationale**: Next.js のサーバーサイドではモジュールがプロセス内でキャッシュされるため、シングルトンパターンで十分。テスト時はモジュールモックまたは `reset()` メソッドで初期化可能。
+**Rationale**: Next.js のサーバーサイドではモジュールがプロセス内でキャッシュされるため、シングルトンパターンで十分。`AsyncLocalStorage` との組み合わせで、ハンドラ登録はシングルトンで共有しつつバッファはリクエストスコープで分離する。テスト時はモジュールモックまたは `reset()` メソッドで初期化可能。
 
 ### D9: Webhook イベント種別の拡張方針
 
