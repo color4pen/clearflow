@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "59115298-9bd8-4ed2-9291-3a8189d7f96a",
   "createdAt": "2026-06-24T01:48:28.593Z",
-  "updatedAt": "2026-06-24T02:13:44.299Z",
+  "updatedAt": "2026-06-24T02:23:39.556Z",
   "request": {
     "title": "ドメインイベント基盤の導入",
     "type": "new-feature",
@@ -33,12 +33,13 @@
       ]
     }
   ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 17,
+    "historyCount": 23,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1,
+      "spec-review": 2,
       "spec-fixer": 1
     }
   }
