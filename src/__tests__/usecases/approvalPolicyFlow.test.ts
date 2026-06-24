@@ -4,10 +4,29 @@
  * ライブ DB を使わず、ソースファイルを静的解析して実装の存在・構造を確認する。
  */
 
-import { describe, it, expect } from "bun:test";
+import { describe, it, expect, beforeEach, mock } from "bun:test";
 import path from "path";
 import { readFile } from "fs/promises";
 import { evaluateCondition } from "@/domain/services/conditionEvaluator";
+import type { ApprovalPolicy } from "@/domain/models/approvalPolicy";
+
+// ---------------------------------------------------------------------------
+// Mock state for evaluatePolicies dynamic tests
+// ---------------------------------------------------------------------------
+
+const policyState = {
+  policies: [] as ApprovalPolicy[],
+};
+
+// bun:test hoists mock.module calls before static imports, so this mock is in
+// place when evaluatePolicies (imported below) resolves @/infrastructure/repositories.
+mock.module("@/infrastructure/repositories", () => ({
+  approvalPolicyRepository: {
+    findActiveByTriggerAction: async () => policyState.policies,
+  },
+}));
+
+import { evaluatePolicies } from "@/application/usecases/evaluatePolicies";
 
 const ROOT = path.join(import.meta.dir, "../../..");
 
@@ -252,5 +271,84 @@ describe("requestRepository.findByOriginTriggerEntity 静的検証", () => {
     expect(body).toContain('"system"');
     expect(body).toContain('"draft"');
     expect(body).toContain('"pending"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// evaluatePolicies — ランタイム動作検証（モック使用）
+// ---------------------------------------------------------------------------
+
+function makePolicy(overrides?: Partial<ApprovalPolicy>): ApprovalPolicy {
+  return {
+    id: "policy-1",
+    organizationId: "org-1",
+    name: "Test Policy",
+    description: null,
+    triggerAction: "inquiry.convert",
+    conditionField: null,
+    conditionOperator: null,
+    conditionValue: null,
+    templateId: "tmpl-1",
+    isActive: true,
+    createdAt: new Date(),
+    ...overrides,
+  };
+}
+
+describe("evaluatePolicies — ランタイム動作検証", () => {
+  beforeEach(() => {
+    policyState.policies = [];
+  });
+
+  it("TC-023: アクティブポリシーが存在しない場合は空配列を返す", async () => {
+    policyState.policies = [];
+    const result = await evaluatePolicies("org-1", "inquiry.convert", {});
+    expect(result).toHaveLength(0);
+  });
+
+  it("TC-024: 無条件ポリシー（conditionField=null）は常に合致する", async () => {
+    policyState.policies = [makePolicy({ conditionField: null })];
+    const result = await evaluatePolicies("org-1", "inquiry.convert", {});
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("policy-1");
+  });
+
+  it("TC-025: 条件が合致するポリシーはリストに含まれる（budget > 1000000 で budget=5000000）", async () => {
+    policyState.policies = [
+      makePolicy({ conditionField: "budget", conditionOperator: "gt", conditionValue: "1000000" }),
+    ];
+    const result = await evaluatePolicies("org-1", "inquiry.convert", { budget: 5000000 });
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("policy-1");
+  });
+
+  it("TC-026: 条件が合致しないポリシーはリストに含まれない（budget > 10000000 で budget=5000000）", async () => {
+    policyState.policies = [
+      makePolicy({ conditionField: "budget", conditionOperator: "gt", conditionValue: "10000000" }),
+    ];
+    const result = await evaluatePolicies("org-1", "inquiry.convert", { budget: 5000000 });
+    expect(result).toHaveLength(0);
+  });
+
+  it("TC-027: conditionField が非 null で conditionOperator が null のポリシーはスキップされる（DB 不変条件違反ガード）", async () => {
+    policyState.policies = [
+      makePolicy({ conditionField: "budget", conditionOperator: null, conditionValue: "1000000" }),
+    ];
+    const result = await evaluatePolicies("org-1", "inquiry.convert", { budget: 5000000 });
+    expect(result).toHaveLength(0);
+  });
+
+  it("TC-028: 複数ポリシーのうち合致するもののみ返す", async () => {
+    policyState.policies = [
+      makePolicy({ id: "policy-1", conditionField: null }), // unconditional — always matches
+      makePolicy({ id: "policy-2", conditionField: "budget", conditionOperator: "gt", conditionValue: "1000000" }), // matches
+      makePolicy({ id: "policy-3", conditionField: "budget", conditionOperator: "gt", conditionValue: "10000000" }), // doesn't match
+    ];
+    const result = await evaluatePolicies("org-1", "inquiry.convert", { budget: 5000000 });
+    expect(result).toHaveLength(2);
+    const ids = result.map((p) => p.id);
+    expect(ids).toContain("policy-1");
+    expect(ids).toContain("policy-2");
+    expect(ids).not.toContain("policy-3");
   });
 });

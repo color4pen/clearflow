@@ -22,10 +22,19 @@ export async function evaluatePolicies(
       // Unconditional policy — always matches
       return true;
     }
+    // Guard: conditionOperator and conditionValue must be non-null when conditionField is set.
+    // This invariant is enforced at the DB level, but we verify at runtime to avoid unexpected
+    // errors from data integrity violations (e.g. manual DB edits or migration bugs).
+    if (policy.conditionOperator === null || policy.conditionValue === null) {
+      console.error(
+        `[evaluatePolicies] Policy ${policy.id} has conditionField set but null conditionOperator or conditionValue — skipping`
+      );
+      return false;
+    }
     return evaluateCondition(
       policy.conditionField,
-      policy.conditionOperator!,
-      policy.conditionValue!,
+      policy.conditionOperator,
+      policy.conditionValue,
       context
     );
   });
