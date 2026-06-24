@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "699413c2-519a-4894-8df2-9b16671a0e5f",
   "createdAt": "2026-06-24T03:32:02.634Z",
-  "updatedAt": "2026-06-24T04:59:08.878Z",
+  "updatedAt": "2026-06-24T05:03:51.396Z",
   "request": {
     "title": "ドメインモデルの設計整合",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "conformance",
+  "step": "adr-gen",
   "status": "running",
   "branch": "change/domain-model-alignment-699413c2",
   "error": null,
@@ -49,7 +49,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 71,
+    "historyCount": 80,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -57,12 +57,13 @@
       "spec-fixer": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1,
+      "verification": 2,
       "code-review": 2,
       "code-fixer": 3,
       "domain-invariants": 2,
       "custom-reviewers": 2,
-      "regression-gate": 1
+      "regression-gate": 1,
+      "conformance": 1
     }
   }
 }
