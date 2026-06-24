@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d632d93a-a172-4a44-8a3f-b9d0b2daa8c4",
   "createdAt": "2026-06-24T01:53:38.996Z",
-  "updatedAt": "2026-06-24T02:01:16.727Z",
+  "updatedAt": "2026-06-24T02:05:53.584Z",
   "request": {
     "title": "認可ルールの一元化と設計整合",
     "type": "refactor",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "request-review",
+  "step": "design",
   "status": "running",
   "branch": "feat/authorization-centralize-d632d93a",
   "error": null,
@@ -35,9 +35,9 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 6,
+    "historyCount": 9,
     "stepCounts": {
-      "request-review": 1
+      "request-review": 2
     }
   }
 }
