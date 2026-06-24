@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d632d93a-a172-4a44-8a3f-b9d0b2daa8c4",
   "createdAt": "2026-06-24T01:53:38.996Z",
-  "updatedAt": "2026-06-24T02:58:26.111Z",
+  "updatedAt": "2026-06-24T03:02:20.741Z",
   "request": {
     "title": "認可ルールの一元化と設計整合",
     "type": "refactor",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/authorization-centralize-d632d93a",
   "error": null,
   "pipelineId": "standard",
@@ -48,8 +48,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/75",
+    "number": 75,
+    "createdAt": "2026-06-24T03:02:20.738Z"
+  },
   "_journal": {
-    "historyCount": 64,
+    "historyCount": 69,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -63,7 +68,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
