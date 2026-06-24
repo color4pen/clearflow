@@ -62,6 +62,18 @@ export async function updateRevenueTarget(data: {
           targetId: id,
           actorId,
           organizationId,
+          metadata: {
+            before: {
+              periodStart: existing.periodStart.toISOString(),
+              periodEnd: existing.periodEnd.toISOString(),
+              targetAmount: existing.targetAmount,
+            },
+            after: {
+              periodStart: (periodStart ?? existing.periodStart).toISOString(),
+              periodEnd: (periodEnd ?? existing.periodEnd).toISOString(),
+              targetAmount: targetAmount ?? existing.targetAmount,
+            },
+          },
         },
         tx
       );

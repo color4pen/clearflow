@@ -1,4 +1,4 @@
-import { eq, and, lte, gte, asc, lt, gt, sql } from "drizzle-orm";
+import { eq, and, lte, gte, asc, lt, gt, ne } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { revenueTargets } from "../schema";
@@ -111,7 +111,7 @@ export async function findOverlapping(
   ];
 
   if (excludeId) {
-    conditions.push(sql`${revenueTargets.id} != ${excludeId}`);
+    conditions.push(ne(revenueTargets.id, excludeId));
   }
 
   const result = await queryRunner

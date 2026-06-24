@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "27723da3-2411-4ae8-9799-d8e6c8c664bc",
   "createdAt": "2026-06-24T03:04:44.718Z",
-  "updatedAt": "2026-06-24T03:57:47.378Z",
+  "updatedAt": "2026-06-24T03:59:56.573Z",
   "request": {
     "title": "売上モジュールの実装",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "regression-gate",
+  "step": "code-fixer",
   "status": "running",
   "branch": "feat/revenue-module-27723da3",
   "error": null,
@@ -48,7 +48,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 54,
+    "historyCount": 58,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -60,7 +60,8 @@
       "code-review": 1,
       "code-fixer": 2,
       "domain-invariants": 2,
-      "custom-reviewers": 2
+      "custom-reviewers": 2,
+      "regression-gate": 1
     }
   }
 }

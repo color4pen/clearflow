@@ -26,6 +26,11 @@ export async function deleteRevenueTarget(data: {
           targetId: id,
           actorId,
           organizationId,
+          metadata: {
+            periodStart: existing.periodStart.toISOString(),
+            periodEnd: existing.periodEnd.toISOString(),
+            targetAmount: existing.targetAmount,
+          },
         },
         tx
       );

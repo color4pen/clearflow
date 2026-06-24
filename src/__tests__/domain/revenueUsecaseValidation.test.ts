@@ -18,6 +18,57 @@ const mockCreate = mock(async (data: {
   updatedAt: new Date(),
 } as RevenueTarget));
 const mockFindById = mock(async () => null as RevenueTarget | null);
+const mockUpdate = mock(async (
+  _id: string,
+  _organizationId: string,
+  _data: Partial<{ periodStart: Date; periodEnd: Date; targetAmount: number }>
+) => null as RevenueTarget | null);
+
+// updateRevenueTarget のロジックを直接テスト（依存を差し替えたインライン実装）
+async function updateRevenueTargetInline(
+  data: {
+    id: string;
+    organizationId: string;
+    actorId: string;
+    periodStart?: Date;
+    periodEnd?: Date;
+    targetAmount?: number;
+  },
+  deps: {
+    findById: typeof mockFindById;
+    findOverlapping: typeof mockFindOverlapping;
+    update: typeof mockUpdate;
+  }
+): Promise<{ ok: true; target: RevenueTarget } | { ok: false; reason: string }> {
+  const { id, organizationId, periodStart, periodEnd, targetAmount } = data;
+
+  const existing = await deps.findById(id, organizationId);
+  if (!existing) {
+    return { ok: false, reason: "売上目標が見つかりません" };
+  }
+
+  if (targetAmount !== undefined && targetAmount <= 0) {
+    return { ok: false, reason: "目標金額は1以上の値を入力してください" };
+  }
+
+  if (periodStart !== undefined || periodEnd !== undefined) {
+    const newStart = periodStart ?? existing.periodStart;
+    const newEnd = periodEnd ?? existing.periodEnd;
+    if (newStart >= newEnd) {
+      return { ok: false, reason: "期間の終了日は開始日より後の日付を指定してください" };
+    }
+    const overlapping = await deps.findOverlapping(organizationId, newStart, newEnd, id);
+    if (overlapping.length > 0) {
+      return { ok: false, reason: "指定した期間には既に目標が設定されています" };
+    }
+  }
+
+  const updated = await deps.update(id, organizationId, { periodStart, periodEnd, targetAmount });
+  if (!updated) {
+    return { ok: false, reason: "売上目標の更新に失敗しました" };
+  }
+  return { ok: true, target: updated };
+}
 
 // setRevenueTarget のロジックを直接テスト（依存を差し替えたインライン実装）
 async function setRevenueTargetInline(
@@ -178,18 +229,62 @@ describe("getRevenueForecast 計算ロジック", () => {
 });
 
 describe("updateRevenueTarget バリデーション", () => {
+  const orgId = "org-123";
+
+  beforeEach(() => {
+    mockFindById.mockImplementation(async () => null);
+    mockFindOverlapping.mockImplementation(async () => []);
+    mockUpdate.mockImplementation(async () => null);
+  });
+
   /**
    * TC-021: 存在しない ID でエラーが返る
    */
   it("TC-021: 存在しない ID で not found エラーが返る", async () => {
-    // updateRevenueTarget の findById が null を返す場合のロジックを検証
-    const existing = null;
-    const result = existing
-      ? { ok: true as const, target: existing }
-      : { ok: false as const, reason: "売上目標が見つかりません" };
+    mockFindById.mockImplementation(async () => null);
+
+    const result = await updateRevenueTargetInline(
+      {
+        id: "non-existent-id",
+        organizationId: orgId,
+        actorId: "actor-id",
+        targetAmount: 1000000,
+      },
+      { findById: mockFindById, findOverlapping: mockFindOverlapping, update: mockUpdate }
+    );
+
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.reason).toContain("見つかりません");
+    }
+  });
+
+  it("TC-021: 既存レコードが存在する場合は更新が成功する", async () => {
+    const existingTarget: RevenueTarget = {
+      id: "target-id",
+      organizationId: orgId,
+      periodStart: new Date("2026-07-01"),
+      periodEnd: new Date("2026-07-31"),
+      targetAmount: 500000,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    mockFindById.mockImplementation(async () => existingTarget);
+    mockUpdate.mockImplementation(async () => ({ ...existingTarget, targetAmount: 1000000 }));
+
+    const result = await updateRevenueTargetInline(
+      {
+        id: "target-id",
+        organizationId: orgId,
+        actorId: "actor-id",
+        targetAmount: 1000000,
+      },
+      { findById: mockFindById, findOverlapping: mockFindOverlapping, update: mockUpdate }
+    );
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.target.targetAmount).toBe(1000000);
     }
   });
 });
