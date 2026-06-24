@@ -88,3 +88,11 @@
 {"type":"transition","ts":"2026-06-24T02:54:01.965Z","step":"verification","status":"ok","message":"verification iteration 1 completed with verdict: passed"}
 {"type":"transition","ts":"2026-06-24T02:54:01.965Z","step":"step-transition","status":"ok","message":"verification → adr-gen"}
 {"type":"transition","ts":"2026-06-24T02:54:01.967Z","step":"adr-gen-started","status":"started","message":"Starting adr-gen step"}
+{"type":"transition","ts":"2026-06-24T02:54:21.745Z","step":"adr-gen-verdict","status":"ok","message":"adr-gen verdict: success"}
+{"type":"step-attempt","step":"adr-gen","sessionId":"0be63107-bd25-4bec-ae06-b407402f6770","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-24T02:54:01.974Z","endedAt":"2026-06-24T02:54:20.375Z"}
+{"type":"transition","ts":"2026-06-24T02:54:21.749Z","step":"step-transition","status":"ok","message":"adr-gen → pr-create"}
+{"type":"transition","ts":"2026-06-24T02:54:21.752Z","step":"step-transition","status":"ok","message":"Transitioning to pr-create step"}
+{"type":"transition","ts":"2026-06-24T02:54:23.413Z","step":"pr-create-verdict","status":"ok","message":"pr-create verdict: success"}
+{"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/contract-invoice-strengthen/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-24T02:54:21.753Z","endedAt":"2026-06-24T02:54:23.412Z"}
+{"type":"lineage","step":"pr-create","ts":"2026-06-24T02:54:23.412Z","outputs":[{"path":"specrunner/changes/contract-invoice-strengthen/pr-create-result.md","hash":"sha256:9fe2498bbf7782afed628e7ee8f8f50805f4c91dee786a1981141e6c2cfafb97"}],"inputs":[{"path":"change/contract-invoice-strengthen-db7d3a51","hash":null}]}
+{"type":"transition","ts":"2026-06-24T02:54:23.415Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
