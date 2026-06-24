@@ -125,6 +125,17 @@ describe("updateInquiryStatus ポリシーゲート 静的検証", () => {
     expect(src).toContain("originType");
   });
 
+  it("監査ログ metadata に templateId が含まれる（deleteTemplate の existsPendingByTemplateId 検出に必要）", async () => {
+    const src = await readSrc("application/usecases/updateInquiryStatus.ts");
+    expect(src).toContain("templateId: template.id");
+  });
+
+  it("ポリシーゲート発動時に引合側の監査ログ（inquiry.conversionPending）が記録される", async () => {
+    const src = await readSrc("application/usecases/updateInquiryStatus.ts");
+    expect(src).toContain('"inquiry.conversionPending"');
+    expect(src).toContain("pendingApprovalRequestId");
+  });
+
   it("ポリシー合致時に originTriggerAction: inquiry.convert を設定する", async () => {
     const src = await readSrc("application/usecases/updateInquiryStatus.ts");
     expect(src).toContain('"inquiry.convert"');

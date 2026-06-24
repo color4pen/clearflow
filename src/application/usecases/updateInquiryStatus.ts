@@ -123,7 +123,24 @@ export async function updateInquiryStatus(
                     targetId: newRequest.id,
                     actorId: data.actorId,
                     organizationId: data.organizationId,
-                    metadata: { originType: "system", policyId: policy.id },
+                    metadata: { originType: "system", policyId: policy.id, templateId: template.id },
+                  },
+                  tx
+                );
+
+                // 引合側の監査証跡：誰がいつ案件化を試みてポリシーゲートが発動したかを記録
+                await auditLogRepository.create(
+                  {
+                    action: "inquiry.conversionPending",
+                    targetType: "inquiry",
+                    targetId: data.inquiryId,
+                    actorId: data.actorId,
+                    organizationId: data.organizationId,
+                    metadata: {
+                      fromStatus: inquiry.status,
+                      pendingApprovalRequestId: newRequest.id,
+                      policyId: policy.id,
+                    },
                   },
                   tx
                 );
