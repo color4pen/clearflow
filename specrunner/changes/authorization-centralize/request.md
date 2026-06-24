@@ -36,10 +36,10 @@
 3. **契約操作に finance を追加**: 契約の作成・編集・完了・解除を admin / manager / finance に変更する
 4. **請求操作を admin + finance に修正**: 請求の作成・編集・発行・入金確認を admin / finance に変更する（manager を除外）
 5. **案件の編集・フェーズ変更に member を許可**: member ロールでも案件情報の更新とフェーズ変更（非終端）ができるようにする。受注・失注は admin / manager のみに維持する
-6. **引合の編集に member を許可**: member ロールでも引合の基本情報を更新できるようにする。案件化・見送りは admin / manager のみに維持する
+6. **引合の編集に member を許可**: member ロールでも引合の基本情報を更新できるようにする。案件化・見送り（declined 遷移）は admin / manager のみに制限する（現行コードでは見送りにロールチェックがないため新規制限の追加となる）
 7. **顧客担当者の追加・編集に member を許可**: member ロールでも担当者の管理ができるようにする
 8. **削除操作を admin のみに制限**: 引合、案件、契約の削除を admin のみに変更する
-9. **委任操作を admin / manager / finance に開放**: 自身の承認権限の委任作成・無効化を admin / manager / finance ロールに許可する。admin はすべてのユーザーの委任を管理可能
+9. **委任操作を admin / manager / finance に開放**: 自身の承認権限の委任作成・無効化を admin / manager / finance ロールに許可する。admin はすべてのユーザーの委任を管理可能。「自身のみ」の制限は action 層で `fromUserId === session.user.id` を検証する（admin は制限なし）
 10. **テンプレート一覧・ユーザー一覧を manager に開放**: 閲覧のみ manager にも許可する
 11. **全アクションファイルの認可チェックを置換**: 各アクションの inline if 文を `canPerform` 呼び出しに置き換える。認可失敗時のレスポンスメッセージを統一する
 
