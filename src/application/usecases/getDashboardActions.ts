@@ -36,14 +36,16 @@ export async function getDashboardActions(
     });
   }
 
-  // (b) Action items: all meetings, all undone action items
+  // (b) Action items: all meetings with dealId, all undone action items
   for (const meeting of meetings) {
+    if (!meeting.dealId) continue;
+    const dealId = meeting.dealId;
     for (const actionItem of meeting.actionItems) {
       if (actionItem.done) continue;
       items.push({
         type: "action_item",
-        dealId: meeting.dealId,
-        dealTitle: dealTitleMap.get(meeting.dealId) ?? "",
+        dealId,
+        dealTitle: dealTitleMap.get(dealId) ?? "",
         description: actionItem.description,
         assignee: actionItem.assignee,
         dueDate: actionItem.dueDate,

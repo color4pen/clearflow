@@ -14,8 +14,10 @@ const createInquirySchema = z.object({
   newClientName: z.string().min(1).optional(),
   title: z.string().min(1, "件名は必須です"),
   description: z.string().optional(),
-  source: z.enum(["web", "phone", "referral", "exhibition", "other"]),
+  source: z.enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"]),
   assigneeId: z.string().uuid().optional(),
+  budget: z.coerce.number().int().optional(),
+  timeline: z.string().optional(),
 });
 
 export type CreateInquiryState = {
@@ -26,6 +28,8 @@ export type CreateInquiryState = {
     description?: string[];
     source?: string[];
     assigneeId?: string[];
+    budget?: string[];
+    timeline?: string[];
   };
   message?: string;
 };
@@ -63,6 +67,8 @@ export async function createInquiryAction(
     description: formData.get("description") || undefined,
     source: formData.get("source"),
     assigneeId: assigneeIdRaw && assigneeIdRaw !== "" ? assigneeIdRaw : undefined,
+    budget: formData.get("budget") || undefined,
+    timeline: formData.get("timeline") || undefined,
   });
 
   if (!parsed.success) {
@@ -91,6 +97,8 @@ export async function createInquiryAction(
     description: parsed.data.description ?? null,
     source: parsed.data.source,
     assigneeId: parsed.data.assigneeId ?? null,
+    budget: parsed.data.budget ?? null,
+    timeline: parsed.data.timeline ?? null,
   });
 
   if (!result.ok) {
@@ -147,9 +155,11 @@ export async function updateInquiryStatusAction(
 const updateInquirySchema = z.object({
   title: z.string().min(1, "件名は必須です"),
   description: z.string().optional(),
-  source: z.enum(["web", "phone", "referral", "exhibition", "other"]),
+  source: z.enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"]),
   clientId: z.string().uuid().optional(),
   assigneeId: z.string().uuid().optional(),
+  budget: z.coerce.number().int().optional(),
+  timeline: z.string().optional(),
 });
 
 export type UpdateInquiryState = {
@@ -159,6 +169,8 @@ export type UpdateInquiryState = {
     source?: string[];
     clientId?: string[];
     assigneeId?: string[];
+    budget?: string[];
+    timeline?: string[];
   };
   message?: string;
   success?: boolean;
@@ -204,6 +216,8 @@ export async function updateInquiryAction(
     source: formData.get("source"),
     clientId: resolvedClientId,
     assigneeId: formData.get("assigneeId") || undefined,
+    budget: formData.get("budget") || undefined,
+    timeline: formData.get("timeline") || undefined,
   };
 
   const parsed = updateInquirySchema.safeParse(raw);
@@ -220,6 +234,8 @@ export async function updateInquiryAction(
     source: parsed.data.source,
     clientId: parsed.data.clientId ?? null,
     assigneeId: parsed.data.assigneeId ?? null,
+    budget: parsed.data.budget ?? null,
+    timeline: parsed.data.timeline ?? null,
   });
 
   if (!result.ok) {

@@ -1,6 +1,6 @@
 import { meetingRepository, auditLogRepository } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
-import type { Meeting, MeetingType, HearingData, ActionItem, MeetingAttendees } from "@/domain/models/meeting";
+import type { Meeting, MeetingType, HearingData, ActionItem, MeetingAttendee } from "@/domain/models/meeting";
 
 export type UpdateMeetingResult =
   | { ok: true; meeting: Meeting }
@@ -13,7 +13,7 @@ export async function updateMeeting(data: {
   type?: MeetingType;
   date?: Date;
   location?: string | null;
-  attendees?: MeetingAttendees;
+  attendees?: MeetingAttendee[];
   summary?: string | null;
   actionItems?: ActionItem[];
   hearingData?: HearingData | null;

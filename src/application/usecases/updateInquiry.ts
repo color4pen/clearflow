@@ -13,6 +13,8 @@ export async function updateInquiry(data: {
   source?: InquirySource;
   clientId?: string | null;
   assigneeId?: string | null;
+  budget?: number | null;
+  timeline?: string | null;
 }): Promise<UpdateInquiryResult> {
   const inquiry = await inquiryRepository.findById(data.inquiryId, data.organizationId);
   if (!inquiry) {
@@ -23,9 +25,11 @@ export async function updateInquiry(data: {
   const updatePayload: Partial<{
     title: string;
     description: string | null;
-    source: string;
+    source: InquirySource;
     clientId: string | null;
     assigneeId: string | null;
+    budget: number | null;
+    timeline: string | null;
   }> = {};
 
   if (data.title !== undefined) updatePayload.title = data.title;
@@ -33,6 +37,8 @@ export async function updateInquiry(data: {
   if (data.source !== undefined) updatePayload.source = data.source;
   if (data.clientId !== undefined) updatePayload.clientId = data.clientId;
   if (data.assigneeId !== undefined) updatePayload.assigneeId = data.assigneeId;
+  if (data.budget !== undefined) updatePayload.budget = data.budget;
+  if (data.timeline !== undefined) updatePayload.timeline = data.timeline;
 
   try {
     const updatedInquiry = await db.transaction(async (tx) => {

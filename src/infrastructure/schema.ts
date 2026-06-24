@@ -10,8 +10,9 @@ import {
   primaryKey,
   unique,
   index,
+  check,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 // Enums
 export const roleEnum = pgEnum("role", ["admin", "member", "manager", "finance"]);
@@ -59,6 +60,15 @@ export const contractStatusEnum = pgEnum("contract_status", [
 ]);
 export const renewalTypeEnum = pgEnum("renewal_type", ["one_time", "recurring"]);
 export const invoiceStatusEnum = pgEnum("invoice_status", ["scheduled", "invoiced", "paid", "overdue"]);
+export const inquirySourceEnum = pgEnum("inquiry_source", [
+  "web",
+  "phone",
+  "email",
+  "referral",
+  "agent_service",
+  "exhibition",
+  "other",
+]);
 
 // Organizations table
 export const organizations = pgTable("organizations", {
@@ -271,9 +281,11 @@ export const inquiries = pgTable("inquiries", {
   clientId: uuid("client_id").references(() => clients.id),
   title: text("title").notNull(),
   description: text("description"),
-  source: text("source").notNull(),
+  source: inquirySourceEnum("source").notNull(),
   status: inquiryStatusEnum("status").notNull().default("new"),
   assigneeId: uuid("assignee_id").references(() => users.id),
+  budget: integer("budget"),
+  timeline: text("timeline"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   // 楽観ロック: converted 遷移で重複 Deal 作成を防ぐ
@@ -281,27 +293,37 @@ export const inquiries = pgTable("inquiries", {
 });
 
 // Meetings table (商談記録)
-export const meetings = pgTable("meetings", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  organizationId: uuid("organization_id")
-    .notNull()
-    .references(() => organizations.id),
-  dealId: uuid("deal_id").notNull().references(() => deals.id),
-  type: meetingTypeEnum("type").notNull(),
-  date: timestamp("date").notNull(),
-  location: text("location"),
-  // { internal: string[], external: string[] }
-  attendees: jsonb("attendees").notNull().default({ internal: [], external: [] }),
-  summary: text("summary"),
-  // Array<{ description: string, assignee: string, dueDate: string | null, done: boolean }>
-  actionItems: jsonb("action_items").notNull().default([]),
-  hearingData: jsonb("hearing_data"),
-  createdById: uuid("created_by_id")
-    .notNull()
-    .references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+export const meetings = pgTable(
+  "meetings",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    dealId: uuid("deal_id").references(() => deals.id),
+    inquiryId: uuid("inquiry_id").references(() => inquiries.id),
+    type: meetingTypeEnum("type").notNull(),
+    date: timestamp("date").notNull(),
+    location: text("location"),
+    // Array<{ userId: string | null, contactId: string | null, name: string, isExternal: boolean }>
+    attendees: jsonb("attendees").notNull().default([]),
+    summary: text("summary"),
+    // Array<{ description: string, assignee: string, dueDate: string | null, done: boolean }>
+    actionItems: jsonb("action_items").notNull().default([]),
+    hearingData: jsonb("hearing_data"),
+    createdById: uuid("created_by_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    check(
+      "meetings_deal_or_inquiry_check",
+      sql`${table.dealId} IS NOT NULL OR ${table.inquiryId} IS NOT NULL`
+    ),
+  ]
+);
 
 // Deals table (案件)
 export const deals = pgTable("deals", {
@@ -315,6 +337,7 @@ export const deals = pgTable("deals", {
     .notNull()
     .references(() => clients.id),
   title: text("title").notNull(),
+  description: text("description"),
   phase: dealPhaseEnum("phase").notNull().default("proposal_prep"),
   estimatedAmount: integer("estimated_amount"),
   estimatedStartDate: timestamp("estimated_start_date"),
@@ -643,6 +666,7 @@ export const inquiriesRelations = relations(inquiries, ({ one, many }) => ({
     references: [users.id],
   }),
   deals: many(deals),
+  meetings: many(meetings),
 }));
 
 export const meetingsRelations = relations(meetings, ({ one }) => ({
@@ -653,6 +677,10 @@ export const meetingsRelations = relations(meetings, ({ one }) => ({
   deal: one(deals, {
     fields: [meetings.dealId],
     references: [deals.id],
+  }),
+  inquiry: one(inquiries, {
+    fields: [meetings.inquiryId],
+    references: [inquiries.id],
   }),
   createdBy: one(users, {
     fields: [meetings.createdById],

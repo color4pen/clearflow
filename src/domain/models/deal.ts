@@ -23,6 +23,7 @@ export type Deal = {
   inquiryId: string | null;
   clientId: string;
   title: string;
+  description: string | null;
   phase: DealPhase;
   estimatedAmount: number | null;
   estimatedStartDate: Date | null;

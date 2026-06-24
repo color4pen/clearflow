@@ -1,4 +1,6 @@
 import { clientRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { db } from "@/infrastructure/db";
+import { validatePrimaryUniqueness } from "@/application/services/clientContactService";
 import type { ClientContact } from "@/domain/models/client";
 
 export type CreateClientContactResult =
@@ -14,7 +16,10 @@ export async function createClientContact(data: {
   position?: string | null;
   email?: string | null;
   phone?: string | null;
+  isPrimary?: boolean;
 }): Promise<CreateClientContactResult> {
+  const isPrimary = data.isPrimary ?? false;
+
   try {
     // テナント検証: clientId が organizationId に属するかを確認する
     const client = await clientRepository.findById(data.clientId, data.organizationId);
@@ -22,21 +27,38 @@ export async function createClientContact(data: {
       return { ok: false, reason: "顧客が見つかりません" };
     }
 
-    const contact = await clientRepository.createContact({
-      clientId: data.clientId,
-      name: data.name,
-      department: data.department,
-      position: data.position,
-      email: data.email,
-      phone: data.phone,
-    });
+    const contact = await db.transaction(async (tx) => {
+      // isPrimary 一意性検証（SELECT と INSERT を同一トランザクション内で実行して TOCTOU を防ぐ）
+      const validation = await validatePrimaryUniqueness(data.clientId, null, isPrimary, tx);
+      if (!validation.ok) {
+        throw new Error(validation.reason);
+      }
 
-    await auditLogRepository.create({
-      action: "client_contact.create",
-      targetType: "client_contact",
-      targetId: contact.id,
-      actorId: data.actorId,
-      organizationId: data.organizationId,
+      const newContact = await clientRepository.createContact(
+        {
+          clientId: data.clientId,
+          name: data.name,
+          department: data.department,
+          position: data.position,
+          email: data.email,
+          phone: data.phone,
+          isPrimary,
+        },
+        tx
+      );
+
+      await auditLogRepository.create(
+        {
+          action: "client_contact.create",
+          targetType: "client_contact",
+          targetId: newContact.id,
+          actorId: data.actorId,
+          organizationId: data.organizationId,
+        },
+        tx
+      );
+
+      return newContact;
     });
 
     return { ok: true, contact };

@@ -14,6 +14,8 @@ export async function createInquiry(data: {
   description?: string | null;
   source: string;
   assigneeId?: string | null;
+  budget?: number | null;
+  timeline?: string | null;
 }): Promise<CreateInquiryResult> {
   // 顧客が指定された場合のみ存在確認
   if (data.clientId) {
@@ -33,6 +35,8 @@ export async function createInquiry(data: {
           description: data.description,
           source: data.source,
           assigneeId: data.assigneeId,
+          budget: data.budget ?? null,
+          timeline: data.timeline ?? null,
         },
         tx
       );

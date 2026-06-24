@@ -17,6 +17,7 @@ export async function createDeal(data: {
   inquiryId?: string;
   clientId?: string;
   title: string;
+  description?: string | null;
   estimatedAmount?: number | null;
   estimatedStartDate?: Date | null;
   estimatedEndDate?: Date | null;
@@ -84,6 +85,7 @@ export async function createDeal(data: {
           clientId: resolvedClientId,
           inquiryId: data.inquiryId,
           title: data.title,
+          description: data.description ?? null,
           estimatedAmount: data.estimatedAmount ?? null,
           estimatedStartDate: data.estimatedStartDate ?? null,
           estimatedEndDate: data.estimatedEndDate ?? null,

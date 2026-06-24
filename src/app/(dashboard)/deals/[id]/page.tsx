@@ -245,7 +245,7 @@ export default async function DealDetailPage({
                 header: "参加者数",
                 align: "right",
                 render: (row) =>
-                  String(row.attendees.internal.length + row.attendees.external.length),
+                  String(row.attendees.length),
               },
               {
                 key: "actionItems",

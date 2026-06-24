@@ -14,12 +14,26 @@ async function readSrc(relPath: string): Promise<string> {
 }
 
 describe("createMeeting usecase 静的検証", () => {
-  it("T-01: dealId が必須パラメータとして含まれる", async () => {
+  it("T-01: dealId と inquiryId の両方がパラメータとして含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createMeeting.ts");
-    // 実行・検証 - dealId が必須
+    // 実行・検証 - dealId と inquiryId の両方が含まれる
     expect(content).toContain("dealId");
-    expect(content).not.toContain("inquiryId");
+    expect(content).toContain("inquiryId");
+  });
+
+  it("T-01b: dealId も inquiryId もない場合にエラーを返すコードが含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("application/usecases/createMeeting.ts");
+    // 実行・検証 - 両方 null のバリデーションがある
+    expect(content).toContain("!data.dealId && !data.inquiryId");
+  });
+
+  it("T-01c: inquiryId 指定時に inquiryRepository.findById で引合存在確認するコードが含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("application/usecases/createMeeting.ts");
+    // 実行・検証 - 引合存在確認がある
+    expect(content).toContain("inquiryRepository.findById");
   });
 
   it("T-02: dealId 指定時に dealRepository.findById で案件存在確認するコードが含まれる", async () => {
@@ -29,11 +43,12 @@ describe("createMeeting usecase 静的検証", () => {
     expect(content).toContain("dealRepository.findById");
   });
 
-  it("T-03: meetingRepository.create 呼び出しに dealId が含まれる", async () => {
+  it("T-03: meetingRepository.create 呼び出しに dealId と inquiryId が含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createMeeting.ts");
-    // 実行・検証 - dealId が create に渡される
-    expect(content).toContain("dealId: data.dealId");
+    // 実行・検証 - dealId と inquiryId が create に渡される
+    expect(content).toContain("dealId:");
+    expect(content).toContain("inquiryId:");
   });
 
   it("auditLogRepository.create の呼び出しが含まれる（監査ログ記録）", async () => {
@@ -96,5 +111,74 @@ describe("listMeetings usecase 静的検証", () => {
     const content = await readSrc("application/usecases/listMeetings.ts");
     // 実行・検証 - リポジトリ呼び出しがある
     expect(content).toContain("meetingRepository.findAllByDeal");
+  });
+});
+
+describe("Meeting domain model 静的検証", () => {
+  it("MeetingAttendee 型が userId / contactId / name / isExternal を持つ", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("domain/models/meeting.ts");
+    // 実行・検証 - 新 MeetingAttendee 型が定義されている
+    expect(content).toContain("MeetingAttendee");
+    expect(content).toContain("userId");
+    expect(content).toContain("contactId");
+    expect(content).toContain("isExternal");
+    // 旧型が存在しない
+    expect(content).not.toContain("MeetingAttendees");
+  });
+
+  it("Meeting 型の attendees が MeetingAttendee[] 型である", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("domain/models/meeting.ts");
+    // 実行・検証 - attendees が配列型
+    expect(content).toContain("attendees: MeetingAttendee[]");
+  });
+
+  it("Meeting 型の dealId が nullable である", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("domain/models/meeting.ts");
+    // 実行・検証 - dealId が string | null
+    expect(content).toContain("dealId: string | null");
+  });
+
+  it("Meeting 型に inquiryId が含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("domain/models/meeting.ts");
+    // 実行・検証 - inquiryId が string | null
+    expect(content).toContain("inquiryId: string | null");
+  });
+});
+
+describe("meetingRepository 静的検証", () => {
+  it("findAllByInquiry が実装されている", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    // 実行・検証 - findAllByInquiry メソッドが存在する
+    expect(content).toContain("findAllByInquiry");
+  });
+
+  it("MeetingAttendee 型を使用している（MeetingAttendees ではない）", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    // 実行・検証 - 新型が使われている
+    expect(content).toContain("MeetingAttendee");
+    expect(content).not.toContain("MeetingAttendees");
+  });
+});
+
+describe("createMeetingAction 静的検証", () => {
+  it("internal/external 参加者を新構造に変換するコードが含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("app/actions/meetings.ts");
+    // 実行・検証 - isExternal フラグを使った変換がある
+    expect(content).toContain("isExternal: false");
+    expect(content).toContain("isExternal: true");
+  });
+
+  it("inquiryId が createMeetingSchema に含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("app/actions/meetings.ts");
+    // 実行・検証 - inquiryId フィールドがある
+    expect(content).toContain("inquiryId");
   });
 });

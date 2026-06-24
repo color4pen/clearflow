@@ -86,3 +86,68 @@ describe("updateInquiryStatusAction ロールチェック静的検証", () => {
     expect(content).toContain('"convert"');
   });
 });
+
+describe("Inquiry ドメインモデル 静的検証", () => {
+  it("InquirySource 型に email と agent_service が含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("domain/models/inquiry.ts");
+    // 実行・検証 - 7 値すべてが含まれる
+    expect(content).toContain('"email"');
+    expect(content).toContain('"agent_service"');
+    expect(content).toContain('"web"');
+    expect(content).toContain('"phone"');
+    expect(content).toContain('"referral"');
+    expect(content).toContain('"exhibition"');
+    expect(content).toContain('"other"');
+  });
+
+  it("Inquiry 型に budget と timeline フィールドが含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("domain/models/inquiry.ts");
+    // 実行・検証 - budget と timeline が含まれる
+    expect(content).toContain("budget: number | null");
+    expect(content).toContain("timeline: string | null");
+  });
+});
+
+describe("createInquiry usecase budget/timeline 静的検証", () => {
+  it("createInquiry の引数に budget と timeline が含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("application/usecases/createInquiry.ts");
+    // 実行・検証 - budget と timeline が含まれる
+    expect(content).toContain("budget");
+    expect(content).toContain("timeline");
+  });
+
+  it("updateInquiry の引数に budget と timeline が含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("application/usecases/updateInquiry.ts");
+    // 実行・検証 - budget と timeline が含まれる
+    expect(content).toContain("budget");
+    expect(content).toContain("timeline");
+  });
+});
+
+describe("inquiries action schema 静的検証", () => {
+  it("createInquirySchema に budget と timeline が含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("app/actions/inquiries.ts");
+    // 実行・検証 - 7 値の enum と budget, timeline が含まれる
+    expect(content).toContain('"email"');
+    expect(content).toContain('"agent_service"');
+    expect(content).toContain("budget");
+    expect(content).toContain("timeline");
+  });
+});
+
+describe("inquirySourceEnum 静的検証", () => {
+  it("schema.ts に inquirySourceEnum が pgEnum として定義されている", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("infrastructure/schema.ts");
+    // 実行・検証 - pgEnum として定義されている
+    expect(content).toContain('inquirySourceEnum');
+    expect(content).toContain('"inquiry_source"');
+    expect(content).toContain('"email"');
+    expect(content).toContain('"agent_service"');
+  });
+});
