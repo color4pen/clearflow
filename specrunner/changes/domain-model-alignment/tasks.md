@@ -16,12 +16,14 @@
 
 - [ ] `meetings` テーブルの `dealId` を `.notNull()` から nullable に変更する: `dealId: uuid("deal_id").references(() => deals.id)` （.notNull() を削除）
 - [ ] `meetings` テーブルに `inquiryId: uuid("inquiry_id").references(() => inquiries.id)` (nullable) カラムを追加する。dealId 定義の直後に配置する
+- [ ] `meetings` テーブルの `attendees` カラムの default 値を旧形式から新形式に変更する: `.default({ internal: [], external: [] })` → `.default([])` （MeetingAttendee[] の空配列）
 - [ ] `meetingsRelations` に `inquiry` relation を追加する: `inquiry: one(inquiries, { fields: [meetings.inquiryId], references: [inquiries.id] })`
 - [ ] `inquiriesRelations` に `meetings: many(meetings)` を追加する
 
 **Acceptance Criteria**:
 - meetings テーブル定義で dealId が nullable になっている
 - meetings テーブル定義に inquiryId (nullable, FK → inquiries.id) が存在する
+- meetings テーブルの attendees カラムの default 値が `[]`（空配列）になっている
 - relations 定義が双方向で設定されている
 - TypeScript の型チェックが通る
 
@@ -74,7 +76,7 @@ ALTER TABLE "meetings" ADD CONSTRAINT "meetings_deal_or_inquiry_check" CHECK (de
 **Step 6: meetings の attendees データ変換**
 ```sql
 UPDATE meetings SET attendees = (
-  SELECT jsonb_agg(item)
+  SELECT COALESCE(jsonb_agg(item), '[]'::jsonb)
   FROM (
     SELECT jsonb_build_object(
       'userId', NULL,
@@ -239,7 +241,20 @@ WHERE attendees ? 'internal';
   - `data.isPrimary` が true の場合、`validateIsPrimaryUniqueness` で重複チェックを実行する
   - バリデーション失敗時は `{ ok: false, reason: "..." }` を返す
 
-- [ ] `src/application/usecases/index.ts` のバレルファイルを確認し、新規の export が必要な場合は追加する
+- [ ] `src/application/usecases/updateClientContact.ts` を新規作成する:
+  - data 引数: `contactId`, `clientId`, `organizationId`, `actorId`, `name`, `department?`, `position?`, `email?`, `phone?`, `isPrimary?`
+  - `clientRepository.findContactsByClientId` で既存担当者一覧を取得する
+  - `validateIsPrimaryUniqueness(data.isPrimary ?? false, existingContacts, data.contactId)` で重複チェックを実行する
+  - バリデーション失敗時は `{ ok: false, reason: "..." }` を返す
+  - `clientRepository.updateContact` で更新する
+  - 監査ログ (`client_contact.update`) を記録する
+  - `{ ok: true; contact: ClientContact }` を返す
+
+- [ ] `src/application/usecases/index.ts` のバレルファイルを確認し、新規の export（`updateClientContact` を含む）が必要な場合は追加する
+
+- [ ] `src/__tests__/usecases/meetingManagement.test.ts` の T-01 テストを更新する:
+  - `expect(content).not.toContain("inquiryId")` の行を削除し、代わりに `expect(content).toContain("inquiryId")` を追加する（T-08 で inquiryId サポートを追加した後の期待値に合わせる）
+  - テスト名を「dealId が必須パラメータとして含まれる」→「dealId または inquiryId を受け付けるコードが含まれる」に変更する
 
 **Acceptance Criteria**:
 - createInquiry / updateInquiry が budget / timeline を扱う
@@ -247,6 +262,8 @@ WHERE attendees ? 'internal';
 - updateMeeting の attendees 型が MeetingAttendee[] になっている
 - createDeal / updateDeal が description を扱う
 - createClientContact が isPrimary の重複チェックを行う
+- updateClientContact usecase が存在し isPrimary の重複チェック（excludeContactId 付き）を行う
+- meetingManagement.test.ts の T-01 が inquiryId を含むことを検証するよう更新されている
 - TypeScript の型チェックが通る
 
 ## T-09: Server Action の更新
@@ -266,14 +283,18 @@ WHERE attendees ? 'internal';
   - createMeeting の呼び出しで `dealId` を optional として渡し、`inquiryId` を追加する
   - `updateMeetingAction` の attendees 組み立ても同様に新形式に変更する
 
-- [ ] `src/app/actions/clients.ts`（該当箇所があれば）:
-  - 担当者作成・更新の action で isPrimary の入力を受け付ける際に、usecase 側のバリデーションで重複チェックが行われることを確認する（action 層の追加変更は不要 — usecase 層で検証するため）
+- [ ] `src/app/actions/clients.ts`:
+  - `addClientContactAction` の `createClientContact` 呼び出しに `isPrimary: parsed.data.isPrimary ?? false` を追加する（現状では isPrimary がフォームから取得されているが usecase に渡されていない）
+  - `updateClientContactAction` を更新する: `clientRepository.updateContact()` の直接呼び出しを廃止し、T-08 で新設した `updateClientContact` usecase を使用するよう変更する。import に `updateClientContact` を追加し、usecase 呼び出しの引数として `contactId`, `clientId`, `organizationId`, `actorId`, 各フィールドを渡す
+  - `updateClientContact` が `{ ok: false }` を返した場合は `{ success: false, message: result.reason }` を返す
 
 **Acceptance Criteria**:
 - inquiries の zod スキーマが 7 値の source enum を受け付ける
 - inquiries の action が budget / timeline を受け渡す
 - meetings の action が dealId optional + inquiryId optional を受け付ける
 - meetings の attendees が新形式（MeetingAttendee[]）で組み立てられる
+- addClientContactAction が isPrimary を createClientContact に渡す
+- updateClientContactAction が updateClientContact usecase を通じて isPrimary 重複チェックを行う
 - TypeScript の型チェックが通る
 
 ## T-10: seed.ts の更新
