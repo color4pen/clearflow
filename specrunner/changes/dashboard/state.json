@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "a4f9ae92-6b78-451f-9ec1-c03308c323ee",
   "createdAt": "2026-06-24T04:22:43.757Z",
-  "updatedAt": "2026-06-24T05:20:07.235Z",
+  "updatedAt": "2026-06-24T05:25:00.285Z",
   "request": {
     "title": "ダッシュボードの実装",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "conformance",
+  "step": "adr-gen",
   "status": "running",
   "branch": "feat/dashboard-a4f9ae92",
   "error": null,
@@ -48,7 +48,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 59,
+    "historyCount": 68,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -56,13 +56,14 @@
       "spec-fixer": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 2,
+      "verification": 3,
       "build-fixer": 1,
       "code-review": 1,
       "code-fixer": 1,
       "domain-invariants": 1,
       "custom-reviewers": 1,
-      "regression-gate": 1
+      "regression-gate": 1,
+      "conformance": 1
     }
   }
 }
