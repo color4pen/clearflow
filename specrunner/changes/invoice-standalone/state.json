@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "73d610a8-9a2d-41ee-ad36-b5c35834a841",
   "createdAt": "2026-06-24T03:48:21.917Z",
-  "updatedAt": "2026-06-24T04:22:05.223Z",
+  "updatedAt": "2026-06-24T04:30:59.735Z",
   "request": {
     "title": "請求画面の独立化",
     "type": "spec-change",
@@ -33,8 +33,9 @@
       ]
     }
   ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 33,
+    "historyCount": 39,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -42,7 +43,8 @@
       "spec-fixer": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 1,
+      "code-review": 1
     }
   }
 }
