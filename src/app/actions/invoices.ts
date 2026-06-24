@@ -27,7 +27,7 @@ const updateInvoiceStatusSchema = z.object({
   invoiceId: z.string().uuid("有効な請求IDが必要です"),
   newStatus: z.enum(["scheduled", "invoiced", "paid", "overdue"]),
   paidAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().refine(
-    (val) => !val || val <= new Date().toISOString().slice(0, 10),
+    (val) => !val || val <= new Intl.DateTimeFormat('sv', { timeZone: 'Asia/Tokyo' }).format(new Date()),
     { message: "入金日は本日以前の日付を指定してください" }
   ),
 });

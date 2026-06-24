@@ -12,7 +12,7 @@ type Props = {
 };
 
 function todayString(): string {
-  return new Date().toISOString().slice(0, 10);
+  return new Intl.DateTimeFormat('sv', { timeZone: 'Asia/Tokyo' }).format(new Date());
 }
 
 export function InvoiceActions({ invoiceId, contractId, status }: Props) {
