@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "11b7ed15-de4b-4863-b98a-5f8791c9b15d",
   "createdAt": "2026-06-24T11:26:02.296Z",
-  "updatedAt": "2026-06-24T11:50:07.863Z",
+  "updatedAt": "2026-06-24T11:56:29.250Z",
   "request": {
     "title": "dispatcher の async 化と submitRequest の監査ログハンドラ移行",
     "type": "refactor",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-review",
+  "step": "code-fixer",
   "status": "running",
   "branch": "feat/audit-log-automation-11b7ed15",
   "error": null,
@@ -34,14 +34,15 @@
     }
   ],
   "_journal": {
-    "historyCount": 25,
+    "historyCount": 29,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
       "spec-review": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 1,
+      "code-review": 1
     }
   }
 }
