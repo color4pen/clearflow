@@ -7,6 +7,9 @@ import type { DashboardActionItem, PipelineSummaryItem } from "@/domain/models/d
 import type { AuditLog } from "@/domain/models/auditLog";
 import type { DealWithDetails } from "@/domain/models/deal";
 import { DashboardHeader } from "./DashboardHeader";
+import { formatRelativeTime } from "./dashboardUtils";
+
+export { formatRelativeTime };
 
 type Props = {
   actions: DashboardActionItem[];
@@ -14,17 +17,6 @@ type Props = {
   recentActivities: AuditLog[];
   staleDeals: DealWithDetails[] | null;
 };
-
-export function formatRelativeTime(date: Date): string {
-  const diffMs = Date.now() - date.getTime();
-  const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "たった今";
-  if (diffMin < 60) return `${diffMin}分前`;
-  const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `${diffH}時間前`;
-  const diffD = Math.floor(diffH / 24);
-  return `${diffD}日前`;
-}
 
 function getEntityLink(targetType: string, targetId: string): string | null {
   switch (targetType) {
