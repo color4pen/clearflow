@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 18.5s | 0 |
-| 2 | typecheck | passed | 3.1s | 0 |
+| 1 | build | passed | 10.9s | 0 |
+| 2 | typecheck | passed | 1.0s | 0 |
 | 3 | test | passed | 0.4s | 0 |
-| 4 | lint | passed | 4.1s | 0 |
+| 4 | lint | passed | 3.8s | 0 |
 
 ## Phase: build
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 11.2s
+✓ Compiled successfully in 5.9s
   Running TypeScript ...
-  Finished TypeScript in 5.1s ...
+  Finished TypeScript in 3.4s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/23) ...
   Generating static pages using 7 workers (5/23) 
   Generating static pages using 7 workers (11/23) 
   Generating static pages using 7 workers (17/23) 
-✓ Generating static pages using 7 workers (23/23) in 181ms
+✓ Generating static pages using 7 workers (23/23) in 178ms
   Finalizing page optimization ...
 
 Route (app)
@@ -76,37 +76,6 @@ $ next build
  Detected additional lockfiles: 
    * bun.lock
 
-Turbopack build encountered 1 warnings:
-./.git/specrunner-worktrees/domain-events-59115298/src/infrastructure/webhookDelivery.ts:1:1
-A Node.js module is loaded ('crypto' at line 1) which is not supported in the Edge Runtime.
-    Learn More: https://nextjs.org/docs/messages/node-module-in-edge-runtime
-[31m[1m>[0m [90m1 |[0m [36mimport[0m { createHmac } [36mfrom[0m [32m"crypto"[0m;
-  [90m  |[0m [31m[1m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
-  [90m2 |[0m [36mimport[0m {
-  [90m3 |[0m   webhookEndpointRepository,
-  [90m4 |[0m   webhookDeliveryRepository,
-
-Ecmascript file had an error
-
-Import traces:
-  Server Component:
-    ./.git/specrunner-worktrees/domain-events-59115298/src/infrastructure/webhookDelivery.ts
-    ./.git/specrunner-worktrees/domain-events-59115298/src/app/actions/webhooks.ts
-    ./.git/specrunner-worktrees/domain-events-59115298/src/app/(dashboard)/settings/webhooks/[id]/deliveries/page.tsx
-
-  Edge Instrumentation:
-    ./.git/specrunner-worktrees/domain-events-59115298/src/infrastructure/webhookDelivery.ts
-    ./.git/specrunner-worktrees/domain-events-59115298/src/infrastructure/handlers/webhookHandler.ts
-    ./.git/specrunner-worktrees/domain-events-59115298/src/infrastructure/handlers/index.ts
-    ./.git/specrunner-worktrees/domain-events-59115298/src/instrumentation.ts
-
-  Instrumentation:
-    ./.git/specrunner-worktrees/domain-events-59115298/src/infrastructure/webhookDelivery.ts
-    ./.git/specrunner-worktrees/domain-events-59115298/src/infrastructure/handlers/webhookHandler.ts
-    ./.git/specrunner-worktrees/domain-events-59115298/src/infrastructure/handlers/index.ts
-    ./.git/specrunner-worktrees/domain-events-59115298/src/instrumentation.ts
-
-
 
 ```
 
@@ -140,10 +109,10 @@ error: async-error
       at <anonymous> (src/__tests__/domain/domainEvents.test.ts:152:13)
 
 
- 591 pass
+ 612 pass
  0 fail
- 1203 expect() calls
-Ran 591 tests across 28 files. [345.00ms]
+ 1278 expect() calls
+Ran 612 tests across 28 files. [361.00ms]
 
 ```
 
