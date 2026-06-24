@@ -236,6 +236,10 @@ export async function handleDomainEventWebhook(event: DomainEvent): Promise<void
       });
       break;
 
+    case "approval.completed":
+      // Internal system event — not delivered as a webhook
+      break;
+
     default: {
       const _exhaustive: never = event;
       console.warn("[webhookHandler] Unhandled domain event type:", (_exhaustive as DomainEvent).type);

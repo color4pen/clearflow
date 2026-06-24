@@ -13,3 +13,4 @@ export { canTransition as canContractTransition } from "./contractTransition";
 export { validateInvoiceTransition } from "./invoiceTransition";
 export { validateContractAmount, validateContractDates } from "./contractValidation";
 export { validateInvoiceDates } from "./invoiceValidation";
+export { evaluateCondition } from "./conditionEvaluator";

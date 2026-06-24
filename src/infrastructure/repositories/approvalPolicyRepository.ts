@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, asc } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { approvalPolicies } from "../schema";
@@ -10,6 +10,8 @@ const CONDITION_OPERATORS: ReadonlySet<ConditionOperator> = new Set([
   "lt",
   "lte",
   "eq",
+  "neq",
+  "in",
 ]);
 
 type PolicyRow = typeof approvalPolicies.$inferSelect;
@@ -113,7 +115,8 @@ export async function findActiveByTriggerAction(
         eq(approvalPolicies.triggerAction, triggerAction),
         eq(approvalPolicies.isActive, true)
       )
-    );
+    )
+    .orderBy(asc(approvalPolicies.createdAt));
   return result.map(mapRow);
 }
 

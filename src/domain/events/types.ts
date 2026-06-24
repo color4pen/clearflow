@@ -1,4 +1,5 @@
 import type { DealPhase } from "@/domain/models/deal";
+import type { OriginType } from "@/domain/models/approvalPolicy";
 
 export type BaseDomainEvent = {
   type: string;
@@ -128,6 +129,20 @@ export type StepRejected = BaseDomainEvent & {
 };
 
 // ---------------------------------------------------------------------------
+// Approval completion events
+// ---------------------------------------------------------------------------
+
+export type ApprovalCompleted = BaseDomainEvent & {
+  type: "approval.completed";
+  payload: {
+    requestId: string;
+    originType: OriginType;
+    originTriggerAction: string | null;
+    originTriggerEntityId: string | null;
+  };
+};
+
+// ---------------------------------------------------------------------------
 // DomainEvent union and DomainEventType
 // ---------------------------------------------------------------------------
 
@@ -149,6 +164,7 @@ export type DomainEvent =
   | RequestRevised
   | RequestResubmitted
   | StepApproved
-  | StepRejected;
+  | StepRejected
+  | ApprovalCompleted;
 
 export type DomainEventType = DomainEvent["type"];
