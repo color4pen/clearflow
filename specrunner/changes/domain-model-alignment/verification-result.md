@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 14.3s | 0 |
-| 2 | typecheck | passed | 3.2s | 0 |
+| 1 | build | passed | 11.0s | 0 |
+| 2 | typecheck | passed | 0.9s | 0 |
 | 3 | test | passed | 0.4s | 0 |
-| 4 | lint | passed | 4.4s | 0 |
+| 4 | lint | passed | 4.0s | 0 |
 
 ## Phase: build
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 8.2s
+✓ Compiled successfully in 6.1s
   Running TypeScript ...
-  Finished TypeScript in 4.0s ...
+  Finished TypeScript in 3.4s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/23) ...
   Generating static pages using 7 workers (5/23) 
   Generating static pages using 7 workers (11/23) 
   Generating static pages using 7 workers (17/23) 
-✓ Generating static pages using 7 workers (23/23) in 186ms
+✓ Generating static pages using 7 workers (23/23) in 162ms
   Finalizing page optimization ...
 
 Route (app)
@@ -112,7 +112,7 @@ error: async-error
  670 pass
  0 fail
  1525 expect() calls
-Ran 670 tests across 31 files. [351.00ms]
+Ran 670 tests across 31 files. [352.00ms]
 
 ```
 
@@ -133,14 +133,7 @@ src/app/components/FormField.tsx
 src/app/components/MarkdownTextarea.tsx
   6:10  warning  'Textarea' is defined but never used  @typescript-eslint/no-unused-vars
 
-src/infrastructure/seed.ts
-  504:10  warning  'greenContact1' is assigned a value but never used       @typescript-eslint/no-unused-vars
-  545:10  warning  'newInquiry1' is assigned a value but never used         @typescript-eslint/no-unused-vars
-  556:10  warning  'newInquiry2' is assigned a value but never used         @typescript-eslint/no-unused-vars
-  564:10  warning  'inProgressInquiry1' is assigned a value but never used  @typescript-eslint/no-unused-vars
-  576:10  warning  'inProgressInquiry2' is assigned a value but never used  @typescript-eslint/no-unused-vars
-
-✖ 10 problems (0 errors, 10 warnings)
+✖ 5 problems (0 errors, 5 warnings)
 
 
 $ eslint
