@@ -1,3 +1,5 @@
+import type { OriginType } from "./approvalPolicy";
+
 export type RequestStatus = "draft" | "pending" | "approved" | "rejected" | "revision" | "expired";
 
 export type Request = {
@@ -11,6 +13,10 @@ export type Request = {
   createdAt: Date;
   updatedAt: Date;
   version: number;
+  originType: OriginType;
+  originPolicyId: string | null;
+  originTriggerAction: string | null;
+  originTriggerEntityId: string | null;
 };
 
 export type ApprovalStepSummary = {

@@ -3,6 +3,7 @@ import { db } from "../db";
 import type { Transaction } from "../db";
 import { requests, auditLogs, approvalSteps } from "../schema";
 import type { Request, RequestStatus, RequestWithSteps } from "@/domain/models/request";
+import type { OriginType } from "@/domain/models/approvalPolicy";
 
 
 function mapRow(row: typeof requests.$inferSelect): Request {
@@ -17,6 +18,10 @@ function mapRow(row: typeof requests.$inferSelect): Request {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     version: row.version,
+    originType: row.originType as OriginType,
+    originPolicyId: row.originPolicyId ?? null,
+    originTriggerAction: row.originTriggerAction ?? null,
+    originTriggerEntityId: row.originTriggerEntityId ?? null,
   };
 }
 
@@ -28,6 +33,10 @@ export async function create(
     organizationId: string;
     creatorId: string;
     status?: RequestStatus;
+    originType?: OriginType;
+    originPolicyId?: string | null;
+    originTriggerAction?: string | null;
+    originTriggerEntityId?: string | null;
   },
   tx?: Transaction
 ): Promise<Request> {
@@ -41,6 +50,10 @@ export async function create(
       status: data.status ?? "draft",
       organizationId: data.organizationId,
       creatorId: data.creatorId,
+      originType: data.originType ?? "manual",
+      originPolicyId: data.originPolicyId ?? null,
+      originTriggerAction: data.originTriggerAction ?? null,
+      originTriggerEntityId: data.originTriggerEntityId ?? null,
     })
     .returning();
   return mapRow(result[0]);

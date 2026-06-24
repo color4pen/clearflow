@@ -104,6 +104,39 @@ export const approvalTemplates = pgTable("approval_templates", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Approval policies table (must be defined before requests due to FK)
+export const approvalPolicies = pgTable(
+  "approval_policies",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    name: text("name").notNull(),
+    description: text("description"),
+    triggerAction: text("trigger_action").notNull(),
+    conditionField: text("condition_field"),
+    conditionOperator: text("condition_operator"),
+    conditionValue: text("condition_value"),
+    templateId: uuid("template_id")
+      .notNull()
+      .references(() => approvalTemplates.id),
+    isActive: boolean("is_active").notNull().default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    check(
+      "approval_policies_condition_check",
+      sql`(${table.conditionField} IS NULL AND ${table.conditionOperator} IS NULL AND ${table.conditionValue} IS NULL) OR (${table.conditionField} IS NOT NULL AND ${table.conditionOperator} IS NOT NULL AND ${table.conditionValue} IS NOT NULL)`
+    ),
+    index("approval_policies_org_trigger_active_idx").on(
+      table.organizationId,
+      table.triggerAction,
+      table.isActive
+    ),
+  ]
+);
+
 // Requests table
 export const requests = pgTable("requests", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -120,7 +153,16 @@ export const requests = pgTable("requests", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   version: integer("version").notNull().default(1),
-});
+  originType: text("origin_type").notNull().default("manual"),
+  originPolicyId: uuid("origin_policy_id").references(() => approvalPolicies.id),
+  originTriggerAction: text("origin_trigger_action"),
+  originTriggerEntityId: uuid("origin_trigger_entity_id"),
+}, (table) => [
+  check(
+    "requests_origin_check",
+    sql`(${table.originType} = 'manual' AND ${table.originPolicyId} IS NULL AND ${table.originTriggerAction} IS NULL AND ${table.originTriggerEntityId} IS NULL) OR (${table.originType} = 'system' AND ${table.originPolicyId} IS NOT NULL AND ${table.originTriggerAction} IS NOT NULL AND ${table.originTriggerEntityId} IS NOT NULL)`
+  ),
+]);
 
 // Audit logs table
 export const auditLogs = pgTable("audit_logs", {
@@ -155,6 +197,8 @@ export const approvalSteps = pgTable("approval_steps", {
     .references(() => organizations.id),
   version: integer("version").notNull().default(1),
   deadline: timestamp("deadline"),
+  name: text("name"),
+  approverId: uuid("approver_id").references(() => users.id),
 });
 
 // Idempotency keys table
@@ -231,6 +275,7 @@ export const approvalDelegations = pgTable(
     endDate: timestamp("end_date").notNull(),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at").defaultNow().notNull(),
+    fromUserRole: text("from_user_role").notNull(),
   },
   (table) => [
     index("approval_delegations_to_user_org_active_idx").on(
@@ -484,6 +529,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   auditLogs: many(auditLogs),
   approvalSteps: many(approvalSteps),
   approvalTemplates: many(approvalTemplates),
+  approvalPolicies: many(approvalPolicies),
   webhookEndpoints: many(webhookEndpoints),
   idempotencyKeys: many(idempotencyKeys),
   approvalDelegations: many(approvalDelegations),
@@ -526,6 +572,19 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   meetings: many(meetings),
   dealsAsAssignee: many(deals, { relationName: "dealsAsAssignee" }),
   dealsAsTechnicalLead: many(deals, { relationName: "dealsAsTechnicalLead" }),
+  stepsApprovedBy: many(approvalSteps, { relationName: "stepsApprovedBy" }),
+  stepsAssignedApprover: many(approvalSteps, { relationName: "stepsAssignedApprover" }),
+}));
+
+export const approvalPoliciesRelations = relations(approvalPolicies, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [approvalPolicies.organizationId],
+    references: [organizations.id],
+  }),
+  template: one(approvalTemplates, {
+    fields: [approvalPolicies.templateId],
+    references: [approvalTemplates.id],
+  }),
 }));
 
 export const requestsRelations = relations(requests, ({ one, many }) => ({
@@ -540,6 +599,10 @@ export const requestsRelations = relations(requests, ({ one, many }) => ({
   template: one(approvalTemplates, {
     fields: [requests.templateId],
     references: [approvalTemplates.id],
+  }),
+  originPolicy: one(approvalPolicies, {
+    fields: [requests.originPolicyId],
+    references: [approvalPolicies.id],
   }),
   approvalSteps: many(approvalSteps),
 }));
@@ -577,10 +640,16 @@ export const approvalStepsRelations = relations(approvalSteps, ({ one }) => ({
   approver: one(users, {
     fields: [approvalSteps.approvedBy],
     references: [users.id],
+    relationName: "stepsApprovedBy",
   }),
   organization: one(organizations, {
     fields: [approvalSteps.organizationId],
     references: [organizations.id],
+  }),
+  assignedApprover: one(users, {
+    fields: [approvalSteps.approverId],
+    references: [users.id],
+    relationName: "stepsAssignedApprover",
   }),
 }));
 

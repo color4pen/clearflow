@@ -598,6 +598,82 @@ describe("Approval delegation structure", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Approval policy schema — T-01 to T-15
+// ---------------------------------------------------------------------------
+
+describe("Approval policy schema", () => {
+  it("approvalPolicy domain model file exists", async () => {
+    const exists = await fileExists("src/domain/models/approvalPolicy.ts");
+    expect(exists).toBe(true);
+  });
+
+  it("approvalPolicy domain model exports ApprovalPolicy type", async () => {
+    const content = await readSrc("domain/models/approvalPolicy.ts");
+    expect(content).toContain("ApprovalPolicy");
+    expect(content).toContain("ConditionOperator");
+    expect(content).toContain("OriginType");
+  });
+
+  it("approvalPolicy domain model has no infrastructure imports", async () => {
+    const content = await readSrc("domain/models/approvalPolicy.ts");
+    expect(content).not.toContain("@/infrastructure");
+  });
+
+  it("approvalPolicyRepository.ts exists", async () => {
+    const exists = await fileExists(
+      "src/infrastructure/repositories/approvalPolicyRepository.ts"
+    );
+    expect(exists).toBe(true);
+  });
+
+  it("repositories/index.ts exports approvalPolicyRepository", async () => {
+    const content = await readSrc("infrastructure/repositories/index.ts");
+    expect(content).toContain("approvalPolicyRepository");
+  });
+
+  it("domain/models/index.ts exports ApprovalPolicy", async () => {
+    const content = await readSrc("domain/models/index.ts");
+    expect(content).toContain("ApprovalPolicy");
+  });
+
+  it("schema.ts contains approval_policies table definition", async () => {
+    const content = await readSrc("infrastructure/schema.ts");
+    expect(content).toContain("approval_policies");
+    expect(content).toContain("trigger_action");
+    expect(content).toContain("condition_field");
+    expect(content).toContain("condition_operator");
+    expect(content).toContain("condition_value");
+    expect(content).toContain("template_id");
+    expect(content).toContain("is_active");
+  });
+
+  it("schema.ts contains from_user_role column in approval_delegations", async () => {
+    const content = await readSrc("infrastructure/schema.ts");
+    expect(content).toContain("from_user_role");
+  });
+
+  it("schema.ts contains origin columns in requests", async () => {
+    const content = await readSrc("infrastructure/schema.ts");
+    expect(content).toContain("origin_type");
+    expect(content).toContain("origin_policy_id");
+    expect(content).toContain("origin_trigger_action");
+    expect(content).toContain("origin_trigger_entity_id");
+  });
+
+  it("schema.ts contains name and approver_id in approval_steps", async () => {
+    const content = await readSrc("infrastructure/schema.ts");
+    expect(content).toContain("approver_id");
+  });
+
+  it("approvalDelegationRepository does not JOIN users for fromUserRole", async () => {
+    const content = await readSrc(
+      "infrastructure/repositories/approvalDelegationRepository.ts"
+    );
+    expect(content).not.toContain("innerJoin(fromUsers");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Build and lint — TC-057, TC-058, TC-059
 // ---------------------------------------------------------------------------
 

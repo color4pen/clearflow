@@ -78,6 +78,7 @@ export async function createDelegation(data: {
         organizationId: data.organizationId,
         startDate: data.startDate,
         endDate: data.endDate,
+        fromUserRole: fromUser.role,
       },
       tx
     );

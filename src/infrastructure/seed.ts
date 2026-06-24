@@ -11,6 +11,7 @@ import {
   verificationTokens,
   approvalSteps,
   approvalTemplates,
+  approvalPolicies,
   webhookEndpoints,
   webhookDeliveries,
   approvalDelegations,
@@ -52,6 +53,7 @@ async function seed() {
   await db.delete(clientContacts);
   await db.delete(clients);
   await db.delete(requests);
+  await db.delete(approvalPolicies);
   await db.delete(approvalTemplates);
   await db.delete(accounts);
   await db.delete(sessions);
@@ -198,6 +200,16 @@ async function seed() {
     })
     .returning();
   console.log(`✅ Created template: ${leaveTemplate.name}`);
+
+  // Create sample approval policy
+  await db.insert(approvalPolicies).values({
+    name: "案件フェーズ変更時の承認",
+    organizationId: org.id,
+    triggerAction: "deal.phase_change",
+    templateId: expenseTemplate.id,
+    isActive: true,
+  });
+  console.log("✅ Created sample approval policy");
 
   // Create requests in various statuses
   const [draftRequest] = await db
@@ -363,6 +375,7 @@ async function seed() {
     startDate: today,
     endDate: sevenDaysLater,
     isActive: true,
+    fromUserRole: "manager",
   });
   console.log(`✅ Created approval delegation: manager → admin (${today.toISOString().slice(0, 10)} ～ ${sevenDaysLater.toISOString().slice(0, 10)})`);
 

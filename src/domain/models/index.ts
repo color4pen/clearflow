@@ -2,6 +2,7 @@ export type { Organization } from "./organization";
 export type { ApprovalDelegation } from "./approvalDelegation";
 export type { Role, User } from "./user";
 export type { Request, RequestStatus } from "./request";
+export type { ApprovalPolicy, ConditionOperator, OriginType } from "./approvalPolicy";
 export type { AuditLog } from "./auditLog";
 export type { ApprovalStep, ApprovalStepStatus } from "./approvalStep";
 export type {
