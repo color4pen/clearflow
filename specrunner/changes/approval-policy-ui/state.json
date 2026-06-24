@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "c1b97d0a-b4d2-4b9f-9d5b-27ee2fcaab21",
   "createdAt": "2026-06-24T10:11:07.420Z",
-  "updatedAt": "2026-06-24T10:28:23.071Z",
+  "updatedAt": "2026-06-24T10:31:53.803Z",
   "request": {
     "title": "承認ポリシー設定画面",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "feat/approval-policy-ui-c1b97d0a",
   "error": null,
@@ -34,11 +34,12 @@
     }
   ],
   "_journal": {
-    "historyCount": 13,
+    "historyCount": 16,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1
+      "spec-review": 1,
+      "test-case-gen": 1
     }
   }
 }
