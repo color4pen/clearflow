@@ -1,16 +1,16 @@
 import type { InvoiceStatus } from "../models/invoice";
 
-// 有効な遷移先の定義。paid と overdue は終端状態
+// 有効な遷移先の定義。paid は終端状態
 const VALID_INVOICE_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
   scheduled: ["invoiced"],
   invoiced: ["paid", "overdue"],
   paid: [],
-  overdue: [],
+  overdue: ["paid"],
 };
 
 /**
  * 請求ステータス遷移の妥当性を検証する。
- * 終端状態（paid / overdue）からの遷移、および定義外の遷移は不可。
+ * 終端状態（paid）からの遷移、および定義外の遷移は不可。
  */
 export function validateInvoiceTransition(
   from: InvoiceStatus,

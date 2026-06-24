@@ -1,9 +1,8 @@
+import Link from "next/link";
 import { invoiceRepository } from "@/infrastructure/repositories";
 import { SectionCard } from "@/app/components";
 import { DataTable } from "@/app/components/DataTable";
 import { invoiceStatusLabels } from "@/app/(dashboard)/labels";
-import { InvoiceStatusButtons } from "./InvoiceStatusButtons";
-import { CreateInvoiceModal } from "./CreateInvoiceModal";
 import type { Invoice } from "@/domain/models/invoice";
 
 type Props = {
@@ -41,7 +40,14 @@ export async function InvoiceSection({ contractId, organizationId, contractStatu
     {
       key: "title",
       header: "請求名",
-      render: (row: Invoice) => <span className="text-text">{row.title}</span>,
+      render: (row: Invoice) => (
+        <Link
+          href={`/contracts/${contractId}/invoices/${row.id}`}
+          className="text-primary underline text-xs"
+        >
+          {row.title}
+        </Link>
+      ),
     },
     {
       key: "amount",
@@ -74,14 +80,6 @@ export async function InvoiceSection({ contractId, organizationId, contractStatu
         );
       },
     },
-    {
-      key: "actions",
-      header: "",
-      render: (row: Invoice) =>
-        canManage ? (
-          <InvoiceStatusButtons invoiceId={row.id} status={row.status} contractId={contractId} />
-        ) : null,
-    },
   ];
 
   return (
@@ -89,7 +87,12 @@ export async function InvoiceSection({ contractId, organizationId, contractStatu
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xs font-bold text-text">請求一覧</h2>
         {canManage && isActiveContract && (
-          <CreateInvoiceModal contractId={contractId} />
+          <Link
+            href={`/contracts/${contractId}/invoices/new`}
+            className="text-xs px-3 py-1 bg-primary text-white"
+          >
+            請求を追加
+          </Link>
         )}
       </div>
 

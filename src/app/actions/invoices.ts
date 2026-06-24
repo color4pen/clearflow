@@ -26,6 +26,10 @@ const createInvoiceSchema = z.object({
 const updateInvoiceStatusSchema = z.object({
   invoiceId: z.string().uuid("有効な請求IDが必要です"),
   newStatus: z.enum(["scheduled", "invoiced", "paid", "overdue"]),
+  paidAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().refine(
+    (val) => !val || val <= new Intl.DateTimeFormat('sv', { timeZone: 'Asia/Tokyo' }).format(new Date()),
+    { message: "入金日は本日以前の日付を指定してください" }
+  ),
 });
 
 const updateInvoiceSchema = z.object({
@@ -164,7 +168,8 @@ export async function updateInvoiceAction(
 export async function updateInvoiceStatusAction(
   invoiceId: string,
   newStatus: string,
-  contractId: string
+  contractId: string,
+  paidAt?: string
 ): Promise<ActionResult> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -175,7 +180,16 @@ export async function updateInvoiceStatusAction(
     return { success: false, message: "この操作を実行する権限がありません" };
   }
 
-  const parsed = updateInvoiceStatusSchema.safeParse({ invoiceId, newStatus });
+  const rateCheck = await checkRateLimit({
+    key: `updateInvoiceStatus:${session.user.id}`,
+    limit: RATE_LIMITS.createRequest.limit,
+    windowMs: RATE_LIMITS.createRequest.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { success: false, message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
+  }
+
+  const parsed = updateInvoiceStatusSchema.safeParse({ invoiceId, newStatus, paidAt });
   if (!parsed.success) {
     const firstError = parsed.error.issues[0];
     return { success: false, message: firstError?.message ?? "入力が無効です" };
@@ -186,6 +200,7 @@ export async function updateInvoiceStatusAction(
     organizationId: session.user.organizationId,
     actorId: session.user.id,
     newStatus: parsed.data.newStatus as InvoiceStatus,
+    paidAt: parsed.data.paidAt ? new Date(parsed.data.paidAt) : undefined,
   });
 
   if (!result.ok) {
@@ -193,6 +208,7 @@ export async function updateInvoiceStatusAction(
   }
 
   revalidatePath(`/contracts/${contractId}`);
+  revalidatePath(`/contracts/${contractId}/invoices/${invoiceId}`);
   return { success: true };
 }
 

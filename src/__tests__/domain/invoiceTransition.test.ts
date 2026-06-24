@@ -49,4 +49,28 @@ describe("invoiceTransition", () => {
     // 検証 - ok: false が返る
     expect(result.ok).toBe(false);
   });
+
+  it("TC-007: overdue → paid が許可される（遅延入金確認）", () => {
+    // 準備 - overdue ステータスから paid への遷移（遅延入金）
+    // 実行 - validateInvoiceTransition を呼び出す
+    const result = validateInvoiceTransition("overdue", "paid");
+    // 検証 - ok: true が返る
+    expect(result).toEqual({ ok: true });
+  });
+
+  it("TC-008: overdue → invoiced が拒否される", () => {
+    // 準備 - overdue ステータスから invoiced への遷移（不正な逆戻り）
+    // 実行 - validateInvoiceTransition を呼び出す
+    const result = validateInvoiceTransition("overdue", "invoiced");
+    // 検証 - ok: false が返る
+    expect(result.ok).toBe(false);
+  });
+
+  it("TC-009: paid → overdue が拒否される（終端状態）", () => {
+    // 準備 - paid ステータスから overdue への遷移（終端から逆戻り）
+    // 実行 - validateInvoiceTransition を呼び出す
+    const result = validateInvoiceTransition("paid", "overdue");
+    // 検証 - ok: false が返る
+    expect(result.ok).toBe(false);
+  });
 });

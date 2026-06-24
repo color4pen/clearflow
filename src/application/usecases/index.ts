@@ -52,3 +52,4 @@ export { setRevenueTarget } from "./setRevenueTarget";
 export { updateRevenueTarget } from "./updateRevenueTarget";
 export { deleteRevenueTarget } from "./deleteRevenueTarget";
 export { getRevenueForecast } from "./getRevenueForecast";
+export { getInvoice } from "./getInvoice";
