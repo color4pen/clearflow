@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "c1b97d0a-b4d2-4b9f-9d5b-27ee2fcaab21",
   "createdAt": "2026-06-24T10:11:07.420Z",
-  "updatedAt": "2026-06-24T11:22:13.274Z",
+  "updatedAt": "2026-06-24T11:22:33.073Z",
   "request": {
     "title": "承認ポリシー設定画面",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/approval-policy-ui-c1b97d0a",
   "error": null,
   "pipelineId": "standard",
@@ -48,8 +48,13 @@
     }
   ],
   "resumePoint": null,
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/85",
+    "number": 85,
+    "createdAt": "2026-06-24T11:22:33.062Z"
+  },
   "_journal": {
-    "historyCount": 101,
+    "historyCount": 106,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -62,7 +67,9 @@
       "domain-invariants": 3,
       "custom-reviewers": 3,
       "regression-gate": 5,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
