@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "db7d3a51-7738-4f55-8306-a4528f82149d",
   "createdAt": "2026-06-24T01:57:59.085Z",
-  "updatedAt": "2026-06-24T02:54:23.415Z",
+  "updatedAt": "2026-06-24T02:56:01.869Z",
   "request": {
     "title": "契約・請求モデルの強化",
     "type": "spec-change",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "change/contract-invoice-strengthen-db7d3a51",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-24T02:54:23.412Z"
   },
   "_journal": {
-    "historyCount": 65,
+    "historyCount": 66,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
