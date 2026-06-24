@@ -17,3 +17,9 @@
 {"type":"transition","ts":"2026-06-24T04:02:50.489Z","step":"spec-review","status":"warning","message":"spec-review iteration 1 completed with verdict: needs-fix"}
 {"type":"transition","ts":"2026-06-24T04:02:50.490Z","step":"step-transition","status":"ok","message":"spec-review → spec-fixer"}
 {"type":"transition","ts":"2026-06-24T04:02:50.492Z","step":"spec-fixer-started","status":"started","message":"Starting spec-fixer step"}
+{"type":"transition","ts":"2026-06-24T04:04:16.183Z","step":"spec-fixer-verdict","status":"ok","message":"spec-fixer verdict: approved"}
+{"type":"step-attempt","step":"spec-fixer","sessionId":"5ba08de4-a041-4434-aef7-5b00b9e996f0","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-24T04:02:50.507Z","endedAt":"2026-06-24T04:04:14.577Z"}
+{"type":"lineage","step":"spec-fixer","ts":"2026-06-24T04:04:14.577Z","outputs":[{"path":"specrunner/changes/invoice-standalone/design.md","hash":"sha256:4396d06cd5829e94f5ee7e0d574f3e92d908758bae9e4deb2f1d18ce9723da47"},{"path":"specrunner/changes/invoice-standalone/spec.md","hash":"sha256:a588401f0975afa126c8badd8e9c9ae146ffb6be5b88410ce4452daf8e672ed6"}],"inputs":[{"path":"specrunner/changes/invoice-standalone/spec-review-result-001.md","hash":"sha256:e970cde45e13445f901b3a946c83ef924ebe6ec555d011eb7a7085a1220e2167"}]}
+{"type":"transition","ts":"2026-06-24T04:04:16.191Z","step":"step-transition","status":"ok","message":"spec-review complete → spec-review (iter 2)"}
+{"type":"transition","ts":"2026-06-24T04:04:16.194Z","step":"spec-review","status":"started","message":"spec-review iteration 2 started"}
+{"type":"transition","ts":"2026-06-24T04:04:16.196Z","step":"spec-review-started","status":"started","message":"Starting spec-review step"}
