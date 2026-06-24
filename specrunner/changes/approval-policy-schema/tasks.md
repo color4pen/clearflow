@@ -16,7 +16,7 @@
 
 ## T-02: requests テーブルへの origin カラム追加（スキーマ定義）
 
-- [ ] `src/infrastructure/schema.ts` の `requests` テーブルに以下のカラムを追加する: `originType` (text `"origin_type"`, notNull, default `'manual'`), `originPolicyId` (uuid `"origin_policy_id"`, nullable, FK → approvalPolicies, `{ onDelete: "set null" }`), `originTriggerAction` (text `"origin_trigger_action"`, nullable), `originTriggerEntityId` (uuid `"origin_trigger_entity_id"`, nullable)。`originPolicyId` の FK に `onDelete: "set null"` を指定する（既存の `templateId` FK と一貫した挙動）
+- [ ] `src/infrastructure/schema.ts` の `requests` テーブルに以下のカラムを追加する: `originType` (text `"origin_type"`, notNull, default `'manual'`), `originPolicyId` (uuid `"origin_policy_id"`, nullable, FK → approvalPolicies、onDelete 指定なし＝デフォルト RESTRICT), `originTriggerAction` (text `"origin_trigger_action"`, nullable), `originTriggerEntityId` (uuid `"origin_trigger_entity_id"`, nullable)。`originPolicyId` の FK には `onDelete` を指定しない（デフォルト RESTRICT）。SET NULL にすると `origin_type = 'system'` のリクエストが存在する状態でポリシーを削除した際に `requests_origin_check` CHECK 制約（origin_policy_id IS NOT NULL）に違反するため
 - [ ] CHECK 制約を追加する: `check("requests_origin_check", sql\`...\`)` で origin_type = 'manual' なら policy 関連が全 null、origin_type = 'system' なら全 NOT NULL であることを保証する
 - [ ] `requestsRelations` に `originPolicy` (one → approvalPolicies, fields: [requests.originPolicyId]) への relation を追加する
 

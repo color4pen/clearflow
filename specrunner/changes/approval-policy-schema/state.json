@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "de675cb9-af85-4b5e-a929-074d0d30fc6a",
   "createdAt": "2026-06-24T07:37:45.283Z",
-  "updatedAt": "2026-06-24T08:03:35.557Z",
+  "updatedAt": "2026-06-24T08:07:00.843Z",
   "request": {
     "title": "承認ポリシーのスキーマとモデル追加",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "spec-review",
+  "step": "spec-fixer",
   "status": "running",
   "branch": "feat/approval-policy-schema-de675cb9",
   "error": null,
@@ -35,11 +35,11 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 23,
+    "historyCount": 27,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 2,
+      "spec-review": 3,
       "spec-fixer": 1
     }
   }
