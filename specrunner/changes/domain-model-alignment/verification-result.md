@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 14.7s | 0 |
-| 2 | typecheck | passed | 3.4s | 0 |
+| 1 | build | passed | 11.2s | 0 |
+| 2 | typecheck | passed | 1.0s | 0 |
 | 3 | test | passed | 0.4s | 0 |
-| 4 | lint | passed | 4.8s | 0 |
+| 4 | lint | passed | 4.2s | 0 |
 
 ## Phase: build
 
@@ -17,7 +17,7 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 7.5s
+✓ Compiled successfully in 6.0s
   Running TypeScript ...
   Finished TypeScript in 3.7s ...
   Collecting page data using 7 workers ...
@@ -25,7 +25,7 @@
   Generating static pages using 7 workers (7/28) 
   Generating static pages using 7 workers (14/28) 
   Generating static pages using 7 workers (21/28) 
-✓ Generating static pages using 7 workers (28/28) in 132ms
+✓ Generating static pages using 7 workers (28/28) in 138ms
   Finalizing page optimization ...
 
 Route (app)
@@ -112,7 +112,7 @@ error: async-error
  776 pass
  0 fail
  1731 expect() calls
-Ran 776 tests across 39 files. [355.00ms]
+Ran 776 tests across 39 files. [354.00ms]
 
 ```
 
