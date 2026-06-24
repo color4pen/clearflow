@@ -67,3 +67,9 @@
 {"type":"transition","ts":"2026-06-24T10:57:41.832Z","step":"custom-reviewers","status":"warning","message":"custom-reviewers iteration 2 completed with verdict: needs-fix"}
 {"type":"transition","ts":"2026-06-24T10:57:41.832Z","step":"step-transition","status":"ok","message":"custom-reviewers → code-fixer"}
 {"type":"transition","ts":"2026-06-24T10:57:41.834Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-24T10:58:37.175Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"7259c95a-e274-4aee-b598-cf82ea6dab82","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-06-24T10:57:41.843Z","endedAt":"2026-06-24T10:58:35.807Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-24T10:58:35.807Z","outputs":[{"path":"specrunner/changes/approval-policy-ui","hash":null}],"inputs":[{"path":"specrunner/changes/approval-policy-ui/domain-invariants-result-002.md","hash":"sha256:f94efd9aeaa996390c789b12f201de7a2076037b6ac83ce3276ee40930541ed5"}]}
+{"type":"transition","ts":"2026-06-24T10:58:37.187Z","step":"step-transition","status":"ok","message":"code-fixer → custom-reviewers"}
+{"type":"transition","ts":"2026-06-24T10:58:37.189Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 3 started"}
+{"type":"transition","ts":"2026-06-24T10:58:37.207Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
