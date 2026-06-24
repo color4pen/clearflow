@@ -12,6 +12,8 @@ export async function updateInquiry(data: {
   description?: string | null;
   source?: InquirySource;
   clientId?: string | null;
+  budget?: number | null;
+  timeline?: string | null;
   assigneeId?: string | null;
 }): Promise<UpdateInquiryResult> {
   const inquiry = await inquiryRepository.findById(data.inquiryId, data.organizationId);
@@ -25,6 +27,8 @@ export async function updateInquiry(data: {
     description: string | null;
     source: string;
     clientId: string | null;
+    budget: number | null;
+    timeline: string | null;
     assigneeId: string | null;
   }> = {};
 
@@ -32,6 +36,8 @@ export async function updateInquiry(data: {
   if (data.description !== undefined) updatePayload.description = data.description;
   if (data.source !== undefined) updatePayload.source = data.source;
   if (data.clientId !== undefined) updatePayload.clientId = data.clientId;
+  if (data.budget !== undefined) updatePayload.budget = data.budget;
+  if (data.timeline !== undefined) updatePayload.timeline = data.timeline;
   if (data.assigneeId !== undefined) updatePayload.assigneeId = data.assigneeId;
 
   try {

@@ -14,12 +14,12 @@ async function readSrc(relPath: string): Promise<string> {
 }
 
 describe("createMeeting usecase 静的検証", () => {
-  it("T-01: dealId が必須パラメータとして含まれる", async () => {
+  it("T-01: dealId または inquiryId を受け付けるコードが含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createMeeting.ts");
-    // 実行・検証 - dealId が必須
+    // 実行・検証 - dealId と inquiryId の両方をサポート
     expect(content).toContain("dealId");
-    expect(content).not.toContain("inquiryId");
+    expect(content).toContain("inquiryId");
   });
 
   it("T-02: dealId 指定時に dealRepository.findById で案件存在確認するコードが含まれる", async () => {

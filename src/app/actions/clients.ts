@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
-import { createClient, listClients, createClientContact, deleteClientContact } from "@/application/usecases";
+import { createClient, listClients, createClientContact, updateClientContact, deleteClientContact } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import { canPerform } from "@/domain/authorization";
 import type { Client } from "@/domain/models/client";
@@ -232,6 +232,7 @@ export async function addClientContactAction(
     position: parsed.data.position ?? null,
     email: parsed.data.email ?? null,
     phone: parsed.data.phone ?? null,
+    isPrimary: parsed.data.isPrimary ?? false,
   });
 
   if (!result.ok) {
@@ -265,13 +266,6 @@ export async function updateClientContactAction(
     return { success: false, message: "この操作を実行する権限がありません" };
   }
 
-  const { clientRepository } = await import("@/infrastructure/repositories");
-
-  const client = await clientRepository.findById(clientId, session.user.organizationId);
-  if (!client) {
-    return { success: false, message: "顧客が見つかりません" };
-  }
-
   const parsed = updateContactSchema.safeParse({
     name: formData.get("name"),
     department: formData.get("department") || undefined,
@@ -286,7 +280,11 @@ export async function updateClientContactAction(
     return { success: false, message: firstError?.message ?? "入力が不正です" };
   }
 
-  const updated = await clientRepository.updateContact(contactId, clientId, {
+  const result = await updateClientContact({
+    contactId,
+    clientId,
+    organizationId: session.user.organizationId,
+    actorId: session.user.id,
     name: parsed.data.name,
     department: parsed.data.department ?? null,
     position: parsed.data.position ?? null,
@@ -295,8 +293,8 @@ export async function updateClientContactAction(
     isPrimary: parsed.data.isPrimary ?? false,
   });
 
-  if (!updated) {
-    return { success: false, message: "担当者が見つかりません" };
+  if (!result.ok) {
+    return { success: false, message: result.reason };
   }
 
   revalidatePath(`/clients/${clientId}`);

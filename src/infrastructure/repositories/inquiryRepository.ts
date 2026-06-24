@@ -13,6 +13,8 @@ function mapRow(row: typeof inquiries.$inferSelect): Inquiry {
     description: row.description ?? null,
     source: row.source as InquirySource,
     status: row.status,
+    budget: row.budget ?? null,
+    timeline: row.timeline ?? null,
     assigneeId: row.assigneeId ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -27,6 +29,8 @@ export async function create(
     title: string;
     description?: string | null;
     source: string;
+    budget?: number | null;
+    timeline?: string | null;
     assigneeId?: string | null;
   },
   tx?: Transaction
@@ -39,8 +43,10 @@ export async function create(
       clientId: data.clientId ?? null,
       title: data.title,
       description: data.description ?? null,
-      source: data.source,
+      source: data.source as "web" | "phone" | "email" | "referral" | "agent_service" | "exhibition" | "other",
       status: "new",
+      budget: data.budget ?? null,
+      timeline: data.timeline ?? null,
       assigneeId: data.assigneeId ?? null,
     })
     .returning();
@@ -91,6 +97,8 @@ export async function findAllWithClientByOrganization(
   }));
 }
 
+type InquirySourceEnum = "web" | "phone" | "email" | "referral" | "agent_service" | "exhibition" | "other";
+
 export async function update(
   id: string,
   organizationId: string,
@@ -99,14 +107,22 @@ export async function update(
     description: string | null;
     source: string;
     clientId: string | null;
+    budget: number | null;
+    timeline: string | null;
     assigneeId: string | null;
   }>,
   tx?: Transaction
 ): Promise<Inquiry | null> {
   const queryRunner = tx ?? db;
+  const { source, ...rest } = data;
+  const setData = {
+    ...rest,
+    ...(source !== undefined ? { source: source as InquirySourceEnum } : {}),
+    updatedAt: new Date(),
+  };
   const result = await queryRunner
     .update(inquiries)
-    .set({ ...data, updatedAt: new Date() })
+    .set(setData)
     .where(and(eq(inquiries.id, id), eq(inquiries.organizationId, organizationId)))
     .returning();
   return result[0] ? mapRow(result[0]) : null;

@@ -33,6 +33,15 @@ export const approvalStepStatusEnum = pgEnum("approval_step_status", [
   "approved",
   "rejected",
 ]);
+export const inquirySourceEnum = pgEnum("inquiry_source", [
+  "web",
+  "phone",
+  "email",
+  "referral",
+  "agent_service",
+  "exhibition",
+  "other",
+]);
 export const inquiryStatusEnum = pgEnum("inquiry_status", [
   "new",
   "converted",
@@ -271,8 +280,10 @@ export const inquiries = pgTable("inquiries", {
   clientId: uuid("client_id").references(() => clients.id),
   title: text("title").notNull(),
   description: text("description"),
-  source: text("source").notNull(),
+  source: inquirySourceEnum("source").notNull(),
   status: inquiryStatusEnum("status").notNull().default("new"),
+  budget: integer("budget"),
+  timeline: text("timeline"),
   assigneeId: uuid("assignee_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -286,12 +297,13 @@ export const meetings = pgTable("meetings", {
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id),
-  dealId: uuid("deal_id").notNull().references(() => deals.id),
+  dealId: uuid("deal_id").references(() => deals.id),
+  inquiryId: uuid("inquiry_id").references(() => inquiries.id),
   type: meetingTypeEnum("type").notNull(),
   date: timestamp("date").notNull(),
   location: text("location"),
-  // { internal: string[], external: string[] }
-  attendees: jsonb("attendees").notNull().default({ internal: [], external: [] }),
+  // Array<{ userId: string | null, contactId: string | null, name: string, isExternal: boolean }>
+  attendees: jsonb("attendees").notNull().default([]),
   summary: text("summary"),
   // Array<{ description: string, assignee: string, dueDate: string | null, done: boolean }>
   actionItems: jsonb("action_items").notNull().default([]),
@@ -315,6 +327,7 @@ export const deals = pgTable("deals", {
     .notNull()
     .references(() => clients.id),
   title: text("title").notNull(),
+  description: text("description"),
   phase: dealPhaseEnum("phase").notNull().default("proposal_prep"),
   estimatedAmount: integer("estimated_amount"),
   estimatedStartDate: timestamp("estimated_start_date"),
@@ -622,6 +635,7 @@ export const inquiriesRelations = relations(inquiries, ({ one, many }) => ({
     references: [users.id],
   }),
   deals: many(deals),
+  meetings: many(meetings),
 }));
 
 export const meetingsRelations = relations(meetings, ({ one }) => ({
@@ -632,6 +646,10 @@ export const meetingsRelations = relations(meetings, ({ one }) => ({
   deal: one(deals, {
     fields: [meetings.dealId],
     references: [deals.id],
+  }),
+  inquiry: one(inquiries, {
+    fields: [meetings.inquiryId],
+    references: [inquiries.id],
   }),
   createdBy: one(users, {
     fields: [meetings.createdById],

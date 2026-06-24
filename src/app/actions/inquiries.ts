@@ -14,7 +14,9 @@ const createInquirySchema = z.object({
   newClientName: z.string().min(1).optional(),
   title: z.string().min(1, "件名は必須です"),
   description: z.string().optional(),
-  source: z.enum(["web", "phone", "referral", "exhibition", "other"]),
+  source: z.enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"]),
+  budget: z.number().int().nullable().optional(),
+  timeline: z.string().nullable().optional(),
   assigneeId: z.string().uuid().optional(),
 });
 
@@ -25,6 +27,8 @@ export type CreateInquiryState = {
     title?: string[];
     description?: string[];
     source?: string[];
+    budget?: string[];
+    timeline?: string[];
     assigneeId?: string[];
   };
   message?: string;
@@ -90,6 +94,8 @@ export async function createInquiryAction(
     title: parsed.data.title,
     description: parsed.data.description ?? null,
     source: parsed.data.source,
+    budget: parsed.data.budget ?? null,
+    timeline: parsed.data.timeline ?? null,
     assigneeId: parsed.data.assigneeId ?? null,
   });
 
@@ -147,8 +153,10 @@ export async function updateInquiryStatusAction(
 const updateInquirySchema = z.object({
   title: z.string().min(1, "件名は必須です"),
   description: z.string().optional(),
-  source: z.enum(["web", "phone", "referral", "exhibition", "other"]),
+  source: z.enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"]),
   clientId: z.string().uuid().optional(),
+  budget: z.number().int().nullable().optional(),
+  timeline: z.string().nullable().optional(),
   assigneeId: z.string().uuid().optional(),
 });
 
@@ -158,6 +166,8 @@ export type UpdateInquiryState = {
     description?: string[];
     source?: string[];
     clientId?: string[];
+    budget?: string[];
+    timeline?: string[];
     assigneeId?: string[];
   };
   message?: string;
@@ -219,6 +229,8 @@ export async function updateInquiryAction(
     description: parsed.data.description ?? null,
     source: parsed.data.source,
     clientId: parsed.data.clientId ?? null,
+    budget: parsed.data.budget ?? null,
+    timeline: parsed.data.timeline ?? null,
     assigneeId: parsed.data.assigneeId ?? null,
   });
 

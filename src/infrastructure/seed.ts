@@ -549,6 +549,8 @@ async function seed() {
     description: "現行システムの老朽化に伴い、クラウド移行を検討中",
     source: "web",
     status: "new",
+    budget: 10000000,
+    timeline: "2026年度内",
   }).returning();
 
   const [newInquiry2] = await db.insert(inquiries).values({
@@ -567,6 +569,8 @@ async function seed() {
     source: "phone",
     status: "new",
     assigneeId: managerUser.id,
+    budget: 15000000,
+    timeline: "来期（2027年4月〜）",
   }).returning();
 
   const [inProgressInquiry2] = await db.insert(inquiries).values({
@@ -574,7 +578,7 @@ async function seed() {
     clientId: nihonFinance.id,
     title: "リスク管理ダッシュボード構築",
     description: "ポートフォリオのリスク指標をリアルタイム可視化したい",
-    source: "referral",
+    source: "email",
     status: "new",
     assigneeId: adminUser.id,
   }).returning();
@@ -594,7 +598,7 @@ async function seed() {
     clientId: techClient.id,
     title: "DX推進プロジェクト受注",
     description: "昨期より継続商談。正式受注に向けて承認済み",
-    source: "referral",
+    source: "agent_service",
     status: "converted",
   }).returning();
 
@@ -616,6 +620,8 @@ async function seed() {
     source: "referral",
     status: "converted",
     assigneeId: adminUser.id,
+    budget: 50000000,
+    timeline: "2027年4月〜",
   }).returning();
 
   const [convertedInquiry5] = await db.insert(inquiries).values({
@@ -721,10 +727,11 @@ async function seed() {
     type: "proposal",
     date: new Date("2026-06-20T14:00:00"),
     location: "大和建設株式会社 会議室",
-    attendees: {
-      internal: [managerUser.name, memberUser.name],
-      external: ["田中 一郎"],
-    },
+    attendees: [
+      { userId: null, contactId: null, name: managerUser.name, isExternal: false },
+      { userId: null, contactId: null, name: memberUser.name, isExternal: false },
+      { userId: null, contactId: null, name: "田中 一郎", isExternal: true },
+    ],
     summary: "案件化後の提案会議。詳細スコープと費用感を確認した。",
     actionItems: [
       { description: "詳細見積書を作成する", assignee: managerUser.name, dueDate: "2026-07-05", done: false },
@@ -740,10 +747,12 @@ async function seed() {
     type: "closing",
     date: new Date("2026-06-10T10:00:00"),
     location: "株式会社テック商事 応接室",
-    attendees: {
-      internal: [adminUser.name, managerUser.name],
-      external: ["山田 太郎", "鈴木 花子"],
-    },
+    attendees: [
+      { userId: null, contactId: null, name: adminUser.name, isExternal: false },
+      { userId: null, contactId: null, name: managerUser.name, isExternal: false },
+      { userId: null, contactId: null, name: "山田 太郎", isExternal: true },
+      { userId: null, contactId: null, name: "鈴木 花子", isExternal: true },
+    ],
     summary: "契約条件の最終確認。準委任契約で合意。7月1日キックオフ予定。",
     actionItems: [
       { description: "契約書のドラフトを送付する", assignee: adminUser.name, dueDate: "2026-06-15", done: true },
@@ -759,10 +768,11 @@ async function seed() {
     type: "followup",
     date: new Date("2026-06-28T14:00:00"),
     location: "オンライン（Zoom）",
-    attendees: {
-      internal: [managerUser.name, memberUser.name],
-      external: ["山田 太郎"],
-    },
+    attendees: [
+      { userId: null, contactId: null, name: managerUser.name, isExternal: false },
+      { userId: null, contactId: null, name: memberUser.name, isExternal: false },
+      { userId: null, contactId: null, name: "山田 太郎", isExternal: true },
+    ],
     summary: "キックオフ前の最終打ち合わせ。開発環境のセットアップ手順を共有。",
     actionItems: [
       { description: "VPN接続情報を提供する", assignee: "山田 太郎", dueDate: "2026-06-30", done: false },
@@ -779,10 +789,11 @@ async function seed() {
     type: "negotiation",
     date: new Date("2026-07-10T13:00:00"),
     location: "さくら物流株式会社 本社",
-    attendees: {
-      internal: [adminUser.name],
-      external: ["高橋 美咲", "中村 健太"],
-    },
+    attendees: [
+      { userId: null, contactId: null, name: adminUser.name, isExternal: false },
+      { userId: null, contactId: null, name: "高橋 美咲", isExternal: true },
+      { userId: null, contactId: null, name: "中村 健太", isExternal: true },
+    ],
     summary: "配送ルート最適化の価格交渉。SES契約での提案を検討中。",
     actionItems: [
       { description: "SES単価の最終提示", assignee: adminUser.name, dueDate: "2026-07-15", done: false },
@@ -797,10 +808,10 @@ async function seed() {
     type: "hearing",
     date: new Date("2026-04-15T10:00:00"),
     location: "大和建設株式会社 第1会議室",
-    attendees: {
-      internal: [managerUser.name],
-      external: ["田中 一郎"],
-    },
+    attendees: [
+      { userId: null, contactId: null, name: managerUser.name, isExternal: false },
+      { userId: null, contactId: null, name: "田中 一郎", isExternal: true },
+    ],
     summary: "初回ヒアリング。工事進捗管理の現状課題をヒアリングした。",
     actionItems: [
       { description: "他社事例をまとめて次回提示する", assignee: managerUser.name, dueDate: "2026-04-30", done: true },
@@ -822,10 +833,12 @@ async function seed() {
     type: "proposal",
     date: new Date("2026-05-20T10:00:00"),
     location: "大和建設株式会社 第2会議室",
-    attendees: {
-      internal: [managerUser.name, memberUser.name],
-      external: ["田中 一郎", "佐藤 次郎"],
-    },
+    attendees: [
+      { userId: null, contactId: null, name: managerUser.name, isExternal: false },
+      { userId: null, contactId: null, name: memberUser.name, isExternal: false },
+      { userId: null, contactId: null, name: "田中 一郎", isExternal: true },
+      { userId: null, contactId: null, name: "佐藤 次郎", isExternal: true },
+    ],
     summary: "工事管理ツールの提案書を提示。承認フロー機能を中心にデモを実施した。",
     actionItems: [
       { description: "カスタマイズ要件をまとめた提案書改訂版を提出する", assignee: managerUser.name, dueDate: "2026-06-05", done: false },
@@ -840,10 +853,12 @@ async function seed() {
     type: "hearing",
     date: new Date("2026-05-25T15:00:00"),
     location: "オンライン（Teams）",
-    attendees: {
-      internal: [adminUser.name, memberUser.name],
-      external: ["渡辺 浩二", "伊藤 恵"],
-    },
+    attendees: [
+      { userId: null, contactId: null, name: adminUser.name, isExternal: false },
+      { userId: null, contactId: null, name: memberUser.name, isExternal: false },
+      { userId: null, contactId: null, name: "渡辺 浩二", isExternal: true },
+      { userId: null, contactId: null, name: "伊藤 恵", isExternal: true },
+    ],
     summary: "リスク管理ダッシュボードの要件ヒアリング。リアルタイム性と可視化の粒度を確認。",
     actionItems: [
       { description: "技術検証の結果レポートを提出する", assignee: memberUser.name, dueDate: "2026-06-08", done: false },
@@ -866,10 +881,10 @@ async function seed() {
     type: "followup",
     date: new Date("2026-06-15T11:00:00"),
     location: "株式会社テック商事 本社",
-    attendees: {
-      internal: [adminUser.name],
-      external: ["山田 太郎"],
-    },
+    attendees: [
+      { userId: null, contactId: null, name: adminUser.name, isExternal: false },
+      { userId: null, contactId: null, name: "山田 太郎", isExternal: true },
+    ],
     summary: "受注後のフォローアップ訪問。プロジェクト開始スケジュールを確認した。",
     actionItems: [
       { description: "キックオフ会議の日程を調整する", assignee: adminUser.name, dueDate: "2026-06-20", done: false },

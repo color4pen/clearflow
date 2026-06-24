@@ -13,6 +13,8 @@ export async function createInquiry(data: {
   title: string;
   description?: string | null;
   source: string;
+  budget?: number | null;
+  timeline?: string | null;
   assigneeId?: string | null;
 }): Promise<CreateInquiryResult> {
   // 顧客が指定された場合のみ存在確認
@@ -32,6 +34,8 @@ export async function createInquiry(data: {
           title: data.title,
           description: data.description,
           source: data.source,
+          budget: data.budget ?? null,
+          timeline: data.timeline ?? null,
           assigneeId: data.assigneeId,
         },
         tx

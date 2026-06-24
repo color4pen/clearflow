@@ -9,6 +9,7 @@ export async function updateDeal(data: {
   organizationId: string;
   actorId: string;
   title?: string;
+  description?: string | null;
   estimatedAmount?: number | null;
   estimatedStartDate?: Date | null;
   estimatedEndDate?: Date | null;
@@ -43,6 +44,7 @@ export async function updateDeal(data: {
         data.organizationId,
         {
           ...(data.title !== undefined && { title: data.title }),
+          ...(data.description !== undefined && { description: data.description }),
           ...(data.estimatedAmount !== undefined && { estimatedAmount: data.estimatedAmount }),
           ...(data.estimatedStartDate !== undefined && {
             estimatedStartDate: data.estimatedStartDate,
@@ -59,6 +61,7 @@ export async function updateDeal(data: {
       // 変更されたフィールドのみ metadata に記録する
       const changedFields = Object.keys({
         ...(data.title !== undefined && { title: data.title }),
+        ...(data.description !== undefined && { description: data.description }),
         ...(data.estimatedAmount !== undefined && { estimatedAmount: data.estimatedAmount }),
         ...(data.estimatedStartDate !== undefined && { estimatedStartDate: data.estimatedStartDate }),
         ...(data.estimatedEndDate !== undefined && { estimatedEndDate: data.estimatedEndDate }),

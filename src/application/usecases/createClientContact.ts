@@ -1,4 +1,5 @@
 import { clientRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { validateIsPrimaryUniqueness } from "@/domain/services/clientContactValidation";
 import type { ClientContact } from "@/domain/models/client";
 
 export type CreateClientContactResult =
@@ -14,12 +15,22 @@ export async function createClientContact(data: {
   position?: string | null;
   email?: string | null;
   phone?: string | null;
+  isPrimary?: boolean;
 }): Promise<CreateClientContactResult> {
   try {
     // テナント検証: clientId が organizationId に属するかを確認する
     const client = await clientRepository.findById(data.clientId, data.organizationId);
     if (!client) {
       return { ok: false, reason: "顧客が見つかりません" };
+    }
+
+    // isPrimary の重複チェック
+    if (data.isPrimary) {
+      const existingContacts = await clientRepository.findContactsByClientId(data.clientId);
+      const validation = validateIsPrimaryUniqueness(data.isPrimary, existingContacts);
+      if (!validation.ok) {
+        return { ok: false, reason: validation.reason };
+      }
     }
 
     const contact = await clientRepository.createContact({
@@ -29,6 +40,7 @@ export async function createClientContact(data: {
       position: data.position,
       email: data.email,
       phone: data.phone,
+      isPrimary: data.isPrimary ?? false,
     });
 
     await auditLogRepository.create({

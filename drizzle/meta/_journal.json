@@ -22,6 +22,13 @@
       "when": 1782267501554,
       "tag": "0002_early_nicolaos",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782274328260,
+      "tag": "0003_shallow_miss_america",
+      "breakpoints": true
     }
   ]
 }

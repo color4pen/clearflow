@@ -33,6 +33,7 @@ export { updateDeal } from "./updateDeal";
 export { addDealContact } from "./addDealContact";
 export { removeDealContact } from "./removeDealContact";
 export { createClientContact } from "./createClientContact";
+export { updateClientContact } from "./updateClientContact";
 export { deleteClientContact } from "./deleteClientContact";
 export { createContract } from "./createContract";
 export { updateContract } from "./updateContract";
