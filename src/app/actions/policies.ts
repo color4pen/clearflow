@@ -14,7 +14,10 @@ const policySchema = z
   .object({
     name: z.string().min(1, "ポリシー名は必須です"),
     description: z.string().optional(),
-    triggerAction: z.string().min(1, "トリガーアクションは必須です"),
+    triggerAction: z.enum(
+      ["inquiry.convert", "contract.create", "contract.cancel"] as const,
+      { message: "トリガーアクションは必須です" }
+    ),
     conditionField: z.string().optional(),
     conditionOperator: z.enum(CONDITION_OPERATORS).optional(),
     conditionValue: z.string().optional(),

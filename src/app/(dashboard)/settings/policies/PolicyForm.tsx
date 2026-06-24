@@ -7,6 +7,7 @@ import type { ApprovalPolicy } from "@/domain/models/approvalPolicy";
 import {
   FormField,
   Input,
+  LinkButton,
   Select,
   Textarea,
   SubmitButton,
@@ -50,12 +51,7 @@ export function PolicyForm(props: Props) {
   const [conditionField, setConditionField] = useState(defaultConditionField);
 
   const boundAction =
-    props.mode === "edit"
-      ? (_prev: ActionState, formData: FormData) => {
-          formData.set("id", (props as Extract<Props, { mode: "edit" }>).policyId);
-          return updatePolicyAction(_prev, formData);
-        }
-      : createPolicyAction;
+    props.mode === "edit" ? updatePolicyAction : createPolicyAction;
 
   const [state, formAction, pending] = useActionState<ActionState, FormData>(
     boundAction,
@@ -247,12 +243,12 @@ export function PolicyForm(props: Props) {
           <SubmitButton pending={pending} pendingText="保存中...">
             {props.mode === "edit" ? "更新する" : "作成する"}
           </SubmitButton>
-          <a
-            href="/settings/policies"
-            className="text-xs text-text-muted underline"
+          <LinkButton
+            variant="muted"
+            onClick={() => router.push("/settings/policies")}
           >
             キャンセル
-          </a>
+          </LinkButton>
         </div>
       </form>
     </div>

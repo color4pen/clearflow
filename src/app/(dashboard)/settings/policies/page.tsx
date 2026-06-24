@@ -16,7 +16,7 @@ export default async function PoliciesPage() {
     redirect("/requests");
   }
 
-  const isAdmin = session.user.role === "admin";
+  const isAdmin = canPerform(session.user.role, "approvalSettings", "createPolicy");
 
   const [policiesResult, templates] = await Promise.all([
     listPoliciesAction(),
