@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { updateMeetingAction } from "@/app/actions/meetings";
 import { SectionCard, FormField, Input, Select, Textarea, preventEnterSubmit } from "@/app/components";
 import { meetingTypeLabels } from "@/app/(dashboard)/labels";
-import type { HearingData } from "@/domain/models/meeting";
+import type { HearingData, MeetingAttendee } from "@/domain/models/meeting";
 
 const typeOptions = Object.entries(meetingTypeLabels).map(([value, label]) => ({
   value,
@@ -19,7 +19,7 @@ type Props = {
     type: string;
     date: Date;
     location: string | null;
-    attendees: { internal: string[]; external: string[] };
+    attendees: MeetingAttendee[];
     hearingData: HearingData | null;
   };
   editable: boolean;
@@ -40,12 +40,14 @@ export function MeetingInfoSection({ meetingId, dealId, meeting, editable, orgUs
   const [type, setType] = useState(meeting.type);
   const [date, setDate] = useState(toDatetimeLocalValue(meeting.date));
   const [location, setLocation] = useState(meeting.location ?? "");
+  const internalNames = meeting.attendees.filter((a) => !a.isExternal).map((a) => a.name);
+  const externalNames = meeting.attendees.filter((a) => a.isExternal).map((a) => a.name);
   const [internalAttendees, setInternalAttendees] = useState<string[]>(
-    meeting.attendees.internal.length > 0 ? [...meeting.attendees.internal] : [""]
+    internalNames.length > 0 ? [...internalNames] : [""]
   );
   const [externalAttendees, setExternalAttendees] = useState<Array<{ name: string; registerAsContact: boolean }>>(
-    meeting.attendees.external.length > 0
-      ? meeting.attendees.external.map((name) => ({ name, registerAsContact: false }))
+    externalNames.length > 0
+      ? externalNames.map((name) => ({ name, registerAsContact: false }))
       : [{ name: "", registerAsContact: false }]
   );
   const [hearingData, setHearingData] = useState<HearingData>(

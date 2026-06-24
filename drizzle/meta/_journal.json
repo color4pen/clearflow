@@ -29,6 +29,13 @@
       "when": 1782271866110,
       "tag": "0003_watery_stepford_cuckoos",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1782281497289,
+      "tag": "0004_rapid_chat",
+      "breakpoints": true
     }
   ]
 }

@@ -131,6 +131,46 @@ describe("updateDeal usecase 静的検証", () => {
   });
 });
 
+describe("Deal domain model description 静的検証", () => {
+  it("Deal 型に description フィールドが含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("domain/models/deal.ts");
+    // 実行・検証 - description が含まれる
+    expect(content).toContain("description: string | null");
+  });
+
+  it("createDeal の引数に description が含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("application/usecases/createDeal.ts");
+    // 実行・検証 - description が含まれる
+    expect(content).toContain("description");
+  });
+
+  it("updateDeal の引数に description が含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("application/usecases/updateDeal.ts");
+    // 実行・検証 - description が含まれる
+    expect(content).toContain("description");
+  });
+
+  it("dealRepository の create に description が含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("infrastructure/repositories/dealRepository.ts");
+    // 実行・検証 - description が含まれる
+    expect(content).toContain("description");
+  });
+
+  it("createDealSchema に description が含まれる", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("app/actions/deals.ts");
+    // 実行・検証 - description が含まれる
+    const schemaIdx = content.indexOf("const createDealSchema");
+    expect(schemaIdx).toBeGreaterThan(-1);
+    const schemaBody = content.slice(schemaIdx, schemaIdx + 600);
+    expect(schemaBody).toContain("description");
+  });
+});
+
 describe("deals Server Action ロールチェック静的検証", () => {
   it("createDealAction に canPerform ロールチェックが含まれる", async () => {
     // 準備 - ソースファイルを読み込む

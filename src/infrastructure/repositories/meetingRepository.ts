@@ -2,17 +2,18 @@ import { eq, and, asc, desc } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { meetings } from "../schema";
-import type { Meeting, MeetingType, HearingData, ActionItem, MeetingAttendees } from "@/domain/models/meeting";
+import type { Meeting, MeetingType, HearingData, ActionItem, MeetingAttendee } from "@/domain/models/meeting";
 
 function mapRow(row: typeof meetings.$inferSelect): Meeting {
   return {
     id: row.id,
     organizationId: row.organizationId,
-    dealId: row.dealId,
+    dealId: row.dealId ?? null,
+    inquiryId: row.inquiryId ?? null,
     type: row.type as MeetingType,
     date: row.date,
     location: row.location ?? null,
-    attendees: row.attendees as MeetingAttendees,
+    attendees: row.attendees as MeetingAttendee[],
     summary: row.summary ?? null,
     actionItems: row.actionItems as ActionItem[],
     hearingData: row.hearingData as HearingData | null,
@@ -25,11 +26,12 @@ function mapRow(row: typeof meetings.$inferSelect): Meeting {
 export async function create(
   data: {
     organizationId: string;
-    dealId: string;
+    dealId?: string | null;
+    inquiryId?: string | null;
     type: MeetingType;
     date: Date;
     location?: string | null;
-    attendees: MeetingAttendees;
+    attendees: MeetingAttendee[];
     summary?: string | null;
     actionItems: ActionItem[];
     hearingData?: HearingData | null;
@@ -42,7 +44,8 @@ export async function create(
     .insert(meetings)
     .values({
       organizationId: data.organizationId,
-      dealId: data.dealId,
+      dealId: data.dealId ?? null,
+      inquiryId: data.inquiryId ?? null,
       type: data.type,
       date: data.date,
       location: data.location ?? null,
@@ -103,7 +106,7 @@ export async function update(
     type: MeetingType;
     date: Date;
     location: string | null;
-    attendees: MeetingAttendees;
+    attendees: MeetingAttendee[];
     summary: string | null;
     actionItems: ActionItem[];
     hearingData: HearingData | null;
@@ -117,4 +120,19 @@ export async function update(
     .where(and(eq(meetings.id, id), eq(meetings.organizationId, organizationId)))
     .returning();
   return result[0] ? mapRow(result[0]) : null;
+}
+
+/**
+ * 指定引合に直接紐づく商談を取得する。organizationId でテナント分離。
+ */
+export async function findAllByInquiry(
+  inquiryId: string,
+  organizationId: string
+): Promise<Meeting[]> {
+  const result = await db
+    .select()
+    .from(meetings)
+    .where(and(eq(meetings.inquiryId, inquiryId), eq(meetings.organizationId, organizationId)))
+    .orderBy(asc(meetings.date));
+  return result.map(mapRow);
 }

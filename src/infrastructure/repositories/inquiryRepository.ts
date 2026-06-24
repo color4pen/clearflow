@@ -2,7 +2,7 @@ import { eq, and, sql } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { inquiries, clients } from "../schema";
-import type { Inquiry, InquiryWithClient, InquiryStatus, InquirySource } from "@/domain/models/inquiry";
+import type { Inquiry, InquiryWithClient, InquiryStatus } from "@/domain/models/inquiry";
 
 function mapRow(row: typeof inquiries.$inferSelect): Inquiry {
   return {
@@ -11,9 +11,11 @@ function mapRow(row: typeof inquiries.$inferSelect): Inquiry {
     clientId: row.clientId ?? null,
     title: row.title,
     description: row.description ?? null,
-    source: row.source as InquirySource,
+    source: row.source,
     status: row.status,
     assigneeId: row.assigneeId ?? null,
+    budget: row.budget ?? null,
+    timeline: row.timeline ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     version: row.version,
@@ -28,6 +30,8 @@ export async function create(
     description?: string | null;
     source: string;
     assigneeId?: string | null;
+    budget?: number | null;
+    timeline?: string | null;
   },
   tx?: Transaction
 ): Promise<Inquiry> {
@@ -39,9 +43,11 @@ export async function create(
       clientId: data.clientId ?? null,
       title: data.title,
       description: data.description ?? null,
-      source: data.source,
+      source: data.source as "web" | "phone" | "email" | "referral" | "agent_service" | "exhibition" | "other",
       status: "new",
       assigneeId: data.assigneeId ?? null,
+      budget: data.budget ?? null,
+      timeline: data.timeline ?? null,
     })
     .returning();
   return mapRow(result[0]);
@@ -91,15 +97,19 @@ export async function findAllWithClientByOrganization(
   }));
 }
 
+type InquirySourceValue = "web" | "phone" | "email" | "referral" | "agent_service" | "exhibition" | "other";
+
 export async function update(
   id: string,
   organizationId: string,
   data: Partial<{
     title: string;
     description: string | null;
-    source: string;
+    source: InquirySourceValue;
     clientId: string | null;
     assigneeId: string | null;
+    budget: number | null;
+    timeline: string | null;
   }>,
   tx?: Transaction
 ): Promise<Inquiry | null> {

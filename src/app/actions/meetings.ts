@@ -29,7 +29,8 @@ const contactRegistrationSchema = z.object({
 });
 
 const createMeetingSchema = z.object({
-  dealId: z.string().uuid("案件IDが不正です"),
+  dealId: z.string().uuid("案件IDが不正です").optional(),
+  inquiryId: z.string().uuid("引合IDが不正です").optional(),
   clientId: z.string().uuid().optional(),
   type: z.enum(["hearing", "proposal", "negotiation", "closing", "followup"]),
   date: z.string().min(1, "日時は必須です"),
@@ -45,6 +46,7 @@ const createMeetingSchema = z.object({
 export type CreateMeetingState = {
   errors?: {
     dealId?: string[];
+    inquiryId?: string[];
     type?: string[];
     date?: string[];
     location?: string[];
@@ -56,6 +58,7 @@ export type CreateMeetingState = {
   };
   message?: string;
   dealId?: string;
+  inquiryId?: string;
 };
 
 export async function createMeetingAction(
@@ -133,10 +136,12 @@ export async function createMeetingAction(
   }
 
   const dealIdRaw = formData.get("dealId");
+  const inquiryIdRaw = formData.get("inquiryId");
   const clientIdRaw = formData.get("clientId");
 
   const parsed = createMeetingSchema.safeParse({
-    dealId: dealIdRaw,
+    dealId: dealIdRaw && dealIdRaw !== "" ? dealIdRaw : undefined,
+    inquiryId: inquiryIdRaw && inquiryIdRaw !== "" ? inquiryIdRaw : undefined,
     clientId: clientIdRaw && clientIdRaw !== "" ? clientIdRaw : undefined,
     type: formData.get("type"),
     date: formData.get("date"),
@@ -153,17 +158,36 @@ export async function createMeetingAction(
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
+  // dealId と inquiryId の両方が未指定の場合はエラー
+  if (!parsed.data.dealId && !parsed.data.inquiryId) {
+    return { errors: { dealId: ["案件または引合のいずれかの指定が必要です"] } };
+  }
+
+  // internal/external の参加者リストを新構造に変換する
+  const attendees = [
+    ...parsed.data.internalAttendees.map((name) => ({
+      userId: null as string | null,
+      contactId: null as string | null,
+      name,
+      isExternal: false,
+    })),
+    ...parsed.data.externalAttendees.map((name) => ({
+      userId: null as string | null,
+      contactId: null as string | null,
+      name,
+      isExternal: true,
+    })),
+  ];
+
   const result = await createMeeting({
     organizationId: session.user.organizationId,
     actorId: session.user.id,
-    dealId: parsed.data.dealId,
+    dealId: parsed.data.dealId ?? null,
+    inquiryId: parsed.data.inquiryId ?? null,
     type: parsed.data.type,
     date: new Date(parsed.data.date),
     location: parsed.data.location ?? null,
-    attendees: {
-      internal: parsed.data.internalAttendees,
-      external: parsed.data.externalAttendees,
-    },
+    attendees,
     summary: parsed.data.summary ?? null,
     actionItems: parsed.data.actionItems,
     hearingData: parsed.data.hearingData ?? null,
@@ -187,8 +211,13 @@ export async function createMeetingAction(
     }
   }
 
-  revalidatePath(`/deals/${parsed.data.dealId}`);
-  return { dealId: parsed.data.dealId };
+  if (parsed.data.dealId) {
+    revalidatePath(`/deals/${parsed.data.dealId}`);
+  }
+  if (parsed.data.inquiryId) {
+    revalidatePath(`/inquiries/${parsed.data.inquiryId}`);
+  }
+  return { dealId: parsed.data.dealId, inquiryId: parsed.data.inquiryId };
 }
 
 const updateMeetingSchema = z.object({
@@ -299,10 +328,20 @@ export async function updateMeetingAction(
 
   const attendees =
     internalAttendees !== undefined || externalAttendees !== undefined
-      ? {
-          internal: parsed.data.internalAttendees ?? [],
-          external: parsed.data.externalAttendees ?? [],
-        }
+      ? [
+          ...(parsed.data.internalAttendees ?? []).map((name) => ({
+            userId: null as string | null,
+            contactId: null as string | null,
+            name,
+            isExternal: false,
+          })),
+          ...(parsed.data.externalAttendees ?? []).map((name) => ({
+            userId: null as string | null,
+            contactId: null as string | null,
+            name,
+            isExternal: true,
+          })),
+        ]
       : undefined;
 
   const result = await updateMeeting({
