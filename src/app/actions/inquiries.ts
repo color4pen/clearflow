@@ -15,7 +15,7 @@ const createInquirySchema = z.object({
   title: z.string().min(1, "件名は必須です"),
   description: z.string().optional(),
   source: z.enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"]),
-  budget: z.number().int().nullable().optional(),
+  budget: z.coerce.number().int().nullable().optional(),
   timeline: z.string().nullable().optional(),
   assigneeId: z.string().uuid().optional(),
 });
@@ -59,6 +59,8 @@ export async function createInquiryAction(
   const clientIdRaw = formData.get("clientId");
   const assigneeIdRaw = formData.get("assigneeId");
   const newClientNameRaw = formData.get("newClientName");
+  const budgetRaw = formData.get("budget");
+  const timelineRaw = formData.get("timeline");
 
   const parsed = createInquirySchema.safeParse({
     clientId: clientIdRaw && clientIdRaw !== "" && clientIdRaw !== "__new__" ? clientIdRaw : undefined,
@@ -66,6 +68,8 @@ export async function createInquiryAction(
     title: formData.get("title"),
     description: formData.get("description") || undefined,
     source: formData.get("source"),
+    budget: budgetRaw !== null && budgetRaw !== "" ? budgetRaw : undefined,
+    timeline: timelineRaw !== null && timelineRaw !== "" ? timelineRaw : undefined,
     assigneeId: assigneeIdRaw && assigneeIdRaw !== "" ? assigneeIdRaw : undefined,
   });
 
@@ -155,7 +159,7 @@ const updateInquirySchema = z.object({
   description: z.string().optional(),
   source: z.enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"]),
   clientId: z.string().uuid().optional(),
-  budget: z.number().int().nullable().optional(),
+  budget: z.coerce.number().int().nullable().optional(),
   timeline: z.string().nullable().optional(),
   assigneeId: z.string().uuid().optional(),
 });
@@ -208,11 +212,16 @@ export async function updateInquiryAction(
     resolvedClientId = clientResult.client.id;
   }
 
+  const budgetRaw = formData.get("budget");
+  const timelineRaw = formData.get("timeline");
+
   const raw = {
     title: formData.get("title"),
     description: formData.get("description") || undefined,
     source: formData.get("source"),
     clientId: resolvedClientId,
+    budget: budgetRaw === null ? undefined : (budgetRaw !== "" ? budgetRaw : null),
+    timeline: timelineRaw === null ? undefined : (timelineRaw || null),
     assigneeId: formData.get("assigneeId") || undefined,
   };
 
