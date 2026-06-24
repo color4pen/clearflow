@@ -1,0 +1,40 @@
+{
+  "version": 2,
+  "jobId": "9c7a810e-b7e9-4101-a4a5-9df60a159dc4",
+  "createdAt": "2026-06-24T23:05:01.403Z",
+  "updatedAt": "2026-06-24T23:05:03.322Z",
+  "request": {
+    "title": "ダッシュボード画面のデザイン適用",
+    "type": "spec-change",
+    "baseBranch": "main"
+  },
+  "repository": {
+    "owner": "color4pen",
+    "name": "clearflow"
+  },
+  "step": "request-review",
+  "status": "running",
+  "branch": "change/design-dashboard-9c7a810e",
+  "error": null,
+  "pipelineId": "standard",
+  "reviewers": [
+    {
+      "name": "domain-invariants",
+      "maxIterations": 3,
+      "purpose": "テナント分離と監査ログの完全性を保証する。承認ワークフローの不変条件が変更によって破壊されていないことを検証する。",
+      "criteria": "### テナント分離\n\n- テナント所有リソースへのクエリは必ず organizationId で制約されている\n- organizationId はセッション（認証済みユーザー）から取得し、リクエストボディから受け取らない\n- リソース ID だけで認可判断をしていない（ID + organizationId の組み合わせで検証する）\n- 新しいリポジトリ関数が追加された場合、テナント条件が付与されている\n\n### 監査ログの完全性\n\n- 状態変更（ステータス遷移、作成、削除）は append-only の監査ログを同一トランザクション内で記録する\n- 監査レコードには actor（実行者）、target（対象リソース）、action（操作種別）、timestamp が含まれる\n- 監査ログテーブルに対する UPDATE / DELETE 操作が存在しない\n- 新しい状態変更操作が追加された場合、対応する監査ログ記録がある",
+      "judgment": "- **approved**: 全観点で違反がない\n- **needs-fix**: テナント条件の欠落、監査ログの記録漏れ、トランザクション外での監査ログ記録のいずれかが検出された",
+      "freeText": "",
+      "paths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ]
+    }
+  ],
+  "_journal": {
+    "historyCount": 2,
+    "stepCounts": {}
+  }
+}
