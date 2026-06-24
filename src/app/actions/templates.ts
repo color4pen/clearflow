@@ -5,6 +5,7 @@ import { z } from "zod";
 import { auth } from "@/infrastructure/auth";
 import { approvalTemplateRepository } from "@/infrastructure/repositories";
 import { createTemplate, updateTemplate, deleteTemplate } from "@/application/usecases";
+import { canPerform } from "@/domain/authorization";
 
 const templateFieldSchema = z
   .object({
@@ -47,7 +48,7 @@ const templateSchema = z.object({
 export async function listTemplatesAction() {
   const session = await auth();
   if (!session?.user?.id) return { success: false as const, message: "認証が必要です" };
-  if (session.user.role !== "admin") return { success: false as const, message: "権限がありません" };
+  if (!canPerform(session.user.role, "approvalSettings", "listTemplates")) return { success: false as const, message: "この操作を実行する権限がありません" };
 
   const templates = await approvalTemplateRepository.findByOrganization(
     session.user.organizationId
@@ -62,7 +63,7 @@ export async function createTemplateAction(
 ) {
   const session = await auth();
   if (!session?.user?.id) return { success: false as const, message: "認証が必要です" };
-  if (session.user.role !== "admin") return { success: false as const, message: "権限がありません" };
+  if (!canPerform(session.user.role, "approvalSettings", "createTemplate")) return { success: false as const, message: "この操作を実行する権限がありません" };
 
   const rawSteps = formData.get("steps");
   let parsedSteps: unknown;
@@ -126,7 +127,7 @@ export async function updateTemplateAction(
 ) {
   const session = await auth();
   if (!session?.user?.id) return { success: false as const, message: "認証が必要です" };
-  if (session.user.role !== "admin") return { success: false as const, message: "権限がありません" };
+  if (!canPerform(session.user.role, "approvalSettings", "editTemplate")) return { success: false as const, message: "この操作を実行する権限がありません" };
 
   const id = formData.get("id") as string;
   if (!id) return { success: false as const, message: "テンプレート ID が必要です" };
@@ -191,7 +192,7 @@ export async function updateTemplateAction(
 export async function deleteTemplateAction(templateId: string) {
   const session = await auth();
   if (!session?.user?.id) return { success: false as const, message: "認証が必要です" };
-  if (session.user.role !== "admin") return { success: false as const, message: "権限がありません" };
+  if (!canPerform(session.user.role, "approvalSettings", "deleteTemplate")) return { success: false as const, message: "この操作を実行する権限がありません" };
 
   const result = await deleteTemplate({
     id: templateId,

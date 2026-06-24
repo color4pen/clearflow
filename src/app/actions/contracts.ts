@@ -12,6 +12,7 @@ import {
   deleteContract,
 } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
+import { canPerform } from "@/domain/authorization";
 import type { ContractWithClient, Contract, ContractStatus } from "@/domain/models/contract";
 import type { ActionResult } from "./requests";
 
@@ -44,8 +45,8 @@ export async function createContractAction(formData: FormData): Promise<ActionRe
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "contract", "create")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const rateCheck = await checkRateLimit({
@@ -110,8 +111,8 @@ export async function updateContractAction(
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "contract", "edit")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const contractTypeRaw = formData.get("contractType");
@@ -188,8 +189,8 @@ export async function updateContractStatusAction(
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "contract", "changeStatus")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const result = await updateContractStatus({
@@ -214,8 +215,8 @@ export async function deleteContractAction(contractId: string): Promise<ActionRe
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "contract", "delete")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const result = await deleteContract({

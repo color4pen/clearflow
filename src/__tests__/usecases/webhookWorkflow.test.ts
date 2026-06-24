@@ -201,9 +201,10 @@ describe("Webhook access control (T-12)", () => {
     expect(src).toContain("session.user.role");
   });
 
-  it('webhooks.ts checks for "admin" role', async () => {
+  it('webhooks.ts uses canPerform for role guard', async () => {
     const src = await readSrc("app/actions/webhooks.ts");
-    expect(src).toContain('"admin"');
+    expect(src).toContain('canPerform');
+    expect(src).toContain('manageWebhooks');
   });
 
   it('webhooks.ts returns "権限がありません" for non-admin', async () => {

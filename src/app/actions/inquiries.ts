@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
 import { createInquiry, updateInquiryStatus, updateInquiry, listInquiries, createClient, deleteInquiry } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
+import { canPerform } from "@/domain/authorization";
 import type { InquiryWithClient } from "@/domain/models/inquiry";
 import type { ActionResult } from "./requests";
 
@@ -36,6 +37,10 @@ export async function createInquiryAction(
   const session = await auth();
   if (!session?.user?.id) {
     return { message: "認証が必要です" };
+  }
+
+  if (!canPerform(session.user.role, "inquiry", "create")) {
+    return { message: "この操作を実行する権限がありません" };
   }
 
   const rateCheck = await checkRateLimit({
@@ -111,10 +116,15 @@ export async function updateInquiryStatusAction(
     return { success: false, message: "ステータスが指定されていません" };
   }
 
-  // converted への遷移は admin と manager のみ
   if (newStatus === "converted") {
-    if (session.user.role !== "admin" && session.user.role !== "manager") {
-      return { success: false, message: "権限がありません" };
+    if (!canPerform(session.user.role, "inquiry", "convert")) {
+      return { success: false, message: "この操作を実行する権限がありません" };
+    }
+  }
+
+  if (newStatus === "declined") {
+    if (!canPerform(session.user.role, "inquiry", "decline")) {
+      return { success: false, message: "この操作を実行する権限がありません" };
     }
   }
 
@@ -164,8 +174,8 @@ export async function updateInquiryAction(
     return { message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { message: "権限がありません" };
+  if (!canPerform(session.user.role, "inquiry", "edit")) {
+    return { message: "この操作を実行する権限がありません" };
   }
 
   const clientIdRaw = formData.get("clientId");
@@ -227,8 +237,8 @@ export async function deleteInquiryAction(inquiryId: string): Promise<ActionResu
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "inquiry", "delete")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const result = await deleteInquiry({

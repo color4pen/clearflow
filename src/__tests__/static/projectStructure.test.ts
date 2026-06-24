@@ -1366,31 +1366,28 @@ describe("Tenant isolation — delete operations", () => {
     expect(findIdx).toBeLessThan(deleteIdx);
   });
 
-  it("deleteInquiryAction includes admin/manager role guard", async () => {
+  it("deleteInquiryAction includes role guard via canPerform", async () => {
     const content = await readSrc("app/actions/inquiries.ts");
     const idx = content.indexOf("export async function deleteInquiryAction");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 600);
-    expect(body).toContain("manager");
-    expect(body).toContain("admin");
+    expect(body).toContain("canPerform");
   });
 
-  it("deleteDealAction includes admin/manager role guard", async () => {
+  it("deleteDealAction includes role guard via canPerform", async () => {
     const content = await readSrc("app/actions/deals.ts");
     const idx = content.indexOf("export async function deleteDealAction");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 600);
-    expect(body).toContain("manager");
-    expect(body).toContain("admin");
+    expect(body).toContain("canPerform");
   });
 
-  it("deleteContractAction includes admin/manager role guard", async () => {
+  it("deleteContractAction includes role guard via canPerform", async () => {
     const content = await readSrc("app/actions/contracts.ts");
     const idx = content.indexOf("export async function deleteContractAction");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 600);
-    expect(body).toContain("manager");
-    expect(body).toContain("admin");
+    expect(body).toContain("canPerform");
   });
 
   it("deleteInquiry records audit log", async () => {

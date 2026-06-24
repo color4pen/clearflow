@@ -8,6 +8,8 @@ import {
   deactivateDelegation,
   listDelegations,
 } from "@/application/usecases";
+import { canPerform } from "@/domain/authorization";
+import { approvalDelegationRepository } from "@/infrastructure/repositories";
 
 const createDelegationSchema = z.object({
   fromUserId: z.string().uuid("fromUserId は UUID 形式でなければなりません"),
@@ -21,8 +23,8 @@ export async function createDelegationAction(formData: FormData) {
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
   }
-  if (session.user.role !== "admin") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "approvalSettings", "createDelegation")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const parsed = createDelegationSchema.safeParse({
@@ -35,6 +37,11 @@ export async function createDelegationAction(formData: FormData) {
   if (!parsed.success) {
     const issues = parsed.error.issues.map((i) => i.message).join(", ");
     return { success: false, message: `バリデーションエラー: ${issues}` };
+  }
+
+  // admin 以外は自身の委任のみ作成可能
+  if (session.user.role !== "admin" && parsed.data.fromUserId !== session.user.id) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const result = await createDelegation({
@@ -60,8 +67,22 @@ export async function deactivateDelegationAction(delegationId: string) {
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
   }
+  if (!canPerform(session.user.role, "approvalSettings", "deactivateDelegation")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
+  }
+
+  // admin 以外は自身の委任のみ無効化可能
   if (session.user.role !== "admin") {
-    return { success: false, message: "権限がありません" };
+    const delegations = await approvalDelegationRepository.findByOrganization(
+      session.user.organizationId
+    );
+    const delegation = delegations.find((d) => d.id === delegationId);
+    if (!delegation) {
+      return { success: false, message: "委任が見つかりません" };
+    }
+    if (delegation.fromUserId !== session.user.id) {
+      return { success: false, message: "この操作を実行する権限がありません" };
+    }
   }
 
   const result = await deactivateDelegation({
@@ -84,13 +105,19 @@ export async function listDelegationsAction() {
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
   }
-  if (session.user.role !== "admin") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "approvalSettings", "listDelegations")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const delegations = await listDelegations({
     organizationId: session.user.organizationId,
   });
 
-  return { success: true, delegations };
+  // admin 以外は自身の委任のみ参照可能
+  const filtered =
+    session.user.role === "admin"
+      ? delegations
+      : delegations.filter((d) => d.fromUserId === session.user.id);
+
+  return { success: true, delegations: filtered };
 }

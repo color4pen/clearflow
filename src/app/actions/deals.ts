@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
 import { createDeal, listDeals, updateDealPhase, updateDeal, deleteDeal } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
+import { canPerform } from "@/domain/authorization";
 import type { DealWithDetails, ContractType } from "@/domain/models/deal";
 import type { DealPhase } from "@/domain/models/deal";
 import type { ActionResult } from "./requests";
@@ -59,8 +60,8 @@ export async function createDealAction(
     return { message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { message: "権限がありません" };
+  if (!canPerform(session.user.role, "deal", "create")) {
+    return { message: "この操作を実行する権限がありません" };
   }
 
   const rateCheck = await checkRateLimit({
@@ -163,14 +164,16 @@ export async function updateDealPhaseAction(
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
-  }
-
   const newPhase = formData.get("newPhase");
 
   if (typeof newPhase !== "string") {
     return { success: false, message: "フェーズが指定されていません" };
+  }
+
+  const isTerminalPhase = newPhase === "won" || newPhase === "lost";
+  const requiredOperation = isTerminalPhase ? "closePhase" : "changePhase";
+  if (!canPerform(session.user.role, "deal", requiredOperation)) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const result = await updateDealPhase({
@@ -198,8 +201,8 @@ export async function updateDealAction(
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "deal", "edit")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const contractTypeRaw = formData.get("contractType");
@@ -244,6 +247,11 @@ export async function updateDealAction(
 
   const phaseRaw = formData.get("phase");
   if (typeof phaseRaw === "string" && phaseRaw !== "") {
+    const isTerminal = phaseRaw === "won" || phaseRaw === "lost";
+    const phaseOperation = isTerminal ? "closePhase" : "changePhase";
+    if (!canPerform(session.user.role, "deal", phaseOperation)) {
+      return { success: false, message: "この操作を実行する権限がありません" };
+    }
     const phaseResult = await updateDealPhase({
       dealId,
       organizationId: session.user.organizationId,
@@ -287,8 +295,8 @@ export async function deleteDealAction(dealId: string): Promise<ActionResult> {
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "deal", "delete")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const result = await deleteDeal({

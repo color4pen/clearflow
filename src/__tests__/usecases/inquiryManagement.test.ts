@@ -76,13 +76,13 @@ describe("createClient usecase 静的検証", () => {
 });
 
 describe("updateInquiryStatusAction ロールチェック静的検証", () => {
-  it("converted 時に admin/manager のみ許可するロールチェックが含まれる", async () => {
+  it("converted 時に canPerform によるロールチェックが含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("app/actions/inquiries.ts");
-    // 実行・検証 - admin/manager ロールチェックがある
+    // 実行・検証 - canPerform によるロールチェックがある
     // 「converted」への遷移時のロールチェック
     expect(content).toContain('"converted"');
-    expect(content).toContain('"admin"');
-    expect(content).toContain('"manager"');
+    expect(content).toContain('canPerform');
+    expect(content).toContain('"convert"');
   });
 });

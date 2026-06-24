@@ -10,6 +10,7 @@ import {
   listInvoicesByContract,
 } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
+import { canPerform } from "@/domain/authorization";
 import type { Invoice, InvoiceStatus } from "@/domain/models/invoice";
 import type { ActionResult } from "./requests";
 
@@ -42,8 +43,8 @@ export async function createInvoiceAction(formData: FormData): Promise<ActionRes
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "invoice", "create")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const rateCheck = await checkRateLimit({
@@ -170,8 +171,8 @@ export async function updateInvoiceStatusAction(
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "invoice", "changeStatus")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const parsed = updateInvoiceStatusSchema.safeParse({ invoiceId, newStatus });
