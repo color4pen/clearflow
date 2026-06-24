@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "a4f9ae92-6b78-451f-9ec1-c03308c323ee",
   "createdAt": "2026-06-24T04:22:43.757Z",
-  "updatedAt": "2026-06-24T05:25:20.325Z",
+  "updatedAt": "2026-06-24T05:28:21.937Z",
   "request": {
     "title": "ダッシュボードの実装",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/dashboard-a4f9ae92",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-24T05:25:20.314Z"
   },
   "_journal": {
-    "historyCount": 73,
+    "historyCount": 74,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
