@@ -4,7 +4,7 @@
  * Verifies webhook-related implementation via source file inspection:
  * - Domain model definitions
  * - Delivery service structure
- * - Usecase integration (fire-and-forget, tx-external)
+ * - Usecase integration (dispatcher-based, tx-internal dispatch + post-tx flush)
  * - Access control
  * - Tenant isolation
  */
@@ -24,7 +24,7 @@ async function readSrc(relPath: string): Promise<string> {
 // ---------------------------------------------------------------------------
 
 describe("Webhook domain model", () => {
-  it("webhookEvent.ts has WEBHOOK_EVENT_TYPES with 8 elements", async () => {
+  it("webhookEvent.ts has WEBHOOK_EVENT_TYPES with 18 elements", async () => {
     const src = await readSrc("domain/models/webhookEvent.ts");
     expect(src).toContain("WEBHOOK_EVENT_TYPES");
 
@@ -34,7 +34,7 @@ describe("Webhook domain model", () => {
       .split(",")
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
-    expect(elements.length).toBe(8);
+    expect(elements.length).toBe(18);
   });
 
   it("webhookEvent.ts exports WebhookEventType", async () => {
@@ -43,7 +43,7 @@ describe("Webhook domain model", () => {
     expect(src).toContain("export");
   });
 
-  it("webhookEvent.ts contains all 8 event types", async () => {
+  it("webhookEvent.ts contains all 8 original approval event types", async () => {
     const src = await readSrc("domain/models/webhookEvent.ts");
     const expectedEvents = [
       "request.created",
@@ -56,6 +56,25 @@ describe("Webhook domain model", () => {
       "step.rejected",
     ];
     for (const event of expectedEvents) {
+      expect(src).toContain(event);
+    }
+  });
+
+  it("webhookEvent.ts contains all 10 new domain event types", async () => {
+    const src = await readSrc("domain/models/webhookEvent.ts");
+    const newEvents = [
+      "inquiry.converted",
+      "inquiry.declined",
+      "deal.phase_changed",
+      "deal.won",
+      "deal.lost",
+      "contract.created",
+      "contract.completed",
+      "contract.cancelled",
+      "invoice.paid",
+      "invoice.overdue",
+    ];
+    for (const event of newEvents) {
       expect(src).toContain(event);
     }
   });
@@ -76,6 +95,11 @@ describe("Webhook delivery service", () => {
     const src = await readSrc("infrastructure/webhookDelivery.ts");
     expect(src).toContain("deliverWebhookEvent");
     expect(src).toContain("export");
+  });
+
+  it("webhookDelivery.ts exports deliverToEndpoint function", async () => {
+    const src = await readSrc("infrastructure/webhookDelivery.ts");
+    expect(src).toContain("export async function deliverToEndpoint");
   });
 
   it("webhookDelivery.ts uses fetch for HTTP delivery", async () => {
@@ -101,7 +125,7 @@ describe("Webhook delivery service", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Usecase integration — deliverWebhookEvent present and fire-and-forget
+// Usecase integration — dispatcher-based event dispatch
 // ---------------------------------------------------------------------------
 
 const usecaseFiles = [
@@ -112,38 +136,45 @@ const usecaseFiles = [
   "application/usecases/resubmitRequest.ts",
 ];
 
-describe("Usecase integration", () => {
+describe("Usecase integration — dispatcher pattern", () => {
   for (const file of usecaseFiles) {
-    it(`${file} calls deliverWebhookEvent`, async () => {
+    it(`${file} uses dispatcher.dispatch (not deliverWebhookEvent directly)`, async () => {
       const src = await readSrc(file);
-      expect(src).toContain("deliverWebhookEvent");
+      expect(src).toContain("dispatcher.dispatch");
+      expect(src).not.toContain("deliverWebhookEvent");
     });
 
-    it(`${file} calls deliverWebhookEvent with void (fire-and-forget)`, async () => {
+    it(`${file} calls dispatcher.flushAsync`, async () => {
       const src = await readSrc(file);
-      expect(src).toContain("void deliverWebhookEvent");
+      expect(src).toContain("dispatcher.flushAsync");
     });
 
-    it(`${file} calls deliverWebhookEvent outside db.transaction`, async () => {
+    it(`${file} wraps body in dispatcher.runInContext`, async () => {
       const src = await readSrc(file);
-      // The last db.transaction block must be followed by a void deliverWebhookEvent call
+      expect(src).toContain("dispatcher.runInContext");
+    });
+
+    it(`${file} calls dispatcher.dispatch before dispatcher.flushAsync`, async () => {
+      const src = await readSrc(file);
+      // At least one dispatcher.dispatch exists
+      const dispatchIdx = src.lastIndexOf("dispatcher.dispatch");
+      expect(dispatchIdx).toBeGreaterThan(-1);
+
+      // dispatcher.flushAsync appears after all dispatcher.dispatch calls
+      const flushIdx = src.lastIndexOf("dispatcher.flushAsync");
+      expect(flushIdx).toBeGreaterThan(-1);
+      expect(flushIdx).toBeGreaterThan(dispatchIdx);
+    });
+
+    it(`${file} calls dispatcher.flushAsync after db.transaction`, async () => {
+      const src = await readSrc(file);
+      // flushAsync must appear after the last db.transaction keyword
       const txIdx = src.lastIndexOf("db.transaction");
       expect(txIdx).toBeGreaterThan(-1);
 
-      // Find the last void deliverWebhookEvent in the file
-      const deliverIdx = src.lastIndexOf("void deliverWebhookEvent");
-      expect(deliverIdx).toBeGreaterThan(-1);
-
-      // The last deliver call must appear after the last transaction start
-      expect(deliverIdx).toBeGreaterThan(txIdx);
-
-      // Verify: after the last db.transaction, find its closing "});"
-      // The last deliver must come after that
-      const txSection = src.slice(txIdx);
-      const closingIdx = txSection.indexOf("});");
-      expect(closingIdx).toBeGreaterThan(-1);
-      const txCloseAbsolute = txIdx + closingIdx;
-      expect(deliverIdx).toBeGreaterThan(txCloseAbsolute);
+      const flushIdx = src.lastIndexOf("dispatcher.flushAsync");
+      expect(flushIdx).toBeGreaterThan(-1);
+      expect(flushIdx).toBeGreaterThan(txIdx);
     });
   }
 });
@@ -153,36 +184,89 @@ describe("Usecase integration", () => {
 // ---------------------------------------------------------------------------
 
 describe("Usecase event types", () => {
-  it('createRequest delivers "request.created"', async () => {
+  it('createRequest dispatches "request.created"', async () => {
     const src = await readSrc("application/usecases/createRequest.ts");
     expect(src).toContain('"request.created"');
   });
 
-  it('submitRequest delivers "request.submitted"', async () => {
+  it('submitRequest dispatches "request.submitted"', async () => {
     const src = await readSrc("application/usecases/submitRequest.ts");
     expect(src).toContain('"request.submitted"');
   });
 
-  it('approveRequest delivers "step.approved" and "request.approved"', async () => {
+  it('approveRequest dispatches "step.approved" and "request.approved"', async () => {
     const src = await readSrc("application/usecases/approveRequest.ts");
     expect(src).toContain('"step.approved"');
     expect(src).toContain('"request.approved"');
   });
 
-  it('rejectRequest (revision) delivers "request.revised" and "step.rejected"', async () => {
+  it('rejectRequest (revision) dispatches "request.revised" and "step.rejected"', async () => {
     const src = await readSrc("application/usecases/rejectRequest.ts");
     expect(src).toContain('"request.revised"');
     expect(src).toContain('"step.rejected"');
   });
 
-  it('rejectRequest (rejected) delivers "request.rejected"', async () => {
+  it('rejectRequest (rejected) dispatches "request.rejected"', async () => {
     const src = await readSrc("application/usecases/rejectRequest.ts");
     expect(src).toContain('"request.rejected"');
   });
 
-  it('resubmitRequest delivers "request.resubmitted"', async () => {
+  it('resubmitRequest dispatches "request.resubmitted"', async () => {
     const src = await readSrc("application/usecases/resubmitRequest.ts");
     expect(src).toContain('"request.resubmitted"');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// New domain event usecases
+// ---------------------------------------------------------------------------
+
+describe("New domain event usecases", () => {
+  it('updateInquiryStatus dispatches "inquiry.converted" on converted transition', async () => {
+    const src = await readSrc("application/usecases/updateInquiryStatus.ts");
+    expect(src).toContain('"inquiry.converted"');
+    expect(src).toContain("dispatcher.dispatch");
+  });
+
+  it('updateInquiryStatus dispatches "inquiry.declined" on declined transition', async () => {
+    const src = await readSrc("application/usecases/updateInquiryStatus.ts");
+    expect(src).toContain('"inquiry.declined"');
+  });
+
+  it('updateDealPhase dispatches "deal.won" on won transition', async () => {
+    const src = await readSrc("application/usecases/updateDealPhase.ts");
+    expect(src).toContain('"deal.won"');
+    expect(src).toContain("dispatcher.dispatch");
+  });
+
+  it('updateDealPhase dispatches "deal.lost" on lost transition', async () => {
+    const src = await readSrc("application/usecases/updateDealPhase.ts");
+    expect(src).toContain('"deal.lost"');
+  });
+
+  it('updateDealPhase dispatches "deal.phase_changed" for other transitions', async () => {
+    const src = await readSrc("application/usecases/updateDealPhase.ts");
+    expect(src).toContain('"deal.phase_changed"');
+  });
+
+  it('createContract dispatches "contract.created"', async () => {
+    const src = await readSrc("application/usecases/createContract.ts");
+    expect(src).toContain('"contract.created"');
+    expect(src).toContain("dispatcher.dispatch");
+  });
+
+  it('updateContractStatus dispatches "contract.completed" and "contract.cancelled"', async () => {
+    const src = await readSrc("application/usecases/updateContractStatus.ts");
+    expect(src).toContain('"contract.completed"');
+    expect(src).toContain('"contract.cancelled"');
+    expect(src).toContain("dispatcher.dispatch");
+  });
+
+  it('updateInvoiceStatus dispatches "invoice.paid" and "invoice.overdue"', async () => {
+    const src = await readSrc("application/usecases/updateInvoiceStatus.ts");
+    expect(src).toContain('"invoice.paid"');
+    expect(src).toContain('"invoice.overdue"');
+    expect(src).toContain("dispatcher.dispatch");
   });
 });
 
@@ -216,6 +300,109 @@ describe("Webhook access control (T-12)", () => {
     const src = await readSrc("app/actions/webhooks.ts");
     expect(src).toContain("session.user.organizationId");
     expect(src).not.toContain('formData.get("organizationId")');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TC-027 / TC-028: webhookHandler.ts delivery function routing
+// ---------------------------------------------------------------------------
+
+describe("TC-027: new domain events route through deliverToEndpoint", () => {
+  it("webhookHandler.ts imports deliverToEndpoint but uses it only via deliverDomainEventToEndpoints", async () => {
+    const src = await readSrc("infrastructure/handlers/webhookHandler.ts");
+    expect(src).toContain("deliverToEndpoint");
+    expect(src).toContain("deliverDomainEventToEndpoints");
+  });
+
+  it("deliverDomainEventToEndpoints helper calls deliverToEndpoint, not deliverWebhookEvent or deliverSingleAttempt", async () => {
+    const src = await readSrc("infrastructure/handlers/webhookHandler.ts");
+    // Extract the helper function body (between the function declaration and the next export)
+    const helperStart = src.indexOf("async function deliverDomainEventToEndpoints");
+    const helperEnd = src.indexOf("\nexport async function handleDomainEventWebhook");
+    expect(helperStart).toBeGreaterThan(-1);
+    expect(helperEnd).toBeGreaterThan(helperStart);
+    const helperBody = src.slice(helperStart, helperEnd);
+
+    expect(helperBody).toContain("deliverToEndpoint");
+    expect(helperBody).not.toContain("deliverWebhookEvent");
+    expect(helperBody).not.toContain("deliverSingleAttempt");
+  });
+
+  const newDomainEvents = [
+    "inquiry.converted",
+    "inquiry.declined",
+    "deal.phase_changed",
+    "deal.won",
+    "deal.lost",
+    "contract.created",
+    "contract.completed",
+    "contract.cancelled",
+    "invoice.paid",
+    "invoice.overdue",
+  ] as const;
+
+  for (const eventType of newDomainEvents) {
+    it(`"${eventType}" case calls deliverDomainEventToEndpoints, not deliverWebhookEvent`, async () => {
+      const src = await readSrc("infrastructure/handlers/webhookHandler.ts");
+      // Find the case block for this event
+      const caseIdx = src.indexOf(`case "${eventType}":`);
+      expect(caseIdx).toBeGreaterThan(-1);
+      // The next case or default keyword marks the end of this case block
+      const nextCaseIdx = src.indexOf("\n    case ", caseIdx + 1);
+      const defaultIdx = src.indexOf("\n    default:", caseIdx + 1);
+      const caseEnd = nextCaseIdx !== -1 ? Math.min(
+        nextCaseIdx,
+        defaultIdx !== -1 ? defaultIdx : Infinity
+      ) : (defaultIdx !== -1 ? defaultIdx : src.length);
+      const caseBody = src.slice(caseIdx, caseEnd);
+
+      expect(caseBody).toContain("deliverDomainEventToEndpoints");
+      expect(caseBody).not.toContain("deliverWebhookEvent");
+      expect(caseBody).not.toContain("deliverSingleAttempt");
+    });
+  }
+});
+
+describe("TC-028: approval events route through deliverWebhookEvent (resolves actorName)", () => {
+  const approvalEvents = [
+    "request.created",
+    "request.submitted",
+    "request.approved",
+    "request.rejected",
+    "request.revised",
+    "request.resubmitted",
+    "step.approved",
+    "step.rejected",
+  ] as const;
+
+  for (const eventType of approvalEvents) {
+    it(`"${eventType}" case calls deliverWebhookEvent, not deliverDomainEventToEndpoints`, async () => {
+      const src = await readSrc("infrastructure/handlers/webhookHandler.ts");
+      const caseIdx = src.indexOf(`case "${eventType}":`);
+      expect(caseIdx).toBeGreaterThan(-1);
+      const nextCaseIdx = src.indexOf("\n    case ", caseIdx + 1);
+      const defaultIdx = src.indexOf("\n    default:", caseIdx + 1);
+      const caseEnd = nextCaseIdx !== -1 ? Math.min(
+        nextCaseIdx,
+        defaultIdx !== -1 ? defaultIdx : Infinity
+      ) : (defaultIdx !== -1 ? defaultIdx : src.length);
+      const caseBody = src.slice(caseIdx, caseEnd);
+
+      expect(caseBody).toContain("deliverWebhookEvent");
+      expect(caseBody).not.toContain("deliverDomainEventToEndpoints");
+    });
+  }
+
+  it("deliverWebhookEvent in webhookDelivery.ts resolves actorName via userRepository", async () => {
+    const src = await readSrc("infrastructure/webhookDelivery.ts");
+    // Locate the deliverWebhookEvent function body
+    const fnIdx = src.indexOf("export async function deliverWebhookEvent");
+    expect(fnIdx).toBeGreaterThan(-1);
+    const fnBody = src.slice(fnIdx);
+
+    expect(fnBody).toContain("userRepository");
+    expect(fnBody).toContain("actorName");
+    expect(fnBody).toContain("actorId");
   });
 });
 

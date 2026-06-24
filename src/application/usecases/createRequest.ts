@@ -6,7 +6,7 @@ import {
 } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
 import { filterStepsByCondition } from "@/domain/services";
-import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
+import { dispatcher } from "@/domain/events";
 import type { Request } from "@/domain/models/request";
 
 export type CreateRequestResult =
@@ -20,78 +20,87 @@ export async function createRequest(data: {
   organizationId: string;
   creatorId: string;
 }): Promise<CreateRequestResult> {
-  // Fetch the explicitly selected template
-  const selectedTemplate = await approvalTemplateRepository.findById(
-    data.templateId,
-    data.organizationId
-  );
+  return dispatcher.runInContext(async () => {
+    // Fetch the explicitly selected template
+    const selectedTemplate = await approvalTemplateRepository.findById(
+      data.templateId,
+      data.organizationId
+    );
 
-  if (!selectedTemplate) {
-    return {
-      ok: false,
-      reason: "テンプレートが見つかりません。",
-    };
-  }
+    if (!selectedTemplate) {
+      return {
+        ok: false,
+        reason: "テンプレートが見つかりません。",
+      };
+    }
 
-  // Filter steps by condition (conditional steps only generated when condition is satisfied)
-  const filteredSteps = filterStepsByCondition(selectedTemplate.steps, data.formData);
+    // Filter steps by condition (conditional steps only generated when condition is satisfied)
+    const filteredSteps = filterStepsByCondition(selectedTemplate.steps, data.formData);
 
-  try {
-    const result = await db.transaction(async (tx) => {
-      const now = new Date();
-      const request = await requestRepository.create(
-        {
-          title: data.title,
-          formData: data.formData,
-          templateId: data.templateId,
-          organizationId: data.organizationId,
-          creatorId: data.creatorId,
-        },
-        tx
-      );
-
-      await approvalStepRepository.createMany(
-        filteredSteps.map((s) => ({
-          requestId: request.id,
-          stepOrder: s.stepOrder,
-          approverRole: s.approverRole,
-          organizationId: data.organizationId,
-          deadline: s.deadlineHours != null
-            ? new Date(now.getTime() + s.deadlineHours * 60 * 60 * 1000)
-            : null,
-        })),
-        tx
-      );
-
-      await auditLogRepository.create(
-        {
-          action: "request.create",
-          targetType: "request",
-          targetId: request.id,
-          actorId: data.creatorId,
-          organizationId: data.organizationId,
-          metadata: {
-            templateId: selectedTemplate.id,
-            templateName: selectedTemplate.name,
+    try {
+      const result = await db.transaction(async (tx) => {
+        const now = new Date();
+        const request = await requestRepository.create(
+          {
+            title: data.title,
+            formData: data.formData,
+            templateId: data.templateId,
+            organizationId: data.organizationId,
+            creatorId: data.creatorId,
           },
-        },
-        tx
-      );
+          tx
+        );
 
-      return request;
-    });
+        await approvalStepRepository.createMany(
+          filteredSteps.map((s) => ({
+            requestId: request.id,
+            stepOrder: s.stepOrder,
+            approverRole: s.approverRole,
+            organizationId: data.organizationId,
+            deadline: s.deadlineHours != null
+              ? new Date(now.getTime() + s.deadlineHours * 60 * 60 * 1000)
+              : null,
+          })),
+          tx
+        );
 
-    void deliverWebhookEvent({
-      organizationId: data.organizationId,
-      event: "request.created",
-      data: { requestId: result.id, requestTitle: result.title, actorId: data.creatorId, status: "draft" },
-    });
+        await auditLogRepository.create(
+          {
+            action: "request.create",
+            targetType: "request",
+            targetId: request.id,
+            actorId: data.creatorId,
+            organizationId: data.organizationId,
+            metadata: {
+              templateId: selectedTemplate.id,
+              templateName: selectedTemplate.name,
+            },
+          },
+          tx
+        );
 
-    return { ok: true, request: result };
-  } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "Failed to create request.",
-    };
-  }
+        dispatcher.dispatch({
+          type: "request.created",
+          organizationId: data.organizationId,
+          actorId: data.creatorId,
+          occurredAt: new Date(),
+          payload: {
+            requestId: request.id,
+            requestTitle: request.title,
+            status: "draft",
+          },
+        });
+
+        return request;
+      });
+
+      dispatcher.flushAsync();
+      return { ok: true, request: result };
+    } catch (err) {
+      return {
+        ok: false,
+        reason: err instanceof Error ? err.message : "Failed to create request.",
+      };
+    }
+  });
 }
