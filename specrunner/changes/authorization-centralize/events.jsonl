@@ -35,3 +35,8 @@
 {"type":"transition","ts":"2026-06-24T02:26:53.960Z","step":"spec-review","status":"ok","message":"spec-review iteration 2 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-24T02:26:53.960Z","step":"step-transition","status":"ok","message":"spec-review → test-case-gen"}
 {"type":"transition","ts":"2026-06-24T02:26:53.963Z","step":"test-case-gen-started","status":"started","message":"Starting test-case-gen step"}
+{"type":"transition","ts":"2026-06-24T02:30:56.323Z","step":"test-case-gen-verdict","status":"ok","message":"test-case-gen verdict: success"}
+{"type":"step-attempt","step":"test-case-gen","sessionId":"515e35e8-c016-4c9c-bcd3-8a9102b62513","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-24T02:26:53.979Z","endedAt":"2026-06-24T02:30:54.951Z"}
+{"type":"lineage","step":"test-case-gen","ts":"2026-06-24T02:30:54.951Z","outputs":[{"path":"specrunner/changes/authorization-centralize/test-cases.md","hash":"sha256:19a115c7eea96390df618814721a675e2cd37de7695d07909ed1252c6cda6d6a"}],"inputs":[{"path":"specrunner/changes/authorization-centralize/design.md","hash":"sha256:fa62c7ee451993baefbc9cfd2eacba358906a22451d88e8949eec613c61b80b1"},{"path":"specrunner/changes/authorization-centralize/tasks.md","hash":"sha256:3119d115a197d280ddfe0004466aee4c3ea9dc182c5ed7a1ac12d400082c6eed"}]}
+{"type":"transition","ts":"2026-06-24T02:30:56.331Z","step":"step-transition","status":"ok","message":"spec-review complete → implementer (iter 2)"}
+{"type":"transition","ts":"2026-06-24T02:30:56.335Z","step":"implementer-started","status":"started","message":"Starting implementer step"}

@@ -76,16 +76,20 @@ describe("updateUserRole usecase", () => {
 // ---------------------------------------------------------------------------
 
 describe("users Server Actions admin guard", () => {
-  it("listUsersAction has role !== 'admin' guard", async () => {
+  it("listUsersAction has canPerform guard", async () => {
     const src = await readSrc("app/actions/users.ts");
-    expect(src).toContain('role !== "admin"');
+    expect(src).toContain('canPerform');
+    const listIdx = src.indexOf("listUsersAction");
+    expect(listIdx).toBeGreaterThan(-1);
+    const guardIdx = src.indexOf('canPerform', listIdx);
+    expect(guardIdx).toBeGreaterThan(-1);
   });
 
-  it("updateUserRoleAction has role !== 'admin' guard", async () => {
+  it("updateUserRoleAction has canPerform guard", async () => {
     const src = await readSrc("app/actions/users.ts");
     const actionIdx = src.indexOf("updateUserRoleAction");
     expect(actionIdx).toBeGreaterThan(-1);
-    const guardIdx = src.indexOf('role !== "admin"', actionIdx);
+    const guardIdx = src.indexOf('canPerform', actionIdx);
     expect(guardIdx).toBeGreaterThan(-1);
   });
 

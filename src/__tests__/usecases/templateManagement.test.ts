@@ -103,26 +103,29 @@ describe("updateTemplate usecase", () => {
 // ---------------------------------------------------------------------------
 
 describe("templates Server Actions admin guard", () => {
-  it("createTemplateAction has role !== 'admin' guard", async () => {
+  it("createTemplateAction has canPerform guard", async () => {
     const src = await readSrc("app/actions/templates.ts");
-    expect(src).toContain('role !== "admin"');
+    expect(src).toContain('canPerform');
+    const createIdx = src.indexOf("createTemplateAction");
+    expect(createIdx).toBeGreaterThan(-1);
+    const guardIdx = src.indexOf('canPerform', createIdx);
+    expect(guardIdx).toBeGreaterThan(-1);
   });
 
-  it("updateTemplateAction has role !== 'admin' guard", async () => {
+  it("updateTemplateAction has canPerform guard", async () => {
     const src = await readSrc("app/actions/templates.ts");
-    // Verify updateTemplateAction function body contains the admin guard
     const updateIdx = src.indexOf("updateTemplateAction");
     expect(updateIdx).toBeGreaterThan(-1);
-    const adminGuardIdx = src.indexOf('role !== "admin"', updateIdx);
-    expect(adminGuardIdx).toBeGreaterThan(-1);
+    const guardIdx = src.indexOf('canPerform', updateIdx);
+    expect(guardIdx).toBeGreaterThan(-1);
   });
 
-  it("deleteTemplateAction has role !== 'admin' guard", async () => {
+  it("deleteTemplateAction has canPerform guard", async () => {
     const src = await readSrc("app/actions/templates.ts");
     const deleteIdx = src.indexOf("deleteTemplateAction");
     expect(deleteIdx).toBeGreaterThan(-1);
-    const adminGuardIdx = src.indexOf('role !== "admin"', deleteIdx);
-    expect(adminGuardIdx).toBeGreaterThan(-1);
+    const guardIdx = src.indexOf('canPerform', deleteIdx);
+    expect(guardIdx).toBeGreaterThan(-1);
   });
 
   it("templates.ts has 'use server' directive", async () => {

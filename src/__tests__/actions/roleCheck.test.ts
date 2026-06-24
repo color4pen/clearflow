@@ -10,42 +10,32 @@ async function readSrc(relPath: string): Promise<string> {
 
 describe("updateInquiryAction ロールチェック静的検証", () => {
   /**
-   * TC-019: updateInquiryAction が member ロールに権限エラーを返す
+   * TC-019: updateInquiryAction が canPerform で権限チェックを行う
    */
-  it('TC-019: member ロール拒否の条件式が含まれる（admin/manager 以外はアクセス不可）', async () => {
-    // 準備 - ソースファイルを読み込む
+  it('TC-019: canPerform を使ったロールチェックがある', async () => {
     const content = await readSrc("app/actions/inquiries.ts");
-    // 実行・検証 - admin/manager 以外を弾くロールチェックがある
-    expect(content).toContain('"admin"');
-    expect(content).toContain('"manager"');
-    expect(content).toContain('session.user.role !== "admin" && session.user.role !== "manager"');
+    expect(content).toContain('canPerform');
+    expect(content).toContain('@/domain/authorization');
   });
 
-  it('TC-019: member ロール拒否時に "権限がありません" を返すコードが含まれる', async () => {
-    // 準備 - ソースファイルを読み込む
+  it('TC-019: 権限エラー時に "この操作を実行する権限がありません" を返すコードが含まれる', async () => {
     const content = await readSrc("app/actions/inquiries.ts");
-    // 実行・検証 - 権限エラーメッセージが返される
-    expect(content).toContain('{ message: "権限がありません" }');
+    expect(content).toContain('{ message: "この操作を実行する権限がありません" }');
   });
 });
 
 describe("updateMeetingAction ロールチェック静的検証", () => {
   /**
-   * TC-030: updateMeetingAction が member ロールに権限エラーを返す
+   * TC-030: updateMeetingAction が canPerform で権限チェックを行う
    */
-  it('TC-030: member ロール拒否の条件式が含まれる（admin/manager 以外はアクセス不可）', async () => {
-    // 準備 - ソースファイルを読み込む
+  it('TC-030: canPerform を使ったロールチェックがある', async () => {
     const content = await readSrc("app/actions/meetings.ts");
-    // 実行・検証 - admin/manager 以外を弾くロールチェックがある
-    expect(content).toContain('"admin"');
-    expect(content).toContain('"manager"');
-    expect(content).toContain('session.user.role !== "admin" && session.user.role !== "manager"');
+    expect(content).toContain('canPerform');
+    expect(content).toContain('@/domain/authorization');
   });
 
-  it('TC-030: member ロール拒否時に "権限がありません" を返すコードが含まれる', async () => {
-    // 準備 - ソースファイルを読み込む
+  it('TC-030: 権限エラー時に "この操作を実行する権限がありません" を返すコードが含まれる', async () => {
     const content = await readSrc("app/actions/meetings.ts");
-    // 実行・検証 - 権限エラーメッセージが返される
-    expect(content).toContain('{ message: "権限がありません" }');
+    expect(content).toContain('{ message: "この操作を実行する権限がありません" }');
   });
 });

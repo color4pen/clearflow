@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
 import { createClient, listClients, createClientContact, deleteClientContact } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
+import { canPerform } from "@/domain/authorization";
 import type { Client } from "@/domain/models/client";
 
 const contactSchema = z.object({
@@ -44,6 +45,10 @@ export async function createClientAction(
   const session = await auth();
   if (!session?.user?.id) {
     return { message: "認証が必要です" };
+  }
+
+  if (!canPerform(session.user.role, "client", "create")) {
+    return { message: "この操作を実行する権限がありません" };
   }
 
   const rateCheck = await checkRateLimit({
@@ -128,6 +133,10 @@ export async function updateClientAction(
     return { message: "認証が必要です" };
   }
 
+  if (!canPerform(session.user.role, "client", "edit")) {
+    return { message: "この操作を実行する権限がありません" };
+  }
+
   const parsed = updateClientSchema.safeParse({
     name: formData.get("name"),
     industry: formData.get("industry") || undefined,
@@ -196,8 +205,8 @@ export async function addClientContactAction(
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "client", "addContact")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const parsed = addContactSchema.safeParse({
@@ -252,8 +261,8 @@ export async function updateClientContactAction(
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "client", "editContact")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const { clientRepository } = await import("@/infrastructure/repositories");
@@ -303,8 +312,8 @@ export async function deleteClientContactAction(
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "client", "deleteContact")) {
+    return { success: false, message: "この操作を実行する権限がありません" };
   }
 
   const result = await deleteClientContact({

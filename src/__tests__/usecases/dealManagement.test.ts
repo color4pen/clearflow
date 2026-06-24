@@ -132,29 +132,27 @@ describe("updateDeal usecase 静的検証", () => {
 });
 
 describe("deals Server Action ロールチェック静的検証", () => {
-  it("createDealAction に admin/manager ロールチェックが含まれる", async () => {
+  it("createDealAction に canPerform ロールチェックが含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("app/actions/deals.ts");
-    // 実行・検証 - admin/manager ロールチェックがある
-    expect(content).toContain('"admin"');
-    expect(content).toContain('"manager"');
+    // 実行・検証 - canPerform ロールチェックがある
+    expect(content).toContain('canPerform');
+    expect(content).toContain('@/domain/authorization');
     // createDealAction 内にロールチェックがあることを確認
     const createActionIdx = content.indexOf("async function createDealAction");
     expect(createActionIdx).toBeGreaterThan(-1);
     const createActionBody = content.slice(createActionIdx, createActionIdx + 600);
-    expect(createActionBody).toContain('"admin"');
-    expect(createActionBody).toContain('"manager"');
+    expect(createActionBody).toContain('canPerform');
   });
 
-  it("updateDealPhaseAction に admin/manager ロールチェックが含まれる", async () => {
+  it("updateDealPhaseAction に canPerform ロールチェックが含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("app/actions/deals.ts");
     // 実行・検証 - updateDealPhaseAction にロールチェックがある
     const phaseActionIdx = content.indexOf("async function updateDealPhaseAction");
     expect(phaseActionIdx).toBeGreaterThan(-1);
     const phaseActionBody = content.slice(phaseActionIdx, phaseActionIdx + 600);
-    expect(phaseActionBody).toContain('"admin"');
-    expect(phaseActionBody).toContain('"manager"');
+    expect(phaseActionBody).toContain('canPerform');
   });
 
   it("createDealAction スキーマで inquiryId が optional である", async () => {

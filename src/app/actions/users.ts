@@ -5,6 +5,7 @@ import { z } from "zod";
 import { auth } from "@/infrastructure/auth";
 import { userRepository } from "@/infrastructure/repositories";
 import { updateUserRole } from "@/application/usecases";
+import { canPerform } from "@/domain/authorization";
 
 const updateUserRoleSchema = z.object({
   userId: z.string().uuid("有効なユーザー ID を指定してください"),
@@ -14,7 +15,7 @@ const updateUserRoleSchema = z.object({
 export async function listUsersAction() {
   const session = await auth();
   if (!session?.user?.id) return { success: false as const, message: "認証が必要です" };
-  if (session.user.role !== "admin") return { success: false as const, message: "権限がありません" };
+  if (!canPerform(session.user.role, "organization", "listUsers")) return { success: false as const, message: "この操作を実行する権限がありません" };
 
   const users = await userRepository.findByOrganization(
     session.user.organizationId
@@ -26,7 +27,7 @@ export async function listUsersAction() {
 export async function updateUserRoleAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return { success: false as const, message: "認証が必要です" };
-  if (session.user.role !== "admin") return { success: false as const, message: "権限がありません" };
+  if (!canPerform(session.user.role, "organization", "changeRole")) return { success: false as const, message: "この操作を実行する権限がありません" };
 
   const rawData = {
     userId: formData.get("userId") as string,

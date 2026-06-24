@@ -11,6 +11,7 @@ import {
 import { WEBHOOK_EVENT_TYPES } from "@/domain/models/webhookEvent";
 import { deliverSingleAttempt } from "@/infrastructure/webhookDelivery";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
+import { canPerform } from "@/domain/authorization";
 
 const PRIVATE_IP_PATTERNS = [
   /^localhost$/i,
@@ -55,7 +56,7 @@ function validateWebhookUrl(
 export async function listWebhookEndpointsAction() {
   const session = await auth();
   if (!session?.user?.id) return { success: false, message: "認証が必要です" };
-  if (session.user.role !== "admin") return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "organization", "manageWebhooks")) return { success: false, message: "この操作を実行する権限がありません" };
 
   const endpoints = await webhookEndpointRepository.findByOrganization(
     session.user.organizationId
@@ -73,7 +74,7 @@ export async function listWebhookEndpointsAction() {
 export async function createWebhookEndpointAction(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) return { success: false, message: "認証が必要です" };
-  if (session.user.role !== "admin") return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "organization", "manageWebhooks")) return { success: false, message: "この操作を実行する権限がありません" };
 
   const rateCheck = await checkRateLimit({
     key: `webhookManage:${session.user.id}`,
@@ -122,7 +123,7 @@ export async function createWebhookEndpointAction(formData: FormData) {
 export async function deleteWebhookEndpointAction(endpointId: string) {
   const session = await auth();
   if (!session?.user?.id) return { success: false, message: "認証が必要です" };
-  if (session.user.role !== "admin") return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "organization", "manageWebhooks")) return { success: false, message: "この操作を実行する権限がありません" };
 
   const rateCheck = await checkRateLimit({
     key: `webhookManage:${session.user.id}`,
@@ -149,7 +150,7 @@ export async function toggleWebhookEndpointAction(
 ) {
   const session = await auth();
   if (!session?.user?.id) return { success: false, message: "認証が必要です" };
-  if (session.user.role !== "admin") return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "organization", "manageWebhooks")) return { success: false, message: "この操作を実行する権限がありません" };
 
   const rateCheck = await checkRateLimit({
     key: `webhookManage:${session.user.id}`,
@@ -174,7 +175,7 @@ export async function toggleWebhookEndpointAction(
 export async function listWebhookDeliveriesAction(endpointId: string) {
   const session = await auth();
   if (!session?.user?.id) return { success: false, message: "認証が必要です" };
-  if (session.user.role !== "admin") return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "organization", "manageWebhooks")) return { success: false, message: "この操作を実行する権限がありません" };
 
   const deliveries = await webhookDeliveryRepository.findByEndpointId(
     endpointId,
@@ -188,7 +189,7 @@ export async function listWebhookDeliveriesAction(endpointId: string) {
 export async function retryWebhookDeliveryAction(deliveryId: string) {
   const session = await auth();
   if (!session?.user?.id) return { success: false, message: "認証が必要です" };
-  if (session.user.role !== "admin") return { success: false, message: "権限がありません" };
+  if (!canPerform(session.user.role, "organization", "manageWebhooks")) return { success: false, message: "この操作を実行する権限がありません" };
 
   const rateCheck = await checkRateLimit({
     key: `webhookManage:${session.user.id}`,

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
 import { createMeeting, updateMeeting, createClientContact } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
+import { canPerform } from "@/domain/authorization";
 
 const hearingDataSchema = z.object({
   challenge: z.string().nullable().default(null),
@@ -64,6 +65,10 @@ export async function createMeetingAction(
   const session = await auth();
   if (!session?.user?.id) {
     return { message: "認証が必要です" };
+  }
+
+  if (!canPerform(session.user.role, "meeting", "create")) {
+    return { message: "この操作を実行する権限がありません" };
   }
 
   const rateCheck = await checkRateLimit({
@@ -222,8 +227,8 @@ export async function updateMeetingAction(
     return { message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
-    return { message: "権限がありません" };
+  if (!canPerform(session.user.role, "meeting", "edit")) {
+    return { message: "この操作を実行する権限がありません" };
   }
 
   const rateCheck = await checkRateLimit({
