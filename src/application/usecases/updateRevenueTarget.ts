@@ -1,4 +1,5 @@
-import { revenueTargetRepository } from "@/infrastructure/repositories";
+import { revenueTargetRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { db } from "@/infrastructure/db";
 import type { RevenueTarget } from "@/domain/models/revenueTarget";
 
 export type UpdateRevenueTargetResult =
@@ -8,11 +9,12 @@ export type UpdateRevenueTargetResult =
 export async function updateRevenueTarget(data: {
   id: string;
   organizationId: string;
+  actorId: string;
   periodStart?: Date;
   periodEnd?: Date;
   targetAmount?: number;
 }): Promise<UpdateRevenueTargetResult> {
-  const { id, organizationId, periodStart, periodEnd, targetAmount } = data;
+  const { id, organizationId, actorId, periodStart, periodEnd, targetAmount } = data;
 
   const existing = await revenueTargetRepository.findById(id, organizationId);
   if (!existing) {
@@ -44,15 +46,38 @@ export async function updateRevenueTarget(data: {
     }
   }
 
-  const updated = await revenueTargetRepository.update(id, organizationId, {
-    periodStart,
-    periodEnd,
-    targetAmount,
-  });
+  try {
+    const updated = await db.transaction(async (tx) => {
+      const result = await revenueTargetRepository.update(
+        id,
+        organizationId,
+        { periodStart, periodEnd, targetAmount },
+        tx
+      );
 
-  if (!updated) {
-    return { ok: false, reason: "売上目標の更新に失敗しました" };
+      await auditLogRepository.create(
+        {
+          action: "revenue_target.update",
+          targetType: "revenue_target",
+          targetId: id,
+          actorId,
+          organizationId,
+        },
+        tx
+      );
+
+      return result;
+    });
+
+    if (!updated) {
+      return { ok: false, reason: "売上目標の更新に失敗しました" };
+    }
+
+    return { ok: true, target: updated };
+  } catch (err) {
+    return {
+      ok: false,
+      reason: err instanceof Error ? err.message : "売上目標の更新に失敗しました",
+    };
   }
-
-  return { ok: true, target: updated };
 }

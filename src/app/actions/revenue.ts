@@ -68,6 +68,7 @@ export async function setRevenueTargetAction(formData: FormData): Promise<Action
     periodStart: new Date(parsed.data.periodStart),
     periodEnd: new Date(parsed.data.periodEnd),
     targetAmount: parsed.data.targetAmount,
+    actorId: session.user.id,
   });
 
   if (!result.ok) {
@@ -116,6 +117,7 @@ export async function updateRevenueTargetAction(formData: FormData): Promise<Act
   const result = await updateRevenueTarget({
     id: parsed.data.id,
     organizationId: session.user.organizationId,
+    actorId: session.user.id,
     periodStart: parsed.data.periodStart ? new Date(parsed.data.periodStart) : undefined,
     periodEnd: parsed.data.periodEnd ? new Date(parsed.data.periodEnd) : undefined,
     targetAmount: parsed.data.targetAmount,
@@ -142,6 +144,7 @@ export async function deleteRevenueTargetAction(id: string): Promise<ActionResul
   const result = await deleteRevenueTarget({
     id,
     organizationId: session.user.organizationId,
+    actorId: session.user.id,
   });
 
   if (!result.ok) {
