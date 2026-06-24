@@ -102,3 +102,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/authorization-centralize/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-24T03:02:19.243Z","endedAt":"2026-06-24T03:02:20.738Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-24T03:02:20.738Z","outputs":[{"path":"specrunner/changes/authorization-centralize/pr-create-result.md","hash":"sha256:39879543134790e74f90998a3852a7d73e35e2a18cfaf6e54a7524047cb5af3d"}],"inputs":[{"path":"feat/authorization-centralize-d632d93a","hash":null}]}
 {"type":"transition","ts":"2026-06-24T03:02:20.741Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-24T03:04:19.942Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
