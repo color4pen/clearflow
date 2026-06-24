@@ -59,3 +59,9 @@
 {"type":"transition","ts":"2026-06-24T02:47:02.412Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-24T02:47:02.412Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-24T02:47:02.415Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-24T02:47:36.386Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"b1900637-b8ea-4832-9aa0-08ed93547112","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-24T02:47:02.428Z","endedAt":"2026-06-24T02:47:35.168Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-24T02:47:35.168Z","outputs":[{"path":"specrunner/changes/authorization-centralize","hash":null}],"inputs":[{"path":"specrunner/changes/authorization-centralize/review-feedback-001.md","hash":"sha256:48ca1105aa7b0cd1f422d89327c900bbcf8b08c692021cd1d69815577331c6b9"}]}
+{"type":"transition","ts":"2026-06-24T02:47:36.389Z","step":"step-transition","status":"ok","message":"code-fixer → custom-reviewers"}
+{"type":"transition","ts":"2026-06-24T02:47:36.390Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 1 started"}
+{"type":"transition","ts":"2026-06-24T02:47:36.398Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
