@@ -27,7 +27,8 @@ export function FinanceDashboard({
   monthlySalesTotal,
   upcomingInvoices,
 }: Props) {
-  const today = new Date().toLocaleDateString("ja-JP", {
+  const now = Date.now();
+  const today = new Date(now).toLocaleDateString("ja-JP", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -104,7 +105,7 @@ export function FinanceDashboard({
               {/* Data rows */}
               {overdueInvoices.map((inv) => {
                 const overdueDays = Math.floor(
-                  (Date.now() - inv.dueDate.getTime()) / 86400000
+                  (now - inv.dueDate.getTime()) / 86400000
                 );
                 return (
                   <div

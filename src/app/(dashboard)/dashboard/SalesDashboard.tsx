@@ -77,7 +77,8 @@ export function SalesDashboard({
   recentActivities,
   staleDeals,
 }: Props) {
-  const today = new Date().toLocaleDateString("ja-JP", {
+  const now = Date.now();
+  const today = new Date(now).toLocaleDateString("ja-JP", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -275,7 +276,7 @@ export function SalesDashboard({
                   <div>
                     {staleDeals.map((deal) => {
                       const staleDays = Math.floor(
-                        (Date.now() - deal.updatedAt.getTime()) / 86400000
+                        (now - deal.updatedAt.getTime()) / 86400000
                       );
                       const subParts: string[] = [
                         phaseLabels[deal.phase] ?? deal.phase,
