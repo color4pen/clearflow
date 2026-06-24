@@ -24,3 +24,5 @@ export type { MeetingType, HearingData, ActionItem, MeetingAttendees, Meeting } 
 export type { DealPhase, ContractType, Deal, DealWithDetails, DealContactRole, DealContact } from "./deal";
 export type { ContractStatus, RenewalType, Contract, ContractWithClient } from "./contract";
 export type { InvoiceStatus, Invoice } from "./invoice";
+export type { RevenueTarget } from "./revenueTarget";
+export type { MonthlyRevenue, CustomerRevenue, DealRevenue, PipelineSummary } from "./revenue";

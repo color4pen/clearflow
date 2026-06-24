@@ -47,6 +47,12 @@ export default async function DashboardLayout({
                 契約
               </Link>
               <Link
+                href="/revenue"
+                className="text-text-on-dark-secondary hover:text-white text-sm"
+              >
+                売上
+              </Link>
+              <Link
                 href="/requests"
                 className="text-text-on-dark-secondary hover:text-white text-sm"
               >

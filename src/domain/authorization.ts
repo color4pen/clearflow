@@ -9,7 +9,8 @@ export type Entity =
   | "invoice"
   | "approval"
   | "approvalSettings"
-  | "organization";
+  | "organization"
+  | "revenue";
 
 type PermissionMatrix = Record<Entity, Record<string, Role[]>>;
 
@@ -116,6 +117,13 @@ const PERMISSION_MATRIX: PermissionMatrix = {
     changeRole: ADMIN_ONLY,
     exportAuditLog: ADMIN_ONLY,
     manageWebhooks: ADMIN_ONLY,
+  },
+
+  // 3.10 売上 (Revenue)
+  revenue: {
+    view: ALL_ROLES,
+    setTarget: ADMIN_MANAGER,
+    export: ADMIN_MANAGER_FINANCE,
   },
 };
 

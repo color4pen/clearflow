@@ -58,3 +58,9 @@ export const invoiceStatusLabels: Record<string, string> = {
   paid: "入金済",
   overdue: "期日超過",
 };
+
+export const aggregationAxisLabels: Record<string, string> = {
+  monthly: "月別",
+  customer: "顧客別",
+  deal: "案件別",
+};

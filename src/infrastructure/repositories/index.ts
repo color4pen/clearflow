@@ -15,3 +15,5 @@ export * as dealRepository from "./dealRepository";
 export * as dealContactRepository from "./dealContactRepository";
 export * as contractRepository from "./contractRepository";
 export * as invoiceRepository from "./invoiceRepository";
+export * as revenueRepository from "./revenueRepository";
+export * as revenueTargetRepository from "./revenueTargetRepository";

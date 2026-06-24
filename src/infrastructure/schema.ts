@@ -402,6 +402,19 @@ export const invoices = pgTable("invoices", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Revenue targets table (売上目標)
+export const revenueTargets = pgTable("revenue_targets", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  targetAmount: integer("target_amount").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Auth.js adapter tables
 export const accounts = pgTable(
   "accounts",
@@ -458,6 +471,14 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   dealContacts: many(dealContacts),
   contracts: many(contracts),
   invoices: many(invoices),
+  revenueTargets: many(revenueTargets),
+}));
+
+export const revenueTargetsRelations = relations(revenueTargets, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [revenueTargets.organizationId],
+    references: [organizations.id],
+  }),
 }));
 
 export const idempotencyKeysRelations = relations(idempotencyKeys, ({ one }) => ({
