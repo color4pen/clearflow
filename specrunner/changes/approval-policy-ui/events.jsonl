@@ -124,3 +124,9 @@
 {"type":"transition","ts":"2026-06-24T11:13:36.521Z","step":"pipeline","status":"ok","message":"running → awaiting-resume: regression-gate did not approve after 3 iterations"}
 {"type":"transition","ts":"2026-06-24T11:14:09.016Z","step":"resume","status":"ok","message":"awaiting-resume → running: Resuming from step 'code-fixer'"}
 {"type":"transition","ts":"2026-06-24T11:14:09.072Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-24T11:16:47.883Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"7259c95a-e274-4aee-b598-cf82ea6dab82","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-06-24T11:14:09.085Z","endedAt":"2026-06-24T11:16:46.412Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-24T11:16:46.412Z","outputs":[{"path":"specrunner/changes/approval-policy-ui","hash":null}],"inputs":[{"path":"specrunner/changes/approval-policy-ui/regression-gate-result-004.md","hash":"sha256:c7764a6c69838990b4fc509c4c92a1ca254265383619023e263e2ee3e60d1873"}]}
+{"type":"transition","ts":"2026-06-24T11:16:47.894Z","step":"step-transition","status":"ok","message":"code-fixer → regression-gate"}
+{"type":"transition","ts":"2026-06-24T11:16:47.896Z","step":"regression-gate","status":"started","message":"regression-gate iteration 1 started"}
+{"type":"transition","ts":"2026-06-24T11:16:47.898Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
