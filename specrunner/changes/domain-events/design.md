@@ -64,21 +64,40 @@
 1. **同期フェーズ**: `dispatch(event)` 呼び出し時に同期ハンドラを即座に実行。ハンドラが例外を投げるとトランザクションがロールバックされる。同時にイベントを内部バッファに蓄積する
 2. **非同期フェーズ**: `flushAsync()` 呼び出し時（トランザクションコミット後）にバッファされた全イベントの非同期ハンドラを実行。fire-and-forget（`void` 呼び出し、エラーはログ出力のみ）
 
+**バッファのライフサイクル**:
+
+ディスパッチャーはモジュールレベルのシングルトン（D8）であり、Bun プロセス内で全リクエストが共有する。バッファのクリアは `flushAsync()` （正常系）または `discardBuffer()` （失敗系）のいずれかで必ず行わなければならない。以下のいずれかのパスを通らずに関数が戻ると、バッファに蓄積されたイベントが後続リクエストの `flushAsync()` によって誤配信される:
+
+- **トランザクション成功**: コミット後に `flushAsync()` を呼び出す（バッファを消費して実行）
+- **楽観的ロック失敗（null リターン）**: `db.transaction()` が `null` を返した場合、`discardBuffer()` を呼び出してバッファを破棄してから早期 return する
+- **トランザクション例外**: `db.transaction()` が例外を投げた場合、catch ブロックで `discardBuffer()` を呼び出してバッファを破棄してから例外を再スローする
+
 ユースケースの呼び出しパターン:
 
 ```
-const events: DomainEvent[] = [];
+try {
+  const result = await db.transaction(async (tx) => {
+    // ... ビジネスロジック ...
+    dispatcher.dispatch(event);  // 同期ハンドラ実行 + バッファ蓄積
+    // ...
+  });
 
-const result = await db.transaction(async (tx) => {
-  // ... ビジネスロジック ...
-  dispatcher.dispatch(event);  // 同期ハンドラ実行 + バッファ蓄積
-  // ...
-});
+  if (result === null) {
+    // 楽観的ロック失敗：バッファを破棄して早期リターン
+    dispatcher.discardBuffer();
+    return null;
+  }
 
-dispatcher.flushAsync();  // 非同期ハンドラ実行（fire-and-forget）
+  dispatcher.flushAsync();  // 非同期ハンドラ実行（fire-and-forget）
+  return result;
+} catch (e) {
+  // トランザクション例外：バッファを破棄して例外を再スロー
+  dispatcher.discardBuffer();
+  throw e;
+}
 ```
 
-**Rationale**: 同期ハンドラは整合性が必要な処理（後続リクエストで実装する承認ポリシー評価など）に使用し、非同期ハンドラは外部配信（Webhook）など失敗がビジネスロジックに影響しない処理に使用する。
+**Rationale**: 同期ハンドラは整合性が必要な処理（後続リクエストで実装する承認ポリシー評価など）に使用し、非同期ハンドラは外部配信（Webhook）など失敗がビジネスロジックに影響しない処理に使用する。バッファの明示的破棄を失敗パスに必須化することで、モジュールレベルシングルトンの共有バッファにおけるリクエスト間の汚染を防ぐ。
 
 ### D4: ドメインイベントの型定義方式 — Discriminated Union
 
@@ -112,9 +131,12 @@ type DomainEvent = InquiryConverted | InquiryDeclined | ... ;
 
 ### D6: Webhook 配信ハンドラの実装方式
 
-`src/infrastructure/handlers/webhookHandler.ts` に非同期イベントハンドラを実装する。ハンドラはドメインイベントの `type` を `WebhookEventType` にマッピングし、既存の `deliverWebhookEvent` 関数を内部で呼び出す。
+`src/infrastructure/handlers/webhookHandler.ts` に非同期イベントハンドラを実装する。ハンドラはドメインイベントの `type` を `WebhookEventType` にマッピングし、配信ロジックを呼び出す。承認系イベント（`request.*`, `step.*`）と新規ドメインイベント（`inquiry.*`, `deal.*`, `contract.*`, `invoice.*`）では配信経路を分ける:
 
-**Rationale**: 既存の Webhook 配信ロジック（エンドポイント取得、HMAC 署名、リトライ）はそのまま再利用する。ハンドラはマッピングと呼び出しの薄いアダプター層として機能する。`deliverWebhookEvent` 関数自体は変更不要。
+- **承認系イベント**: 既存の `deliverWebhookEvent` 関数を呼び出す。この関数は内部で `userRepository.findById(actorId)` を実行して `actorName` を解決し、ペイロードに含める。既存の Webhook 受信側が `actorName` フィールドを期待しているため、このルックアップは維持する
+- **新規ドメインイベント**: `deliverWebhookEvent` を経由せず、`deliverSingleAttempt`（または同等の低レベル配信関数）を直接呼び出して `actorName` の DB ルックアップを省略する。新規イベントの Webhook ペイロードに `actorName` は不要であり、既存受信側との後方互換も問題にならない
+
+**Rationale**: `deliverWebhookEvent` の `actorName` ルックアップは承認系イベントでは必要だが、新規ドメインイベントでは不要な DB クエリとなる。配信経路を分けることで、不要なルックアップを排除しつつ既存の承認系 Webhook の互換性を維持する。
 
 ### D7: ハンドラ登録の初期化
 
