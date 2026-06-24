@@ -60,7 +60,7 @@ export default async function DashboardPage() {
   const { summary: pipelineSummary, deals } = pipelineResult;
 
   // Stale deals: non-terminal phase, updatedAt >= 14 days ago
-  const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+  const fourteenDaysAgo = new Date(new Date().getTime() - 14 * 24 * 60 * 60 * 1000);
   const staleDeals =
     userRole === "manager" || userRole === "admin"
       ? deals.filter(
