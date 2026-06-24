@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "73d610a8-9a2d-41ee-ad36-b5c35834a841",
   "createdAt": "2026-06-24T03:48:21.917Z",
-  "updatedAt": "2026-06-24T04:11:31.326Z",
+  "updatedAt": "2026-06-24T04:15:41.459Z",
   "request": {
     "title": "請求画面の独立化",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "change/invoice-standalone-73d610a8",
   "error": null,
@@ -34,12 +34,13 @@
     }
   ],
   "_journal": {
-    "historyCount": 21,
+    "historyCount": 24,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
       "spec-review": 2,
-      "spec-fixer": 1
+      "spec-fixer": 1,
+      "test-case-gen": 1
     }
   }
 }

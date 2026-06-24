@@ -1,11 +1,11 @@
 import type { InvoiceStatus } from "../models/invoice";
 
-// 有効な遷移先の定義。paid と overdue は終端状態
+// 有効な遷移先の定義。paid は終端状態
 const VALID_INVOICE_TRANSITIONS: Record<InvoiceStatus, InvoiceStatus[]> = {
   scheduled: ["invoiced"],
   invoiced: ["paid", "overdue"],
   paid: [],
-  overdue: [],
+  overdue: ["paid"],
 };
 
 /**

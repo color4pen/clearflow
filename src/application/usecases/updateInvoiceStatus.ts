@@ -16,6 +16,7 @@ export async function updateInvoiceStatus(data: {
   organizationId: string;
   actorId: string;
   newStatus: InvoiceStatus;
+  paidAt?: Date;
 }): Promise<UpdateInvoiceStatusResult> {
   return dispatcher.runInContext(async () => {
     const invoice = await invoiceRepository.findById(data.invoiceId, data.organizationId);
@@ -33,7 +34,7 @@ export async function updateInvoiceStatus(data: {
     if (data.newStatus === "invoiced") {
       additionalFields.invoicedAt = new Date();
     } else if (data.newStatus === "paid") {
-      additionalFields.paidAt = new Date();
+      additionalFields.paidAt = data.paidAt ?? new Date();
     }
 
     try {
