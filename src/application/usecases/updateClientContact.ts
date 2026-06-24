@@ -1,5 +1,6 @@
 import { clientRepository, auditLogRepository } from "@/infrastructure/repositories";
 import { validateIsPrimaryUniqueness } from "@/domain/services/clientContactValidation";
+import { db } from "@/infrastructure/db";
 import type { ClientContact } from "@/domain/models/client";
 
 export type UpdateClientContactResult =
@@ -36,26 +37,34 @@ export async function updateClientContact(data: {
       return { ok: false, reason: validation.reason };
     }
 
-    const updated = await clientRepository.updateContact(data.contactId, data.clientId, {
-      name: data.name,
-      department: data.department ?? null,
-      position: data.position ?? null,
-      email: data.email ?? null,
-      phone: data.phone ?? null,
-      isPrimary: data.isPrimary ?? false,
+    const updated = await db.transaction(async (tx) => {
+      const contact = await clientRepository.updateContact(data.contactId, data.clientId, {
+        name: data.name,
+        department: data.department ?? null,
+        position: data.position ?? null,
+        email: data.email ?? null,
+        phone: data.phone ?? null,
+        isPrimary: data.isPrimary ?? false,
+      }, tx);
+
+      if (!contact) {
+        return null;
+      }
+
+      await auditLogRepository.create({
+        action: "client_contact.update",
+        targetType: "client_contact",
+        targetId: data.contactId,
+        actorId: data.actorId,
+        organizationId: data.organizationId,
+      }, tx);
+
+      return contact;
     });
 
     if (!updated) {
       return { ok: false, reason: "担当者が見つかりません" };
     }
-
-    await auditLogRepository.create({
-      action: "client_contact.update",
-      targetType: "client_contact",
-      targetId: data.contactId,
-      actorId: data.actorId,
-      organizationId: data.organizationId,
-    });
 
     return { ok: true, contact: updated };
   } catch (err) {

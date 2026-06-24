@@ -238,8 +238,8 @@ export async function updateInquiryAction(
     description: parsed.data.description ?? null,
     source: parsed.data.source,
     clientId: parsed.data.clientId ?? null,
-    budget: parsed.data.budget ?? null,
-    timeline: parsed.data.timeline ?? null,
+    budget: parsed.data.budget,
+    timeline: parsed.data.timeline,
     assigneeId: parsed.data.assigneeId ?? null,
   });
 
