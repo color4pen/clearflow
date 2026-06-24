@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "de675cb9-af85-4b5e-a929-074d0d30fc6a",
   "createdAt": "2026-06-24T07:37:45.283Z",
-  "updatedAt": "2026-06-24T07:54:43.508Z",
+  "updatedAt": "2026-06-24T08:03:35.557Z",
   "request": {
     "title": "承認ポリシーのスキーマとモデル追加",
     "type": "new-feature",
@@ -33,12 +33,13 @@
       ]
     }
   ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 17,
+    "historyCount": 23,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1,
+      "spec-review": 2,
       "spec-fixer": 1
     }
   }
