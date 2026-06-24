@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "9c7a810e-b7e9-4101-a4a5-9df60a159dc4",
   "createdAt": "2026-06-24T23:05:01.403Z",
-  "updatedAt": "2026-06-24T23:55:38.536Z",
+  "updatedAt": "2026-06-24T23:56:04.361Z",
   "request": {
     "title": "ダッシュボード画面のデザイン適用",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/design-dashboard-9c7a810e",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/88",
+    "number": 88,
+    "createdAt": "2026-06-24T23:56:04.347Z"
+  },
   "_journal": {
-    "historyCount": 76,
+    "historyCount": 81,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -62,7 +67,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
