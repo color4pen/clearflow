@@ -60,6 +60,10 @@ function isOverdue(item: DashboardActionItem): boolean {
   return false;
 }
 
+function calcStaleDays(updatedAt: Date): number {
+  return Math.floor((Date.now() - updatedAt.getTime()) / 86400000);
+}
+
 function getDateDisplay(item: DashboardActionItem): { text: string; date: Date | null } {
   if (item.type === "approval") {
     return { text: item.deadline ? formatDate(item.deadline) : "—", date: item.deadline };
@@ -77,8 +81,7 @@ export function SalesDashboard({
   recentActivities,
   staleDeals,
 }: Props) {
-  const now = Date.now();
-  const today = new Date(now).toLocaleDateString("ja-JP", {
+  const today = new Date().toLocaleDateString("ja-JP", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -275,9 +278,7 @@ export function SalesDashboard({
                 ) : (
                   <div>
                     {staleDeals.map((deal) => {
-                      const staleDays = Math.floor(
-                        (now - deal.updatedAt.getTime()) / 86400000
-                      );
+                      const staleDays = calcStaleDays(deal.updatedAt);
                       const subParts: string[] = [
                         phaseLabels[deal.phase] ?? deal.phase,
                       ];

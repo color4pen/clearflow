@@ -21,14 +21,17 @@ function formatDate(date: Date | null): string {
   });
 }
 
+function calcOverdueDays(dueDate: Date): number {
+  return Math.floor((Date.now() - dueDate.getTime()) / 86400000);
+}
+
 export function FinanceDashboard({
   overdueInvoices,
   unpaidInvoices,
   monthlySalesTotal,
   upcomingInvoices,
 }: Props) {
-  const now = Date.now();
-  const today = new Date(now).toLocaleDateString("ja-JP", {
+  const today = new Date().toLocaleDateString("ja-JP", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -104,9 +107,7 @@ export function FinanceDashboard({
               </div>
               {/* Data rows */}
               {overdueInvoices.map((inv) => {
-                const overdueDays = Math.floor(
-                  (now - inv.dueDate.getTime()) / 86400000
-                );
+                const overdueDays = calcOverdueDays(inv.dueDate);
                 return (
                   <div
                     key={inv.id}
