@@ -1,7 +1,7 @@
 import { requestRepository, auditLogRepository } from "@/infrastructure/repositories";
 import { validateTransition } from "@/domain/services/requestTransition";
 import { db } from "@/infrastructure/db";
-import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
+import { dispatcher } from "@/domain/events";
 import type { Request } from "@/domain/models/request";
 
 const OPTIMISTIC_LOCK_ERROR = "この申請は他のユーザーによって更新されました。画面を更新してください";
@@ -15,58 +15,67 @@ export async function submitRequest(data: {
   organizationId: string;
   actorId: string;
 }): Promise<SubmitRequestResult> {
-  const existing = await requestRepository.findById(
-    data.requestId,
-    data.organizationId
-  );
-  if (!existing) {
-    return { ok: false, reason: "Request not found." };
-  }
+  return dispatcher.runInContext(async () => {
+    const existing = await requestRepository.findById(
+      data.requestId,
+      data.organizationId
+    );
+    if (!existing) {
+      return { ok: false, reason: "Request not found." };
+    }
 
-  const validation = validateTransition(existing.status, "pending");
-  if (!validation.ok) {
-    return { ok: false, reason: validation.reason };
-  }
+    const validation = validateTransition(existing.status, "pending");
+    if (!validation.ok) {
+      return { ok: false, reason: validation.reason };
+    }
 
-  try {
-    const updated = await db.transaction(async (tx) => {
-      const result = await requestRepository.updateStatus(
-        data.requestId,
-        data.organizationId,
-        "pending",
-        new Date(),
-        existing.version,
-        tx
-      );
-      if (!result) {
-        throw new Error(OPTIMISTIC_LOCK_ERROR);
-      }
+    try {
+      const updated = await db.transaction(async (tx) => {
+        const result = await requestRepository.updateStatus(
+          data.requestId,
+          data.organizationId,
+          "pending",
+          new Date(),
+          existing.version,
+          tx
+        );
+        if (!result) {
+          throw new Error(OPTIMISTIC_LOCK_ERROR);
+        }
 
-      await auditLogRepository.create(
-        {
-          action: "request.submit",
-          targetType: "request",
-          targetId: data.requestId,
-          actorId: data.actorId,
+        await auditLogRepository.create(
+          {
+            action: "request.submit",
+            targetType: "request",
+            targetId: data.requestId,
+            actorId: data.actorId,
+            organizationId: data.organizationId,
+          },
+          tx
+        );
+
+        dispatcher.dispatch({
+          type: "request.submitted",
           organizationId: data.organizationId,
-        },
-        tx
-      );
+          actorId: data.actorId,
+          occurredAt: new Date(),
+          payload: {
+            requestId: result.id,
+            requestTitle: result.title,
+            status: "pending",
+          },
+        });
 
-      return result;
-    });
+        return result;
+      });
 
-    void deliverWebhookEvent({
-      organizationId: data.organizationId,
-      event: "request.submitted",
-      data: { requestId: updated.id, requestTitle: updated.title, actorId: data.actorId, status: "pending" },
-    });
-
-    return { ok: true, request: updated };
-  } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "Failed to update request.",
-    };
-  }
+      dispatcher.flushAsync();
+      return { ok: true, request: updated };
+    } catch (err) {
+      return {
+        ok: false,
+        reason: err instanceof Error ? err.message : "Failed to update request.",
+      };
+    }
+  });
 }

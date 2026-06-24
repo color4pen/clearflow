@@ -6,7 +6,7 @@ import {
 import { validateTransition } from "@/domain/services/requestTransition";
 import { getCurrentStep, isStepExpired } from "@/domain/services/approvalStepService";
 import { db } from "@/infrastructure/db";
-import { deliverWebhookEvent } from "@/infrastructure/webhookDelivery";
+import { dispatcher } from "@/domain/events";
 import type { Request } from "@/domain/models/request";
 import type { ApprovalStep } from "@/domain/models/approvalStep";
 
@@ -23,56 +23,153 @@ export async function rejectRequest(data: {
   targetStatus?: "rejected" | "revision";
   comment?: string;
 }): Promise<RejectRequestResult> {
-  const targetStatus = data.targetStatus ?? "rejected";
+  return dispatcher.runInContext(async () => {
+    const targetStatus = data.targetStatus ?? "rejected";
 
-  const existing = await requestRepository.findById(
-    data.requestId,
-    data.organizationId
-  );
-  if (!existing) {
-    return { ok: false, reason: "Request not found." };
-  }
+    const existing = await requestRepository.findById(
+      data.requestId,
+      data.organizationId
+    );
+    if (!existing) {
+      return { ok: false, reason: "Request not found." };
+    }
 
-  const validation = validateTransition(existing.status, targetStatus);
-  if (!validation.ok) {
-    return { ok: false, reason: validation.reason };
-  }
+    const validation = validateTransition(existing.status, targetStatus);
+    if (!validation.ok) {
+      return { ok: false, reason: validation.reason };
+    }
 
-  if (targetStatus === "revision") {
-    // Revision (差し戻し) flow
+    if (targetStatus === "revision") {
+      // Revision (差し戻し) flow
+      try {
+        const txResult = await db.transaction(async (tx): Promise<{ request: Request; currentStep: ApprovalStep | null }> => {
+          const steps = await approvalStepRepository.findByRequestId(
+            data.requestId,
+            data.organizationId,
+            tx
+          );
+
+          const currentStep = getCurrentStep(steps);
+          if (currentStep) {
+            // TOCTOU防止: TX内で期限チェック
+            if (isStepExpired(currentStep)) {
+              throw new Error("この承認ステップの期限が切れています");
+            }
+            const updatedStep = await approvalStepRepository.updateStatus(
+              currentStep.id,
+              data.organizationId,
+              {
+                status: "rejected",
+                comment: data.comment ?? null,
+              },
+              currentStep.version,
+              tx
+            );
+            if (!updatedStep) {
+              throw new Error(OPTIMISTIC_LOCK_ERROR);
+            }
+          }
+
+          const result = await requestRepository.updateStatus(
+            data.requestId,
+            data.organizationId,
+            "revision",
+            new Date(),
+            existing.version,
+            tx
+          );
+          if (!result) {
+            throw new Error(OPTIMISTIC_LOCK_ERROR);
+          }
+
+          await auditLogRepository.create(
+            {
+              action: "approval_step.reject",
+              targetType: "request",
+              targetId: data.requestId,
+              actorId: data.actorId,
+              organizationId: data.organizationId,
+              metadata: {
+                stepId: currentStep?.id ?? null,
+                stepOrder: currentStep?.stepOrder ?? null,
+                approverRole: currentStep?.approverRole ?? null,
+                comment: data.comment ?? null,
+              },
+            },
+            tx
+          );
+
+          dispatcher.dispatch({
+            type: "request.revised",
+            organizationId: data.organizationId,
+            actorId: data.actorId,
+            occurredAt: new Date(),
+            payload: {
+              requestId: result.id,
+              requestTitle: result.title,
+              status: "revision",
+            },
+          });
+
+          dispatcher.dispatch({
+            type: "step.rejected",
+            organizationId: data.organizationId,
+            actorId: data.actorId,
+            occurredAt: new Date(),
+            payload: {
+              requestId: result.id,
+              requestTitle: result.title,
+              status: "revision",
+              metadata: {
+                stepId: currentStep?.id,
+                stepOrder: currentStep?.stepOrder,
+                approverRole: currentStep?.approverRole,
+              },
+            },
+          });
+
+          return { request: result, currentStep };
+        });
+
+        dispatcher.flushAsync();
+        return { ok: true, request: txResult.request };
+      } catch (err) {
+        return {
+          ok: false,
+          reason:
+            err instanceof Error ? err.message : "Failed to update request.",
+        };
+      }
+    }
+
+    // Default: final rejection (rejected terminal state)
+    // Pre-check: deadline fast-fail for rejected path
+    const preSteps = await approvalStepRepository.findByRequestId(
+      data.requestId,
+      data.organizationId
+    );
+    const preCurrentStep = getCurrentStep(preSteps);
+    if (preCurrentStep && isStepExpired(preCurrentStep)) {
+      return { ok: false, reason: "この承認ステップの期限が切れています" };
+    }
+
     try {
-      const txResult = await db.transaction(async (tx): Promise<{ request: Request; currentStep: ApprovalStep | null }> => {
-        const steps = await approvalStepRepository.findByRequestId(
+      const updated = await db.transaction(async (tx) => {
+        // TOCTOU防止: TX内で再チェック
+        const freshSteps = await approvalStepRepository.findByRequestId(
           data.requestId,
           data.organizationId,
           tx
         );
-
-        const currentStep = getCurrentStep(steps);
-        if (currentStep) {
-          // TOCTOU防止: TX内で期限チェック
-          if (isStepExpired(currentStep)) {
-            throw new Error("この承認ステップの期限が切れています");
-          }
-          const updatedStep = await approvalStepRepository.updateStatus(
-            currentStep.id,
-            data.organizationId,
-            {
-              status: "rejected",
-              comment: data.comment ?? null,
-            },
-            currentStep.version,
-            tx
-          );
-          if (!updatedStep) {
-            throw new Error(OPTIMISTIC_LOCK_ERROR);
-          }
+        const freshCurrentStep = getCurrentStep(freshSteps);
+        if (freshCurrentStep && isStepExpired(freshCurrentStep)) {
+          throw new Error("この承認ステップの期限が切れています");
         }
 
         const result = await requestRepository.updateStatus(
           data.requestId,
           data.organizationId,
-          "revision",
+          "rejected",
           new Date(),
           existing.version,
           tx
@@ -83,127 +180,37 @@ export async function rejectRequest(data: {
 
         await auditLogRepository.create(
           {
-            action: "approval_step.reject",
+            action: "request.reject",
             targetType: "request",
             targetId: data.requestId,
             actorId: data.actorId,
             organizationId: data.organizationId,
-            metadata: {
-              stepId: currentStep?.id ?? null,
-              stepOrder: currentStep?.stepOrder ?? null,
-              approverRole: currentStep?.approverRole ?? null,
-              comment: data.comment ?? null,
-            },
           },
           tx
         );
 
-        return { request: result, currentStep };
-      });
-
-      void deliverWebhookEvent({
-        organizationId: data.organizationId,
-        event: "request.revised",
-        data: {
-          requestId: txResult.request.id,
-          requestTitle: txResult.request.title,
+        dispatcher.dispatch({
+          type: "request.rejected",
+          organizationId: data.organizationId,
           actorId: data.actorId,
-          status: "revision",
-        },
-      });
-
-      void deliverWebhookEvent({
-        organizationId: data.organizationId,
-        event: "step.rejected",
-        data: {
-          requestId: txResult.request.id,
-          requestTitle: txResult.request.title,
-          actorId: data.actorId,
-          status: "revision",
-          metadata: {
-            stepId: txResult.currentStep?.id,
-            stepOrder: txResult.currentStep?.stepOrder,
-            approverRole: txResult.currentStep?.approverRole,
+          occurredAt: new Date(),
+          payload: {
+            requestId: result.id,
+            requestTitle: result.title,
+            status: "rejected",
           },
-        },
+        });
+
+        return result;
       });
 
-      return { ok: true, request: txResult.request };
+      dispatcher.flushAsync();
+      return { ok: true, request: updated };
     } catch (err) {
       return {
         ok: false,
-        reason:
-          err instanceof Error ? err.message : "Failed to update request.",
+        reason: err instanceof Error ? err.message : "Failed to update request.",
       };
     }
-  }
-
-  // Default: final rejection (rejected terminal state)
-  // Pre-check: deadline fast-fail for rejected path
-  const preSteps = await approvalStepRepository.findByRequestId(
-    data.requestId,
-    data.organizationId
-  );
-  const preCurrentStep = getCurrentStep(preSteps);
-  if (preCurrentStep && isStepExpired(preCurrentStep)) {
-    return { ok: false, reason: "この承認ステップの期限が切れています" };
-  }
-
-  try {
-    const updated = await db.transaction(async (tx) => {
-      // TOCTOU防止: TX内で再チェック
-      const freshSteps = await approvalStepRepository.findByRequestId(
-        data.requestId,
-        data.organizationId,
-        tx
-      );
-      const freshCurrentStep = getCurrentStep(freshSteps);
-      if (freshCurrentStep && isStepExpired(freshCurrentStep)) {
-        throw new Error("この承認ステップの期限が切れています");
-      }
-
-      const result = await requestRepository.updateStatus(
-        data.requestId,
-        data.organizationId,
-        "rejected",
-        new Date(),
-        existing.version,
-        tx
-      );
-      if (!result) {
-        throw new Error(OPTIMISTIC_LOCK_ERROR);
-      }
-
-      await auditLogRepository.create(
-        {
-          action: "request.reject",
-          targetType: "request",
-          targetId: data.requestId,
-          actorId: data.actorId,
-          organizationId: data.organizationId,
-        },
-        tx
-      );
-
-      return result;
-    });
-
-    void deliverWebhookEvent({
-      organizationId: data.organizationId,
-      event: "request.rejected",
-      data: {
-        requestId: updated.id,
-        requestTitle: updated.title,
-        actorId: data.actorId,
-        status: "rejected",
-      },
-    });
-
-    return { ok: true, request: updated };
-  } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "Failed to update request.",
-    };
-  }
+  });
 }

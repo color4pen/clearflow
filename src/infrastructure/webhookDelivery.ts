@@ -17,7 +17,7 @@ export function computeSignature(secret: string, payload: string): string {
 export const MAX_ATTEMPTS = 4;
 export const BASE_DELAY_MS = 1000;
 
-async function deliverToEndpoint(
+export async function deliverToEndpoint(
   endpoint: WebhookEndpoint,
   payload: WebhookPayload
 ): Promise<void> {
