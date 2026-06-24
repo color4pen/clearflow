@@ -1,15 +1,15 @@
 # Verification Result — design-dashboard — iter 1
 
-## Verdict: failed
+## Verdict: passed
 
 ## Phase Results
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 18.0s | 0 |
+| 1 | build | passed | 25.9s | 0 |
 | 2 | typecheck | passed | 1.1s | 0 |
 | 3 | test | passed | 0.4s | 0 |
-| 4 | lint | failed | 4.1s | 1 |
+| 4 | lint | passed | 4.2s | 0 |
 
 ## Phase: build
 
@@ -17,7 +17,7 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 12.7s
+✓ Compiled successfully in 20.6s
   Running TypeScript ...
   Finished TypeScript in 3.7s ...
   Collecting page data using 7 workers ...
@@ -25,7 +25,7 @@
   Generating static pages using 7 workers (7/30) 
   Generating static pages using 7 workers (14/30) 
   Generating static pages using 7 workers (22/30) 
-✓ Generating static pages using 7 workers (30/30) in 128ms
+✓ Generating static pages using 7 workers (30/30) in 129ms
   Finalizing page optimization ...
 
 Route (app)
@@ -124,37 +124,7 @@ Ran 891 tests across 43 files. [370.00ms]
 
 ## Phase: lint
 
-Step 'lint' failed
-
 ```
-
-src/app/(dashboard)/dashboard/FinanceDashboard.tsx
-  30:15  error  Error: Cannot call impure function during render
-
-`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
-
-src/app/(dashboard)/dashboard/FinanceDashboard.tsx:30:15
-  28 |   upcomingInvoices,
-  29 | }: Props) {
-> 30 |   const now = Date.now();
-     |               ^^^^^^^^^^ Cannot call impure function
-  31 |   const today = new Date(now).toLocaleDateString("ja-JP", {
-  32 |     year: "numeric",
-  33 |     month: "2-digit",  react-hooks/purity
-
-src/app/(dashboard)/dashboard/SalesDashboard.tsx
-  80:15  error  Error: Cannot call impure function during render
-
-`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
-
-src/app/(dashboard)/dashboard/SalesDashboard.tsx:80:15
-  78 |   staleDeals,
-  79 | }: Props) {
-> 80 |   const now = Date.now();
-     |               ^^^^^^^^^^ Cannot call impure function
-  81 |   const today = new Date(now).toLocaleDateString("ja-JP", {
-  82 |     year: "numeric",
-  83 |     month: "2-digit",  react-hooks/purity
 
 src/app/(dashboard)/requests/BulkApprovalPanel.tsx
   34:10  warning  'formatAmount' is defined but never used  @typescript-eslint/no-unused-vars
@@ -176,10 +146,9 @@ src/infrastructure/seed.ts
   575:10  warning  'inProgressInquiry1' is assigned a value but never used  @typescript-eslint/no-unused-vars
   585:10  warning  'inProgressInquiry2' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
-✖ 12 problems (2 errors, 10 warnings)
+✖ 10 problems (0 errors, 10 warnings)
 
 
 $ eslint
-error: script "lint" exited with code 1
 
 ```
