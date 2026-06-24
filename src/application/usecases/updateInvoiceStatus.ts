@@ -59,7 +59,7 @@ export async function updateInvoiceStatus(data: {
         );
 
         if (data.newStatus === "paid") {
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "invoice.paid",
             organizationId: data.organizationId,
             actorId: data.actorId,
@@ -70,7 +70,7 @@ export async function updateInvoiceStatus(data: {
             },
           });
         } else if (data.newStatus === "overdue") {
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "invoice.overdue",
             organizationId: data.organizationId,
             actorId: data.actorId,

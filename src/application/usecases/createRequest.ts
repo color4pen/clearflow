@@ -79,7 +79,7 @@ export async function createRequest(data: {
           tx
         );
 
-        dispatcher.dispatch({
+        await dispatcher.dispatch({
           type: "request.created",
           organizationId: data.organizationId,
           actorId: data.creatorId,

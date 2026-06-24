@@ -1,6 +1,7 @@
 import { dispatcher } from "@/domain/events";
 import { handleDomainEventWebhook } from "./webhookHandler";
 import { handleApprovalCompleted } from "./approvalCompletedHandler";
+import { handleAuditLog } from "./auditLogHandler";
 import type { DomainEvent } from "@/domain/events";
 
 // ---------------------------------------------------------------------------
@@ -48,4 +49,5 @@ export function registerHandlers(): void {
   }
 
   dispatcher.on("approval.completed", handleApprovalCompleted, "async");
+  dispatcher.on("request.submitted", handleAuditLog, "sync");
 }

@@ -2,11 +2,11 @@
 
 ## T-01: EventHandler 型と dispatch() の async 化
 
-- [ ] `src/domain/events/dispatcher.ts` に `DispatchOptions` 型を追加: `export type DispatchOptions = { tx?: unknown };`
-- [ ] `EventHandler<T>` 型を `(event: T, options?: DispatchOptions) => void | Promise<void>` に変更
-- [ ] `dispatch(event: DomainEvent): void` を `async dispatch(event: DomainEvent, options?: DispatchOptions): Promise<void>` に変更
-- [ ] sync ハンドラ呼び出し（L43）を `await entry.handler(event, options)` に変更
-- [ ] `src/domain/events/index.ts` の export に `DispatchOptions` を追加
+- [x] `src/domain/events/dispatcher.ts` に `DispatchOptions` 型を追加: `export type DispatchOptions = { tx?: unknown };`
+- [x] `EventHandler<T>` 型を `(event: T, options?: DispatchOptions) => void | Promise<void>` に変更
+- [x] `dispatch(event: DomainEvent): void` を `async dispatch(event: DomainEvent, options?: DispatchOptions): Promise<void>` に変更
+- [x] sync ハンドラ呼び出し（L43）を `await entry.handler(event, options)` に変更
+- [x] `src/domain/events/index.ts` の export に `DispatchOptions` を追加
 
 **Acceptance Criteria**:
 - `dispatch()` の戻り値が `Promise<void>` になっている
@@ -18,16 +18,16 @@
 
 以下の 22 箇所すべてに `await` を追加する:
 
-- [ ] `src/application/usecases/approveRequest.ts` — 5 箇所（L78, L103, L236, L280, L305）
-- [ ] `src/application/usecases/rejectRequest.ts` — 3 箇所（L102, L114, L192）
-- [ ] `src/application/usecases/updateDealPhase.ts` — 3 箇所（L57, L68, L79）
-- [ ] `src/application/usecases/updateInquiryStatus.ts` — 3 箇所（L148, L221, L276）
-- [ ] `src/application/usecases/updateContractStatus.ts` — 2 箇所（L58, L66）
-- [ ] `src/application/usecases/updateInvoiceStatus.ts` — 2 箇所（L62, L73）
-- [ ] `src/application/usecases/submitRequest.ts` — 1 箇所（L57）
-- [ ] `src/application/usecases/createRequest.ts` — 1 箇所（L82）
-- [ ] `src/application/usecases/createContract.ts` — 1 箇所（L80）
-- [ ] `src/application/usecases/resubmitRequest.ts` — 1 箇所（L86）
+- [x] `src/application/usecases/approveRequest.ts` — 5 箇所（L78, L103, L236, L280, L305）
+- [x] `src/application/usecases/rejectRequest.ts` — 3 箇所（L102, L114, L192）
+- [x] `src/application/usecases/updateDealPhase.ts` — 3 箇所（L57, L68, L79）
+- [x] `src/application/usecases/updateInquiryStatus.ts` — 3 箇所（L148, L221, L276）
+- [x] `src/application/usecases/updateContractStatus.ts` — 2 箇所（L58, L66）
+- [x] `src/application/usecases/updateInvoiceStatus.ts` — 2 箇所（L62, L73）
+- [x] `src/application/usecases/submitRequest.ts` — 1 箇所（L57）
+- [x] `src/application/usecases/createRequest.ts` — 1 箇所（L82）
+- [x] `src/application/usecases/createContract.ts` — 1 箇所（L80）
+- [x] `src/application/usecases/resubmitRequest.ts` — 1 箇所（L86）
 
 変更パターン: `dispatcher.dispatch({` → `await dispatcher.dispatch({`
 （approveRequest L103, L305 は `dispatcher.dispatch(approvalCompletedEvent)` → `await dispatcher.dispatch(approvalCompletedEvent)`）
@@ -39,7 +39,7 @@
 
 ## T-03: submitRequest の dispatch 呼び出しに tx を追加
 
-- [ ] `src/application/usecases/submitRequest.ts` L57 の dispatch 呼び出しに `{ tx }` オプションを追加: `await dispatcher.dispatch({...}, { tx })`
+- [x] `src/application/usecases/submitRequest.ts` L57 の dispatch 呼び出しに `{ tx }` オプションを追加: `await dispatcher.dispatch({...}, { tx })`
 
 **Acceptance Criteria**:
 - submitRequest の dispatch 呼び出しが `await dispatcher.dispatch(event, { tx })` の形式になっている
@@ -47,14 +47,14 @@
 
 ## T-04: 監査ログハンドラの実装
 
-- [ ] `src/infrastructure/handlers/auditLogHandler.ts` を新規作成
-- [ ] `auditLogRepository` を `@/infrastructure/repositories` から import
-- [ ] `Transaction` 型を `@/infrastructure/db` から import
-- [ ] `DomainEvent` と `DispatchOptions` を `@/domain/events` から import
-- [ ] `handleAuditLog` 関数を export: `async function handleAuditLog(event: DomainEvent, options?: DispatchOptions): Promise<void>`
-- [ ] `event.type === "request.submitted"` のみ処理する switch/if 文を実装
-- [ ] auditLogRepository.create の呼び出しデータ: `{ action: "request.submit", targetType: "request", targetId: event.payload.requestId, actorId: event.actorId, organizationId: event.organizationId, metadata: null }`
-- [ ] tx は `options?.tx as Transaction | undefined` で取得し、`auditLogRepository.create(data, tx)` に渡す
+- [x] `src/infrastructure/handlers/auditLogHandler.ts` を新規作成
+- [x] `auditLogRepository` を `@/infrastructure/repositories` から import
+- [x] `Transaction` 型を `@/infrastructure/db` から import
+- [x] `DomainEvent` と `DispatchOptions` を `@/domain/events` から import
+- [x] `handleAuditLog` 関数を export: `async function handleAuditLog(event: DomainEvent, options?: DispatchOptions): Promise<void>`
+- [x] `event.type === "request.submitted"` のみ処理する switch/if 文を実装
+- [x] auditLogRepository.create の呼び出しデータ: `{ action: "request.submit", targetType: "request", targetId: event.payload.requestId, actorId: event.actorId, organizationId: event.organizationId, metadata: null }`
+- [x] tx は `options?.tx as Transaction | undefined` で取得し、`auditLogRepository.create(data, tx)` に渡す
 
 **Acceptance Criteria**:
 - `src/infrastructure/handlers/auditLogHandler.ts` が存在する
@@ -64,9 +64,9 @@
 
 ## T-05: registerHandlers の更新
 
-- [ ] `src/infrastructure/handlers/index.ts` に `handleAuditLog` を import
-- [ ] `registerHandlers()` 内で `dispatcher.on("request.submitted", handleAuditLog, "sync")` を追加
-- [ ] 既存の webhook ハンドラ登録・approvalCompleted ハンドラ登録は変更しない
+- [x] `src/infrastructure/handlers/index.ts` に `handleAuditLog` を import
+- [x] `registerHandlers()` 内で `dispatcher.on("request.submitted", handleAuditLog, "sync")` を追加
+- [x] 既存の webhook ハンドラ登録・approvalCompleted ハンドラ登録は変更しない
 
 **Acceptance Criteria**:
 - `handleAuditLog` が `request.submitted` イベントの sync ハンドラとして登録されている
@@ -75,9 +75,9 @@
 
 ## T-06: submitRequest から手動の auditLogRepository 呼び出しを削除
 
-- [ ] `src/application/usecases/submitRequest.ts` から L46-55 の `auditLogRepository.create(...)` ブロックを削除
-- [ ] L1 の import から `auditLogRepository` を削除: `import { requestRepository, auditLogRepository } from` → `import { requestRepository } from`
-- [ ] 削除後も dispatch 呼び出し、db.transaction、flushAsync の順序が正しいことを確認
+- [x] `src/application/usecases/submitRequest.ts` から L46-55 の `auditLogRepository.create(...)` ブロックを削除
+- [x] L1 の import から `auditLogRepository` を削除: `import { requestRepository, auditLogRepository } from` → `import { requestRepository } from`
+- [x] 削除後も dispatch 呼び出し、db.transaction、flushAsync の順序が正しいことを確認
 
 **Acceptance Criteria**:
 - submitRequest.ts に `auditLogRepository.create` の直接呼び出しが存在しない
@@ -86,10 +86,10 @@
 
 ## T-07: テストの更新
 
-- [ ] `src/__tests__/usecases/requestWorkflow.test.ts` TC-011 を更新: submitRequest.ts のソースから `auditLogRepository` を検証する代わりに、`auditLogHandler.ts` のソースから `request.submit` の処理を検証する形に変更する。あるいは、submitRequest.ts が `dispatcher.dispatch` を呼び出すことと、auditLogHandler.ts が `request.submit` アクションで `auditLogRepository.create` を呼び出すことをそれぞれ検証する
-- [ ] submitRequest.ts のソースに `request.submit` 文字列が含まれなくなる場合、TC-011 の `expect(src).toContain("request.submit")` も更新する（dispatch イベントの type は `request.submitted` であり `request.submit` ではないため、手動呼び出し削除後に失敗する可能性がある）
-- [ ] TC-011 が `targetType` を検証している部分: submitRequest.ts には dispatch イベントで `targetType` を含まないため、ハンドラ側の検証に切り替えるか削除する
-- [ ] 他のテスト（TC-012, TC-013 等）は変更不要であることを確認する（approveRequest, rejectRequest は手動呼び出しを維持するため）
+- [x] `src/__tests__/usecases/requestWorkflow.test.ts` TC-011 を更新: submitRequest.ts のソースから `auditLogRepository` を検証する代わりに、`auditLogHandler.ts` のソースから `request.submit` の処理を検証する形に変更する
+- [x] `src/__tests__/domain/domainEvents.test.ts` の dispatch 関連テストを async dispatch に対応させる（await 追加、rejects.toThrow() への変更）
+- [x] TC-011 が `targetType` を検証している部分: ハンドラ側の検証に切り替え
+- [x] 他のテスト（TC-012, TC-013 等）は変更不要であることを確認する（approveRequest, rejectRequest は手動呼び出しを維持するため）
 
 **Acceptance Criteria**:
 - TC-011 が submitRequest の監査ログがハンドラ経由で記録されることを正しく検証している
@@ -98,11 +98,11 @@
 
 ## T-08: 最終検証
 
-- [ ] `bun run typecheck` がエラーなしで通ることを確認
-- [ ] `bun test` が全テスト green であることを確認
-- [ ] `grep -rn 'dispatcher\.dispatch(' src/application/usecases/` で全箇所が `await` 付きであることを確認
-- [ ] submitRequest.ts に `auditLogRepository` が残っていないことを確認
-- [ ] 他のユースケース（approveRequest, rejectRequest 等）の `auditLogRepository.create` 手動呼び出しが残っていることを確認
+- [x] `bun run typecheck` がエラーなしで通ることを確認
+- [x] `bun test` が全テスト green であることを確認
+- [x] `grep -rn 'dispatcher\.dispatch(' src/application/usecases/` で全箇所が `await` 付きであることを確認
+- [x] submitRequest.ts に `auditLogRepository` が残っていないことを確認
+- [x] 他のユースケース（approveRequest, rejectRequest 等）の `auditLogRepository.create` 手動呼び出しが残っていることを確認
 
 **Acceptance Criteria**:
 - `typecheck && test` が green

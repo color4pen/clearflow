@@ -83,7 +83,7 @@ describe("EventDispatcher", () => {
     let caughtError: Error | null = null;
     await d.runInContext(async () => {
       try {
-        d.dispatch(makeEvent("inquiry.converted"));
+        await d.dispatch(makeEvent("inquiry.converted"));
       } catch (err) {
         caughtError = err as Error;
       }
@@ -102,7 +102,7 @@ describe("EventDispatcher", () => {
 
     await d.runInContext(async () => {
       try {
-        d.dispatch(makeEvent("inquiry.converted"));
+        await d.dispatch(makeEvent("inquiry.converted"));
       } catch {
         // expected
       }
@@ -281,8 +281,8 @@ describe("EventDispatcher", () => {
     d.on("inquiry.converted", async () => { called.push("async1"); }, "async");
 
     await d.runInContext(async () => {
-      d.dispatch(makeEvent("inquiry.converted"));
-      // sync handlers called immediately
+      await d.dispatch(makeEvent("inquiry.converted"));
+      // sync handlers called immediately (all sync handlers run before dispatch resolves)
       expect(called).toContain("sync1");
       expect(called).toContain("sync2");
       d.flushAsync();
@@ -329,10 +329,10 @@ describe("EventDispatcher", () => {
   // dispatch() outside runInContext throws
   // -------------------------------------------------------------------------
 
-  it("dispatch() outside runInContext throws an error", () => {
-    expect(() => {
-      d.dispatch(makeEvent("inquiry.converted"));
-    }).toThrow();
+  it("dispatch() outside runInContext throws an error", async () => {
+    await expect(d.dispatch(makeEvent("inquiry.converted"))).rejects.toThrow(
+      "dispatcher.dispatch() called outside of runInContext() scope"
+    );
   });
 });
 

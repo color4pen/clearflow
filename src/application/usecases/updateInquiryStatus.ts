@@ -145,7 +145,7 @@ export async function updateInquiryStatus(
                   tx
                 );
 
-                dispatcher.dispatch({
+                await dispatcher.dispatch({
                   type: "request.submitted",
                   organizationId: data.organizationId,
                   actorId: data.actorId,
@@ -218,7 +218,7 @@ export async function updateInquiryStatus(
             tx
           );
 
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "inquiry.converted",
             organizationId: data.organizationId,
             actorId: data.actorId,
@@ -273,7 +273,7 @@ export async function updateInquiryStatus(
         );
 
         if (data.newStatus === "declined") {
-          dispatcher.dispatch({
+          await dispatcher.dispatch({
             type: "inquiry.declined",
             organizationId: data.organizationId,
             actorId: data.actorId,
