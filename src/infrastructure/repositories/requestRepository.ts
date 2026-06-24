@@ -1,4 +1,4 @@
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, inArray } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { requests, auditLogs, approvalSteps } from "../schema";
@@ -158,6 +158,32 @@ export async function findAllWithStepsByOrganization(
     }
   }
   return Array.from(map.values());
+}
+
+/**
+ * Finds an existing system-generated approval request for the given trigger
+ * entity that is still in progress (status = draft or pending). Used to
+ * prevent duplicate approval requests for the same entity.
+ */
+export async function findByOriginTriggerEntity(
+  organizationId: string,
+  triggerAction: string,
+  triggerEntityId: string
+): Promise<Request | null> {
+  const result = await db
+    .select()
+    .from(requests)
+    .where(
+      and(
+        eq(requests.organizationId, organizationId),
+        eq(requests.originType, "system"),
+        eq(requests.originTriggerAction, triggerAction),
+        eq(requests.originTriggerEntityId, triggerEntityId),
+        inArray(requests.status, ["draft", "pending"])
+      )
+    )
+    .limit(1);
+  return result[0] ? mapRow(result[0]) : null;
 }
 
 export async function updateStatus(

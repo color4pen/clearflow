@@ -15,6 +15,7 @@ import { db } from "@/infrastructure/db";
 import { dispatcher } from "@/domain/events";
 import type { Request } from "@/domain/models/request";
 import type { ApprovalStep } from "@/domain/models/approvalStep";
+import type { ApprovalCompleted } from "@/domain/events/types";
 
 const OPTIMISTIC_LOCK_ERROR = "この申請は他のユーザーによって更新されました。画面を更新してください";
 
@@ -85,6 +86,22 @@ export async function approveRequest(data: {
               status: "approved",
             },
           });
+
+          if (result.originType === "system") {
+            const approvalCompletedEvent: ApprovalCompleted = {
+              type: "approval.completed",
+              organizationId: data.organizationId,
+              actorId: data.actorId,
+              occurredAt: new Date(),
+              payload: {
+                requestId: result.id,
+                originType: result.originType,
+                originTriggerAction: result.originTriggerAction,
+                originTriggerEntityId: result.originTriggerEntityId,
+              },
+            };
+            dispatcher.dispatch(approvalCompletedEvent);
+          }
 
           return result;
         });
@@ -271,6 +288,22 @@ export async function approveRequest(data: {
               status: "approved",
             },
           });
+
+          if (result.originType === "system") {
+            const approvalCompletedEvent: ApprovalCompleted = {
+              type: "approval.completed",
+              organizationId: data.organizationId,
+              actorId: data.actorId,
+              occurredAt: new Date(),
+              payload: {
+                requestId: result.id,
+                originType: result.originType,
+                originTriggerAction: result.originTriggerAction,
+                originTriggerEntityId: result.originTriggerEntityId,
+              },
+            };
+            dispatcher.dispatch(approvalCompletedEvent);
+          }
 
           return { request: result, approvedStep: freshCurrentStep, allApproved: true };
         }

@@ -68,11 +68,11 @@ describe("updateInquiryStatus converted 遷移（直接 Deal 作成）", () => {
     expect(src).toContain("dealRepository.create");
   });
 
-  it("converted 遷移で requestRepository.create の呼び出しが含まれない", async () => {
+  it("converted 遷移でポリシー非合致時は dealRepository.create が呼び出される", async () => {
     // 準備 - ユースケースファイルを読み込む
     const src = await readSrc("application/usecases/updateInquiryStatus.ts");
-    // 実行・検証 - requestRepository.create が存在しない（承認リクエスト作成なし）
-    expect(src).not.toContain("requestRepository.create");
+    // 実行・検証 - 従来フロー（ポリシー非合致 or skipPolicyCheck=true）では Deal を生成する
+    expect(src).toContain("dealRepository.create");
   });
 
   it("converted 遷移で db.transaction が使われている", async () => {

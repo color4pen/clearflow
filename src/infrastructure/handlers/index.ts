@@ -1,5 +1,6 @@
 import { dispatcher } from "@/domain/events";
 import { handleDomainEventWebhook } from "./webhookHandler";
+import { handleApprovalCompleted } from "./approvalCompletedHandler";
 import type { DomainEvent } from "@/domain/events";
 
 // ---------------------------------------------------------------------------
@@ -35,6 +36,7 @@ export function registerHandlers(): void {
     "contract.cancelled",
     "invoice.paid",
     "invoice.overdue",
+    "approval.completed",
   ];
 
   for (const eventType of allEventTypes) {
@@ -44,4 +46,6 @@ export function registerHandlers(): void {
       "async"
     );
   }
+
+  dispatcher.on("approval.completed", handleApprovalCompleted, "async");
 }

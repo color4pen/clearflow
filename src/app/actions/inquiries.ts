@@ -149,6 +149,14 @@ export async function updateInquiryStatusAction(
 
   revalidatePath("/inquiries");
   revalidatePath(`/inquiries/${inquiryId}`);
+
+  if (result.pendingApproval) {
+    return {
+      success: true,
+      message: "承認リクエストを作成しました。承認後に案件が自動生成されます",
+    };
+  }
+
   return { success: true };
 }
 
