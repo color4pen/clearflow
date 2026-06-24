@@ -3,6 +3,7 @@ import {
   auditLogRepository,
 } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
+import { validateContractAmount, validateContractDates } from "@/domain/services/contractValidation";
 import type { Contract, RenewalType } from "@/domain/models/contract";
 
 export type UpdateContractResult = { ok: true; contract: Contract } | { ok: false; reason: string };
@@ -13,8 +14,8 @@ export async function updateContract(data: {
   actorId: string;
   title?: string;
   contractType?: string | null;
-  amount?: number | null;
-  startDate?: Date | null;
+  amount?: number;
+  startDate?: Date;
   endDate?: Date | null;
   paymentTerms?: string | null;
   renewalType?: RenewalType;
@@ -23,6 +24,21 @@ export async function updateContract(data: {
   const contract = await contractRepository.findById(data.contractId, data.organizationId);
   if (!contract) {
     return { ok: false, reason: "契約が見つかりません" };
+  }
+
+  if (data.amount !== undefined) {
+    const amountValidation = validateContractAmount(data.amount);
+    if (!amountValidation.ok) {
+      return { ok: false, reason: amountValidation.reason };
+    }
+  }
+
+  // 更新後の startDate と endDate を算出する（指定されたフィールドは新値、未指定は既存値を使用）
+  const effectiveStartDate = data.startDate !== undefined ? data.startDate : contract.startDate;
+  const effectiveEndDate = data.endDate !== undefined ? data.endDate : contract.endDate;
+  const datesValidation = validateContractDates(effectiveStartDate, effectiveEndDate);
+  if (!datesValidation.ok) {
+    return { ok: false, reason: datesValidation.reason };
   }
 
   try {

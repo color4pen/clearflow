@@ -12,8 +12,8 @@ function mapRow(row: typeof contracts.$inferSelect): Contract {
     clientId: row.clientId,
     title: row.title,
     contractType: row.contractType ?? null,
-    amount: row.amount ?? null,
-    startDate: row.startDate ?? null,
+    amount: row.amount,
+    startDate: row.startDate,
     endDate: row.endDate ?? null,
     paymentTerms: row.paymentTerms ?? null,
     renewalType: row.renewalType as RenewalType,
@@ -31,8 +31,8 @@ export async function create(
     clientId: string;
     title: string;
     contractType?: string | null;
-    amount?: number | null;
-    startDate?: Date | null;
+    amount: number;
+    startDate: Date;
     endDate?: Date | null;
     paymentTerms?: string | null;
     renewalType?: RenewalType;
@@ -49,8 +49,8 @@ export async function create(
       clientId: data.clientId,
       title: data.title,
       contractType: data.contractType ?? null,
-      amount: data.amount ?? null,
-      startDate: data.startDate ?? null,
+      amount: data.amount,
+      startDate: data.startDate,
       endDate: data.endDate ?? null,
       paymentTerms: data.paymentTerms ?? null,
       renewalType: data.renewalType ?? "one_time",
@@ -142,8 +142,8 @@ export async function update(
   data: Partial<{
     title: string;
     contractType: string | null;
-    amount: number | null;
-    startDate: Date | null;
+    amount: number;
+    startDate: Date;
     endDate: Date | null;
     paymentTerms: string | null;
     renewalType: RenewalType;

@@ -15,6 +15,13 @@
       "when": 1782095292014,
       "tag": "0001_soft_cloak",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782267501554,
+      "tag": "0002_early_nicolaos",
+      "breakpoints": true
     }
   ]
 }

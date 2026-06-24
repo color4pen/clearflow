@@ -914,6 +914,7 @@ async function seed() {
       contractId: dxContract.id,
       title: "着手金",
       amount: 9000000,
+      dueDate: new Date("2026-07-31"),
       status: "paid",
       invoicedAt: new Date("2026-07-10"),
       paidAt: new Date("2026-07-31"),
@@ -923,6 +924,7 @@ async function seed() {
       contractId: dxContract.id,
       title: "中間金",
       amount: 9000000,
+      dueDate: new Date("2026-10-31"),
       status: "invoiced",
       invoicedAt: new Date("2026-10-01"),
     },
@@ -931,6 +933,7 @@ async function seed() {
       contractId: dxContract.id,
       title: "残金",
       amount: 12000000,
+      dueDate: new Date("2027-03-31"),
       status: "scheduled",
     },
   ]);

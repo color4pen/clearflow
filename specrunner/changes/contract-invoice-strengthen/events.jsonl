@@ -17,3 +17,8 @@
 {"type":"transition","ts":"2026-06-24T02:12:01.029Z","step":"spec-review","status":"ok","message":"spec-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-24T02:12:01.029Z","step":"step-transition","status":"ok","message":"spec-review → test-case-gen"}
 {"type":"transition","ts":"2026-06-24T02:12:01.031Z","step":"test-case-gen-started","status":"started","message":"Starting test-case-gen step"}
+{"type":"transition","ts":"2026-06-24T02:16:51.300Z","step":"test-case-gen-verdict","status":"ok","message":"test-case-gen verdict: success"}
+{"type":"step-attempt","step":"test-case-gen","sessionId":"219eeddd-b08e-499c-944f-e4c7ad3998b3","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-24T02:12:01.047Z","endedAt":"2026-06-24T02:16:50.069Z"}
+{"type":"lineage","step":"test-case-gen","ts":"2026-06-24T02:16:50.069Z","outputs":[{"path":"specrunner/changes/contract-invoice-strengthen/test-cases.md","hash":"sha256:b746aaca5ed299e4517e197e1e653c5f35f89bdb37c50a1adffdbbbd711584ea"}],"inputs":[{"path":"specrunner/changes/contract-invoice-strengthen/design.md","hash":"sha256:a8bbe8b046f15773ef67ce388aceb59e9487a60b23e13b5a1b5cd6723d79202a"},{"path":"specrunner/changes/contract-invoice-strengthen/tasks.md","hash":"sha256:bb45175d219b13df11dc5b9011e7f76053b366f40475144ca6fb40d956f445bc"}]}
+{"type":"transition","ts":"2026-06-24T02:16:51.311Z","step":"step-transition","status":"ok","message":"spec-review complete → implementer (iter 1)"}
+{"type":"transition","ts":"2026-06-24T02:16:51.314Z","step":"implementer-started","status":"started","message":"Starting implementer step"}
