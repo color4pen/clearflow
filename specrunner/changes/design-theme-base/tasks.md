@@ -2,26 +2,26 @@
 
 ## T-01: globals.css にカラートークンとカスタムフォントサイズを追加する
 
-- [ ] `:root` ブロックに以下のカラートークンを追加する:
+- [x] `:root` ブロックに以下のカラートークンを追加する:
   - `--bg-info: #eef5fb`
   - `--bg-success-light: #eef7f1`
   - `--border-success-light: #cde6d8`
   - `--text-sidebar-muted: #7f95a8`
-- [ ] `@theme inline` ブロックに以下の Tailwind カラートークンを追加する:
+- [x] `@theme inline` ブロックに以下の Tailwind カラートークンを追加する:
   - `--color-bg-info: var(--bg-info)`
   - `--color-bg-success-light: var(--bg-success-light)`
   - `--color-border-success-light: var(--border-success-light)`
   - `--color-text-sidebar-muted: var(--text-sidebar-muted)`
-- [ ] `@theme inline` ブロックに以下のカスタムフォントサイズを追加する:
+- [x] `@theme inline` ブロックに以下のカスタムフォントサイズを追加する:
   - `--text-2xs: 0.625rem` + `--text-2xs--line-height: 1.4`
   - `--text-table-head: 0.6875rem` + `--text-table-head--line-height: 1.4`
   - `--text-base-app: 0.78125rem` + `--text-base-app--line-height: 1.5`
   - `--text-body: 0.8125rem` + `--text-body--line-height: 1.5`
-- [ ] `@theme inline` ブロックの `--font-sans` を `var(--font-noto-sans-jp)` に変更する
-- [ ] `@theme inline` ブロックの `--font-mono` を `var(--font-ibm-plex-mono)` に変更する
-- [ ] body スタイルの `font-family: Arial, Helvetica, sans-serif` を削除する（Tailwind の `--font-sans` が適用されるため不要）
-- [ ] body スタイルに `font-size: 13px` を追加する
-- [ ] ダークモード（`[data-theme="dark"]`）ブロックには新規カラートークンを追加しない（スコープ外）
+- [x] `@theme inline` ブロックの `--font-sans` を `var(--font-noto-sans-jp)` に変更する
+- [x] `@theme inline` ブロックの `--font-mono` を `var(--font-ibm-plex-mono)` に変更する
+- [x] body スタイルの `font-family: Arial, Helvetica, sans-serif` を削除する（Tailwind の `--font-sans` が適用されるため不要）
+- [x] body スタイルに `font-size: 13px` を追加する
+- [x] ダークモード（`[data-theme="dark"]`）ブロックには新規カラートークンを追加しない（スコープ外）
 
 **Acceptance Criteria**:
 - `:root` に 4 つの新規カラートークンが定義されている
@@ -31,11 +31,11 @@
 
 ## T-02: layout.tsx のフォントインポートを変更する
 
-- [ ] `src/app/layout.tsx` の `Geist`, `Geist_Mono` インポートを削除する
-- [ ] `Noto_Sans_JP` を `next/font/google` からインポートする。設定: `variable: "--font-noto-sans-jp"`, `subsets: ["latin"]`, `weight: ["400", "500", "700"]`
-- [ ] `IBM_Plex_Mono` を `next/font/google` からインポートする。設定: `variable: "--font-ibm-plex-mono"`, `subsets: ["latin"]`, `weight: ["400", "500"]`
-- [ ] html タグの className に設定する CSS 変数名を新フォントのものに更新する
-- [ ] 旧変数名（`geistSans`, `geistMono`）を新変数名に変更する
+- [x] `src/app/layout.tsx` の `Geist`, `Geist_Mono` インポートを削除する
+- [x] `Noto_Sans_JP` を `next/font/google` からインポートする。設定: `variable: "--font-noto-sans-jp"`, `subsets: ["latin"]`, `weight: ["400", "500", "700"]`
+- [x] `IBM_Plex_Mono` を `next/font/google` からインポートする。設定: `variable: "--font-ibm-plex-mono"`, `subsets: ["latin"]`, `weight: ["400", "500"]`
+- [x] html タグの className に設定する CSS 変数名を新フォントのものに更新する
+- [x] 旧変数名（`geistSans`, `geistMono`）を新変数名に変更する
 
 **Acceptance Criteria**:
 - `Geist` / `Geist_Mono` のインポートが存在しない
@@ -44,10 +44,10 @@
 
 ## T-03: styles.ts の定数を更新する
 
-- [ ] `INPUT_BASE`: `rounded-none` → `rounded`、`px-2 py-1` → `px-2.5 py-1.5` に変更する
-- [ ] `SELECT_BASE`: `rounded-none` → `rounded`、`px-2 py-1` → `px-2.5 py-1.5` に変更する
-- [ ] `BTN_SUBMIT`: `rounded-none` → `rounded`、`px-3 py-1` → `px-3.5 py-1.5` に変更する。`font-medium` を追加する
-- [ ] `SECTION_CARD`: `border-border-light` → `border-border` に変更する。`rounded shadow-sm` を追加する
+- [x] `INPUT_BASE`: `rounded-none` → `rounded`、`px-2 py-1` → `px-2.5 py-1.5` に変更する
+- [x] `SELECT_BASE`: `rounded-none` → `rounded`、`px-2 py-1` → `px-2.5 py-1.5` に変更する
+- [x] `BTN_SUBMIT`: `rounded-none` → `rounded`、`px-3 py-1` → `px-3.5 py-1.5` に変更する。`font-medium` を追加する
+- [x] `SECTION_CARD`: `border-border-light` → `border-border` に変更する。`rounded shadow-sm` を追加する
 
 **Acceptance Criteria**:
 - INPUT_BASE / SELECT_BASE に `rounded` と `px-2.5 py-1.5` が含まれている
@@ -57,9 +57,9 @@
 
 ## T-04: FormField.tsx の Input / Select / Textarea を更新する
 
-- [ ] `Input` コンポーネント: `rounded-none` → `rounded`、`px-2 py-1` → `px-2.5 py-1.5` に変更する
-- [ ] `Select` コンポーネント: `rounded-none` → `rounded`、`px-2 py-1` → `px-2.5 py-1.5` に変更する
-- [ ] `Textarea` コンポーネント: `rounded-none` → `rounded`、`px-2 py-1` → `p-2.5` に変更する
+- [x] `Input` コンポーネント: `rounded-none` → `rounded`、`px-2 py-1` → `px-2.5 py-1.5` に変更する
+- [x] `Select` コンポーネント: `rounded-none` → `rounded`、`px-2 py-1` → `px-2.5 py-1.5` に変更する
+- [x] `Textarea` コンポーネント: `rounded-none` → `rounded`、`px-2 py-1` → `p-2.5` に変更する
 
 **Acceptance Criteria**:
 - Input / Select に `rounded` と `px-2.5 py-1.5` が含まれている
@@ -68,9 +68,9 @@
 
 ## T-05: SectionCard.tsx を更新する
 
-- [ ] `border-border-light` を `border-border` に変更する
-- [ ] `rounded` を追加する
-- [ ] `shadow-sm` を追加する
+- [x] `border-border-light` を `border-border` に変更する
+- [x] `rounded` を追加する
+- [x] `shadow-sm` を追加する
 
 **Acceptance Criteria**:
 - className に `border-border`、`rounded`、`shadow-sm` が含まれている
@@ -78,9 +78,9 @@
 
 ## T-06: LinkButton.tsx の SubmitButton を更新する
 
-- [ ] `rounded-none` → `rounded` に変更する
-- [ ] `px-3 py-1` → `px-3.5 py-1.5` に変更する
-- [ ] `font-medium` を className に追加する
+- [x] `rounded-none` → `rounded` に変更する
+- [x] `px-3 py-1` → `px-3.5 py-1.5` に変更する
+- [x] `font-medium` を className に追加する
 
 **Acceptance Criteria**:
 - SubmitButton に `rounded`、`px-3.5 py-1.5`、`font-medium` が含まれている
@@ -88,8 +88,8 @@
 
 ## T-07: MoneyInput.tsx を更新する
 
-- [ ] `baseClass` の `rounded-none` → `rounded` に変更する
-- [ ] `px-2 py-1` → `px-2.5 py-1.5` に変更する
+- [x] `baseClass` の `rounded-none` → `rounded` に変更する
+- [x] `px-2 py-1` → `px-2.5 py-1.5` に変更する
 
 **Acceptance Criteria**:
 - baseClass に `rounded` と `px-2.5 py-1.5` が含まれている
@@ -97,8 +97,8 @@
 
 ## T-08: MarkdownTextarea.tsx を更新する
 
-- [ ] 編集モードの textarea の `rounded-none` → `rounded` に変更する（注: `border-t-0` との組み合わせに留意。タブとの接続部分で角丸が不要な場合は `rounded-b` に調整する）
-- [ ] `px-2 py-1` → `p-2.5` に変更する
+- [x] 編集モードの textarea の `rounded-none` → `rounded` に変更する（注: `border-t-0` との組み合わせに留意。タブとの接続部分で角丸が不要な場合は `rounded-b` に調整する）
+- [x] `px-2 py-1` → `p-2.5` に変更する
 
 **Acceptance Criteria**:
 - textarea に `rounded`（または `rounded-b`）が含まれ、`rounded-none` が含まれない
@@ -106,11 +106,11 @@
 
 ## T-09: DataTable.tsx を更新する
 
-- [ ] ヘッダー行（th）: `px-1 py-1.5 text-xs` → `px-3.5 py-2 text-table-head` に変更する。`font-bold` → `font-medium` に変更する
-- [ ] データ行（td）: `px-1 py-1 text-xs` → `px-3.5 py-2.5 text-base-app` に変更する
-- [ ] データ行（tr）: `border border-border-light` → `border-b border-border-light` に変更する（行ごとの下ボーダーのみにする）
-- [ ] ヘッダー行（tr）: `border border-border-table-head` は維持する
-- [ ] 非クリック行の hover はそのまま `hover:bg-bg-surface-alt` を維持する。クリック可能行の hover は `hover:bg-primary/10` を維持する
+- [x] ヘッダー行（th）: `px-1 py-1.5 text-xs` → `px-3.5 py-2 text-table-head` に変更する。`font-bold` → `font-medium` に変更する
+- [x] データ行（td）: `px-1 py-1 text-xs` → `px-3.5 py-2.5 text-base-app` に変更する
+- [x] データ行（tr）: `border border-border-light` → `border-b border-border-light` に変更する（行ごとの下ボーダーのみにする）
+- [x] ヘッダー行（tr）: `border border-border-table-head` は維持する
+- [x] 非クリック行の hover はそのまま `hover:bg-bg-surface-alt` を維持する。クリック可能行の hover は `hover:bg-primary/10` を維持する
 
 **Acceptance Criteria**:
 - th に `px-3.5 py-2 text-table-head font-medium` が含まれている
@@ -119,28 +119,28 @@
 
 ## T-10: ダッシュボード layout.tsx をサイドバーレイアウトに変更する
 
-- [ ] 既存の `<header>` + 横ナビ構造を、`<div className="flex min-h-screen">` をルートとするサイドバー + メインコンテンツ構造に書き換える
-- [ ] サイドバー（`<aside>`）を実装する:
+- [x] 既存の `<header>` + 横ナビ構造を、`<div className="flex min-h-screen">` をルートとするサイドバー + メインコンテンツ構造に書き換える
+- [x] サイドバー（`<aside>`）を実装する:
   - 幅: `w-[210px] min-w-[210px]`
   - 背景: `bg-bg-header`
   - レイアウト: `flex flex-col` で高さ全体を使う（`h-screen sticky top-0`）
   - ロゴエリア: 上部に padding 付きで配置。「Clearflow」（`text-[15px] font-bold text-white`）と「案件管理」（`text-2xs text-text-sidebar-muted`）を縦並び
-- [ ] ナビゲーションを実装する:
+- [x] ナビゲーションを実装する:
   - `<nav className="flex-1 overflow-y-auto">` で縦スクロール可能に
   - 各リンク: `block px-4 py-2 text-sm text-text-on-dark-secondary hover:bg-white/6`
   - active 状態: `bg-white/10 text-white border-l-2 border-white`（active 判定は実装時に `usePathname` で実装）
   - 「申請一覧」の横に承認バッジの表示位置を確保する（初期状態では件数非表示）
   - 管理者メニュー（設定、監査ログ）は `isAdmin` 条件で表示する（既存ロジック維持）
-- [ ] ユーザー情報エリアをサイドバー下部に配置する:
+- [x] ユーザー情報エリアをサイドバー下部に配置する:
   - `border-t border-white/10` で区切る
   - ユーザー名 + ロール: `text-xs text-text-on-dark-disabled`
   - ThemeToggle コンポーネントを配置する
   - ログアウトボタン（既存の form + signOut action）を配置する
-- [ ] メインコンテンツ領域を実装する:
+- [x] メインコンテンツ領域を実装する:
   - `<main className="flex-1 overflow-y-auto bg-bg-page">` でスクロール可能に
   - 内側に `<div style={{ maxWidth: 1260 }} className="mx-auto px-7 pt-[22px] pb-14">` でコンテンツを制約する
-- [ ] ナビゲーションの active 状態判定のため、コンポーネントを Client Component に分離する必要がある場合は `SidebarNav.tsx` を新規作成する（`usePathname` は Client Component でのみ使用可能）
-- [ ] 既存の `ThemeToggle` インポートを維持する
+- [x] ナビゲーションの active 状態判定のため、コンポーネントを Client Component に分離する必要がある場合は `SidebarNav.tsx` を新規作成する（`usePathname` は Client Component でのみ使用可能）
+- [x] 既存の `ThemeToggle` インポートを維持する
 
 **Acceptance Criteria**:
 - サイドバーが左側 210px に表示される（`bg-bg-header`）
@@ -153,10 +153,10 @@
 
 ## T-11: テストのアサーション値を更新する
 
-- [ ] `src/__tests__/static/uiBusinessStyle.test.ts` の TC-004: `expect(content).toContain("rounded-none")` → `expect(content).toContain("rounded")` に変更する。`toContain("rounded")` は `rounded-none` にもマッチするため、`rounded-none` が存在しないことの否定アサーション `expect(content).not.toContain("rounded-none")` も追加する
-- [ ] TC-033: 同様に `expect(content).toContain("rounded-none")` → `expect(content).toContain("rounded")` に変更し、`expect(content).not.toContain("rounded-none")` を追加する
-- [ ] TC-004 のコメント行 `bg-primary・text-white・rounded-none を含む` を `bg-primary・text-white・rounded を含む` に更新する
-- [ ] TC-033 のコメント行 `block w-full border border-border rounded-none を含む` を `block w-full border border-border rounded を含む` に更新する
+- [x] `src/__tests__/static/uiBusinessStyle.test.ts` の TC-004: `expect(content).toContain("rounded-none")` → `expect(content).toContain("rounded")` に変更する。`toContain("rounded")` は `rounded-none` にもマッチするため、`rounded-none` が存在しないことの否定アサーション `expect(content).not.toContain("rounded-none")` も追加する
+- [x] TC-033: 同様に `expect(content).toContain("rounded-none")` → `expect(content).toContain("rounded")` に変更し、`expect(content).not.toContain("rounded-none")` を追加する
+- [x] TC-004 のコメント行 `bg-primary・text-white・rounded-none を含む` を `bg-primary・text-white・rounded を含む` に更新する
+- [x] TC-033 のコメント行 `block w-full border border-border rounded-none を含む` を `block w-full border border-border rounded を含む` に更新する
 
 **Acceptance Criteria**:
 - TC-004 が `rounded` の存在と `rounded-none` の不在をアサーションしている
@@ -165,9 +165,9 @@
 
 ## T-12: 最終検証
 
-- [ ] `bun run typecheck` が green であることを確認する
-- [ ] `bun test` が全て pass することを確認する（特に TC-004, TC-033）
-- [ ] `rounded-none` が `src/` 配下に存在しないことを grep で確認する（テストのコメント行を除く）
+- [x] `bun run typecheck` が green であることを確認する
+- [x] `bun test` が全て pass することを確認する（特に TC-004, TC-033）
+- [x] `rounded-none` が `src/` 配下に存在しないことを grep で確認する（テストのコメント行を除く）
 
 **Acceptance Criteria**:
 - `bun run typecheck` が exit 0 で完了する

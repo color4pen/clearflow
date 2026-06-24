@@ -7,7 +7,7 @@ type Props = {
 
 export function SectionCard({ children, className = "" }: Props) {
   return (
-    <div className={`bg-bg-surface border border-border-light ${className}`}>
+    <div className={`bg-bg-surface border border-border rounded shadow-sm ${className}`}>
       {children}
     </div>
   );

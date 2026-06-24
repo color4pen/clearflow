@@ -27,7 +27,7 @@ export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
         if (e.key === "Enter") e.preventDefault();
         props.onKeyDown?.(e);
       }}
-      className={`w-full border border-border rounded-none px-2 py-1 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder ${props.className ?? ""}`}
+      className={`w-full border border-border rounded px-2.5 py-1.5 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder ${props.className ?? ""}`}
     />
   );
 }
@@ -40,7 +40,7 @@ export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
         if (e.key === "Enter") e.preventDefault();
         props.onKeyDown?.(e);
       }}
-      className={`block w-full border border-border rounded-none px-2 py-1 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none ${props.className ?? ""}`}
+      className={`block w-full border border-border rounded px-2.5 py-1.5 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none ${props.className ?? ""}`}
     />
   );
 }
@@ -49,7 +49,7 @@ export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return (
     <textarea
       {...props}
-      className={`w-full border border-border rounded-none px-2 py-1 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder ${props.className ?? ""}`}
+      className={`w-full border border-border rounded p-2.5 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder ${props.className ?? ""}`}
     />
   );
 }

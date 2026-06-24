@@ -99,7 +99,7 @@ export function MarkdownTextarea({
           onChange={handleChange}
           rows={rows}
           placeholder={placeholder}
-          className="w-full border border-border border-t-0 rounded-none px-2 py-1 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder resize-none overflow-hidden"
+          className="w-full border border-border border-t-0 rounded-b p-2.5 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder resize-none overflow-hidden"
           style={{ minHeight: `${rows * 1.5}rem` }}
         />
       ) : (

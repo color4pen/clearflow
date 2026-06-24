@@ -46,7 +46,7 @@ export function MoneyInput({ name, defaultValue, placeholder, className, disable
   }
 
   const baseClass =
-    "w-full border border-border rounded-none px-2 py-1 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder";
+    "w-full border border-border rounded px-2.5 py-1.5 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder";
 
   return (
     <>

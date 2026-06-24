@@ -150,14 +150,15 @@ describe("styles.ts constants — TC-003 and TC-004", () => {
 
   /**
    * TC-004: BTN_SUBMIT が定義されており
-   *         bg-primary・text-white・rounded-none を含む
+   *         bg-primary・text-white・rounded を含む
    */
-  it("TC-004: styles.ts exports BTN_SUBMIT containing bg-primary, text-white, and rounded-none", async () => {
+  it("TC-004: styles.ts exports BTN_SUBMIT containing bg-primary, text-white, and rounded", async () => {
     const content = await readSrc("app/(dashboard)/styles.ts");
     expect(content).toContain("BTN_SUBMIT");
     expect(content).toContain("bg-primary");
     expect(content).toContain("text-white");
-    expect(content).toContain("rounded-none");
+    expect(content).toContain("rounded");
+    expect(content).not.toContain("rounded-none");
   });
 });
 
@@ -178,13 +179,14 @@ describe("styles.ts constants — TC-032 and TC-033", () => {
 
   /**
    * TC-033: SELECT_BASE が定義されており
-   *         block w-full border border-border rounded-none を含む
+   *         block w-full border border-border rounded を含む
    */
-  it("TC-033: styles.ts exports SELECT_BASE containing block w-full border border-border rounded-none", async () => {
+  it("TC-033: styles.ts exports SELECT_BASE containing block w-full border border-border rounded", async () => {
     const content = await readSrc("app/(dashboard)/styles.ts");
     expect(content).toContain("SELECT_BASE");
     expect(content).toContain("block w-full");
     expect(content).toContain("border border-border");
-    expect(content).toContain("rounded-none");
+    expect(content).toContain("rounded");
+    expect(content).not.toContain("rounded-none");
   });
 });
