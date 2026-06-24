@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { auth, signOut } from "@/infrastructure/auth";
 import { ThemeToggle } from "./ThemeToggle";
+import { SidebarNav } from "./SidebarNav";
 
 export default async function DashboardLayout({
   children,
@@ -16,77 +16,21 @@ export default async function DashboardLayout({
   const isAdmin = session.user.role === "admin";
 
   return (
-    <div className="min-h-screen bg-bg-page">
-      <header className="bg-bg-header">
-        <div className="mx-auto px-2 py-0.5 flex items-center justify-between" style={{ maxWidth: 1200 }}>
-          <div className="flex items-center gap-4">
-            <span className="text-text-on-dark text-sm font-bold tracking-wide">Clearflow</span>
-            <nav className="flex items-center gap-3">
-              <Link
-                href="/dashboard"
-                className="text-text-on-dark-secondary hover:text-white text-sm"
-              >
-                ダッシュボード
-              </Link>
-              <Link
-                href="/clients"
-                className="text-text-on-dark-secondary hover:text-white text-sm"
-              >
-                顧客
-              </Link>
-              <Link
-                href="/inquiries"
-                className="text-text-on-dark-secondary hover:text-white text-sm"
-              >
-                引き合い
-              </Link>
-              <Link
-                href="/deals"
-                className="text-text-on-dark-secondary hover:text-white text-sm"
-              >
-                案件
-              </Link>
-              <Link
-                href="/contracts"
-                className="text-text-on-dark-secondary hover:text-white text-sm"
-              >
-                契約
-              </Link>
-              <Link
-                href="/revenue"
-                className="text-text-on-dark-secondary hover:text-white text-sm"
-              >
-                売上
-              </Link>
-              <Link
-                href="/requests"
-                className="text-text-on-dark-secondary hover:text-white text-sm"
-              >
-                申請一覧
-              </Link>
-              {isAdmin && (
-                <Link
-                  href="/settings/templates"
-                  className="text-text-on-dark-muted hover:text-text-on-dark-secondary text-sm"
-                >
-                  設定
-                </Link>
-              )}
-              {isAdmin && (
-                <Link
-                  href="/settings/audit-logs"
-                  className="text-text-on-dark-muted hover:text-text-on-dark-secondary text-sm"
-                >
-                  監査ログ
-                </Link>
-              )}
-            </nav>
+    <div className="flex min-h-screen">
+      <aside className="w-[210px] min-w-[210px] bg-bg-header flex flex-col h-screen sticky top-0">
+        <div className="px-4 py-4">
+          <div className="text-[15px] font-bold text-white">Clearflow</div>
+          <div className="text-2xs text-text-sidebar-muted">案件管理</div>
+        </div>
+
+        <SidebarNav isAdmin={isAdmin} />
+
+        <div className="border-t border-white/10 px-4 py-3 flex flex-col gap-2">
+          <div className="text-xs text-text-on-dark-disabled">
+            {session.user.name} / {session.user.role}
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <span className="text-text-on-dark-disabled text-xs">
-              {session.user.name} / {session.user.role}
-            </span>
             <form
               action={async () => {
                 "use server";
@@ -95,15 +39,20 @@ export default async function DashboardLayout({
             >
               <button
                 type="submit"
-                className="text-text-on-dark-muted hover:text-text-on-dark-secondary text-xs ml-1"
+                className="text-text-on-dark-muted hover:text-text-on-dark-secondary text-xs"
               >
                 [ログアウト]
               </button>
             </form>
           </div>
         </div>
-      </header>
-      <main className="mx-auto px-2 py-2" style={{ maxWidth: 1200 }}>{children}</main>
+      </aside>
+
+      <main className="flex-1 overflow-y-auto bg-bg-page">
+        <div style={{ maxWidth: 1260 }} className="mx-auto px-7 pt-[22px] pb-14">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }
