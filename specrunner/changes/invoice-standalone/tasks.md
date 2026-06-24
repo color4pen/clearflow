@@ -16,7 +16,9 @@
 - [ ] `src/application/usecases/updateInvoiceStatus.ts` の入力型に `paidAt?: Date` を追加する
 - [ ] `additionalFields` の `paidAt` 設定を `data.paidAt ?? new Date()` に変更する（ユーザー指定があればそれを使用、なければ現在日時）
 - [ ] `src/app/actions/invoices.ts` の `updateInvoiceStatusAction` に `paidAt` パラメータを追加する。paid 遷移時のみ paidAt を受け取るようにする
-- [ ] Server Action の入力バリデーション（zod スキーマ `updateInvoiceStatusSchema`）に `paidAt: z.string().datetime().optional()` または `z.string().optional()` を追加する
+- [ ] `updateInvoiceStatusAction` の先頭に `createInvoiceAction` と同様の `checkRateLimit` 呼び出しを追加する
+- [ ] Server Action の入力バリデーション（zod スキーマ `updateInvoiceStatusSchema`）に `paidAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional()` を追加する。`<input type="date">` は `YYYY-MM-DD` 形式の文字列を出力するため、`z.string().datetime()` は使用しないこと
+- [ ] `updateInvoiceStatusSchema` の `paidAt` に対して、未来日付を拒否するバリデーションを追加する（`.refine(val => !val || val <= new Date().toISOString().slice(0, 10), { message: "入金日は本日以前の日付を指定してください" })`）
 
 **Acceptance Criteria**:
 - `updateInvoiceStatus({ ..., newStatus: "paid", paidAt: new Date("2026-06-20") })` で `paidAt` が指定値で保存される
