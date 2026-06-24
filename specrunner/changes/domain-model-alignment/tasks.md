@@ -52,7 +52,11 @@
 
 - [ ] `src/infrastructure/schema.ts` の `meetings` テーブルで `dealId` を `.notNull()` を外して nullable にする: `uuid("deal_id").references(() => deals.id)`
 - [ ] `src/infrastructure/schema.ts` の `meetings` テーブルに `inquiryId: uuid("inquiry_id").references(() => inquiries.id)` (nullable) を追加する
-- [ ] `src/infrastructure/schema.ts` の `meetings` テーブル定義のコメントに CHECK 制約 `deal_id IS NOT NULL OR inquiry_id IS NOT NULL` が存在する旨を記載する
+- [ ] `src/infrastructure/schema.ts` の `meetings` テーブル定義に Drizzle の `check()` として CHECK 制約を追加する（コメント記載のみは不可。`check()` で定義しないと将来の `drizzle-kit generate` が DB との差分を検出して `ALTER TABLE DROP CONSTRAINT` を生成し制約が失われる）:
+  ```typescript
+  // テーブル定義の第3引数（extra config）に追加:
+  (table) => [check("meetings_deal_or_inquiry_check", sql`${table.dealId} IS NOT NULL OR ${table.inquiryId} IS NOT NULL`)]
+  ```
 - [ ] `src/domain/models/meeting.ts` の `Meeting` 型の `dealId` を `string | null` に変更し、`inquiryId: string | null` を追加する
 - [ ] `src/infrastructure/repositories/meetingRepository.ts` の `mapRow` を更新: `dealId` を nullable 対応にし、`inquiryId` のマッピングを追加する
 - [ ] `src/infrastructure/repositories/meetingRepository.ts` の `create` 関数の引数で `dealId` を optional にし、`inquiryId` を追加する
@@ -109,34 +113,34 @@
 
 ## T-06: ClientContact の isPrimary 一意性検証
 
-- [ ] `src/domain/services/clientContactService.ts` を新規作成する
+- [ ] `src/application/services/clientContactService.ts` を新規作成する（domain/services ではなく application/services に配置すること。この関数は clientRepository を呼び出すため「domain layer は repository を呼び出さない」プロジェクト原則に反する。domain/services の既存ファイルはすべてリポジトリ非依存の純粋関数であり、その原則を維持する）
 - [ ] `validatePrimaryUniqueness(clientId: string, contactId: string | null, isPrimary: boolean, tx?: Transaction)` 関数を実装する:
   - `isPrimary` が false の場合は即座に成功を返す
-  - `isPrimary` が true の場合、同じ `clientId` で `isPrimary=true` の既存レコードを検索する
+  - `isPrimary` が true の場合、同じ `clientId` で `isPrimary=true` の既存レコードを `clientRepository` で検索する
   - `contactId` が指定されている場合（更新時）は自身を除外する
   - 既存の primary が存在する場合はエラーを返す
-- [ ] `src/domain/services/index.ts` に `validatePrimaryUniqueness` のエクスポートを追加する
 - [ ] `src/application/usecases/createClientContact.ts` に `isPrimary` パラメータ (optional, default false) を追加する
-- [ ] `createClientContact` use case 内で、create 前に `validatePrimaryUniqueness(clientId, null, isPrimary, tx)` を呼び出す
+- [ ] `createClientContact` use case 全体を `db.transaction(async (tx) => { ... })` ブロックで囲む。検証 (SELECT) と挿入 (INSERT) を同一トランザクション内で実行することで、並行リクエストによる TOCTOU 競合（両方とも primary なしを確認して双方が isPrimary=true で作成する競合）を防ぐ
+- [ ] `createClientContact` use case 内で、`db.transaction` ブロック内にて `clientRepository.createContact` の前に `validatePrimaryUniqueness(clientId, null, isPrimary, tx)` を呼び出す
 - [ ] `src/app/actions/clients.ts` の `addClientContactAction` で use case に `isPrimary` を渡す: `isPrimary: parsed.data.isPrimary ?? false`
-- [ ] `src/app/actions/clients.ts` の `updateClientContactAction` で、`clientRepository.updateContact` 呼び出し前に `validatePrimaryUniqueness(clientId, contactId, isPrimary)` を呼び出す
+- [ ] `src/app/actions/clients.ts` の `updateClientContactAction` で、`clientRepository.updateContact` 呼び出し前に `validatePrimaryUniqueness(clientId, contactId, isPrimary)` を呼び出す（`src/application/services/clientContactService` からインポート）
 - [ ] バリデーションエラー時はユーザーに「この顧客には既に主担当者が設定されています」等のメッセージを返す
 
 **Acceptance Criteria**:
-- `clientContactService.ts` に `validatePrimaryUniqueness` 関数が存在する
-- createClientContact use case が isPrimary パラメータを受け取り、重複チェックを行う
+- `src/application/services/clientContactService.ts` に `validatePrimaryUniqueness` 関数が存在する（domain/services には存在しない）
+- createClientContact use case が db.transaction ブロックを持ち、isPrimary パラメータを受け取り、トランザクション内で重複チェックを行う
 - updateClientContactAction が更新前に isPrimary 重複チェックを行う
 - 同一 client に isPrimary=true が 2 件以上存在する操作がアプリケーション層でブロックされる
 
 ## T-07: マイグレーション SQL の生成と手書き追記
 
 - [ ] T-01〜T-05 のスキーマ変更を全て `src/infrastructure/schema.ts` に反映した後、`bunx drizzle-kit generate` を実行してマイグレーション SQL を生成する
-- [ ] 生成されたマイグレーション SQL に以下の手書き SQL を追記する:
-  - **source enum 変換**: enum に含まれない既存 source 値を `'other'` に UPDATE してから ALTER COLUMN で型変更する
+- [ ] 生成されたマイグレーション SQL を編集し、以下の手書き SQL を**指定された位置に挿入する**（末尾への追記ではなく、ALTER COLUMN より前に挿入すること）:
+  - **source enum 変換**: `CREATE TYPE "inquiry_source"` の直後かつ `ALTER TABLE "inquiries" ALTER COLUMN "source"` の**直前**に以下の UPDATE を挿入する。UPDATE が ALTER COLUMN より後に実行されると PostgreSQL が 'invalid input value for enum' エラーで失敗するため必ず前に置くこと:
     ```sql
     UPDATE "inquiries" SET "source" = 'other' WHERE "source" NOT IN ('web', 'phone', 'email', 'referral', 'agent_service', 'exhibition', 'other');
     ```
-  - **attendees 構造変換**: 既存の `{ internal: [...], external: [...] }` を新構造に変換する
+  - **attendees 構造変換**: `attendees` カラムを変更する DDL がある場合はその前に、なければ `meetings` テーブル関連の DDL の末尾に挿入する:
     ```sql
     UPDATE "meetings" SET "attendees" = (
       SELECT COALESCE(jsonb_agg(item), '[]'::jsonb) FROM (
@@ -148,11 +152,11 @@
       ) sub
     );
     ```
-  - **CHECK 制約追加**:
+  - **CHECK 制約追加**: `inquiry_id` カラムの追加 DDL の後に挿入する（Drizzle check() として schema.ts に定義済みの場合は drizzle-kit generate が自動生成するため手書き不要）:
     ```sql
     ALTER TABLE "meetings" ADD CONSTRAINT "meetings_deal_or_inquiry_check" CHECK ("deal_id" IS NOT NULL OR "inquiry_id" IS NOT NULL);
     ```
-- [ ] マイグレーション SQL が正しい順序で実行されることを確認する（enum 作成 → データ変換 → 型変更 → CHECK 制約）
+- [ ] マイグレーション SQL ファイルを開き、ステートメントの実行順序が `CREATE TYPE` → `UPDATE（データ変換）` → `ALTER COLUMN（型変更）` → `カラム追加 DDL` → `CHECK 制約` になっていることを目視確認してから保存する
 
 **Acceptance Criteria**:
 - マイグレーション SQL が `drizzle/` ディレクトリに存在する
@@ -166,7 +170,7 @@
 - [ ] `src/__tests__/usecases/meetingManagement.test.ts` を更新: attendees の型を新構造 (`MeetingAttendee[]`) に合わせる。inquiryId を使った Meeting 作成のテストを追加する
 - [ ] `src/__tests__/usecases/inquiryManagement.test.ts` を更新: budget / timeline を含む引き合い作成・更新のテストを追加する。新しい source 値 (`email`, `agent_service`) でのテストを追加する
 - [ ] `src/__tests__/usecases/dealManagement.test.ts` を更新: description を含む案件作成・更新のテストを追加する
-- [ ] `src/__tests__/domain/` に `clientContactService.test.ts` を新規作成: `validatePrimaryUniqueness` のテストケースを追加する
+- [ ] `src/__tests__/application/` に `clientContactService.test.ts` を新規作成（`src/application/services/clientContactService.ts` のテスト）: `validatePrimaryUniqueness` のテストケースを追加する
   - isPrimary=false の場合は常に成功
   - isPrimary=true で既存 primary なしの場合は成功
   - isPrimary=true で既存 primary ありの場合はエラー
