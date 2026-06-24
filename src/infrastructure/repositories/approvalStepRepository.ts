@@ -18,6 +18,8 @@ function mapRow(row: typeof approvalSteps.$inferSelect): ApprovalStep {
     organizationId: row.organizationId,
     version: row.version,
     deadline: row.deadline ?? null,
+    name: row.name ?? null,
+    approverId: row.approverId ?? null,
   };
 }
 
@@ -28,6 +30,8 @@ export async function createMany(
     approverRole: string;
     organizationId: string;
     deadline?: Date | null;
+    name?: string | null;
+    approverId?: string | null;
   }>,
   tx?: Transaction
 ): Promise<ApprovalStep[]> {
@@ -43,6 +47,8 @@ export async function createMany(
         organizationId: s.organizationId,
         status: "pending" as const,
         deadline: s.deadline ?? null,
+        name: s.name ?? null,
+        approverId: s.approverId ?? null,
       }))
     )
     .returning();

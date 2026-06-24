@@ -13,4 +13,6 @@ export type ApprovalStep = {
   organizationId: string;
   version: number;
   deadline: Date | null;
+  name: string | null;
+  approverId: string | null;
 };

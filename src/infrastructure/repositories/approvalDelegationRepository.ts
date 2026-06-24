@@ -1,17 +1,17 @@
 import { eq, and, lte, gte, desc } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
-import { approvalDelegations, users } from "../schema";
+import { approvalDelegations } from "../schema";
 import type { ApprovalDelegation } from "@/domain/models/approvalDelegation";
 
 type DelegationRow = typeof approvalDelegations.$inferSelect;
 
-function mapRow(row: DelegationRow, fromUserRole: string): ApprovalDelegation {
+function mapRow(row: DelegationRow): ApprovalDelegation {
   return {
     id: row.id,
     fromUserId: row.fromUserId,
     toUserId: row.toUserId,
-    fromUserRole,
+    fromUserRole: row.fromUserRole,
     organizationId: row.organizationId,
     startDate: row.startDate,
     endDate: row.endDate,
@@ -22,7 +22,7 @@ function mapRow(row: DelegationRow, fromUserRole: string): ApprovalDelegation {
 
 /**
  * Find active delegations for a specific toUserId within the given time window.
- * Joins users table to include fromUserRole.
+ * fromUserRole is read directly from the column (no JOIN needed).
  */
 export async function findActiveByToUserId(
   toUserId: string,
@@ -31,14 +31,9 @@ export async function findActiveByToUserId(
   tx?: Transaction
 ): Promise<ApprovalDelegation[]> {
   const queryRunner = tx ?? db;
-  const fromUsers = users;
   const result = await queryRunner
-    .select({
-      delegation: approvalDelegations,
-      fromUserRole: fromUsers.role,
-    })
+    .select()
     .from(approvalDelegations)
-    .innerJoin(fromUsers, eq(approvalDelegations.fromUserId, fromUsers.id))
     .where(
       and(
         eq(approvalDelegations.toUserId, toUserId),
@@ -48,7 +43,7 @@ export async function findActiveByToUserId(
         gte(approvalDelegations.endDate, now)
       )
     );
-  return result.map((row) => mapRow(row.delegation, row.fromUserRole));
+  return result.map(mapRow);
 }
 
 /**
@@ -58,17 +53,12 @@ export async function findActiveByToUserId(
 export async function findByOrganization(
   organizationId: string
 ): Promise<ApprovalDelegation[]> {
-  const fromUsers = users;
   const result = await db
-    .select({
-      delegation: approvalDelegations,
-      fromUserRole: fromUsers.role,
-    })
+    .select()
     .from(approvalDelegations)
-    .innerJoin(fromUsers, eq(approvalDelegations.fromUserId, fromUsers.id))
     .where(eq(approvalDelegations.organizationId, organizationId))
     .orderBy(desc(approvalDelegations.createdAt));
-  return result.map((row) => mapRow(row.delegation, row.fromUserRole));
+  return result.map(mapRow);
 }
 
 /**
@@ -83,14 +73,9 @@ export async function findOverlapping(
   startDate: Date,
   endDate: Date
 ): Promise<ApprovalDelegation[]> {
-  const fromUsers = users;
   const result = await db
-    .select({
-      delegation: approvalDelegations,
-      fromUserRole: fromUsers.role,
-    })
+    .select()
     .from(approvalDelegations)
-    .innerJoin(fromUsers, eq(approvalDelegations.fromUserId, fromUsers.id))
     .where(
       and(
         eq(approvalDelegations.fromUserId, fromUserId),
@@ -101,11 +86,12 @@ export async function findOverlapping(
         gte(approvalDelegations.endDate, startDate)
       )
     );
-  return result.map((row) => mapRow(row.delegation, row.fromUserRole));
+  return result.map(mapRow);
 }
 
 /**
  * Create a new delegation record.
+ * fromUserRole must be provided by the caller (no additional SELECT needed).
  */
 export async function create(
   data: {
@@ -114,6 +100,7 @@ export async function create(
     organizationId: string;
     startDate: Date;
     endDate: Date;
+    fromUserRole: string;
   },
   tx?: Transaction
 ): Promise<ApprovalDelegation> {
@@ -127,17 +114,10 @@ export async function create(
       startDate: data.startDate,
       endDate: data.endDate,
       isActive: true,
+      fromUserRole: data.fromUserRole,
     })
     .returning();
-  const row = result[0];
-  // Fetch fromUserRole within the same queryRunner to honour the transaction
-  const fromUserResult = await queryRunner
-    .select({ role: users.role })
-    .from(users)
-    .where(eq(users.id, data.fromUserId))
-    .limit(1);
-  const fromUserRole = fromUserResult[0]?.role ?? "";
-  return mapRow(row, fromUserRole);
+  return mapRow(result[0]);
 }
 
 /**
@@ -162,13 +142,5 @@ export async function update(
     )
     .returning();
   if (!result[0]) return null;
-  const row = result[0];
-  // Fetch fromUserRole within the same queryRunner to honour the transaction
-  const fromUserResult = await queryRunner
-    .select({ role: users.role })
-    .from(users)
-    .where(eq(users.id, row.fromUserId))
-    .limit(1);
-  const fromUserRole = fromUserResult[0]?.role ?? "";
-  return mapRow(row, fromUserRole);
+  return mapRow(result[0]);
 }
