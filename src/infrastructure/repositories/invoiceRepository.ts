@@ -1,4 +1,4 @@
-import { eq, and, asc, sql } from "drizzle-orm";
+import { eq, and, asc, gte, lt, sql } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { invoices } from "../schema";
@@ -113,6 +113,48 @@ export async function updateStatus(
     .where(and(eq(invoices.id, id), eq(invoices.organizationId, organizationId)))
     .returning();
   return result[0] ? mapRow(result[0]) : null;
+}
+
+/**
+ * 組織に紐づく全請求を取得する。テナント分離のため organizationId を必須条件とする。
+ * filters でオプションの status フィルタ、期間フィルタ（paidAt / issueDate の範囲）を受け付ける。
+ * 結果は dueDate 昇順でソートされる。
+ */
+export async function findAllByOrganization(
+  organizationId: string,
+  filters?: {
+    status?: InvoiceStatus;
+    paidAtFrom?: Date;
+    paidAtTo?: Date;
+    issueDateFrom?: Date;
+    issueDateTo?: Date;
+  }
+): Promise<Invoice[]> {
+  const conditions = [eq(invoices.organizationId, organizationId)];
+
+  if (filters?.status !== undefined) {
+    conditions.push(eq(invoices.status, filters.status));
+  }
+  if (filters?.paidAtFrom !== undefined) {
+    conditions.push(gte(invoices.paidAt, filters.paidAtFrom));
+  }
+  if (filters?.paidAtTo !== undefined) {
+    conditions.push(lt(invoices.paidAt, filters.paidAtTo));
+  }
+  if (filters?.issueDateFrom !== undefined) {
+    conditions.push(gte(invoices.issueDate, filters.issueDateFrom));
+  }
+  if (filters?.issueDateTo !== undefined) {
+    conditions.push(lt(invoices.issueDate, filters.issueDateTo));
+  }
+
+  const result = await db
+    .select()
+    .from(invoices)
+    .where(and(...conditions))
+    .orderBy(asc(invoices.dueDate));
+
+  return result.map(mapRow);
 }
 
 /** 契約に紐づく全請求の金額合計を SQL の SUM で返す。請求が存在しない場合は 0 を返す */

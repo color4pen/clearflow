@@ -26,3 +26,4 @@ export type { ContractStatus, RenewalType, Contract, ContractWithClient } from "
 export type { InvoiceStatus, Invoice } from "./invoice";
 export type { RevenueTarget } from "./revenueTarget";
 export type { MonthlyRevenue, CustomerRevenue, DealRevenue, PipelineSummary } from "./revenue";
+export type { DashboardActionItem, PipelineSummaryItem } from "./dashboard";

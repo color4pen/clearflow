@@ -23,6 +23,12 @@ export default async function DashboardLayout({
             <span className="text-text-on-dark text-sm font-bold tracking-wide">Clearflow</span>
             <nav className="flex items-center gap-3">
               <Link
+                href="/dashboard"
+                className="text-text-on-dark-secondary hover:text-white text-sm"
+              >
+                ダッシュボード
+              </Link>
+              <Link
                 href="/clients"
                 className="text-text-on-dark-secondary hover:text-white text-sm"
               >
