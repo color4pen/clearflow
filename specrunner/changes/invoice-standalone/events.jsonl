@@ -61,3 +61,9 @@
 {"type":"transition","ts":"2026-06-24T04:38:16.104Z","step":"code-review","status":"warning","message":"code-review iteration 1 completed with verdict: needs-fix"}
 {"type":"transition","ts":"2026-06-24T04:38:16.105Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-24T04:38:16.107Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-24T04:41:39.259Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"37eedb59-2d1e-4428-b3a6-1a27bca24ccc","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-24T04:38:16.121Z","endedAt":"2026-06-24T04:41:37.817Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-24T04:41:37.817Z","outputs":[{"path":"specrunner/changes/invoice-standalone","hash":null}],"inputs":[{"path":"specrunner/changes/invoice-standalone/review-feedback-002.md","hash":"sha256:71bc16c415bc8fedbd62304bd8a8001ff84cf20a1e34ab7351c6142bb65e8c75"}]}
+{"type":"transition","ts":"2026-06-24T04:41:39.266Z","step":"step-transition","status":"ok","message":"code-fixer → code-review"}
+{"type":"transition","ts":"2026-06-24T04:41:39.268Z","step":"code-review","status":"started","message":"code-review iteration 2 started"}
+{"type":"transition","ts":"2026-06-24T04:41:39.269Z","step":"code-review-started","status":"started","message":"Starting code-review step"}
