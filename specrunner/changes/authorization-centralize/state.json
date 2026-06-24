@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d632d93a-a172-4a44-8a3f-b9d0b2daa8c4",
   "createdAt": "2026-06-24T01:53:38.996Z",
-  "updatedAt": "2026-06-24T02:47:36.398Z",
+  "updatedAt": "2026-06-24T02:51:49.837Z",
   "request": {
     "title": "認可ルールの一元化と設計整合",
     "type": "refactor",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/authorization-centralize-d632d93a",
   "error": null,
@@ -34,8 +34,22 @@
     }
   ],
   "resumePoint": null,
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "83557b6c45a39617e660f4ba23b6e9c9e0125b68",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 45,
+    "historyCount": 50,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -45,7 +59,9 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 1,
-      "code-fixer": 1
+      "code-fixer": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
