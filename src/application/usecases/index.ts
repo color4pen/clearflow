@@ -46,3 +46,4 @@ export { listInvoicesByContract } from "./listInvoicesByContract";
 export { deleteInquiry } from "./deleteInquiry";
 export { deleteDeal } from "./deleteDeal";
 export { deleteContract } from "./deleteContract";
+export { listInvoicesByOrganization } from "./listInvoicesByOrganization";
