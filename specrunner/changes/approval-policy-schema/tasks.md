@@ -5,16 +5,18 @@
 - [ ] `src/infrastructure/schema.ts` に `approvalPolicies` テーブルを追加する。`approvalTemplates` の定義の後に配置する。カラム: `id` (uuid PK defaultRandom), `organizationId` (uuid FK → organizations, notNull), `name` (text, notNull), `description` (text, nullable), `triggerAction` (text `"trigger_action"`, notNull), `conditionField` (text `"condition_field"`, nullable), `conditionOperator` (text `"condition_operator"`, nullable), `conditionValue` (text `"condition_value"`, nullable), `templateId` (uuid FK → approvalTemplates, notNull), `isActive` (boolean, notNull, default true), `createdAt` (timestamp `"created_at"`, defaultNow, notNull)
 - [ ] CHECK 制約を追加する: `check("approval_policies_condition_check", sql\`...\`)` で condition_field, condition_operator, condition_value の 3 フィールドが全部 null か全部 NOT NULL であることを保証する
 - [ ] `approvalPoliciesRelations` を追加する: `organization` (one → organizations), `template` (one → approvalTemplates) への relation
+- [ ] 複合インデックスを追加する: `index("approval_policies_org_trigger_active_idx").on(approvalPolicies.organizationId, approvalPolicies.triggerAction, approvalPolicies.isActive)` — `findActiveByTriggerAction` のクエリパフォーマンスのため
 
 **Acceptance Criteria**:
 - `approvalPolicies` テーブルが `src/infrastructure/schema.ts` に定義されている
 - CHECK 制約 `approval_policies_condition_check` が定義されている
+- 複合インデックス `approval_policies_org_trigger_active_idx` が定義されている
 - relations が正しく定義されている
 - `typecheck` が green
 
 ## T-02: requests テーブルへの origin カラム追加（スキーマ定義）
 
-- [ ] `src/infrastructure/schema.ts` の `requests` テーブルに以下のカラムを追加する: `originType` (text `"origin_type"`, notNull, default `'manual'`), `originPolicyId` (uuid `"origin_policy_id"`, nullable, FK → approvalPolicies), `originTriggerAction` (text `"origin_trigger_action"`, nullable), `originTriggerEntityId` (uuid `"origin_trigger_entity_id"`, nullable)
+- [ ] `src/infrastructure/schema.ts` の `requests` テーブルに以下のカラムを追加する: `originType` (text `"origin_type"`, notNull, default `'manual'`), `originPolicyId` (uuid `"origin_policy_id"`, nullable, FK → approvalPolicies, `{ onDelete: "set null" }`), `originTriggerAction` (text `"origin_trigger_action"`, nullable), `originTriggerEntityId` (uuid `"origin_trigger_entity_id"`, nullable)。`originPolicyId` の FK に `onDelete: "set null"` を指定する（既存の `templateId` FK と一貫した挙動）
 - [ ] CHECK 制約を追加する: `check("requests_origin_check", sql\`...\`)` で origin_type = 'manual' なら policy 関連が全 null、origin_type = 'system' なら全 NOT NULL であることを保証する
 - [ ] `requestsRelations` に `originPolicy` (one → approvalPolicies, fields: [requests.originPolicyId]) への relation を追加する
 
@@ -70,7 +72,7 @@
 ## T-07: ApprovalPolicy ドメインモデル型の定義
 
 - [ ] `src/domain/models/approvalPolicy.ts` を新規作成する
-- [ ] `ConditionOperator = "gt" | "gte" | "lt" | "lte" | "eq"` 型を export する
+- [ ] `ConditionOperator = "gt" | "gte" | "lt" | "lte" | "eq"` 型を export する。ファイル内に以下のコメントを添える: `// TODO: ConditionOperator は approvalTemplate.ts の StepCondition.operator と同一の値域。演算子追加時の片方更新漏れリスクを避けるため、将来 src/domain/models/shared.ts へ共有型として抽出することを検討する`
 - [ ] `OriginType = "manual" | "system"` 型を export する
 - [ ] `ApprovalPolicy` 型を export する。フィールド: id (string), organizationId (string), name (string), description (string | null), triggerAction (string), conditionField (string | null), conditionOperator (ConditionOperator | null), conditionValue (string | null), templateId (string), isActive (boolean), createdAt (Date)
 - [ ] `src/domain/models/index.ts` に `ApprovalPolicy`, `ConditionOperator`, `OriginType` の re-export を追加する
@@ -103,7 +105,7 @@
 ## T-10: approvalPolicyRepository の新設
 
 - [ ] `src/infrastructure/repositories/approvalPolicyRepository.ts` を新規作成する
-- [ ] `mapRow` 関数を実装する: DB 行を `ApprovalPolicy` 型に変換。`conditionOperator` は `as ConditionOperator | null` でキャストする
+- [ ] `mapRow` 関数を実装する: DB 行を `ApprovalPolicy` 型に変換。`conditionOperator` はガード関数でバリデーションする: `const CONDITION_OPERATORS: ReadonlySet<ConditionOperator> = new Set(["gt", "gte", "lt", "lte", "eq"])` を定義し、`row.conditionOperator !== null && !CONDITION_OPERATORS.has(row.conditionOperator as ConditionOperator)` の場合は `Error` を throw する。バリデーション通過後に `as ConditionOperator` でキャストする
 - [ ] `create(data, tx?)` を実装する: `approvalPolicies` テーブルに INSERT + returning + mapRow
 - [ ] `findById(id, organizationId)` を実装する: id + organizationId で絞り込み、mapRow で変換
 - [ ] `findByOrganization(organizationId)` を実装する: organizationId で絞り込み、createdAt 降順
@@ -160,10 +162,18 @@
 - `create`, `update` 関数が追加の SELECT クエリを含まない
 - `typecheck` が green
 
+## T-13b: createDelegation usecase の呼び出し更新
+
+- [ ] `src/application/usecases/createDelegation.ts` の `approvalDelegationRepository.create()` 呼び出し（トランザクション内）を更新する: `fromUserRole: fromUser.role` を data オブジェクトに追加する。`fromUser` は既にステップ 3 のクロスオーグチェックで取得済みのため、追加の DB クエリは不要
+
+**Acceptance Criteria**:
+- `approvalDelegationRepository.create()` の呼び出し引数に `fromUserRole: fromUser.role` が含まれている
+- `typecheck` が green
+
 ## T-14: シードデータの更新
 
 - [ ] `src/infrastructure/seed.ts` に `approvalPolicies` テーブルの import を追加する
-- [ ] truncate 処理に `approvalPolicies` の削除を追加する。`requests` テーブルの前に配置する（requests.origin_policy_id FK のため）。`approvalSteps` の削除の後に配置する
+- [ ] truncate 処理に `approvalPolicies` の削除を追加する。`requests` テーブルの後に配置する（requests.origin_policy_id → approval_policies.id の FK 制約により、子テーブルである requests を先に削除する必要がある）。`approvalTemplates` の削除の前に配置する
 - [ ] サンプルポリシーを 1 件追加する: name = '案件フェーズ変更時の承認', trigger_action = 'deal.phase_change', condition なし, template_id = expenseTemplate.id, is_active = true
 - [ ] 既存の `approval_delegations` の INSERT に `fromUserRole` フィールドを追加する: `fromUserRole: "manager"`（managerUser → adminUser の委譲のため）
 

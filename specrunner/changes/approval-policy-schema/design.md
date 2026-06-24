@@ -79,7 +79,7 @@ CHECK (
 `requests` テーブルに以下の 4 カラムを追加する:
 
 - `origin_type` (text NOT NULL default `'manual'`) — `'manual'` | `'system'`
-- `origin_policy_id` (uuid nullable FK → approval_policies)
+- `origin_policy_id` (uuid nullable FK → approval_policies, ON DELETE SET NULL) — ポリシーが削除された場合は NULL にセット（既存の `template_id` FK と一貫した挙動）
 - `origin_trigger_action` (text nullable) — ポリシー起動時のトリガーアクション
 - `origin_trigger_entity_id` (uuid nullable) — トリガーエンティティの ID（例: deal ID）。FK 制約なし（エンティティ型が可変のため）
 
@@ -156,7 +156,7 @@ export type ApprovalPolicy = {
 };
 ```
 
-`ConditionOperator` は既存の `ApprovalTemplate` の `StepCondition.operator` と同じ値域。将来的に共有型として抽出可能だが、本リクエストではモデルごとに独立定義する。
+`ConditionOperator` は既存の `ApprovalTemplate` の `StepCondition.operator` と同じ値域。本リクエストではモデルごとに独立定義するが、将来演算子を追加する際の片方更新漏れリスクを避けるため、`src/domain/models/shared.ts` への共有型抽出を将来検討する。ソースファイル内に TODO コメントを残す。
 
 `OriginType` は `Request` モデルの origin_type フィールドで使用する。`approvalPolicy.ts` に配置することで、承認ポリシーの概念と紐付ける。
 
@@ -196,7 +196,9 @@ export type ApprovalPolicy = {
 - `updateById(id, organizationId, data, tx?)` — ポリシーの更新
 - `deleteById(id, organizationId, tx?)` — ポリシーの削除
 
-全関数にテナント分離（`organizationId` 条件）を適用する。`mapRow` 関数で DB 行を `ApprovalPolicy` 型に変換する。既存の `approvalTemplateRepository` のパターンに準拠する。
+全関数にテナント分離（`organizationId` 条件）を適用する。`mapRow` 関数で DB 行を `ApprovalPolicy` 型に変換する。`conditionOperator` は `CONDITION_OPERATORS` セットによる実行時検証を行ってからキャストする。既存の `approvalTemplateRepository` のパターンに準拠する。
+
+`approval_policies` テーブルには `(organization_id, trigger_action, is_active)` の複合インデックスを設ける。`findActiveByTriggerAction` がポリシー評価のたびに呼び出されるため、シーケンシャルスキャンを防ぐ。
 
 `src/infrastructure/repositories/index.ts` から re-export する。
 
@@ -230,7 +232,7 @@ export type ApprovalPolicy = {
 
 `src/infrastructure/seed.ts` を更新する:
 
-- `approvalPolicies` テーブルの truncate 文を追加（`approvalSteps` の後、`approvalTemplates` の前）
+- `approvalPolicies` テーブルの truncate 文を追加（`requests` テーブルの後かつ `approvalTemplates` の前）。FK の向きは `requests.origin_policy_id → approval_policies.id` であるため、子テーブル（requests）を先に削除してから親テーブル（approvalPolicies）を削除する
 - `approvalPolicies` のインポートを追加
 - サンプルポリシーを 1 件追加: 「案件フェーズ変更時の承認」（`trigger_action: 'deal.phase_change'`, 条件なし, 経費テンプレート参照）
 - `approval_delegations` の既存シードに `fromUserRole` を追加
