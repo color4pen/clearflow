@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 10.3s | 0 |
-| 2 | typecheck | passed | 1.1s | 0 |
+| 1 | build | passed | 10.7s | 0 |
+| 2 | typecheck | passed | 0.9s | 0 |
 | 3 | test | passed | 0.4s | 0 |
-| 4 | lint | passed | 4.3s | 0 |
+| 4 | lint | passed | 4.1s | 0 |
 
 ## Phase: build
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 5.1s
+✓ Compiled successfully in 5.6s
   Running TypeScript ...
-  Finished TypeScript in 3.9s ...
+  Finished TypeScript in 3.6s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/28) ...
   Generating static pages using 7 workers (7/28) 
   Generating static pages using 7 workers (14/28) 
   Generating static pages using 7 workers (21/28) 
-✓ Generating static pages using 7 workers (28/28) in 144ms
+✓ Generating static pages using 7 workers (28/28) in 147ms
   Finalizing page optimization ...
 
 Route (app)
@@ -107,10 +107,10 @@ error: async-error
       at <anonymous> (src/__tests__/domain/domainEvents.test.ts:152:13)
 
 
- 722 pass
+ 724 pass
  0 fail
- 1626 expect() calls
-Ran 722 tests across 36 files. [351.00ms]
+ 1632 expect() calls
+Ran 724 tests across 37 files. [361.00ms]
 
 ```
 
