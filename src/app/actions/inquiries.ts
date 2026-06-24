@@ -13,7 +13,9 @@ const createInquirySchema = z.object({
   newClientName: z.string().min(1).optional(),
   title: z.string().min(1, "件名は必須です"),
   description: z.string().optional(),
-  source: z.enum(["web", "phone", "referral", "exhibition", "other"]),
+  source: z.enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"]),
+  budget: z.coerce.number().int().optional(),
+  timeline: z.string().optional(),
   assigneeId: z.string().uuid().optional(),
 });
 
@@ -51,12 +53,15 @@ export async function createInquiryAction(
   const assigneeIdRaw = formData.get("assigneeId");
   const newClientNameRaw = formData.get("newClientName");
 
+  const budgetRaw = formData.get("budget");
   const parsed = createInquirySchema.safeParse({
     clientId: clientIdRaw && clientIdRaw !== "" && clientIdRaw !== "__new__" ? clientIdRaw : undefined,
     newClientName: newClientNameRaw && newClientNameRaw !== "" ? newClientNameRaw : undefined,
     title: formData.get("title"),
     description: formData.get("description") || undefined,
     source: formData.get("source"),
+    budget: budgetRaw && budgetRaw !== "" ? budgetRaw : undefined,
+    timeline: formData.get("timeline") || undefined,
     assigneeId: assigneeIdRaw && assigneeIdRaw !== "" ? assigneeIdRaw : undefined,
   });
 
@@ -85,6 +90,8 @@ export async function createInquiryAction(
     title: parsed.data.title,
     description: parsed.data.description ?? null,
     source: parsed.data.source,
+    budget: parsed.data.budget ?? null,
+    timeline: parsed.data.timeline ?? null,
     assigneeId: parsed.data.assigneeId ?? null,
   });
 
@@ -137,7 +144,9 @@ export async function updateInquiryStatusAction(
 const updateInquirySchema = z.object({
   title: z.string().min(1, "件名は必須です"),
   description: z.string().optional(),
-  source: z.enum(["web", "phone", "referral", "exhibition", "other"]),
+  source: z.enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"]),
+  budget: z.coerce.number().int().optional(),
+  timeline: z.string().optional(),
   clientId: z.string().uuid().optional(),
   assigneeId: z.string().uuid().optional(),
 });
@@ -188,10 +197,13 @@ export async function updateInquiryAction(
     resolvedClientId = clientResult.client.id;
   }
 
+  const budgetRawUpdate = formData.get("budget");
   const raw = {
     title: formData.get("title"),
     description: formData.get("description") || undefined,
     source: formData.get("source"),
+    budget: budgetRawUpdate && budgetRawUpdate !== "" ? budgetRawUpdate : undefined,
+    timeline: formData.get("timeline") || undefined,
     clientId: resolvedClientId,
     assigneeId: formData.get("assigneeId") || undefined,
   };
@@ -208,6 +220,8 @@ export async function updateInquiryAction(
     title: parsed.data.title,
     description: parsed.data.description ?? null,
     source: parsed.data.source,
+    budget: parsed.data.budget ?? null,
+    timeline: parsed.data.timeline ?? null,
     clientId: parsed.data.clientId ?? null,
     assigneeId: parsed.data.assigneeId ?? null,
   });

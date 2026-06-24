@@ -1,6 +1,6 @@
 export type InquiryStatus = "new" | "converted" | "declined";
 
-export type InquirySource = "web" | "phone" | "referral" | "exhibition" | "other";
+export type InquirySource = "web" | "phone" | "email" | "referral" | "agent_service" | "exhibition" | "other";
 
 export type Inquiry = {
   id: string;
@@ -11,6 +11,8 @@ export type Inquiry = {
   description: string | null;
   source: InquirySource;
   status: InquiryStatus;
+  budget: number | null;
+  timeline: string | null;
   assigneeId: string | null;
   createdAt: Date;
   updatedAt: Date;

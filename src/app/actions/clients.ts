@@ -4,6 +4,7 @@ import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
 import { createClient, listClients, createClientContact, deleteClientContact } from "@/application/usecases";
+import { validatePrimaryUniqueness } from "@/domain/services";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import type { Client } from "@/domain/models/client";
 
@@ -219,6 +220,7 @@ export async function addClientContactAction(
     name: parsed.data.name,
     organizationId: session.user.organizationId,
     actorId: session.user.id,
+    isPrimary: parsed.data.isPrimary ?? false,
     department: parsed.data.department ?? null,
     position: parsed.data.position ?? null,
     email: parsed.data.email ?? null,
@@ -275,6 +277,18 @@ export async function updateClientContactAction(
   if (!parsed.success) {
     const firstError = parsed.error.issues[0];
     return { success: false, message: firstError?.message ?? "入力が不正です" };
+  }
+
+  // isPrimary=true への変更時は重複チェックを行う（自身を除外して既存の主担当者数を確認）
+  if (parsed.data.isPrimary) {
+    const contacts = await clientRepository.findContactsByClientId(clientId);
+    const existingPrimaryCount = contacts.filter(
+      (c) => c.isPrimary && c.id !== contactId
+    ).length;
+    const validation = validatePrimaryUniqueness(parsed.data.isPrimary, existingPrimaryCount);
+    if (!validation.valid) {
+      return { success: false, message: validation.reason };
+    }
   }
 
   const updated = await clientRepository.updateContact(contactId, clientId, {

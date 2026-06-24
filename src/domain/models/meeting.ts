@@ -16,15 +16,20 @@ export type ActionItem = {
   done: boolean;
 };
 
-export type MeetingAttendees = {
-  internal: string[];
-  external: string[];
+export type MeetingAttendee = {
+  userId: string | null;
+  contactId: string | null;
+  name: string;
+  isExternal: boolean;
 };
+
+export type MeetingAttendees = MeetingAttendee[];
 
 export type Meeting = {
   id: string;
   organizationId: string;
-  dealId: string;
+  dealId: string | null;
+  inquiryId: string | null;
   type: MeetingType;
   date: Date;
   location: string | null;

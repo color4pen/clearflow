@@ -7,6 +7,7 @@ export type Invoice = {
   title: string;
   amount: number;
   dueDate: Date | null;
+  issueDate: Date | null;
   status: InvoiceStatus;
   invoicedAt: Date | null;
   paidAt: Date | null;

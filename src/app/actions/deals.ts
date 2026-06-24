@@ -13,6 +13,7 @@ const createDealSchema = z.object({
   inquiryId: z.string().uuid().optional(),
   clientId: z.string().uuid().optional(),
   title: z.string().min(1, "案件名は必須です"),
+  description: z.string().optional(),
   estimatedAmount: z.coerce.number().int().optional(),
   estimatedStartDate: z.string().optional(),
   estimatedEndDate: z.string().optional(),
@@ -24,6 +25,7 @@ const createDealSchema = z.object({
 
 const updateDealSchema = z.object({
   title: z.string().min(1).optional(),
+  description: z.string().optional().nullable(),
   estimatedAmount: z.coerce.number().int().optional().nullable(),
   estimatedStartDate: z.string().optional().nullable(),
   estimatedEndDate: z.string().optional().nullable(),
@@ -83,6 +85,7 @@ export async function createDealAction(
     inquiryId: inquiryIdRaw && inquiryIdRaw !== "" ? inquiryIdRaw : undefined,
     clientId: clientIdRaw && clientIdRaw !== "" && clientIdRaw !== "__new__" ? clientIdRaw : undefined,
     title: formData.get("title"),
+    description: formData.get("description") || undefined,
     estimatedAmount:
       estimatedAmountRaw && estimatedAmountRaw !== "" ? estimatedAmountRaw : undefined,
     estimatedStartDate: formData.get("estimatedStartDate") || undefined,
@@ -130,6 +133,7 @@ export async function createDealAction(
     inquiryId: parsed.data.inquiryId,
     clientId: resolvedClientId,
     title: parsed.data.title,
+    description: parsed.data.description ?? null,
     estimatedAmount: parsed.data.estimatedAmount ?? null,
     estimatedStartDate: parsed.data.estimatedStartDate
       ? new Date(parsed.data.estimatedStartDate)
@@ -209,11 +213,15 @@ export async function updateDealAction(
   const estimatedStartDateRaw = formData.get("estimatedStartDate");
   const estimatedEndDateRaw = formData.get("estimatedEndDate");
   const notesRaw = formData.get("notes");
+  const descriptionRaw = formData.get("description");
 
   // null means the field was not present in FormData (partial update from inline edit).
   // undefined means "don't change this field". Empty string means "clear this field".
   const parsed = updateDealSchema.safeParse({
     title: formData.get("title") || undefined,
+    description:
+      descriptionRaw === null ? undefined :
+        (descriptionRaw || null),
     estimatedAmount:
       estimatedAmountRaw === null ? undefined :
         (estimatedAmountRaw !== "" ? estimatedAmountRaw : null),
@@ -260,6 +268,7 @@ export async function updateDealAction(
     organizationId: session.user.organizationId,
     actorId: session.user.id,
     title: parsed.data.title,
+    description: parsed.data.description ?? null,
     estimatedAmount: parsed.data.estimatedAmount ?? null,
     estimatedStartDate: parsed.data.estimatedStartDate
       ? new Date(parsed.data.estimatedStartDate)

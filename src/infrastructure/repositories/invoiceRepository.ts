@@ -12,6 +12,7 @@ function mapRow(row: typeof invoices.$inferSelect): Invoice {
     title: row.title,
     amount: row.amount,
     dueDate: row.dueDate ?? null,
+    issueDate: row.issueDate ?? null,
     status: row.status as InvoiceStatus,
     invoicedAt: row.invoicedAt ?? null,
     paidAt: row.paidAt ?? null,
@@ -28,6 +29,7 @@ export async function create(
     title: string;
     amount: number;
     dueDate?: Date | null;
+    issueDate?: Date | null;
     notes?: string | null;
   },
   tx?: Transaction
@@ -41,6 +43,7 @@ export async function create(
       title: data.title,
       amount: data.amount,
       dueDate: data.dueDate ?? null,
+      issueDate: data.issueDate ?? null,
       notes: data.notes ?? null,
     })
     .returning();
@@ -82,6 +85,7 @@ export async function update(
     title: string;
     amount: number;
     dueDate: Date | null;
+    issueDate: Date | null;
     notes: string | null;
   }>,
   tx?: Transaction

@@ -8,7 +8,8 @@ function mapRow(row: typeof meetings.$inferSelect): Meeting {
   return {
     id: row.id,
     organizationId: row.organizationId,
-    dealId: row.dealId,
+    dealId: row.dealId ?? null,
+    inquiryId: row.inquiryId ?? null,
     type: row.type as MeetingType,
     date: row.date,
     location: row.location ?? null,
@@ -25,7 +26,8 @@ function mapRow(row: typeof meetings.$inferSelect): Meeting {
 export async function create(
   data: {
     organizationId: string;
-    dealId: string;
+    dealId?: string | null;
+    inquiryId?: string | null;
     type: MeetingType;
     date: Date;
     location?: string | null;
@@ -42,7 +44,8 @@ export async function create(
     .insert(meetings)
     .values({
       organizationId: data.organizationId,
-      dealId: data.dealId,
+      dealId: data.dealId ?? null,
+      inquiryId: data.inquiryId ?? null,
       type: data.type,
       date: data.date,
       location: data.location ?? null,
@@ -96,6 +99,21 @@ export async function findAllByOrganization(
   return result.map(mapRow);
 }
 
+/**
+ * 指定引き合いに直接紐づく商談を取得する。organizationId でテナント分離。
+ */
+export async function findAllByInquiry(
+  inquiryId: string,
+  organizationId: string
+): Promise<Meeting[]> {
+  const result = await db
+    .select()
+    .from(meetings)
+    .where(and(eq(meetings.inquiryId, inquiryId), eq(meetings.organizationId, organizationId)))
+    .orderBy(asc(meetings.date));
+  return result.map(mapRow);
+}
+
 export async function update(
   id: string,
   organizationId: string,
@@ -107,6 +125,7 @@ export async function update(
     summary: string | null;
     actionItems: ActionItem[];
     hearingData: HearingData | null;
+    inquiryId: string | null;
   }>,
   tx?: Transaction
 ): Promise<Meeting | null> {

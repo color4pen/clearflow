@@ -12,6 +12,7 @@ function mapRow(row: typeof deals.$inferSelect): Deal {
     inquiryId: row.inquiryId ?? null,
     clientId: row.clientId,
     title: row.title,
+    description: row.description ?? null,
     phase: row.phase,
     estimatedAmount: row.estimatedAmount ?? null,
     estimatedStartDate: row.estimatedStartDate ?? null,
@@ -33,6 +34,7 @@ export async function create(
     clientId: string;
     inquiryId?: string;
     title: string;
+    description?: string | null;
     estimatedAmount?: number | null;
     estimatedStartDate?: Date | null;
     estimatedEndDate?: Date | null;
@@ -51,6 +53,7 @@ export async function create(
       clientId: data.clientId,
       inquiryId: data.inquiryId ?? null,
       title: data.title,
+      description: data.description ?? null,
       estimatedAmount: data.estimatedAmount ?? null,
       estimatedStartDate: data.estimatedStartDate ?? null,
       estimatedEndDate: data.estimatedEndDate ?? null,
@@ -140,6 +143,7 @@ export async function update(
   organizationId: string,
   data: Partial<{
     title: string;
+    description: string | null;
     estimatedAmount: number | null;
     estimatedStartDate: Date | null;
     estimatedEndDate: Date | null;

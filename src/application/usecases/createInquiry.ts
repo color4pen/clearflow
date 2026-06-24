@@ -1,6 +1,6 @@
 import { clientRepository, inquiryRepository, auditLogRepository } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
-import type { Inquiry } from "@/domain/models/inquiry";
+import type { Inquiry, InquirySource } from "@/domain/models/inquiry";
 
 export type CreateInquiryResult =
   | { ok: true; inquiry: Inquiry }
@@ -12,7 +12,9 @@ export async function createInquiry(data: {
   clientId?: string | null;
   title: string;
   description?: string | null;
-  source: string;
+  source: InquirySource;
+  budget?: number | null;
+  timeline?: string | null;
   assigneeId?: string | null;
 }): Promise<CreateInquiryResult> {
   // 顧客が指定された場合のみ存在確認
@@ -32,6 +34,8 @@ export async function createInquiry(data: {
           title: data.title,
           description: data.description,
           source: data.source,
+          budget: data.budget,
+          timeline: data.timeline,
           assigneeId: data.assigneeId,
         },
         tx

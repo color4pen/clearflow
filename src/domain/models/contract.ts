@@ -9,8 +9,8 @@ export type Contract = {
   clientId: string;
   title: string;
   contractType: string | null;
-  amount: number | null;
-  startDate: Date | null;
+  amount: number;
+  startDate: Date;
   endDate: Date | null;
   paymentTerms: string | null;
   renewalType: RenewalType;

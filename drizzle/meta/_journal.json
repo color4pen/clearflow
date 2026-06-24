@@ -15,6 +15,13 @@
       "when": 1782095292014,
       "tag": "0001_soft_cloak",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782269536923,
+      "tag": "0002_goofy_thanos",
+      "breakpoints": true
     }
   ]
 }

@@ -11,3 +11,4 @@ export { canTransition } from "./inquiryTransition";
 export { canTransition as canDealTransition } from "./dealTransition";
 export { canTransition as canContractTransition } from "./contractTransition";
 export { validateInvoiceTransition } from "./invoiceTransition";
+export { validatePrimaryUniqueness } from "./clientContactService";

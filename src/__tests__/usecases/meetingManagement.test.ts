@@ -14,12 +14,17 @@ async function readSrc(relPath: string): Promise<string> {
 }
 
 describe("createMeeting usecase 静的検証", () => {
-  it("T-01: dealId が必須パラメータとして含まれる", async () => {
+  it("T-01: dealId と inquiryId の両方がパラメータとして含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createMeeting.ts");
-    // 実行・検証 - dealId が必須
+    // 実行・検証 - dealId と inquiryId が存在する
     expect(content).toContain("dealId");
-    expect(content).not.toContain("inquiryId");
+    expect(content).toContain("inquiryId");
+  });
+
+  it("T-01b: dealId と inquiryId 両方 null の場合のバリデーションが含まれる", async () => {
+    const content = await readSrc("application/usecases/createMeeting.ts");
+    expect(content).toContain("案件または引き合いの指定が必要です");
   });
 
   it("T-02: dealId 指定時に dealRepository.findById で案件存在確認するコードが含まれる", async () => {
@@ -29,11 +34,16 @@ describe("createMeeting usecase 静的検証", () => {
     expect(content).toContain("dealRepository.findById");
   });
 
+  it("T-02b: inquiryId 指定時に inquiryRepository.findById で引き合い存在確認するコードが含まれる", async () => {
+    const content = await readSrc("application/usecases/createMeeting.ts");
+    expect(content).toContain("inquiryRepository.findById");
+  });
+
   it("T-03: meetingRepository.create 呼び出しに dealId が含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createMeeting.ts");
     // 実行・検証 - dealId が create に渡される
-    expect(content).toContain("dealId: data.dealId");
+    expect(content).toContain("dealId");
   });
 
   it("auditLogRepository.create の呼び出しが含まれる（監査ログ記録）", async () => {

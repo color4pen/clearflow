@@ -37,6 +37,14 @@ export async function createContract(data: {
   const startDate = data.startDate !== undefined ? data.startDate : deal.estimatedStartDate;
   const endDate = data.endDate !== undefined ? data.endDate : deal.estimatedEndDate;
 
+  // amount と startDate は必須（新規作成時のアプリケーション層検証）
+  if (amount === null || amount === undefined || amount <= 0) {
+    return { ok: false, reason: "契約金額は必須です" };
+  }
+  if (startDate === null || startDate === undefined) {
+    return { ok: false, reason: "契約開始日は必須です" };
+  }
+
   try {
     const contract = await db.transaction(async (tx) => {
       const newContract = await contractRepository.create(

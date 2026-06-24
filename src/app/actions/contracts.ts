@@ -19,7 +19,7 @@ const createContractSchema = z.object({
   dealId: z.string().uuid("有効な案件IDが必要です"),
   title: z.string().optional(),
   contractType: z.enum(["quasi_delegation", "fixed_price", "ses"]).optional(),
-  amount: z.coerce.number().int().nonnegative().optional(),
+  amount: z.coerce.number().int().positive("金額は1以上の値を入力してください").optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
   paymentTerms: z.string().optional(),
@@ -30,8 +30,8 @@ const createContractSchema = z.object({
 const updateContractSchema = z.object({
   title: z.string().min(1).optional(),
   contractType: z.enum(["quasi_delegation", "fixed_price", "ses"]).optional().nullable(),
-  amount: z.coerce.number().int().nonnegative().optional().nullable(),
-  startDate: z.string().optional().nullable(),
+  amount: z.coerce.number().int().positive("金額は1以上の値を入力してください").optional(),
+  startDate: z.string().optional(),
   endDate: z.string().optional().nullable(),
   paymentTerms: z.string().optional().nullable(),
   renewalType: z.enum(["one_time", "recurring"]).optional(),
@@ -131,10 +131,10 @@ export async function updateContractAction(
         (contractTypeRaw !== "" ? contractTypeRaw : null),
     amount:
       amountRaw === null ? undefined :
-        (amountRaw !== "" ? amountRaw : null),
+        (amountRaw !== "" ? amountRaw : undefined),
     startDate:
       startDateRaw === null ? undefined :
-        (startDateRaw || null),
+        (startDateRaw || undefined),
     endDate:
       endDateRaw === null ? undefined :
         (endDateRaw || null),
@@ -161,7 +161,7 @@ export async function updateContractAction(
     title: parsed.data.title,
     contractType: parsed.data.contractType,
     amount: parsed.data.amount,
-    startDate: parsed.data.startDate ? new Date(parsed.data.startDate) : null,
+    startDate: parsed.data.startDate ? new Date(parsed.data.startDate) : undefined,
     endDate: parsed.data.endDate ? new Date(parsed.data.endDate) : null,
     paymentTerms: parsed.data.paymentTerms,
     renewalType: parsed.data.renewalType,

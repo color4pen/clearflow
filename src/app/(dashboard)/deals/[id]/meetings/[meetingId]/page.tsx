@@ -23,7 +23,7 @@ export default async function DealMeetingDetailPage({
     notFound();
   }
 
-  if (meeting.dealId !== id) {
+  if (!meeting.dealId || meeting.dealId !== id) {
     notFound();
   }
 

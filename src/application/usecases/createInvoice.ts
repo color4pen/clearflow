@@ -15,6 +15,7 @@ export async function createInvoice(data: {
   title: string;
   amount: number;
   dueDate?: Date | null;
+  issueDate?: Date | null;
   notes?: string | null;
 }): Promise<CreateInvoiceResult> {
   const contract = await contractRepository.findById(data.contractId, data.organizationId);
@@ -50,6 +51,7 @@ export async function createInvoice(data: {
           title: data.title,
           amount: data.amount,
           dueDate: data.dueDate ?? null,
+          issueDate: data.issueDate ?? null,
           notes: data.notes ?? null,
         },
         tx

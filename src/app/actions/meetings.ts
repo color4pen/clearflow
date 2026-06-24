@@ -28,7 +28,8 @@ const contactRegistrationSchema = z.object({
 });
 
 const createMeetingSchema = z.object({
-  dealId: z.string().uuid("案件IDが不正です"),
+  dealId: z.string().uuid("案件IDが不正です").optional(),
+  inquiryId: z.string().uuid().optional(),
   clientId: z.string().uuid().optional(),
   type: z.enum(["hearing", "proposal", "negotiation", "closing", "followup"]),
   date: z.string().min(1, "日時は必須です"),
@@ -39,7 +40,10 @@ const createMeetingSchema = z.object({
   actionItems: z.array(actionItemSchema).optional().default([]),
   hearingData: hearingDataSchema.optional(),
   contactRegistrations: z.array(contactRegistrationSchema).optional().default([]),
-});
+}).refine(
+  (data) => data.dealId || data.inquiryId,
+  { message: "案件または引き合いの指定が必要です", path: ["dealId"] }
+);
 
 export type CreateMeetingState = {
   errors?: {
@@ -128,10 +132,12 @@ export async function createMeetingAction(
   }
 
   const dealIdRaw = formData.get("dealId");
+  const inquiryIdRaw = formData.get("inquiryId");
   const clientIdRaw = formData.get("clientId");
 
   const parsed = createMeetingSchema.safeParse({
-    dealId: dealIdRaw,
+    dealId: dealIdRaw && dealIdRaw !== "" ? dealIdRaw : undefined,
+    inquiryId: inquiryIdRaw && inquiryIdRaw !== "" ? inquiryIdRaw : undefined,
     clientId: clientIdRaw && clientIdRaw !== "" ? clientIdRaw : undefined,
     type: formData.get("type"),
     date: formData.get("date"),
@@ -151,14 +157,25 @@ export async function createMeetingAction(
   const result = await createMeeting({
     organizationId: session.user.organizationId,
     actorId: session.user.id,
-    dealId: parsed.data.dealId,
+    dealId: parsed.data.dealId ?? null,
+    inquiryId: parsed.data.inquiryId ?? null,
     type: parsed.data.type,
     date: new Date(parsed.data.date),
     location: parsed.data.location ?? null,
-    attendees: {
-      internal: parsed.data.internalAttendees,
-      external: parsed.data.externalAttendees,
-    },
+    attendees: [
+      ...parsed.data.internalAttendees.map((name) => ({
+        userId: null,
+        contactId: null,
+        name,
+        isExternal: false,
+      })),
+      ...parsed.data.externalAttendees.map((name) => ({
+        userId: null,
+        contactId: null,
+        name,
+        isExternal: true,
+      })),
+    ],
     summary: parsed.data.summary ?? null,
     actionItems: parsed.data.actionItems,
     hearingData: parsed.data.hearingData ?? null,
@@ -182,7 +199,9 @@ export async function createMeetingAction(
     }
   }
 
-  revalidatePath(`/deals/${parsed.data.dealId}`);
+  if (parsed.data.dealId) {
+    revalidatePath(`/deals/${parsed.data.dealId}`);
+  }
   return { dealId: parsed.data.dealId };
 }
 
@@ -294,10 +313,20 @@ export async function updateMeetingAction(
 
   const attendees =
     internalAttendees !== undefined || externalAttendees !== undefined
-      ? {
-          internal: parsed.data.internalAttendees ?? [],
-          external: parsed.data.externalAttendees ?? [],
-        }
+      ? [
+          ...(parsed.data.internalAttendees ?? []).map((name) => ({
+            userId: null,
+            contactId: null,
+            name,
+            isExternal: false,
+          })),
+          ...(parsed.data.externalAttendees ?? []).map((name) => ({
+            userId: null,
+            contactId: null,
+            name,
+            isExternal: true,
+          })),
+        ]
       : undefined;
 
   const result = await updateMeeting({

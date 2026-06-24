@@ -38,6 +38,15 @@ export const inquiryStatusEnum = pgEnum("inquiry_status", [
   "converted",
   "declined",
 ]);
+export const inquirySourceEnum = pgEnum("inquiry_source", [
+  "web",
+  "phone",
+  "email",
+  "referral",
+  "agent_service",
+  "exhibition",
+  "other",
+]);
 export const meetingTypeEnum = pgEnum("meeting_type", [
   "hearing",
   "proposal",
@@ -271,8 +280,10 @@ export const inquiries = pgTable("inquiries", {
   clientId: uuid("client_id").references(() => clients.id),
   title: text("title").notNull(),
   description: text("description"),
-  source: text("source").notNull(),
+  source: inquirySourceEnum("source").notNull(),
   status: inquiryStatusEnum("status").notNull().default("new"),
+  budget: integer("budget"),
+  timeline: text("timeline"),
   assigneeId: uuid("assignee_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -286,12 +297,13 @@ export const meetings = pgTable("meetings", {
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id),
-  dealId: uuid("deal_id").notNull().references(() => deals.id),
+  dealId: uuid("deal_id").references(() => deals.id),
+  inquiryId: uuid("inquiry_id").references(() => inquiries.id),
   type: meetingTypeEnum("type").notNull(),
   date: timestamp("date").notNull(),
   location: text("location"),
-  // { internal: string[], external: string[] }
-  attendees: jsonb("attendees").notNull().default({ internal: [], external: [] }),
+  // Array<{ userId: string | null, contactId: string | null, name: string, isExternal: boolean }>
+  attendees: jsonb("attendees").notNull().default([]),
   summary: text("summary"),
   // Array<{ description: string, assignee: string, dueDate: string | null, done: boolean }>
   actionItems: jsonb("action_items").notNull().default([]),
@@ -315,6 +327,7 @@ export const deals = pgTable("deals", {
     .notNull()
     .references(() => clients.id),
   title: text("title").notNull(),
+  description: text("description"),
   phase: dealPhaseEnum("phase").notNull().default("proposal_prep"),
   estimatedAmount: integer("estimated_amount"),
   estimatedStartDate: timestamp("estimated_start_date"),
@@ -369,8 +382,8 @@ export const contracts = pgTable(
       .references(() => clients.id),
     title: text("title").notNull(),
     contractType: text("contract_type"),
-    amount: integer("amount"),
-    startDate: timestamp("start_date"),
+    amount: integer("amount").notNull(),
+    startDate: timestamp("start_date").notNull(),
     endDate: timestamp("end_date"),
     paymentTerms: text("payment_terms"),
     renewalType: renewalTypeEnum("renewal_type").notNull().default("one_time"),
@@ -393,6 +406,7 @@ export const invoices = pgTable("invoices", {
   title: text("title").notNull(),
   amount: integer("amount").notNull(),
   dueDate: timestamp("due_date"),
+  issueDate: timestamp("issue_date"),
   status: invoiceStatusEnum("status").notNull().default("scheduled"),
   invoicedAt: timestamp("invoiced_at"),
   paidAt: timestamp("paid_at"),
@@ -621,6 +635,7 @@ export const inquiriesRelations = relations(inquiries, ({ one, many }) => ({
     references: [users.id],
   }),
   deals: many(deals),
+  meetings: many(meetings),
 }));
 
 export const meetingsRelations = relations(meetings, ({ one }) => ({
@@ -631,6 +646,10 @@ export const meetingsRelations = relations(meetings, ({ one }) => ({
   deal: one(deals, {
     fields: [meetings.dealId],
     references: [deals.id],
+  }),
+  inquiry: one(inquiries, {
+    fields: [meetings.inquiryId],
+    references: [inquiries.id],
   }),
   createdBy: one(users, {
     fields: [meetings.createdById],

@@ -11,6 +11,8 @@ export async function updateInquiry(data: {
   title?: string;
   description?: string | null;
   source?: InquirySource;
+  budget?: number | null;
+  timeline?: string | null;
   clientId?: string | null;
   assigneeId?: string | null;
 }): Promise<UpdateInquiryResult> {
@@ -23,7 +25,9 @@ export async function updateInquiry(data: {
   const updatePayload: Partial<{
     title: string;
     description: string | null;
-    source: string;
+    source: InquirySource;
+    budget: number | null;
+    timeline: string | null;
     clientId: string | null;
     assigneeId: string | null;
   }> = {};
@@ -31,6 +35,8 @@ export async function updateInquiry(data: {
   if (data.title !== undefined) updatePayload.title = data.title;
   if (data.description !== undefined) updatePayload.description = data.description;
   if (data.source !== undefined) updatePayload.source = data.source;
+  if (data.budget !== undefined) updatePayload.budget = data.budget;
+  if (data.timeline !== undefined) updatePayload.timeline = data.timeline;
   if (data.clientId !== undefined) updatePayload.clientId = data.clientId;
   if (data.assigneeId !== undefined) updatePayload.assigneeId = data.assigneeId;
 

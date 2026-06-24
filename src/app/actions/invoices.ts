@@ -17,6 +17,7 @@ const createInvoiceSchema = z.object({
   title: z.string().min(1, "タイトルは必須です").max(255, "タイトルは255文字以内で入力してください"),
   amount: z.coerce.number().int("金額は整数で入力してください").positive("金額は1以上の値を入力してください"),
   dueDate: z.string().optional(),
+  issueDate: z.string().optional(),
   notes: z.string().max(1000, "備考は1000文字以内で入力してください").optional(),
 });
 
@@ -46,12 +47,14 @@ export async function createInvoiceAction(formData: FormData): Promise<ActionRes
 
   const notesRaw = formData.get("notes");
   const dueDateRaw = formData.get("dueDate");
+  const issueDateRaw = formData.get("issueDate");
 
   const parsed = createInvoiceSchema.safeParse({
     contractId: formData.get("contractId"),
     title: formData.get("title"),
     amount: formData.get("amount"),
     dueDate: dueDateRaw && dueDateRaw !== "" ? dueDateRaw : undefined,
+    issueDate: issueDateRaw && issueDateRaw !== "" ? issueDateRaw : undefined,
     notes: notesRaw && notesRaw !== "" ? String(notesRaw) : undefined,
   });
 
@@ -67,6 +70,7 @@ export async function createInvoiceAction(formData: FormData): Promise<ActionRes
     title: parsed.data.title,
     amount: parsed.data.amount,
     dueDate: parsed.data.dueDate ? new Date(parsed.data.dueDate) : null,
+    issueDate: parsed.data.issueDate ? new Date(parsed.data.issueDate) : null,
     notes: parsed.data.notes ?? null,
   });
 
