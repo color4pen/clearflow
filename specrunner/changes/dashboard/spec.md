@@ -156,13 +156,13 @@
 #### Scenario: paidAt 期間フィルタで請求を取得する
 
 **Given** 組織に 2026-06-01 と 2026-05-15 に支払われた請求が存在する
-**When** `listInvoicesByOrganization(orgId, { status: "paid", paidAtFrom: 2026-06-01, paidAtTo: 2026-06-30 })` を呼ぶ
+**When** `listInvoicesByOrganization(orgId, { status: "paid", paidAtFrom: 2026-06-01T00:00:00Z, paidAtTo: 2026-07-01T00:00:00Z })` を呼ぶ（`paidAtTo` は翌月初を exclusive 境界として渡す）
 **Then** 2026-06-01 に支払われた請求のみが返される
 
 #### Scenario: issueDate 期間フィルタで請求を取得する
 
 **Given** 組織に issueDate が 2026-06-15 と 2026-08-01 の予定請求が存在する
-**When** `listInvoicesByOrganization(orgId, { status: "scheduled", issueDateFrom: 2026-06-01, issueDateTo: 2026-07-31 })` を呼ぶ
+**When** `listInvoicesByOrganization(orgId, { status: "scheduled", issueDateFrom: 2026-06-01T00:00:00Z, issueDateTo: 2026-08-01T00:00:00Z })` を呼ぶ（`issueDateTo` は翌々月初を exclusive 境界として渡す）
 **Then** issueDate が 2026-06-15 の請求のみが返される
 
 #### Scenario: organizationId によるテナント分離

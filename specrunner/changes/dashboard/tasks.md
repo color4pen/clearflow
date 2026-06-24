@@ -6,8 +6,8 @@
 - [ ] シグネチャ: `findAllByOrganization(organizationId: string, filters?: { status?: InvoiceStatus; paidAtFrom?: Date; paidAtTo?: Date; issueDateFrom?: Date; issueDateTo?: Date }): Promise<Invoice[]>`
 - [ ] `eq(invoices.organizationId, organizationId)` を必須条件とする（テナント分離）
 - [ ] `filters.status` が指定された場合、`eq(invoices.status, filters.status)` を追加する
-- [ ] `filters.paidAtFrom` / `filters.paidAtTo` が指定された場合、`gte(invoices.paidAt, from)` / `lte(invoices.paidAt, to)` を追加する（`lte` ではなく `lt` で翌月初を exclusive にする。呼び出し側が翌月初 00:00:00 UTC を渡す前提）
-- [ ] `filters.issueDateFrom` / `filters.issueDateTo` が指定された場合、同様に `gte` / `lte` を追加する
+- [ ] `filters.paidAtFrom` / `filters.paidAtTo` が指定された場合、`gte(invoices.paidAt, from)` / `lt(invoices.paidAt, to)` を追加する（呼び出し側が翌月初 00:00:00 UTC を exclusive 境界として渡す前提）
+- [ ] `filters.issueDateFrom` / `filters.issueDateTo` が指定された場合、`gte(invoices.issueDate, from)` / `lt(invoices.issueDate, to)` を追加する（呼び出し側が翌々月初 00:00:00 UTC を exclusive 境界として渡す前提）
 - [ ] 結果を `asc(invoices.dueDate)` でソートする
 - [ ] 既存の `mapRow` 関数を再利用する
 
@@ -47,6 +47,7 @@
   - `requestRepository.findAllWithStepsByOrganization(organizationId)` — pending かつ `approverRole === userRole` のステップを持つリクエストを抽出
   - `meetingRepository.findAllByOrganization(organizationId)` — 全商談から `done === false` のアクションアイテムを抽出（dealId, description, assignee, dueDate を保持）
   - `inquiryRepository.findAllWithClientByOrganization(organizationId)` — `status === "new"` の引合を抽出
+  - `listDeals(organizationId)` — 案件リストを取得し、`Map<dealId, dealTitle>` を構築する。action_item の `dealTitle` はこの Map から解決する（Map に存在しない場合は空文字列）
 - [ ] 3 種類のアイテムを `DashboardActionItem[]` にマージし、期日昇順でソートする。ソートキー: approval は `deadline`、action_item は `dueDate`（ISO 文字列を Date 化）、inquiry は `createdAt`。期日が null のアイテムは末尾に配置する
 - [ ] `src/application/usecases/index.ts` にエクスポートを追加する
 
@@ -84,13 +85,15 @@
 
 ## T-05: 営業ダッシュボードの Server Component とクライアントコンポーネントを実装する
 
+- [ ] `src/application/usecases/getRecentActivities.ts` を新規作成する。シグネチャ: `getRecentActivities(organizationId: string): Promise<AuditLog[]>`。内部で `auditLogRepository.findByOrganization(organizationId, { limit: 20 })` を呼ぶ
+- [ ] `src/application/usecases/index.ts` に `export { getRecentActivities } from "./getRecentActivities";` を追加する
 - [ ] `src/app/(dashboard)/dashboard/page.tsx` を新規作成する（Server Component）
 - [ ] `auth()` でセッションを取得し、未認証の場合 `/login` にリダイレクトする
 - [ ] `session.user.role` で分岐: `finance` なら経理ダッシュボードデータを取得、それ以外は営業ダッシュボードデータを取得する
 - [ ] 営業ダッシュボード向けデータ取得（`Promise.all` で並列化）:
   - `getDashboardActions(organizationId, userRole)`
   - `getPipelineSummary(organizationId)`
-  - `auditLogRepository.findByOrganization(organizationId, { limit: 20 })`
+  - `getRecentActivities(organizationId)`
 - [ ] `deals` 配列から停滞案件をフィルタする: `phase` が `won`/`lost` 以外かつ `updatedAt` が 14 日以上前
 - [ ] `session.user.role` が `manager` / `admin` の場合のみ停滞案件を props に渡す（それ以外は `null`）
 - [ ] `src/app/(dashboard)/dashboard/SalesDashboard.tsx` をクライアントコンポーネント（`"use client"`）として新規作成する
