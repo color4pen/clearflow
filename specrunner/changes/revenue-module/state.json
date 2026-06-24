@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "27723da3-2411-4ae8-9799-d8e6c8c664bc",
   "createdAt": "2026-06-24T03:04:44.718Z",
-  "updatedAt": "2026-06-24T04:07:06.260Z",
+  "updatedAt": "2026-06-24T04:10:49.024Z",
   "request": {
     "title": "売上モジュールの実装",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/revenue-module-27723da3",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/78",
+    "number": 78,
+    "createdAt": "2026-06-24T04:10:49.010Z"
+  },
   "_journal": {
-    "historyCount": 76,
+    "historyCount": 81,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -62,7 +67,9 @@
       "domain-invariants": 2,
       "custom-reviewers": 2,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
