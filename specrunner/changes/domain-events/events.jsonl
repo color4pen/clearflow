@@ -85,3 +85,9 @@
 {"type":"transition","ts":"2026-06-24T03:09:15.152Z","step":"code-review","status":"ok","message":"code-review iteration 2 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-24T03:09:15.152Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-24T03:09:15.155Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-24T03:10:47.532Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"78d487c7-5595-4868-8ada-2d07860d29b1","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-06-24T03:09:15.170Z","endedAt":"2026-06-24T03:10:46.140Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-24T03:10:46.140Z","outputs":[{"path":"specrunner/changes/domain-events","hash":null}],"inputs":[{"path":"specrunner/changes/domain-events/review-feedback-002.md","hash":"sha256:357c9a37a0092de93d216aecae753c759c9542b38ef18af8136268d641aacb24"}]}
+{"type":"transition","ts":"2026-06-24T03:10:47.537Z","step":"step-transition","status":"ok","message":"code-fixer → custom-reviewers"}
+{"type":"transition","ts":"2026-06-24T03:10:47.539Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 1 started"}
+{"type":"transition","ts":"2026-06-24T03:10:47.553Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
