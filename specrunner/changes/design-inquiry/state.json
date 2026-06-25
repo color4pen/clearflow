@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "fa61d0c3-f9c3-4a48-8651-ea478147481d",
   "createdAt": "2026-06-25T00:04:40.085Z",
-  "updatedAt": "2026-06-25T00:22:33.107Z",
+  "updatedAt": "2026-06-25T00:27:39.282Z",
   "request": {
     "title": "引合画面のデザイン適用",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "spec-review",
+  "step": "test-case-gen",
   "status": "running",
   "branch": "change/design-inquiry-fa61d0c3",
   "error": null,
@@ -34,11 +34,11 @@
     }
   ],
   "_journal": {
-    "historyCount": 17,
+    "historyCount": 21,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1,
+      "spec-review": 2,
       "spec-fixer": 1
     }
   }
