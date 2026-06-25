@@ -82,3 +82,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/design-dialog-toast/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-25T07:04:19.339Z","endedAt":"2026-06-25T07:04:21.189Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-25T07:04:21.189Z","outputs":[{"path":"specrunner/changes/design-dialog-toast/pr-create-result.md","hash":"sha256:a741ee37740a87167ca973ab39edea9582a73c91e091be1f9a822957e98df5f8"}],"inputs":[{"path":"change/design-dialog-toast-e1441092","hash":null}]}
 {"type":"transition","ts":"2026-06-25T07:04:21.213Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-25T07:05:01.453Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}

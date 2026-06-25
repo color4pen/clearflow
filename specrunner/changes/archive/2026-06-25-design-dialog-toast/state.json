@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "e1441092-314f-4fc4-aa9b-f981a9698059",
   "createdAt": "2026-06-25T06:26:47.056Z",
-  "updatedAt": "2026-06-25T07:04:21.213Z",
+  "updatedAt": "2026-06-25T07:05:01.453Z",
   "request": {
     "title": "ダイアログ・トーストのデザイン統一",
     "type": "spec-change",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "change/design-dialog-toast-e1441092",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-25T07:04:21.187Z"
   },
   "_journal": {
-    "historyCount": 57,
+    "historyCount": 58,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
