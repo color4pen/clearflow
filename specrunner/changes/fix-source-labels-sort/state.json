@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d2540bd1-ff34-4c0c-baad-bfa6e19bc4fa",
   "createdAt": "2026-06-25T09:02:37.517Z",
-  "updatedAt": "2026-06-25T09:05:44.527Z",
+  "updatedAt": "2026-06-25T09:09:07.278Z",
   "request": {
     "title": "経路ラベル追加とテーブル並び順の修正",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "design",
+  "step": "spec-review",
   "status": "running",
   "branch": "change/fix-source-labels-sort-d2540bd1",
   "error": null,
@@ -34,9 +34,10 @@
     }
   ],
   "_journal": {
-    "historyCount": 5,
+    "historyCount": 9,
     "stepCounts": {
-      "request-review": 1
+      "request-review": 1,
+      "design": 1
     }
   }
 }
