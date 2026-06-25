@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "6ff8d39b-ba20-4f1b-a926-7ffaee9b96ef",
   "createdAt": "2026-06-25T05:31:37.907Z",
-  "updatedAt": "2026-06-25T06:25:22.811Z",
+  "updatedAt": "2026-06-25T06:25:46.388Z",
   "request": {
     "title": "設定画面のデザイン適用",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/design-settings-6ff8d39b",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/95",
+    "number": 95,
+    "createdAt": "2026-06-25T06:25:46.379Z"
+  },
   "_journal": {
-    "historyCount": 57,
+    "historyCount": 62,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -61,7 +66,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
