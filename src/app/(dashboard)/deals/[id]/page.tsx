@@ -158,7 +158,7 @@ export default async function DealDetailPage({
           </SectionCard>
 
           {/* フェーズ変更 */}
-          {canChangePhase && (
+          {canChangePhase && deal.phase !== "won" && deal.phase !== "lost" && (
             <SectionCard className="p-3">
               <DealPhaseActions deal={deal} canChangePhase={canChangePhase} />
             </SectionCard>
