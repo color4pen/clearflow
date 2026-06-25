@@ -5,12 +5,17 @@ import {
   inquiryRepository,
   clientRepository,
   dealRepository,
+  meetingRepository,
+  requestRepository,
 } from "@/infrastructure/repositories";
 import { SectionCard } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
 import { DeleteInquiryButton } from "./DeleteInquiryButton";
-import { InquiryInfoSection } from "./InquiryInfoSection";
-import { phaseLabels } from "@/app/(dashboard)/labels";
+import { InquiryStatusBadge } from "../InquiryStatusBadge";
+import { InquiryStatusBanner } from "./InquiryStatusBanner";
+import { InquiryInfoDisplay } from "./InquiryInfoDisplay";
+import { InquiryCustomerSection } from "./InquiryCustomerSection";
+import { InquiryMeetingSection } from "./InquiryMeetingSection";
 
 export default async function InquiryDetailPage({
   params,
@@ -26,78 +31,119 @@ export default async function InquiryDetailPage({
     notFound();
   }
 
-  const [client, deal, clients] = await Promise.all([
+  const [client, deal, clients, meetings, pendingRequest] = await Promise.all([
     inquiry.clientId
       ? clientRepository.findById(inquiry.clientId, organizationId)
       : Promise.resolve(null),
     dealRepository.findByInquiryId(id, organizationId),
-    inquiry.clientId ? Promise.resolve([]) : clientRepository.findAllByOrganization(organizationId),
+    inquiry.clientId
+      ? Promise.resolve([])
+      : clientRepository.findAllByOrganization(organizationId),
+    meetingRepository.findAllByInquiry(id, organizationId),
+    requestRepository.findByOriginTriggerEntity(organizationId, "inquiry.convert", id),
   ]);
 
   const canChangeStatus =
     session!.user.role === "admin" || session!.user.role === "manager";
   const editable = canChangeStatus;
 
+  const dealMeetingNewPath = deal ? `/deals/${deal.id}/meetings/new` : null;
+
   return (
     <div>
-      <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2">
-        <span className="text-sm font-bold text-text">{inquiry.title}</span>
-        <span className="text-text-muted text-xs ml-2">
-          <Link href="/inquiries" className="text-primary underline">引き合い一覧</Link>
-          {" > "}詳細
+      {/* Breadcrumb + title */}
+      <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2 flex items-center gap-2">
+        <span className="text-xs text-text-muted">
+          <Link href="/inquiries" className="text-primary underline">引合一覧</Link>
+          {" / "}
+          <span className="text-text">{inquiry.title}</span>
         </span>
+        <InquiryStatusBadge status={inquiry.status} />
       </div>
 
-      <SectionCard className="p-3 mb-2">
-        <InquiryInfoSection
-          inquiry={{
-            id: inquiry.id,
-            title: inquiry.title,
-            source: inquiry.source,
-            description: inquiry.description,
-            clientId: inquiry.clientId,
-            assigneeId: inquiry.assigneeId ?? null,
-            status: inquiry.status,
-          }}
-          editable={editable}
-          clients={clients.map((c) => ({ id: c.id, name: c.name }))}
-          clientName={client?.name ?? null}
-          clientLinkId={client?.id ?? null}
-        />
-        <dl className="text-xs space-y-1 mt-1">
-          <div className="flex gap-2">
-            <dt className="text-text-muted w-20 shrink-0">作成日</dt>
-            <dd className="text-text px-2 py-1">{inquiry.createdAt.toLocaleDateString("ja-JP")}</dd>
-          </div>
-        </dl>
-        {canChangeStatus && !deal && (
-          <div className="mt-2">
-            <DeleteInquiryButton inquiryId={id} />
-          </div>
-        )}
-      </SectionCard>
+      {/* Status banner */}
+      <InquiryStatusBanner
+        status={inquiry.status}
+        dealId={deal?.id ?? null}
+        dealTitle={deal?.title ?? null}
+        hasPendingApproval={pendingRequest !== null}
+      />
 
-      <SectionCard className="p-3 mb-2">
-        <h2 className="text-xs font-bold text-text mb-2">
-          {inquiry.status === "converted" ? "案件" : "ステータス変更"}
-        </h2>
-        {inquiry.status === "converted" && deal ? (
-          <div className="text-xs">
-            <Link href={`/deals/${deal.id}`} className="text-primary underline font-bold">
-              {deal.title}
-            </Link>
-            <span className="text-text-muted ml-2">{phaseLabels[deal.phase] ?? deal.phase}</span>
-          </div>
-        ) : inquiry.status === "converted" && !deal ? (
-          <p className="text-xs text-text-muted">案件化済み（案件データなし）</p>
-        ) : (
-          <InquiryActions
-            inquiry={{ id: inquiry.id, status: inquiry.status }}
-            canChangeStatus={canChangeStatus}
-          />
-        )}
-      </SectionCard>
+      {/* 2-column grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "24px" }}>
+        {/* Left column */}
+        <div className="flex flex-col gap-4">
+          {/* Basic info section */}
+          <SectionCard className="p-3">
+            <InquiryInfoDisplay
+              inquiry={{
+                id: inquiry.id,
+                title: inquiry.title,
+                source: inquiry.source,
+                description: inquiry.description,
+                clientId: inquiry.clientId,
+                assigneeId: inquiry.assigneeId ?? null,
+                status: inquiry.status,
+              }}
+              editable={editable}
+            />
+            <dl className="text-xs mt-2">
+              <div
+                style={{ display: "grid", gridTemplateColumns: "90px 1fr", gap: "4px 8px" }}
+              >
+                <div className="text-text-muted py-1">作成日</div>
+                <div className="text-text py-1">
+                  {inquiry.createdAt.toLocaleDateString("ja-JP")}
+                </div>
+              </div>
+            </dl>
+          </SectionCard>
 
+          {/* Customer section */}
+          <SectionCard className="p-3">
+            <InquiryCustomerSection
+              inquiryId={inquiry.id}
+              inquiryTitle={inquiry.title}
+              inquirySource={inquiry.source}
+              inquiryDescription={inquiry.description}
+              clientId={inquiry.clientId}
+              clientName={client?.name ?? null}
+              clientLinkId={client?.id ?? null}
+              clients={clients.map((c) => ({ id: c.id, name: c.name }))}
+              editable={editable}
+            />
+          </SectionCard>
+
+          {/* Actions section */}
+          <SectionCard className="p-3">
+            <h2 className="text-xs font-bold text-text mb-2">操作</h2>
+            {inquiry.status !== "converted" && (
+              <InquiryActions
+                inquiry={{ id: inquiry.id, status: inquiry.status }}
+                canChangeStatus={canChangeStatus}
+              />
+            )}
+            {canChangeStatus && !deal && inquiry.status !== "converted" && (
+              <div className="mt-2">
+                <DeleteInquiryButton inquiryId={id} />
+              </div>
+            )}
+            {inquiry.status === "converted" && !deal && (
+              <p className="text-xs text-text-muted">案件化済み（案件データなし）</p>
+            )}
+          </SectionCard>
+        </div>
+
+        {/* Right column */}
+        <div>
+          <SectionCard className="p-3">
+            <InquiryMeetingSection
+              meetings={meetings}
+              dealMeetingNewPath={dealMeetingNewPath}
+            />
+          </SectionCard>
+        </div>
+      </div>
     </div>
   );
 }
