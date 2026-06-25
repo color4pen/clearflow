@@ -16,7 +16,9 @@ const sourceOptions = [
   { value: "", label: "選択してください" },
   { value: "web", label: "Web" },
   { value: "phone", label: "電話" },
+  { value: "email", label: "メール" },
   { value: "referral", label: "紹介" },
+  { value: "agent_service", label: "仲介サービス" },
   { value: "exhibition", label: "展示会" },
   { value: "other", label: "その他" },
 ];

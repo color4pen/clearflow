@@ -1,4 +1,4 @@
-import { eq, and, asc } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { contracts, clients, deals } from "../schema";
@@ -102,7 +102,7 @@ export async function findAllByClientId(
         eq(contracts.organizationId, organizationId)
       )
     )
-    .orderBy(asc(contracts.createdAt));
+    .orderBy(desc(contracts.createdAt));
   return result.map(mapRow);
 }
 
@@ -119,7 +119,7 @@ export async function findAllByOrganization(
     .innerJoin(clients, eq(contracts.clientId, clients.id))
     .innerJoin(deals, and(eq(contracts.dealId, deals.id), eq(deals.organizationId, organizationId)))
     .where(eq(contracts.organizationId, organizationId))
-    .orderBy(asc(contracts.createdAt));
+    .orderBy(desc(contracts.createdAt));
 
   return rows.map((row) => ({
     ...mapRow(row.contract),

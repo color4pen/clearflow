@@ -1,4 +1,4 @@
-import { eq, and, inArray, count } from "drizzle-orm";
+import { eq, and, inArray, count, desc } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { clients, clientContacts } from "../schema";
@@ -79,7 +79,7 @@ export async function findAllByOrganization(
     .select()
     .from(clients)
     .where(eq(clients.organizationId, organizationId))
-    .orderBy(clients.createdAt);
+    .orderBy(desc(clients.createdAt));
   return result.map(mapRow);
 }
 

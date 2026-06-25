@@ -1527,3 +1527,62 @@ describe("引合画面デザイン適用 — TC-034 and TC-038", () => {
     expect(content).toContain("dealMap.get");
   });
 });
+
+// ---------------------------------------------------------------------------
+// 経路ラベル追加 — TC-001, TC-007
+// ---------------------------------------------------------------------------
+
+describe("経路ラベル追加 — sourceLabels and sourceOptions", () => {
+  /**
+   * TC-001: sourceLabels に email と agent_service が含まれる
+   */
+  it("TC-001: labels.ts の sourceLabels に email と agent_service が含まれる", async () => {
+    const content = await readSrc("app/(dashboard)/labels.ts");
+    // sourceLabels の定義ブロックを抽出
+    const startIdx = content.indexOf("export const sourceLabels");
+    expect(startIdx).toBeGreaterThan(-1);
+    const endIdx = content.indexOf("};", startIdx);
+    const block = content.slice(startIdx, endIdx + 2);
+    // email と agent_service が含まれる
+    expect(block).toContain("email");
+    expect(block).toContain("agent_service");
+    expect(block).toContain("メール");
+    expect(block).toContain("仲介サービス");
+  });
+
+  /**
+   * TC-007: sourceOptions が 8 要素かつ正確な順序で定義されている
+   */
+  it("TC-007: InquiryForm の sourceOptions が 8 要素かつ正確な順序で定義されている", async () => {
+    const content = await readSrc("app/(dashboard)/inquiries/new/InquiryForm.tsx");
+    const startIdx = content.indexOf("const sourceOptions");
+    expect(startIdx).toBeGreaterThan(-1);
+    const endIdx = content.indexOf("];", startIdx);
+    const block = content.slice(startIdx, endIdx + 2);
+
+    // 8 要素すべてが含まれる（プレースホルダー + 7 値）
+    expect(block).toContain('value: ""');
+    expect(block).toContain('"web"');
+    expect(block).toContain('"phone"');
+    expect(block).toContain('"email"');
+    expect(block).toContain('"referral"');
+    expect(block).toContain('"agent_service"');
+    expect(block).toContain('"exhibition"');
+    expect(block).toContain('"other"');
+
+    // 定義順の検証：["", "web", "phone", "email", "referral", "agent_service", "exhibition", "other"]
+    const positions = [
+      block.indexOf('value: ""'),
+      block.indexOf('"web"'),
+      block.indexOf('"phone"'),
+      block.indexOf('"email"'),
+      block.indexOf('"referral"'),
+      block.indexOf('"agent_service"'),
+      block.indexOf('"exhibition"'),
+      block.indexOf('"other"'),
+    ];
+    for (let i = 1; i < positions.length; i++) {
+      expect(positions[i]).toBeGreaterThan(positions[i - 1]);
+    }
+  });
+});

@@ -7,7 +7,9 @@ export const statusLabels: Record<string, string> = {
 export const sourceLabels: Record<string, string> = {
   web: "Web",
   phone: "電話",
+  email: "メール",
   referral: "紹介",
+  agent_service: "仲介サービス",
   exhibition: "展示会",
   other: "その他",
 };
