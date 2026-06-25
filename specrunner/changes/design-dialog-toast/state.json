@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "e1441092-314f-4fc4-aa9b-f981a9698059",
   "createdAt": "2026-06-25T06:26:47.056Z",
-  "updatedAt": "2026-06-25T06:56:51.025Z",
+  "updatedAt": "2026-06-25T06:59:22.425Z",
   "request": {
     "title": "ダイアログ・トーストのデザイン統一",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "regression-gate",
+  "step": "conformance",
   "status": "running",
   "branch": "change/design-dialog-toast-e1441092",
   "error": null,
@@ -48,7 +48,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 38,
+    "historyCount": 43,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -59,7 +59,8 @@
       "code-review": 1,
       "code-fixer": 1,
       "domain-invariants": 1,
-      "custom-reviewers": 1
+      "custom-reviewers": 1,
+      "regression-gate": 1
     }
   }
 }
