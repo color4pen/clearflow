@@ -81,7 +81,7 @@ export default async function PoliciesPage() {
             },
             {
               key: "templateId",
-              header: "テンプレート",
+              header: "テンプレート名",
               render: (p) => (
                 <span className="text-text-muted">
                   {templateMap.get(p.templateId) ?? p.templateId}
@@ -90,7 +90,7 @@ export default async function PoliciesPage() {
             },
             {
               key: "isActive",
-              header: "状態",
+              header: "有効/無効",
               render: (p) =>
                 p.isActive ? (
                   <span className="text-success text-xs font-bold">有効</span>

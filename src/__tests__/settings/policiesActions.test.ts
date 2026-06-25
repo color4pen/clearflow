@@ -119,12 +119,12 @@ describe("SettingsNav — 承認ポリシーリンク追加", () => {
     expect(src).toContain("承認ポリシー");
   });
 
-  it("テンプレートリンクの後に承認ポリシーリンクが配置されている", async () => {
+  it("承認ポリシーリンクはテンプレートリンクの前、ユーザーリンクの前に配置されている", async () => {
     const src = await readSrc("app/(dashboard)/settings/SettingsNav.tsx");
-    const templateIdx = src.indexOf('"/settings/templates"');
     const policyIdx = src.indexOf('"/settings/policies"');
+    const templateIdx = src.indexOf('"/settings/templates"');
     const userIdx = src.indexOf('"/settings/users"');
-    expect(templateIdx).toBeLessThan(policyIdx);
-    expect(policyIdx).toBeLessThan(userIdx);
+    expect(policyIdx).toBeLessThan(templateIdx);
+    expect(templateIdx).toBeLessThan(userIdx);
   });
 });

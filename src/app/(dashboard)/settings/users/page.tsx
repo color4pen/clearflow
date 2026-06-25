@@ -68,15 +68,6 @@ export default async function UsersPage() {
                 );
               },
             },
-            {
-              key: "createdAt",
-              header: "作成日時",
-              render: (user) => (
-                <span className="text-text-muted">
-                  {new Date(user.createdAt).toLocaleDateString("ja-JP")}
-                </span>
-              ),
-            },
           ]}
           rows={users}
           rowKey={(user) => user.id}
