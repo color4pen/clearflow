@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f21309a2-eca6-49b5-9e17-74f140571b3d",
   "createdAt": "2026-06-25T09:41:49.343Z",
-  "updatedAt": "2026-06-25T10:18:32.914Z",
+  "updatedAt": "2026-06-25T10:19:00.101Z",
   "request": {
     "title": "引合の問い合わせ内容フィールド追加",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/inquiry-contact-note-f21309a2",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/98",
+    "number": 98,
+    "createdAt": "2026-06-25T10:19:00.088Z"
+  },
   "_journal": {
-    "historyCount": 52,
+    "historyCount": 57,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -61,7 +66,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
