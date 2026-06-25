@@ -44,3 +44,5 @@ next-env.d.ts
 !.specrunner/config.json
 node_modules/
 docs/_generated/
+.claude/.spec-runner/scan/
+.claude/.spec-runner/state/

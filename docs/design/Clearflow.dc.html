@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family:'Noto Sans JP',system-ui,sans-serif; font-size:13px; line-height:1.5; color:#2c3e50; background:#e8e8e8; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; }
+  .row-hover:hover { background:#f9f9f9; }
+  .nav-hover:hover { background:rgba(255,255,255,0.06); }
+  .cell-hover:hover { background:#ffffff; }
+  a { color:#2980b9; text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  input,select,textarea,button { font-family:inherit; }
+  ::-webkit-scrollbar { width:12px; height:12px; }
+  ::-webkit-scrollbar-thumb { background:#cccccc; border:3px solid transparent; background-clip:padding-box; border-radius:6px; }
+</style>
+</helmet>
+<template id="__bundler_thumbnail" data-bg-color="#2c3e50">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#2c3e50"/>
+    <rect x="360" y="250" width="480" height="300" rx="14" fill="#ffffff"/>
+    <rect x="360" y="250" width="480" height="56" rx="14" fill="#2980b9"/>
+    <rect x="360" y="296" width="480" height="10" fill="#2980b9"/>
+    <rect x="392" y="346" width="180" height="16" rx="4" fill="#2c3e50"/>
+    <rect x="392" y="384" width="416" height="10" rx="4" fill="#cccccc"/>
+    <rect x="392" y="410" width="416" height="10" rx="4" fill="#e0e0e0"/>
+    <rect x="392" y="452" width="120" height="34" rx="6" fill="#2980b9"/>
+    <text x="600" y="160" font-family="'Noto Sans JP',sans-serif" font-size="64" font-weight="700" fill="#ffffff" text-anchor="middle">Clearflow</text>
+  </svg>
+</template>
+
+<div style="display:flex; height:100vh; overflow:hidden;">
+
+  <!-- SIDEBAR -->
+  <aside style="width:210px; flex-shrink:0; background:#2c3e50; display:flex; flex-direction:column;">
+    <div onClick="{{ goHome }}" style="padding:15px 16px; border-bottom:1px solid rgba(255,255,255,0.10); display:flex; align-items:baseline; gap:6px; cursor:pointer;">
+      <span style="font-weight:700; font-size:15px; letter-spacing:-0.01em; color:#ffffff;">Clearflow</span>
+      <span style="font-size:10px; color:#7f95a8;">案件管理</span>
+    </div>
+    <nav style="padding:8px; display:flex; flex-direction:column; gap:1px; flex:1;">
+      <sc-for list="{{ nav }}" as="item" hint-placeholder-count="8">
+        <div class="nav-hover" onClick="{{ item.onClick }}" style="{{ item.style }}"><span>{{ item.label }}</span><sc-if value="{{ item.badge }}" hint-placeholder-val="{{ false }}"><span style="background:#c0392b; color:#fff; font-size:10px; font-weight:600; border-radius:8px; padding:0 6px; min-width:16px; text-align:center;">{{ item.badge }}</span></sc-if></div>
+      </sc-for>
+    </nav>
+    <div style="padding:11px 16px; border-top:1px solid rgba(255,255,255,0.10); display:flex; flex-direction:column; gap:1px;">
+      <span style="font-size:12px; font-weight:500; color:#ecf0f1;">{{ userName }}</span>
+      <span style="font-size:11px; color:#7f95a8;">{{ roleLabel }}</span>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main style="flex:1; overflow-y:auto; background:#e8e8e8;">
+    <div style="max-width:1260px; margin:0 auto; padding:22px 28px 56px;">
+
+      <!-- ===== SALES DASHBOARD ===== -->
+      <sc-if value="{{ isDashSales }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:20px;">
+          <div>
+            <h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">ダッシュボード</h1>
+            <p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">{{ today }} · {{ roleLabel }}として表示中</p>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button onClick="{{ goDeals }}" style="font-size:12px; padding:7px 13px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">案件を見る</button>
+            <button onClick="{{ goQuotes }}" style="font-size:12px; padding:7px 13px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">引合を登録</button>
+          </div>
+        </div>
+        <div style="margin-bottom:24px;">
+          <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px;">
+            <h2 style="margin:0; font-size:12px; font-weight:700; color:#2c3e50; letter-spacing:0.02em;">パイプライン</h2>
+            <span style="font-size:11px; color:#7f8c8d;">フェーズをクリックで案件一覧へ</span>
+          </div>
+          <div style="display:grid; grid-template-columns:repeat(6,1fr); border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+            <sc-for list="{{ pipeline }}" as="p" hint-placeholder-count="6">
+              <div class="cell-hover" onClick="{{ goDeals }}" style="{{ p.style }}">
+                <span style="font-size:11px; color:#7f8c8d;">{{ p.phase }}</span>
+                <div style="display:flex; align-items:baseline; gap:5px; margin-top:6px;">
+                  <span style="font-size:20px; font-weight:700; line-height:1; color:#2c3e50;">{{ p.count }}</span>
+                  <span style="font-size:11px; color:#7f8c8d;">件</span>
+                </div>
+                <span class="mono" style="font-size:12px; color:#555; margin-top:5px;">{{ p.amount }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1.55fr 1fr; gap:24px; align-items:start;">
+          <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">アクション待ち</h2>
+                <span style="font-size:11px; color:#fff; background:#c0392b; border-radius:3px; padding:1px 6px; font-weight:500;">{{ overdueCount }} 件超過</span>
+              </div>
+              <span style="font-size:11px; color:#7f8c8d;">期日順 · 全{{ actionCount }}件</span>
+            </div>
+            <sc-for list="{{ actions }}" as="a" hint-placeholder-count="6">
+              <div class="row-hover" onClick="{{ a.onClick }}" style="display:flex; align-items:flex-start; gap:12px; padding:11px 14px; border-bottom:1px solid #f0f0f0; cursor:pointer;">
+                <span style="flex-shrink:0; width:62px; font-size:11px; font-weight:500; padding-top:1px; color:{{ a.typeColor }};">{{ a.type }}</span>
+                <div style="flex:1; min-width:0;">
+                  <div style="font-size:13px; font-weight:500; color:#2c3e50;">{{ a.title }}</div>
+                  <div style="font-size:11px; color:#7f8c8d; margin-top:2px;">{{ a.context }}</div>
+                </div>
+                <span class="mono" style="flex-shrink:0; font-size:11px; padding-top:1px; color:{{ a.dueColor }};">{{ a.due }}</span>
+              </div>
+            </sc-for>
+          </section>
+          <div style="display:flex; flex-direction:column; gap:24px;">
+            <sc-if value="{{ isMgr }}" hint-placeholder-val="{{ true }}">
+              <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;">
+                  <h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">停滞案件</h2>
+                  <span style="font-size:11px; color:#7f8c8d;">14日以上 更新なし</span>
+                </div>
+                <sc-for list="{{ stalled }}" as="s" hint-placeholder-count="3">
+                  <div class="row-hover" onClick="{{ s.onClick }}" style="padding:11px 14px; border-bottom:1px solid #f0f0f0; cursor:pointer;">
+                    <div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px;">
+                      <span style="font-size:13px; font-weight:500; color:#2c3e50;">{{ s.name }}</span>
+                      <span class="mono" style="font-size:11px; color:#c0392b; flex-shrink:0;">{{ s.stale }}</span>
+                    </div>
+                    <div style="display:flex; align-items:baseline; gap:8px; margin-top:3px; font-size:11px; color:#7f8c8d;">
+                      <span>{{ s.phase }}</span><span style="color:#ccc;">·</span><span class="mono">{{ s.amount }}</span><span style="color:#ccc;">·</span><span>{{ s.owner }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </section>
+            </sc-if>
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="padding:11px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;">
+                <h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">直近の活動</h2>
+              </div>
+              <sc-for list="{{ activity }}" as="v" hint-placeholder-count="8">
+                <div style="display:flex; gap:10px; padding:8px 14px; border-bottom:1px solid #f0f0f0; align-items:baseline;">
+                  <span style="flex-shrink:0; font-size:12px; font-weight:500; width:46px; color:#555;">{{ v.actor }}</span>
+                  <span style="flex:1; font-size:12px; color:#555; min-width:0;">{{ v.text }}</span>
+                  <span style="flex-shrink:0; font-size:11px; color:#999;">{{ v.time }}</span>
+                </div>
+              </sc-for>
+            </section>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== FINANCE DASHBOARD ===== -->
+      <sc-if value="{{ isDashFinance }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:20px;">
+          <div>
+            <h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">ダッシュボード</h1>
+            <p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">{{ today }} · 経理として表示中</p>
+          </div>
+          <button onClick="{{ goContract }}" style="font-size:12px; padding:7px 13px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">契約を見る</button>
+        </div>
+        <div style="display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06); margin-bottom:24px;">
+          <div style="padding:14px 16px; border-right:1px solid #e0e0e0;">
+            <span style="font-size:11px; color:#7f8c8d;">今月の売上（入金確認済み）</span>
+            <div class="mono" style="font-size:26px; font-weight:700; color:#1a8a4a; margin-top:6px;">{{ finMonthRevenue }}</div>
+            <span style="font-size:11px; color:#7f8c8d;">2026年6月</span>
+          </div>
+          <div style="padding:14px 16px; border-right:1px solid #e0e0e0; display:flex; flex-direction:column;">
+            <span style="font-size:11px; color:#7f8c8d;">期日超過</span>
+            <span class="mono" style="font-size:18px; font-weight:700; color:#c0392b; margin-top:6px;">{{ finOverdueTotal }}</span>
+            <span style="font-size:11px; color:#7f8c8d;">{{ finOverdueCount }} 件</span>
+          </div>
+          <div style="padding:14px 16px; border-right:1px solid #e0e0e0; display:flex; flex-direction:column;">
+            <span style="font-size:11px; color:#7f8c8d;">未入金</span>
+            <span class="mono" style="font-size:18px; font-weight:700; color:#2c3e50; margin-top:6px;">{{ finUnpaidTotal }}</span>
+            <span style="font-size:11px; color:#7f8c8d;">{{ finUnpaidCount }} 件</span>
+          </div>
+          <div style="padding:14px 16px; display:flex; flex-direction:column;">
+            <span style="font-size:11px; color:#7f8c8d;">請求予定</span>
+            <span class="mono" style="font-size:18px; font-weight:700; color:#2c3e50; margin-top:6px;">{{ finScheduledTotal }}</span>
+            <span style="font-size:11px; color:#7f8c8d;">{{ finScheduledCount }} 件</span>
+          </div>
+        </div>
+        <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden; margin-bottom:24px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">期日超過の請求</h2>
+              <span style="font-size:11px; color:#fff; background:#c0392b; border-radius:3px; padding:1px 6px;">{{ finOverdueCount }} 件</span>
+            </div>
+            <span style="font-size:11px; color:#7f8c8d;">支払期日順</span>
+          </div>
+          <div style="display:grid; grid-template-columns:120px 1.4fr 1fr 130px 110px 90px; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;">
+            <span>請求番号</span><span>契約名</span><span>顧客名</span><span style="text-align:right;">金額</span><span style="text-align:right;">支払期日</span><span style="text-align:right;">超過</span>
+          </div>
+          <sc-for list="{{ finOverdue }}" as="i" hint-placeholder-count="3">
+            <div class="row-hover" onClick="{{ i.onClick }}" style="display:grid; grid-template-columns:120px 1.4fr 1fr 130px 110px 90px; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; cursor:pointer; align-items:center;">
+              <span class="mono" style="color:#7f8c8d;">{{ i.no }}</span>
+              <span style="color:#2c3e50;">{{ i.contract }}</span>
+              <span style="color:#555;">{{ i.client }}</span>
+              <span class="mono" style="text-align:right; color:#2c3e50;">{{ i.amount }}</span>
+              <span class="mono" style="text-align:right; color:#555;">{{ i.due }}</span>
+              <span class="mono" style="text-align:right; color:#c0392b;">{{ i.over }}</span>
+            </div>
+          </sc-for>
+        </section>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:start;">
+          <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+            <div style="padding:11px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">未入金の請求</h2></div>
+            <sc-for list="{{ finUnpaid }}" as="i" hint-placeholder-count="3">
+              <div class="row-hover" onClick="{{ i.onClick }}" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #f0f0f0; cursor:pointer;">
+                <div style="min-width:0;"><div style="font-size:12.5px; color:#2c3e50;">{{ i.contract }} <sc-if value="{{ i.today }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px; color:#2980b9; border:1px solid #2980b9; border-radius:3px; padding:0 5px; margin-left:2px;">{{ i.today }}</span></sc-if></div><div style="font-size:11px; color:#7f8c8d;">{{ i.client }} · 期日 {{ i.due }}</div></div>
+                <span class="mono" style="font-size:12.5px; color:#2c3e50; flex-shrink:0;">{{ i.amount }}</span>
+              </div>
+            </sc-for>
+          </section>
+          <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+            <div style="padding:11px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">請求予定（今月〜来月）</h2></div>
+            <sc-for list="{{ finScheduled }}" as="i" hint-placeholder-count="3">
+              <div class="row-hover" onClick="{{ i.onClick }}" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #f0f0f0; cursor:pointer;">
+                <div style="min-width:0;"><div style="font-size:12.5px; color:#2c3e50;">{{ i.contract }}</div><div style="font-size:11px; color:#7f8c8d;">{{ i.client }} · 予定 {{ i.due }}</div></div>
+                <span class="mono" style="font-size:12.5px; color:#555; flex-shrink:0;">{{ i.amount }}</span>
+              </div>
+            </sc-for>
+          </section>
+        </div>
+      </sc-if>
+
+      <!-- ===== QUOTES LIST ===== -->
+      <sc-if value="{{ isQuotes }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:16px;">
+          <div>
+            <h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">引合</h1>
+            <p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">全 {{ quotesTotal }} 件</p>
+          </div>
+          <sc-if value="{{ can.quoteCreate }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goQuoteNew }}" style="font-size:12px; padding:7px 13px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">引合を登録</button></sc-if>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <div style="display:inline-flex; border:1px solid #cccccc; border-radius:4px; overflow:hidden; background:#fff;">
+            <sc-for list="{{ quoteTabs }}" as="t" hint-placeholder-count="4"><div onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</div></sc-for>
+          </div>
+          <select style="font-size:12px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff; color:#555;">
+            <option>すべての経路</option><option>Webフォーム</option><option>紹介</option><option>既存顧客</option><option>展示会</option>
+          </select>
+          <input placeholder="顧客名・件名で検索" style="margin-left:auto; width:240px; font-size:12px; padding:6px 10px; border:1px solid #cccccc; border-radius:3px;">
+        </div>
+        <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+          <div style="display:grid; grid-template-columns:1.7fr 1fr 110px 160px 110px; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;">
+            <span>件名</span><span>顧客名</span><span>経路</span><span>ステータス</span><span style="text-align:right;">登録日</span>
+          </div>
+          <sc-for list="{{ quotes }}" as="q" hint-placeholder-count="6">
+            <div class="row-hover" onClick="{{ q.onClick }}" style="display:grid; grid-template-columns:1.7fr 1fr 110px 160px 110px; padding:10px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; cursor:pointer; align-items:center;">
+              <span style="color:#2980b9; font-weight:500;">{{ q.subject }}</span>
+              <span style="color:#555;">{{ q.client }}</span>
+              <span style="color:#7f8c8d;">{{ q.source }}</span>
+              <span style="display:flex; align-items:center; gap:8px;">
+                <span style="display:inline-block; font-size:11px; padding:1px 7px; border-radius:3px; background:#f5f5f5; border:1px solid #e0e0e0; color:{{ q.statusColor }};">{{ q.statusText }}</span>
+                <sc-if value="{{ q.converted }}" hint-placeholder-val="{{ false }}"><a onClick="{{ q.dealClick }}" style="font-size:11px; cursor:pointer;">→ 案件</a></sc-if>
+              </span>
+              <span class="mono" style="text-align:right; color:#7f8c8d;">{{ q.date }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ===== QUOTE DETAIL ===== -->
+      <sc-if value="{{ isQuote }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ goQuotes }}" style="cursor:pointer;">引合一覧</a> <span style="color:#ccc;">/</span> {{ quoteSubject }}</div>
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px; gap:16px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">{{ quoteSubject }}</h1>
+            <span style="display:inline-block; font-size:11px; padding:2px 8px; border-radius:3px; background:#f5f5f5; border:1px solid #e0e0e0; color:{{ quoteHeadColor }};">{{ quoteHeadText }}</span>
+          </div>
+          <div style="display:inline-flex; border:1px solid #cccccc; border-radius:4px; overflow:hidden; background:#fff; flex-shrink:0;">
+            <sc-for list="{{ qStatusTabs }}" as="t" hint-placeholder-count="5"><div onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</div></sc-for>
+          </div>
+        </div>
+        <p style="margin:0 0 18px; font-size:11px; color:#999;">↑ デモ用ステータス切替（実際は操作で遷移）</p>
+
+        <!-- status banners -->
+        <sc-if value="{{ qPending }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border:1px solid #2980b9; background:#eef5fb; border-radius:4px; margin-bottom:16px;">
+            <span style="font-size:12.5px; color:#2c3e50;">この引合は案件化の<b>承認待ち</b>です。</span>
+            <a onClick="{{ goApproval }}" style="font-size:12px; cursor:pointer;">承認リクエストを見る →</a>
+          </div>
+        </sc-if>
+        <sc-if value="{{ qConverted }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border:1px solid #cde6d8; background:#eef7f1; border-radius:4px; margin-bottom:16px;">
+            <span style="font-size:12.5px; color:#2c3e50;">この引合は<b>案件化済み</b>です。</span>
+            <a onClick="{{ goDeals }}" style="font-size:12px; cursor:pointer;">案件を見る →</a>
+          </div>
+        </sc-if>
+
+        <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:24px; align-items:start;">
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;">
+                <h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">基本情報</h2>
+                <span style="font-size:11px; color:#7f8c8d;">クリックで編集</span>
+              </div>
+              <sc-for list="{{ quoteBasics }}" as="b" hint-placeholder-count="4">
+                <div class="row-hover" style="display:grid; grid-template-columns:90px 1fr; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; cursor:text;">
+                  <span style="color:#7f8c8d;">{{ b.0 }}</span><span style="color:#2c3e50;">{{ b.1 }}</span>
+                </div>
+              </sc-for>
+            </section>
+
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">顧客</h2></div>
+              <sc-if value="{{ qNoClient }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:14px;">
+                  <p style="margin:0 0 10px; font-size:12.5px; color:#c0392b;">顧客が紐づいていません。案件化には顧客の紐づけが必要です。</p>
+                  <div style="display:flex; gap:8px;">
+                    <button onClick="{{ onLinkClient }}" style="font-size:12px; padding:6px 12px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">既存顧客から選択</button>
+                    <button onClick="{{ onLinkClient }}" style="font-size:12px; padding:6px 12px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">顧客を新規作成</button>
+                  </div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ qShowClient }}" hint-placeholder-val="{{ true }}">
+                <div class="row-hover" onClick="{{ goClient }}" style="display:flex; justify-content:space-between; align-items:center; padding:11px 14px; cursor:pointer;">
+                  <span style="font-size:13px; color:#2980b9; font-weight:500;">{{ quoteClient }}</span>
+                  <span style="font-size:11px; color:#7f8c8d;">顧客詳細 →</span>
+                </div>
+              </sc-if>
+            </section>
+
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">操作</h2></div>
+              <div style="padding:14px;">
+                <sc-if value="{{ opConvert }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex; gap:8px;">
+                    <button onClick="{{ onConvert }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">案件化する</button>
+                    <button onClick="{{ onDecline }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #cccccc; background:#fff; color:#555; border-radius:3px; cursor:pointer;">見送る</button>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ opNoClient }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex; gap:8px; align-items:center;">
+                    <button disabled style="font-size:12.5px; padding:8px 16px; border:1px solid #e0e0e0; background:#f5f5f5; color:#bbb; border-radius:3px; cursor:not-allowed;">案件化する</button>
+                    <span style="font-size:12px; color:#c0392b;">顧客の紐づけが必要です</span>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ opDeclined }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ onUndecline }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #cccccc; background:#fff; color:#555; border-radius:3px; cursor:pointer;">見送りを撤回する</button>
+                </sc-if>
+                <sc-if value="{{ qPending }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px; color:#7f8c8d;">承認完了まで操作はできません。</span></sc-if>
+                <sc-if value="{{ qConverted }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px; color:#7f8c8d;">案件化済みのため操作はありません。</span></sc-if>
+              </div>
+            </section>
+          </div>
+
+          <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;">
+              <h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">商談記録</h2>
+              <button onClick="{{ goMeetingNew }}" style="font-size:11px; padding:4px 10px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">+ 商談を追加</button>
+            </div>
+            <sc-for list="{{ quoteMeetings }}" as="m" hint-placeholder-count="2">
+              <div class="row-hover" onClick="{{ m.onClick }}" style="padding:11px 14px; border-bottom:1px solid #f0f0f0; cursor:pointer;">
+                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                  <span style="font-size:12.5px; font-weight:500; color:#2c3e50;">{{ m.type }}</span>
+                  <span class="mono" style="font-size:11px; color:#7f8c8d;">{{ m.date }}</span>
+                </div>
+                <p style="margin:4px 0 0; font-size:12px; color:#555;">{{ m.summary }}</p>
+              </div>
+            </sc-for>
+          </section>
+        </div>
+      </sc-if>
+
+      <!-- ===== DEALS LIST ===== -->
+      <sc-if value="{{ isDeals }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:16px;">
+          <div><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">案件</h1><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">パイプライン全体</p></div>
+          <sc-if value="{{ can.dealCreate }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goDealNew }}" style="font-size:12px; padding:7px 13px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">案件を登録</button></sc-if>
+        </div>
+        <div style="display:grid; grid-template-columns:repeat(6,1fr); border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06); margin-bottom:16px;">
+          <sc-for list="{{ dealPhaseSummary }}" as="p" hint-placeholder-count="6">
+            <div style="{{ p.style }}">
+              <span style="font-size:11px; color:#7f8c8d;">{{ p.phase }}</span>
+              <div style="display:flex; align-items:baseline; gap:5px; margin-top:6px;"><span style="font-size:20px; font-weight:700; line-height:1; color:#2c3e50;">{{ p.count }}</span><span style="font-size:11px; color:#7f8c8d;">件</span></div>
+              <span class="mono" style="font-size:12px; color:#555; margin-top:5px;">{{ p.amount }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <div style="display:inline-flex; border:1px solid #cccccc; border-radius:4px; overflow:hidden; background:#fff;">
+            <sc-for list="{{ dealViewTabs }}" as="t" hint-placeholder-count="2"><div onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</div></sc-for>
+          </div>
+          <select style="font-size:12px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff; color:#555;"><option>すべてのフェーズ</option><option>ヒアリング</option><option>提案</option><option>見積</option><option>交渉</option><option>クロージング</option></select>
+          <select style="font-size:12px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff; color:#555;"><option>すべての顧客</option></select>
+          <select style="font-size:12px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff; color:#555;"><option>すべての契約形態</option><option>請負</option><option>準委任</option><option>保守</option></select>
+        </div>
+        <sc-if value="{{ isDealTable }}" hint-placeholder-val="{{ true }}">
+          <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+            <div style="display:grid; grid-template-columns:1.7fr 1fr 100px 90px 140px 110px; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;">
+              <span>案件名</span><span>顧客名</span><span>フェーズ</span><span>契約形態</span><span style="text-align:right;">想定金額</span><span style="text-align:right;">受注見込み</span>
+            </div>
+            <sc-for list="{{ dealsRows }}" as="d" hint-placeholder-count="8">
+              <div class="row-hover" onClick="{{ d.onClick }}" style="display:grid; grid-template-columns:1.7fr 1fr 100px 90px 140px 110px; padding:10px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; cursor:pointer; align-items:center;">
+                <span style="color:#2980b9; font-weight:500;">{{ d.name }}</span><span style="color:#555;">{{ d.client }}</span><span style="color:#7f8c8d;">{{ d.phase }}</span><span style="color:#7f8c8d;">{{ d.type }}</span>
+                <span class="mono" style="text-align:right; color:#2c3e50;">{{ d.amount }}</span><span class="mono" style="text-align:right; color:{{ d.closeColor }};">{{ d.close }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ isDealPhase }}" hint-placeholder-val="{{ false }}">
+          <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+            <sc-for list="{{ dealFlat }}" as="x" hint-placeholder-count="8">
+              <sc-if value="{{ x.header }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 14px; background:#f9f9f9; border-bottom:1px solid #e0e0e0;">
+                  <span style="font-size:12.5px; font-weight:700; color:#2c3e50;">{{ x.phase }} <span style="color:#7f8c8d; font-weight:400;">{{ x.count }}</span></span>
+                  <span class="mono" style="font-size:12px; color:#555;">{{ x.amount }}</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ x.row }}" hint-placeholder-val="{{ true }}">
+                <div class="row-hover" onClick="{{ x.onClick }}" style="display:grid; grid-template-columns:1.7fr 1fr 90px 140px; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; cursor:pointer; align-items:center;">
+                  <span style="color:#2980b9; font-weight:500;">{{ x.name }}</span><span style="color:#555;">{{ x.client }}</span><span style="color:#7f8c8d;">{{ x.type }}</span><span class="mono" style="text-align:right; color:#2c3e50;">{{ x.amount }}</span>
+                </div>
+              </sc-if>
+            </sc-for>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ===== DEAL DETAIL ===== -->
+      <sc-if value="{{ isDeal }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ goDeals }}" style="cursor:pointer;">案件一覧</a> <span style="color:#ccc;">/</span> {{ dealName }}</div>
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px; gap:16px;">
+          <div><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">{{ dealName }}</h1><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">{{ dealClient }} · 現在フェーズ: {{ dealCurrentPhase }}</p></div>
+          <sc-if value="{{ can.dealWonLost }}" hint-placeholder-val="{{ true }}"><div style="display:flex; gap:8px; flex-shrink:0;">
+            <button onClick="{{ onWon }}" style="font-size:12px; padding:7px 14px; border:1px solid #1a8a4a; background:#fff; color:#1a8a4a; border-radius:3px; cursor:pointer; font-weight:500;">受注にする</button>
+            <button onClick="{{ onLost }}" style="font-size:12px; padding:7px 14px; border:1px solid #c0392b; background:#fff; color:#c0392b; border-radius:3px; cursor:pointer;">失注にする</button>
+          </div></sc-if>
+        </div>
+        <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:24px; align-items:start;">
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">基本情報</h2><span style="font-size:11px; color:#7f8c8d;">クリックで編集</span></div>
+              <sc-for list="{{ dealBasics }}" as="b" hint-placeholder-count="4"><div class="row-hover" style="display:grid; grid-template-columns:120px 1fr; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; cursor:text;"><span style="color:#7f8c8d;">{{ b.0 }}</span><span style="color:#2c3e50;">{{ b.1 }}</span></div></sc-for>
+            </section>
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div class="row-hover" onClick="{{ goClient }}" style="display:flex; justify-content:space-between; align-items:center; padding:11px 14px; border-bottom:1px solid #f0f0f0; cursor:pointer;"><span style="font-size:12.5px; color:#7f8c8d;">顧客</span><span style="font-size:12.5px; color:#2980b9; font-weight:500;">{{ dealClient }} →</span></div>
+              <div class="row-hover" onClick="{{ goQuote }}" style="display:flex; justify-content:space-between; align-items:center; padding:11px 14px; cursor:pointer;"><span style="font-size:12.5px; color:#7f8c8d;">引合</span><span style="font-size:12.5px; color:#2980b9;">基幹システム刷新（引合）→</span></div>
+            </section>
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">フェーズ変更</h2></div>
+              <div style="padding:14px;">
+                <div style="display:flex; border:1px solid #cccccc; border-radius:4px; overflow:hidden;">
+                  <sc-for list="{{ dealPhaseCtrl }}" as="p" hint-placeholder-count="5"><div onClick="{{ p.onClick }}" style="{{ p.style }}">{{ p.label }}</div></sc-for>
+                </div>
+                <p style="margin:10px 0 0; font-size:11px; color:#999;">フェーズの変更は即座に反映されます。受注 / 失注は確認ダイアログで確定します。</p>
+              </div>
+            </section>
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">商談記録</h2><button onClick="{{ goMeetingNew }}" style="font-size:11px; padding:4px 10px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">+ 商談を追加</button></div>
+              <sc-for list="{{ dealMeetings }}" as="m" hint-placeholder-count="3">
+                <div class="row-hover" onClick="{{ m.onClick }}" style="padding:11px 14px; border-bottom:1px solid #f0f0f0; cursor:pointer;">
+                  <div style="display:flex; justify-content:space-between; align-items:baseline;"><span style="font-size:12.5px; font-weight:500; color:#2c3e50;">{{ m.type }} <span style="font-size:10px; color:#7f8c8d; border:1px solid #e0e0e0; border-radius:3px; padding:0 5px; margin-left:4px;">{{ m.tag }}</span></span><span class="mono" style="font-size:11px; color:#7f8c8d;">{{ m.date }}</span></div>
+                  <p style="margin:4px 0 0; font-size:12px; color:#555;">{{ m.summary }}</p>
+                </div>
+              </sc-for>
+            </section>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <sc-if value="{{ dealWon }}" hint-placeholder-val="{{ false }}">
+              <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#eef7f1;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#1a8a4a;">契約（受注済み）</h2><sc-if value="{{ can.contractManage }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goContractNew }}" style="font-size:11px; padding:4px 10px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">+ 契約を作成</button></sc-if></div>
+                <div class="row-hover" onClick="{{ dealContract.onClick }}" style="padding:11px 14px; cursor:pointer;">
+                  <div style="font-size:12.5px; color:#2980b9; font-weight:500;">{{ dealContract.name }}</div>
+                  <div style="font-size:11px; color:#7f8c8d; margin-top:2px;"><span class="mono">{{ dealContract.amount }}</span> · {{ dealContract.status }}</div>
+                </div>
+              </section>
+            </sc-if>
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">担当者</h2><button onClick="{{ addContact }}" style="font-size:11px; padding:4px 10px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">+ 追加</button></div>
+              <sc-for list="{{ dealContacts }}" as="c" hint-placeholder-count="3"><div style="display:flex; justify-content:space-between; align-items:center; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px;"><span style="color:#2c3e50;">{{ c.name }}</span><span style="font-size:11px; color:#7f8c8d;">{{ c.role }}</span></div></sc-for>
+            </section>
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">アクションアイテム <span style="font-size:11px; color:#7f8c8d; font-weight:400;">未完了</span></h2></div>
+              <sc-for list="{{ dealActionItems }}" as="a" hint-placeholder-count="3">
+                <div style="display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:1px solid #f0f0f0;">
+                  <span style="width:14px; height:14px; border:1px solid #cccccc; border-radius:3px; flex-shrink:0;"></span>
+                  <span style="flex:1; font-size:12.5px; color:#2c3e50;">{{ a.text }}</span>
+                  <span style="font-size:11px; color:#7f8c8d;">{{ a.owner }}</span>
+                  <span class="mono" style="font-size:11px; color:#7f8c8d;">{{ a.due }}</span>
+                </div>
+              </sc-for>
+            </section>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== MEETING DETAIL ===== -->
+      <sc-if value="{{ isMeeting }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ goDeals }}" style="cursor:pointer;">案件</a> <span style="color:#ccc;">/</span> 商談 <span style="color:#ccc;">/</span> {{ meetingType }}</div>
+        <div style="margin-bottom:18px;"><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">{{ meetingType }}</h1><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;"><span class="mono">{{ meetingDate }}</span></p></div>
+        <div style="display:grid; grid-template-columns:1.6fr 1fr; gap:24px; align-items:start;">
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;">
+                <h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">議事録</h2>
+                <div style="display:inline-flex; border:1px solid #cccccc; border-radius:4px; overflow:hidden;">
+                  <sc-for list="{{ noteTabs }}" as="t" hint-placeholder-count="2"><div onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</div></sc-for>
+                </div>
+              </div>
+              <div style="padding:14px;">
+                <sc-if value="{{ noteEdit }}" hint-placeholder-val="{{ true }}">
+                  <textarea defaultValue="{{ minutesMd }}" style="width:100%; min-height:230px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; line-height:1.7; color:#2c3e50; border:1px solid #cccccc; border-radius:3px; padding:10px; resize:vertical;"></textarea>
+                </sc-if>
+                <sc-if value="{{ notePreview }}" hint-placeholder-val="{{ false }}">
+                  <div style="min-height:230px;">{{ minutesPreview }}</div>
+                </sc-if>
+              </div>
+            </section>
+            <sc-if value="{{ isHearing }}" hint-placeholder-val="{{ true }}">
+              <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+                <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">ヒアリング情報</h2></div>
+                <sc-for list="{{ hearingFields }}" as="h" hint-placeholder-count="5"><div style="display:grid; grid-template-columns:100px 1fr; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px;"><span style="color:#7f8c8d;">{{ h.0 }}</span><span style="color:#2c3e50;">{{ h.1 }}</span></div></sc-for>
+              </section>
+            </sc-if>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">出席者</h2><button onClick="{{ addAttendee }}" style="font-size:11px; padding:4px 10px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">+ 追加</button></div>
+              <div style="padding:9px 14px 4px; font-size:10px; color:#7f8c8d; letter-spacing:0.04em;">社内</div>
+              <sc-for list="{{ attInternal }}" as="a" hint-placeholder-count="2"><div style="display:flex; justify-content:space-between; align-items:center; padding:7px 14px; font-size:12.5px;"><span style="color:#2c3e50;">{{ a.name }}</span><span style="font-size:11px; color:#7f8c8d;">{{ a.role }}</span></div></sc-for>
+              <div style="padding:9px 14px 4px; font-size:10px; color:#7f8c8d; letter-spacing:0.04em; border-top:1px solid #f0f0f0; margin-top:4px;">外部</div>
+              <sc-for list="{{ attExternal }}" as="a" hint-placeholder-count="2"><div style="display:flex; justify-content:space-between; align-items:center; padding:7px 14px; font-size:12.5px;"><span style="color:#2c3e50;">{{ a.name }}</span><span style="font-size:11px; color:#7f8c8d;">{{ a.org }}</span></div></sc-for>
+            </section>
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">アクションアイテム</h2><button onClick="{{ addMActionItem }}" style="font-size:11px; padding:4px 10px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">+ 追加</button></div>
+              <sc-for list="{{ mActionItems }}" as="a" hint-placeholder-count="3"><div style="display:flex; align-items:center; gap:10px; padding:9px 14px; border-bottom:1px solid #f0f0f0;"><span style="{{ a.box }}">{{ a.mark }}</span><span style="{{ a.textStyle }}">{{ a.text }}</span><span style="font-size:11px; color:#7f8c8d;">{{ a.owner }}</span><span class="mono" style="font-size:11px; color:#7f8c8d;">{{ a.due }}</span></div></sc-for>
+            </section>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== CLIENT DETAIL ===== -->
+      <sc-if value="{{ isClient }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ goClients }}" style="cursor:pointer;">顧客一覧</a> <span style="color:#ccc;">/</span> {{ clientName }}</div>
+        <div style="margin-bottom:18px;"><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">{{ clientName }}</h1></div>
+        <div style="display:grid; grid-template-columns:1.5fr 1fr; gap:24px; align-items:start;">
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">企業情報</h2><span style="font-size:11px; color:#7f8c8d;">クリックで編集</span></div>
+              <sc-for list="{{ clientCompany }}" as="c" hint-placeholder-count="4"><div class="row-hover" style="display:grid; grid-template-columns:80px 1fr; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; cursor:text;"><span style="color:#7f8c8d;">{{ c.0 }}</span><span style="color:#2c3e50;">{{ c.1 }}</span></div></sc-for>
+            </section>
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">担当者</h2><button onClick="{{ addClientContact }}" style="font-size:11px; padding:4px 10px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">+ 追加</button></div>
+              <div style="display:grid; grid-template-columns:1.2fr 1fr 1.4fr 120px; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>名前</span><span>部署 / 役職</span><span>連絡先</span><span></span></div>
+              <sc-for list="{{ clientContacts }}" as="c" hint-placeholder-count="3">
+                <div style="display:grid; grid-template-columns:1.2fr 1fr 1.4fr 120px; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12px; align-items:center;">
+                  <span style="color:#2c3e50; font-weight:500;">{{ c.name }} <sc-if value="{{ c.primary }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px; color:#2980b9; border:1px solid #2980b9; border-radius:3px; padding:0 4px; margin-left:2px;">主担当</span></sc-if></span>
+                  <span style="color:#7f8c8d;">{{ c.dept }} / {{ c.title }}</span>
+                  <span style="color:#555;"><span class="mono">{{ c.email }}</span><br><span class="mono" style="color:#7f8c8d;">{{ c.phone }}</span></span>
+                  <span></span>
+                </div>
+              </sc-for>
+            </section>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">関連引合</h2></div>
+              <sc-for list="{{ clientQuotes }}" as="q" hint-placeholder-count="2">
+                <div class="row-hover" onClick="{{ q.onClick }}" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #f0f0f0; cursor:pointer;">
+                  <div style="min-width:0;"><div style="font-size:12.5px; color:#2980b9;">{{ q.subject }}</div><div class="mono" style="font-size:11px; color:#7f8c8d;">{{ q.date }}</div></div>
+                  <span style="display:inline-block; font-size:11px; padding:1px 7px; border-radius:3px; background:#f5f5f5; border:1px solid #e0e0e0; color:{{ q.statusColor }};">{{ q.statusText }}</span>
+                </div>
+              </sc-for>
+            </section>
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">関連案件</h2></div>
+              <sc-for list="{{ clientDeals }}" as="d" hint-placeholder-count="1">
+                <div class="row-hover" onClick="{{ d.onClick }}" style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #f0f0f0; cursor:pointer;">
+                  <div style="min-width:0;"><div style="font-size:12.5px; color:#2980b9;">{{ d.name }}</div><div style="font-size:11px; color:#7f8c8d;">{{ d.phase }}</div></div>
+                  <span class="mono" style="font-size:12px; color:#2c3e50;">{{ d.amount }}</span>
+                </div>
+              </sc-for>
+            </section>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== CONTRACT DETAIL ===== -->
+      <sc-if value="{{ isContract }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ goContracts }}" style="cursor:pointer;">契約一覧</a> <span style="color:#ccc;">/</span> {{ contractName }}</div>
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:18px; gap:16px;">
+          <div style="display:flex; align-items:center; gap:10px;"><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">{{ contractName }}</h1><span style="display:inline-block; font-size:11px; padding:2px 8px; border-radius:3px; background:#f5f5f5; border:1px solid #e0e0e0; color:#2980b9;">進行中</span></div>
+          <sc-if value="{{ can.contractManage }}" hint-placeholder-val="{{ true }}"><div style="display:flex; gap:8px; flex-shrink:0;"><button onClick="{{ onContractComplete }}" style="font-size:12px; padding:7px 14px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">完了する</button><button onClick="{{ onContractCancel }}" style="font-size:12px; padding:7px 14px; border:1px solid #c0392b; background:#fff; color:#c0392b; border-radius:3px; cursor:pointer;">解除する</button></div></sc-if>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1.3fr; gap:24px; align-items:start;">
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">基本情報</h2></div>
+              <sc-for list="{{ contractBasics }}" as="b" hint-placeholder-count="5"><div style="display:grid; grid-template-columns:90px 1fr; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px;"><span style="color:#7f8c8d;">{{ b.0 }}</span><span style="color:#2c3e50;">{{ b.1 }}</span></div></sc-for>
+              <div class="row-hover" onClick="{{ goDeal }}" style="display:flex; justify-content:space-between; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; cursor:pointer;"><span style="color:#7f8c8d;">案件</span><span style="color:#2980b9;">案件詳細 →</span></div>
+              <div class="row-hover" onClick="{{ goClient }}" style="display:flex; justify-content:space-between; padding:9px 14px; font-size:12.5px; cursor:pointer;"><span style="color:#7f8c8d;">顧客</span><span style="color:#2980b9;">顧客詳細 →</span></div>
+            </section>
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">請求サマリ <span style="font-size:11px; color:#7f8c8d; font-weight:400;">単発契約</span></h2></div>
+              <div style="padding:14px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;"><span style="color:#7f8c8d;">契約金額</span><span class="mono" style="color:#2c3e50;">¥45,000,000</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;"><span style="color:#7f8c8d;">請求済み</span><span class="mono" style="color:#2c3e50;">¥18,000,000</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:10px;"><span style="color:#7f8c8d;">残り請求可能</span><span class="mono" style="color:#2980b9; font-weight:500;">¥27,000,000</span></div>
+                <div style="height:8px; background:#eef0f1; border-radius:4px; overflow:hidden;"><div style="width:40%; height:100%; background:#2980b9;"></div></div>
+                <div style="text-align:right; font-size:10px; color:#7f8c8d; margin-top:4px;">40% 請求済み</div>
+              </div>
+            </section>
+          </div>
+          <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">請求一覧</h2><sc-if value="{{ can.invoiceManage }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goInvoiceNew }}" style="font-size:11px; padding:4px 10px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer;">+ 請求を作成</button></sc-if></div>
+            <div style="display:grid; grid-template-columns:100px 1fr 120px 110px 100px; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>番号</span><span>区分</span><span style="text-align:right;">金額</span><span style="text-align:right;">支払期日</span><span style="text-align:right;">状態</span></div>
+            <sc-for list="{{ contractInvoices }}" as="i" hint-placeholder-count="2">
+              <div class="row-hover" onClick="{{ i.onClick }}" style="display:grid; grid-template-columns:100px 1fr 120px 110px 100px; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12px; cursor:pointer; align-items:center;">
+                <span class="mono" style="color:#2980b9;">{{ i.no }}</span><span style="color:#555;">{{ i.label }}</span><span class="mono" style="text-align:right; color:#2c3e50;">{{ i.amount }}</span><span class="mono" style="text-align:right; color:#7f8c8d;">{{ i.due }}</span><span style="text-align:right; color:{{ i.statusColor }};">{{ i.statusText }}</span>
+              </div>
+            </sc-for>
+          </section>
+        </div>
+      </sc-if>
+
+      <!-- ===== INVOICE DETAIL ===== -->
+      <sc-if value="{{ isInvoice }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ goContracts }}" style="cursor:pointer;">契約一覧</a> <span style="color:#ccc;">/</span> <a onClick="{{ goContract }}" style="cursor:pointer;">{{ contractName }}</a> <span style="color:#ccc;">/</span> 請求詳細</div>
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:8px; gap:16px;">
+          <div style="display:flex; align-items:center; gap:10px;"><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">INV-0425 中間金</h1><span style="display:inline-block; font-size:11px; padding:2px 8px; border-radius:3px; background:#f5f5f5; border:1px solid #e0e0e0; color:{{ invStatusColor }};">{{ invStatusText }}</span></div>
+          <div style="display:inline-flex; border:1px solid #cccccc; border-radius:4px; overflow:hidden; background:#fff; flex-shrink:0;"><sc-for list="{{ invStatusTabs }}" as="t" hint-placeholder-count="4"><div onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</div></sc-for></div>
+        </div>
+        <p style="margin:0 0 18px; font-size:11px; color:#999;">↑ デモ用ステータス切替</p>
+        <div style="max-width:560px;">
+          <sc-if value="{{ invIsOverdue }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:10px 14px; border:1px solid #e3b7b1; background:#fbf0ef; border-radius:4px; margin-bottom:16px; font-size:12.5px; color:#c0392b;">支払期日を <b>14日</b> 超過しています。</div>
+          </sc-if>
+          <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden; margin-bottom:20px;">
+            <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">基本情報</h2></div>
+            <sc-for list="{{ invBasics }}" as="b" hint-placeholder-count="4"><div style="display:grid; grid-template-columns:90px 1fr; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px;"><span style="color:#7f8c8d;">{{ b.0 }}</span><span class="mono" style="color:#2c3e50;">{{ b.1 }}</span></div></sc-for>
+            <div class="row-hover" onClick="{{ goContract }}" style="display:flex; justify-content:space-between; padding:9px 14px; font-size:12.5px; cursor:pointer;"><span style="color:#7f8c8d;">契約</span><span style="color:#2980b9;">{{ contractName }} →</span></div>
+          </section>
+          <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+            <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">操作</h2></div>
+            <div style="padding:14px; display:flex; gap:8px; align-items:center;">
+              <sc-if value="{{ invOpScheduled }}" hint-placeholder-val="{{ false }}"><button onClick="{{ issueInvoice }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">発行する</button></sc-if>
+              <sc-if value="{{ invOpInvoiced }}" hint-placeholder-val="{{ false }}"><button onClick="{{ openPayment }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #1a8a4a; background:#1a8a4a; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">入金確認</button><button onClick="{{ markOverdue }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #cccccc; background:#fff; color:#555; border-radius:3px; cursor:pointer;">期日超過にする</button></sc-if>
+              <sc-if value="{{ invOpOverdue }}" hint-placeholder-val="{{ false }}"><button onClick="{{ openPayment }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #1a8a4a; background:#1a8a4a; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">入金確認</button></sc-if>
+              <sc-if value="{{ invIsPaid }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px; color:#7f8c8d;">入金済みのため操作はありません。</span></sc-if>
+              <sc-if value="{{ invNoPerm }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px; color:#7f8c8d;">請求操作の権限がありません。</span></sc-if>
+            </div>
+          </section>
+        </div>
+      </sc-if>
+
+      <!-- ===== APPROVALS LIST ===== -->
+      <sc-if value="{{ isApprovals }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:16px;">
+          <div><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">承認</h1><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">承認リクエスト</p></div>
+          <button onClick="{{ goApprovalNew }}" style="font-size:12px; padding:7px 13px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">手動で申請</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <div style="display:inline-flex; border:1px solid #cccccc; border-radius:4px; overflow:hidden; background:#fff;"><sc-for list="{{ approvalTabs }}" as="t" hint-placeholder-count="3"><div onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</div></sc-for></div>
+          <select style="font-size:12px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff; color:#555;"><option>すべてのステータス</option><option>承認待ち</option><option>承認済み</option><option>却下</option><option>期限切れ</option></select>
+        </div>
+        <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+          <div style="display:grid; grid-template-columns:1.9fr 90px 110px 90px 110px; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>件名</span><span>申請者</span><span>ステータス</span><span>種別</span><span style="text-align:right;">申請日</span></div>
+          <sc-for list="{{ approvals }}" as="a" hint-placeholder-count="5">
+            <div class="row-hover" onClick="{{ a.onClick }}" style="display:grid; grid-template-columns:1.9fr 90px 110px 90px 110px; padding:10px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; cursor:pointer; align-items:center;">
+              <span style="color:#2980b9; font-weight:500;">{{ a.subject }}</span><span style="color:#555;">{{ a.applicant }}</span>
+              <span><span style="display:inline-block; font-size:11px; padding:1px 7px; border-radius:3px; background:#f5f5f5; border:1px solid #e0e0e0; color:{{ a.statusColor }};">{{ a.statusText }}</span></span>
+              <span style="font-size:11px; color:#7f8c8d;">{{ a.kind }}</span><span class="mono" style="text-align:right; color:#7f8c8d;">{{ a.date }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ===== APPROVAL DETAIL ===== -->
+      <sc-if value="{{ isApproval }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ goApproval }}" style="cursor:pointer;">承認</a> <span style="color:#ccc;">/</span> 受注承認</div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;"><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">受注承認「ニットウ 基幹刷新」</h1><span style="display:inline-block; font-size:11px; padding:2px 8px; border-radius:3px; background:#f5f5f5; border:1px solid #e0e0e0; color:#d4880f;">承認待ち</span></div>
+        <p style="margin:0 0 16px; font-size:12px; color:#7f8c8d;">申請者: 田中 健一 · <span class="mono">2026/06/24 10:00</span> · 自動</p>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:11px 14px; border:1px solid #2980b9; background:#eef5fb; border-radius:4px; margin-bottom:20px;">
+          <span style="font-size:12.5px; color:#2c3e50;">この承認は引合「ECサイトリニューアル」の<b>案件化</b>に必要です。</span>
+          <a onClick="{{ goQuote }}" style="font-size:12px; cursor:pointer;">引合を見る →</a>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1.2fr; gap:24px; align-items:start;">
+          <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+            <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">申請内容</h2></div>
+            <sc-for list="{{ approvalForm }}" as="f" hint-placeholder-count="4"><div style="display:grid; grid-template-columns:100px 1fr; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px;"><span style="color:#7f8c8d;">{{ f.0 }}</span><span style="color:#2c3e50;">{{ f.1 }}</span></div></sc-for>
+          </section>
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">承認ステップ</h2></div>
+              <div style="padding:6px 14px;">
+                <sc-for list="{{ approvalSteps }}" as="s" hint-placeholder-count="2">
+                  <div style="display:flex; gap:12px; padding:10px 0; border-bottom:1px solid #f0f0f0;">
+                    <span style="{{ s.circle }}">{{ s.order }}</span>
+                    <div style="flex:1;">
+                      <div style="display:flex; justify-content:space-between; align-items:baseline;"><span style="font-size:12.5px; font-weight:500; color:#2c3e50;">{{ s.name }}</span><span style="font-size:11px; color:{{ s.stateColor }};">{{ s.state }}</span></div>
+                      <div style="font-size:11px; color:#7f8c8d; margin-top:2px;">{{ s.approver }}</div>
+                      <div style="font-size:11px; color:#555; margin-top:3px;">{{ s.comment }} <span class="mono" style="color:#999;">{{ s.date }}</span></div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </section>
+            <sc-if value="{{ isApprover }}" hint-placeholder-val="{{ true }}">
+              <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+                <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">承認 / 却下</h2></div>
+                <div style="padding:14px;">
+                  <textarea placeholder="コメント（任意）" style="width:100%; min-height:64px; font-size:12.5px; border:1px solid #cccccc; border-radius:3px; padding:8px; resize:vertical; margin-bottom:10px;"></textarea>
+                  <div style="display:flex; gap:8px;"><button onClick="{{ onApprove }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #1a8a4a; background:#1a8a4a; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">承認する</button><button onClick="{{ onReject }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #c0392b; background:#fff; color:#c0392b; border-radius:3px; cursor:pointer;">却下する</button></div>
+                </div>
+              </section>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ===== REVENUE DASHBOARD ===== -->
+      <sc-if value="{{ isRevenue }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:18px;">
+          <div><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">売上</h1><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">{{ today }}</p></div>
+          <div style="display:flex; gap:8px;"><button onClick="{{ goSalesDetail }}" style="font-size:12px; padding:7px 13px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">売上明細</button><button onClick="{{ goSalesPlan }}" style="font-size:12px; padding:7px 13px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">予実管理</button></div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06); margin-bottom:24px;">
+          <div style="padding:14px 16px; border-right:1px solid #e0e0e0;"><span style="font-size:11px; color:#7f8c8d;">今月の売上（入金確認済み）</span><div class="mono" style="font-size:26px; font-weight:700; color:#1a8a4a; margin-top:6px;">{{ revMonth }}</div></div>
+          <div style="padding:14px 16px; border-right:1px solid #e0e0e0;"><span style="font-size:11px; color:#7f8c8d;">確定見込み（契約 + 請求予定）</span><div class="mono" style="font-size:22px; font-weight:700; color:#2980b9; margin-top:6px;">{{ revConfirmed }}</div></div>
+          <div style="padding:14px 16px;"><span style="font-size:11px; color:#7f8c8d;">案件見込み（パイプライン）</span><div class="mono" style="font-size:22px; font-weight:700; color:#2c3e50; margin-top:6px;">{{ revPipeline }}</div></div>
+        </div>
+        <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden; margin-bottom:24px;">
+          <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">月次推移 <span style="font-size:11px; color:#7f8c8d; font-weight:400;">過去12ヶ月 · クリックで明細</span></h2></div>
+          <div style="padding:18px 16px 12px; display:flex; align-items:flex-end; gap:10px; height:200px;">
+            <sc-for list="{{ trend }}" as="t" hint-placeholder-count="12">
+              <div onClick="{{ t.onClick }}" style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:6px; cursor:pointer;">
+                <span class="mono" style="font-size:9px; color:#7f8c8d;">{{ t.value }}</span>
+                <div style="width:100%; max-width:34px; background:{{ t.barColor }}; border-radius:2px 2px 0 0; height:{{ t.h }}%;"></div>
+                <span style="font-size:10px; color:#7f8c8d;">{{ t.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+        <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden; max-width:620px;">
+          <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">顧客別売上ランキング</h2></div>
+          <sc-for list="{{ ranking }}" as="r" hint-placeholder-count="5">
+            <div class="row-hover" onClick="{{ r.onClick }}" style="display:grid; grid-template-columns:140px 1fr 80px; align-items:center; gap:12px; padding:10px 14px; border-bottom:1px solid #f0f0f0; cursor:pointer;">
+              <span style="font-size:12.5px; color:#2980b9;">{{ r.name }}</span>
+              <div style="height:10px; background:#eef0f1; border-radius:5px; overflow:hidden;"><div style="height:100%; background:#2980b9; width:{{ r.pct }};"></div></div>
+              <span class="mono" style="font-size:12px; color:#2c3e50; text-align:right;">{{ r.amount }}</span>
+            </div>
+          </sc-for>
+        </section>
+      </sc-if>
+
+      <!-- ===== SETTINGS ===== -->
+      <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-bottom:8px;"><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">設定</h1></div>
+        <div style="display:flex; gap:4px; border-bottom:1px solid #cccccc; margin-bottom:20px;"><sc-for list="{{ settingsTabs }}" as="t" hint-placeholder-count="6"><div onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</div></sc-for></div>
+
+        <!-- POLICY LIST -->
+        <sc-if value="{{ stPolicy }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:14px;">
+            <div><h2 style="margin:0; font-size:15px; font-weight:700; color:#2c3e50;">承認ポリシー</h2><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">トリガーと条件に応じて承認フローを自動起動します。</p></div>
+            <sc-if value="{{ canPolicyEdit }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goPolicyNew }}" style="font-size:12px; padding:7px 13px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">ポリシーを作成</button></sc-if>
+          </div>
+          <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+            <div style="display:grid; grid-template-columns:1.3fr 1fr 1.2fr 1.2fr 70px; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>ポリシー名</span><span>トリガー</span><span>条件</span><span>テンプレート</span><span style="text-align:right;">有効</span></div>
+            <sc-for list="{{ policies }}" as="p" hint-placeholder-count="4">
+              <div class="row-hover" onClick="{{ p.onClick }}" style="display:grid; grid-template-columns:1.3fr 1fr 1.2fr 1.2fr 70px; padding:11px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; align-items:center; cursor:pointer;">
+                <span style="color:#2c3e50; font-weight:500;">{{ p.name }}</span><span style="color:#555;">{{ p.trigger }}</span><span style="color:#7f8c8d;">{{ p.cond }}</span><span style="color:#555;">{{ p.template }}</span>
+                <span style="display:flex; justify-content:flex-end;"><span onClick="{{ p.onToggle }}" style="{{ p.toggleStyle }}"><span style="{{ p.knobStyle }}"></span></span></span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <!-- POLICY FORM -->
+        <sc-if value="{{ stPolicyForm }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ settingsBackList }}" style="cursor:pointer;">承認ポリシー</a> <span style="color:#ccc;">/</span> ポリシーを作成</div>
+          <h2 style="margin:0 0 14px; font-size:15px; font-weight:700; color:#2c3e50;">承認ポリシー</h2>
+          <div style="max-width:620px;"><section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+            <div style="padding:12px 16px; border-bottom:1px solid #f0f0f0;"><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">ポリシー名<span style="color:#c0392b;"> *</span></label><input type="text" style="width:100%; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px;"></div>
+            <div style="padding:12px 16px; border-bottom:1px solid #f0f0f0;"><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">説明</label><textarea style="width:100%; min-height:60px; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px; resize:vertical;"></textarea></div>
+            <div style="padding:12px 16px; border-bottom:1px solid #f0f0f0;"><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">トリガーアクション<span style="color:#c0392b;"> *</span></label>{{ polTrigEl }}</div>
+            <div style="display:grid; grid-template-columns:1.4fr 0.8fr 1fr; gap:12px; padding:12px 16px; border-bottom:1px solid #f0f0f0;">
+              <div><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">条件フィールド</label><input type="text" placeholder="例: amount" style="width:100%; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px;"></div>
+              <div><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">演算子</label>{{ polCondEl }}</div>
+              <div><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">条件値</label><input type="text" style="width:100%; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px;"></div>
+            </div>
+            <div style="padding:6px 16px 12px;"><p style="margin:0; font-size:11px; color:#999;">条件フィールドが空の場合は「常に承認を要求」します。</p></div>
+            <div style="padding:12px 16px; border-top:1px solid #f0f0f0; border-bottom:1px solid #f0f0f0;"><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">テンプレート<span style="color:#c0392b;"> *</span></label>{{ polTmplEl }}</div>
+            <div style="padding:12px 16px; display:flex; justify-content:flex-end; gap:8px; background:#f9f9f9;"><button onClick="{{ settingsBackList }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #cccccc; background:#fff; color:#555; border-radius:3px; cursor:pointer;">キャンセル</button><button onClick="{{ savePolicy }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">保存</button></div>
+          </section></div>
+        </sc-if>
+
+        <!-- TEMPLATE LIST -->
+        <sc-if value="{{ stTemplate }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:14px;">
+            <div><h2 style="margin:0; font-size:15px; font-weight:700; color:#2c3e50;">承認テンプレート</h2><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">承認ステップとフォーム項目を定義します。</p></div>
+            <sc-if value="{{ canPolicyEdit }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goTemplateNew }}" style="font-size:12px; padding:7px 13px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">テンプレートを作成</button></sc-if>
+          </div>
+          <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>テンプレート名</span><span>ステップ数</span><span style="text-align:right;">作成日</span></div>
+            <sc-for list="{{ templates }}" as="t" hint-placeholder-count="4"><div class="row-hover" onClick="{{ goTemplateNew }}" style="display:grid; grid-template-columns:2fr 1fr 1fr; padding:11px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; align-items:center; cursor:pointer;"><span style="color:#2c3e50; font-weight:500;">{{ t.name }}</span><span style="color:#7f8c8d;">{{ t.steps }}</span><span class="mono" style="text-align:right; color:#7f8c8d;">{{ t.created }}</span></div></sc-for>
+          </div>
+        </sc-if>
+
+        <!-- TEMPLATE FORM -->
+        <sc-if value="{{ stTemplateForm }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ settingsBackList }}" style="cursor:pointer;">承認テンプレート</a> <span style="color:#ccc;">/</span> テンプレートを作成</div>
+          <h2 style="margin:0 0 14px; font-size:15px; font-weight:700; color:#2c3e50;">承認テンプレート</h2>
+          <div style="max-width:680px; display:flex; flex-direction:column; gap:18px;">
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="padding:12px 16px; border-bottom:1px solid #f0f0f0;"><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">テンプレート名<span style="color:#c0392b;"> *</span></label><input type="text" style="width:100%; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px;"></div>
+              <div style="padding:12px 16px;"><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">説明</label><textarea style="width:100%; min-height:54px; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px; resize:vertical;"></textarea></div>
+            </section>
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h3 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">承認ステップ</h3><button style="font-size:11px; padding:4px 10px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">+ ステップを追加</button></div>
+              <div style="display:grid; grid-template-columns:30px 1.4fr 1fr 90px 30px; gap:8px; padding:10px 14px; align-items:center;"><span class="mono" style="color:#7f8c8d; font-size:12px;">1</span><input type="text" placeholder="ステップ名" defaultValue="一次承認" style="font-size:12.5px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px;"><select style="font-size:12.5px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff;"><option>マネージャー</option><option>管理者</option><option>経理</option></select><input type="number" placeholder="期限日数" style="font-size:12.5px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px;"><span style="color:#c0392b; cursor:pointer; text-align:center;">×</span></div>
+              <div style="display:grid; grid-template-columns:30px 1.4fr 1fr 90px 30px; gap:8px; padding:10px 14px; align-items:center; border-top:1px solid #f0f0f0;"><span class="mono" style="color:#7f8c8d; font-size:12px;">2</span><input type="text" placeholder="ステップ名" defaultValue="最終承認" style="font-size:12.5px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px;"><select style="font-size:12.5px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff;"><option>管理者</option><option>マネージャー</option><option>経理</option></select><input type="number" placeholder="期限日数" style="font-size:12.5px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px;"><span style="color:#c0392b; cursor:pointer; text-align:center;">×</span></div>
+            </section>
+            <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+              <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h3 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">フォーム項目 <span style="font-size:11px; color:#7f8c8d; font-weight:400;">手動申請用</span></h3><button style="font-size:11px; padding:4px 10px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">+ 項目を追加</button></div>
+              <div style="display:grid; grid-template-columns:1fr 1fr 0.9fr 60px 30px; gap:8px; padding:10px 14px; align-items:center;"><input type="text" placeholder="キー" defaultValue="amount" style="font-size:12.5px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px;"><input type="text" placeholder="ラベル" defaultValue="想定金額" style="font-size:12.5px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px;"><select style="font-size:12.5px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff;"><option>number</option><option>text</option><option>date</option><option>textarea</option><option>select</option></select><span style="display:flex; align-items:center; gap:4px; font-size:11px; color:#7f8c8d;"><span style="width:14px; height:14px; border:1px solid #cccccc; border-radius:3px;"></span>必須</span><span style="color:#c0392b; cursor:pointer; text-align:center;">×</span></div>
+            </section>
+            <div style="display:flex; justify-content:flex-end; gap:8px;"><button onClick="{{ settingsBackList }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #cccccc; background:#fff; color:#555; border-radius:3px; cursor:pointer;">キャンセル</button><button onClick="{{ saveTemplate }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">保存</button></div>
+          </div>
+        </sc-if>
+
+        <!-- USERS -->
+        <sc-if value="{{ stUsers }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-bottom:14px;"><h2 style="margin:0; font-size:15px; font-weight:700; color:#2c3e50;">ユーザー管理</h2><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">ロールの変更は管理者のみ可能です。</p></div>
+          <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+            <div style="display:grid; grid-template-columns:1fr 1.6fr 160px; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>ユーザー名</span><span>メールアドレス</span><span>ロール</span></div>
+            <sc-for list="{{ userRows }}" as="u" hint-placeholder-count="5"><div style="display:grid; grid-template-columns:1fr 1.6fr 160px; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; align-items:center;"><span style="color:#2c3e50; font-weight:500;">{{ u.name }}</span><span class="mono" style="color:#7f8c8d; font-size:12px;">{{ u.email }}</span><span>{{ u.roleEl }}</span></div></sc-for>
+          </div>
+        </sc-if>
+
+        <!-- DELEGATION LIST -->
+        <sc-if value="{{ stDelegation }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:14px;">
+            <div><h2 style="margin:0; font-size:15px; font-weight:700; color:#2c3e50;">承認の委任</h2><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">不在時に自分の承認権限を他のユーザーへ委任します。</p></div>
+            <sc-if value="{{ canDelegationCreate }}" hint-placeholder-val="{{ true }}"><button onClick="{{ goDelegationNew }}" style="font-size:12px; padding:7px 13px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">委任を作成</button></sc-if>
+          </div>
+          <h3 style="margin:0 0 8px; font-size:12px; font-weight:700; color:#555;">自分の委任</h3>
+          <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06); margin-bottom:20px;">
+            <div style="display:grid; grid-template-columns:1fr 1.4fr 70px; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>委任先</span><span>期間</span><span style="text-align:right;">有効</span></div>
+            <sc-for list="{{ myDelegations }}" as="d" hint-placeholder-count="1"><div style="display:grid; grid-template-columns:1fr 1.4fr 70px; padding:10px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; align-items:center;"><span style="color:#2c3e50;">{{ d.to }}</span><span class="mono" style="color:#7f8c8d;">{{ d.period }}</span><span style="display:flex; justify-content:flex-end;"><span onClick="{{ d.onToggle }}" style="{{ d.toggleStyle }}"><span style="{{ d.knobStyle }}"></span></span></span></div></sc-for>
+          </div>
+          <sc-if value="{{ isAdminView }}" hint-placeholder-val="{{ false }}">
+            <h3 style="margin:0 0 8px; font-size:12px; font-weight:700; color:#555;">全ユーザーの委任 <span style="font-weight:400; color:#7f8c8d;">（管理者）</span></h3>
+            <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+              <div style="display:grid; grid-template-columns:1fr 1fr 1.4fr; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>委任元</span><span>委任先</span><span>期間</span></div>
+              <sc-for list="{{ allDelegations }}" as="d" hint-placeholder-count="2"><div style="display:grid; grid-template-columns:1fr 1fr 1.4fr; padding:10px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; align-items:center;"><span style="color:#2c3e50;">{{ d.owner }}</span><span style="color:#555;">{{ d.to }}</span><span class="mono" style="color:#7f8c8d;">{{ d.period }}</span></div></sc-for>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <!-- DELEGATION FORM -->
+        <sc-if value="{{ stDelegationForm }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ settingsBackList }}" style="cursor:pointer;">承認の委任</a> <span style="color:#ccc;">/</span> 委任を作成</div>
+          <h2 style="margin:0 0 14px; font-size:15px; font-weight:700; color:#2c3e50;">委任を作成</h2>
+          <div style="max-width:520px;"><section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+            <div style="padding:12px 16px; border-bottom:1px solid #f0f0f0;"><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">委任先ユーザー<span style="color:#c0392b;"> *</span></label><select style="width:100%; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px; background:#fff;"><option>佐藤 美咲</option><option>高橋 浩</option><option>鈴木 一郎</option></select></div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px 16px;"><div><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">開始日<span style="color:#c0392b;"> *</span></label><input type="date" style="font-size:13px; padding:6px 9px; border:1px solid #cccccc; border-radius:3px;"></div><div><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">終了日<span style="color:#c0392b;"> *</span></label><input type="date" style="font-size:13px; padding:6px 9px; border:1px solid #cccccc; border-radius:3px;"></div></div>
+            <div style="padding:12px 16px; display:flex; justify-content:flex-end; gap:8px; background:#f9f9f9;"><button onClick="{{ settingsBackList }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #cccccc; background:#fff; color:#555; border-radius:3px; cursor:pointer;">キャンセル</button><button onClick="{{ saveDelegation }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">作成</button></div>
+          </section></div>
+        </sc-if>
+
+        <!-- WEBHOOK LIST -->
+        <sc-if value="{{ stWebhook }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:14px;">
+            <div><h2 style="margin:0; font-size:15px; font-weight:700; color:#2c3e50;">Webhook</h2><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">イベント発生時に外部エンドポイントへ通知します。</p></div>
+            <button onClick="{{ goWebhookNew }}" style="font-size:12px; padding:7px 13px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">エンドポイントを追加</button>
+          </div>
+          <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06); margin-bottom:24px;">
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 70px; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>URL</span><span>購読イベント</span><span>直近の配信</span><span style="text-align:right;">有効</span></div>
+            <sc-for list="{{ webhooks }}" as="w" hint-placeholder-count="2"><div style="display:grid; grid-template-columns:2fr 1fr 1fr 70px; padding:10px 14px; border-bottom:1px solid #f0f0f0; font-size:12px; align-items:center;"><span class="mono" style="color:#2980b9;">{{ w.url }}</span><span style="color:#7f8c8d;">{{ w.events }}</span><span style="color:{{ w.lastColor }};">{{ w.last }}</span><span style="display:flex; justify-content:flex-end;"><span onClick="{{ w.onToggle }}" style="{{ w.toggleStyle }}"><span style="{{ w.knobStyle }}"></span></span></span></div></sc-for>
+          </div>
+          <h3 style="margin:0 0 8px; font-size:12px; font-weight:700; color:#555;">配信ログ</h3>
+          <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+            <div style="display:grid; grid-template-columns:1.4fr 1fr 1fr; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>イベント種別</span><span>配信日時</span><span style="text-align:right;">ステータス</span></div>
+            <sc-for list="{{ deliveryLog }}" as="l" hint-placeholder-count="3"><div style="display:grid; grid-template-columns:1.4fr 1fr 1fr; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12px; align-items:center;"><span class="mono" style="color:#2c3e50;">{{ l.event }}</span><span class="mono" style="color:#7f8c8d;">{{ l.time }}</span><span class="mono" style="text-align:right; color:{{ l.color }};">{{ l.status }}</span></div></sc-for>
+          </div>
+        </sc-if>
+
+        <!-- WEBHOOK FORM -->
+        <sc-if value="{{ stWebhookForm }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ settingsBackList }}" style="cursor:pointer;">Webhook</a> <span style="color:#ccc;">/</span> エンドポイントを追加</div>
+          <h2 style="margin:0 0 14px; font-size:15px; font-weight:700; color:#2c3e50;">エンドポイントを追加</h2>
+          <div style="max-width:560px;"><section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+            <div style="padding:12px 16px; border-bottom:1px solid #f0f0f0;"><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">URL<span style="color:#c0392b;"> *</span></label><input type="text" placeholder="https://" style="width:100%; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px;"></div>
+            <div style="padding:12px 16px; border-bottom:1px solid #f0f0f0;"><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">シークレット<span style="color:#c0392b;"> *</span></label><input type="text" placeholder="whsec_..." style="width:100%; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px; font-family:'IBM Plex Mono',monospace;"></div>
+            <div style="padding:12px 16px;"><label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:8px;">購読イベント</label><div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;"><span style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:#2c3e50;"><span style="width:14px; height:14px; border:1px solid #1a8a4a; background:#1a8a4a; border-radius:3px; color:#fff; font-size:10px; text-align:center; line-height:14px;">✓</span>deal.won</span><span style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:#2c3e50;"><span style="width:14px; height:14px; border:1px solid #1a8a4a; background:#1a8a4a; border-radius:3px; color:#fff; font-size:10px; text-align:center; line-height:14px;">✓</span>invoice.paid</span><span style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:#2c3e50;"><span style="width:14px; height:14px; border:1px solid #cccccc; border-radius:3px;"></span>quote.created</span><span style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:#2c3e50;"><span style="width:14px; height:14px; border:1px solid #cccccc; border-radius:3px;"></span>contract.cancelled</span></div></div>
+            <div style="padding:12px 16px; display:flex; justify-content:flex-end; gap:8px; background:#f9f9f9;"><button onClick="{{ settingsBackList }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #cccccc; background:#fff; color:#555; border-radius:3px; cursor:pointer;">キャンセル</button><button onClick="{{ saveWebhook }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">保存</button></div>
+          </section></div>
+        </sc-if>
+
+        <!-- AUDIT -->
+        <sc-if value="{{ stAudit }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:14px;">
+            <div><h2 style="margin:0; font-size:15px; font-weight:700; color:#2c3e50;">監査ログ</h2><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">全操作の記録です。</p></div>
+            <sc-if value="{{ canAuditExport }}" hint-placeholder-val="{{ true }}"><button onClick="{{ exportCsv }}" style="font-size:12px; padding:7px 13px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">CSVエクスポート</button></sc-if>
+          </div>
+          <div style="display:flex; gap:8px; margin-bottom:14px;">
+            <select style="font-size:12px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff; color:#555;"><option>すべての操作者</option><option>田中</option><option>佐藤</option><option>山口</option></select>
+            <select style="font-size:12px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff; color:#555;"><option>すべての操作</option><option>作成</option><option>更新</option><option>削除</option><option>承認</option></select>
+            <select style="font-size:12px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff; color:#555;"><option>すべての対象</option><option>引合</option><option>案件</option><option>契約</option><option>請求</option></select>
+            <input type="date" style="font-size:12px; padding:5px 8px; border:1px solid #cccccc; border-radius:3px; color:#555;">
+          </div>
+          <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+            <div style="display:grid; grid-template-columns:140px 80px 1fr 80px 1.4fr; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>日時</span><span>操作者</span><span>操作内容</span><span>対象種別</span><span>対象名</span></div>
+            <sc-for list="{{ auditLogs }}" as="l" hint-placeholder-count="5"><div class="row-hover" style="display:grid; grid-template-columns:140px 80px 1fr 80px 1.4fr; padding:9px 14px; border-bottom:1px solid #f0f0f0; font-size:12px; align-items:center;"><span class="mono" style="color:#7f8c8d;">{{ l.time }}</span><span style="color:#555;">{{ l.actor }}</span><span style="color:#2c3e50;">{{ l.action }}</span><span style="color:#7f8c8d;">{{ l.ttype }}</span><span onClick="{{ l.onClick }}" style="color:#2980b9; cursor:pointer;">{{ l.tname }}</span></div></sc-for>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ===== CLIENTS LIST ===== -->
+      <sc-if value="{{ isClients }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:16px;">
+          <div><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">顧客</h1><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">全 7 社</p></div>
+          <button onClick="{{ goClientNew }}" style="font-size:12px; padding:7px 13px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">顧客を登録</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <select style="font-size:12px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff; color:#555;"><option>すべての業種</option><option>製造</option><option>IT・通信</option><option>卸売・小売</option><option>運輸・物流</option><option>医療・福祉</option></select>
+          <input placeholder="企業名で検索" style="margin-left:auto; width:240px; font-size:12px; padding:6px 10px; border:1px solid #cccccc; border-radius:3px;">
+        </div>
+        <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+          <div style="display:grid; grid-template-columns:1.8fr 1fr 100px 110px; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>企業名</span><span>業種</span><span style="text-align:right;">関連案件</span><span style="text-align:right;">登録日</span></div>
+          <sc-for list="{{ clientsRows }}" as="c" hint-placeholder-count="7">
+            <div class="row-hover" onClick="{{ c.onClick }}" style="display:grid; grid-template-columns:1.8fr 1fr 100px 110px; padding:10px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; cursor:pointer; align-items:center;">
+              <span style="color:#2980b9; font-weight:500;">{{ c.name }}</span><span style="color:#555;">{{ c.industry }}</span><span class="mono" style="text-align:right; color:#2c3e50;">{{ c.deals }}</span><span class="mono" style="text-align:right; color:#7f8c8d;">{{ c.date }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ===== CONTRACTS LIST ===== -->
+      <sc-if value="{{ isContracts }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:16px;">
+          <div><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">契約</h1><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">全 5 件 · <span style="color:#c0392b;">終了30日以内 2 件</span></p></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <select style="font-size:12px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; background:#fff; color:#555;"><option>すべてのステータス</option><option>有効</option><option>完了</option><option>解除</option></select>
+          <input placeholder="契約名・顧客名で検索" style="margin-left:auto; width:240px; font-size:12px; padding:6px 10px; border:1px solid #cccccc; border-radius:3px;">
+        </div>
+        <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+          <div style="display:grid; grid-template-columns:1.6fr 1fr 1fr 80px 130px 150px 70px; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>契約名</span><span>顧客名</span><span>案件名</span><span>形態</span><span style="text-align:right;">金額</span><span style="text-align:right;">期間</span><span style="text-align:right;">状態</span></div>
+          <sc-for list="{{ contractsRows }}" as="c" hint-placeholder-count="5">
+            <div class="row-hover" onClick="{{ c.onClick }}" style="display:grid; grid-template-columns:1.6fr 1fr 1fr 80px 130px 150px 70px; padding:10px 14px; border-bottom:1px solid #f0f0f0; font-size:12px; cursor:pointer; align-items:center;">
+              <span style="color:#2980b9; font-weight:500;">{{ c.name }}</span><span style="color:#555;">{{ c.client }}</span><span style="color:#7f8c8d;">{{ c.deal }}</span><span style="color:#7f8c8d;">{{ c.type }}</span>
+              <span class="mono" style="text-align:right; color:#2c3e50;">{{ c.amount }}</span>
+              <span class="mono" style="text-align:right; color:{{ c.periodColor }};">{{ c.period }}</span>
+              <span style="text-align:right; color:{{ c.statusColor }};">{{ c.statusText }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ===== GENERIC FORM ===== -->
+      <sc-if value="{{ isForm }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ formCrumbBack }}" style="cursor:pointer;">{{ formCrumbA }}</a> <span style="color:#ccc;">/</span> {{ formCrumbB }}</div>
+        <div style="margin-bottom:18px;"><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">{{ formTitle }}</h1></div>
+        <div style="max-width:620px;">
+          <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden;">
+            <sc-for list="{{ formFields }}" as="f" hint-placeholder-count="5">
+              <div style="padding:12px 16px; border-bottom:1px solid #f0f0f0;">
+                <label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:5px;">{{ f.label }}<sc-if value="{{ f.required }}" hint-placeholder-val="{{ false }}"><span style="color:#c0392b;"> *</span></sc-if></label>
+                <sc-if value="{{ f.isText }}" hint-placeholder-val="{{ false }}"><input type="text" placeholder="{{ f.placeholder }}" defaultValue="{{ f.value }}" style="width:100%; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px; color:#2c3e50; background:#fff;"></sc-if>
+                <sc-if value="{{ f.isNum }}" hint-placeholder-val="{{ false }}"><input type="number" placeholder="{{ f.placeholder }}" defaultValue="{{ f.value }}" style="width:100%; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px; color:#2c3e50; background:#fff; font-family:'IBM Plex Mono',monospace;"></sc-if>
+                <sc-if value="{{ f.isDate }}" hint-placeholder-val="{{ false }}"><input type="date" style="font-size:13px; padding:6px 9px; border:1px solid #cccccc; border-radius:3px; color:#2c3e50; background:#fff;"></sc-if>
+                <sc-if value="{{ f.isDateTime }}" hint-placeholder-val="{{ false }}"><input type="datetime-local" style="font-size:13px; padding:6px 9px; border:1px solid #cccccc; border-radius:3px; color:#2c3e50; background:#fff;"></sc-if>
+                <sc-if value="{{ f.isArea }}" hint-placeholder-val="{{ false }}"><textarea placeholder="{{ f.placeholder }}" style="width:100%; min-height:72px; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px; color:#2c3e50; background:#fff; resize:vertical;"></textarea></sc-if>
+                <sc-if value="{{ f.isSelect }}" hint-placeholder-val="{{ false }}">{{ f.selectEl }}</sc-if>
+                <sc-if value="{{ f.isReadonly }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px; padding:7px 9px; background:#f5f5f5; border:1px solid #e0e0e0; border-radius:3px; color:#555;">{{ f.value }}</div></sc-if>
+                <sc-if value="{{ f.isNote }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px; color:#2980b9; font-weight:500;">{{ f.value }}</div></sc-if>
+                <sc-if value="{{ f.hint }}" hint-placeholder-val="{{ false }}"><p style="margin:5px 0 0; font-size:11px; color:#999;">{{ f.hint }}</p></sc-if>
+              </div>
+            </sc-for>
+            <div style="padding:12px 16px; display:flex; justify-content:flex-end; gap:8px; background:#f9f9f9;">
+              <button onClick="{{ onFormCancel }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #cccccc; background:#fff; color:#555; border-radius:3px; cursor:pointer;">キャンセル</button>
+              <sc-if value="{{ formSecondary }}" hint-placeholder-val="{{ false }}"><button onClick="{{ onFormSecondary }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">{{ formSecondary }}</button></sc-if>
+              <button onClick="{{ onFormSubmit }}" style="font-size:12.5px; padding:8px 16px; border:1px solid #2980b9; background:#2980b9; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">{{ formSubmit }}</button>
+            </div>
+          </section>
+        </div>
+      </sc-if>
+
+      <!-- ===== SALES DETAIL (売上明細) ===== -->
+      <sc-if value="{{ isSalesDetail }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ goRevenue }}" style="cursor:pointer;">売上</a> <span style="color:#ccc;">/</span> 売上明細</div>
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:14px;">
+          <div><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">売上明細</h1><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">入金確認済みの売上内訳</p></div>
+          <button onClick="{{ exportCsv }}" style="font-size:12px; padding:7px 13px; border:1px solid #cccccc; background:#fff; color:#2c3e50; border-radius:3px; cursor:pointer;">CSVエクスポート</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+          <div style="display:inline-flex; border:1px solid #cccccc; border-radius:4px; overflow:hidden; background:#fff;"><sc-for list="{{ salesAxisTabs }}" as="t" hint-placeholder-count="3"><div onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</div></sc-for></div>
+          <div style="margin-left:auto; display:flex; align-items:center; gap:6px; font-size:12px; color:#7f8c8d;"><span>期間</span><input type="date" style="font-size:12px; padding:5px 8px; border:1px solid #cccccc; border-radius:3px;"><span>〜</span><input type="date" style="font-size:12px; padding:5px 8px; border:1px solid #cccccc; border-radius:3px;"></div>
+        </div>
+        <div style="border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06);">
+          <div style="display:grid; grid-template-columns:1.8fr 1fr 1fr; padding:8px 14px; background:#dcdde1; font-size:11px; color:#555; font-weight:500;"><span>{{ salesColLabel }}</span><span style="text-align:right;">売上金額</span><span style="text-align:right;">{{ salesSubLabel }}</span></div>
+          <sc-for list="{{ salesRows }}" as="r" hint-placeholder-count="4">
+            <div class="row-hover" onClick="{{ r.onClick }}" style="display:grid; grid-template-columns:1.8fr 1fr 1fr; padding:10px 14px; border-bottom:1px solid #f0f0f0; font-size:12.5px; align-items:center; cursor:pointer;">
+              <span style="color:#2980b9; font-weight:500;">{{ r.label }}</span><span class="mono" style="text-align:right; color:#2c3e50;">{{ r.amount }}</span><span style="text-align:right; color:#7f8c8d;">{{ r.sub }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- ===== PLAN (予実管理) ===== -->
+      <sc-if value="{{ isSalesPlan }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:11px; color:#7f8c8d; margin-bottom:10px;"><a onClick="{{ goRevenue }}" style="cursor:pointer;">売上</a> <span style="color:#ccc;">/</span> 予実管理</div>
+        <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:14px;">
+          <div><h1 style="margin:0; font-size:18px; font-weight:700; color:#2c3e50;">予実管理</h1><p style="margin:3px 0 0; font-size:12px; color:#7f8c8d;">{{ planLabel }}</p></div>
+          <div style="display:inline-flex; border:1px solid #cccccc; border-radius:4px; overflow:hidden; background:#fff;"><sc-for list="{{ planTabs }}" as="t" hint-placeholder-count="3"><div onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }}</div></sc-for></div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; border:1px solid #cccccc; border-radius:4px; background:#fff; overflow:hidden; box-shadow:0 1px 2px rgba(44,62,80,0.06); margin-bottom:20px;">
+          <div style="padding:14px 16px; border-right:1px solid #e0e0e0;">
+            <span style="font-size:11px; color:#7f8c8d;">目標金額 <span style="color:#2980b9;">（クリックで編集）</span></span>
+            <input defaultValue="{{ planTarget }}" style="display:block; margin-top:6px; width:100%; font-family:'IBM Plex Mono',monospace; font-size:20px; font-weight:700; color:#2c3e50; border:1px solid transparent; border-radius:3px; padding:2px 4px; background:transparent;" style-focus="border:1px solid #2980b9; background:#fff;">
+          </div>
+          <div style="padding:14px 16px; border-right:1px solid #e0e0e0;"><span style="font-size:11px; color:#7f8c8d;">実績（入金確認済み）</span><div class="mono" style="font-size:22px; font-weight:700; color:#1a8a4a; margin-top:6px;">{{ planActual }}</div></div>
+          <div style="padding:14px 16px;"><span style="font-size:11px; color:#7f8c8d;">進捗率</span><div class="mono" style="font-size:22px; font-weight:700; color:#2c3e50; margin-top:6px;">{{ planPct }}</div></div>
+        </div>
+        <section style="border:1px solid #cccccc; border-radius:4px; background:#fff; box-shadow:0 1px 2px rgba(44,62,80,0.06); overflow:hidden; max-width:680px;">
+          <div style="padding:10px 14px; border-bottom:1px solid #e0e0e0; background:#f9f9f9;"><h2 style="margin:0; font-size:13px; font-weight:700; color:#2c3e50;">達成状況</h2></div>
+          <div style="padding:16px;">
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><span style="color:#7f8c8d;">実績 / 目標</span><span class="mono" style="color:#2c3e50;">{{ planActual }} / {{ planTarget }}</span></div>
+            <div style="height:12px; background:#eef0f1; border-radius:6px; overflow:hidden; margin-bottom:16px;"><div style="height:100%; background:#1a8a4a; width:{{ planPctW }};"></div></div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:6px;"><span style="color:#7f8c8d;">着地予測（パイプライン加味）</span><span class="mono" style="color:#2980b9; font-weight:500;">{{ planLanding }}</span></div>
+            <p style="margin:6px 0 0; font-size:11px; color:#999;">着地予測は、確定済み売上に進行中案件の加重見込みを加算した値です。</p>
+          </div>
+        </section>
+      </sc-if>
+
+      <!--SCREENS-->
+
+    </div>
+  </main>
+
+  <!-- DIALOG -->
+  <sc-if value="{{ dialogOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeDialog }}" style="position:fixed; inset:0; background:rgba(44,62,80,0.45); display:flex; align-items:center; justify-content:center; z-index:50;">
+      <div style="width:404px; background:#fff; border:1px solid #cccccc; border-radius:4px; box-shadow:0 10px 30px rgba(44,62,80,0.25); overflow:hidden;">
+        <div style="padding:14px 16px; border-bottom:1px solid #e0e0e0;"><h3 style="margin:0; font-size:14px; font-weight:700; color:#2c3e50;">{{ dialogTitle }}</h3></div>
+        <div style="padding:16px;">
+          <p style="margin:0; font-size:12.5px; color:#555; line-height:1.7;">{{ dialogBody }}</p>
+          <sc-if value="{{ dialogPayment }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:12px;">
+              <label style="display:block; font-size:11px; color:#7f8c8d; margin-bottom:4px;">入金日</label>
+              <input type="date" value="2026-06-24" style="font-size:13px; padding:6px 8px; border:1px solid #cccccc; border-radius:3px; width:100%;">
+            </div>
+          </sc-if>
+        </div>
+        <div style="padding:12px 16px; border-top:1px solid #e0e0e0; display:flex; justify-content:flex-end; gap:8px; background:#f9f9f9;">
+          <button onClick="{{ closeDialog }}" style="font-size:12px; padding:7px 13px; border:1px solid #cccccc; background:#fff; color:#555; border-radius:3px; cursor:pointer;">キャンセル</button>
+          <button onClick="{{ confirmDialog }}" style="font-size:12px; padding:7px 13px; border:1px solid {{ dialogColor }}; background:{{ dialogColor }}; color:#fff; border-radius:3px; cursor:pointer; font-weight:500;">{{ dialogConfirmLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- TOAST -->
+  <sc-if value="{{ toastMsg }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#2c3e50; color:#fff; font-size:12.5px; padding:9px 16px; border-radius:4px; box-shadow:0 4px 12px rgba(44,62,80,0.25); z-index:60;">{{ toastMsg }}</div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: { &quot;width&quot;: 1280, &quot;height&quot;: 880 },
+  &quot;role&quot;: { &quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;manager&quot;, &quot;options&quot;: [&quot;member&quot;, &quot;manager&quot;, &quot;admin&quot;, &quot;finance&quot;], &quot;tsType&quot;: &quot;string&quot; }
+}">
+class Component extends DCLogic {
+  state = {
+    screen: 'dashboard', ctx: {},
+    quoteStatus: 'new', invoiceStatus: 'overdue', dealPhase: '交渉', dealWon: false,
+    dealView: 'table', quoteTab: 'all', approvalTab: 'todo', noteTab: 'edit', settingsView: 'list', settingsTab: 'policy', salesAxis: 'month', planPeriod: 'month',
+    dialog: null, toast: null,
+  };
+  go(screen, ctx = {}) { this.setState({ screen, ctx, dialog: null }); const m = document.querySelector('main'); if (m) m.scrollTop = 0; }
+  toast(msg) { this.setState({ toast: msg }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ toast: null }), 2600); }
+  set(patch) { this.setState(patch); }
+  openDialog(d) { this.setState({ dialog: d }); }
+  closeDialog() { this.setState({ dialog: null }); }
+  confirmDialog() { const d = this.state.dialog; this.setState({ dialog: null }); if (d && d.after) d.after.call(this); if (d && d.toast) this.toast(d.toast); }
+
+  renderVals() {
+    const RED = '#c0392b', WARN = '#d4880f', PRI = '#2980b9', OK = '#1a8a4a', SEC = '#555555', MUTED = '#7f8c8d', EXP = '#999999';
+    const role = this.props.role ?? 'manager';
+    const isMgr = role === 'manager' || role === 'admin';
+    const isFinance = role === 'finance';
+    const roleLabel = { member: '営業担当', manager: 'マネージャー', admin: '管理者', finance: '経理' }[role] || 'マネージャー';
+    const userName = isFinance ? '山口 美咲' : '田中 健一';
+    const S = this.state, screen = S.screen, ctx = S.ctx || {};
+    const go = (s, c) => () => this.go(s, c);
+
+    const has = (...rs) => rs.includes(role);
+    const can = {
+      quoteCreate: has('admin','manager','member'), quoteConvert: has('admin','manager'),
+      dealCreate: has('admin','manager'), dealWonLost: has('admin','manager'), dealEdit: has('admin','manager','member'),
+      contractManage: has('admin','manager','finance'), invoiceManage: has('admin','finance'),
+      del: has('admin'), policyEdit: has('admin'), policyView: has('admin','manager'),
+      delegationCreate: has('admin','manager','finance'), userView: has('admin','manager'), webhook: has('admin'), auditExport: has('admin'),
+    };
+    const pendingApprovals = 3;
+    const sectionOf = { dashboard:'ダッシュボード', quotes:'引合', quote:'引合', quoteNew:'引合', deals:'案件', deal:'案件', dealNew:'案件', meeting:'案件', meetingNew:'案件', clients:'顧客', client:'顧客', clientNew:'顧客', contracts:'契約', contract:'契約', contractNew:'契約', invoice:'契約', invoiceNew:'契約', approvals:'承認', approval:'承認', approvalNew:'承認', revenue:'売上', salesDetail:'売上', salesPlan:'売上', settings:'設定' };
+    const activeSection = sectionOf[screen] || '';
+    const navDef = [['ダッシュボード','dashboard'],['引合','quotes'],['案件','deals'],['顧客','clients'],['契約','contracts'],['承認','approvals'],['売上','revenue']];
+    if (role !== 'member') navDef.push(['設定','settings']);
+    const nav = navDef.map(([label, sc]) => {
+      const active = activeSection === label;
+      const base = 'display:flex; align-items:center; justify-content:space-between; padding:6px 12px; font-size:13px; border-radius:4px; cursor:pointer; border-left:2px solid transparent; ';
+      const style = active
+        ? base + 'background:rgba(255,255,255,0.10); color:#fff; font-weight:600; border-left:2px solid #2980b9;'
+        : base + 'color:#aeb9c4; font-weight:400;';
+      return { label, style, onClick: go(sc), badge: (label === '承認' && pendingApprovals > 0) ? String(pendingApprovals) : '' };
+    });
+
+    // ---- SALES DASHBOARD ----
+    const cellBase = 'padding:12px 14px; display:flex; flex-direction:column; cursor:pointer; border-right:1px solid #e0e0e0;';
+    const pipeRaw = [['ヒアリング',8,'¥42.0M'],['提案',5,'¥68.5M'],['見積',4,'¥51.2M'],['交渉',3,'¥38.0M'],['クロージング',2,'¥27.5M'],['合計',22,'¥227.2M']];
+    const pipeline = pipeRaw.map((p, i) => ({ phase: p[0], count: p[1], amount: p[2], style: cellBase + (i === pipeRaw.length - 1 ? ' border-right:none; background:#f5f5f5;' : '') }));
+    let actions = [
+      { type:'承認待ち', typeColor:SEC, title:'値引き承認「グリーンテック CRM導入」', context:'申請: 佐藤 · あなたの承認が必要', due:'2日超過', dueColor:RED, role:'mgr', onClick: go('approval') },
+      { type:'アクション', typeColor:MUTED, title:'提案書フィードバックを反映する', context:'案件: ベイサイド観光 予約システム', due:'1日超過', dueColor:RED, role:'all', onClick: go('deal', { name:'ベイサイド観光 予約システム', client:'ベイサイド観光' }) },
+      { type:'承認待ち', typeColor:SEC, title:'受注承認「ニットウ 基幹システム刷新」', context:'申請: 田中 · あなたの承認が必要', due:'今日 6/24', dueColor:WARN, role:'mgr', onClick: go('approval') },
+      { type:'アクション', typeColor:MUTED, title:'議事録を共有する', context:'商談: メディカルリンク 定例MTG', due:'今日 6/24', dueColor:WARN, role:'all', onClick: go('meeting') },
+      { type:'新規引合', typeColor:PRI, title:'ECサイトリニューアル', context:'朝日商事 · 経路: Webフォーム', due:'6/23 登録', dueColor:MUTED, role:'all', onClick: go('quote', { subject:'ECサイトリニューアル', client:'朝日商事' }) },
+      { type:'アクション', typeColor:MUTED, title:'見積書を送付する', context:'案件: フジデンキ 在庫管理システム', due:'6/25', dueColor:MUTED, role:'all', onClick: go('deal', { name:'フジデンキ 在庫管理システム', client:'フジデンキ' }) },
+      { type:'新規引合', typeColor:PRI, title:'社内ポータル構築', context:'山陽製作所 · 経路: 紹介', due:'6/24 登録', dueColor:MUTED, role:'all', onClick: go('quote', { subject:'社内ポータル構築', client:'山陽製作所' }) },
+      { type:'アクション', typeColor:MUTED, title:'契約書ドラフトを確認する', context:'案件: 大同物流 配車最適化', due:'6/27', dueColor:MUTED, role:'all', onClick: go('deal', { name:'大同物流 配車最適化', client:'大同物流' }) },
+    ];
+    if (!isMgr) actions = actions.filter(a => a.role !== 'mgr');
+    const overdueCount = actions.filter(a => a.dueColor === RED).length;
+    const stalled = [
+      { name:'スカイ航空 予約基盤刷新', phase:'交渉', amount:'¥45.0M', owner:'担当 田中', stale:'16日', onClick: go('deal', { name:'スカイ航空 予約基盤刷新', client:'スカイ航空' }) },
+      { name:'西日本ロジ WMS導入', phase:'見積', amount:'¥24.0M', owner:'担当 鈴木', stale:'21日', onClick: go('deal', { name:'西日本ロジ WMS導入', client:'西日本ロジスティクス' }) },
+      { name:'ホクト電機 勤怠管理刷新', phase:'提案', amount:'¥12.0M', owner:'担当 佐藤', stale:'18日', onClick: go('deal', { name:'ホクト電機 勤怠管理刷新', client:'ホクト電機' }) },
+    ];
+    const activity = [
+      { actor:'田中', text:'案件「ニットウ 基幹刷新」を 交渉 → 受注見込み に変更', time:'10分前' },
+      { actor:'佐藤', text:'商談記録を追加「メディカルリンク 定例MTG」', time:'32分前' },
+      { actor:'山口', text:'請求 INV-0421「フジデンキ」を発行', time:'1時間前' },
+      { actor:'鈴木', text:'引合「ECサイトリニューアル」を登録', time:'2時間前' },
+      { actor:'高橋', text:'値引き承認「アプリ刷新」を承認', time:'3時間前' },
+      { actor:'田中', text:'顧客「朝日商事」を新規作成', time:'4時間前' },
+      { actor:'佐藤', text:'アクションを完了「見積書を送付」', time:'5時間前' },
+      { actor:'山口', text:'入金確認 INV-0410「大同物流」', time:'昨日' },
+      { actor:'鈴木', text:'契約「グリーンテック 保守契約」を作成', time:'昨日' },
+      { actor:'田中', text:'商談記録を追加「山陽製作所 初回ヒアリング」', time:'昨日' },
+    ];
+
+    // ---- FINANCE DASHBOARD ----
+    const finOverdue = [
+      { no:'INV-0388', contract:'大同物流 保守契約', client:'大同物流', amount:'¥1,200,000', due:'6/10', over:'14日', onClick: go('invoice') },
+      { no:'INV-0395', contract:'ホクト電機 勤怠管理', client:'ホクト電機', amount:'¥3,500,000', due:'6/15', over:'9日', onClick: go('invoice') },
+      { no:'INV-0401', contract:'メディカルリンク 予約', client:'メディカルリンク', amount:'¥800,000', due:'6/20', over:'4日', onClick: go('invoice') },
+    ];
+    const finUnpaid = [
+      { no:'INV-0421', contract:'フジデンキ 在庫管理', client:'フジデンキ', amount:'¥2,400,000', due:'6/30', today:'本日請求', onClick: go('invoice') },
+      { no:'INV-0418', contract:'グリーンテック CRM', client:'グリーンテック', amount:'¥1,800,000', due:'7/05', today:'', onClick: go('invoice') },
+      { no:'INV-0420', contract:'朝日商事 ECサイト', client:'朝日商事', amount:'¥4,200,000', due:'7/10', today:'', onClick: go('invoice') },
+    ];
+    const finScheduled = [
+      { no:'INV-0425', contract:'ニットウ 基幹刷新（着手金）', client:'ニットウ', amount:'¥6,000,000', due:'6/28', onClick: go('invoice') },
+      { no:'INV-0426', contract:'山陽製作所 ポータル', client:'山陽製作所', amount:'¥1,500,000', due:'7/15', onClick: go('invoice') },
+      { no:'INV-0430', contract:'ベイサイド観光 予約', client:'ベイサイド観光', amount:'¥900,000', due:'7/31', onClick: go('invoice') },
+    ];
+
+    // ---- QUOTES LIST ----
+    const tabStyle = (active) => 'padding:6px 14px; font-size:12px; cursor:pointer; border-right:1px solid #e0e0e0; ' + (active ? 'background:#2980b9; color:#fff; font-weight:500;' : 'background:#fff; color:#555;');
+    const quoteTabs = [['all','すべて'],['new','新規'],['converted','案件化済み'],['declined','見送り']].map(([k,l]) => ({ label:l, style: tabStyle(S.quoteTab===k), onClick:()=>this.set({quoteTab:k}) }));
+    const qsMap = { new:['新規',PRI], converted:['案件化済み',OK], declined:['見送り',MUTED] };
+    let quotesAll = [
+      { subject:'ECサイトリニューアル', client:'朝日商事', source:'Webフォーム', sk:'new', date:'2026/06/23' },
+      { subject:'基幹システム刷新', client:'株式会社ニットウ', source:'紹介', sk:'converted', date:'2026/06/10', deal:'ニットウ 基幹システム刷新' },
+      { subject:'在庫管理システム', client:'フジデンキ', source:'既存顧客', sk:'converted', date:'2026/06/05', deal:'フジデンキ 在庫管理システム' },
+      { subject:'勤怠管理刷新', client:'ホクト電機', source:'展示会', sk:'declined', date:'2026/05/28' },
+      { subject:'社内ポータル構築', client:'山陽製作所', source:'紹介', sk:'new', date:'2026/06/24' },
+      { subject:'CRM導入', client:'グリーンテック', source:'Webフォーム', sk:'converted', date:'2026/06/01', deal:'グリーンテック CRM導入' },
+      { subject:'配車最適化システム', client:'大同物流', source:'既存顧客', sk:'new', date:'2026/06/22' },
+    ].map(q => ({ ...q, statusText: qsMap[q.sk][0], statusColor: qsMap[q.sk][1], converted: q.sk === 'converted',
+      onClick: go('quote', { subject:q.subject, client:q.client }),
+      dealClick: (e) => { e.stopPropagation(); this.go('deal', { name:q.deal, client:q.client }); } }));
+    const quotes = S.quoteTab === 'all' ? quotesAll : quotesAll.filter(q => q.sk === S.quoteTab);
+
+    // ---- QUOTE DETAIL ----
+    const qStatusTabs = [['new','新規'],['noclient','顧客未設定'],['pending','承認待ち'],['converted','案件化済み'],['declined','見送り']].map(([k,l]) => ({ label:l, style: tabStyle(S.quoteStatus===k), onClick:()=>this.set({quoteStatus:k}) }));
+    const qs = S.quoteStatus;
+    const quoteSubject = ctx.subject || 'ECサイトリニューアル';
+    const quoteClient = ctx.client || '朝日商事';
+    const qHead = { new:['新規',PRI], noclient:['新規',PRI], pending:['承認待ち',WARN], converted:['案件化済み',OK], declined:['見送り',MUTED] }[qs];
+    const quoteBasics = [
+      ['概要','既存ECサイトの全面刷新。EC基盤の移行、UI/UX改善、在庫連携の自動化を想定。'],
+      ['経路','Webフォーム'], ['予算','¥3,000,000 〜 ¥5,000,000'], ['時期','2026年9月 着手希望'],
+    ];
+    const quoteMeetings = [
+      { date:'2026/06/23 14:00', type:'初回ヒアリング', summary:'現行課題と予算感をヒアリング。9月着手を希望。', onClick: go('meeting') },
+      { date:'2026/06/18 10:30', type:'電話', summary:'問い合わせ内容の一次確認。', onClick: go('meeting') },
+    ];
+
+    // ---- DEALS LIST ----
+    const fmt = n => '¥' + n.toLocaleString('en-US');
+    const fmtM = n => '¥' + (n / 1000000).toFixed(1) + 'M';
+    const phaseOrder = ['ヒアリング','提案','見積','交渉','クロージング'];
+    const dealsRaw = [
+      { name:'ニットウ 基幹システム刷新', client:'株式会社ニットウ', phase:'交渉', type:'請負', amountNum:45000000, close:'2026/07' },
+      { name:'ECサイトリニューアル', client:'朝日商事', phase:'提案', type:'請負', amountNum:4500000, close:'2026/09' },
+      { name:'フジデンキ 在庫管理システム', client:'フジデンキ', phase:'見積', type:'準委任', amountNum:12000000, close:'2026/08' },
+      { name:'グリーンテック CRM導入', client:'グリーンテック', phase:'クロージング', type:'請負', amountNum:8000000, close:'2026/07' },
+      { name:'ベイサイド観光 予約システム', client:'ベイサイド観光', phase:'ヒアリング', type:'準委任', amountNum:6000000, close:'2026/10' },
+      { name:'大同物流 配車最適化', client:'大同物流', phase:'提案', type:'請負', amountNum:9000000, close:'2026/09' },
+      { name:'スカイ航空 予約基盤刷新', client:'スカイ航空', phase:'交渉', type:'請負', amountNum:45000000, close:'2026/08' },
+      { name:'西日本ロジ WMS導入', client:'西日本ロジスティクス', phase:'見積', type:'請負', amountNum:24000000, close:'2026/09' },
+    ];
+    const dealsRows = dealsRaw.map(d => ({ ...d, amount: fmt(d.amountNum), closeColor: (d.close === '2026/07') ? '#c0392b' : '#7f8c8d', onClick: go('deal', { name:d.name, client:d.client }) }));
+    const dealPhaseSummary = phaseOrder.map((p) => {
+      const rs = dealsRaw.filter(d => d.phase === p); const sum = rs.reduce((a, d) => a + d.amountNum, 0);
+      return { phase:p, count:rs.length, amount: fmtM(sum), style: cellBase };
+    });
+    dealPhaseSummary.push({ phase:'合計', count: dealsRaw.length, amount: fmtM(dealsRaw.reduce((a,d)=>a+d.amountNum,0)), style: cellBase + ' border-right:none; background:#f5f5f5;' });
+    const dealGroups = phaseOrder.map(p => {
+      const rs = dealsRows.filter(d => d.phase === p); const sum = rs.reduce((a, d) => a + d.amountNum, 0);
+      return { phase:p, count:rs.length, amount: fmtM(sum), rows: rs };
+    }).filter(g => g.count > 0);
+    const dealFlat = [];
+    dealGroups.forEach(g => {
+      dealFlat.push({ header: true, row: false, phase: g.phase, count: g.count + '件', amount: g.amount });
+      g.rows.forEach(r => dealFlat.push({ header: false, row: true, name: r.name, client: r.client, type: r.type, amount: r.amount, onClick: r.onClick }));
+    });
+    const dealViewTabs = [['table','テーブル'],['phase','フェーズ別']].map(([k,l]) => ({ label:l, style: tabStyle(S.dealView===k), onClick:()=>this.set({dealView:k}) }));
+
+    // ---- DEAL DETAIL ----
+    const dealName = ctx.name || 'ニットウ 基幹システム刷新';
+    const dealClient = ctx.client || '株式会社ニットウ';
+    const dealBasics = [
+      ['概要','基幹システムの全面刷新。販売・在庫・会計を統合し、業務効率化を図る。'],
+      ['契約形態','請負'], ['想定金額','¥45,000,000'], ['受注見込み時期','2026年7月'],
+    ];
+    const dealPhaseCtrl = phaseOrder.map(p => {
+      const active = S.dealPhase === p;
+      return { label:p, style:'flex:1; text-align:center; padding:8px 0; font-size:12px; cursor:pointer; border-right:1px solid #e0e0e0; ' + (active ? 'background:#2980b9; color:#fff; font-weight:600;' : 'background:#fff; color:#555;'),
+        onClick:()=>{ this.set({ dealPhase:p }); this.toast('フェーズを「'+p+'」に変更しました'); } };
+    });
+    const dealContacts = [
+      { name:'山本 太郎', role:'意思決定者' }, { name:'伊藤 花子', role:'窓口担当' }, { name:'渡辺 健', role:'技術担当' },
+    ];
+    const dealMeetings = [
+      { date:'2026/06/20 13:00', type:'提案MTG', summary:'提案書を提示。概算費用とスケジュールを共有。', tag:'案件', onClick: go('meeting') },
+      { date:'2026/06/10 10:00', type:'見積調整', summary:'要件を精緻化し見積を更新。', tag:'案件', onClick: go('meeting') },
+      { date:'2026/05/28 15:00', type:'初回ヒアリング', summary:'引合フェーズの記録。現行課題を確認。', tag:'引合', onClick: go('meeting') },
+    ];
+    const dealActionItems = [
+      { text:'最終見積書を送付する', owner:'田中', due:'6/25' },
+      { text:'技術検証の結果を共有する', owner:'鈴木', due:'6/27' },
+      { text:'契約書ドラフトを確認する', owner:'田中', due:'6/29' },
+    ];
+    const dealContract = { name: dealName + ' 開発契約', amount:'¥45,000,000', status:'契約準備中', onClick: go('contract') };
+
+    // ---- MEETING DETAIL ----
+    const inlineMd = (s) => s.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#2c3e50;">$1</strong>');
+    const mdToHtml = (md) => md.split('\n').map(l => {
+      if (l.startsWith('## ')) return '<div style="font-size:13px;font-weight:700;margin:14px 0 4px;color:#2c3e50;">' + l.slice(3) + '</div>';
+      if (l.startsWith('# ')) return '<div style="font-size:15px;font-weight:700;margin:8px 0 8px;color:#2c3e50;">' + l.slice(2) + '</div>';
+      if (l.startsWith('- ')) return '<div style="font-size:12.5px;color:#555;padding-left:16px;position:relative;margin:3px 0;"><span style="position:absolute;left:2px;">·</span>' + inlineMd(l.slice(2)) + '</div>';
+      if (l.trim() === '') return '<div style="height:6px;"></div>';
+      return '<div style="font-size:12.5px;color:#555;margin:3px 0;">' + inlineMd(l) + '</div>';
+    }).join('');
+    const minutesMd = '# 初回ヒアリング 議事録\n## 議題\n- 現行ECの課題整理\n- 提案方針のすり合わせ\n## 決定事項\n- **2026年9月着手**で合意\n- 次回までに**最終見積**を提示\n## ネクストアクション\n- 見積書の送付（田中 / 6/25）\n- 技術検証メモの共有（鈴木 / 6/27）';
+    const minutesPreview = React.createElement('div', { dangerouslySetInnerHTML: { __html: mdToHtml(minutesMd) } });
+    const hearingFields = [
+      ['課題','現行ECの保守性が低く、改修コストが増大している'],
+      ['予算','¥3,000,000 〜 ¥5,000,000'],
+      ['意思決定者','情報システム部 山本部長'],
+      ['時期','2026年9月 着手希望'],
+      ['競合','A社・B社が並行提案中'],
+    ];
+    const attInternal = [ { name:'田中 健一', role:'営業担当' }, { name:'鈴木 一郎', role:'エンジニア' } ];
+    const attExternal = [ { name:'山本 太郎', org:'朝日商事 / 情報システム部長' }, { name:'伊藤 花子', org:'朝日商事 / 担当' } ];
+    const mActionItems = [
+      { text:'最終見積書を送付する', owner:'田中', due:'6/25', done:false },
+      { text:'技術検証メモを共有する', owner:'鈴木', due:'6/27', done:false },
+      { text:'現行システム資料を受領する', owner:'田中', due:'6/22', done:true },
+    ].map(a => ({ ...a, box: a.done ? 'width:14px; height:14px; border:1px solid #1a8a4a; background:#1a8a4a; border-radius:3px; flex-shrink:0; color:#fff; font-size:10px; text-align:center; line-height:14px;' : 'width:14px; height:14px; border:1px solid #cccccc; border-radius:3px; flex-shrink:0;',
+      mark: a.done ? '✓' : '', textStyle: a.done ? 'flex:1; font-size:12.5px; color:#999; text-decoration:line-through;' : 'flex:1; font-size:12.5px; color:#2c3e50;' }));
+    const noteTabs = [['edit','編集'],['preview','プレビュー']].map(([k,l]) => ({ label:l, style: tabStyle(S.noteTab===k), onClick:()=>this.set({noteTab:k}) }));
+
+    // ---- CLIENT DETAIL ----
+    const clientName = ctx.client || '朝日商事 株式会社';
+    const clientCompany = [
+      ['業種','卸売・小売'], ['規模','従業員 約450名'], ['所在地','東京都中央区日本橋 〇-〇-〇'],
+      ['備考','長年取引のある既存顧客。複数案件が並行して進行中。'],
+    ];
+    const clientContacts = [
+      { name:'山本 太郎', dept:'情報システム部', title:'部長', email:'yamamoto@asahi.example', phone:'03-1234-5678', primary:true },
+      { name:'伊藤 花子', dept:'情報システム部', title:'主任', email:'ito@asahi.example', phone:'03-1234-5679', primary:false },
+      { name:'高橋 浩', dept:'営業推進部', title:'課長', email:'takahashi@asahi.example', phone:'03-1234-5680', primary:false },
+    ];
+    const clientQuotes = [
+      { subject:'ECサイトリニューアル', statusText:'新規', statusColor:PRI, date:'2026/06/23', onClick: go('quote', { subject:'ECサイトリニューアル', client:clientName }) },
+      { subject:'基幹システム連携', statusText:'見送り', statusColor:MUTED, date:'2026/03/10', onClick: go('quote', { subject:'基幹システム連携', client:clientName }) },
+    ];
+    const clientDeals = [
+      { name:'ECサイトリニューアル', phase:'提案', amount:'¥4,500,000', onClick: go('deal', { name:'ECサイトリニューアル', client:clientName }) },
+    ];
+
+    // ---- CONTRACT DETAIL ----
+    const contractName = ctx.name ? (ctx.name + ' 開発契約') : 'ニットウ 基幹システム刷新 開発契約';
+    const contractBasics = [
+      ['契約形態','請負（単発）'], ['金額','¥45,000,000'], ['開始日','2026/07/01'], ['終了日','2027/03/31'],
+      ['更新種別','更新なし（単発）'],
+    ];
+    const contractInvoices = [
+      { no:'INV-0410', label:'着手金', amount:'¥6,000,000', issue:'2026/05/31', due:'2026/06/30', statusText:'入金済み', statusColor:OK, onClick: go('invoice') },
+      { no:'INV-0425', label:'中間金', amount:'¥12,000,000', issue:'2026/06/28', due:'2026/07/31', statusText:'発行済み', statusColor:PRI, onClick: go('invoice') },
+    ];
+
+    // ---- INVOICE DETAIL ----
+    const invSt = S.invoiceStatus;
+    const invMap = { scheduled:['請求予定',EXP], invoiced:['発行済み',PRI], overdue:['期日超過',RED], paid:['入金済み',OK] };
+    const invStatusTabs = [['scheduled','請求予定'],['invoiced','発行済み'],['overdue','期日超過'],['paid','入金済み']].map(([k,l]) => ({ label:l, style: tabStyle(invSt===k), onClick:()=>this.set({invoiceStatus:k}) }));
+    const invBasics = [
+      ['金額','¥6,000,000'], ['請求日', invSt === 'scheduled' ? '— (未発行)' : '2026/06/28'],
+      ['支払期日','2026/06/30'], ['入金日', invSt === 'paid' ? '2026/06/25' : '—'],
+    ];
+
+    // ---- APPROVALS LIST ----
+    const apMap = { pending:['承認待ち',WARN], approved:['承認済み',OK], rejected:['却下',RED], expired:['期限切れ',EXP] };
+    let apAll = [
+      { subject:'受注承認「ニットウ 基幹刷新」', applicant:'田中', sk:'pending', kind:'自動', date:'2026/06/24' },
+      { subject:'値引き承認「グリーンテック CRM」', applicant:'佐藤', sk:'pending', kind:'手動', date:'2026/06/22' },
+      { subject:'案件化承認「ECサイトリニューアル」', applicant:'鈴木', sk:'approved', kind:'自動', date:'2026/06/20' },
+      { subject:'受注承認「フジデンキ 在庫管理」', applicant:'田中', sk:'rejected', kind:'自動', date:'2026/06/15' },
+      { subject:'値引き承認「大同物流 配車最適化」', applicant:'高橋', sk:'pending', kind:'手動', date:'2026/06/23' },
+      { subject:'案件化承認「メディカルリンク 予約」', applicant:'鈴木', sk:'expired', kind:'自動', date:'2026/06/05' },
+    ].map(a => ({ ...a, statusText: apMap[a.sk][0], statusColor: apMap[a.sk][1], onClick: go('approval') }));
+    const apTabsDef = [['todo','要対応'],['mine','自分の申請']];
+    if (isMgr) apTabsDef.push(['all','すべて']);
+    const approvalTabs = apTabsDef.map(([k,l]) => ({ label:l, style: tabStyle(S.approvalTab===k), onClick:()=>this.set({approvalTab:k}) }));
+    const approvals = S.approvalTab === 'todo' ? apAll.filter(a => a.sk === 'pending')
+      : S.approvalTab === 'mine' ? apAll.filter(a => a.applicant === '田中') : apAll;
+
+    // ---- APPROVAL DETAIL ----
+    const approvalForm = [
+      ['対象案件','ニットウ 基幹システム刷新'], ['想定金額','¥45,000,000'], ['契約形態','請負'], ['申請理由','高額案件のため受注承認が必要'],
+    ];
+    const approvalSteps = [
+      { order:'1', name:'一次承認', approver:'佐藤（マネージャー）', state:'承認済み', stateColor:OK, comment:'内容に問題なし。', date:'2026/06/23 15:00', done:true },
+      { order:'2', name:'最終承認', approver:'高橋（部長）', state:'承認待ち', stateColor:WARN, comment:'—', date:'—', done:false },
+    ].map(s => ({ ...s, circle: 'width:22px; height:22px; border-radius:50%; flex-shrink:0; font-size:11px; text-align:center; line-height:22px; ' + (s.done ? 'background:#1a8a4a; color:#fff;' : 'background:#fff; border:1px solid #d4880f; color:#d4880f;') }));
+
+    // ---- REVENUE DASHBOARD ----
+    const trendRaw = [['25/7',12],['8',15],['9',9],['10',18],['11',14],['12',16],['26/1',11],['2',20],['3',13],['4',17],['5',15],['6',18.4]];
+    const trendMax = 20;
+    const trend = trendRaw.map((t, i) => ({ label: t[0], value: '¥' + t[1].toFixed(1) + 'M', h: Math.round(t[1] / trendMax * 100), barColor: i === trendRaw.length - 1 ? '#1a8a4a' : '#2980b9' }));
+    const ranking = [
+      ['株式会社ニットウ', 42.0, 100], ['グリーンテック', 28.0, 67], ['フジデンキ', 22.0, 52], ['朝日商事', 18.0, 43], ['大同物流', 12.0, 29],
+    ].map(r => ({ name: r[0], amount: '¥' + r[1].toFixed(1) + 'M', pct: r[2] + '%', onClick: go('client', { client: r[0] }) }));
+    const trendClick = trend.map(t => ({ ...t, onClick: go('salesDetail') }));
+
+    // ---- SALES DETAIL ----
+    const salesAxisTabs = [['month','月別'],['client','顧客別'],['deal','案件別']].map(([k, l]) => ({ label: l, style: tabStyle(S.salesAxis === k), onClick: () => this.set({ salesAxis: k }) }));
+    const salesData = {
+      month: { col:'月', sub:'件数', rows:[['2026年6月','¥18,400,000','5 件'],['2026年5月','¥15,000,000','4 件'],['2026年4月','¥17,000,000','5 件'],['2026年3月','¥13,000,000','3 件']].map(r=>({label:r[0],amount:r[1],sub:r[2]})) },
+      client: { col:'顧客', sub:'件数', rows:[['株式会社ニットウ','¥42,000,000','3 件',go('client',{client:'株式会社ニットウ'})],['グリーンテック','¥28,000,000','2 件',go('client',{client:'グリーンテック'})],['フジデンキ','¥22,000,000','1 件',go('client',{client:'フジデンキ'})],['朝日商事','¥18,000,000','1 件',go('client',{client:'朝日商事 株式会社'})]].map(r=>({label:r[0],amount:r[1],sub:r[2],onClick:r[3]})) },
+      deal: { col:'案件', sub:'契約形態', rows:[['ニットウ 基幹刷新','¥45,000,000','請負',go('deal',{name:'ニットウ 基幹システム刷新',client:'株式会社ニットウ'})],['グリーンテック CRM','¥8,000,000','請負',go('deal',{name:'グリーンテック CRM導入',client:'グリーンテック'})],['フジデンキ 在庫管理','¥12,000,000','準委任',go('deal',{name:'フジデンキ 在庫管理システム',client:'フジデンキ'})]].map(r=>({label:r[0],amount:r[1],sub:r[2],onClick:r[3]})) },
+    };
+    const salesCur = salesData[S.salesAxis] || salesData.month;
+
+    // ---- PLAN (予実) ----
+    const planTabs = [['month','月次'],['quarter','四半期'],['year','年次']].map(([k, l]) => ({ label: l, style: tabStyle(S.planPeriod === k), onClick: () => this.set({ planPeriod: k }) }));
+    const planMap = {
+      month:   { target:'¥20,000,000', actual:'¥18,400,000', pct:92, landing:'¥21,000,000', label:'2026年6月' },
+      quarter: { target:'¥60,000,000', actual:'¥51,000,000', pct:85, landing:'¥62,000,000', label:'2026年 第2四半期' },
+      year:    { target:'¥240,000,000', actual:'¥182,000,000', pct:76, landing:'¥235,000,000', label:'2026年度' },
+    };
+    const planCur = planMap[S.planPeriod] || planMap.month;
+
+    // ---- SETTINGS ----
+    const mkToggle = (on, onClick) => ({ toggleStyle: 'width:34px; height:18px; border-radius:9px; position:relative; cursor:pointer; flex-shrink:0; ' + (on ? 'background:#2980b9;' : 'background:#cccccc;'), knobStyle: 'position:absolute; top:2px; width:14px; height:14px; border-radius:50%; background:#fff; ' + (on ? 'left:18px;' : 'left:2px;'), onToggle: onClick });
+    const canUserEdit = role === 'admin';
+    const tabDefs = [['policy','承認ポリシー',can.policyView],['template','テンプレート',can.policyView],['users','ユーザー',can.userView],['delegation','代理承認',true],['webhook','Webhook',can.webhook],['audit','監査ログ',can.policyView]].filter(t => t[2]);
+    let stab = S.settingsTab || 'policy';
+    if (!tabDefs.some(t => t[0] === stab)) stab = (tabDefs[0] || [])[0];
+    const sView = S.settingsView || 'list';
+    const settingsTabs = tabDefs.map(([k, l]) => ({ label: l, style: 'padding:8px 14px; font-size:12.5px; cursor:pointer; border-bottom:2px solid ' + (stab === k ? '#2980b9' : 'transparent') + '; color:' + (stab === k ? '#2c3e50' : '#7f8c8d') + '; font-weight:' + (stab === k ? '600' : '400') + ';', onClick: () => this.set({ settingsTab: k, settingsView: 'list' }) }));
+    const policies = [
+      { name:'高額案件の受注承認', trigger:'案件の受注', cond:'想定金額 ≥ ¥10,000,000', template:'受注承認フロー', on:true },
+      { name:'値引き承認', trigger:'見積の値引き', cond:'値引率 ≥ 10%', template:'値引き承認フロー', on:true },
+      { name:'引合の案件化承認', trigger:'引合の案件化', cond:'全件', template:'案件化承認フロー', on:true },
+      { name:'新規顧客の与信確認', trigger:'顧客の新規登録', cond:'新規取引先', template:'与信確認フロー', on:false },
+    ].map(p => ({ ...p, ...mkToggle(p.on, () => this.toast(p.on ? '「'+p.name+'」を無効にしました' : '「'+p.name+'」を有効にしました')), onClick: () => { if (can.policyEdit) this.set({ settingsTab:'policy', settingsView:'form' }); } }));
+    const templates = [
+      { name:'受注承認フロー', steps:'2 ステップ', created:'2025/04/01' }, { name:'値引き承認フロー', steps:'1 ステップ', created:'2025/04/01' },
+      { name:'案件化承認フロー', steps:'1 ステップ', created:'2025/06/10' }, { name:'与信確認フロー', steps:'2 ステップ', created:'2025/09/15' },
+    ];
+    const roleJP = { admin:'管理者', manager:'マネージャー', member:'営業担当', finance:'経理' };
+    const userRows = [
+      { name:'佐藤 美咲', email:'sato@clearflow.example', role:'admin' }, { name:'田中 健一', email:'tanaka@clearflow.example', role:'manager' },
+      { name:'高橋 浩', email:'takahashi@clearflow.example', role:'manager' }, { name:'鈴木 一郎', email:'suzuki@clearflow.example', role:'member' },
+      { name:'山口 美咲', email:'yamaguchi@clearflow.example', role:'finance' },
+    ].map(u => ({ ...u, roleEl: React.createElement('select', { defaultValue: u.role, disabled: !canUserEdit, onChange: () => this.toast('ロールを変更しました'), style: { fontSize:'12px', padding:'4px 8px', border:'1px solid #cccccc', borderRadius:'3px', background: canUserEdit ? '#fff' : '#f5f5f5', color:'#2c3e50' } }, ['admin','manager','member','finance'].map(r => React.createElement('option', { key:r, value:r }, roleJP[r]))) }));
+    const myDelegations = [ { to:'佐藤 美咲', period:'2026/06/20 – 2026/06/30', on:true } ].map(d => ({ ...d, ...mkToggle(d.on, () => this.toast('委任を切り替えました')) }));
+    const allDelegations = [ { owner:'田中 健一', to:'佐藤 美咲', period:'2026/06/20 – 2026/06/30' }, { owner:'山口 美咲', to:'高橋 浩', period:'2026/07/01 – 2026/07/15' } ];
+    const webhooks = [
+      { url:'https://hooks.example.com/clearflow', events:'5 イベント', on:true, last:'成功 (200)', lastColor:OK },
+      { url:'https://api.partner.example/wh', events:'2 イベント', on:false, last:'失敗 (500)', lastColor:RED },
+    ].map(w => ({ ...w, ...mkToggle(w.on, () => this.toast('エンドポイントを切り替えました')) }));
+    const deliveryLog = [
+      { event:'deal.won', time:'2026/06/24 10:02', status:'成功 (200)', color:OK },
+      { event:'invoice.paid', time:'2026/06/23 16:40', status:'成功 (200)', color:OK },
+      { event:'quote.created', time:'2026/06/23 09:12', status:'失敗 (500)', color:RED },
+    ];
+    const auditLogs = [
+      { time:'2026/06/24 10:10', actor:'田中', action:'フェーズ変更', ttype:'案件', tname:'ニットウ 基幹刷新', onClick: go('deal', { name:'ニットウ 基幹システム刷新', client:'株式会社ニットウ' }) },
+      { time:'2026/06/24 09:30', actor:'山口', action:'請求発行', ttype:'請求', tname:'INV-0421', onClick: go('invoice') },
+      { time:'2026/06/23 16:40', actor:'鈴木', action:'引合登録', ttype:'引合', tname:'ECサイトリニューアル', onClick: go('quote', { subject:'ECサイトリニューアル', client:'朝日商事' }) },
+      { time:'2026/06/23 15:00', actor:'佐藤', action:'承認', ttype:'承認', tname:'受注承認「ニットウ」', onClick: go('approval') },
+      { time:'2026/06/23 11:00', actor:'高橋', action:'顧客作成', ttype:'顧客', tname:'朝日商事 株式会社', onClick: go('client', { client:'朝日商事 株式会社' }) },
+    ];
+
+    // ---- CLIENTS LIST ----
+    const clientsRows = [
+      ['朝日商事 株式会社','卸売・小売',2,'2024/04/10'], ['株式会社ニットウ','製造',3,'2023/11/02'],
+      ['フジデンキ','製造',1,'2025/01/20'], ['グリーンテック','IT・通信',2,'2024/08/15'],
+      ['大同物流','運輸・物流',1,'2025/03/05'], ['メディカルリンク','医療・福祉',1,'2025/05/12'],
+      ['山陽製作所','製造',1,'2026/06/01'],
+    ].map(r => ({ name:r[0], industry:r[1], deals:r[2], date:r[3], onClick: go('client', { client:r[0] }) }));
+
+    // ---- CONTRACTS LIST ----
+    const ctMap = { active:['有効',PRI], completed:['完了',MUTED], cancelled:['解除',RED] };
+    const contractsRows = [
+      ['ニットウ 基幹刷新 開発契約','株式会社ニットウ','基幹システム刷新','請負','¥45,000,000','2026/07 – 2027/03','active',false],
+      ['グリーンテック CRM 保守契約','グリーンテック','CRM導入','準委任','¥3,600,000','2025/10 – 2026/07','active',true],
+      ['フジデンキ 在庫管理 開発','フジデンキ','在庫管理システム','請負','¥12,000,000','2026/02 – 2026/06','active',true],
+      ['大同物流 保守契約','大同物流','配車最適化','準委任','¥1,200,000','2025/04 – 2026/03','completed',false],
+      ['メディカルリンク 予約システム','メディカルリンク','予約システム','SES','¥8,000,000','2025/06 – 2025/12','cancelled',false],
+    ].map(r => ({ name:r[0], client:r[1], deal:r[2], type:r[3], amount:r[4], period:r[5], statusText: ctMap[r[6]][0], statusColor: ctMap[r[6]][1], soon:r[7], periodColor: r[7] ? RED : MUTED, onClick: go('contract', { name:r[2] }) }));
+
+    // ---- FORMS (generic) ----
+    const inpStyle = 'width:100%; font-size:13px; padding:7px 9px; border:1px solid #cccccc; border-radius:3px; color:#2c3e50; background:#fff;';
+    const selStyle = inpStyle;
+    const F = (label, type, o = {}) => {
+      const b = { label, required: !!o.req, placeholder: o.ph || '', value: o.value || '', hint: o.hint || '',
+        isText: type === 'text', isNum: type === 'number', isDate: type === 'date', isDateTime: type === 'datetime',
+        isArea: type === 'textarea', isSelect: type === 'select', isReadonly: type === 'readonly', isNote: type === 'note' };
+      if (type === 'select') b.selectEl = React.createElement('select', { defaultValue: o.value || (o.options && o.options[0]), style: selStyle.split(';').reduce((a,s)=>{const[k,v]=s.split(':');if(k&&k.trim()){a[k.trim().replace(/-([a-z])/g,(m,c)=>c.toUpperCase())]=v.trim();}return a;},{}) }, (o.options || []).map((op, i) => React.createElement('option', { key: i }, op)));
+      return b;
+    };
+    let form = null;
+    if (screen === 'quoteNew') form = { title:'引合を登録', crumbA:'引合一覧', crumbBack: go('quotes'), crumbB:'新規登録', submit:'登録', onSubmit:()=>{ this.toast('引合を登録しました'); this.go('quotes'); }, onCancel: go('quotes'),
+      fields:[ F('件名','text',{req:true}), F('経路','select',{req:true,options:['Web','電話','メール','紹介','仲介サービス','展示会','その他']}), F('概要','textarea'), F('予算（円）','number',{ph:'例: 5000000'}), F('時期','text',{ph:'例: 2026年9月 着手希望'}), F('顧客','select',{options:['（未選択 / あとで紐づけ）','朝日商事 株式会社','株式会社ニットウ','フジデンキ','グリーンテック','大同物流'],hint:'一覧にない場合は顧客一覧から新規作成してください'}) ] };
+    else if (screen === 'dealNew') form = { title:'案件を登録', crumbA:'案件一覧', crumbBack: go('deals'), crumbB:'新規登録', submit:'登録', onSubmit:()=>{ this.toast('案件を登録しました'); this.go('deals'); }, onCancel: go('deals'),
+      fields:[ F('案件名','text',{req:true}), F('顧客','select',{req:true,options:['朝日商事 株式会社','株式会社ニットウ','フジデンキ','グリーンテック','大同物流']}), F('概要','textarea'), F('契約形態','select',{options:['準委任','請負','SES']}), F('想定金額（円）','number'), F('受注見込み時期','date') ] };
+    else if (screen === 'clientNew') form = { title:'顧客を登録', crumbA:'顧客一覧', crumbBack: go('clients'), crumbB:'新規登録', submit:'登録', onSubmit:()=>{ this.toast('顧客を登録しました'); this.go('clients'); }, onCancel: go('clients'),
+      fields:[ F('企業名','text',{req:true}), F('業種','text'), F('規模','text',{ph:'例: 従業員 約450名'}), F('所在地','text'), F('備考','textarea') ] };
+    else if (screen === 'meetingNew') form = { title:'商談を登録', crumbA:'案件', crumbBack: go('deal'), crumbB:'商談を登録', submit:'登録', onSubmit:()=>{ this.toast('商談を登録しました'); this.go('meeting'); }, onCancel: go('deal'),
+      fields:[ F('紐づけ先','readonly',{value:'案件: ニットウ 基幹システム刷新'}), F('日時','datetime',{req:true}), F('種別','select',{req:true,options:['ヒアリング','提案','交渉','クロージング','フォローアップ']}), F('議事要旨','text',{hint:'議事録は登録後に詳細画面で編集できます'}) ] };
+    else if (screen === 'contractNew') form = { title:'契約を作成', crumbA:'案件', crumbBack: go('deal'), crumbB:'契約を作成', submit:'登録', onSubmit:()=>{ this.toast('契約を作成しました'); this.go('contract'); }, onCancel: go('deal'),
+      fields:[ F('紐づけ先','readonly',{value:'案件: ニットウ 基幹システム刷新'}), F('契約名','text',{req:true,value:'ニットウ 基幹システム刷新 開発契約'}), F('契約形態','select',{req:true,value:'請負',options:['請負','準委任','SES']}), F('金額（円）','number',{req:true,value:'45000000'}), F('開始日','date',{req:true}), F('終了日','date'), F('更新種別','select',{req:true,options:['単発','継続']}) ] };
+    else if (screen === 'invoiceNew') form = { title:'請求を作成', crumbA:'契約一覧', crumbBack: go('contracts'), crumbB:'請求を作成', submit:'登録', onSubmit:()=>{ this.toast('請求を作成しました'); this.go('invoice'); }, onCancel: go('contract'),
+      fields:[ F('紐づけ先','readonly',{value:'契約: ニットウ 基幹刷新 開発契約'}), F('残り請求可能金額','note',{value:'残り ¥27,000,000（単発契約）'}), F('金額（円）','number',{req:true}), F('請求日','date',{req:true}), F('支払期日','date',{req:true,hint:'請求日より後の日付を指定してください'}) ] };
+    else if (screen === 'approvalNew') form = { title:'手動で承認を申請', crumbA:'承認', crumbBack: go('approvals'), crumbB:'手動申請', submit:'提出', secondary:'下書き保存', onSecondary:()=>{ this.toast('下書きを保存しました'); }, onSubmit:()=>{ this.toast('承認申請を提出しました'); this.go('approvals'); }, onCancel: go('approvals'),
+      fields:[ F('テンプレート','select',{req:true,options:['受注承認フロー','値引き承認フロー','与信確認フロー']}), F('件名','text',{req:true}), F('対象案件','text'), F('想定金額（円）','number'), F('申請理由','textarea') ] };
+
+    const dialog = S.dialog;
+    return {
+      // shell
+      nav, roleLabel, userName, isMgr, can, today: '2026年6月24日 (水)',
+      goHome: go('dashboard'), goQuotes: go('quotes'), goDeals: go('deals'), goContract: go('contract'),
+      goClients: go('clients'), goContracts: go('contracts'), goRevenue: go('revenue'),
+      goQuoteNew: go('quoteNew'), goDealNew: go('dealNew'), goClientNew: go('clientNew'),
+      goMeetingNew: go('meetingNew'), goContractNew: go('contractNew'), goInvoiceNew: go('invoiceNew'),
+      goApprovalNew: go('approvalNew'), goSalesDetail: go('salesDetail'), goSalesPlan: go('salesPlan'),
+      // screen flags
+      isDashSales: screen === 'dashboard' && !isFinance,
+      isDashFinance: screen === 'dashboard' && isFinance,
+      isQuotes: screen === 'quotes', isQuote: screen === 'quote', isQuoteNew: screen === 'quoteNew',
+      isDeals: screen === 'deals', isDeal: screen === 'deal', isDealNew: screen === 'dealNew',
+      isMeeting: screen === 'meeting', isMeetingNew: screen === 'meetingNew',
+      isClients: screen === 'clients', isClient: screen === 'client', isClientNew: screen === 'clientNew',
+      isContracts: screen === 'contracts', isContract: screen === 'contract', isContractNew: screen === 'contractNew',
+      isInvoice: screen === 'invoice', isInvoiceNew: screen === 'invoiceNew',
+      isApprovals: screen === 'approvals', isApproval: screen === 'approval', isApprovalNew: screen === 'approvalNew',
+      isRevenue: screen === 'revenue', isSalesDetail: screen === 'salesDetail', isSalesPlan: screen === 'salesPlan',
+      isSettings: screen === 'settings',
+      clientsRows, contractsRows,
+      // forms
+      isForm: !!form,
+      formTitle: form && form.title, formCrumbA: form && form.crumbA, formCrumbBack: form && form.crumbBack, formCrumbB: form && form.crumbB,
+      formFields: form ? form.fields : [], formSubmit: form && form.submit,
+      formSecondary: form && form.secondary, onFormSecondary: form && form.onSecondary,
+      onFormSubmit: form && form.onSubmit, onFormCancel: form && form.onCancel,
+      // sales dash
+      pipeline, actions, overdueCount, actionCount: actions.length, stalled, activity,
+      // finance dash
+      finMonthRevenue: '¥18,400,000',
+      finOverdue, finUnpaid, finScheduled,
+      finOverdueTotal: '¥5,500,000', finOverdueCount: finOverdue.length,
+      finUnpaidTotal: '¥8,400,000', finUnpaidCount: finUnpaid.length,
+      finScheduledTotal: '¥8,400,000', finScheduledCount: finScheduled.length,
+      // quotes
+      quoteTabs, quotes, quotesTotal: quotesAll.length,
+      qStatusTabs, quoteSubject, quoteClient,
+      quoteHeadText: qHead[0], quoteHeadColor: qHead[1],
+      quoteBasics, quoteMeetings,
+      qConvert: qs === 'new', qNoClient: qs === 'noclient', qPending: qs === 'pending', qConverted: qs === 'converted', qDeclined: qs === 'declined',
+      opConvert: qs === 'new' && can.quoteConvert, opNoClient: qs === 'noclient' && can.quoteConvert, opDeclined: qs === 'declined' && can.quoteConvert,
+      onConvert: () => { this.toast('案件化しました'); this.go('deal', { name: quoteSubject, client: quoteClient }); },
+      onDecline: () => { this.set({ quoteStatus: 'declined' }); this.toast('引合を見送りにしました'); },
+      onUndecline: () => { this.set({ quoteStatus: 'new' }); this.toast('見送りを撤回しました'); },
+      onLinkClient: () => { this.set({ quoteStatus: 'new' }); this.toast('顧客を紐づけました'); },
+      addQuoteMeeting: () => this.toast('商談記録を追加しました'),
+      goApproval: go('approval'), goClient: go('client'), goDeal: go('deal'),
+      qShowClient: qs !== 'noclient',
+      // deals
+      dealPhaseSummary, dealsRows, dealFlat, dealViewTabs,
+      isDealTable: S.dealView === 'table', isDealPhase: S.dealView === 'phase',
+      dealName, dealClient, dealBasics, dealPhaseCtrl, dealCurrentPhase: S.dealPhase,
+      dealContacts, dealMeetings, dealActionItems, dealWon: S.dealWon, dealContract,
+      onWon: () => this.openDialog({ title:'この案件を受注にしますか？', body:'受注にすると契約の作成が可能になります。この操作は取り消せません。', confirmLabel:'受注にする', color:'#1a8a4a', toast:'案件を受注にしました', after(){ this.setState({ dealWon:true, dealPhase:'クロージング' }); } }),
+      onLost: () => this.openDialog({ title:'この案件を失注にしますか？', body:'失注にすると案件はクローズされます。この操作は取り消せません。', confirmLabel:'失注にする', color:'#c0392b', toast:'案件を失注にしました' }),
+      onCreateContract: () => { this.toast('契約を作成しました'); this.go('contract'); },
+      addDealMeeting: () => this.toast('商談記録を追加しました'),
+      addContact: () => this.toast('担当者を追加しました'),
+      // meeting
+      meetingType: ctx.type || '初回ヒアリング', meetingDate: '2026/06/20 13:00', isHearing: true,
+      noteTabs, noteEdit: S.noteTab === 'edit', notePreview: S.noteTab === 'preview', minutesMd, minutesPreview,
+      hearingFields, attInternal, attExternal, mActionItems,
+      addAttendee: () => this.toast('出席者を追加しました'), addMActionItem: () => this.toast('アクションを追加しました'),
+      // client
+      clientName, clientCompany, clientContacts, clientQuotes, clientDeals,
+      addClientContact: () => this.toast('担当者を追加しました'), editCompany: () => this.toast('保存しました'),
+      // contract
+      contractName, contractBasics, contractInvoices,
+      onContractComplete: () => this.toast('契約を完了にしました'),
+      onContractCancel: () => this.openDialog({ title:'契約を解除しますか？', body:'契約を解除すると進行中の請求にも影響します。この操作は取り消せません。', confirmLabel:'解除する', color:'#c0392b', toast:'契約を解除しました' }),
+      addInvoice: () => { this.toast('請求を作成しました'); this.go('invoice'); },
+      // invoice
+      invStatusTabs, invBasics,
+      invStatusText: invMap[invSt][0], invStatusColor: invMap[invSt][1],
+      invIsScheduled: invSt === 'scheduled', invIsInvoiced: invSt === 'invoiced', invIsOverdue: invSt === 'overdue', invIsPaid: invSt === 'paid',
+      invOpScheduled: invSt === 'scheduled' && can.invoiceManage, invOpInvoiced: invSt === 'invoiced' && can.invoiceManage, invOpOverdue: invSt === 'overdue' && can.invoiceManage,
+      invNoPerm: !can.invoiceManage,
+      issueInvoice: () => { this.set({ invoiceStatus:'invoiced' }); this.toast('請求書を発行しました'); },
+      markOverdue: () => { this.set({ invoiceStatus:'overdue' }); this.toast('期日超過に変更しました'); },
+      openPayment: () => this.openDialog({ kind:'payment', title:'入金を確認', body:'入金を確認します。入金日を入力してください。', confirmLabel:'入金を確定', color:'#1a8a4a', toast:'入金を確認しました', after(){ this.setState({ invoiceStatus:'paid' }); } }),
+      // approvals
+      approvalTabs, approvals,
+      approvalForm, approvalSteps, isApprover: isMgr,
+      onApprove: () => this.toast('承認しました'), onReject: () => this.toast('却下しました'),
+      goQuote: go('quote', { subject:'ECサイトリニューアル', client:'朝日商事' }),
+      addManualApproval: () => this.toast('承認申請を作成しました'),
+      // revenue
+      trend: trendClick, ranking, revMonth: '¥18,400,000', revConfirmed: '¥86,000,000', revPipeline: '¥227,200,000',
+      // sales detail / plan
+      salesAxisTabs, salesRows: salesCur.rows, salesColLabel: salesCur.col, salesSubLabel: salesCur.sub,
+      planTabs, planTarget: planCur.target, planActual: planCur.actual, planPct: planCur.pct + '%', planPctW: planCur.pct + '%', planLanding: planCur.landing, planLabel: planCur.label,
+      // settings
+      settingsTabs, policies, templates, userRows, myDelegations, allDelegations, webhooks, deliveryLog, auditLogs,
+      stPolicy: stab === 'policy' && sView === 'list', stPolicyForm: stab === 'policy' && sView === 'form',
+      stTemplate: stab === 'template' && sView === 'list', stTemplateForm: stab === 'template' && sView === 'form',
+      stUsers: stab === 'users', stDelegation: stab === 'delegation' && sView === 'list', stDelegationForm: stab === 'delegation' && sView === 'form',
+      stWebhook: stab === 'webhook' && sView === 'list', stWebhookForm: stab === 'webhook' && sView === 'form', stAudit: stab === 'audit',
+      canPolicyEdit: can.policyEdit, canWebhook: can.webhook, canDelegationCreate: can.delegationCreate, canUserEdit, isAdminView: role === 'admin', canAuditExport: can.auditExport,
+      polTrigEl: React.createElement('select', { style: { fontSize:'13px', padding:'7px 9px', border:'1px solid #cccccc', borderRadius:'3px', background:'#fff', color:'#2c3e50', width:'100%' } }, ['引合の案件化','契約の作成','契約の解除'].map(o => React.createElement('option', { key:o }, o))),
+      polCondEl: React.createElement('select', { style: { fontSize:'13px', padding:'7px 9px', border:'1px solid #cccccc', borderRadius:'3px', background:'#fff', color:'#2c3e50', width:'100%' } }, ['=','≠','>','≥','<','≤','含む'].map(o => React.createElement('option', { key:o }, o))),
+      polTmplEl: React.createElement('select', { style: { fontSize:'13px', padding:'7px 9px', border:'1px solid #cccccc', borderRadius:'3px', background:'#fff', color:'#2c3e50', width:'100%' } }, ['受注承認フロー','値引き承認フロー','案件化承認フロー','与信確認フロー'].map(o => React.createElement('option', { key:o }, o))),
+      goPolicyNew: () => this.set({ settingsTab:'policy', settingsView:'form' }),
+      goTemplateNew: () => this.set({ settingsTab:'template', settingsView:'form' }),
+      goDelegationNew: () => this.set({ settingsTab:'delegation', settingsView:'form' }),
+      goWebhookNew: () => this.set({ settingsTab:'webhook', settingsView:'form' }),
+      settingsBackList: () => this.set({ settingsView:'list' }),
+      savePolicy: () => { this.toast('ポリシーを保存しました'); this.set({ settingsView:'list' }); },
+      saveTemplate: () => { this.toast('テンプレートを保存しました'); this.set({ settingsView:'list' }); },
+      saveDelegation: () => { this.toast('委任を作成しました'); this.set({ settingsView:'list' }); },
+      saveWebhook: () => { this.toast('エンドポイントを保存しました'); this.set({ settingsView:'list' }); },
+      addPolicy: () => this.toast('ポリシーを作成しました'), exportCsv: () => this.toast('CSVをエクスポートしました'),
+      // dialog / toast
+      dialogOpen: !!dialog, dialogTitle: dialog && dialog.title, dialogBody: dialog && dialog.body,
+      dialogConfirmLabel: dialog && dialog.confirmLabel, dialogColor: (dialog && dialog.color) || PRI,
+      dialogPayment: !!(dialog && dialog.kind === 'payment'),
+      closeDialog: () => this.closeDialog(), confirmDialog: () => this.confirmDialog(),
+      toastMsg: S.toast,
+    };
+  }
+}
+</script>
+</body>
+</html>
