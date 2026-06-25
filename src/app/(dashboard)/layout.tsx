@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/infrastructure/auth";
 import { ThemeToggle } from "./ThemeToggle";
 import { SidebarNav } from "./SidebarNav";
+import { DashboardProviders } from "./DashboardProviders";
 
 export default async function DashboardLayout({
   children,
@@ -50,7 +51,7 @@ export default async function DashboardLayout({
 
       <main className="flex-1 overflow-y-auto bg-bg-page">
         <div style={{ maxWidth: 1260 }} className="mx-auto px-7 pt-[22px] pb-14">
-          {children}
+          <DashboardProviders>{children}</DashboardProviders>
         </div>
       </main>
     </div>
