@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d2540bd1-ff34-4c0c-baad-bfa6e19bc4fa",
   "createdAt": "2026-06-25T09:02:37.517Z",
-  "updatedAt": "2026-06-25T09:33:43.692Z",
+  "updatedAt": "2026-06-25T09:35:54.537Z",
   "request": {
     "title": "経路ラベル追加とテーブル並び順の修正",
     "type": "spec-change",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "change/fix-source-labels-sort-d2540bd1",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-25T09:33:43.684Z"
   },
   "_journal": {
-    "historyCount": 57,
+    "historyCount": 58,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
