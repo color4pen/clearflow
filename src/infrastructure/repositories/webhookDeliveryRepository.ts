@@ -1,4 +1,4 @@
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, inArray, sql } from "drizzle-orm";
 import { db } from "../db";
 import { webhookDeliveries, webhookEndpoints } from "../schema";
 import type { WebhookDelivery, WebhookDeliveryStatus } from "@/domain/models/webhookDelivery";
@@ -122,4 +122,40 @@ export async function findByEndpointId(
 
   const result = await query;
   return result.map(mapRow);
+}
+
+export async function findLatestByEndpointIds(
+  endpointIds: string[],
+  organizationId: string
+): Promise<Map<string, { status: WebhookDeliveryStatus; lastAttemptAt: Date | null }>> {
+  if (endpointIds.length === 0) return new Map();
+
+  // Verify all endpoints belong to the organization, then get latest delivery per endpoint
+  const rows = await db
+    .select({
+      endpointId: webhookDeliveries.endpointId,
+      status: webhookDeliveries.status,
+      lastAttemptAt: webhookDeliveries.lastAttemptAt,
+      rn: sql<number>`row_number() over (partition by ${webhookDeliveries.endpointId} order by ${webhookDeliveries.createdAt} desc)`,
+    })
+    .from(webhookDeliveries)
+    .innerJoin(
+      webhookEndpoints,
+      and(
+        eq(webhookDeliveries.endpointId, webhookEndpoints.id),
+        eq(webhookEndpoints.organizationId, organizationId)
+      )
+    )
+    .where(inArray(webhookDeliveries.endpointId, endpointIds));
+
+  const result = new Map<string, { status: WebhookDeliveryStatus; lastAttemptAt: Date | null }>();
+  for (const row of rows) {
+    if (row.rn === 1) {
+      result.set(row.endpointId, {
+        status: row.status as WebhookDeliveryStatus,
+        lastAttemptAt: row.lastAttemptAt ?? null,
+      });
+    }
+  }
+  return result;
 }

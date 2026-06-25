@@ -9,6 +9,26 @@ import Link from "next/link";
 import { WebhookCreateForm } from "./WebhookCreateForm";
 import { PageToolbar, DataTable, SectionCard } from "@/app/components";
 
+function LastDeliveryStatus({
+  status,
+}: {
+  status: { status: string; lastAttemptAt: Date | null } | null;
+}) {
+  if (!status) {
+    return <span className="text-text-disabled text-xs">配信なし</span>;
+  }
+  if (status.status === "delivered") {
+    return <span className="text-success text-xs font-bold">成功</span>;
+  }
+  if (status.status === "failed") {
+    return <span className="text-danger text-xs font-bold">失敗</span>;
+  }
+  if (status.status === "pending") {
+    return <span className="text-warning text-xs font-bold">処理中</span>;
+  }
+  return <span className="text-text-muted text-xs">{status.status}</span>;
+}
+
 export default async function WebhooksSettingsPage() {
   const session = await auth();
   if (!session?.user || session.user.role !== "admin") {
@@ -35,11 +55,10 @@ export default async function WebhooksSettingsPage() {
           <DataTable
             columns={[
               { key: "url", header: "URL", render: (ep) => <span className="max-w-xs truncate">{ep.url}</span> },
-              { key: "secret", header: "Secret", render: (ep) => <span className="text-text-muted">{ep.secret}</span> },
               { key: "events", header: "イベント数", render: (ep) => <>{ep.events.length}</> },
               {
                 key: "isActive",
-                header: "状態",
+                header: "有効/無効",
                 render: (ep) =>
                   ep.isActive ? (
                     <span className="text-success text-xs font-bold">有効</span>
@@ -48,12 +67,10 @@ export default async function WebhooksSettingsPage() {
                   ),
               },
               {
-                key: "createdAt",
-                header: "作成日時",
+                key: "lastDeliveryStatus",
+                header: "直近配信状態",
                 render: (ep) => (
-                  <span className="text-text-muted">
-                    {new Date(ep.createdAt).toLocaleDateString("ja-JP")}
-                  </span>
+                  <LastDeliveryStatus status={ep.lastDeliveryStatus ?? null} />
                 ),
               },
               {

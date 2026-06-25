@@ -30,6 +30,8 @@ export async function GET(request: Request) {
   let startDate: Date | undefined;
   let endDate: Date | undefined;
   let action: string | undefined;
+  let actorId: string | undefined;
+  let targetType: string | undefined;
 
   const startDateParam = searchParams.get("startDate");
   if (startDateParam) {
@@ -52,10 +54,22 @@ export async function GET(request: Request) {
     action = actionParam;
   }
 
+  const actorIdParam = searchParams.get("actorId");
+  if (actorIdParam) {
+    actorId = actorIdParam;
+  }
+
+  const targetTypeParam = searchParams.get("targetType");
+  if (targetTypeParam) {
+    targetType = targetTypeParam;
+  }
+
   const logs = await auditLogRepository.findByOrganization(session.user.organizationId, {
     startDate,
     endDate,
     action,
+    actorId,
+    targetType,
   });
 
   const BOM = "﻿";

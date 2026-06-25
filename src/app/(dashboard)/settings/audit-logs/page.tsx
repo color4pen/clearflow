@@ -17,6 +17,17 @@ const ACTION_OPTIONS = [
   { value: "step.reject", label: "step.reject" },
 ];
 
+const TARGET_TYPE_OPTIONS = [
+  { value: "", label: "すべて" },
+  { value: "request", label: "request" },
+  { value: "step", label: "step" },
+  { value: "policy", label: "policy" },
+  { value: "template", label: "template" },
+  { value: "delegation", label: "delegation" },
+  { value: "webhook", label: "webhook" },
+  { value: "user", label: "user" },
+];
+
 export default async function AuditLogsPage({
   searchParams,
 }: {
@@ -32,6 +43,8 @@ export default async function AuditLogsPage({
   const startDateStr = typeof params.startDate === "string" ? params.startDate : undefined;
   const endDateStr = typeof params.endDate === "string" ? params.endDate : undefined;
   const actionStr = typeof params.action === "string" ? params.action : undefined;
+  const actorIdStr = typeof params.actorId === "string" ? params.actorId : undefined;
+  const targetTypeStr = typeof params.targetType === "string" ? params.targetType : undefined;
   const pageStr = typeof params.page === "string" ? params.page : undefined;
 
   const page = Math.max(1, parseInt(pageStr ?? "1", 10) || 1);
@@ -50,6 +63,8 @@ export default async function AuditLogsPage({
   }
 
   const action = actionStr || undefined;
+  const actorId = actorIdStr || undefined;
+  const targetType = targetTypeStr || undefined;
 
   const [logs, orgUsers] = await Promise.all([
     auditLogRepository.findByOrganization(session.user.organizationId, {
@@ -58,6 +73,8 @@ export default async function AuditLogsPage({
       startDate,
       endDate,
       action,
+      actorId,
+      targetType,
     }),
     listOrganizationUsers({ organizationId: session.user.organizationId }),
   ]);
@@ -69,6 +86,8 @@ export default async function AuditLogsPage({
   if (startDateStr) exportParams.set("startDate", startDateStr);
   if (endDateStr) exportParams.set("endDate", endDateStr);
   if (actionStr) exportParams.set("action", actionStr);
+  if (actorIdStr) exportParams.set("actorId", actorIdStr);
+  if (targetTypeStr) exportParams.set("targetType", targetTypeStr);
   const exportUrl = `/api/audit-logs/export${exportParams.toString() ? "?" + exportParams.toString() : ""}`;
 
   // Build pagination links
@@ -76,6 +95,8 @@ export default async function AuditLogsPage({
   if (startDateStr) filterParams.set("startDate", startDateStr);
   if (endDateStr) filterParams.set("endDate", endDateStr);
   if (actionStr) filterParams.set("action", actionStr);
+  if (actorIdStr) filterParams.set("actorId", actorIdStr);
+  if (targetTypeStr) filterParams.set("targetType", targetTypeStr);
 
   const prevFilterParams = new URLSearchParams(filterParams);
   prevFilterParams.set("page", String(page - 1));
@@ -103,24 +124,22 @@ export default async function AuditLogsPage({
 
       {/* フィルタ */}
       <form method="get" className="bg-bg-toolbar border border-border border-t-0 px-2 py-1 mb-0">
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 items-end">
-          <FormField label="開始日" htmlFor="startDate">
-            <Input
-              type="date"
-              id="startDate"
-              name="startDate"
-              defaultValue={startDateStr ?? ""}
-            />
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-4 items-end">
+          <FormField label="操作者" htmlFor="actorId">
+            <Select
+              id="actorId"
+              name="actorId"
+              defaultValue={actorIdStr ?? ""}
+            >
+              <option value="">すべて</option>
+              {orgUsers.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name}
+                </option>
+              ))}
+            </Select>
           </FormField>
-          <FormField label="終了日" htmlFor="endDate">
-            <Input
-              type="date"
-              id="endDate"
-              name="endDate"
-              defaultValue={endDateStr ?? ""}
-            />
-          </FormField>
-          <FormField label="アクション種別" htmlFor="action">
+          <FormField label="操作種別" htmlFor="action">
             <Select
               id="action"
               name="action"
@@ -133,6 +152,37 @@ export default async function AuditLogsPage({
               ))}
             </Select>
           </FormField>
+          <FormField label="対象種別" htmlFor="targetType">
+            <Select
+              id="targetType"
+              name="targetType"
+              defaultValue={targetTypeStr ?? ""}
+            >
+              {TARGET_TYPE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </Select>
+          </FormField>
+          <div className="grid grid-cols-2 gap-1">
+            <FormField label="開始日" htmlFor="startDate">
+              <Input
+                type="date"
+                id="startDate"
+                name="startDate"
+                defaultValue={startDateStr ?? ""}
+              />
+            </FormField>
+            <FormField label="終了日" htmlFor="endDate">
+              <Input
+                type="date"
+                id="endDate"
+                name="endDate"
+                defaultValue={endDateStr ?? ""}
+              />
+            </FormField>
+          </div>
         </div>
         <div className="flex justify-end mt-1">
           <button
@@ -164,18 +214,27 @@ export default async function AuditLogsPage({
                   </span>
                 ),
               },
-              { key: "action", header: "アクション", render: (log) => <span className="text-text">{log.action}</span> },
-              { key: "targetType", header: "対象種別", render: (log) => <span className="text-text">{log.targetType}</span> },
-              { key: "targetId", header: "対象 ID", render: (log) => <span className="text-text">{log.targetId}</span> },
-              { key: "actorId", header: "実行者", render: (log) => <span className="text-text">{userNameMap.get(log.actorId) ?? log.actorId}</span> },
               {
-                key: "metadata",
-                header: "メタデータ",
+                key: "actorId",
+                header: "操作者",
                 render: (log) => (
-                  <span className="text-text-muted max-w-xs truncate">
-                    {JSON.stringify(log.metadata ?? {}).slice(0, 100)}
-                  </span>
+                  <span className="text-text">{userNameMap.get(log.actorId) ?? log.actorId}</span>
                 ),
+              },
+              {
+                key: "action",
+                header: "操作内容",
+                render: (log) => <span className="text-text">{log.action}</span>,
+              },
+              {
+                key: "targetType",
+                header: "対象種別",
+                render: (log) => <span className="text-text">{log.targetType}</span>,
+              },
+              {
+                key: "targetId",
+                header: "対象名",
+                render: (log) => <span className="text-text">{log.targetId}</span>,
               },
             ]}
             rows={logs}

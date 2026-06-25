@@ -62,11 +62,18 @@ export async function listWebhookEndpointsAction() {
     session.user.organizationId
   );
 
+  const endpointIds = endpoints.map((ep) => ep.id);
+  const latestDeliveryMap = await webhookDeliveryRepository.findLatestByEndpointIds(
+    endpointIds,
+    session.user.organizationId
+  );
+
   return {
     success: true,
     endpoints: endpoints.map((ep) => ({
       ...ep,
       secret: ep.secret.slice(0, 8) + "...",
+      lastDeliveryStatus: latestDeliveryMap.get(ep.id) ?? null,
     })),
   };
 }

@@ -48,6 +48,8 @@ export async function findByOrganization(
     startDate?: Date;
     endDate?: Date;
     action?: string;
+    actorId?: string;
+    targetType?: string;
   }
 ): Promise<AuditLog[]> {
   const conditions = [eq(auditLogs.organizationId, organizationId)];
@@ -60,6 +62,12 @@ export async function findByOrganization(
   }
   if (options?.action) {
     conditions.push(eq(auditLogs.action, options.action));
+  }
+  if (options?.actorId) {
+    conditions.push(eq(auditLogs.actorId, options.actorId));
+  }
+  if (options?.targetType) {
+    conditions.push(eq(auditLogs.targetType, options.targetType));
   }
 
   let query = db

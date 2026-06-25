@@ -39,15 +39,10 @@ export default async function TemplatesPage() {
         <DataTable
           columns={[
             { key: "name", header: "テンプレート名", render: (t) => <span className="text-text">{t.name}</span> },
-            {
-              key: "fields",
-              header: "フィールド数",
-              render: (t) => <span className="text-text">{t.fields.length}</span>,
-            },
             { key: "steps", header: "ステップ数", render: (t) => <span className="text-text">{t.steps.length}</span> },
             {
               key: "createdAt",
-              header: "作成日時",
+              header: "作成日",
               render: (t) => (
                 <span className="text-text-muted">
                   {new Date(t.createdAt).toLocaleDateString("ja-JP")}

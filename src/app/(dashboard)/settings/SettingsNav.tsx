@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/settings/webhooks", label: "Webhook" },
-  { href: "/settings/templates", label: "テンプレート" },
   { href: "/settings/policies", label: "承認ポリシー" },
+  { href: "/settings/templates", label: "テンプレート" },
   { href: "/settings/users", label: "ユーザー" },
   { href: "/settings/delegations", label: "代理承認" },
+  { href: "/settings/webhooks", label: "Webhook" },
   { href: "/settings/audit-logs", label: "監査ログ" },
 ];
 
