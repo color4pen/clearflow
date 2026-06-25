@@ -41,10 +41,9 @@ function getPeriodBounds(periodType: PeriodType): { periodStart: Date; periodEnd
   return { periodStart: start, periodEnd: end };
 }
 
-function getPrevNextLinks(periodType: PeriodType): { prevHref: string; nextHref: string } {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
+function getPrevNextLinks(periodType: PeriodType, periodStart: Date): { prevHref: string; nextHref: string } {
+  const year = periodStart.getFullYear();
+  const month = periodStart.getMonth();
 
   if (periodType === "monthly") {
     const prevDate = new Date(year, month - 1, 1);
@@ -122,7 +121,7 @@ export default async function RevenueForecastPage({
     periodEnd,
   });
 
-  const { prevHref, nextHref } = getPrevNextLinks(periodType);
+  const { prevHref, nextHref } = getPrevNextLinks(periodType, periodStart);
 
   return (
     <div>
