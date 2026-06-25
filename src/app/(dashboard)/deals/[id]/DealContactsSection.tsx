@@ -19,11 +19,9 @@ export function DealContactsSection({
   clientContacts,
   clientId,
 }: Props) {
-  // dealContacts と clientContacts を contactId で結合する
   const contactMap = new Map(clientContacts.map((c) => [c.id, c]));
   const registeredContactIds = new Set(dealContacts.map((dc) => dc.contactId));
 
-  // 追加済みでない担当者のみ追加フォームに表示する
   const availableContacts = clientContacts.filter(
     (c) => !registeredContactIds.has(c.id)
   );
@@ -33,48 +31,33 @@ export function DealContactsSection({
       {dealContacts.length === 0 ? (
         <p className="text-xs text-text-muted">担当者が登録されていません</p>
       ) : (
-        <table className="text-xs w-full">
-          <thead>
-            <tr className="text-text-muted border-b border-border">
-              <th className="text-left py-1 pr-2">氏名</th>
-              <th className="text-left py-1 pr-2">部署</th>
-              <th className="text-left py-1 pr-2">役職</th>
-              <th className="text-left py-1 pr-2">ロール</th>
-              <th className="py-1"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {dealContacts.map((dc) => {
-              const contact = contactMap.get(dc.contactId);
-              return (
-                <tr key={dc.id} className="border-b border-border-light">
-                  <td className="py-1 pr-2 text-text">{contact?.name ?? "-"}</td>
-                  <td className="py-1 pr-2 text-text">{contact?.department ?? "-"}</td>
-                  <td className="py-1 pr-2 text-text">{contact?.position ?? "-"}</td>
-                  <td className="py-1 pr-2 text-text">
-                    {dealContactRoleLabels[dc.role] ?? dc.role}
-                  </td>
-                  <td className="py-1">
-                    <form
-                      action={async (formData: FormData) => {
-                        await removeDealContactAction(dealId, formData);
-                      }}
-                      onKeyDown={preventEnterSubmit}
-                    >
-                      <input type="hidden" name="contactId" value={dc.contactId} />
-                      <button
-                        type="submit"
-                        className="text-danger underline text-xs"
-                      >
-                        削除
-                      </button>
-                    </form>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="space-y-1">
+          {dealContacts.map((dc) => {
+            const contact = contactMap.get(dc.contactId);
+            return (
+              <div key={dc.id} className="flex items-center gap-2">
+                <span className="text-xs text-text flex-1">{contact?.name ?? "-"}</span>
+                <span className="text-2xs bg-bg-surface-alt px-1.5 py-0.5 rounded text-text-muted">
+                  {dealContactRoleLabels[dc.role] ?? dc.role}
+                </span>
+                <form
+                  action={async (formData: FormData) => {
+                    await removeDealContactAction(dealId, formData);
+                  }}
+                  onKeyDown={preventEnterSubmit}
+                >
+                  <input type="hidden" name="contactId" value={dc.contactId} />
+                  <button
+                    type="submit"
+                    className="text-danger underline text-xs"
+                  >
+                    削除
+                  </button>
+                </form>
+              </div>
+            );
+          })}
+        </div>
       )}
 
       {/* 追加フォーム（clientId が null の場合は非表示） */}
@@ -126,7 +109,6 @@ export function DealContactsSection({
         </form>
       )}
 
-      {/* 追加可能な担当者がいない場合（全員追加済み）かつ clientId あり */}
       {clientId && availableContacts.length === 0 && clientContacts.length > 0 && (
         <p className="text-xs text-text-muted mt-2">追加できる担当者はいません</p>
       )}

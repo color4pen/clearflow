@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateDealAction } from "@/app/actions/deals";
 import { Input, Select, MoneyInput, preventEnterSubmit } from "@/app/components";
-import { phaseLabels, contractTypeLabels } from "@/app/(dashboard)/labels";
+import { contractTypeLabels } from "@/app/(dashboard)/labels";
 
 type DealInfo = {
   id: string;
@@ -24,9 +24,9 @@ type Props = {
 
 export function DealInfoSection({ deal, editable }: Props) {
   const router = useRouter();
+  const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [phase, setPhase] = useState(deal.phase);
   const [isDirty, setIsDirty] = useState(false);
 
   const startDateStr = deal.estimatedStartDate
@@ -36,26 +36,14 @@ export function DealInfoSection({ deal, editable }: Props) {
     ? deal.estimatedEndDate.toISOString().slice(0, 10)
     : "";
 
-  function handlePhaseChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const newValue = e.target.value;
-    if (newValue === "won") {
-      if (!window.confirm("フェーズを「受注」に変更しますか？")) {
-        e.target.value = phase;
-        return;
-      }
-    }
-    if (newValue === "lost") {
-      if (!window.confirm("フェーズを「失注」に変更しますか？")) {
-        e.target.value = phase;
-        return;
-      }
-    }
-    setPhase(newValue);
+  function markDirty() {
     setIsDirty(true);
   }
 
-  function markDirty() {
-    setIsDirty(true);
+  function handleCancel() {
+    setIsEditing(false);
+    setIsDirty(false);
+    setError(null);
   }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -69,109 +57,165 @@ export function DealInfoSection({ deal, editable }: Props) {
 
     if (result.success) {
       setIsDirty(false);
+      setIsEditing(false);
       router.refresh();
     } else {
       setError(result.message ?? "保存に失敗しました");
     }
   }
 
+  // 表示モード
+  if (!isEditing) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <h2 className="text-xs font-bold text-text">案件情報</h2>
+          {editable && (
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="text-xs font-bold px-3 py-1 border border-border text-text-muted hover:text-text"
+            >
+              編集
+            </button>
+          )}
+        </div>
+        <div className="text-xs space-y-1">
+          <div className="flex gap-2">
+            <span className="text-text-muted w-[90px] shrink-0">案件名</span>
+            <span className="text-text flex-1">{deal.title}</span>
+          </div>
+          <div className="flex gap-2">
+            <span className="text-text-muted w-[90px] shrink-0">想定金額</span>
+            <span className="text-text flex-1">
+              {deal.estimatedAmount != null
+                ? `¥${deal.estimatedAmount.toLocaleString("ja-JP")}`
+                : "-"}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <span className="text-text-muted w-[90px] shrink-0">想定開始日</span>
+            <span className="text-text flex-1">
+              {deal.estimatedStartDate
+                ? deal.estimatedStartDate.toLocaleDateString("ja-JP")
+                : "-"}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <span className="text-text-muted w-[90px] shrink-0">想定終了日</span>
+            <span className="text-text flex-1">
+              {deal.estimatedEndDate
+                ? deal.estimatedEndDate.toLocaleDateString("ja-JP")
+                : "-"}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <span className="text-text-muted w-[90px] shrink-0">契約種別</span>
+            <span className="text-text flex-1">
+              {deal.contractType
+                ? contractTypeLabels[deal.contractType] ?? deal.contractType
+                : "-"}
+            </span>
+          </div>
+          <div className="flex gap-2">
+            <span className="text-text-muted w-[90px] shrink-0">作成日</span>
+            <span className="text-text flex-1">
+              {deal.createdAt.toLocaleDateString("ja-JP")}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 編集モード
   return (
     <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit}>
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xs font-bold text-text">案件情報</h2>
         <div className="flex items-center gap-2">
           {error && <span className="text-danger text-xs">{error}</span>}
-          {editable && (
-            <button
-              type="submit"
-              disabled={!isDirty || isSubmitting}
-              className={`text-xs font-bold px-3 py-1 ${
-                isDirty
-                  ? "bg-green-600 text-white cursor-pointer"
-                  : "bg-bg-toolbar border border-border text-text-muted cursor-not-allowed"
-              } disabled:opacity-50`}
-            >
-              {isSubmitting ? "保存中..." : "保存"}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="text-xs px-3 py-1 border border-border text-text-muted hover:text-text"
+          >
+            キャンセル
+          </button>
+          <button
+            type="submit"
+            disabled={!isDirty || isSubmitting}
+            className={`text-xs font-bold px-3 py-1 ${
+              isDirty
+                ? "bg-green-600 text-white cursor-pointer"
+                : "bg-bg-toolbar border border-border text-text-muted cursor-not-allowed"
+            } disabled:opacity-50`}
+          >
+            {isSubmitting ? "保存中..." : "保存"}
+          </button>
         </div>
       </div>
       <dl className="text-xs space-y-1">
         <div className="flex gap-2">
-          <dt className="text-text-muted w-24 shrink-0">案件名</dt>
+          <dt className="text-text-muted w-[90px] shrink-0">案件名</dt>
           <dd className="text-text flex-1">
-            <Input name="title" defaultValue={deal.title} disabled={!editable} onChange={markDirty} />
+            <Input name="title" defaultValue={deal.title} onChange={markDirty} />
           </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="text-text-muted w-24 shrink-0">フェーズ</dt>
-          <dd className="text-text flex-1">
-            <Select
-              name="phase"
-              value={phase}
-              onChange={handlePhaseChange}
-              disabled={!editable || phase === "won" || phase === "lost"}
-            >
-              {Object.entries(phaseLabels).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
-              ))}
-            </Select>
-          </dd>
-        </div>
-        <div className="flex gap-2">
-          <dt className="text-text-muted w-24 shrink-0">想定金額</dt>
+          <dt className="text-text-muted w-[90px] shrink-0">想定金額</dt>
           <dd className="text-text flex-1">
             <MoneyInput
               name="estimatedAmount"
               defaultValue={deal.estimatedAmount}
-              disabled={!editable}
               onChange={markDirty}
             />
           </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="text-text-muted w-24 shrink-0">想定開始日</dt>
+          <dt className="text-text-muted w-[90px] shrink-0">想定開始日</dt>
           <dd className="text-text flex-1">
             <Input
               type="date"
               name="estimatedStartDate"
               defaultValue={startDateStr}
-              disabled={!editable}
               onChange={markDirty}
             />
           </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="text-text-muted w-24 shrink-0">想定終了日</dt>
+          <dt className="text-text-muted w-[90px] shrink-0">想定終了日</dt>
           <dd className="text-text flex-1">
             <Input
               type="date"
               name="estimatedEndDate"
               defaultValue={endDateStr}
-              disabled={!editable}
               onChange={markDirty}
             />
           </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="text-text-muted w-24 shrink-0">契約種別</dt>
+          <dt className="text-text-muted w-[90px] shrink-0">契約種別</dt>
           <dd className="text-text flex-1">
             <Select
               name="contractType"
               defaultValue={deal.contractType ?? ""}
-              disabled={!editable}
               onChange={markDirty}
             >
               <option value="">-</option>
               {Object.entries(contractTypeLabels).map(([value, label]) => (
-                <option key={value} value={value}>{label}</option>
+                <option key={value} value={value}>
+                  {label}
+                </option>
               ))}
             </Select>
           </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="text-text-muted w-24 shrink-0">作成日</dt>
-          <dd className="text-text px-2 py-1">{deal.createdAt.toLocaleDateString("ja-JP")}</dd>
+          <dt className="text-text-muted w-[90px] shrink-0">作成日</dt>
+          <dd className="text-text px-2 py-1">
+            {deal.createdAt.toLocaleDateString("ja-JP")}
+          </dd>
         </div>
       </dl>
     </form>
