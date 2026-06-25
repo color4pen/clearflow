@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 25.9s | 0 |
-| 2 | typecheck | passed | 3.5s | 0 |
+| 1 | build | passed | 26.8s | 0 |
+| 2 | typecheck | passed | 1.0s | 0 |
 | 3 | test | passed | 0.4s | 0 |
-| 4 | lint | passed | 5.3s | 0 |
+| 4 | lint | passed | 4.5s | 0 |
 
 ## Phase: build
 
@@ -17,9 +17,9 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 20.8s
+✓ Compiled successfully in 21.1s
   Running TypeScript ...
-  Finished TypeScript in 3.8s ...
+  Finished TypeScript in 4.1s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/30) ...
   Generating static pages using 7 workers (7/30) 
@@ -118,7 +118,7 @@ src/__tests__/usecases/approvalPolicyFlow.test.ts:
  970 pass
  0 fail
  2061 expect() calls
-Ran 970 tests across 50 files. [382.00ms]
+Ran 970 tests across 50 files. [393.00ms]
 
 ```
 
