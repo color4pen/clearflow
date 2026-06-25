@@ -2,25 +2,14 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import type { InquiryStatus } from "@/domain/models/inquiry";
 import { InquiryStatusBadge } from "./InquiryStatusBadge";
-
-type InquiryRow = {
-  id: string;
-  title: string;
-  clientName: string | null;
-  source: string;
-  status: InquiryStatus;
-  createdAt: string;
-  dealId: string | null;
-};
+import { filterInquiries } from "./filterInquiries";
+import type { InquiryRow, TabValue } from "./filterInquiries";
 
 type Props = {
   inquiries: InquiryRow[];
   sources: Array<{ value: string; label: string }>;
 };
-
-type TabValue = "all" | "new" | "converted" | "declined";
 
 const TAB_LABELS: { value: TabValue; label: string }[] = [
   { value: "all", label: "全て" },
@@ -34,19 +23,10 @@ export function InquiryListView({ inquiries, sources }: Props) {
   const [sourceFilter, setSourceFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filtered = useMemo(() => {
-    return inquiries.filter((row) => {
-      if (activeTab !== "all" && row.status !== activeTab) return false;
-      if (sourceFilter !== "" && row.source !== sourceFilter) return false;
-      if (searchQuery !== "") {
-        const q = searchQuery.toLowerCase();
-        const titleMatch = row.title.toLowerCase().includes(q);
-        const clientMatch = (row.clientName ?? "").toLowerCase().includes(q);
-        if (!titleMatch && !clientMatch) return false;
-      }
-      return true;
-    });
-  }, [inquiries, activeTab, sourceFilter, searchQuery]);
+  const filtered = useMemo(
+    () => filterInquiries(inquiries, { activeTab, sourceFilter, searchQuery }),
+    [inquiries, activeTab, sourceFilter, searchQuery],
+  );
 
   const gridCols = "1.7fr 1fr 110px 160px 110px";
 

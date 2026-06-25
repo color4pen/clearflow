@@ -1481,3 +1481,49 @@ describe("Tenant isolation — delete operations", () => {
     expect(content).toContain("auditLogRepository.create");
   });
 });
+
+// ---------------------------------------------------------------------------
+// 引合画面デザイン適用 — TC-034, TC-038
+// ---------------------------------------------------------------------------
+
+describe("引合画面デザイン適用 — TC-034 and TC-038", () => {
+  /**
+   * TC-034: InquiryInfoSection に顧客関連 UI が含まれない
+   *
+   * 顧客セクション（<dt>顧客</dt>）、clientMode state、
+   * clients/clientName/clientLinkId props が削除されており、
+   * 件名・経路・内容の編集フォームのみが残っている。
+   */
+  it("TC-034: InquiryInfoSection does not contain customer-related UI or props", async () => {
+    const content = await readSrc(
+      "app/(dashboard)/inquiries/[id]/InquiryInfoSection.tsx",
+    );
+    // 顧客ブロックが存在しない
+    expect(content).not.toContain("<dt>顧客</dt>");
+    expect(content).not.toContain("clientMode");
+    expect(content).not.toContain("clientName");
+    expect(content).not.toContain("clientLinkId");
+    // 件名・経路・内容のフォームは残っている
+    expect(content).toContain("title");
+    expect(content).toContain("source");
+    expect(content).toContain("description");
+  });
+
+  /**
+   * TC-038: dealMap の inquiryId → dealId マッピングが正しく構築される
+   *
+   * page.tsx の Server Component が deals 配列から
+   * inquiryId → dealId の Map を reduce で構築している。
+   */
+  it("TC-038: inquiries page.tsx builds dealMap using reduce and Map", async () => {
+    const content = await readSrc("app/(dashboard)/inquiries/page.tsx");
+    // dealMap が Map として構築される
+    expect(content).toContain("dealMap");
+    expect(content).toContain("new Map");
+    // inquiryId → dealId のマッピングで d.id を値に使う
+    expect(content).toContain("map.set");
+    expect(content).toContain("inquiryId");
+    // dealId が InquiryListView に渡される
+    expect(content).toContain("dealMap.get");
+  });
+});
