@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "963d89ad-2ef0-428c-898e-75ae21d97484",
   "createdAt": "2026-06-25T03:43:10.817Z",
-  "updatedAt": "2026-06-25T04:47:41.827Z",
+  "updatedAt": "2026-06-25T04:48:19.173Z",
   "request": {
     "title": "承認画面のデザイン適用",
     "type": "spec-change",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "change/design-approval-963d89ad",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-25T04:47:41.812Z"
   },
   "_journal": {
-    "historyCount": 73,
+    "historyCount": 74,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
