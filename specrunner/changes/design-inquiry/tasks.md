@@ -28,7 +28,7 @@
     clientName: string | null;
     source: string;
     status: InquiryStatus;
-    createdAt: Date;
+    createdAt: string;  // toISOString() で変換済み — Date はシリアライゼーション境界を超えられない
     dealId: string | null;  // Server Component で構築した dealId マッピング結果
   };
   type Props = {
@@ -137,9 +137,6 @@ Server Component としてデータ取得と InquiryListView への props 渡し
       status: string;
     };
     editable: boolean;
-    clients: Array<{ id: string; name: string }>;
-    clientName: string | null;
-    clientLinkId: string | null;
   };
   ```
 - [ ] **表示モード**（デフォルト）: ラベル + 値のグリッドレイアウト（`grid-template-columns: 90px 1fr`）

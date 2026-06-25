@@ -168,6 +168,12 @@
 **When** ページが描画される
 **Then** 商談記録セクションのヘッダーに「+ 商談を追加」ボタンが表示される
 
+#### Scenario: status=new（deal なし）の引合で追加ボタンが disabled になる
+
+**Given** status=new の引合が存在し、紐づく deal がない（dealId=null）
+**When** 引合詳細ページを開く
+**Then** 「+ 商談を追加」ボタンが disabled 状態（クリック不可、`cursor-not-allowed`）で表示される
+
 #### Scenario: 案件化済みの引合で追加ボタンが案件の商談作成へリンクする
 
 **Given** status=converted の引合が存在し、紐づく deal(id=deal-1) がある
