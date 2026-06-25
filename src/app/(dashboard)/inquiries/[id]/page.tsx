@@ -81,6 +81,7 @@ export default async function InquiryDetailPage({
                 title: inquiry.title,
                 source: inquiry.source,
                 description: inquiry.description,
+                contactNote: inquiry.contactNote,
                 clientId: inquiry.clientId,
                 assigneeId: inquiry.assigneeId ?? null,
                 status: inquiry.status,
@@ -106,6 +107,7 @@ export default async function InquiryDetailPage({
               inquiryTitle={inquiry.title}
               inquirySource={inquiry.source}
               inquiryDescription={inquiry.description}
+              inquiryContactNote={inquiry.contactNote}
               clientId={inquiry.clientId}
               clientName={client?.name ?? null}
               clientLinkId={client?.id ?? null}

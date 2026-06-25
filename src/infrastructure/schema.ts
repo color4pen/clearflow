@@ -326,6 +326,7 @@ export const inquiries = pgTable("inquiries", {
   clientId: uuid("client_id").references(() => clients.id),
   title: text("title").notNull(),
   description: text("description"),
+  contactNote: text("contact_note"),
   source: inquirySourceEnum("source").notNull(),
   status: inquiryStatusEnum("status").notNull().default("new"),
   assigneeId: uuid("assignee_id").references(() => users.id),

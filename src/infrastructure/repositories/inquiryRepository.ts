@@ -11,6 +11,7 @@ function mapRow(row: typeof inquiries.$inferSelect): Inquiry {
     clientId: row.clientId ?? null,
     title: row.title,
     description: row.description ?? null,
+    contactNote: row.contactNote ?? null,
     source: row.source,
     status: row.status,
     assigneeId: row.assigneeId ?? null,
@@ -28,6 +29,7 @@ export async function create(
     clientId?: string | null;
     title: string;
     description?: string | null;
+    contactNote?: string | null;
     source: string;
     assigneeId?: string | null;
     budget?: number | null;
@@ -43,6 +45,7 @@ export async function create(
       clientId: data.clientId ?? null,
       title: data.title,
       description: data.description ?? null,
+      contactNote: data.contactNote ?? null,
       source: data.source as "web" | "phone" | "email" | "referral" | "agent_service" | "exhibition" | "other",
       status: "new",
       assigneeId: data.assigneeId ?? null,
@@ -105,6 +108,7 @@ export async function update(
   data: Partial<{
     title: string;
     description: string | null;
+    contactNote: string | null;
     source: InquirySourceValue;
     clientId: string | null;
     assigneeId: string | null;

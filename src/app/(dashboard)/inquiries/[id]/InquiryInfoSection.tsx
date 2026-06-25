@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateInquiryAction } from "@/app/actions/inquiries";
-import { Input, Select, MarkdownTextarea, preventEnterSubmit } from "@/app/components";
+import { Input, Select, Textarea, MarkdownTextarea, preventEnterSubmit } from "@/app/components";
 import { sourceLabels } from "@/app/(dashboard)/labels";
 
 type Props = {
@@ -12,6 +12,7 @@ type Props = {
     title: string;
     source: string;
     description: string | null;
+    contactNote: string | null;
     clientId: string | null;
     assigneeId: string | null;
     status: string;
@@ -90,7 +91,13 @@ export function InquiryInfoSection({ inquiry, editable, onSaved }: Props) {
           </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="text-text-muted w-20 shrink-0">内容</dt>
+          <dt className="text-text-muted w-20 shrink-0">問い合わせ内容</dt>
+          <dd className="text-text flex-1">
+            <Textarea name="contactNote" defaultValue={inquiry.contactNote ?? ""} disabled={!editable} rows={6} onChange={markDirty} />
+          </dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="text-text-muted w-20 shrink-0">概要</dt>
           <dd className="text-text flex-1">
             <MarkdownTextarea
               name="description"

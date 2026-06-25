@@ -14,6 +14,7 @@ const createInquirySchema = z.object({
   newClientName: z.string().min(1).optional(),
   title: z.string().min(1, "件名は必須です"),
   description: z.string().optional(),
+  contactNote: z.string().optional(),
   source: z.enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"]),
   assigneeId: z.string().uuid().optional(),
   budget: z.coerce.number().int().optional(),
@@ -26,6 +27,7 @@ export type CreateInquiryState = {
     newClientName?: string[];
     title?: string[];
     description?: string[];
+    contactNote?: string[];
     source?: string[];
     assigneeId?: string[];
     budget?: string[];
@@ -65,6 +67,7 @@ export async function createInquiryAction(
     newClientName: newClientNameRaw && newClientNameRaw !== "" ? newClientNameRaw : undefined,
     title: formData.get("title"),
     description: formData.get("description") || undefined,
+    contactNote: formData.get("contactNote") || undefined,
     source: formData.get("source"),
     assigneeId: assigneeIdRaw && assigneeIdRaw !== "" ? assigneeIdRaw : undefined,
     budget: formData.get("budget") || undefined,
@@ -95,6 +98,7 @@ export async function createInquiryAction(
     clientId: resolvedClientId,
     title: parsed.data.title,
     description: parsed.data.description ?? null,
+    contactNote: parsed.data.contactNote ?? null,
     source: parsed.data.source,
     assigneeId: parsed.data.assigneeId ?? null,
     budget: parsed.data.budget ?? null,
@@ -163,6 +167,7 @@ export async function updateInquiryStatusAction(
 const updateInquirySchema = z.object({
   title: z.string().min(1, "件名は必須です"),
   description: z.string().optional(),
+  contactNote: z.string().optional(),
   source: z.enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"]),
   clientId: z.string().uuid().optional(),
   assigneeId: z.string().uuid().optional(),
@@ -174,6 +179,7 @@ export type UpdateInquiryState = {
   errors?: {
     title?: string[];
     description?: string[];
+    contactNote?: string[];
     source?: string[];
     clientId?: string[];
     assigneeId?: string[];
@@ -221,6 +227,7 @@ export async function updateInquiryAction(
   const raw = {
     title: formData.get("title"),
     description: formData.get("description") || undefined,
+    contactNote: formData.get("contactNote") || undefined,
     source: formData.get("source"),
     clientId: resolvedClientId,
     assigneeId: formData.get("assigneeId") || undefined,
@@ -239,6 +246,7 @@ export async function updateInquiryAction(
     actorId: session.user.id,
     title: parsed.data.title,
     description: parsed.data.description ?? null,
+    contactNote: parsed.data.contactNote ?? null,
     source: parsed.data.source,
     clientId: parsed.data.clientId ?? null,
     assigneeId: parsed.data.assigneeId ?? null,

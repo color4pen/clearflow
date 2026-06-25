@@ -16,6 +16,7 @@ export type Inquiry = {
   clientId: string | null;
   title: string;
   description: string | null;
+  contactNote: string | null;
   source: InquirySource;
   status: InquiryStatus;
   assigneeId: string | null;
