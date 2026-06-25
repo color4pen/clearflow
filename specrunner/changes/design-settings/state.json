@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "6ff8d39b-ba20-4f1b-a926-7ffaee9b96ef",
   "createdAt": "2026-06-25T05:31:37.907Z",
-  "updatedAt": "2026-06-25T05:38:52.509Z",
+  "updatedAt": "2026-06-25T05:43:43.669Z",
   "request": {
     "title": "設定画面のデザイン適用",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "design",
+  "step": "spec-review",
   "status": "running",
   "branch": "change/design-settings-6ff8d39b",
   "error": null,
@@ -34,9 +34,10 @@
     }
   ],
   "_journal": {
-    "historyCount": 5,
+    "historyCount": 9,
     "stepCounts": {
-      "request-review": 1
+      "request-review": 1,
+      "design": 1
     }
   }
 }
