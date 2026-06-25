@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "fa61d0c3-f9c3-4a48-8651-ea478147481d",
   "createdAt": "2026-06-25T00:04:40.085Z",
-  "updatedAt": "2026-06-25T00:56:49.766Z",
+  "updatedAt": "2026-06-25T00:57:41.870Z",
   "request": {
     "title": "引合画面のデザイン適用",
     "type": "spec-change",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "change/design-inquiry-fa61d0c3",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-25T00:56:49.756Z"
   },
   "_journal": {
-    "historyCount": 65,
+    "historyCount": 66,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
