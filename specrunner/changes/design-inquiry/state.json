@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "fa61d0c3-f9c3-4a48-8651-ea478147481d",
   "createdAt": "2026-06-25T00:04:40.085Z",
-  "updatedAt": "2026-06-25T00:56:27.151Z",
+  "updatedAt": "2026-06-25T00:56:49.766Z",
   "request": {
     "title": "引合画面のデザイン適用",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/design-inquiry-fa61d0c3",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/89",
+    "number": 89,
+    "createdAt": "2026-06-25T00:56:49.756Z"
+  },
   "_journal": {
-    "historyCount": 60,
+    "historyCount": 65,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -62,7 +67,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
