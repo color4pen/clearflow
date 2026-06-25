@@ -196,7 +196,7 @@ export function MeetingAttendeesSection({
             )}
           </div>
           <div>
-            <p className="text-text-muted font-bold mb-0.5">社外</p>
+            <p className="text-text-muted font-bold mb-0.5">外部</p>
             {editable && existingContacts.length > 0 && (
               <div className="mb-1">
                 <Select
