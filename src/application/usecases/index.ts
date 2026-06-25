@@ -61,3 +61,5 @@ export { getRecentActivities } from "./getRecentActivities";
 export { createPolicy } from "./createPolicy";
 export { updatePolicy } from "./updatePolicy";
 export { togglePolicy } from "./togglePolicy";
+export { getInquiry } from "./getInquiry";
+export { getActiveDelegationsForUser } from "./getActiveDelegationsForUser";

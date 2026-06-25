@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import type { ActionResult } from "@/app/actions/requests";
-import { SubmitButton, LinkButton, FormField, Textarea, preventEnterSubmit } from "@/app/components";
+import { SubmitButton, FormField, Textarea, preventEnterSubmit } from "@/app/components";
+// Textarea is used for the comment field in the approval action form
 
 export type ServerAction = (formData: FormData) => Promise<ActionResult>;
 
@@ -51,12 +52,14 @@ function ActionForm({
 
 export function ActionButtons({
   requestStatus,
+  isCurrentApprover,
   submitAction,
   approveAction,
   rejectAction,
   resubmitAction,
 }: {
   requestStatus: string;
+  isCurrentApprover: boolean;
   submitAction: ServerAction;
   approveAction: ServerAction;
   rejectAction: ServerAction;
@@ -77,61 +80,47 @@ export function ActionButtons({
     );
   }
 
-  if (requestStatus === "pending") {
+  if (requestStatus === "pending" && isCurrentApprover) {
     return (
       <div className="border-t border-border-light pt-4">
-        <h3 className="text-xs font-bold text-text mb-2">アクション</h3>
-        <div className="flex items-center gap-2 mb-4">
-          <ActionForm action={approveAction}>
-            {(isPending) => (
-              <LinkButton variant="success" disabled={isPending}>
-                承認
-              </LinkButton>
-            )}
-          </ActionForm>
-          <span className="text-text-muted text-xs">|</span>
-          <ActionForm action={rejectAction}>
-            {(isPending) => (
-              <>
-                <input type="hidden" name="targetStatus" value="rejected" />
-                <LinkButton variant="danger" disabled={isPending}>
-                  却下
-                </LinkButton>
-              </>
-            )}
-          </ActionForm>
-          <span className="text-text-muted text-xs">|</span>
-          <ActionForm action={rejectAction} className="space-y-2">
-            {(isPending) => (
-              <>
-                <input type="hidden" name="targetStatus" value="revision" />
-                <LinkButton variant="warning" disabled={isPending}>
-                  差戻
-                </LinkButton>
-              </>
-            )}
-          </ActionForm>
-        </div>
-        {/* 差し戻しフォーム */}
-        <div className="mt-2">
-          <ActionForm action={rejectAction} className="space-y-2">
-            {(isPending) => (
-              <>
-                <input type="hidden" name="targetStatus" value="revision" />
-                <FormField label="差し戻しコメント" htmlFor="revision-comment">
-                  <Textarea
-                    id="revision-comment"
-                    name="comment"
-                    rows={3}
-                    placeholder="差し戻し理由を入力してください"
-                  />
-                </FormField>
+        <h3 className="text-xs font-bold text-text mb-3">承認操作</h3>
+        <div className="space-y-4">
+          {/* Comment field shared between approve and reject */}
+          <FormField label="コメント（任意）" htmlFor="action-comment">
+            <Textarea
+              id="action-comment"
+              name="comment"
+              rows={3}
+              placeholder="コメントを入力してください"
+            />
+          </FormField>
+
+          <div className="flex items-center gap-3">
+            {/* Approve form */}
+            <ActionForm action={approveAction} className="contents">
+              {(isPending) => (
                 <SubmitButton pending={isPending}>
-                  差し戻す
+                  承認する
                 </SubmitButton>
-              </>
-            )}
-          </ActionForm>
+              )}
+            </ActionForm>
+
+            {/* Reject form */}
+            <ActionForm action={rejectAction}>
+              {(isPending) => (
+                <>
+                  <input type="hidden" name="targetStatus" value="rejected" />
+                  <button
+                    type="submit"
+                    disabled={isPending}
+                    className="text-xs border border-danger text-danger bg-white rounded px-3 py-1.5 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                  >
+                    {isPending ? "処理中..." : "却下する"}
+                  </button>
+                </>
+              )}
+            </ActionForm>
+          </div>
         </div>
       </div>
     );
