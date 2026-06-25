@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "25dfe498-1cf6-4a83-9b48-b5c43da40cc3",
   "createdAt": "2026-06-25T04:48:42.899Z",
-  "updatedAt": "2026-06-25T04:52:23.779Z",
+  "updatedAt": "2026-06-25T04:58:57.483Z",
   "request": {
     "title": "売上画面のデザイン適用",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "design",
+  "step": "spec-review",
   "status": "running",
   "branch": "change/design-revenue-25dfe498",
   "error": null,
@@ -34,9 +34,10 @@
     }
   ],
   "_journal": {
-    "historyCount": 5,
+    "historyCount": 9,
     "stepCounts": {
-      "request-review": 1
+      "request-review": 1,
+      "design": 1
     }
   }
 }
