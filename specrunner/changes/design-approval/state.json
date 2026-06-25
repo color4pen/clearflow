@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "963d89ad-2ef0-428c-898e-75ae21d97484",
   "createdAt": "2026-06-25T03:43:10.817Z",
-  "updatedAt": "2026-06-25T04:10:50.649Z",
+  "updatedAt": "2026-06-25T04:15:02.484Z",
   "request": {
     "title": "承認画面のデザイン適用",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "change/design-approval-963d89ad",
   "error": null,
@@ -34,12 +34,13 @@
     }
   ],
   "_journal": {
-    "historyCount": 21,
+    "historyCount": 24,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
       "spec-review": 2,
-      "spec-fixer": 1
+      "spec-fixer": 1,
+      "test-case-gen": 1
     }
   }
 }
