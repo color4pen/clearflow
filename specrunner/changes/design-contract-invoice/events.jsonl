@@ -41,3 +41,9 @@
 {"type":"transition","ts":"2026-06-25T03:03:56.910Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-25T03:03:56.911Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-25T03:03:56.913Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-25T03:05:10.004Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"58e83eb6-3f3e-47d4-ad93-468977cffb6e","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-25T03:03:56.926Z","endedAt":"2026-06-25T03:05:08.637Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-25T03:05:08.637Z","outputs":[{"path":"specrunner/changes/design-contract-invoice","hash":null}],"inputs":[{"path":"specrunner/changes/design-contract-invoice/review-feedback-001.md","hash":"sha256:e416bab533d923c039f987b417a40067aef7cf85951a21f5633ed559fedc2ae7"}]}
+{"type":"transition","ts":"2026-06-25T03:05:10.010Z","step":"step-transition","status":"ok","message":"code-fixer → custom-reviewers"}
+{"type":"transition","ts":"2026-06-25T03:05:10.011Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 1 started"}
+{"type":"transition","ts":"2026-06-25T03:05:10.024Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
