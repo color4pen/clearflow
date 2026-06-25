@@ -41,3 +41,16 @@
 {"type":"transition","ts":"2026-06-25T06:56:15.766Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-25T06:56:15.767Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-25T06:56:15.772Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-25T06:56:50.962Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"f13870aa-79ab-4901-8f70-fbea3f4b31e6","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-25T06:56:15.784Z","endedAt":"2026-06-25T06:56:49.638Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-25T06:56:49.638Z","outputs":[{"path":"specrunner/changes/design-dialog-toast","hash":null}],"inputs":[{"path":"specrunner/changes/design-dialog-toast/review-feedback-001.md","hash":"sha256:e4fc8337ae11be53c3fa71d4c8f8632bb3cc8b18737fa2979111f6c22492c129"}]}
+{"type":"transition","ts":"2026-06-25T06:56:50.972Z","step":"step-transition","status":"ok","message":"code-fixer → custom-reviewers"}
+{"type":"transition","ts":"2026-06-25T06:56:50.974Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 1 started"}
+{"type":"transition","ts":"2026-06-25T06:56:50.991Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
+{"type":"transition","ts":"2026-06-25T06:56:51.013Z","step":"domain-invariants-skipped","status":"warning","message":"domain-invariants skipped: no changed files matched paths [src/application/**, src/infrastructure/repositories/**, src/app/actions/**, src/domain/**]"}
+{"type":"step-attempt","step":"domain-invariants","sessionId":null,"outcome":{"verdict":"skipped","findingsPath":null,"error":null,"skipReason":"no changed files matched paths [src/application/**, src/infrastructure/repositories/**, src/app/actions/**, src/domain/**]"},"startedAt":"2026-06-25T06:56:51.013Z","endedAt":"2026-06-25T06:56:51.013Z"}
+{"type":"step-attempt","step":"custom-reviewers","sessionId":null,"outcome":{"verdict":"approved","findingsPath":null,"error":null},"startedAt":"2026-06-25T06:56:50.990Z","endedAt":"2026-06-25T06:56:51.022Z"}
+{"type":"transition","ts":"2026-06-25T06:56:51.023Z","step":"custom-reviewers","status":"ok","message":"custom-reviewers iteration 1 completed with verdict: approved"}
+{"type":"transition","ts":"2026-06-25T06:56:51.023Z","step":"step-transition","status":"ok","message":"custom-reviewers → regression-gate"}
+{"type":"transition","ts":"2026-06-25T06:56:51.024Z","step":"regression-gate","status":"started","message":"regression-gate iteration 1 started"}
+{"type":"transition","ts":"2026-06-25T06:56:51.025Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
