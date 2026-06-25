@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 40.3s | 0 |
-| 2 | typecheck | passed | 3.4s | 0 |
+| 1 | build | passed | 21.9s | 0 |
+| 2 | typecheck | passed | 1.2s | 0 |
 | 3 | test | passed | 0.4s | 0 |
-| 4 | lint | passed | 5.7s | 0 |
+| 4 | lint | passed | 4.7s | 0 |
 
 ## Phase: build
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 34.5s
+✓ Compiled successfully in 16.4s
   Running TypeScript ...
-  Finished TypeScript in 4.4s ...
+  Finished TypeScript in 3.9s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/30) ...
   Generating static pages using 7 workers (7/30) 
   Generating static pages using 7 workers (14/30) 
   Generating static pages using 7 workers (22/30) 
-✓ Generating static pages using 7 workers (30/30) in 143ms
+✓ Generating static pages using 7 workers (30/30) in 122ms
   Finalizing page optimization ...
 
 Route (app)
@@ -126,9 +126,6 @@ Ran 929 tests across 47 files. [403.00ms]
 
 ```
 
-src/app/(dashboard)/requests/[id]/page.tsx
-  20:23  warning  'statusClass' is defined but never used  @typescript-eslint/no-unused-vars
-
 src/app/(dashboard)/settings/templates/DeleteButton.tsx
   10:24  warning  '_prev' is defined but never used      @typescript-eslint/no-unused-vars
   10:38  warning  '_formData' is defined but never used  @typescript-eslint/no-unused-vars
@@ -146,7 +143,7 @@ src/infrastructure/seed.ts
   575:10  warning  'inProgressInquiry1' is assigned a value but never used  @typescript-eslint/no-unused-vars
   585:10  warning  'inProgressInquiry2' is assigned a value but never used  @typescript-eslint/no-unused-vars
 
-✖ 10 problems (0 errors, 10 warnings)
+✖ 9 problems (0 errors, 9 warnings)
 
 
 $ eslint
