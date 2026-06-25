@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f21309a2-eca6-49b5-9e17-74f140571b3d",
   "createdAt": "2026-06-25T09:41:49.343Z",
-  "updatedAt": "2026-06-25T09:41:51.053Z",
+  "updatedAt": "2026-06-25T09:45:14.017Z",
   "request": {
     "title": "引合の問い合わせ内容フィールド追加",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "request-review",
+  "step": "design",
   "status": "running",
   "branch": "change/inquiry-contact-note-f21309a2",
   "error": null,
@@ -34,7 +34,9 @@
     }
   ],
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 5,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
