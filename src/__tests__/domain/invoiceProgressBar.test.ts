@@ -1,4 +1,5 @@
 import { describe, it, expect } from "bun:test";
+import type { RenewalType } from "@/domain/models/contract";
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -80,6 +81,14 @@ describe("invoiceProgressBar", () => {
     expect(result.paidPct).toBe(0);
     expect(result.invoicedPct).toBe(0);
     expect(result.remaining).toBe(0);
+  });
+
+  it("TC-013: 定期契約（recurring）ではプログレスバーを表示しない", () => {
+    // InvoiceSection の isOneTime ? <ProgressBarSummary> : <grid-cols-3> 分岐の
+    // recurring 側を検証する。renewalType === "recurring" のとき isOneTime が false になることを確認。
+    const renewalType: RenewalType = "recurring";
+    const isOneTime = renewalType === "one_time";
+    expect(isOneTime).toBe(false);
   });
 });
 

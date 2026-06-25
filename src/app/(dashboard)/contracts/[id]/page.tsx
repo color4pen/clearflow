@@ -28,7 +28,12 @@ export default async function ContractDetailPage({
   const isTerminal = contract.status === "completed" || contract.status === "cancelled";
 
   const invoices = await invoiceRepository.findAllByContract(id, organizationId);
-  const hasPendingApproval = await requestRepository.existsPendingByTriggerEntityId(organizationId, id);
+  let hasPendingApproval = false;
+  try {
+    hasPendingApproval = await requestRepository.existsPendingByTriggerEntityId(organizationId, id);
+  } catch {
+    // DB エラー時はバナー非表示で degradation
+  }
 
   return (
     <div>

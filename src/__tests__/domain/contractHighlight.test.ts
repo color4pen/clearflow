@@ -1,18 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import type { ContractWithClient } from "@/domain/models/contract";
-
-/**
- * 終了日が今日から 30 日以内の active 契約かどうかを判定するユーティリティ。
- * contracts/page.tsx の isExpiringWithin30Days と同じロジック。
- */
-function isExpiringWithin30Days(row: Pick<ContractWithClient, "endDate" | "status">): boolean {
-  if (!row.endDate || row.status !== "active") return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const thirtyDaysLater = new Date(today);
-  thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
-  return row.endDate <= thirtyDaysLater;
-}
+import { isExpiringWithin30Days } from "@/domain/services/contractHighlight";
 
 function daysFromNow(days: number): Date {
   const d = new Date();

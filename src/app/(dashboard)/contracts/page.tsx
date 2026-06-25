@@ -3,16 +3,8 @@ import { auth } from "@/infrastructure/auth";
 import { listContracts } from "@/application/usecases";
 import { PageToolbar, SectionCard, DataTable } from "@/app/components";
 import { contractStatusLabels, contractTypeLabels } from "@/app/(dashboard)/labels";
+import { isExpiringWithin30Days } from "@/domain/services/contractHighlight";
 import type { ContractWithClient } from "@/domain/models/contract";
-
-function isExpiringWithin30Days(row: ContractWithClient): boolean {
-  if (!row.endDate || row.status !== "active") return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const thirtyDaysLater = new Date(today);
-  thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
-  return row.endDate <= thirtyDaysLater;
-}
 
 export default async function ContractsPage() {
   const session = await auth();

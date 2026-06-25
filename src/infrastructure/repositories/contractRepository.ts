@@ -117,7 +117,7 @@ export async function findAllByOrganization(
     })
     .from(contracts)
     .innerJoin(clients, eq(contracts.clientId, clients.id))
-    .innerJoin(deals, eq(contracts.dealId, deals.id))
+    .innerJoin(deals, and(eq(contracts.dealId, deals.id), eq(deals.organizationId, organizationId)))
     .where(eq(contracts.organizationId, organizationId))
     .orderBy(asc(contracts.createdAt));
 
