@@ -376,8 +376,8 @@ export async function updateMeetingAction(
           });
         }
       }
-    } catch {
-      // best-effort
+    } catch (err) {
+      console.error("[meetings] 顧客担当者の登録に失敗:", err);
     }
   }
 

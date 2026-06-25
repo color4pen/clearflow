@@ -104,7 +104,7 @@ export async function updateInvoiceAction(
     return { success: false, message: "認証が必要です" };
   }
 
-  if (session.user.role !== "admin" && session.user.role !== "manager") {
+  if (!canPerform(session.user.role, "invoice", "edit")) {
     return { success: false, message: "権限がありません" };
   }
 
