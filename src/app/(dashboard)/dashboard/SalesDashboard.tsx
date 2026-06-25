@@ -185,10 +185,10 @@ export function SalesDashboard({
                   const { text: dateText } = getDateDisplay(item);
                   const itemKey =
                     item.type === "approval"
-                      ? item.requestId
+                      ? `approval-${item.requestId}`
                       : item.type === "action_item"
-                        ? item.dealId
-                        : item.inquiryId;
+                        ? `action-${item.dealId}-${item.description}`
+                        : `inquiry-${item.inquiryId}`;
                   return (
                     <div
                       key={itemKey}
