@@ -1,4 +1,4 @@
-import { eq, and, asc, sql } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import type { Transaction } from "../db";
@@ -98,7 +98,7 @@ export async function findAllByOrganization(
     .leftJoin(inquiries, eq(deals.inquiryId, inquiries.id))
     .leftJoin(assignees, eq(deals.assigneeId, assignees.id))
     .where(eq(deals.organizationId, organizationId))
-    .orderBy(asc(deals.createdAt));
+    .orderBy(desc(deals.createdAt));
 
   return rows.map((row) => ({
     ...mapRow(row.deal),
@@ -120,7 +120,7 @@ export async function findAllByClientId(
     .where(
       and(eq(deals.clientId, clientId), eq(deals.organizationId, organizationId))
     )
-    .orderBy(asc(deals.createdAt));
+    .orderBy(desc(deals.createdAt));
   return result.map(mapRow);
 }
 

@@ -1,4 +1,4 @@
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, desc } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { inquiries, clients } from "../schema";
@@ -74,7 +74,7 @@ export async function findAllByOrganization(
     .select()
     .from(inquiries)
     .where(eq(inquiries.organizationId, organizationId))
-    .orderBy(inquiries.createdAt);
+    .orderBy(desc(inquiries.createdAt));
   return result.map(mapRow);
 }
 
@@ -89,7 +89,7 @@ export async function findAllWithClientByOrganization(
     .from(inquiries)
     .leftJoin(clients, eq(inquiries.clientId, clients.id))
     .where(eq(inquiries.organizationId, organizationId))
-    .orderBy(inquiries.createdAt);
+    .orderBy(desc(inquiries.createdAt));
 
   return rows.map((row) => ({
     ...mapRow(row.inquiry),
@@ -166,6 +166,6 @@ export async function findByClientId(
     .select()
     .from(inquiries)
     .where(and(eq(inquiries.clientId, clientId), eq(inquiries.organizationId, organizationId)))
-    .orderBy(inquiries.createdAt);
+    .orderBy(desc(inquiries.createdAt));
   return result.map(mapRow);
 }

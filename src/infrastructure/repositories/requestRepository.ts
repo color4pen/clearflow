@@ -1,4 +1,4 @@
-import { eq, and, sql, inArray } from "drizzle-orm";
+import { eq, and, sql, inArray, desc } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { requests, auditLogs, approvalSteps } from "../schema";
@@ -113,7 +113,7 @@ export async function findAllByOrganization(
     .select()
     .from(requests)
     .where(eq(requests.organizationId, organizationId))
-    .orderBy(requests.createdAt);
+    .orderBy(desc(requests.createdAt));
   return result.map(mapRow);
 }
 
@@ -137,7 +137,7 @@ export async function findAllWithStepsByOrganization(
       )
     )
     .where(eq(requests.organizationId, organizationId))
-    .orderBy(requests.createdAt, approvalSteps.stepOrder);
+    .orderBy(desc(requests.createdAt), approvalSteps.stepOrder);
 
   // Group rows by requestId
   const map = new Map<string, RequestWithSteps>();
