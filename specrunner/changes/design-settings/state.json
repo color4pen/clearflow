@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "6ff8d39b-ba20-4f1b-a926-7ffaee9b96ef",
   "createdAt": "2026-06-25T05:31:37.907Z",
-  "updatedAt": "2026-06-25T06:16:16.133Z",
+  "updatedAt": "2026-06-25T06:19:09.989Z",
   "request": {
     "title": "設定画面のデザイン適用",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "change/design-settings-6ff8d39b",
   "error": null,
@@ -33,8 +33,22 @@
       ]
     }
   ],
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "1e0041cdfabe5a1713f4545214efe68079d53b0f",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 38,
+    "historyCount": 43,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -43,7 +57,9 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 2,
-      "code-fixer": 1
+      "code-fixer": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
