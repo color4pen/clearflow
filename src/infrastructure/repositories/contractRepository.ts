@@ -1,7 +1,7 @@
 import { eq, and, asc } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
-import { contracts, clients } from "../schema";
+import { contracts, clients, deals } from "../schema";
 import type { Contract, ContractWithClient, ContractStatus, RenewalType } from "@/domain/models/contract";
 
 function mapRow(row: typeof contracts.$inferSelect): Contract {
@@ -113,15 +113,18 @@ export async function findAllByOrganization(
     .select({
       contract: contracts,
       clientName: clients.name,
+      dealTitle: deals.title,
     })
     .from(contracts)
     .innerJoin(clients, eq(contracts.clientId, clients.id))
+    .innerJoin(deals, eq(contracts.dealId, deals.id))
     .where(eq(contracts.organizationId, organizationId))
     .orderBy(asc(contracts.createdAt));
 
   return rows.map((row) => ({
     ...mapRow(row.contract),
     clientName: row.clientName,
+    dealTitle: row.dealTitle,
   }));
 }
 

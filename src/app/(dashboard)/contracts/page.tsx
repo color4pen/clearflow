@@ -5,6 +5,15 @@ import { PageToolbar, SectionCard, DataTable } from "@/app/components";
 import { contractStatusLabels, contractTypeLabels } from "@/app/(dashboard)/labels";
 import type { ContractWithClient } from "@/domain/models/contract";
 
+function isExpiringWithin30Days(row: ContractWithClient): boolean {
+  if (!row.endDate || row.status !== "active") return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const thirtyDaysLater = new Date(today);
+  thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
+  return row.endDate <= thirtyDaysLater;
+}
+
 export default async function ContractsPage() {
   const session = await auth();
   const organizationId = session!.user.organizationId;
@@ -36,6 +45,11 @@ export default async function ContractsPage() {
                 render: (row) => row.clientName,
               },
               {
+                key: "dealTitle",
+                header: "案件名",
+                render: (row) => row.dealTitle,
+              },
+              {
                 key: "contractType",
                 header: "契約種別",
                 render: (row) =>
@@ -51,6 +65,15 @@ export default async function ContractsPage() {
                     : "-",
               },
               {
+                key: "period",
+                header: "期間",
+                render: (row) => {
+                  const start = row.startDate.toLocaleDateString("ja-JP");
+                  const end = row.endDate ? row.endDate.toLocaleDateString("ja-JP") : null;
+                  return end ? `${start} 〜 ${end}` : `${start} 〜`;
+                },
+              },
+              {
                 key: "status",
                 header: "ステータス",
                 render: (row) => contractStatusLabels[row.status] ?? row.status,
@@ -59,6 +82,9 @@ export default async function ContractsPage() {
             rows={contracts}
             rowKey={(row) => row.id}
             rowHref={(row) => `/contracts/${row.id}`}
+            rowClass={(row) =>
+              isExpiringWithin30Days(row) ? "bg-amber-50" : undefined
+            }
           />
         )}
       </SectionCard>

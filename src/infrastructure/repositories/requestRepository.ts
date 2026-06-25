@@ -186,6 +186,28 @@ export async function findByOriginTriggerEntity(
   return result[0] ? mapRow(result[0]) : null;
 }
 
+/**
+ * Returns true if there is at least one pending approval request associated
+ * with the given trigger entity (e.g. a contract). Used to show the
+ * approval-pending banner on entity detail pages.
+ */
+export async function existsPendingByTriggerEntityId(
+  organizationId: string,
+  triggerEntityId: string
+): Promise<boolean> {
+  const result = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(requests)
+    .where(
+      and(
+        eq(requests.organizationId, organizationId),
+        eq(requests.originTriggerEntityId, triggerEntityId),
+        eq(requests.status, "pending")
+      )
+    );
+  return (result[0]?.count ?? 0) > 0;
+}
+
 export async function updateStatus(
   id: string,
   organizationId: string,

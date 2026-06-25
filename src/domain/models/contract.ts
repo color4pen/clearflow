@@ -20,5 +20,5 @@ export type Contract = {
   updatedAt: Date;
 };
 
-/** 一覧表示用: クライアント名を含む */
-export type ContractWithClient = Contract & { clientName: string };
+/** 一覧表示用: クライアント名と案件名を含む */
+export type ContractWithClient = Contract & { clientName: string; dealTitle: string };
