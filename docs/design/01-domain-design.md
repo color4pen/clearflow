@@ -65,13 +65,17 @@
 | id | ID | Yes | |
 | organizationId | ID | Yes | テナント識別子 |
 | title | string | Yes | 引合の件名 |
-| description | string | No | 引合の概要・背景 |
+| contactNote | string | No | 問い合わせ内容（メール原文、電話メモなど事実の記録） |
+| description | string | No | 概要（営業の解釈・要約） |
 | source | InquirySource | Yes | 引合の経路 |
 | budget | number | No | 顧客の想定予算 |
 | timeline | string | No | 顧客の希望時期 |
 | status | InquiryStatus | Yes | 引合の状態 |
 | clientId | ID | No | 顧客（引合受付時点では未特定の場合がある） |
+| assigneeId | ID | No | 社内担当者 |
 | createdAt | datetime | Yes | |
+| updatedAt | datetime | Yes | |
+| version | number | Yes | 楽観的ロック用 |
 
 **値オブジェクト: InquirySource**
 
@@ -123,12 +127,19 @@ declined ──→ new     判断を撤回して再検討する
 | title | string | Yes | 案件名 |
 | description | string | No | 案件の概要 |
 | phase | DealPhase | Yes | 案件のフェーズ |
-| contractType | ContractType | No | 想定される契約形態 |
+| contractType | string | No | 想定される契約形態（quasi_delegation / fixed_price / ses） |
 | estimatedAmount | number | No | 想定金額 |
-| expectedCloseDate | date | No | 受注見込み時期 |
+| estimatedStartDate | datetime | No | 想定開始日 |
+| estimatedEndDate | datetime | No | 想定終了日 |
 | clientId | ID | Yes | 顧客 |
 | inquiryId | ID | No | 元となった引合（直接作成の場合は null） |
+| assigneeId | ID | No | 営業担当者 |
+| technicalLeadId | ID | No | 技術リード |
+| estimateRequestId | ID | No | 見積承認リクエスト |
+| notes | string | No | 備考 |
 | createdAt | datetime | Yes | |
+| updatedAt | datetime | Yes | |
+| version | number | Yes | 楽観的ロック用 |
 
 **エンティティ: DealContact**
 
@@ -144,7 +155,7 @@ declined ──→ new     判断を撤回して再検討する
 **値オブジェクト: DealPhase**
 
 ```
-proposal_prep | proposed | negotiation | estimate_approval | won | lost
+proposal_prep | proposed | negotiation | won | lost
 ```
 
 - `won`（受注）と `lost`（失注）は終端フェーズ。
@@ -200,10 +211,12 @@ non-terminal ───→ lost            失注（不可逆）
 | inquiryId | ID | No | 引合（案件化前の商談） |
 | type | MeetingType | Yes | 商談の種別 |
 | date | datetime | Yes | 実施日時 |
-| summary | string | No | 議事要旨 |
-| body | string | No | 詳細な議事録 |
+| summary | string | No | 議事要旨（Markdown） |
+| location | string | No | 場所 |
 | hearingData | HearingData | No | ヒアリング固有の情報（type が hearing の場合） |
+| createdById | ID | Yes | 作成者 |
 | createdAt | datetime | Yes | |
+| updatedAt | datetime | Yes | |
 
 **値オブジェクト: MeetingType**
 
@@ -301,14 +314,18 @@ hearing | proposal | negotiation | closing | followup
 | id | ID | Yes | |
 | organizationId | ID | Yes | テナント識別子 |
 | dealId | ID | Yes | 案件 |
+| clientId | ID | Yes | 顧客（非正規化: Deal 経由でも取得可能だが JOIN 削減のため保持） |
 | title | string | Yes | 契約名 |
-| contractType | ContractType | Yes | 契約形態 |
+| contractType | string | No | 契約形態（quasi_delegation / fixed_price / ses） |
 | amount | number | Yes | 契約金額 |
-| startDate | date | Yes | 契約開始日 |
-| endDate | date | No | 契約終了日 |
+| startDate | datetime | Yes | 契約開始日 |
+| endDate | datetime | No | 契約終了日 |
+| paymentTerms | string | No | 支払条件 |
 | renewalType | RenewalType | Yes | 更新種別 |
+| renewalCycle | string | No | 更新サイクル（継続契約の場合） |
 | status | ContractStatus | Yes | 契約の状態 |
 | createdAt | datetime | Yes | |
+| updatedAt | datetime | Yes | |
 
 **値オブジェクト: RenewalType**
 
@@ -359,12 +376,16 @@ active ──→ cancelled    契約の解除・中止
 | id | ID | Yes | |
 | organizationId | ID | Yes | テナント識別子 |
 | contractId | ID | Yes | 契約 |
+| title | string | Yes | 請求名 |
 | amount | number | Yes | 請求金額 |
-| issueDate | date | Yes | 請求日 |
-| dueDate | date | Yes | 支払期日 |
+| issueDate | datetime | No | 請求予定日 |
+| dueDate | datetime | Yes | 支払期日 |
+| invoicedAt | datetime | No | 実際の発行日時 |
 | paidAt | datetime | No | 入金日 |
 | status | InvoiceStatus | Yes | 請求の状態 |
+| notes | string | No | 備考 |
 | createdAt | datetime | Yes | |
+| updatedAt | datetime | Yes | |
 
 **値オブジェクト: InvoiceStatus**
 
