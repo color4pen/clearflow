@@ -10,6 +10,7 @@ export async function updateInquiry(data: {
   actorId: string;
   title?: string;
   description?: string | null;
+  contactNote?: string | null;
   source?: InquirySource;
   clientId?: string | null;
   assigneeId?: string | null;
@@ -25,6 +26,7 @@ export async function updateInquiry(data: {
   const updatePayload: Partial<{
     title: string;
     description: string | null;
+    contactNote: string | null;
     source: InquirySource;
     clientId: string | null;
     assigneeId: string | null;
@@ -34,6 +36,7 @@ export async function updateInquiry(data: {
 
   if (data.title !== undefined) updatePayload.title = data.title;
   if (data.description !== undefined) updatePayload.description = data.description;
+  if (data.contactNote !== undefined) updatePayload.contactNote = data.contactNote;
   if (data.source !== undefined) updatePayload.source = data.source;
   if (data.clientId !== undefined) updatePayload.clientId = data.clientId;
   if (data.assigneeId !== undefined) updatePayload.assigneeId = data.assigneeId;

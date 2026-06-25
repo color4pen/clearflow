@@ -12,6 +12,7 @@ type Props = {
   inquiryTitle: string;
   inquirySource: string;
   inquiryDescription: string | null;
+  inquiryContactNote: string | null;
   clientId: string | null;
   clientName: string | null;
   clientLinkId: string | null;
@@ -24,6 +25,7 @@ export function InquiryCustomerSection({
   inquiryTitle,
   inquirySource,
   inquiryDescription,
+  inquiryContactNote,
   clientId,
   clientName,
   clientLinkId,
@@ -46,6 +48,7 @@ export function InquiryCustomerSection({
     formData.set("title", inquiryTitle);
     formData.set("source", inquirySource);
     if (inquiryDescription) formData.set("description", inquiryDescription);
+    if (inquiryContactNote) formData.set("contactNote", inquiryContactNote);
 
     if (clientMode === "new" && newClientName.trim()) {
       formData.set("newClientName", newClientName.trim());

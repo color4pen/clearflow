@@ -10,6 +10,7 @@ type Props = {
     title: string;
     source: string;
     description: string | null;
+    contactNote: string | null;
     clientId: string | null;
     assigneeId: string | null;
     status: string;
@@ -67,7 +68,12 @@ export function InquiryInfoDisplay({ inquiry, editable }: Props) {
           {sourceLabels[inquiry.source] ?? inquiry.source}
         </div>
 
-        <div className="text-text-muted py-1">内容</div>
+        <div className="text-text-muted py-1">問い合わせ内容</div>
+        <div className="text-text py-1 whitespace-pre-wrap">
+          {inquiry.contactNote ?? "-"}
+        </div>
+
+        <div className="text-text-muted py-1">概要</div>
         <div className="text-text py-1 whitespace-pre-wrap">
           {inquiry.description ?? "-"}
         </div>

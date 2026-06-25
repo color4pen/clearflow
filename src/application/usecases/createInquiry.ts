@@ -12,6 +12,7 @@ export async function createInquiry(data: {
   clientId?: string | null;
   title: string;
   description?: string | null;
+  contactNote?: string | null;
   source: string;
   assigneeId?: string | null;
   budget?: number | null;
@@ -33,6 +34,7 @@ export async function createInquiry(data: {
           clientId: data.clientId ?? null,
           title: data.title,
           description: data.description,
+          contactNote: data.contactNote,
           source: data.source,
           assigneeId: data.assigneeId,
           budget: data.budget ?? null,
