@@ -181,7 +181,7 @@ export function BulkApprovalPanel({
         <table className="w-full border-collapse table-fixed">
           <colgroup>
             {showBulkApproval && <col className="w-6" />}
-            <col style={{ width: "1.9fr" }} />
+            <col />
             <col style={{ width: "90px" }} />
             <col style={{ width: "110px" }} />
             <col style={{ width: "90px" }} />

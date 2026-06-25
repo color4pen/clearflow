@@ -17,7 +17,7 @@ import { ActionButtons } from "./ActionButtons";
 import type { ServerAction } from "./ActionButtons";
 import { ApprovalStepper } from "./ApprovalStepper";
 import { SystemOriginBanner } from "./SystemOriginBanner";
-import { statusLabel, statusClass } from "../statusUtils";
+import { statusLabel } from "../statusUtils";
 import { SectionCard } from "@/app/components";
 import { getCurrentStep, canApproveWithDelegation } from "@/domain/services/approvalStepService";
 
