@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "e06aa7fb-12e1-4b83-9bf6-647012db8ee5",
   "createdAt": "2026-06-25T01:07:13.599Z",
-  "updatedAt": "2026-06-25T01:21:41.971Z",
+  "updatedAt": "2026-06-25T01:24:18.518Z",
   "request": {
     "title": "案件画面のデザイン適用",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "change/design-deal-e06aa7fb",
   "error": null,
@@ -34,11 +34,12 @@
     }
   ],
   "_journal": {
-    "historyCount": 13,
+    "historyCount": 16,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1
+      "spec-review": 1,
+      "test-case-gen": 1
     }
   }
 }

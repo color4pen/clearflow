@@ -14,35 +14,20 @@ type Props = {
   canChangePhase: boolean;
 };
 
-const ALL_PHASES: DealPhase[] = ["proposal_prep", "proposed", "negotiation", "won", "lost"];
+const NON_TERMINAL_PHASES: DealPhase[] = ["proposal_prep", "proposed", "negotiation"];
 const TERMINAL_PHASES: DealPhase[] = ["won", "lost"];
-
-function getVariant(phase: DealPhase): "primary" | "success" | "danger" {
-  if (phase === "won") return "success";
-  if (phase === "lost") return "danger";
-  return "primary";
-}
-
-const variantStyles = {
-  primary: "bg-primary text-white",
-  success: "bg-green-600 text-white",
-  danger: "border border-danger text-danger hover:bg-danger hover:text-white",
-};
 
 export function DealPhaseActions({ deal, canChangePhase }: Props) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  if (TERMINAL_PHASES.includes(deal.phase)) {
-    return <p className="text-xs text-text-muted">このフェーズはこれ以上変更できません</p>;
-  }
-
-  if (!canChangePhase) {
-    return <p className="text-xs text-text-muted">フェーズの変更は管理者またはマネージャーのみ実行できます</p>;
+  if (TERMINAL_PHASES.includes(deal.phase) || !canChangePhase) {
+    return null;
   }
 
   async function handleTransition(newPhase: DealPhase) {
+    if (newPhase === deal.phase) return;
     setIsSubmitting(true);
     setErrorMessage(null);
     const formData = new FormData();
@@ -56,31 +41,31 @@ export function DealPhaseActions({ deal, canChangePhase }: Props) {
     }
   }
 
-  // 現在のフェーズを除いた全フェーズを遷移先候補として生成する（won/lost を含む）
-  const options = ALL_PHASES.filter((p) => p !== deal.phase).map((phase) => ({
-    phase,
-    label: phaseLabels[phase] ?? phase,
-    variant: getVariant(phase),
-  }));
-
   return (
-    <div className="space-y-2">
+    <div>
+      <h2 className="text-xs font-bold text-text mb-2">フェーズ変更</h2>
       {errorMessage && (
-        <p className="text-danger text-xs">{errorMessage}</p>
+        <p className="text-danger text-xs mb-1">{errorMessage}</p>
       )}
-
       <div className="flex gap-2 flex-wrap">
-        {options.map((option) => (
-          <button
-            key={option.phase}
-            type="button"
-            disabled={isSubmitting}
-            onClick={() => handleTransition(option.phase)}
-            className={`text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50 ${variantStyles[option.variant]}`}
-          >
-            {option.label}
-          </button>
-        ))}
+        {NON_TERMINAL_PHASES.map((phase) => {
+          const isCurrent = phase === deal.phase;
+          return (
+            <button
+              key={phase}
+              type="button"
+              disabled={isCurrent || isSubmitting}
+              onClick={() => handleTransition(phase)}
+              className={`text-xs font-bold px-4 py-1.5 ${
+                isCurrent
+                  ? "bg-primary text-white cursor-default"
+                  : "border border-border text-text hover:bg-bg-page cursor-pointer disabled:opacity-50"
+              }`}
+            >
+              {phaseLabels[phase] ?? phase}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

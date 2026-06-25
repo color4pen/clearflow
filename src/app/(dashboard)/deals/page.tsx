@@ -1,32 +1,41 @@
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { listDeals } from "@/application/usecases";
+import { getPipelineSummary } from "@/application/usecases";
 import { PageToolbar, ToolbarActions, DataTable, SectionCard } from "@/app/components";
-import { phaseLabels } from "@/app/(dashboard)/labels";
+import { phaseLabels, contractTypeLabels } from "@/app/(dashboard)/labels";
+import { DealsFilter } from "./DealsFilter";
 import type { DealWithDetails } from "@/domain/models/deal";
-
-const allPhases = [
-  "proposal_prep",
-  "proposed",
-  "negotiation",
-  "won",
-  "lost",
-] as const;
 
 export default async function DealsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ phase?: string }>;
+  searchParams: Promise<{ phase?: string; client?: string; contractType?: string }>;
 }) {
-  const { phase } = await searchParams;
+  const { phase, client, contractType } = await searchParams;
   const session = await auth();
   const organizationId = session!.user.organizationId;
 
-  const allDeals = await listDeals(organizationId);
+  const { summary, deals: allDeals } = await getPipelineSummary(organizationId);
 
-  const filteredDeals = phase
-    ? allDeals.filter((d) => d.phase === phase)
-    : allDeals;
+  // Extract unique values for filter options
+  const clients = [
+    ...new Set(allDeals.map((d) => d.clientName).filter((n): n is string => Boolean(n))),
+  ].sort();
+  const contractTypes = [
+    ...new Set(
+      allDeals.map((d) => d.contractType).filter((t): t is NonNullable<typeof t> => t !== null)
+    ),
+  ].sort();
+
+  // Pipeline summary totals
+  const totalCount = summary.reduce((s, i) => s + i.count, 0);
+  const totalAmount = summary.reduce((s, i) => s + i.totalAmount, 0);
+
+  // Apply filters
+  let filteredDeals: DealWithDetails[] = allDeals;
+  if (phase) filteredDeals = filteredDeals.filter((d) => d.phase === phase);
+  if (client) filteredDeals = filteredDeals.filter((d) => d.clientName === client);
+  if (contractType) filteredDeals = filteredDeals.filter((d) => d.contractType === contractType);
 
   return (
     <div>
@@ -41,22 +50,53 @@ export default async function DealsPage({
         }
       />
 
-      <div className="mt-2 mb-2 flex gap-2 flex-wrap">
-        <Link
-          href="/deals"
-          className={`text-xs px-2 py-0.5 border ${!phase ? "bg-primary text-white border-primary" : "border-border text-text-muted hover:text-text"}`}
-        >
-          全て
-        </Link>
-        {allPhases.map((p) => (
+      {/* パイプラインサマリ */}
+      <SectionCard className="p-4 mb-2">
+        <div className="grid grid-cols-6">
+          {summary.map((item) => (
+            <Link
+              key={item.phase}
+              href={`/deals?phase=${item.phase}`}
+              className="block p-3 hover:bg-bg-page text-center border-r border-border"
+            >
+              <div className="text-xs text-text-muted mb-1">
+                {phaseLabels[item.phase] ?? item.phase}
+              </div>
+              <div className="text-xl font-bold text-text">
+                {item.count}
+                <span className="text-sm font-normal ml-0.5">件</span>
+              </div>
+              <div className="text-xs text-text-secondary font-mono">
+                ¥{item.totalAmount.toLocaleString("ja-JP")}
+              </div>
+            </Link>
+          ))}
+          {/* 合計 */}
           <Link
-            key={p}
-            href={`/deals?phase=${p}`}
-            className={`text-xs px-2 py-0.5 border ${phase === p ? "bg-primary text-white border-primary" : "border-border text-text-muted hover:text-text"}`}
+            href="/deals"
+            className="block p-3 hover:bg-bg-page text-center"
           >
-            {phaseLabels[p]}
+            <div className="text-xs text-text-muted mb-1">合計</div>
+            <div className="text-xl font-bold text-text">
+              {totalCount}
+              <span className="text-sm font-normal ml-0.5">件</span>
+            </div>
+            <div className="text-xs text-text-secondary font-mono">
+              ¥{totalAmount.toLocaleString("ja-JP")}
+            </div>
           </Link>
-        ))}
+        </div>
+      </SectionCard>
+
+      {/* フィルタ */}
+      <div className="mb-2">
+        <DealsFilter
+          currentPhase={phase ?? ""}
+          currentClient={client ?? ""}
+          currentContractType={contractType ?? ""}
+          clients={clients}
+          contractTypes={contractTypes}
+        />
       </div>
 
       <SectionCard className="p-2">
@@ -65,11 +105,6 @@ export default async function DealsPage({
         ) : (
           <DataTable<DealWithDetails>
             columns={[
-              {
-                key: "phase",
-                header: "フェーズ",
-                render: (row) => phaseLabels[row.phase] ?? row.phase,
-              },
               {
                 key: "title",
                 header: "案件名",
@@ -85,18 +120,30 @@ export default async function DealsPage({
                 render: (row) => row.clientName,
               },
               {
+                key: "phase",
+                header: "フェーズ",
+                render: (row) => phaseLabels[row.phase] ?? row.phase,
+              },
+              {
+                key: "contractType",
+                header: "契約形態",
+                render: (row) =>
+                  row.contractType
+                    ? contractTypeLabels[row.contractType] ?? row.contractType
+                    : "-",
+              },
+              {
                 key: "estimatedAmount",
                 header: "想定金額",
                 align: "right",
                 render: (row) =>
-                  row.estimatedAmount != null
-                    ? `¥${row.estimatedAmount.toLocaleString("ja-JP")}`
-                    : "-",
-              },
-              {
-                key: "assigneeName",
-                header: "担当者",
-                render: (row) => row.assigneeName ?? "-",
+                  row.estimatedAmount != null ? (
+                    <span className="font-mono">
+                      ¥{row.estimatedAmount.toLocaleString("ja-JP")}
+                    </span>
+                  ) : (
+                    "-"
+                  ),
               },
             ]}
             rows={filteredDeals}
