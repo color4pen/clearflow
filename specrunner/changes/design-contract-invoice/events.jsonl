@@ -87,3 +87,11 @@
 {"type":"transition","ts":"2026-06-25T03:20:54.109Z","step":"verification","status":"ok","message":"verification iteration 1 completed with verdict: passed"}
 {"type":"transition","ts":"2026-06-25T03:20:54.109Z","step":"step-transition","status":"ok","message":"verification → adr-gen"}
 {"type":"transition","ts":"2026-06-25T03:20:54.112Z","step":"adr-gen-started","status":"started","message":"Starting adr-gen step"}
+{"type":"transition","ts":"2026-06-25T03:21:12.613Z","step":"adr-gen-verdict","status":"ok","message":"adr-gen verdict: success"}
+{"type":"step-attempt","step":"adr-gen","sessionId":"b1c2ea7f-1c6e-47e9-a4d6-10b5bfd26970","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-25T03:20:54.125Z","endedAt":"2026-06-25T03:21:11.301Z"}
+{"type":"transition","ts":"2026-06-25T03:21:12.619Z","step":"step-transition","status":"ok","message":"adr-gen → pr-create"}
+{"type":"transition","ts":"2026-06-25T03:21:12.623Z","step":"step-transition","status":"ok","message":"Transitioning to pr-create step"}
+{"type":"transition","ts":"2026-06-25T03:21:14.435Z","step":"pr-create-verdict","status":"ok","message":"pr-create verdict: success"}
+{"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/design-contract-invoice/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-25T03:21:12.625Z","endedAt":"2026-06-25T03:21:14.434Z"}
+{"type":"lineage","step":"pr-create","ts":"2026-06-25T03:21:14.434Z","outputs":[{"path":"specrunner/changes/design-contract-invoice/pr-create-result.md","hash":"sha256:b7ee54f3bfe2a4e05431bb674b7afe9930c30c9b25c25d799cdfa9b0fe7f13a8"}],"inputs":[{"path":"change/design-contract-invoice-a1057692","hash":null}]}
+{"type":"transition","ts":"2026-06-25T03:21:14.446Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}

@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "a1057692-3d85-49ff-ab47-64f800a5beb8",
   "createdAt": "2026-06-25T02:36:59.480Z",
-  "updatedAt": "2026-06-25T03:20:54.112Z",
+  "updatedAt": "2026-06-25T03:21:14.446Z",
   "request": {
     "title": "契約・請求画面のデザイン適用",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/design-contract-invoice-a1057692",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/92",
+    "number": 92,
+    "createdAt": "2026-06-25T03:21:14.433Z"
+  },
   "_journal": {
-    "historyCount": 60,
+    "historyCount": 65,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -61,7 +66,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
