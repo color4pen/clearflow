@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "25dfe498-1cf6-4a83-9b48-b5c43da40cc3",
   "createdAt": "2026-06-25T04:48:42.899Z",
-  "updatedAt": "2026-06-25T05:30:46.711Z",
+  "updatedAt": "2026-06-25T05:31:20.310Z",
   "request": {
     "title": "売上画面のデザイン適用",
     "type": "spec-change",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "change/design-revenue-25dfe498",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-25T05:30:46.708Z"
   },
   "_journal": {
-    "historyCount": 65,
+    "historyCount": 66,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
