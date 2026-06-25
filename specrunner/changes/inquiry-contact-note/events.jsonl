@@ -55,3 +55,10 @@
 {"type":"transition","ts":"2026-06-25T10:12:22.620Z","step":"step-transition","status":"ok","message":"custom-reviewers → regression-gate"}
 {"type":"transition","ts":"2026-06-25T10:12:22.622Z","step":"regression-gate","status":"started","message":"regression-gate iteration 1 started"}
 {"type":"transition","ts":"2026-06-25T10:12:22.623Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
+{"type":"transition","ts":"2026-06-25T10:15:22.869Z","step":"regression-gate-verdict","status":"ok","message":"regression-gate verdict: approved"}
+{"type":"step-attempt","step":"regression-gate","sessionId":"3cb089cb-1522-4441-8847-8ef4742fe355","outcome":{"verdict":"approved","findingsPath":"specrunner/changes/inquiry-contact-note/regression-gate-result-001.md","error":null,"toolResult":{"ok":true,"approved":true,"findings":[],"observations":[{"severity":"low","file":"src/__tests__/usecases/inquiryManagement.test.ts","title":"contactNote アサーション未追加（Fix: no 合意済み）","rationale":"TC-003, TC-004, TC-007, TC-008, TC-009 に対応する readSrc + toContain アサーションはテストファイルに存在しないが、review-feedback-001.md で Fix: no が明示されており意図的スキップ。実装ファイル側は全て正しく contactNote を含み、TypeScript typecheck が型整合を保証。リグレッションではなく次回追加推奨事項。"}]},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-25T10:12:22.634Z","endedAt":"2026-06-25T10:15:21.251Z"}
+{"type":"lineage","step":"regression-gate","ts":"2026-06-25T10:15:21.251Z","outputs":[{"path":"specrunner/changes/inquiry-contact-note/regression-gate-result-002.md","hash":null}],"inputs":[{"path":".","hash":null}]}
+{"type":"transition","ts":"2026-06-25T10:15:22.880Z","step":"regression-gate","status":"ok","message":"regression-gate iteration 1 completed with verdict: approved"}
+{"type":"transition","ts":"2026-06-25T10:15:22.881Z","step":"step-transition","status":"ok","message":"regression-gate → conformance"}
+{"type":"transition","ts":"2026-06-25T10:15:22.883Z","step":"conformance","status":"started","message":"conformance iteration 1 started"}
+{"type":"transition","ts":"2026-06-25T10:15:22.884Z","step":"conformance-started","status":"started","message":"Starting conformance step"}
