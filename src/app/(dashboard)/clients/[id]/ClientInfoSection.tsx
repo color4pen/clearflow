@@ -72,31 +72,31 @@ export function ClientInfoSection({ client, editable }: Props) {
       </div>
       <dl className="text-xs space-y-1">
         <div className="flex gap-2">
-          <dt className="text-text-muted w-16 shrink-0">企業名</dt>
+          <dt className="text-text-muted w-20 shrink-0">企業名</dt>
           <dd className="text-text flex-1">
             <Input name="name" defaultValue={client.name} disabled={!editable} onChange={markDirty} required />
           </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="text-text-muted w-16 shrink-0">業種</dt>
+          <dt className="text-text-muted w-20 shrink-0">業種</dt>
           <dd className="text-text flex-1">
             <Input name="industry" defaultValue={client.industry ?? ""} disabled={!editable} onChange={markDirty} />
           </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="text-text-muted w-16 shrink-0">規模</dt>
+          <dt className="text-text-muted w-20 shrink-0">規模</dt>
           <dd className="text-text flex-1">
             <Input name="size" defaultValue={client.size ?? ""} disabled={!editable} onChange={markDirty} />
           </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="text-text-muted w-16 shrink-0">所在地</dt>
+          <dt className="text-text-muted w-20 shrink-0">所在地</dt>
           <dd className="text-text flex-1">
             <Input name="address" defaultValue={client.address ?? ""} disabled={!editable} onChange={markDirty} />
           </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="text-text-muted w-16 shrink-0">備考</dt>
+          <dt className="text-text-muted w-20 shrink-0">備考</dt>
           <dd className="text-text flex-1">
             <Textarea
               name="notes"
@@ -109,7 +109,7 @@ export function ClientInfoSection({ client, editable }: Props) {
           </dd>
         </div>
         <div className="flex gap-2">
-          <dt className="text-text-muted w-16 shrink-0">登録日</dt>
+          <dt className="text-text-muted w-20 shrink-0">登録日</dt>
           <dd className="text-text px-2 py-1">{client.createdAt.toLocaleDateString("ja-JP")}</dd>
         </div>
       </dl>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { useRouter } from "next/navigation";
 import { addClientContactAction, deleteClientContactAction, updateClientContactAction } from "@/app/actions/clients";
 import { Input, preventEnterSubmit } from "@/app/components";
@@ -72,6 +72,16 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
     }
   }
 
+  function formatDeptPosition(contact: ClientContact): string {
+    const parts = [contact.department, contact.position].filter(Boolean);
+    return parts.length > 0 ? parts.join(" / ") : "-";
+  }
+
+  function formatContact(contact: ClientContact): string {
+    const parts = [contact.email, contact.phone].filter(Boolean);
+    return parts.length > 0 ? parts.join(" / ") : "-";
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between px-2 py-1 border-b border-border-light">
@@ -93,47 +103,56 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
       {contacts.length === 0 && !showForm ? (
         <p className="text-xs text-text-muted px-2 py-3">担当者が登録されていません</p>
       ) : contacts.length > 0 ? (
-        <table className="text-xs w-full">
-          <thead>
-            <tr className="text-text-muted border-b border-border">
-              <th className="text-left py-1 px-2">氏名</th>
-              <th className="text-left py-1 px-2">部署</th>
-              <th className="text-left py-1 px-2">役職</th>
-              <th className="text-left py-1 px-2">メール</th>
-              <th className="text-left py-1 px-2">電話</th>
-              <th className="text-left py-1 px-2">主担当</th>
-              {editable && <th className="py-1 px-2"></th>}
-            </tr>
-          </thead>
-          <tbody>
-            {contacts.map((contact) => (
-              <tr
-                key={contact.id}
-                className={`border-b border-border-light${editable ? " cursor-pointer hover:bg-primary/10" : ""}`}
-                onClick={() => editable && setEditingContact(contact)}
-              >
-                <td className="py-1 px-2 text-text">{contact.name}</td>
-                <td className="py-1 px-2 text-text">{contact.department ?? "-"}</td>
-                <td className="py-1 px-2 text-text">{contact.position ?? "-"}</td>
-                <td className="py-1 px-2 text-text">{contact.email ?? "-"}</td>
-                <td className="py-1 px-2 text-text">{contact.phone ?? "-"}</td>
-                <td className="py-1 px-2 text-text">{contact.isPrimary ? "[主]" : "-"}</td>
-                {editable && (
-                  <td className="py-1 px-2">
+        <div
+          className="text-xs"
+          style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1.4fr 120px" }}
+        >
+          {/* ヘッダー行 */}
+          <div className="text-text-muted py-1 px-2 border-b border-border">名前</div>
+          <div className="text-text-muted py-1 px-2 border-b border-border">部署・役職</div>
+          <div className="text-text-muted py-1 px-2 border-b border-border">連絡先</div>
+          <div className="text-text-muted py-1 px-2 border-b border-border">アクション</div>
+
+          {/* データ行 */}
+          {contacts.map((contact) => {
+            const rowClass = `py-1 px-2 border-b border-border-light text-text${
+              editable ? " cursor-pointer hover:bg-primary/10" : ""
+            }`;
+            const onRowClick = editable ? () => setEditingContact(contact) : undefined;
+
+            return (
+              <Fragment key={contact.id}>
+                <div className={rowClass} onClick={onRowClick}>
+                  {contact.name}
+                  {contact.isPrimary && (
+                    <span className="ml-1 text-primary font-bold">[主]</span>
+                  )}
+                </div>
+                <div className={rowClass} onClick={onRowClick}>
+                  {formatDeptPosition(contact)}
+                </div>
+                <div className={rowClass} onClick={onRowClick}>
+                  {formatContact(contact)}
+                </div>
+                <div className="py-1 px-2 border-b border-border-light">
+                  {editable && (
                     <button
                       type="button"
-                      onClick={(e) => { e.stopPropagation(); handleDelete(contact.id); }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(contact.id);
+                      }}
                       disabled={deletingId === contact.id}
                       className="text-danger underline text-xs cursor-pointer disabled:opacity-50"
                     >
                       {deletingId === contact.id ? "削除中..." : "削除"}
                     </button>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                  )}
+                </div>
+              </Fragment>
+            );
+          })}
+        </div>
       ) : null}
 
       {showForm && (

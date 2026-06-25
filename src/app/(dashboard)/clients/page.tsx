@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { listClients } from "@/application/usecases";
-import { clientRepository, inquiryRepository, dealRepository } from "@/infrastructure/repositories";
+import { dealRepository } from "@/infrastructure/repositories";
 import { PageToolbar, ToolbarActions, DataTable } from "@/app/components";
 
 export default async function ClientsPage() {
@@ -10,23 +10,8 @@ export default async function ClientsPage() {
 
   const clients = await listClients(organizationId);
 
-  // 担当者数を一括取得（GROUP BY で N+1 回避）
-  const contactCountMap = await clientRepository.countContactsByClientIds(
-    clients.map((c) => c.id)
-  );
-
-  // 引き合い数・案件数を一括取得して JS で集計（N+1 回避）
-  const [allInquiries, allDeals] = await Promise.all([
-    inquiryRepository.findAllByOrganization(organizationId),
-    dealRepository.findAllByOrganization(organizationId),
-  ]);
-
-  const inquiryCountMap = new Map<string, number>();
-  for (const inq of allInquiries) {
-    if (inq.clientId) {
-      inquiryCountMap.set(inq.clientId, (inquiryCountMap.get(inq.clientId) ?? 0) + 1);
-    }
-  }
+  // 案件数を一括取得して JS で集計（N+1 回避）
+  const allDeals = await dealRepository.findAllByOrganization(organizationId);
 
   const dealCountMap = new Map<string, number>();
   for (const deal of allDeals) {
@@ -74,25 +59,8 @@ export default async function ClientsPage() {
               render: (row) => row.industry ?? "-",
             },
             {
-              key: "size",
-              header: "規模",
-              render: (row) => row.size ?? "-",
-            },
-            {
-              key: "contacts",
-              header: "担当者数",
-              align: "right" as const,
-              render: (row) => `${contactCountMap.get(row.id) ?? 0} 名`,
-            },
-            {
-              key: "inquiries",
-              header: "引き合い数",
-              align: "right" as const,
-              render: (row) => `${inquiryCountMap.get(row.id) ?? 0} 件`,
-            },
-            {
               key: "deals",
-              header: "案件数",
+              header: "関連案件数",
               align: "right" as const,
               render: (row) => `${dealCountMap.get(row.id) ?? 0} 件`,
             },
