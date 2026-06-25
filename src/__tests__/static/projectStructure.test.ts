@@ -382,46 +382,46 @@ describe("Seed script", () => {
 describe("Multi-stage approval UI", () => {
   /**
    * TC-051: 承認ステップの進捗が申請詳細画面に一覧表示される
-   * The request detail page must render an ApprovalStepsSection component
+   * The request detail page must render an ApprovalStepper component (design-approval)
    * that shows each step's order, approverRole, status, approval timestamp,
    * and rejection comment.
    */
   it("TC-051: request detail page renders ApprovalStepsSection with step progress", async () => {
-    const content = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
-    // ApprovalStepsSection component must be present
-    expect(content).toContain("ApprovalStepsSection");
+    const page = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
+    // ApprovalStepper component must be present (replaced ApprovalStepsSection)
+    expect(page).toContain("ApprovalStepper");
+    // Stepper functionality is in ApprovalStepper.tsx
+    const stepper = await readSrc("app/(dashboard)/requests/[id]/ApprovalStepper.tsx");
     // Must display stepOrder
-    expect(content).toContain("stepOrder");
+    expect(stepper).toContain("stepOrder");
     // Must display approverRole
-    expect(content).toContain("approverRole");
-    // Must display step status
-    expect(content).toContain("stepStatusLabel");
+    expect(stepper).toContain("approverRole");
     // Must display approvedAt timestamp
-    expect(content).toContain("approvedAt");
+    expect(stepper).toContain("approvedAt");
     // Must display rejection comment
-    expect(content).toContain("comment");
+    expect(stepper).toContain("comment");
   });
 
   /**
-   * TC-052: 差し戻しボタンとコメント入力が pending 状態の申請に表示される
-   * When a request is in "pending" state, the detail page must show
-   * a revision form with a comment textarea and a "差し戻す" submit button.
-   * Action buttons are implemented in ActionButtons.tsx (Client Component).
+   * TC-052: 承認/却下ボタンとコメント入力が pending 状態の承認者に表示される
+   * When a request is in "pending" state and user is current approver, the detail page
+   * must show "承認する" / "却下する" buttons and a comment textarea.
+   * (design-approval: 差し戻し form replaced by approve/reject with isCurrentApprover check)
    */
   it("TC-052: request detail page shows revision form with comment textarea for pending requests", async () => {
     const page = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
     const actionButtons = await readSrc("app/(dashboard)/requests/[id]/ActionButtons.tsx");
     const content = page + actionButtons;
-    // Must check for pending status to show revision form
+    // Must check for pending status
     expect(content).toContain('"pending"');
-    // Must have a Textarea (React component) for the revision comment
+    // Must have a Textarea (React component) for the comment
     expect(content).toContain("Textarea");
-    // The revision comment field must have name="comment"
+    // The comment field must have name="comment"
     expect(content).toContain('name="comment"');
-    // The targetStatus hidden input must carry "revision"
-    expect(content).toContain('value="revision"');
-    // Must have a "差し戻す" button
-    expect(content).toContain("差し戻す");
+    // Must have "承認する" button (replaced 差し戻す)
+    expect(content).toContain("承認する");
+    // Must have "却下する" button
+    expect(content).toContain("却下する");
   });
 
   /**

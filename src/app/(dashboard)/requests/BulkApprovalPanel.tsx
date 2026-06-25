@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
 import type { BulkApproveActionResult } from "@/app/actions/requests";
 
@@ -16,13 +16,11 @@ type RequestItem = {
   status: string;
   statusText: string;
   statusClass: string;
-  statusRowClass: string;
-  amount: number | null;
   creatorId: string;
   creatorName: string;
   createdAt: Date;
   approvalSteps: ApprovalStepItem[];
-  currentDeadline: Date | null;
+  originType: string;
 };
 
 type Props = {
@@ -31,61 +29,45 @@ type Props = {
   showBulkApproval?: boolean;
 };
 
-function formatAmount(amount: number | null): string {
-  if (amount === null) return "-";
-  return amount.toLocaleString("ja-JP") + "円";
+function formatDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}/${m}/${d}`;
 }
 
-function formatDeadline(deadline: Date | null): { text: string; urgent: boolean } {
-  if (!deadline) return { text: "-", urgent: false };
-  const now = new Date();
-  const diffMs = deadline.getTime() - now.getTime();
-  if (diffMs <= 0) return { text: "期限切れ", urgent: true };
-  const diffDays = diffMs / (1000 * 60 * 60 * 24);
-  const days = Math.floor(diffDays);
-  if (days < 1) {
-    const hours = Math.floor(diffMs / (1000 * 60 * 60));
-    return { text: `${hours}時間`, urgent: true };
-  }
-  return {
-    text: `${days}日`,
-    urgent: days <= 3,
-  };
-}
-
-function ApprovalProgress({ steps }: { steps: ApprovalStepItem[] }) {
-  if (steps.length === 0) return <span className="text-text-disabled text-xs">-</span>;
-
-  const total = steps.length;
-  const done = steps.filter((s) => s.status === "approved").length;
-  const rejected = steps.find((s) => s.status === "rejected");
-  const current = steps.find((s) => s.status === "pending");
-  const tooltip = steps.map((s) => `${s.approverRole}: ${s.status}`).join("\n");
-
-  if (rejected) {
+function OriginTypeLabel({ originType }: { originType: string }) {
+  if (originType === "system") {
     return (
-      <span className="text-xs text-danger" title={tooltip}>
-        ✕ {rejected.approverRole}
+      <span className="text-xs bg-bg-toolbar text-text-muted border border-border rounded px-1.5 py-0.5">
+        自動
       </span>
     );
   }
-
-  if (done === total) {
-    return (
-      <span className="text-xs text-success" title={tooltip}>
-        ✓ {done}/{total}
-      </span>
-    );
-  }
-
   return (
-    <span className="text-xs text-text-muted" title={tooltip}>
-      {done}/{total} {current?.approverRole}
+    <span className="text-xs text-text-disabled">
+      手動
     </span>
   );
 }
 
 type BulkResult = BulkApproveActionResult["results"];
+
+function RowClickHandler() {
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      if (target.closest("a,button,input")) return;
+      const row = target.closest("tr[data-href]");
+      if (row) {
+        window.location.href = (row as HTMLElement).dataset.href!;
+      }
+    }
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, []);
+  return null;
+}
 
 export function BulkApprovalPanel({
   requests,
@@ -157,6 +139,8 @@ export function BulkApprovalPanel({
 
   return (
     <div>
+      <RowClickHandler />
+
       {resultMessage && (
         <div
           className={`mb-4 p-4 border ${
@@ -193,42 +177,51 @@ export function BulkApprovalPanel({
         </div>
       )}
 
-      <div className="overflow-hidden border-t-0">
-        <table className="min-w-full border-collapse">
+      <div className="overflow-hidden border border-border border-t-0">
+        <table className="w-full border-collapse table-fixed">
+          <colgroup>
+            {showBulkApproval && <col className="w-6" />}
+            <col />
+            <col style={{ width: "90px" }} />
+            <col style={{ width: "110px" }} />
+            <col style={{ width: "90px" }} />
+            <col style={{ width: "110px" }} />
+          </colgroup>
           <thead>
-            <tr className="bg-bg-table-head border border-border-table-head">
+            <tr className="bg-bg-table-head border-b border-border-table-head">
               {showBulkApproval && (
-                <th className="px-1 py-1.5 text-xs text-text font-bold text-center w-6">☐</th>
+                <th className="px-1 py-1.5 text-xs text-text font-bold text-center">☐</th>
               )}
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-left w-8">No.</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-left">件名</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-right w-20">金額</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-center w-14">状態</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-center w-32">承認経路</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-left w-16">申請者</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-left w-12 font-sans">申請日</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-center w-12">期限</th>
-              <th className="px-1 py-1.5 text-xs text-text font-bold text-center w-28">操作</th>
+              <th className="px-2 py-1.5 text-xs text-text font-bold text-left">件名</th>
+              <th className="px-2 py-1.5 text-xs text-text font-bold text-left">申請者</th>
+              <th className="px-2 py-1.5 text-xs text-text font-bold text-center">ステータス</th>
+              <th className="px-2 py-1.5 text-xs text-text font-bold text-center">種別</th>
+              <th className="px-2 py-1.5 text-xs text-text font-bold text-left">申請日</th>
             </tr>
           </thead>
           <tbody>
             {requests.map((request, idx) => {
-              const deadlineInfo = formatDeadline(request.currentDeadline);
-              const isActionable = request.status === "pending" || request.status === "revision" || request.status === "draft";
-              const rowBg = request.status === "pending"
-                ? "bg-bg-row-pending border-border-row-pending"
-                : request.status === "revision"
-                  ? "bg-bg-row-revision border-border-row-revision"
-                  : idx % 2 === 0
-                    ? "bg-bg-surface border-border-light"
-                    : "bg-bg-surface-alt border-border-light";
-              const textColor = isActionable ? "text-text" : "text-text-disabled";
-              const idColor = isActionable ? "text-text-muted" : "text-text-on-dark-secondary";
+              const isActionable =
+                request.status === "pending" ||
+                request.status === "revision" ||
+                request.status === "draft";
+              const rowBg =
+                request.status === "pending"
+                  ? "bg-bg-row-pending"
+                  : request.status === "revision"
+                    ? "bg-bg-row-revision"
+                    : idx % 2 === 0
+                      ? "bg-bg-surface"
+                      : "bg-bg-surface-alt";
 
               return (
-                <tr key={request.id} className={`${rowBg} border hover:bg-[#eef2f7]`}>
+                <tr
+                  key={request.id}
+                  data-href={`/requests/${request.id}`}
+                  className={`${rowBg} border-b border-border-light hover:bg-[#eef2f7] cursor-pointer`}
+                >
                   {showBulkApproval && (
-                    <td className="px-1 py-1 text-center">
+                    <td className="px-1 py-1.5 text-center">
                       {request.status === "pending" ? (
                         <input
                           type="checkbox"
@@ -243,48 +236,31 @@ export function BulkApprovalPanel({
                       )}
                     </td>
                   )}
-                  <td className={`px-1 py-1 text-xs ${idColor}`}>
-                    {request.id.slice(0, 4)}
-                  </td>
-                  <td className={`px-1 py-1 text-xs ${textColor}`}>
+                  <td className="px-2 py-1.5 text-xs truncate">
                     <Link
                       href={`/requests/${request.id}`}
-                      className={isActionable ? "text-text underline hover:text-primary" : "text-text-disabled hover:text-text-muted"}
+                      className={
+                        isActionable
+                          ? "text-text underline hover:text-primary"
+                          : "text-text-disabled hover:text-text-muted"
+                      }
                     >
                       {request.title}
                     </Link>
                   </td>
-                  <td className="px-1 py-1 text-right font-sans text-xs">
-                    <span className={textColor}>
-                      {request.amount !== null ? request.amount.toLocaleString("ja-JP") : "-"}
-                    </span>
+                  <td className="px-2 py-1.5 text-xs text-text-secondary truncate">
+                    {request.creatorName}
                   </td>
-                  <td className="px-1 py-1 text-center">
+                  <td className="px-2 py-1.5 text-center">
                     <span className={`text-xs ${request.statusClass}`}>
                       {request.statusText}
                     </span>
                   </td>
-                  <td className="px-1 py-1 text-center">
-                    <ApprovalProgress steps={request.approvalSteps} />
+                  <td className="px-2 py-1.5 text-center">
+                    <OriginTypeLabel originType={request.originType} />
                   </td>
-                  <td className={`px-1 py-1 text-xs ${isActionable ? "text-text-secondary" : "text-text-disabled"}`}>
-                    {request.creatorName}
-                  </td>
-                  <td className={`px-1 py-1 text-xs font-sans ${idColor}`}>
-                    {String(request.createdAt.getMonth() + 1).padStart(2, "0")}/{String(request.createdAt.getDate()).padStart(2, "0")}
-                  </td>
-                  <td className="px-1 py-1 text-center">
-                    <span className={deadlineInfo.urgent ? "text-danger font-bold text-xs" : "text-text-muted text-xs"}>
-                      {deadlineInfo.text === "-" ? <span className="text-bg-table-head">-</span> : deadlineInfo.urgent ? `残${deadlineInfo.text}` : `残${deadlineInfo.text}`}
-                    </span>
-                  </td>
-                  <td className="px-1 py-1 text-center">
-                    {request.status === "pending" && (
-                      <span className="text-xs text-primary underline">承認 | 却下 | 差戻</span>
-                    )}
-                    {request.status === "revision" && (
-                      <span className="text-xs text-primary underline">再申請</span>
-                    )}
+                  <td className="px-2 py-1.5 text-xs text-text-muted font-sans">
+                    {formatDate(request.createdAt)}
                   </td>
                 </tr>
               );
@@ -307,7 +283,7 @@ export function BulkApprovalPanel({
 
       <div className="bg-bg-toolbar border border-border border-t-0 px-2 py-1.5">
         <span className="text-xs text-text-muted">
-          全{total}件 (承認待:{pendingCount}  承認済:{approvedCount}  却下:{rejectedCount})
+          全{total}件 (承認待:{pendingCount}　承認済:{approvedCount}　却下:{rejectedCount})
         </span>
       </div>
     </div>

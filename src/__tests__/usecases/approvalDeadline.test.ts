@@ -596,7 +596,8 @@ describe("createRequest — deadline calculation (TC-025, TC-026)", () => {
 
 describe("UI — deadline display in ApprovalStepsSection", () => {
   it("renders deadline display for steps with deadline", async () => {
-    const src = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
+    // Deadline display is now in ApprovalStepper.tsx (design-approval refactoring)
+    const src = await readSrc("app/(dashboard)/requests/[id]/ApprovalStepper.tsx");
     expect(src).toContain("deadline");
     expect(src).toContain("期限切れ");
   });
@@ -616,7 +617,8 @@ describe("UI — deadline display in ApprovalStepsSection", () => {
   });
 
   it("shows remaining time for future deadlines", async () => {
-    const src = await readSrc("app/(dashboard)/requests/[id]/page.tsx");
+    // Remaining time display is now in ApprovalStepper.tsx (design-approval refactoring)
+    const src = await readSrc("app/(dashboard)/requests/[id]/ApprovalStepper.tsx");
     expect(src).toContain("残り");
   });
 });
