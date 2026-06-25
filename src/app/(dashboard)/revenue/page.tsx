@@ -110,12 +110,14 @@ export default async function RevenueDashboardPage() {
                       </Link>
                     </td>
                     <td className="py-1 w-32">
-                      <div className="bg-gray-100 rounded h-3 w-full">
-                        <div
-                          className="bg-primary h-3 rounded"
-                          style={{ width: barWidth }}
-                        />
-                      </div>
+                      <Link href={href} className="block w-full h-full">
+                        <div className="bg-gray-100 rounded h-3 w-full">
+                          <div
+                            className="bg-primary h-3 rounded"
+                            style={{ width: barWidth }}
+                          />
+                        </div>
+                      </Link>
                     </td>
                   </tr>
                 );
