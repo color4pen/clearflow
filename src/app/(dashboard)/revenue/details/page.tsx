@@ -50,6 +50,7 @@ export default async function RevenueDetailsPage({
     <div>
       <PageToolbar title="売上明細" />
 
+      {/* 期間フィルタ */}
       <SectionCard className="p-4 mt-2">
         <form method="GET" className="flex flex-wrap items-end gap-3">
           <div>
@@ -70,20 +71,8 @@ export default async function RevenueDetailsPage({
               className="border rounded px-2 py-1 text-sm"
             />
           </div>
-          <div>
-            <label className="block text-xs text-text-muted mb-1">集計軸</label>
-            <select
-              name="axis"
-              defaultValue={axis}
-              className="border rounded px-2 py-1 text-sm"
-            >
-              {(Object.entries(aggregationAxisLabels) as [RevenueAxis, string][]).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* axis を hidden で渡してフォーム送信時に維持する */}
+          <input type="hidden" name="axis" value={axis} />
           <button
             type="submit"
             className="px-3 py-1 bg-primary text-white rounded text-sm hover:opacity-90"
@@ -97,6 +86,23 @@ export default async function RevenueDetailsPage({
             CSVエクスポート
           </Link>
         </form>
+
+        {/* 集計軸タブ */}
+        <div className="mt-3 flex gap-2">
+          {(Object.entries(aggregationAxisLabels) as [RevenueAxis, string][]).map(([key, label]) => (
+            <Link
+              key={key}
+              href={`/revenue/details?startDate=${startDateStr}&endDate=${endDateStr}&axis=${key}`}
+              className={
+                axis === key
+                  ? "bg-primary text-white rounded px-3 py-1 text-sm font-medium"
+                  : "text-text-muted px-3 py-1 text-sm hover:text-text"
+              }
+            >
+              {label}
+            </Link>
+          ))}
+        </div>
       </SectionCard>
 
       <SectionCard className="p-2 mt-2">
@@ -130,6 +136,7 @@ export default async function RevenueDetailsPage({
             ]}
             rows={result.data}
             rowKey={(row) => row.clientId}
+            rowHref={(row) => `/clients/${row.clientId}`}
           />
         )}
         {result.axis === "deal" && (
@@ -146,6 +153,7 @@ export default async function RevenueDetailsPage({
             ]}
             rows={result.data}
             rowKey={(row) => row.dealId}
+            rowHref={(row) => `/deals/${row.dealId}`}
           />
         )}
         {result.data.length === 0 && (

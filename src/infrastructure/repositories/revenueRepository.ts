@@ -5,6 +5,32 @@ import type { MonthlyRevenue, CustomerRevenue, DealRevenue, PipelineSummary } fr
 import type { DealPhase } from "@/domain/models/deal";
 
 /**
+ * 確定見込み売上: 期間内の scheduled + invoiced ステータスの請求合計金額を返す
+ */
+export async function getConfirmedRevenue(
+  organizationId: string,
+  startDate: Date,
+  endDate: Date
+): Promise<number> {
+  const rows = await db
+    .select({
+      total: sql<number>`COALESCE(SUM(${invoices.amount}), 0)`,
+    })
+    .from(invoices)
+    .innerJoin(contracts, eq(invoices.contractId, contracts.id))
+    .where(
+      and(
+        eq(invoices.organizationId, organizationId),
+        inArray(invoices.status, ["scheduled", "invoiced"]),
+        gte(invoices.dueDate, startDate),
+        lte(invoices.dueDate, endDate)
+      )
+    );
+
+  return Number(rows[0]?.total ?? 0);
+}
+
+/**
  * 月次売上集計: 期間内の入金済み請求を月ごとに集計する
  */
 export async function getMonthlyRevenue(

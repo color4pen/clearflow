@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { getRevenueDashboard } from "@/application/usecases";
 import { PageToolbar, SectionCard, DataTable } from "@/app/components";
@@ -20,20 +21,34 @@ export default async function RevenueDashboardPage() {
     0
   );
 
+  const maxTrendAmount = Math.max(
+    ...dashboard.monthlyTrend.map((i) => i.amount),
+    1
+  );
+
   return (
     <div>
       <PageToolbar title="売上ダッシュボード" />
 
-      <div className="mt-2 grid grid-cols-2 gap-2">
+      {/* KPI カード: 3 カラム */}
+      <div className="mt-2 grid grid-cols-3 gap-2">
         <SectionCard className="p-4">
-          <h2 className="text-sm font-semibold text-text-muted mb-2">今月の入金確認済み合計</h2>
-          <p className="text-2xl font-bold text-text">
+          <h2 className="text-sm font-semibold text-text-muted mb-2">今月の売上</h2>
+          <p className="text-2xl font-bold text-success">
             ¥{currentMonthTotal.toLocaleString("ja-JP")}
           </p>
         </SectionCard>
 
         <SectionCard className="p-4">
-          <h2 className="text-sm font-semibold text-text-muted mb-2">パイプライン売上予測</h2>
+          <h2 className="text-sm font-semibold text-text-muted mb-2">確定見込み</h2>
+          <p className="text-2xl font-bold text-text">
+            ¥{dashboard.confirmedRevenue.toLocaleString("ja-JP")}
+          </p>
+          <p className="text-xs text-text-muted mt-1">契約・請求予定の金額</p>
+        </SectionCard>
+
+        <SectionCard className="p-4">
+          <h2 className="text-sm font-semibold text-text-muted mb-2">パイプライン見込み</h2>
           <p className="text-2xl font-bold text-text">
             ¥{pipelineTotal.toLocaleString("ja-JP")}
           </p>
@@ -53,6 +68,7 @@ export default async function RevenueDashboardPage() {
         </SectionCard>
       </div>
 
+      {/* 月次売上推移 */}
       <SectionCard className="p-4 mt-2">
         <h2 className="text-sm font-semibold text-text-muted mb-2">月次売上推移（過去12ヶ月）</h2>
         {dashboard.monthlyTrend.length === 0 ? (
@@ -63,22 +79,55 @@ export default async function RevenueDashboardPage() {
               <tr className="border-b text-left text-text-muted">
                 <th className="py-1 pr-4">期間</th>
                 <th className="py-1 pr-4 text-right">金額</th>
-                <th className="py-1 text-right">件数</th>
+                <th className="py-1 pr-4 text-right">件数</th>
+                <th className="py-1">推移</th>
               </tr>
             </thead>
             <tbody>
-              {dashboard.monthlyTrend.map((item) => (
-                <tr key={item.yearMonth} className="border-b">
-                  <td className="py-1 pr-4">{item.yearMonth}</td>
-                  <td className="py-1 pr-4 text-right">¥{item.amount.toLocaleString("ja-JP")}</td>
-                  <td className="py-1 text-right">{item.count}</td>
-                </tr>
-              ))}
+              {dashboard.monthlyTrend.map((item) => {
+                const [year, month] = item.yearMonth.split("-");
+                const lastDay = new Date(Number(year), Number(month), 0).getDate();
+                const href = `/revenue/details?startDate=${item.yearMonth}-01&endDate=${item.yearMonth}-${String(lastDay).padStart(2, "0")}&axis=monthly`;
+                const barWidth = `${(item.amount / maxTrendAmount) * 100}%`;
+                return (
+                  <tr
+                    key={item.yearMonth}
+                    className="border-b cursor-pointer hover:bg-primary/10"
+                  >
+                    <td className="py-1 pr-4">
+                      <Link href={href} className="block w-full h-full">
+                        {item.yearMonth}
+                      </Link>
+                    </td>
+                    <td className="py-1 pr-4 text-right">
+                      <Link href={href} className="block w-full h-full">
+                        ¥{item.amount.toLocaleString("ja-JP")}
+                      </Link>
+                    </td>
+                    <td className="py-1 pr-4 text-right">
+                      <Link href={href} className="block w-full h-full">
+                        {item.count}
+                      </Link>
+                    </td>
+                    <td className="py-1 w-32">
+                      <Link href={href} className="block w-full h-full">
+                        <div className="bg-gray-100 rounded h-3 w-full">
+                          <div
+                            className="bg-primary h-3 rounded"
+                            style={{ width: barWidth }}
+                          />
+                        </div>
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
       </SectionCard>
 
+      {/* 顧客別売上ランキング */}
       <SectionCard className="p-4 mt-2">
         <h2 className="text-sm font-semibold text-text-muted mb-2">顧客別売上ランキング（上位10社）</h2>
         {dashboard.topCustomers.length === 0 ? (
@@ -106,6 +155,7 @@ export default async function RevenueDashboardPage() {
             ]}
             rows={dashboard.topCustomers}
             rowKey={(row) => row.clientId}
+            rowHref={(row) => `/clients/${row.clientId}`}
           />
         )}
       </SectionCard>
