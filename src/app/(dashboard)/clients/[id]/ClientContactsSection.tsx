@@ -3,7 +3,7 @@
 import { Fragment, useState } from "react";
 import { useRouter } from "next/navigation";
 import { addClientContactAction, deleteClientContactAction, updateClientContactAction } from "@/app/actions/clients";
-import { Input, preventEnterSubmit } from "@/app/components";
+import { ConfirmDialog, Input, preventEnterSubmit, useToast } from "@/app/components";
 import type { ClientContact } from "@/domain/models/client";
 
 type Props = {
@@ -14,17 +14,17 @@ type Props = {
 
 export function ClientContactsSection({ clientId, contacts, editable }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [editingContact, setEditingContact] = useState<ClientContact | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
   async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsAdding(true);
-    setError(null);
 
     const formData = new FormData(e.currentTarget);
     const result = await addClientContactAction(clientId, formData);
@@ -32,25 +32,27 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
 
     if (result.success) {
       setShowForm(false);
+      showToast("担当者を追加しました", "success");
       router.refresh();
     } else {
-      setError(result.message ?? "追加に失敗しました");
+      showToast(result.message ?? "追加に失敗しました", "error");
     }
   }
 
-  async function handleDelete(contactId: string) {
-    if (!window.confirm("この担当者を削除しますか？")) return;
-
+  async function handleDeleteConfirm() {
+    if (!confirmDeleteId) return;
+    const contactId = confirmDeleteId;
     setDeletingId(contactId);
-    setError(null);
+    setConfirmDeleteId(null);
 
     const result = await deleteClientContactAction(clientId, contactId);
     setDeletingId(null);
 
     if (result.success) {
+      showToast("担当者を削除しました", "success");
       router.refresh();
     } else {
-      setError(result.message ?? "削除に失敗しました");
+      showToast(result.message ?? "削除に失敗しました", "error");
     }
   }
 
@@ -58,7 +60,6 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
     e.preventDefault();
     if (!editingContact) return;
     setIsEditing(true);
-    setError(null);
 
     const formData = new FormData(e.currentTarget);
     const result = await updateClientContactAction(clientId, editingContact.id, formData);
@@ -66,9 +67,10 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
 
     if (result.success) {
       setEditingContact(null);
+      showToast("担当者を更新しました", "success");
       router.refresh();
     } else {
-      setError(result.message ?? "更新に失敗しました");
+      showToast(result.message ?? "更新に失敗しました", "error");
     }
   }
 
@@ -87,7 +89,6 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
       <div className="flex items-center justify-between px-2 py-1 border-b border-border-light">
         <h2 className="text-xs font-bold text-text">担当者一覧</h2>
         <div className="flex items-center gap-2">
-          {error && <span className="text-danger text-xs">{error}</span>}
           {editable && !showForm && (
             <button
               type="button"
@@ -140,7 +141,7 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDelete(contact.id);
+                        setConfirmDeleteId(contact.id);
                       }}
                       disabled={deletingId === contact.id}
                       className="text-danger underline text-xs cursor-pointer disabled:opacity-50"
@@ -195,7 +196,7 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
             </button>
             <button
               type="button"
-              onClick={() => { setShowForm(false); setError(null); }}
+              onClick={() => setShowForm(false)}
               className="text-xs text-text-muted underline cursor-pointer"
             >
               キャンセル
@@ -237,11 +238,10 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
                   </label>
                 </div>
               </div>
-              {error && <p className="text-danger text-xs mb-2">{error}</p>}
               <div className="flex gap-2 justify-end mt-3">
                 <button
                   type="button"
-                  onClick={() => { setEditingContact(null); setError(null); }}
+                  onClick={() => setEditingContact(null)}
                   className="border border-border text-text text-xs px-3 py-1.5 cursor-pointer"
                 >
                   キャンセル
@@ -258,6 +258,16 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDeleteId !== null}
+        variant="danger"
+        title="削除確認"
+        message="この担当者を削除しますか？"
+        loading={deletingId !== null}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

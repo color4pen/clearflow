@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateInquiryStatusAction } from "@/app/actions/inquiries";
+import { ConfirmDialog, useToast } from "@/app/components";
 import type { InquiryStatus } from "@/domain/models/inquiry";
 
 type Props = {
@@ -15,9 +16,9 @@ type Props = {
 
 export function InquiryActions({ inquiry, canChangeStatus }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [showConvertConfirm, setShowConvertConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (inquiry.status === "converted") {
     return null;
@@ -25,24 +26,25 @@ export function InquiryActions({ inquiry, canChangeStatus }: Props) {
 
   async function handleTransition(newStatus: InquiryStatus) {
     setIsSubmitting(true);
-    setErrorMessage(null);
     const formData = new FormData();
     formData.set("newStatus", newStatus);
     const result = await updateInquiryStatusAction(inquiry.id, formData);
     setIsSubmitting(false);
     if (!result.success) {
-      setErrorMessage(result.message ?? "エラーが発生しました");
+      showToast(result.message ?? "エラーが発生しました", "error");
     } else {
+      showToast("ステータスを更新しました", "success");
       router.refresh();
     }
   }
 
+  async function handleConvertConfirm() {
+    setShowConvertConfirm(false);
+    await handleTransition("converted");
+  }
+
   return (
     <div className="space-y-2">
-      {errorMessage && (
-        <p className="text-danger text-xs">{errorMessage}</p>
-      )}
-
       <div className="flex gap-2 flex-wrap">
         {inquiry.status === "new" && canChangeStatus && (
           <button
@@ -78,31 +80,16 @@ export function InquiryActions({ inquiry, canChangeStatus }: Props) {
         )}
       </div>
 
-      {showConvertConfirm && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-          <div className="bg-bg-surface border border-border p-4 max-w-sm w-full">
-            <p className="text-sm font-bold text-text mb-3">案件化</p>
-            <p className="text-xs text-text-muted mb-4">この引き合いを案件化しますか？案件が作成され、ステータスが「案件化済」に変わります。</p>
-            <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => setShowConvertConfirm(false)}
-                className="border border-border text-text text-xs px-3 py-1.5 cursor-pointer"
-              >
-                キャンセル
-              </button>
-              <button
-                type="button"
-                disabled={isSubmitting}
-                onClick={() => handleTransition("converted")}
-                className="bg-green-600 text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
-              >
-                {isSubmitting ? "処理中..." : "案件化する"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={showConvertConfirm}
+        variant="primary"
+        title="案件化"
+        message="この引き合いを案件化しますか？案件が作成され、ステータスが「案件化済」に変わります。"
+        confirmLabel="案件化する"
+        loading={isSubmitting}
+        onConfirm={handleConvertConfirm}
+        onCancel={() => setShowConvertConfirm(false)}
+      />
     </div>
   );
 }

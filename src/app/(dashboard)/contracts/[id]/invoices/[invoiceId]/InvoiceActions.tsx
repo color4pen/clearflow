@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateInvoiceStatusAction } from "@/app/actions/invoices";
+import { ConfirmDialog, useToast } from "@/app/components";
 import type { InvoiceStatus } from "@/domain/models/invoice";
 
 type Props = {
@@ -17,20 +18,20 @@ function todayString(): string {
 
 export function InvoiceActions({ invoiceId, contractId, status }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showPaidDialog, setShowPaidDialog] = useState(false);
   const [paidAt, setPaidAt] = useState<string>(todayString());
 
   async function handleTransition(newStatus: InvoiceStatus, paidAtDate?: string) {
     setIsSubmitting(true);
-    setError(null);
     const result = await updateInvoiceStatusAction(invoiceId, newStatus, contractId, paidAtDate);
     setIsSubmitting(false);
     if (!result.success) {
-      setError(result.message ?? "エラーが発生しました");
+      showToast(result.message ?? "エラーが発生しました", "error");
     } else {
       setShowPaidDialog(false);
+      showToast("ステータスを更新しました", "success");
       router.refresh();
     }
   }
@@ -45,8 +46,6 @@ export function InvoiceActions({ invoiceId, contractId, status }: Props) {
 
   return (
     <div className="flex flex-col gap-2">
-      {error && <p className="text-danger text-xs">{error}</p>}
-
       <div className="flex gap-2">
         {status === "scheduled" && (
           <button
@@ -82,44 +81,29 @@ export function InvoiceActions({ invoiceId, contractId, status }: Props) {
         )}
       </div>
 
-      {showPaidDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-bg-surface border border-border w-80 p-4">
-            <h3 className="text-sm font-bold text-text mb-3">入金日を確認</h3>
-            <div className="mb-4">
-              <label className="text-xs text-text-muted block mb-1" htmlFor="paid-at-input">
-                入金日
-              </label>
-              <input
-                id="paid-at-input"
-                type="date"
-                value={paidAt}
-                max={todayString()}
-                onChange={(e) => setPaidAt(e.target.value)}
-                className="border border-border text-xs px-2 py-1 w-full bg-bg-surface text-text"
-              />
-            </div>
-            <div className="flex gap-2 justify-end">
-              <button
-                type="button"
-                onClick={() => { setShowPaidDialog(false); setError(null); }}
-                disabled={isSubmitting}
-                className="text-xs px-3 py-1 border border-border text-text cursor-pointer disabled:opacity-50"
-              >
-                キャンセル
-              </button>
-              <button
-                type="button"
-                onClick={handlePaidConfirm}
-                disabled={isSubmitting}
-                className="text-xs px-3 py-1 bg-green-600 text-white cursor-pointer disabled:opacity-50"
-              >
-                {isSubmitting ? "処理中..." : "確認"}
-              </button>
-            </div>
-          </div>
+      <ConfirmDialog
+        open={showPaidDialog}
+        variant="primary"
+        title="入金日を確認"
+        confirmLabel="確認"
+        loading={isSubmitting}
+        onConfirm={handlePaidConfirm}
+        onCancel={() => setShowPaidDialog(false)}
+      >
+        <div>
+          <label className="text-xs text-text-muted block mb-1" htmlFor="paid-at-input">
+            入金日
+          </label>
+          <input
+            id="paid-at-input"
+            type="date"
+            value={paidAt}
+            max={todayString()}
+            onChange={(e) => setPaidAt(e.target.value)}
+            className="border border-border text-xs px-2 py-1 w-full bg-bg-surface text-text"
+          />
         </div>
-      )}
+      </ConfirmDialog>
     </div>
   );
 }
