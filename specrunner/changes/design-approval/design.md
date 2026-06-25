@@ -26,6 +26,7 @@
 - `getInquiry` ユースケースは存在しない（`inquiryRepository.findById` は存在）
 - `getContract` ユースケースは存在する
 - `canApprove(step, actorRole)` ドメインサービスが role ベースの承認権限チェックを提供
+- `canApproveWithDelegation(step, actorRole, delegations)` ドメインサービスが委任を含む承認権限チェックを提供。`{ allowed: boolean; delegation?: ApprovalDelegation }` を返す。委任データは呼び出し元が `approvalDelegationRepository.findActiveByToUserId` で事前取得して渡す
 
 ## Goals / Non-Goals
 
@@ -90,11 +91,11 @@
 
 ### D6: 承認/却下ボタンの表示判定は Server Component で行う
 
-**選択**: `page.tsx` で現在の pending ステップの `approverRole` とセッションユーザーの `role` を比較し、一致時のみ操作ボタンを表示する。判定には `canApprove` ドメインサービス（純関数）を利用する。実際の認可は Server Action 側でも二重チェックされる。
+**選択**: `page.tsx` で現在の pending ステップの `approverRole` とセッションユーザーの `role`・委任情報を照合し、一致時のみ操作ボタンを表示する。判定には `canApproveWithDelegation` ドメインサービスを利用し、`approvalDelegationRepository.findActiveByToUserId(userId, organizationId, new Date())` で取得した委任データを渡す。実際の認可は Server Action 側でも二重チェックされる。
 
-**却下**: クライアントサイドで判定する方式 / 常にボタンを表示してエラーハンドリングで対応する方式
+**却下**: `canApprove`（role 直接一致のみ）を利用する方式 / クライアントサイドで判定する方式 / 常にボタンを表示してエラーハンドリングで対応する方式
 
-**Rationale**: 承認権限の判定結果で UI を出し分けるため、Server Component で判定してクライアントに渡す。`canApprove` は純関数のため page.tsx からの呼び出しに問題なし。Server Action の認可チェックと合わせて二重防御となる。
+**Rationale**: 承認権限の判定結果で UI を出し分けるため、Server Component で判定してクライアントに渡す。`canApprove` は role 直接一致のみ評価するため、委任を受けたユーザーが approverRole と異なる role を持つ場合にボタンが非表示となり既存の委任機能がリグレッションする。`canApproveWithDelegation` を使用することで委任ユーザーも操作可能になる。委任データの取得は `approvalDelegationRepository.findActiveByToUserId` で行い、`page.tsx` から直接呼び出す（usecase 層と同じパターン）。Server Action の認可チェックと合わせて二重防御となる。
 
 ### D7: 承認コメントは UI のみ実装し approve への送信は保留する
 

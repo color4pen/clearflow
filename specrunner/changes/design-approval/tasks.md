@@ -2,11 +2,11 @@
 
 ## T-01: getInquiry ユースケースを新規作成する
 
-- [ ] `src/application/usecases/getInquiry.ts` を新規作成する。`inquiryRepository.findById(inquiryId, organizationId)` を呼び出し `Inquiry | null` を返す（既存の `getRequest`, `getDeal`, `getContract` と同パターン）
+- [ ] `src/application/usecases/getInquiry.ts` を新規作成する。`getInquiry({ inquiryId, organizationId }: { inquiryId: string; organizationId: string })` を named args シグネチャで定義し、`inquiryRepository.findById(inquiryId, organizationId)` を呼び出し `Inquiry | null` を返す（既存の `getContract` と同パターン）
 - [ ] `src/application/usecases/index.ts` に `export { getInquiry } from "./getInquiry"` を追加する
 
 **Acceptance Criteria**:
-- `getInquiry(inquiryId, organizationId)` が `Inquiry | null` を返す
+- `getInquiry({ inquiryId, organizationId })` が `Inquiry | null` を返す
 - `src/application/usecases/index.ts` から `getInquiry` がエクスポートされている
 - 既存テストが破壊されていない
 
@@ -29,7 +29,7 @@
 - [ ] タブの認可チェックを実装する: `tab === "all"` かつ `role` が `admin`/`manager` 以外の場合、デフォルトタブにフォールバック
 - [ ] デフォルトタブを決定する: `role === "member"` → `"my-requests"`, それ以外 → `"action-required"`
 - [ ] タブごとのフィルタリングを実装する:
-  - `action-required`: `requests.filter(r => r.status === "pending" && r.approvalSteps.some(s => s.status === "pending" && s.approverRole === role))`
+  - `action-required`: `requests.filter(r => r.status === "pending" && (r.approvalSteps.length === 0 || r.approvalSteps.some(s => s.status === "pending" && s.approverRole === role)))` — `approvalSteps` が空のレガシー申請（単一承認フロー）は role 判定をスキップし pending であれば表示する
   - `my-requests`: `requests.filter(r => r.creatorId === userId)`
   - `all`: フィルタなし（全件）
 - [ ] 表示タブリストを構築する: admin/manager には 3 タブ、それ以外は 2 タブ（「すべて」なし）
@@ -90,8 +90,8 @@
 - [ ] Props: `originType: OriginType`, `originTriggerAction: string | null`, `originTriggerEntityId: string | null`, `organizationId: string`
 - [ ] `originType !== "system"` の場合は `null` を返す
 - [ ] `originTriggerAction` に応じてエンティティ名とリンク先を解決する:
-  - `"inquiry.convert"` → `getInquiry(originTriggerEntityId, organizationId)` で引合を取得。テキスト: 「この承認は引合「{title}」の案件化に必要です」、リンク: `/inquiries/{id}`
-  - `"contract.create"` → `getContract(originTriggerEntityId, organizationId)` で契約を取得。リンク: `/contracts/{id}`
+  - `"inquiry.convert"` → `getInquiry({ inquiryId: originTriggerEntityId, organizationId })` で引合を取得。テキスト: 「この承認は引合「{title}」の案件化に必要です」、リンク: `/inquiries/{id}`
+  - `"contract.create"` → `getContract({ contractId: originTriggerEntityId, organizationId })` で契約を取得。リンク: `/contracts/{id}`
   - `"contract.cancel"` → 同上
 - [ ] エンティティが取得できない場合は `null` を返す（エラーにしない）
 - [ ] バナーのスタイル: 情報バナー（青系背景 + ボーダー + アイコン）
@@ -127,7 +127,8 @@
 
 - [ ] `page.tsx` にセッションユーザーの `role` と `id` を追加で取得する
 - [ ] `getApprovalSteps` の結果から現在のステップを特定する（`getCurrentStep` ドメインサービス使用、または `steps.find(s => s.status === "pending")` を `stepOrder` 順で取得）
-- [ ] `canApprove(currentStep, role)` で承認者判定を行い、`isCurrentApprover` フラグを算出する
+- [ ] `approvalDelegationRepository.findActiveByToUserId(userId, organizationId, new Date())` でセッションユーザーの委任データを取得する
+- [ ] `canApproveWithDelegation(currentStep, role, delegations)` で承認者判定を行い、`result.allowed` から `isCurrentApprover` フラグを算出する
 - [ ] ヘッダーセクションを実装する:
   - 「← 申請一覧に戻る」リンク（既存維持）
   - 件名（大きめフォント）
