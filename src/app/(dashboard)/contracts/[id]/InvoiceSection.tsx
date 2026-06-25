@@ -1,15 +1,17 @@
 import Link from "next/link";
-import { invoiceRepository } from "@/infrastructure/repositories";
 import { SectionCard } from "@/app/components";
 import { DataTable } from "@/app/components/DataTable";
 import { invoiceStatusLabels } from "@/app/(dashboard)/labels";
 import type { Invoice } from "@/domain/models/invoice";
+import type { RenewalType } from "@/domain/models/contract";
 
 type Props = {
   contractId: string;
-  organizationId: string;
+  invoices: Invoice[];
   contractStatus: string;
   canManage: boolean;
+  contractAmount: number;
+  renewalType: RenewalType;
 };
 
 function computeSummary(invoices: Invoice[]) {
@@ -30,11 +32,58 @@ function computeSummary(invoices: Invoice[]) {
   return { invoicedTotal, paidTotal, scheduledTotal };
 }
 
-export async function InvoiceSection({ contractId, organizationId, contractStatus, canManage }: Props) {
-  const invoices = await invoiceRepository.findAllByContract(contractId, organizationId);
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+type ProgressBarSummaryProps = {
+  contractAmount: number;
+  paidTotal: number;
+  invoicedTotal: number;
+  scheduledTotal: number;
+};
+
+function ProgressBarSummary({ contractAmount, paidTotal, invoicedTotal, scheduledTotal }: ProgressBarSummaryProps) {
+  const base = contractAmount > 0 ? contractAmount : 1;
+  const paidPct = clamp((paidTotal / base) * 100, 0, 100);
+  const invoicedPct = clamp((invoicedTotal / base) * 100, 0, 100 - paidPct);
+  const remaining = Math.max(contractAmount - paidTotal - invoicedTotal - scheduledTotal, 0);
+
+  return (
+    <div className="mb-3">
+      <div className="flex h-3 w-full overflow-hidden bg-gray-200 mb-1">
+        <div
+          className="bg-green-500 h-full"
+          style={{ width: `${paidPct}%` }}
+        />
+        <div
+          className="bg-blue-500 h-full"
+          style={{ width: `${invoicedPct}%` }}
+        />
+      </div>
+      <div className="flex gap-3 text-xs text-text-muted">
+        <span>
+          <span className="inline-block w-2 h-2 bg-green-500 mr-1" />
+          入金済 ¥{paidTotal.toLocaleString("ja-JP")}
+        </span>
+        <span>
+          <span className="inline-block w-2 h-2 bg-blue-500 mr-1" />
+          請求済 ¥{invoicedTotal.toLocaleString("ja-JP")}
+        </span>
+        <span>
+          <span className="inline-block w-2 h-2 bg-gray-200 border border-gray-300 mr-1" />
+          残り ¥{remaining.toLocaleString("ja-JP")}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export function InvoiceSection({ contractId, invoices, contractStatus, canManage, contractAmount, renewalType }: Props) {
   const { invoicedTotal, paidTotal, scheduledTotal } = computeSummary(invoices);
 
   const isActiveContract = contractStatus === "active";
+  const isOneTime = renewalType === "one_time";
 
   const columns = [
     {
@@ -97,26 +146,35 @@ export async function InvoiceSection({ contractId, organizationId, contractStatu
       </div>
 
       {/* 請求サマリー */}
-      <div className="grid grid-cols-3 gap-2 mb-3">
-        <div className="bg-bg-toolbar border border-border p-2 text-center">
-          <p className="text-xs text-text-muted">請求済合計</p>
-          <p className="text-sm font-bold text-text">
-            ¥{invoicedTotal.toLocaleString("ja-JP")}
-          </p>
+      {isOneTime ? (
+        <ProgressBarSummary
+          contractAmount={contractAmount}
+          paidTotal={paidTotal}
+          invoicedTotal={invoicedTotal}
+          scheduledTotal={scheduledTotal}
+        />
+      ) : (
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <div className="bg-bg-toolbar border border-border p-2 text-center">
+            <p className="text-xs text-text-muted">請求済合計</p>
+            <p className="text-sm font-bold text-text">
+              ¥{invoicedTotal.toLocaleString("ja-JP")}
+            </p>
+          </div>
+          <div className="bg-bg-toolbar border border-border p-2 text-center">
+            <p className="text-xs text-text-muted">入金済合計</p>
+            <p className="text-sm font-bold text-text">
+              ¥{paidTotal.toLocaleString("ja-JP")}
+            </p>
+          </div>
+          <div className="bg-bg-toolbar border border-border p-2 text-center">
+            <p className="text-xs text-text-muted">未請求合計</p>
+            <p className="text-sm font-bold text-text">
+              ¥{scheduledTotal.toLocaleString("ja-JP")}
+            </p>
+          </div>
         </div>
-        <div className="bg-bg-toolbar border border-border p-2 text-center">
-          <p className="text-xs text-text-muted">入金済合計</p>
-          <p className="text-sm font-bold text-text">
-            ¥{paidTotal.toLocaleString("ja-JP")}
-          </p>
-        </div>
-        <div className="bg-bg-toolbar border border-border p-2 text-center">
-          <p className="text-xs text-text-muted">未請求合計</p>
-          <p className="text-sm font-bold text-text">
-            ¥{scheduledTotal.toLocaleString("ja-JP")}
-          </p>
-        </div>
-      </div>
+      )}
 
       {invoices.length === 0 ? (
         <p className="text-xs text-text-muted">請求はまだありません</p>

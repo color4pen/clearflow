@@ -39,71 +39,63 @@ export default async function InvoiceDetailPage({
         <span className="text-text-muted text-xs ml-2">
           <Link href="/contracts" className="text-primary underline">契約一覧</Link>
           {" > "}
-          <Link href={`/contracts/${contractId}`} className="text-primary underline">契約詳細</Link>
+          <Link href={`/contracts/${contractId}`} className="text-primary underline">{contract.title}</Link>
           {" > "}請求詳細
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className="max-w-[560px] mx-auto">
         <SectionCard className="p-3">
           <h2 className="text-xs font-bold text-text mb-2">請求情報</h2>
-          <dl className="text-xs space-y-1">
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">タイトル</dt>
-              <dd className="text-text px-2 py-1">{invoice.title}</dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">金額</dt>
-              <dd className="text-text px-2 py-1">¥{invoice.amount.toLocaleString("ja-JP")}</dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">請求日</dt>
-              <dd className="text-text px-2 py-1">{formatDate(invoice.issueDate)}</dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">支払期日</dt>
-              <dd className="text-text px-2 py-1">{formatDate(invoice.dueDate)}</dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">入金日</dt>
-              <dd className="text-text px-2 py-1">{formatDate(invoice.paidAt)}</dd>
-            </div>
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">ステータス</dt>
-              <dd className="text-text px-2 py-1">
-                <span className={
-                  invoice.status === "invoiced" ? "text-primary" :
-                  invoice.status === "paid" ? "text-success" :
-                  invoice.status === "overdue" ? "text-danger" : ""
-                }>
-                  {invoiceStatusLabels[invoice.status] ?? invoice.status}
-                </span>
-              </dd>
-            </div>
+          <dl className="grid grid-cols-[90px_1fr] gap-y-1 text-xs">
+            <dt className="text-text-muted">タイトル</dt>
+            <dd className="text-text">{invoice.title}</dd>
+
+            <dt className="text-text-muted">金額</dt>
+            <dd className="text-text">¥{invoice.amount.toLocaleString("ja-JP")}</dd>
+
+            <dt className="text-text-muted">請求日</dt>
+            <dd className="text-text">{formatDate(invoice.issueDate)}</dd>
+
+            <dt className="text-text-muted">支払期日</dt>
+            <dd className="text-text">{formatDate(invoice.dueDate)}</dd>
+
+            <dt className="text-text-muted">入金日</dt>
+            <dd className="text-text">{formatDate(invoice.paidAt)}</dd>
+
+            <dt className="text-text-muted">ステータス</dt>
+            <dd className="text-text">
+              <span className={
+                invoice.status === "invoiced" ? "text-primary" :
+                invoice.status === "paid" ? "text-success" :
+                invoice.status === "overdue" ? "text-danger" : ""
+              }>
+                {invoiceStatusLabels[invoice.status] ?? invoice.status}
+              </span>
+            </dd>
+
             {invoice.notes && (
-              <div className="flex gap-2">
-                <dt className="text-text-muted w-24 shrink-0">備考</dt>
-                <dd className="text-text px-2 py-1 whitespace-pre-wrap">{invoice.notes}</dd>
-              </div>
+              <>
+                <dt className="text-text-muted">備考</dt>
+                <dd className="text-text whitespace-pre-wrap">{invoice.notes}</dd>
+              </>
             )}
           </dl>
-        </SectionCard>
 
-        <SectionCard className="p-3">
-          <h2 className="text-xs font-bold text-text mb-2">関連情報</h2>
-          <dl className="text-xs space-y-1">
-            <div className="flex gap-2">
-              <dt className="text-text-muted w-24 shrink-0">紐づく契約</dt>
-              <dd className="text-text px-2 py-1">
+          <div className="mt-3">
+            <h3 className="text-xs font-bold text-text mb-1">関連情報</h3>
+            <dl className="grid grid-cols-[90px_1fr] gap-y-1 text-xs">
+              <dt className="text-text-muted">紐づく契約</dt>
+              <dd className="text-text">
                 <Link href={`/contracts/${contractId}`} className="text-primary underline text-xs">
                   {contract.title}
                 </Link>
               </dd>
-            </div>
-          </dl>
+            </dl>
+          </div>
 
           {canChangeStatus && (
-            <div className="mt-4">
+            <div className="mt-3">
               <h3 className="text-xs font-bold text-text mb-2">ステータス操作</h3>
               <InvoiceActions
                 invoiceId={invoiceId}

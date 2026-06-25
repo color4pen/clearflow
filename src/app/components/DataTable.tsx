@@ -13,7 +13,7 @@ type Props<T> = {
   columns: Column<T>[];
   rows: T[];
   rowKey: (row: T) => string;
-  rowClass?: (row: T, index: number) => string;
+  rowClass?: (row: T, index: number) => string | undefined;
   onRowClick?: (row: T) => void;
   rowHref?: (row: T) => string;
   footer?: ReactNode;
