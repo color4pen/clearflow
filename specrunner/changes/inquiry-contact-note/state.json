@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f21309a2-eca6-49b5-9e17-74f140571b3d",
   "createdAt": "2026-06-25T09:41:49.343Z",
-  "updatedAt": "2026-06-25T10:08:55.025Z",
+  "updatedAt": "2026-06-25T10:12:22.623Z",
   "request": {
     "title": "引合の問い合わせ内容フィールド追加",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "change/inquiry-contact-note-f21309a2",
   "error": null,
@@ -33,8 +33,22 @@
       ]
     }
   ],
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "6a58236c1a0fef9acf53617c2a0a9587f05d9ba5",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 33,
+    "historyCount": 38,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -43,7 +57,9 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 1,
-      "code-fixer": 1
+      "code-fixer": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
