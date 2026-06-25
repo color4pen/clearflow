@@ -86,3 +86,11 @@
 {"type":"transition","ts":"2026-06-25T01:47:53.091Z","step":"verification","status":"ok","message":"verification iteration 1 completed with verdict: passed"}
 {"type":"transition","ts":"2026-06-25T01:47:53.091Z","step":"step-transition","status":"ok","message":"verification → adr-gen"}
 {"type":"transition","ts":"2026-06-25T01:47:53.094Z","step":"adr-gen-started","status":"started","message":"Starting adr-gen step"}
+{"type":"transition","ts":"2026-06-25T01:48:11.916Z","step":"adr-gen-verdict","status":"ok","message":"adr-gen verdict: success"}
+{"type":"step-attempt","step":"adr-gen","sessionId":"f594e444-d609-4171-8860-73b282672f45","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-25T01:47:53.110Z","endedAt":"2026-06-25T01:48:10.574Z"}
+{"type":"transition","ts":"2026-06-25T01:48:11.924Z","step":"step-transition","status":"ok","message":"adr-gen → pr-create"}
+{"type":"transition","ts":"2026-06-25T01:48:11.927Z","step":"step-transition","status":"ok","message":"Transitioning to pr-create step"}
+{"type":"transition","ts":"2026-06-25T01:48:13.824Z","step":"pr-create-verdict","status":"ok","message":"pr-create verdict: success"}
+{"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/design-deal/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-25T01:48:11.929Z","endedAt":"2026-06-25T01:48:13.822Z"}
+{"type":"lineage","step":"pr-create","ts":"2026-06-25T01:48:13.822Z","outputs":[{"path":"specrunner/changes/design-deal/pr-create-result.md","hash":"sha256:a48db1600c5d36731c38f253cc9cedd54197e4206ea96a771022583f3f52d289"}],"inputs":[{"path":"change/design-deal-e06aa7fb","hash":null}]}
+{"type":"transition","ts":"2026-06-25T01:48:13.834Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
