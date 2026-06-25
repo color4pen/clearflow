@@ -3,6 +3,7 @@ import type { MonthlyRevenue, CustomerRevenue, PipelineSummary } from "@/domain/
 
 export type RevenueDashboard = {
   currentMonthRevenue: MonthlyRevenue[];
+  confirmedRevenue: number;
   monthlyTrend: MonthlyRevenue[];
   pipelineSummary: PipelineSummary[];
   topCustomers: CustomerRevenue[];
@@ -21,8 +22,9 @@ export async function getRevenueDashboard(data: {
   // 12 ヶ月前の開始日
   const twelveMonthsAgoStart = new Date(now.getFullYear(), now.getMonth() - 11, 1);
 
-  const [currentMonthRevenue, monthlyTrend, pipelineSummary, topCustomers] = await Promise.all([
+  const [currentMonthRevenue, confirmedRevenue, monthlyTrend, pipelineSummary, topCustomers] = await Promise.all([
     revenueRepository.getMonthlyRevenue(organizationId, currentMonthStart, currentMonthEnd),
+    revenueRepository.getConfirmedRevenue(organizationId, currentMonthStart, currentMonthEnd),
     revenueRepository.getMonthlyRevenue(organizationId, twelveMonthsAgoStart, currentMonthEnd),
     revenueRepository.getPipelineSummary(organizationId),
     revenueRepository.getCustomerRevenue(organizationId, twelveMonthsAgoStart, currentMonthEnd, 10),
@@ -30,6 +32,7 @@ export async function getRevenueDashboard(data: {
 
   return {
     currentMonthRevenue,
+    confirmedRevenue,
     monthlyTrend,
     pipelineSummary,
     topCustomers,
