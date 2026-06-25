@@ -65,6 +65,8 @@ export function ActionButtons({
   rejectAction: ServerAction;
   resubmitAction: ServerAction;
 }) {
+  const [comment, setComment] = useState("");
+
   if (requestStatus === "draft") {
     return (
       <div className="border-t border-border-light pt-4">
@@ -85,30 +87,35 @@ export function ActionButtons({
       <div className="border-t border-border-light pt-4">
         <h3 className="text-xs font-bold text-text mb-3">承認操作</h3>
         <div className="space-y-4">
-          {/* Comment field shared between approve and reject */}
+          {/* Comment field — controlled so its value can be injected into each form */}
           <FormField label="コメント（任意）" htmlFor="action-comment">
             <Textarea
               id="action-comment"
-              name="comment"
               rows={3}
               placeholder="コメントを入力してください"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
             />
           </FormField>
 
           <div className="flex items-center gap-3">
-            {/* Approve form */}
+            {/* Approve form — hidden comment input carries the controlled value */}
             <ActionForm action={approveAction} className="contents">
               {(isPending) => (
-                <SubmitButton pending={isPending}>
-                  承認する
-                </SubmitButton>
+                <>
+                  <input type="hidden" name="comment" value={comment} />
+                  <SubmitButton pending={isPending}>
+                    承認する
+                  </SubmitButton>
+                </>
               )}
             </ActionForm>
 
-            {/* Reject form */}
+            {/* Reject form — hidden comment input carries the controlled value */}
             <ActionForm action={rejectAction}>
               {(isPending) => (
                 <>
+                  <input type="hidden" name="comment" value={comment} />
                   <input type="hidden" name="targetStatus" value="rejected" />
                   <button
                     type="submit"
