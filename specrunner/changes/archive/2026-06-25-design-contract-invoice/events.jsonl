@@ -95,3 +95,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/design-contract-invoice/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-25T03:21:12.625Z","endedAt":"2026-06-25T03:21:14.434Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-25T03:21:14.434Z","outputs":[{"path":"specrunner/changes/design-contract-invoice/pr-create-result.md","hash":"sha256:b7ee54f3bfe2a4e05431bb674b7afe9930c30c9b25c25d799cdfa9b0fe7f13a8"}],"inputs":[{"path":"change/design-contract-invoice-a1057692","hash":null}]}
 {"type":"transition","ts":"2026-06-25T03:21:14.446Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-25T03:21:50.232Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
