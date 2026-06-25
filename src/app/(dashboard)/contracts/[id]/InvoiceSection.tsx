@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { invoiceRepository } from "@/infrastructure/repositories";
 import { SectionCard } from "@/app/components";
 import { DataTable } from "@/app/components/DataTable";
 import { invoiceStatusLabels } from "@/app/(dashboard)/labels";
@@ -8,7 +7,7 @@ import type { RenewalType } from "@/domain/models/contract";
 
 type Props = {
   contractId: string;
-  organizationId: string;
+  invoices: Invoice[];
   contractStatus: string;
   canManage: boolean;
   contractAmount: number;
@@ -80,8 +79,7 @@ function ProgressBarSummary({ contractAmount, paidTotal, invoicedTotal, schedule
   );
 }
 
-export async function InvoiceSection({ contractId, organizationId, contractStatus, canManage, contractAmount, renewalType }: Props) {
-  const invoices = await invoiceRepository.findAllByContract(contractId, organizationId);
+export function InvoiceSection({ contractId, invoices, contractStatus, canManage, contractAmount, renewalType }: Props) {
   const { invoicedTotal, paidTotal, scheduledTotal } = computeSummary(invoices);
 
   const isActiveContract = contractStatus === "active";

@@ -102,7 +102,7 @@ export default async function ContractDetailPage({
         <div>
           <InvoiceSection
             contractId={contract.id}
-            organizationId={organizationId}
+            invoices={invoices}
             contractStatus={contract.status}
             canManage={canManage}
             contractAmount={contract.amount}
