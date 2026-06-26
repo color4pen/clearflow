@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "109dc74a-af9b-456f-a158-03d94810bfea",
   "createdAt": "2026-06-26T07:47:00.787Z",
-  "updatedAt": "2026-06-26T08:23:10.405Z",
+  "updatedAt": "2026-06-26T08:27:08.588Z",
   "request": {
     "title": "営業系ページの repository 直接呼び出しを usecase 経由に移行",
     "type": "refactor",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/usecase-page-sales-109dc74a",
   "error": null,
@@ -33,8 +33,22 @@
       ]
     }
   ],
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "22ab05a6d25a3ef7ef46f2c20aec97a1ae2b38ac",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 38,
+    "historyCount": 43,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -43,7 +57,9 @@
       "test-case-gen": 1,
       "implementer": 1,
       "verification": 1,
-      "code-review": 1
+      "code-review": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
