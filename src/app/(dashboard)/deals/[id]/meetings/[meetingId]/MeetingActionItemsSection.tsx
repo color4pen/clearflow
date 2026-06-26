@@ -23,12 +23,10 @@ export function MeetingActionItemsSection({ meetingId, dealId, actionItems, orgU
   const [newDueDate, setNewDueDate] = useState("");
   const [addError, setAddError] = useState<string | null>(null);
 
-  function handleToggle(idx: number) {
+  function handleToggle(id: string) {
     if (!editable || isPending) return;
-    const item = actionItems[idx];
-    if (!item) return;
     startTransition(async () => {
-      await toggleActionItemAction({ id: item.id });
+      await toggleActionItemAction({ id });
       router.refresh();
     });
   }
@@ -96,13 +94,13 @@ export function MeetingActionItemsSection({ meetingId, dealId, actionItems, orgU
 
       {actionItems.length > 0 && (
         <ul className="text-xs space-y-1">
-          {actionItems.map((item, idx) => (
+          {actionItems.map((item) => (
             <li key={item.id} className="flex gap-2 items-start">
               <input
                 type="checkbox"
                 checked={item.done}
                 disabled={!editable || isPending}
-                onChange={() => handleToggle(idx)}
+                onChange={() => handleToggle(item.id)}
                 className="mt-0.5 cursor-pointer disabled:cursor-default"
               />
               <span className={item.done ? "text-text-muted line-through flex-1" : "text-text flex-1"}>

@@ -97,6 +97,7 @@ export async function updateActionItem(data: {
           targetId: data.id,
           actorId: data.actorId,
           organizationId: data.organizationId,
+          metadata: updateData,
         },
         tx
       );
