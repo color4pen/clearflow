@@ -14,7 +14,6 @@ import {
   resubmitRequestAction,
 } from "@/app/actions/requests";
 import { ActionButtons } from "./ActionButtons";
-import type { ServerAction } from "./ActionButtons";
 import { ApprovalStepper } from "./ApprovalStepper";
 import { SystemOriginBanner } from "./SystemOriginBanner";
 import { statusLabel } from "../statusUtils";
@@ -63,10 +62,10 @@ export default async function RequestDetailPage({
       ? canApproveWithDelegation(currentStep, role, delegations).allowed
       : false;
 
-  const submitAction = submitRequestAction.bind(null, id) as unknown as ServerAction;
-  const approveAction = approveRequestAction.bind(null, id) as unknown as ServerAction;
-  const rejectAction = rejectRequestAction.bind(null, id) as unknown as ServerAction;
-  const resubmitAction = resubmitRequestAction.bind(null, id) as unknown as ServerAction;
+  const submitAction = submitRequestAction.bind(null, id);
+  const approveAction = approveRequestAction.bind(null, id);
+  const rejectAction = rejectRequestAction.bind(null, id);
+  const resubmitAction = resubmitRequestAction.bind(null, id);
 
   const formDataEntries = Object.entries(request.formData);
 
