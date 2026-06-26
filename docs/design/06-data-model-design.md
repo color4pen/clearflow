@@ -194,7 +194,7 @@ text 型で管理する値（pgEnum にしない）:
 | location | text | YES | | 場所 |
 | attendees | jsonb | NO | DEFAULT '[]' | 出席者 |
 | summary | text | YES | | 議事要旨（Markdown） |
-| action_items | jsonb | NO | DEFAULT '[]' | アクションアイテム |
+| action_items | jsonb | NO | DEFAULT '[]' | アクションアイテム（非推奨: action_items テーブルに移行済み。後方互換のため残置） |
 | hearing_data | jsonb | YES | | ヒアリング固有情報 |
 | created_by_id | uuid | NO | FK → users.id | 作成者 |
 | created_at | timestamptz | NO | DEFAULT now() | |
@@ -217,7 +217,7 @@ CHECK (deal_id IS NOT NULL OR inquiry_id IS NOT NULL)
 ]
 ```
 
-**JSON 構造: action_items**
+**JSON 構造: action_items（非推奨）**
 ```json
 [
   {
@@ -228,6 +228,25 @@ CHECK (deal_id IS NOT NULL OR inquiry_id IS NOT NULL)
   }
 ]
 ```
+
+#### action_items
+
+商談・案件・引合に紐づくタスク。紐づけ先なし（個人タスク）も許可する。
+
+| カラム | 型 | NULL | 制約 | 説明 |
+|---|---|---|---|---|
+| id | uuid | NO | PK, DEFAULT gen_random_uuid() | |
+| organization_id | uuid | NO | FK → organizations.id | テナント |
+| description | text | NO | | 内容 |
+| assignee_id | uuid | YES | FK → users.id | 担当者 |
+| due_date | timestamptz | YES | | 期日 |
+| done | boolean | NO | DEFAULT false | 完了状態 |
+| meeting_id | uuid | YES | FK → meetings.id | 商談 |
+| deal_id | uuid | YES | FK → deals.id | 案件 |
+| inquiry_id | uuid | YES | FK → inquiries.id | 引合 |
+| created_by_id | uuid | NO | FK → users.id | 作成者 |
+| created_at | timestamptz | NO | DEFAULT now() | |
+| updated_at | timestamptz | NO | DEFAULT now() | |
 
 ---
 
@@ -434,6 +453,7 @@ organizations ─┬── users
                ├── inquiries
                ├── deals ──── deal_contacts
                ├── meetings
+               ├── action_items
                ├── contracts ──── invoices
                ├── approval_policies
                ├── approval_templates
@@ -456,4 +476,9 @@ approval_policies ──→ approval_templates
 approval_requests ──→ approval_templates
 approval_requests ──→ approval_policies (システム連動の場合)
 deals ──→ approval_requests (見積承認, 任意)
+action_items ──→ meetings (任意)
+action_items ──→ deals (任意)
+action_items ──→ inquiries (任意)
+action_items ──→ users (担当者, 任意)
+action_items ──→ users (作成者, 必須)
 ```
