@@ -21,9 +21,11 @@ function formatDateJP(date: Date): string {
 export async function listActionItems(data: {
   organizationId: string;
   done?: boolean;
+  assigneeId?: string;
 }): Promise<ActionItemWithSource[]> {
   const items = await actionItemRepository.findByOrganization(data.organizationId, {
     done: data.done,
+    assigneeId: data.assigneeId,
   });
 
   // Extract unique IDs for related entities

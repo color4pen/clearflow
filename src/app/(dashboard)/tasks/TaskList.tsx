@@ -3,9 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createActionItemAction } from "@/app/actions/actionItems";
-import { useToast } from "@/app/components";
+import { Input, useToast } from "@/app/components";
 import { ActionItemRow } from "@/app/(dashboard)/components/ActionItemRow";
-import { ActionItemModal } from "@/app/(dashboard)/components/ActionItemModal";
 import type { ActionItemWithSource } from "@/application/usecases/listActionItems";
 
 type Props = {
@@ -13,20 +12,45 @@ type Props = {
   orgUsers: { id: string; name: string }[];
   currentUserId: string;
   canDelete: boolean;
+  dealOptions: { id: string; title: string }[];
+  inquiryOptions: { id: string; title: string }[];
 };
 
-export function TaskList({ items, orgUsers, currentUserId, canDelete }: Props) {
+export function TaskList({ items, orgUsers, currentUserId, canDelete, dealOptions, inquiryOptions }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [description, setDescription] = useState("");
+  const [assigneeId, setAssigneeId] = useState(currentUserId);
+  const [dueDate, setDueDate] = useState("");
+  const [dealId, setDealId] = useState("");
+  const [inquiryId, setInquiryId] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  function handleAdd(values: { description: string; assigneeId: string | null; dueDate: string | null }) {
+  function handleOpenAdd() {
+    setDescription("");
+    setAssigneeId(currentUserId);
+    setDueDate("");
+    setDealId("");
+    setInquiryId("");
+    setError(null);
+    setShowAddModal(true);
+  }
+
+  function handleAdd() {
+    if (!description.trim()) {
+      setError("内容は必須です");
+      return;
+    }
+    setError(null);
     startTransition(async () => {
       const result = await createActionItemAction({
-        description: values.description,
-        assigneeId: values.assigneeId ?? undefined,
-        dueDate: values.dueDate ?? undefined,
+        description: description.trim(),
+        assigneeId: assigneeId || undefined,
+        dueDate: dueDate || undefined,
+        dealId: dealId || undefined,
+        inquiryId: inquiryId || undefined,
       });
       if (result.message) {
         showToast(result.message, "error");
@@ -39,40 +63,70 @@ export function TaskList({ items, orgUsers, currentUserId, canDelete }: Props) {
 
   return (
     <div>
-      <ActionItemModal
-        open={showAddModal}
-        title="個人タスクを追加"
-        orgUsers={orgUsers}
-        defaultValues={{ assigneeId: currentUserId }}
-        loading={isPending}
-        onSubmit={handleAdd}
-        onCancel={() => setShowAddModal(false)}
-      />
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setShowAddModal(false)}>
+          <div className="bg-bg-surface border border-border rounded p-4 shadow-md w-full" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
+            <p className="text-sm font-bold text-text mb-3">タスクを作成</p>
+            <div className="space-y-2">
+              {error && <p className="text-danger text-xs">{error}</p>}
+              <div>
+                <label className="text-xs text-text-muted block mb-0.5">内容</label>
+                <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="タスクの内容（必須）" disabled={isPending} />
+              </div>
+              <div>
+                <label className="text-xs text-text-muted block mb-0.5">担当者</label>
+                <select value={assigneeId} onChange={(e) => setAssigneeId(e.target.value)} disabled={isPending} className="w-full text-xs border border-border rounded px-2 py-1.5 bg-bg-surface text-text">
+                  <option value="">未設定</option>
+                  {orgUsers.map((u) => (<option key={u.id} value={u.id}>{u.name}</option>))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-text-muted block mb-0.5">期日</label>
+                <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} disabled={isPending} />
+              </div>
+              <div>
+                <label className="text-xs text-text-muted block mb-0.5">案件</label>
+                <select value={dealId} onChange={(e) => setDealId(e.target.value)} disabled={isPending} className="w-full text-xs border border-border rounded px-2 py-1.5 bg-bg-surface text-text">
+                  <option value="">なし</option>
+                  {dealOptions.map((d) => (<option key={d.id} value={d.id}>{d.title}</option>))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-text-muted block mb-0.5">引合</label>
+                <select value={inquiryId} onChange={(e) => setInquiryId(e.target.value)} disabled={isPending} className="w-full text-xs border border-border rounded px-2 py-1.5 bg-bg-surface text-text">
+                  <option value="">なし</option>
+                  {inquiryOptions.map((i) => (<option key={i.id} value={i.id}>{i.title}</option>))}
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end mt-4">
+              <button type="button" onClick={() => setShowAddModal(false)} disabled={isPending} className="border border-border text-text text-xs px-3 py-1.5 cursor-pointer disabled:opacity-50">キャンセル</button>
+              <button type="button" onClick={handleAdd} disabled={isPending} className="bg-primary text-white text-xs px-3 py-1.5 cursor-pointer disabled:opacity-50">{isPending ? "作成中..." : "作成"}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between px-3.5 py-2">
         <span className="text-xs text-text-muted">{items.length} 件</span>
-        <button
-          type="button"
-          onClick={() => setShowAddModal(true)}
-          className="text-xs font-medium px-3 py-1.5 bg-primary text-white rounded cursor-pointer"
-        >
-          個人タスク追加
+        <button type="button" onClick={handleOpenAdd} className="text-xs font-medium px-3 py-1.5 bg-primary text-white rounded cursor-pointer">
+          新規作成
         </button>
       </div>
 
       {items.length === 0 ? (
-        <p className="text-xs text-text-muted">アクションアイテムはありません</p>
+        <p className="text-xs text-text-muted px-3.5 py-4">タスクはありません</p>
       ) : (
         <div>
-          <div className="flex gap-2 items-center text-xs text-text-muted font-bold border-b border-border py-1 px-2 bg-bg-toolbar">
-            <span className="w-4 shrink-0"></span>
-            <span className="flex-1">内容</span>
-            <span className="w-20 shrink-0">担当者</span>
-            <span className="w-24 shrink-0">期日</span>
-            <span className="w-28 shrink-0">紐づけ先</span>
-            <span className="w-20 shrink-0"></span>
+          <div className="grid text-table-head font-medium text-text-secondary bg-bg-table-head px-3.5 py-2" style={{ gridTemplateColumns: "24px 1fr 100px 100px 140px 80px" }}>
+            <span></span>
+            <span>内容</span>
+            <span>担当者</span>
+            <span>期日</span>
+            <span>紐づけ先</span>
+            <span></span>
           </div>
-          <ul className="text-xs space-y-0 divide-y divide-border">
+          <ul className="divide-y divide-border-light">
             {items.map((item) => (
               <ActionItemRow
                 key={item.id}
