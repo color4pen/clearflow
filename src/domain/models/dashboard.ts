@@ -10,10 +10,10 @@ export type DashboardActionItem =
     }
   | {
       type: "action_item";
-      dealId: string;
+      dealId: string | null;
       dealTitle: string;
       description: string;
-      assignee: string;
+      assigneeId: string | null;
       dueDate: string | null;
     }
   | {

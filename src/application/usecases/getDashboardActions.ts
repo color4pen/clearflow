@@ -1,4 +1,4 @@
-import { requestRepository, meetingRepository, inquiryRepository } from "@/infrastructure/repositories";
+import { requestRepository, inquiryRepository, actionItemRepository } from "@/infrastructure/repositories";
 import { listDeals } from "./listDeals";
 import type { DashboardActionItem } from "@/domain/models/dashboard";
 
@@ -6,9 +6,9 @@ export async function getDashboardActions(
   organizationId: string,
   userRole: string
 ): Promise<DashboardActionItem[]> {
-  const [requestsWithSteps, meetings, inquiries, deals] = await Promise.all([
+  const [requestsWithSteps, actionItemsList, inquiries, deals] = await Promise.all([
     requestRepository.findAllWithStepsByOrganization(organizationId),
-    meetingRepository.findAllByOrganization(organizationId),
+    actionItemRepository.findByOrganization(organizationId, { done: false }),
     inquiryRepository.findAllWithClientByOrganization(organizationId),
     listDeals(organizationId),
   ]);
@@ -36,21 +36,18 @@ export async function getDashboardActions(
     });
   }
 
-  // (b) Action items: all meetings with dealId, all undone action items
-  for (const meeting of meetings) {
-    if (!meeting.dealId) continue;
-    const dealId = meeting.dealId;
-    for (const actionItem of meeting.actionItems) {
-      if (actionItem.done) continue;
-      items.push({
-        type: "action_item",
-        dealId,
-        dealTitle: dealTitleMap.get(dealId) ?? "",
-        description: actionItem.description,
-        assignee: actionItem.assignee,
-        dueDate: actionItem.dueDate,
-      });
-    }
+  // (b) Action items: all undone action items from action_items table
+  for (const actionItem of actionItemsList) {
+    const dealId = actionItem.dealId;
+    const dealTitle = dealId ? (dealTitleMap.get(dealId) ?? "") : "";
+    items.push({
+      type: "action_item",
+      dealId,
+      dealTitle,
+      description: actionItem.description,
+      assigneeId: actionItem.assigneeId,
+      dueDate: actionItem.dueDate ? actionItem.dueDate.toISOString() : null,
+    });
   }
 
   // (c) Inquiries with status === "new"

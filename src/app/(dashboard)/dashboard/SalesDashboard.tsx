@@ -24,6 +24,7 @@ type Props = {
   recentActivities: AuditLog[];
   staleDeals: DealWithDetails[] | null;
   userRole: string;
+  userMap: Record<string, string>;
 };
 
 function getEntityLink(targetType: string, targetId: string): string | null {
@@ -81,6 +82,7 @@ export function SalesDashboard({
   recentActivities,
   staleDeals,
   userRole,
+  userMap,
 }: Props) {
   const today = new Date().toLocaleDateString("ja-JP", {
     year: "numeric",
@@ -187,7 +189,7 @@ export function SalesDashboard({
                     item.type === "approval"
                       ? `approval-${item.requestId}`
                       : item.type === "action_item"
-                        ? `action-${item.dealId}-${item.description}`
+                        ? `action-${item.dealId ?? "none"}-${item.assigneeId ?? "none"}-${item.description}`
                         : `inquiry-${item.inquiryId}`;
                   return (
                     <div
@@ -230,14 +232,22 @@ export function SalesDashboard({
                         )}
                         {item.type === "action_item" && (
                           <>
-                            <Link
-                              href={`/deals/${item.dealId}`}
-                              className="text-primary underline text-xs truncate block"
-                            >
-                              {item.dealTitle || item.dealId}
-                            </Link>
+                            {item.dealId ? (
+                              <Link
+                                href={`/deals/${item.dealId}`}
+                                className="text-primary underline text-xs truncate block"
+                              >
+                                {item.dealTitle || item.dealId}
+                              </Link>
+                            ) : (
+                              <p className="text-xs text-text truncate">
+                                {item.description}
+                              </p>
+                            )}
                             <p className="text-xs text-text-muted truncate">
-                              {item.description}
+                              {item.assigneeId
+                                ? (userMap[item.assigneeId] ?? item.assigneeId)
+                                : "未設定"}
                             </p>
                           </>
                         )}

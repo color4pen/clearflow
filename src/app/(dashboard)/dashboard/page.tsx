@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
-import { getDashboardActions, getPipelineSummary, getRecentActivities, listInvoicesByOrganization } from "@/application/usecases";
+import { getDashboardActions, getPipelineSummary, getRecentActivities, listInvoicesByOrganization, listOrganizationUsers } from "@/application/usecases";
 import { SalesDashboard } from "./SalesDashboard";
 import { FinanceDashboard } from "./FinanceDashboard";
 
@@ -51,11 +51,16 @@ export default async function DashboardPage() {
   }
 
   // Sales dashboard data
-  const [actions, pipelineResult, recentActivities] = await Promise.all([
+  const [actions, pipelineResult, recentActivities, users] = await Promise.all([
     getDashboardActions(organizationId, userRole),
     getPipelineSummary(organizationId),
     getRecentActivities(organizationId),
+    listOrganizationUsers({ organizationId }),
   ]);
+
+  const userMap: Record<string, string> = Object.fromEntries(
+    users.map((u) => [u.id, u.name])
+  );
 
   const { summary: pipelineSummary, deals } = pipelineResult;
 
@@ -78,6 +83,7 @@ export default async function DashboardPage() {
       recentActivities={recentActivities}
       staleDeals={staleDeals}
       userRole={userRole}
+      userMap={userMap}
     />
   );
 }
