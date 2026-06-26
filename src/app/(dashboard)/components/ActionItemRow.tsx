@@ -116,74 +116,77 @@ export function ActionItemRow({
       onSubmit={handleSave}
       onCancel={() => setShowEditModal(false)}
     />
-    <li className="flex gap-2 items-start text-xs">
+    <li
+      className="grid items-center text-base-app px-3.5 py-2.5 hover:bg-bg-surface-alt"
+      style={{ gridTemplateColumns: showSource ? "24px 1fr 100px 100px 140px 80px" : "24px 1fr 100px 100px 80px" }}
+    >
       <input
         type="checkbox"
         checked={item.done}
         disabled={isPending}
         onChange={handleToggle}
-        className="mt-0.5 cursor-pointer disabled:cursor-default"
+        className="cursor-pointer disabled:cursor-default"
       />
       <span
         className={
           item.done
-            ? "text-text-muted line-through flex-1"
-            : "text-text flex-1"
+            ? "text-text-muted line-through truncate"
+            : "text-text truncate"
         }
       >
         {item.description}
       </span>
-      <span className="text-text-muted shrink-0">
-        （{resolveAssigneeName(item.assigneeId)}）
+      <span className="text-text-muted truncate">
+        {resolveAssigneeName(item.assigneeId)}
       </span>
-      {item.dueDate && (
-        <span className="text-text-muted shrink-0">
-          {formatDueDate(item.dueDate)}
-        </span>
-      )}
+      <span className="text-text-muted font-mono">
+        {item.dueDate ? formatDueDate(item.dueDate) : "—"}
+      </span>
       {showSource && (
-        <span className="text-text-muted shrink-0">
+        <span className="text-text-muted truncate">
           {sourceHref ? (
             <Link href={sourceHref} className="text-primary underline">
-              {sourceName ?? ""}
+              {sourceName ?? "—"}
             </Link>
           ) : (
-            sourceName ?? ""
+            sourceName ?? "—"
           )}
         </span>
       )}
-      {editable && (
-        <button
-          type="button"
-          onClick={() => setShowEditModal(true)}
-          disabled={isPending}
-          className="text-xs text-primary underline shrink-0 cursor-pointer disabled:opacity-50"
-        >
-          編集
-        </button>
-      )}
-      {canDelete && (
-        <>
+      <span className="flex gap-2 justify-end">
+        {editable && (
+          <button
+            type="button"
+            onClick={() => setShowEditModal(true)}
+            disabled={isPending}
+            className="text-xs text-primary underline cursor-pointer disabled:opacity-50"
+          >
+            編集
+          </button>
+        )}
+        {canDelete && (
           <button
             type="button"
             onClick={() => setShowDeleteConfirm(true)}
             disabled={isPending}
-            className="text-xs text-danger underline shrink-0 cursor-pointer disabled:opacity-50"
+            className="text-xs text-danger underline cursor-pointer disabled:opacity-50"
           >
             削除
           </button>
-          <ConfirmDialog
-            open={showDeleteConfirm}
-            title="アクションアイテムを削除"
-            message="このアクションアイテムを削除しますか？"
-            variant="danger"
-            loading={isPending}
-            onConfirm={handleDelete}
-            onCancel={() => setShowDeleteConfirm(false)}
-          />
-        </>
-      )}
+        )}
+      </span>
     </li>
+    {canDelete && (
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        title="アクションアイテムを削除"
+        message="このアクションアイテムを削除しますか？"
+        variant="danger"
+        loading={isPending}
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
+    )}
     </>
   );
 }
