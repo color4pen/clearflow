@@ -11,9 +11,10 @@ type Props = {
   items: ActionItemWithSource[];
   orgUsers: { id: string; name: string }[];
   currentUserId: string;
+  canDelete: boolean;
 };
 
-export function TaskList({ items, orgUsers, currentUserId }: Props) {
+export function TaskList({ items, orgUsers, currentUserId, canDelete }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showAddForm, setShowAddForm] = useState(false);
@@ -150,7 +151,7 @@ export function TaskList({ items, orgUsers, currentUserId }: Props) {
                 item={item}
                 orgUsers={orgUsers}
                 editable={true}
-                canDelete={true}
+                canDelete={canDelete}
                 showSource={true}
                 sourceName={item.sourceName}
                 sourceHref={item.sourceHref}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { listActionItems, listOrganizationUsers } from "@/application/usecases";
+import { canPerform } from "@/domain/authorization";
 import { PageToolbar, SectionCard } from "@/app/components";
 import { TaskList } from "./TaskList";
 
@@ -12,6 +13,7 @@ export default async function TasksPage({
   const session = await auth();
   const organizationId = session!.user.organizationId;
   const currentUserId = session!.user.id;
+  const canDelete = canPerform(session!.user.role, "actionItem", "delete");
 
   const { status } = await searchParams;
   const isDone = status === "done";
@@ -55,6 +57,7 @@ export default async function TasksPage({
           items={items}
           orgUsers={orgUsers}
           currentUserId={currentUserId}
+          canDelete={canDelete}
         />
       </SectionCard>
     </div>
