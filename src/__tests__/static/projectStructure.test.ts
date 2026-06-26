@@ -1737,3 +1737,33 @@ describe("アクションアイテム リポジトリ・ユースケース・サ
     expect(content).toContain("organizationId");
   });
 });
+
+// ---------------------------------------------------------------------------
+// アクションアイテム full-UI — T-02, T-07, T-01
+// ---------------------------------------------------------------------------
+
+describe("アクションアイテム full-UI — タスク一覧・サイドバー・usecase", () => {
+  /**
+   * Server Actions に revalidatePath("/tasks") が含まれる
+   */
+  it("app/actions/actionItems.ts に revalidatePath(\"/tasks\") が含まれる", async () => {
+    const content = await readSrc("app/actions/actionItems.ts");
+    expect(content).toContain('revalidatePath("/tasks")');
+  });
+
+  /**
+   * SidebarNav に "/tasks" が含まれる
+   */
+  it("SidebarNav.tsx に \"/tasks\" が含まれる", async () => {
+    const content = await readSrc("app/(dashboard)/SidebarNav.tsx");
+    expect(content).toContain('"/tasks"');
+  });
+
+  /**
+   * listActionItems ユースケースが存在する
+   */
+  it("application/usecases/listActionItems.ts が存在する", async () => {
+    const exists = await fileExists("src/application/usecases/listActionItems.ts");
+    expect(exists).toBe(true);
+  });
+});

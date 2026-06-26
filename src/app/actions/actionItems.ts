@@ -78,6 +78,7 @@ export async function createActionItemAction(
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/tasks");
 
   if (parsed.data.dealId) {
     revalidatePath(`/deals/${parsed.data.dealId}`);
@@ -143,6 +144,7 @@ export async function toggleActionItemAction(
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/tasks");
 
   if (existing?.dealId) {
     revalidatePath(`/deals/${existing.dealId}`);
@@ -221,6 +223,7 @@ export async function updateActionItemAction(
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/tasks");
 
   const updatedItem = result.actionItem;
 
@@ -287,6 +290,7 @@ export async function deleteActionItemAction(
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/tasks");
 
   if (existing?.dealId) {
     revalidatePath(`/deals/${existing.dealId}`);

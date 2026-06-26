@@ -5,21 +5,20 @@ import { useRouter } from "next/navigation";
 import { createActionItemAction } from "@/app/actions/actionItems";
 import { Input } from "@/app/components";
 import { ActionItemRow } from "@/app/(dashboard)/components/ActionItemRow";
-import type { ActionItem } from "@/domain/models/actionItem";
+import type { ActionItemWithSource } from "@/application/usecases/listActionItems";
 
 type Props = {
-  actionItems: ActionItem[];
-  dealId: string;
+  items: ActionItemWithSource[];
   orgUsers: { id: string; name: string }[];
-  editable: boolean;
+  currentUserId: string;
 };
 
-export function DealActionItemsSection({ actionItems, dealId, orgUsers, editable }: Props) {
-  const [isPending, startTransition] = useTransition();
+export function TaskList({ items, orgUsers, currentUserId }: Props) {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [showAddForm, setShowAddForm] = useState(false);
   const [newDescription, setNewDescription] = useState("");
-  const [newAssigneeId, setNewAssigneeId] = useState("");
+  const [newAssigneeId, setNewAssigneeId] = useState(currentUserId);
   const [newDueDate, setNewDueDate] = useState("");
   const [addError, setAddError] = useState<string | null>(null);
 
@@ -35,14 +34,14 @@ export function DealActionItemsSection({ actionItems, dealId, orgUsers, editable
         description: newDescription.trim(),
         assigneeId: newAssigneeId || undefined,
         dueDate: newDueDate || undefined,
-        dealId,
+        // No dealId / meetingId / inquiryId → personal task
       });
       if (result.message) {
         setAddError(result.message);
         return;
       }
       setNewDescription("");
-      setNewAssigneeId("");
+      setNewAssigneeId(currentUserId);
       setNewDueDate("");
       setShowAddForm(false);
       router.refresh();
@@ -51,47 +50,32 @@ export function DealActionItemsSection({ actionItems, dealId, orgUsers, editable
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-xs font-bold text-text">アクションアイテム</h2>
-        {editable && !showAddForm && (
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs text-text-muted">{items.length} 件</span>
+        {!showAddForm && (
           <button
             type="button"
             onClick={() => setShowAddForm(true)}
             className="text-xs font-bold px-3 py-1 bg-green-600 text-white cursor-pointer"
           >
-            追加
+            個人タスク追加
           </button>
         )}
       </div>
 
-      {actionItems.length === 0 && !showAddForm && (
-        <p className="text-xs text-text-muted">アクションアイテムはありません</p>
-      )}
-
-      {actionItems.length > 0 && (
-        <ul className="text-xs space-y-1">
-          {actionItems.map((item) => (
-            <ActionItemRow
-              key={item.id}
-              item={item}
-              orgUsers={orgUsers}
-              editable={editable}
-              canDelete={editable}
-              showSource={false}
-            />
-          ))}
-        </ul>
-      )}
-
       {showAddForm && (
-        <div className="mt-2 border border-border p-2 space-y-1" onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}>
+        <div
+          className="mb-3 border border-border p-2 space-y-1"
+          onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}
+        >
+          <p className="text-xs font-bold text-text mb-1">個人タスクを追加</p>
           {addError && <p className="text-danger text-xs">{addError}</p>}
           <div className="flex gap-2 items-center">
             <label className="text-xs text-text-muted w-16 shrink-0">内容</label>
             <Input
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
-              placeholder="アクションアイテムの内容"
+              placeholder="タスクの内容（必須）"
               disabled={isPending}
             />
           </div>
@@ -135,7 +119,7 @@ export function DealActionItemsSection({ actionItems, dealId, orgUsers, editable
                 setShowAddForm(false);
                 setAddError(null);
                 setNewDescription("");
-                setNewAssigneeId("");
+                setNewAssigneeId(currentUserId);
                 setNewDueDate("");
               }}
               disabled={isPending}
@@ -144,6 +128,35 @@ export function DealActionItemsSection({ actionItems, dealId, orgUsers, editable
               キャンセル
             </button>
           </div>
+        </div>
+      )}
+
+      {items.length === 0 ? (
+        <p className="text-xs text-text-muted">アクションアイテムはありません</p>
+      ) : (
+        <div>
+          <div className="flex gap-2 items-center text-xs text-text-muted font-bold border-b border-border py-1 px-2 bg-bg-toolbar">
+            <span className="w-4 shrink-0"></span>
+            <span className="flex-1">内容</span>
+            <span className="w-20 shrink-0">担当者</span>
+            <span className="w-24 shrink-0">期日</span>
+            <span className="w-28 shrink-0">紐づけ先</span>
+            <span className="w-20 shrink-0"></span>
+          </div>
+          <ul className="text-xs space-y-0 divide-y divide-border">
+            {items.map((item) => (
+              <ActionItemRow
+                key={item.id}
+                item={item}
+                orgUsers={orgUsers}
+                editable={true}
+                canDelete={true}
+                showSource={true}
+                sourceName={item.sourceName}
+                sourceHref={item.sourceHref}
+              />
+            ))}
+          </ul>
         </div>
       )}
     </div>

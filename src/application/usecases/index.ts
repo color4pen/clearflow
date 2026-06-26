@@ -86,3 +86,5 @@ export { updateActionItem } from "./updateActionItem";
 export { deleteActionItem } from "./deleteActionItem";
 export { listActionItemsByDeal } from "./listActionItemsByDeal";
 export { listActionItemsByMeeting } from "./listActionItemsByMeeting";
+export { listActionItems } from "./listActionItems";
+export type { ActionItemWithSource } from "./listActionItems";
