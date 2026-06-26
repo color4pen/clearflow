@@ -3,6 +3,7 @@ import {
   dealRepository,
   meetingRepository,
   inquiryRepository,
+  userRepository,
   auditLogRepository,
 } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
@@ -23,6 +24,13 @@ export async function createActionItem(data: {
   inquiryId?: string | null;
 }): Promise<CreateActionItemResult> {
   // 紐づけ先エンティティの存在確認と organizationId 一致検証
+  if (data.assigneeId) {
+    const assignee = await userRepository.findById(data.assigneeId, data.organizationId);
+    if (!assignee) {
+      return { ok: false, reason: "担当者が見つかりません" };
+    }
+  }
+
   if (data.dealId) {
     const deal = await dealRepository.findById(data.dealId, data.organizationId);
     if (!deal) {

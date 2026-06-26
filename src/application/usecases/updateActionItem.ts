@@ -3,6 +3,7 @@ import {
   dealRepository,
   meetingRepository,
   inquiryRepository,
+  userRepository,
   auditLogRepository,
 } from "@/infrastructure/repositories";
 import { db } from "@/infrastructure/db";
@@ -29,6 +30,13 @@ export async function updateActionItem(data: {
   }
 
   // 紐づけ先エンティティが変更される場合、新しい紐づけ先の存在確認 + organizationId 一致検証
+  if (data.assigneeId !== undefined && data.assigneeId !== null && data.assigneeId !== existing.assigneeId) {
+    const assignee = await userRepository.findById(data.assigneeId, data.organizationId);
+    if (!assignee) {
+      return { ok: false, reason: "担当者が見つかりません" };
+    }
+  }
+
   if (data.dealId !== undefined && data.dealId !== existing.dealId) {
     if (data.dealId !== null) {
       const deal = await dealRepository.findById(data.dealId, data.organizationId);
