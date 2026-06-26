@@ -42,6 +42,7 @@ export async function getDashboardActions(
     const dealTitle = dealId ? (dealTitleMap.get(dealId) ?? "") : "";
     items.push({
       type: "action_item",
+      id: actionItem.id,
       dealId,
       dealTitle,
       description: actionItem.description,

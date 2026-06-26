@@ -189,7 +189,7 @@ export function SalesDashboard({
                     item.type === "approval"
                       ? `approval-${item.requestId}`
                       : item.type === "action_item"
-                        ? `action-${item.dealId ?? "none"}-${item.assigneeId ?? "none"}-${item.description}`
+                        ? `action-${item.id}`
                         : `inquiry-${item.inquiryId}`;
                   return (
                     <div
