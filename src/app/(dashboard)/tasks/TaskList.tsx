@@ -118,7 +118,7 @@ export function TaskList({ items, orgUsers, currentUserId, canDelete, dealOption
         <p className="text-xs text-text-muted px-3.5 py-4">タスクはありません</p>
       ) : (
         <div>
-          <div className="grid text-table-head font-medium text-text-secondary bg-bg-table-head px-3.5 py-2" style={{ gridTemplateColumns: "24px 1fr 100px 100px 140px 80px" }}>
+          <div className="grid text-table-head font-medium text-text-secondary bg-bg-table-head px-3.5 py-2" style={{ gridTemplateColumns: "24px 1fr 100px 100px 140px 50px" }}>
             <span></span>
             <span>内容</span>
             <span>担当者</span>

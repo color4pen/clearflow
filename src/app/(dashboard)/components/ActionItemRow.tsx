@@ -115,10 +115,11 @@ export function ActionItemRow({
       loading={isPending}
       onSubmit={handleSave}
       onCancel={() => setShowEditModal(false)}
+      onDelete={canDelete ? () => setShowDeleteConfirm(true) : undefined}
     />
     <li
       className="grid items-center text-base-app px-3.5 py-2.5 hover:bg-bg-surface-alt"
-      style={{ gridTemplateColumns: showSource ? "24px 1fr 100px 100px 140px 80px" : "24px 1fr 100px 100px 80px" }}
+      style={{ gridTemplateColumns: showSource ? "24px 1fr 100px 100px 140px 50px" : "24px 1fr 100px 100px 50px" }}
     >
       <input
         type="checkbox"
@@ -153,7 +154,7 @@ export function ActionItemRow({
           )}
         </span>
       )}
-      <span className="flex gap-2 justify-end">
+      <span className="flex justify-end">
         {editable && (
           <button
             type="button"
@@ -162,16 +163,6 @@ export function ActionItemRow({
             className="text-xs text-primary underline cursor-pointer disabled:opacity-50"
           >
             編集
-          </button>
-        )}
-        {canDelete && (
-          <button
-            type="button"
-            onClick={() => setShowDeleteConfirm(true)}
-            disabled={isPending}
-            className="text-xs text-danger underline cursor-pointer disabled:opacity-50"
-          >
-            削除
           </button>
         )}
       </span>
