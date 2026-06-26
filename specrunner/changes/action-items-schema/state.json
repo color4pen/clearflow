@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "b0ee552d-18d1-4d5b-a789-b7ad86accf32",
   "createdAt": "2026-06-26T09:42:28.174Z",
-  "updatedAt": "2026-06-26T10:47:56.677Z",
+  "updatedAt": "2026-06-26T10:51:07.257Z",
   "request": {
     "title": "アクションアイテムのテーブル・モデル・リポジトリ・ユースケース新設",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/action-items-schema-b0ee552d",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/104",
+    "number": 104,
+    "createdAt": "2026-06-26T10:51:07.244Z"
+  },
   "_journal": {
-    "historyCount": 68,
+    "historyCount": 73,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -62,7 +67,9 @@
       "domain-invariants": 2,
       "custom-reviewers": 2,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
