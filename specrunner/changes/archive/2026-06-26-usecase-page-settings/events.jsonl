@@ -71,3 +71,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/usecase-page-settings/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-26T08:16:25.083Z","endedAt":"2026-06-26T08:16:26.803Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-26T08:16:26.803Z","outputs":[{"path":"specrunner/changes/usecase-page-settings/pr-create-result.md","hash":"sha256:8f7c9fffef977fdabadacdbf2770b8551c373d750f66306f64ea36d42f880105"}],"inputs":[{"path":"feat/usecase-page-settings-9bdf6e2c","hash":null}]}
 {"type":"transition","ts":"2026-06-26T08:16:26.808Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-26T08:18:01.370Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
