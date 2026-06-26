@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "9bdf6e2c-6d87-4280-ad67-f0f831457222",
   "createdAt": "2026-06-26T07:47:23.942Z",
-  "updatedAt": "2026-06-26T08:12:54.453Z",
+  "updatedAt": "2026-06-26T08:16:05.411Z",
   "request": {
     "title": "設定系ページの repository 直接呼び出しを usecase 経由に移行",
     "type": "refactor",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "conformance",
+  "step": "adr-gen",
   "status": "running",
   "branch": "feat/usecase-page-settings-9bdf6e2c",
   "error": null,
@@ -48,7 +48,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 40,
+    "historyCount": 44,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -59,7 +59,8 @@
       "code-review": 1,
       "domain-invariants": 1,
       "custom-reviewers": 1,
-      "regression-gate": 1
+      "regression-gate": 1,
+      "conformance": 1
     }
   }
 }
