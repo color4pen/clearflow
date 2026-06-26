@@ -8,7 +8,8 @@ import {
   updateActionItemAction,
   deleteActionItemAction,
 } from "@/app/actions/actionItems";
-import { Input, ConfirmDialog, useToast } from "@/app/components";
+import { ConfirmDialog, useToast } from "@/app/components";
+import { ActionItemModal } from "./ActionItemModal";
 import type { ActionItem } from "@/domain/models/actionItem";
 
 type Props = {
@@ -33,15 +34,8 @@ export function ActionItemRow({
   const router = useRouter();
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
-  const [isEditing, setIsEditing] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  // Editable field states (initialized from item)
-  const [editDescription, setEditDescription] = useState(item.description);
-  const [editAssigneeId, setEditAssigneeId] = useState(item.assigneeId ?? "");
-  const [editDueDate, setEditDueDate] = useState(
-    item.dueDate ? formatDateForInput(item.dueDate) : ""
-  );
 
   function formatDateForInput(date: Date): string {
     const y = date.getFullYear();
@@ -77,34 +71,19 @@ export function ActionItemRow({
     });
   }
 
-  function handleEditStart() {
-    setEditDescription(item.description);
-    setEditAssigneeId(item.assigneeId ?? "");
-    setEditDueDate(item.dueDate ? formatDateForInput(item.dueDate) : "");
-    setIsEditing(true);
-  }
-
-  function handleEditCancel() {
-    setIsEditing(false);
-  }
-
-  function handleSave() {
-    if (!editDescription.trim()) {
-      showToast("内容は必須です", "error");
-      return;
-    }
+  function handleSave(values: { description: string; assigneeId: string | null; dueDate: string | null }) {
     startTransition(async () => {
       const result = await updateActionItemAction({
         id: item.id,
-        description: editDescription.trim(),
-        assigneeId: editAssigneeId || null,
-        dueDate: editDueDate || null,
+        description: values.description,
+        assigneeId: values.assigneeId,
+        dueDate: values.dueDate,
       });
       if (result.message) {
         showToast(result.message, "error");
         return;
       }
-      setIsEditing(false);
+      setShowEditModal(false);
       router.refresh();
     });
   }
@@ -122,66 +101,21 @@ export function ActionItemRow({
     });
   }
 
-  if (isEditing) {
-    return (
-      <li className="text-xs space-y-1 border border-border p-2">
-        <div className="flex gap-2 items-center">
-          <label className="text-text-muted w-12 shrink-0">内容</label>
-          <Input
-            value={editDescription}
-            onChange={(e) => setEditDescription(e.target.value)}
-            disabled={isPending}
-            placeholder="アクションアイテムの内容"
-          />
-        </div>
-        <div className="flex gap-2 items-center">
-          <label className="text-text-muted w-12 shrink-0">担当者</label>
-          <select
-            value={editAssigneeId}
-            onChange={(e) => setEditAssigneeId(e.target.value)}
-            disabled={isPending}
-            className="text-xs border border-border px-2 py-1 flex-1 bg-bg-page text-text"
-          >
-            <option value="">未設定</option>
-            {orgUsers.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex gap-2 items-center">
-          <label className="text-text-muted w-12 shrink-0">期日</label>
-          <Input
-            type="date"
-            value={editDueDate}
-            onChange={(e) => setEditDueDate(e.target.value)}
-            disabled={isPending}
-          />
-        </div>
-        <div className="flex gap-2 mt-1">
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={isPending}
-            className="text-xs font-bold px-3 py-1 bg-green-600 text-white cursor-pointer disabled:opacity-50"
-          >
-            {isPending ? "保存中..." : "保存"}
-          </button>
-          <button
-            type="button"
-            onClick={handleEditCancel}
-            disabled={isPending}
-            className="text-xs font-bold px-3 py-1 bg-bg-toolbar border border-border text-text cursor-pointer disabled:opacity-50"
-          >
-            キャンセル
-          </button>
-        </div>
-      </li>
-    );
-  }
-
   return (
+    <>
+    <ActionItemModal
+      open={showEditModal}
+      title="アクションアイテムを編集"
+      orgUsers={orgUsers}
+      defaultValues={{
+        description: item.description,
+        assigneeId: item.assigneeId ?? "",
+        dueDate: item.dueDate ? formatDateForInput(item.dueDate) : "",
+      }}
+      loading={isPending}
+      onSubmit={handleSave}
+      onCancel={() => setShowEditModal(false)}
+    />
     <li className="flex gap-2 items-start text-xs">
       <input
         type="checkbox"
@@ -221,7 +155,7 @@ export function ActionItemRow({
       {editable && (
         <button
           type="button"
-          onClick={handleEditStart}
+          onClick={() => setShowEditModal(true)}
           disabled={isPending}
           className="text-xs text-primary underline shrink-0 cursor-pointer disabled:opacity-50"
         >
@@ -250,5 +184,6 @@ export function ActionItemRow({
         </>
       )}
     </li>
+    </>
   );
 }
