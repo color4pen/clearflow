@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { dealRepository } from "@/infrastructure/repositories";
+import { getDeal } from "@/application/usecases";
 import { NewContractForm } from "./NewContractForm";
 
 export default async function NewContractPage({
@@ -17,7 +17,7 @@ export default async function NewContractPage({
   const session = await auth();
   const organizationId = session!.user.organizationId;
 
-  const deal = await dealRepository.findById(dealId, organizationId);
+  const deal = await getDeal(dealId, organizationId);
   if (!deal) {
     notFound();
   }

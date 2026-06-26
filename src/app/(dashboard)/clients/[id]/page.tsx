@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { clientRepository, inquiryRepository, dealRepository, contractRepository } from "@/infrastructure/repositories";
+import { getClient, listClientContacts, listInquiriesByClient, listDealsByClient, listContractsByClient } from "@/application/usecases";
 import { SectionCard, DataTable } from "@/app/components";
 import { statusLabels, sourceLabels, phaseLabels, contractTypeLabels, contractStatusLabels } from "@/app/(dashboard)/labels";
 import { ClientInfoSection } from "./ClientInfoSection";
@@ -20,11 +20,11 @@ export default async function ClientDetailPage({
 
   const [client, contacts, relatedInquiries, relatedDeals, relatedContracts] =
     await Promise.all([
-      clientRepository.findById(id, organizationId),
-      clientRepository.findContactsByClientId(id),
-      inquiryRepository.findByClientId(id, organizationId),
-      dealRepository.findAllByClientId(id, organizationId),
-      contractRepository.findAllByClientId(id, organizationId),
+      getClient(id, organizationId),
+      listClientContacts(id),
+      listInquiriesByClient(id, organizationId),
+      listDealsByClient(id, organizationId),
+      listContractsByClient(id, organizationId),
     ]);
 
   if (!client) {

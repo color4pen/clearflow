@@ -1,6 +1,5 @@
 import { auth } from "@/infrastructure/auth";
-import { clientRepository } from "@/infrastructure/repositories";
-import { listOrganizationUsers } from "@/application/usecases";
+import { listOrganizationUsers, listClients } from "@/application/usecases";
 import { NewDealForm } from "./NewDealForm";
 import { PageToolbar } from "@/app/components";
 import type { Client } from "@/domain/models/client";
@@ -17,7 +16,7 @@ export default async function NewDealPage({
   // 引き合いなし（直接作成）の場合のみ顧客一覧を取得する
   let clients: Client[] = [];
   if (!inquiryId) {
-    clients = await clientRepository.findAllByOrganization(organizationId);
+    clients = await listClients(organizationId);
   }
 
   const allUsers = await listOrganizationUsers({ organizationId });

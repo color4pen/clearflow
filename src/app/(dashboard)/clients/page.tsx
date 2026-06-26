@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { listClients } from "@/application/usecases";
-import { dealRepository } from "@/infrastructure/repositories";
+import { listClients, listDeals } from "@/application/usecases";
 import { PageToolbar, ToolbarActions, DataTable } from "@/app/components";
 
 export default async function ClientsPage() {
@@ -11,7 +10,7 @@ export default async function ClientsPage() {
   const clients = await listClients(organizationId);
 
   // 案件数を一括取得して JS で集計（N+1 回避）
-  const allDeals = await dealRepository.findAllByOrganization(organizationId);
+  const allDeals = await listDeals(organizationId);
 
   const dealCountMap = new Map<string, number>();
   for (const deal of allDeals) {

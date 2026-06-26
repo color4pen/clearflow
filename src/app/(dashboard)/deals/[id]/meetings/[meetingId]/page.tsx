@@ -1,8 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { meetingRepository, dealRepository, clientRepository } from "@/infrastructure/repositories";
-import { listOrganizationUsers } from "@/application/usecases";
+import { listOrganizationUsers, getMeeting, getDeal, listClientContacts } from "@/application/usecases";
 import { SectionCard } from "@/app/components";
 import { meetingTypeLabels } from "@/app/(dashboard)/labels";
 import { MeetingInfoSection } from "./MeetingInfoSection";
@@ -20,7 +19,7 @@ export default async function DealMeetingDetailPage({
   const session = await auth();
   const organizationId = session!.user.organizationId;
 
-  const meeting = await meetingRepository.findById(meetingId, organizationId);
+  const meeting = await getMeeting(meetingId, organizationId);
   if (!meeting) {
     notFound();
   }
@@ -29,10 +28,10 @@ export default async function DealMeetingDetailPage({
     notFound();
   }
 
-  const deal = await dealRepository.findById(id, organizationId);
+  const deal = await getDeal(id, organizationId);
   const [users, contacts] = await Promise.all([
     listOrganizationUsers({ organizationId }),
-    deal?.clientId ? clientRepository.findContactsByClientId(deal.clientId) : Promise.resolve([]),
+    deal?.clientId ? listClientContacts(deal.clientId) : Promise.resolve([]),
   ]);
 
   const editable =
