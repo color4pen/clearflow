@@ -219,6 +219,20 @@
       },
       "jobId": "109dc74a-af9b-456f-a158-03d94810bfea",
       "stepName": "conformance"
+    },
+    {
+      "command": "job",
+      "timestamp": "2026-06-26T08:30:53.853Z",
+      "modelUsage": {
+        "claude-sonnet-4-6": {
+          "inputTokens": 3,
+          "outputTokens": 60,
+          "cacheReadInputTokens": 7567,
+          "cacheCreationInputTokens": 4670
+        }
+      },
+      "jobId": "109dc74a-af9b-456f-a158-03d94810bfea",
+      "stepName": "adr-gen"
     }
   ]
 }

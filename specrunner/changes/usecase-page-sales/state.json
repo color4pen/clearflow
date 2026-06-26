@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "109dc74a-af9b-456f-a158-03d94810bfea",
   "createdAt": "2026-06-26T07:47:00.787Z",
-  "updatedAt": "2026-06-26T08:30:33.381Z",
+  "updatedAt": "2026-06-26T08:30:56.926Z",
   "request": {
     "title": "営業系ページの repository 直接呼び出しを usecase 経由に移行",
     "type": "refactor",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/usecase-page-sales-109dc74a",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/103",
+    "number": 103,
+    "createdAt": "2026-06-26T08:30:56.912Z"
+  },
   "_journal": {
-    "historyCount": 52,
+    "historyCount": 57,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -61,7 +66,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
