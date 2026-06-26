@@ -9,6 +9,7 @@
 - 2 ファイルが `src/application/usecases/` に存在する
 - 各関数は repository メソッドの 1 行ラッパーである
 - 型 import は `@/domain/models/client` から行っている
+- `listClientContacts.ts` の関数定義直前に、repository JSDoc と同等のテナント分離前提を記す JSDoc コメントを追加すること（例: `/** @note organizationId を引数に取らない。呼び出し前に getClient 等でテナント検証を完了させること。 */`）
 - `bun run build` が通る
 
 ---
@@ -183,16 +184,25 @@
 
 対象: `src/app/(dashboard)/contracts/[id]/page.tsx`
 
+> **注意**: このファイルには既に `let hasPendingApproval = false;` というローカル変数が存在する（line 31/33/48 付近）。
+> `hasPendingApproval` という名前の usecase を import すると TypeScript strict モードで名前衝突によるコンパイルエラーが発生するため、
+> **import 追加より先にローカル変数をリネームすること**。
+
+- [ ] ローカル変数 `hasPendingApproval` を `isPending` にリネームする:
+  - `let hasPendingApproval = false;` → `let isPending = false;`
+  - `hasPendingApproval = await requestRepository.existsPendingByTriggerEntityId(organizationId, id);` → `isPending = await requestRepository.existsPendingByTriggerEntityId(organizationId, id);`
+  - JSX 内の `{hasPendingApproval && (` → `{isPending && (`
 - [ ] `import { contractRepository, invoiceRepository, requestRepository } from "@/infrastructure/repositories"` を削除する
 - [ ] `import { getContract, listInvoicesByContract, hasPendingApproval } from "@/application/usecases"` を追加する
 - [ ] `contractRepository.findById(id, organizationId)` → `getContract({ contractId: id, organizationId })` に置き換え（既存 usecase は object args）
 - [ ] `invoiceRepository.findAllByContract(id, organizationId)` → `listInvoicesByContract({ contractId: id, organizationId })` に置き換え（既存 usecase は object args）
-- [ ] `requestRepository.existsPendingByTriggerEntityId(organizationId, id)` → `hasPendingApproval(organizationId, id)` に置き換え
+- [ ] `requestRepository.existsPendingByTriggerEntityId(organizationId, id)` の呼び出し（`isPending =` の右辺）→ `hasPendingApproval(organizationId, id)` に置き換え
 
 **Acceptance Criteria**:
 - `@/infrastructure/repositories` からの import がファイルに存在しない
 - 3 つの usecase が `@/application/usecases` から import されている
 - `getContract`, `listInvoicesByContract` の呼び出しが object args 形式に変更されている
+- ローカル変数が `isPending` にリネームされており、`hasPendingApproval` という識別子がローカル変数として存在しない
 - `bun run build` が通る
 
 ---
