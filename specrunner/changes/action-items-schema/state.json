@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "b0ee552d-18d1-4d5b-a789-b7ad86accf32",
   "createdAt": "2026-06-26T09:42:28.174Z",
-  "updatedAt": "2026-06-26T09:42:30.142Z",
+  "updatedAt": "2026-06-26T09:46:36.938Z",
   "request": {
     "title": "アクションアイテムのテーブル・モデル・リポジトリ・ユースケース新設",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "request-review",
+  "step": "design",
   "status": "running",
   "branch": "feat/action-items-schema-b0ee552d",
   "error": null,
@@ -34,7 +34,9 @@
     }
   ],
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 5,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
