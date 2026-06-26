@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "109dc74a-af9b-456f-a158-03d94810bfea",
   "createdAt": "2026-06-26T07:47:00.787Z",
-  "updatedAt": "2026-06-26T07:47:03.006Z",
+  "updatedAt": "2026-06-26T07:51:52.315Z",
   "request": {
     "title": "営業系ページの repository 直接呼び出しを usecase 経由に移行",
     "type": "refactor",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "request-review",
+  "step": "design",
   "status": "running",
   "branch": "feat/usecase-page-sales-109dc74a",
   "error": null,
@@ -34,7 +34,9 @@
     }
   ],
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 5,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
