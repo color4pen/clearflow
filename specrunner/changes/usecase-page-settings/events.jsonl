@@ -63,3 +63,11 @@
 {"type":"transition","ts":"2026-06-26T08:16:05.409Z","step":"conformance","status":"ok","message":"conformance iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-26T08:16:05.409Z","step":"step-transition","status":"ok","message":"conformance → adr-gen"}
 {"type":"transition","ts":"2026-06-26T08:16:05.411Z","step":"adr-gen-started","status":"started","message":"Starting adr-gen step"}
+{"type":"transition","ts":"2026-06-26T08:16:25.069Z","step":"adr-gen-verdict","status":"ok","message":"adr-gen verdict: success"}
+{"type":"step-attempt","step":"adr-gen","sessionId":"a9f21582-9465-422e-8c04-95bfab6317d1","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-26T08:16:05.419Z","endedAt":"2026-06-26T08:16:23.845Z"}
+{"type":"transition","ts":"2026-06-26T08:16:25.077Z","step":"step-transition","status":"ok","message":"adr-gen → pr-create"}
+{"type":"transition","ts":"2026-06-26T08:16:25.082Z","step":"step-transition","status":"ok","message":"Transitioning to pr-create step"}
+{"type":"transition","ts":"2026-06-26T08:16:26.803Z","step":"pr-create-verdict","status":"ok","message":"pr-create verdict: success"}
+{"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/usecase-page-settings/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-26T08:16:25.083Z","endedAt":"2026-06-26T08:16:26.803Z"}
+{"type":"lineage","step":"pr-create","ts":"2026-06-26T08:16:26.803Z","outputs":[{"path":"specrunner/changes/usecase-page-settings/pr-create-result.md","hash":"sha256:8f7c9fffef977fdabadacdbf2770b8551c373d750f66306f64ea36d42f880105"}],"inputs":[{"path":"feat/usecase-page-settings-9bdf6e2c","hash":null}]}
+{"type":"transition","ts":"2026-06-26T08:16:26.808Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
