@@ -63,3 +63,7 @@ export { updatePolicy } from "./updatePolicy";
 export { togglePolicy } from "./togglePolicy";
 export { getInquiry } from "./getInquiry";
 export { getActiveDelegationsForUser } from "./getActiveDelegationsForUser";
+export { listAuditLogs } from "./listAuditLogs";
+export { listApprovalTemplates } from "./listApprovalTemplates";
+export { getApprovalTemplate } from "./getApprovalTemplate";
+export { getApprovalPolicy } from "./getApprovalPolicy";

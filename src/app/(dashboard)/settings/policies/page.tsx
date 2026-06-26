@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { canPerform } from "@/domain/authorization";
-import { approvalTemplateRepository } from "@/infrastructure/repositories";
+import { listApprovalTemplates } from "@/application/usecases";
 import { listPoliciesAction, togglePolicyAction } from "@/app/actions/policies";
 import { PageToolbar, DataTable, SectionCard } from "@/app/components";
 import { getTriggerActionLabel, formatCondition } from "./constants";
@@ -20,7 +20,7 @@ export default async function PoliciesPage() {
 
   const [policiesResult, templates] = await Promise.all([
     listPoliciesAction(),
-    approvalTemplateRepository.findByOrganization(session.user.organizationId),
+    listApprovalTemplates({ organizationId: session.user.organizationId }),
   ]);
   const policies = policiesResult.success ? (policiesResult.policies ?? []) : [];
 

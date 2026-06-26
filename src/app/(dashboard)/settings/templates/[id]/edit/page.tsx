@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
-import { approvalTemplateRepository } from "@/infrastructure/repositories";
+import { getApprovalTemplate } from "@/application/usecases";
 import { TemplateForm } from "../../TemplateForm";
 
 export default async function EditTemplatePage({
@@ -14,10 +14,10 @@ export default async function EditTemplatePage({
   }
 
   const { id } = await params;
-  const template = await approvalTemplateRepository.findById(
-    id,
-    session.user.organizationId
-  );
+  const template = await getApprovalTemplate({
+    templateId: id,
+    organizationId: session.user.organizationId,
+  });
 
   if (!template) {
     notFound();

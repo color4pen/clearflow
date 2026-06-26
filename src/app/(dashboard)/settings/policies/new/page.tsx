@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
 import { canPerform } from "@/domain/authorization";
-import { approvalTemplateRepository } from "@/infrastructure/repositories";
+import { listApprovalTemplates } from "@/application/usecases";
 import { PolicyForm } from "../PolicyForm";
 
 export default async function NewPolicyPage() {
@@ -13,9 +13,9 @@ export default async function NewPolicyPage() {
     redirect("/requests");
   }
 
-  const templates = await approvalTemplateRepository.findByOrganization(
-    session.user.organizationId
-  );
+  const templates = await listApprovalTemplates({
+    organizationId: session.user.organizationId,
+  });
 
   return (
     <div>
