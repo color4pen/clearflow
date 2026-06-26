@@ -77,14 +77,14 @@ describe("TC-020: 監査ログページ — 操作者フィルタ", () => {
     expect(src).toContain("searchParams");
   });
 
-  it("actorId を auditLogRepository.findByOrganization に渡す", async () => {
+  it("actorId を listAuditLogs に渡す", async () => {
     const src = await readSrc("app/(dashboard)/settings/audit-logs/page.tsx");
-    expect(src).toContain("findByOrganization");
-    const fnIdx = src.indexOf("findByOrganization");
+    expect(src).toContain("listAuditLogs");
+    const fnIdx = src.indexOf("listAuditLogs");
     const afterFn = src.slice(fnIdx);
-    // findByOrganization の呼び出しに actorId が含まれる
-    const callEnd = afterFn.indexOf(")");
-    expect(afterFn.slice(0, callEnd + 1)).toContain("actorId");
+    // listAuditLogs の呼び出しに actorId が含まれる
+    const callEnd = afterFn.indexOf("])");
+    expect(afterFn.slice(0, callEnd + 2)).toContain("actorId");
   });
 
   it("操作者フィルタ UI（Select）が actorId name 属性で存在する", async () => {
@@ -110,12 +110,12 @@ describe("TC-021: 監査ログページ — 対象種別フィルタ", () => {
     expect(src).toContain("searchParams");
   });
 
-  it("targetType を auditLogRepository.findByOrganization に渡す", async () => {
+  it("targetType を listAuditLogs に渡す", async () => {
     const src = await readSrc("app/(dashboard)/settings/audit-logs/page.tsx");
-    const fnIdx = src.indexOf("findByOrganization");
+    const fnIdx = src.indexOf("listAuditLogs");
     const afterFn = src.slice(fnIdx);
-    const callEnd = afterFn.indexOf(")");
-    expect(afterFn.slice(0, callEnd + 1)).toContain("targetType");
+    const callEnd = afterFn.indexOf("])");
+    expect(afterFn.slice(0, callEnd + 2)).toContain("targetType");
   });
 
   it("対象種別フィルタ UI（Select）が targetType name 属性で存在する", async () => {

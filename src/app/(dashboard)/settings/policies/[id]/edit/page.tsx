@@ -1,10 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
 import { canPerform } from "@/domain/authorization";
-import {
-  approvalPolicyRepository,
-  approvalTemplateRepository,
-} from "@/infrastructure/repositories";
+import { getApprovalPolicy, listApprovalTemplates } from "@/application/usecases";
 import { PolicyForm } from "../../PolicyForm";
 
 export default async function EditPolicyPage({
@@ -22,8 +19,8 @@ export default async function EditPolicyPage({
 
   const { id } = await params;
   const [policy, templates] = await Promise.all([
-    approvalPolicyRepository.findById(id, session.user.organizationId),
-    approvalTemplateRepository.findByOrganization(session.user.organizationId),
+    getApprovalPolicy({ policyId: id, organizationId: session.user.organizationId }),
+    listApprovalTemplates({ organizationId: session.user.organizationId }),
   ]);
 
   if (!policy) {

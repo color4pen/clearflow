@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
-import { auditLogRepository } from "@/infrastructure/repositories";
-import { listOrganizationUsers } from "@/application/usecases";
+import { listAuditLogs, listOrganizationUsers } from "@/application/usecases";
 import { PageToolbar, DataTable, SectionCard } from "@/app/components";
 import { AuditLogFilter } from "./AuditLogFilter";
 
@@ -68,14 +67,17 @@ export default async function AuditLogsPage({
   const targetType = targetTypeStr || undefined;
 
   const [logs, orgUsers] = await Promise.all([
-    auditLogRepository.findByOrganization(session.user.organizationId, {
-      limit: LIMIT,
-      offset,
-      startDate,
-      endDate,
-      action,
-      actorId,
-      targetType,
+    listAuditLogs({
+      organizationId: session.user.organizationId,
+      filters: {
+        limit: LIMIT,
+        offset,
+        startDate,
+        endDate,
+        action,
+        actorId,
+        targetType,
+      },
     }),
     listOrganizationUsers({ organizationId: session.user.organizationId }),
   ]);
