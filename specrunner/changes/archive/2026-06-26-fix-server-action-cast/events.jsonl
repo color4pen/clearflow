@@ -70,3 +70,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/fix-server-action-cast/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-26T08:11:57.213Z","endedAt":"2026-06-26T08:11:58.726Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-26T08:11:58.726Z","outputs":[{"path":"specrunner/changes/fix-server-action-cast/pr-create-result.md","hash":"sha256:e48f384f63f70854dcf97e6aafa9770e227ba718d812a8f3a539df970ea85723"}],"inputs":[{"path":"feat/fix-server-action-cast-ad5233f4","hash":null}]}
 {"type":"transition","ts":"2026-06-26T08:11:58.739Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-26T08:13:35.968Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
