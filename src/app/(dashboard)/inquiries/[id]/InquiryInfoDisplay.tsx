@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkBreaks from "remark-breaks";
 import { sourceLabels } from "@/app/(dashboard)/labels";
 import { InquiryInfoSection } from "./InquiryInfoSection";
 
@@ -16,6 +18,17 @@ type Props = {
     status: string;
   };
   editable: boolean;
+};
+
+type MdProps = { children?: React.ReactNode };
+
+const mdComponents = {
+  p: ({ children }: MdProps) => <p className="leading-relaxed mb-1">{children}</p>,
+  ul: ({ children }: MdProps) => <ul className="list-disc pl-4 mb-1">{children}</ul>,
+  ol: ({ children }: MdProps) => <ol className="list-decimal pl-4 mb-1">{children}</ol>,
+  li: ({ children }: MdProps) => <li className="leading-relaxed">{children}</li>,
+  strong: ({ children }: MdProps) => <strong className="font-bold">{children}</strong>,
+  a: ({ href, children }: MdProps & { href?: string }) => <a href={href} className="text-primary underline">{children}</a>,
 };
 
 export function InquiryInfoDisplay({ inquiry, editable }: Props) {
@@ -69,13 +82,21 @@ export function InquiryInfoDisplay({ inquiry, editable }: Props) {
         </div>
 
         <div className="text-text-muted py-1">問い合わせ内容</div>
-        <div className="text-text py-1 whitespace-pre-wrap">
-          {inquiry.contactNote ?? "-"}
+        <div className="text-text py-1">
+          {inquiry.contactNote ? (
+            <ReactMarkdown remarkPlugins={[remarkBreaks]} components={mdComponents}>
+              {inquiry.contactNote}
+            </ReactMarkdown>
+          ) : "-"}
         </div>
 
         <div className="text-text-muted py-1">概要</div>
-        <div className="text-text py-1 whitespace-pre-wrap">
-          {inquiry.description ?? "-"}
+        <div className="text-text py-1">
+          {inquiry.description ? (
+            <ReactMarkdown remarkPlugins={[remarkBreaks]} components={mdComponents}>
+              {inquiry.description}
+            </ReactMarkdown>
+          ) : "-"}
         </div>
       </div>
     </div>

@@ -142,9 +142,9 @@ FieldType: text | number | date | textarea | select
 | organizationId | ID | Yes | テナント識別子 |
 | templateId | ID | Yes | 元となったテンプレート |
 | title | string | Yes | 承認リクエストの件名 |
-| applicantId | ID | Yes | 申請者 |
+| creatorId | ID | Yes | 申請者 |
 | status | RequestStatus | Yes | 承認リクエストの状態 |
-| formData | FormData | No | 申請時の入力データ |
+| formData | FormData | Yes | 申請時の入力データ（デフォルト: 空オブジェクト） |
 | origin | RequestOrigin | Yes | 起動パターン（手動 or システム連動） |
 | createdAt | datetime | Yes | |
 
@@ -194,10 +194,10 @@ draft | pending | approved | rejected | revision | expired
 | approverRole | Role | No | 承認者ロール |
 | approverId | ID | No | 承認者ユーザー |
 | status | StepStatus | Yes | ステップの状態 |
-| actorId | ID | No | 実際に承認/却下したユーザー |
+| approvedBy | ID | No | 実際に承認/却下したユーザー |
 | comment | string | No | 承認/却下時のコメント |
 | deadline | datetime | No | 承認期限 |
-| decidedAt | datetime | No | 承認/却下の日時 |
+| approvedAt | datetime | No | 承認/却下の日時 |
 
 ```
 StepStatus: pending | approved | rejected

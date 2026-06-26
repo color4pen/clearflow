@@ -93,7 +93,13 @@ export function InquiryInfoSection({ inquiry, editable, onSaved }: Props) {
         <div className="flex gap-2">
           <dt className="text-text-muted w-20 shrink-0">問い合わせ内容</dt>
           <dd className="text-text flex-1">
-            <Textarea name="contactNote" defaultValue={inquiry.contactNote ?? ""} disabled={!editable} rows={6} onChange={markDirty} />
+            <MarkdownTextarea
+              name="contactNote"
+              defaultValue={inquiry.contactNote ?? ""}
+              disabled={!editable}
+              rows={6}
+              onChange={markDirty}
+            />
           </dd>
         </div>
         <div className="flex gap-2">

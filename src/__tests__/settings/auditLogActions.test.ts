@@ -88,7 +88,7 @@ describe("TC-020: 監査ログページ — 操作者フィルタ", () => {
   });
 
   it("操作者フィルタ UI（Select）が actorId name 属性で存在する", async () => {
-    const src = await readSrc("app/(dashboard)/settings/audit-logs/page.tsx");
+    const src = await readSrc("app/(dashboard)/settings/audit-logs/AuditLogFilter.tsx");
     expect(src).toContain('name="actorId"');
   });
 
@@ -119,7 +119,7 @@ describe("TC-021: 監査ログページ — 対象種別フィルタ", () => {
   });
 
   it("対象種別フィルタ UI（Select）が targetType name 属性で存在する", async () => {
-    const src = await readSrc("app/(dashboard)/settings/audit-logs/page.tsx");
+    const src = await readSrc("app/(dashboard)/settings/audit-logs/AuditLogFilter.tsx");
     expect(src).toContain('name="targetType"');
   });
 

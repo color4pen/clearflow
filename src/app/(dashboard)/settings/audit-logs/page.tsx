@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
 import { auditLogRepository } from "@/infrastructure/repositories";
 import { listOrganizationUsers } from "@/application/usecases";
-import { PageToolbar, DataTable, SectionCard, FormField, Input, Select } from "@/app/components";
+import { PageToolbar, DataTable, SectionCard } from "@/app/components";
+import { AuditLogFilter } from "./AuditLogFilter";
 
 const LIMIT = 50;
 
@@ -123,76 +124,16 @@ export default async function AuditLogsPage({
       />
 
       {/* フィルタ */}
-      <form method="get" className="bg-bg-toolbar border border-border border-t-0 px-2 py-1 mb-0">
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-4 items-end">
-          <FormField label="操作者" htmlFor="actorId">
-            <Select
-              id="actorId"
-              name="actorId"
-              defaultValue={actorIdStr ?? ""}
-            >
-              <option value="">すべて</option>
-              {orgUsers.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
-              ))}
-            </Select>
-          </FormField>
-          <FormField label="操作種別" htmlFor="action">
-            <Select
-              id="action"
-              name="action"
-              defaultValue={actionStr ?? ""}
-            >
-              {ACTION_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </Select>
-          </FormField>
-          <FormField label="対象種別" htmlFor="targetType">
-            <Select
-              id="targetType"
-              name="targetType"
-              defaultValue={targetTypeStr ?? ""}
-            >
-              {TARGET_TYPE_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </Select>
-          </FormField>
-          <div className="grid grid-cols-2 gap-1">
-            <FormField label="開始日" htmlFor="startDate">
-              <Input
-                type="date"
-                id="startDate"
-                name="startDate"
-                defaultValue={startDateStr ?? ""}
-              />
-            </FormField>
-            <FormField label="終了日" htmlFor="endDate">
-              <Input
-                type="date"
-                id="endDate"
-                name="endDate"
-                defaultValue={endDateStr ?? ""}
-              />
-            </FormField>
-          </div>
-        </div>
-        <div className="flex justify-end mt-1">
-          <button
-            type="submit"
-            className="text-primary underline text-xs"
-          >
-            フィルタ
-          </button>
-        </div>
-      </form>
+      <AuditLogFilter
+        orgUsers={orgUsers.map((u) => ({ id: u.id, name: u.name }))}
+        actorId={actorIdStr ?? undefined}
+        action={actionStr ?? undefined}
+        targetType={targetTypeStr ?? undefined}
+        startDate={startDateStr ?? undefined}
+        endDate={endDateStr ?? undefined}
+        actionOptions={ACTION_OPTIONS}
+        targetTypeOptions={TARGET_TYPE_OPTIONS}
+      />
 
       {/* テーブル */}
       <div className="border-t-0">

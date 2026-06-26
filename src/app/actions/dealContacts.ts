@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
 import { addDealContact, removeDealContact } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
+import { canPerform } from "@/domain/authorization";
 import type { ActionResult } from "./requests";
 
 const addDealContactSchema = z.object({
@@ -23,6 +24,10 @@ export async function addDealContactAction(
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
+  }
+
+  if (!canPerform(session.user.role, "deal", "manageContacts")) {
+    return { success: false, message: "権限がありません" };
   }
 
   const rateCheck = await checkRateLimit({
@@ -69,6 +74,10 @@ export async function removeDealContactAction(
   const session = await auth();
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
+  }
+
+  if (!canPerform(session.user.role, "deal", "manageContacts")) {
+    return { success: false, message: "権限がありません" };
   }
 
   const rateCheck = await checkRateLimit({
