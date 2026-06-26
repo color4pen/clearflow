@@ -24,7 +24,7 @@ export default async function ContractDetailPage({
   }
 
   const canManage =
-    session!.user.role === "admin" || session!.user.role === "manager";
+    session!.user.role === "admin" || session!.user.role === "manager" || session!.user.role === "finance";
   const isTerminal = contract.status === "completed" || contract.status === "cancelled";
 
   const invoices = await listInvoicesByContract({ contractId: id, organizationId });

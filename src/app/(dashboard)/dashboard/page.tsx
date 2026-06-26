@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
-import { getDashboardActions, getPipelineSummary, getRecentActivities, listInvoicesByOrganization, listOrganizationUsers } from "@/application/usecases";
+import { getDashboardActions, getPipelineSummary, getRecentActivities, listInvoicesByOrganization, listOrganizationUsers, getContract } from "@/application/usecases";
 import { SalesDashboard } from "./SalesDashboard";
 import { FinanceDashboard } from "./FinanceDashboard";
 
@@ -40,12 +40,23 @@ export default async function DashboardPage() {
 
     const monthlySalesTotal = paidInvoices.reduce((sum, inv) => sum + inv.amount, 0);
 
+    const allInvoices = [...overdueInvoices, ...unpaidInvoices, ...upcomingInvoices];
+    const contractIds = [...new Set(allInvoices.map((inv) => inv.contractId))];
+    const contracts = await Promise.all(
+      contractIds.map((id) => getContract({ contractId: id, organizationId }))
+    );
+    const contractMap: Record<string, string> = {};
+    for (const c of contracts) {
+      if (c) contractMap[c.id] = c.title;
+    }
+
     return (
       <FinanceDashboard
         overdueInvoices={overdueInvoices}
         unpaidInvoices={unpaidInvoices}
         monthlySalesTotal={monthlySalesTotal}
         upcomingInvoices={upcomingInvoices}
+        contractMap={contractMap}
       />
     );
   }

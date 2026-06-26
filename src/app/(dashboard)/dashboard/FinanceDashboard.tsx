@@ -10,6 +10,7 @@ type Props = {
   unpaidInvoices: Invoice[];
   monthlySalesTotal: number;
   upcomingInvoices: Invoice[];
+  contractMap: Record<string, string>;
 };
 
 function formatDate(date: Date | null): string {
@@ -30,6 +31,7 @@ export function FinanceDashboard({
   unpaidInvoices,
   monthlySalesTotal,
   upcomingInvoices,
+  contractMap,
 }: Props) {
   const today = new Date().toLocaleDateString("ja-JP", {
     year: "numeric",
@@ -119,7 +121,7 @@ export function FinanceDashboard({
                         href={`/contracts/${inv.contractId}`}
                         className="text-primary underline"
                       >
-                        {inv.contractId.slice(0, 8)}
+                        {contractMap[inv.contractId] ?? inv.contractId.slice(0, 8)}
                       </Link>
                     </div>
                     <div className="text-xs font-mono text-right">
@@ -165,7 +167,7 @@ export function FinanceDashboard({
                         href={`/contracts/${inv.contractId}`}
                         className="text-2xs text-text-muted underline"
                       >
-                        {inv.contractId.slice(0, 8)}
+                        {contractMap[inv.contractId] ?? inv.contractId.slice(0, 8)}
                       </Link>
                     </div>
                     <div className="shrink-0 text-right">
@@ -207,7 +209,7 @@ export function FinanceDashboard({
                         href={`/contracts/${inv.contractId}`}
                         className="text-2xs text-text-muted underline"
                       >
-                        {inv.contractId.slice(0, 8)}
+                        {contractMap[inv.contractId] ?? inv.contractId.slice(0, 8)}
                       </Link>
                     </div>
                     <div className="shrink-0 text-right">

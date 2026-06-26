@@ -3,8 +3,9 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createActionItemAction } from "@/app/actions/actionItems";
-import { Input } from "@/app/components";
+import { useToast } from "@/app/components";
 import { ActionItemRow } from "@/app/(dashboard)/components/ActionItemRow";
+import { ActionItemModal } from "@/app/(dashboard)/components/ActionItemModal";
 import type { ActionItem } from "@/domain/models/actionItem";
 
 type Props = {
@@ -17,54 +18,51 @@ type Props = {
 export function DealActionItemsSection({ actionItems, dealId, orgUsers, editable }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [newDescription, setNewDescription] = useState("");
-  const [newAssigneeId, setNewAssigneeId] = useState("");
-  const [newDueDate, setNewDueDate] = useState("");
-  const [addError, setAddError] = useState<string | null>(null);
+  const { showToast } = useToast();
+  const [showAddModal, setShowAddModal] = useState(false);
 
-  function handleAdd() {
-    if (!newDescription.trim()) {
-      setAddError("内容は必須です");
-      return;
-    }
-    setAddError(null);
-
+  function handleAdd(values: { description: string; assigneeId: string | null; dueDate: string | null }) {
     startTransition(async () => {
       const result = await createActionItemAction({
-        description: newDescription.trim(),
-        assigneeId: newAssigneeId || undefined,
-        dueDate: newDueDate || undefined,
+        description: values.description,
+        assigneeId: values.assigneeId ?? undefined,
+        dueDate: values.dueDate ?? undefined,
         dealId,
       });
       if (result.message) {
-        setAddError(result.message);
+        showToast(result.message, "error");
         return;
       }
-      setNewDescription("");
-      setNewAssigneeId("");
-      setNewDueDate("");
-      setShowAddForm(false);
+      setShowAddModal(false);
       router.refresh();
     });
   }
 
   return (
     <div>
+      <ActionItemModal
+        open={showAddModal}
+        title="アクションアイテムを追加"
+        orgUsers={orgUsers}
+        loading={isPending}
+        onSubmit={handleAdd}
+        onCancel={() => setShowAddModal(false)}
+      />
+
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-xs font-bold text-text">アクションアイテム</h2>
-        {editable && !showAddForm && (
+        {editable && (
           <button
             type="button"
-            onClick={() => setShowAddForm(true)}
-            className="text-xs font-bold px-3 py-1 bg-green-600 text-white cursor-pointer"
+            onClick={() => setShowAddModal(true)}
+            className="text-xs font-medium px-3 py-1.5 bg-primary text-white rounded cursor-pointer"
           >
             追加
           </button>
         )}
       </div>
 
-      {actionItems.length === 0 && !showAddForm && (
+      {actionItems.length === 0 && (
         <p className="text-xs text-text-muted">アクションアイテムはありません</p>
       )}
 
@@ -81,70 +79,6 @@ export function DealActionItemsSection({ actionItems, dealId, orgUsers, editable
             />
           ))}
         </ul>
-      )}
-
-      {showAddForm && (
-        <div className="mt-2 border border-border p-2 space-y-1" onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}>
-          {addError && <p className="text-danger text-xs">{addError}</p>}
-          <div className="flex gap-2 items-center">
-            <label className="text-xs text-text-muted w-16 shrink-0">内容</label>
-            <Input
-              value={newDescription}
-              onChange={(e) => setNewDescription(e.target.value)}
-              placeholder="アクションアイテムの内容"
-              disabled={isPending}
-            />
-          </div>
-          <div className="flex gap-2 items-center">
-            <label className="text-xs text-text-muted w-16 shrink-0">担当者</label>
-            <select
-              value={newAssigneeId}
-              onChange={(e) => setNewAssigneeId(e.target.value)}
-              disabled={isPending}
-              className="text-xs border border-border px-2 py-1 flex-1 bg-bg-page text-text"
-            >
-              <option value="">未設定</option>
-              {orgUsers.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="flex gap-2 items-center">
-            <label className="text-xs text-text-muted w-16 shrink-0">期日</label>
-            <Input
-              type="date"
-              value={newDueDate}
-              onChange={(e) => setNewDueDate(e.target.value)}
-              disabled={isPending}
-            />
-          </div>
-          <div className="flex gap-2 mt-1">
-            <button
-              type="button"
-              onClick={handleAdd}
-              disabled={isPending}
-              className="text-xs font-bold px-3 py-1 bg-green-600 text-white cursor-pointer disabled:opacity-50"
-            >
-              {isPending ? "追加中..." : "追加"}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setShowAddForm(false);
-                setAddError(null);
-                setNewDescription("");
-                setNewAssigneeId("");
-                setNewDueDate("");
-              }}
-              disabled={isPending}
-              className="text-xs font-bold px-3 py-1 bg-bg-toolbar border border-border text-text cursor-pointer disabled:opacity-50"
-            >
-              キャンセル
-            </button>
-          </div>
-        </div>
       )}
     </div>
   );

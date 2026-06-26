@@ -353,7 +353,7 @@ export function SalesDashboard({
                       >
                         {/* Actor */}
                         <div className="w-[46px] shrink-0 text-xs text-text-secondary truncate">
-                          {log.actorId.slice(0, 8)}
+                          {userMap[log.actorId] ?? log.actorId.slice(0, 8)}
                         </div>
                         {/* Action + target */}
                         <div className="flex-1 min-w-0 text-xs">
