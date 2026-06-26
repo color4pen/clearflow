@@ -35,10 +35,14 @@ export function ConfirmDialog({
       : "bg-primary text-white text-xs px-3 py-1.5 cursor-pointer disabled:opacity-50";
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div
+      className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+      onClick={onCancel}
+    >
       <div
         className="bg-bg-surface border border-border rounded p-4 shadow-md w-full"
         style={{ maxWidth: 420 }}
+        onClick={(e) => e.stopPropagation()}
       >
         <p className="text-sm font-bold text-text mb-3">{title}</p>
         {message && <p className="text-xs text-text-muted mb-4">{message}</p>}
