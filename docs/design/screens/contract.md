@@ -54,6 +54,7 @@
 | 基本情報を編集 | admin / manager / finance | 契約が更新される |
 | 完了する | admin / manager / finance | status が completed になる（確認ダイアログ） |
 | 解除する | admin / manager / finance | status が cancelled になる（確認ダイアログ）。承認ポリシー評価あり |
+| 削除 | admin | 契約が削除される（確認ダイアログ） |
 
 ### 遷移
 
