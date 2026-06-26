@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "ad5233f4-dd45-4b30-84a0-1976ab61c7bb",
   "createdAt": "2026-06-26T07:47:41.487Z",
-  "updatedAt": "2026-06-26T07:47:43.029Z",
+  "updatedAt": "2026-06-26T07:55:42.944Z",
   "request": {
     "title": "Server Action の二重キャスト解消",
     "type": "refactor",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "request-review",
+  "step": "design",
   "status": "running",
   "branch": "feat/fix-server-action-cast-ad5233f4",
   "error": null,
@@ -34,7 +34,9 @@
     }
   ],
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 5,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
