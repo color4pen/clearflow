@@ -34,11 +34,11 @@ describe("getDashboardActions usecase 静的検証", () => {
     expect(content).toContain("continue");
   });
 
-  it("TC-102: done === false のアクションアイテムのみ含まれる — done チェックがある", async () => {
+  it("TC-102: done === false のアクションアイテムのみ含まれる — done: false フィルタがある", async () => {
     const content = await readSrc("application/usecases/getDashboardActions.ts");
-    // done フラグのチェックが存在する
-    expect(content).toContain("actionItem.done");
-    expect(content).toContain("continue");
+    // done: false フィルタが findByOrganization に渡されている
+    expect(content).toContain("done: false");
+    expect(content).toContain("actionItemRepository.findByOrganization");
   });
 
   it("TC-103: status === 'new' の引合のみ含まれる — status フィルタがある", async () => {
@@ -77,9 +77,9 @@ describe("getDashboardActions usecase 静的検証", () => {
     expect(content).toContain("requestRepository.findAllWithStepsByOrganization");
   });
 
-  it("getDashboardActions が meetingRepository.findAllByOrganization を呼ぶ", async () => {
+  it("getDashboardActions が actionItemRepository.findByOrganization を呼ぶ", async () => {
     const content = await readSrc("application/usecases/getDashboardActions.ts");
-    expect(content).toContain("meetingRepository.findAllByOrganization");
+    expect(content).toContain("actionItemRepository.findByOrganization");
   });
 
   it("getDashboardActions が inquiryRepository.findAllWithClientByOrganization を呼ぶ", async () => {

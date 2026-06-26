@@ -2,72 +2,75 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { updateMeetingAction } from "@/app/actions/meetings";
+import { createActionItemAction, toggleActionItemAction } from "@/app/actions/actionItems";
 import { Input } from "@/app/components";
-import type { ActionItem } from "@/domain/models/meeting";
+import type { ActionItem } from "@/domain/models/actionItem";
 
 type Props = {
   meetingId: string;
   dealId: string;
   actionItems: ActionItem[];
+  orgUsers: { id: string; name: string }[];
   editable: boolean;
 };
 
-const boundUpdateMeetingAction = updateMeetingAction.bind(null, {});
-
-export function MeetingActionItemsSection({ meetingId, dealId, actionItems, editable }: Props) {
+export function MeetingActionItemsSection({ meetingId, dealId, actionItems, orgUsers, editable }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [showAddForm, setShowAddForm] = useState(false);
   const [newDescription, setNewDescription] = useState("");
-  const [newAssignee, setNewAssignee] = useState("");
+  const [newAssigneeId, setNewAssigneeId] = useState("");
   const [newDueDate, setNewDueDate] = useState("");
   const [addError, setAddError] = useState<string | null>(null);
 
-  function handleToggle(index: number) {
+  function handleToggle(id: string) {
     if (!editable || isPending) return;
-
-    const updatedItems = actionItems.map((item, i) =>
-      i === index ? { ...item, done: !item.done } : item
-    );
-
     startTransition(async () => {
-      const formData = new FormData();
-      formData.set("meetingId", meetingId);
-      formData.set("dealId", dealId);
-      formData.set("actionItems", JSON.stringify(updatedItems));
-      await boundUpdateMeetingAction(formData);
+      await toggleActionItemAction({ id });
       router.refresh();
     });
   }
 
   function handleAdd() {
-    if (!newDescription.trim() || !newAssignee.trim()) {
-      setAddError("内容と担当者は必須です");
+    if (!newDescription.trim()) {
+      setAddError("内容は必須です");
       return;
     }
     setAddError(null);
 
-    const newItem: ActionItem = {
-      description: newDescription.trim(),
-      assignee: newAssignee.trim(),
-      dueDate: newDueDate || null,
-      done: false,
-    };
-    const updatedItems = [...actionItems, newItem];
-
     startTransition(async () => {
-      const formData = new FormData();
-      formData.set("meetingId", meetingId);
-      formData.set("dealId", dealId);
-      formData.set("actionItems", JSON.stringify(updatedItems));
-      await boundUpdateMeetingAction(formData);
+      const result = await createActionItemAction({
+        description: newDescription.trim(),
+        assigneeId: newAssigneeId || undefined,
+        dueDate: newDueDate || undefined,
+        meetingId,
+        dealId,
+      });
+      if (result.message) {
+        setAddError(result.message);
+        return;
+      }
       setNewDescription("");
-      setNewAssignee("");
+      setNewAssigneeId("");
       setNewDueDate("");
       setShowAddForm(false);
       router.refresh();
     });
+  }
+
+  function formatDueDate(date: Date | null): string | null {
+    if (!date) return null;
+    return date.toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  }
+
+  function resolveAssigneeName(assigneeId: string | null): string {
+    if (!assigneeId) return "未設定";
+    const user = orgUsers.find((u) => u.id === assigneeId);
+    return user?.name ?? "未設定";
   }
 
   return (
@@ -91,21 +94,21 @@ export function MeetingActionItemsSection({ meetingId, dealId, actionItems, edit
 
       {actionItems.length > 0 && (
         <ul className="text-xs space-y-1">
-          {actionItems.map((item, idx) => (
-            <li key={idx} className="flex gap-2 items-start">
+          {actionItems.map((item) => (
+            <li key={item.id} className="flex gap-2 items-start">
               <input
                 type="checkbox"
                 checked={item.done}
                 disabled={!editable || isPending}
-                onChange={() => handleToggle(idx)}
+                onChange={() => handleToggle(item.id)}
                 className="mt-0.5 cursor-pointer disabled:cursor-default"
               />
               <span className={item.done ? "text-text-muted line-through flex-1" : "text-text flex-1"}>
                 {item.description}
               </span>
-              <span className="text-text-muted shrink-0">（{item.assignee}）</span>
+              <span className="text-text-muted shrink-0">（{resolveAssigneeName(item.assigneeId)}）</span>
               {item.dueDate && (
-                <span className="text-text-muted shrink-0">{item.dueDate}</span>
+                <span className="text-text-muted shrink-0">{formatDueDate(item.dueDate)}</span>
               )}
             </li>
           ))}
@@ -126,12 +129,19 @@ export function MeetingActionItemsSection({ meetingId, dealId, actionItems, edit
           </div>
           <div className="flex gap-2 items-center">
             <label className="text-xs text-text-muted w-16 shrink-0">担当者</label>
-            <Input
-              value={newAssignee}
-              onChange={(e) => setNewAssignee(e.target.value)}
-              placeholder="担当者名"
+            <select
+              value={newAssigneeId}
+              onChange={(e) => setNewAssigneeId(e.target.value)}
               disabled={isPending}
-            />
+              className="text-xs border border-border px-2 py-1 flex-1 bg-bg-page text-text"
+            >
+              <option value="">未設定</option>
+              {orgUsers.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name}
+                </option>
+              ))}
+            </select>
           </div>
           <div className="flex gap-2 items-center">
             <label className="text-xs text-text-muted w-16 shrink-0">期日</label>
@@ -157,7 +167,7 @@ export function MeetingActionItemsSection({ meetingId, dealId, actionItems, edit
                 setShowAddForm(false);
                 setAddError(null);
                 setNewDescription("");
-                setNewAssignee("");
+                setNewAssigneeId("");
                 setNewDueDate("");
               }}
               disabled={isPending}

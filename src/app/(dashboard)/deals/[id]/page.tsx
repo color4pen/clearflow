@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { getDeal, getInquiry, listMeetings, listDealContacts, listContractsByDeal, getClient, listClientContacts } from "@/application/usecases";
+import { getDeal, getInquiry, listMeetings, listDealContacts, listContractsByDeal, getClient, listClientContacts, listActionItemsByDeal, listOrganizationUsers } from "@/application/usecases";
 import { SectionCard, DataTable } from "@/app/components";
 import { DealContactsSection } from "./DealContactsSection";
 import { DealNotesSection } from "./DealNotesSection";
@@ -32,11 +32,13 @@ export default async function DealDetailPage({
     notFound();
   }
 
-  const [inquiry, dealMeetings, dealContacts, dealContracts] = await Promise.all([
+  const [inquiry, dealMeetings, dealContacts, dealContracts, actionItemsResult, users] = await Promise.all([
     deal.inquiryId ? getInquiry({ inquiryId: deal.inquiryId, organizationId }) : null,
     listMeetings(deal.id, organizationId),
     listDealContacts(deal.id, organizationId),
     listContractsByDeal(deal.id, organizationId),
+    listActionItemsByDeal({ dealId: deal.id, organizationId }),
+    listOrganizationUsers({ organizationId }),
   ]);
 
   const client = await getClient(deal.clientId, organizationId);
@@ -44,22 +46,6 @@ export default async function DealDetailPage({
 
   const canChangePhase =
     session!.user.role === "admin" || session!.user.role === "manager";
-
-  const flatActionItems = dealMeetings.flatMap((m) =>
-    m.actionItems.map((item, index) => ({
-      meetingId: m.id,
-      dealId: deal.id,
-      meetingLabel: `${meetingTypeLabels[m.type] ?? m.type} ${m.date.toLocaleDateString("ja-JP")}`,
-      actionItem: item,
-      index,
-    }))
-  );
-
-  const allMeetingActionItems = dealMeetings.map((m) => ({
-    meetingId: m.id,
-    dealId: deal.id,
-    actionItems: m.actionItems,
-  }));
 
   return (
     <div>
@@ -288,10 +274,10 @@ export default async function DealDetailPage({
 
           {/* アクションアイテム */}
           <SectionCard className="p-3">
-            <h2 className="text-xs font-bold text-text mb-2">アクションアイテム</h2>
             <DealActionItemsSection
-              items={flatActionItems}
-              allMeetingActionItems={allMeetingActionItems}
+              actionItems={actionItemsResult.ok ? actionItemsResult.actionItems : []}
+              dealId={deal.id}
+              orgUsers={users.map((u) => ({ id: u.id, name: u.name }))}
               editable={canChangePhase}
             />
           </SectionCard>

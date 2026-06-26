@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { listOrganizationUsers, getMeeting, getDeal, listClientContacts } from "@/application/usecases";
+import { listOrganizationUsers, getMeeting, getDeal, listClientContacts, listActionItemsByMeeting } from "@/application/usecases";
 import { SectionCard } from "@/app/components";
 import { meetingTypeLabels } from "@/app/(dashboard)/labels";
 import { MeetingInfoSection } from "./MeetingInfoSection";
@@ -29,9 +29,10 @@ export default async function DealMeetingDetailPage({
   }
 
   const deal = await getDeal(id, organizationId);
-  const [users, contacts] = await Promise.all([
+  const [users, contacts, actionItemsResult] = await Promise.all([
     listOrganizationUsers({ organizationId }),
     deal?.clientId ? listClientContacts(deal.clientId) : Promise.resolve([]),
+    listActionItemsByMeeting({ meetingId, organizationId }),
   ]);
 
   const editable =
@@ -109,7 +110,8 @@ export default async function DealMeetingDetailPage({
             <MeetingActionItemsSection
               meetingId={meetingId}
               dealId={id}
-              actionItems={meeting.actionItems}
+              actionItems={actionItemsResult.ok ? actionItemsResult.actionItems : []}
+              orgUsers={users.map((u) => ({ id: u.id, name: u.name }))}
               editable={editable}
             />
           </SectionCard>

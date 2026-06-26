@@ -1,86 +1,187 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { updateMeetingAction } from "@/app/actions/meetings";
-import type { ActionItem } from "@/domain/models/meeting";
-
-type FlatItem = {
-  meetingId: string;
-  dealId: string;
-  meetingLabel: string;
-  actionItem: ActionItem;
-  index: number;
-};
-
-type MeetingActionItems = {
-  meetingId: string;
-  dealId: string;
-  actionItems: ActionItem[];
-};
+import { toggleActionItemAction, createActionItemAction } from "@/app/actions/actionItems";
+import { Input } from "@/app/components";
+import type { ActionItem } from "@/domain/models/actionItem";
 
 type Props = {
-  items: FlatItem[];
-  allMeetingActionItems: MeetingActionItems[];
+  actionItems: ActionItem[];
+  dealId: string;
+  orgUsers: { id: string; name: string }[];
   editable: boolean;
 };
 
-const boundUpdateMeetingAction = updateMeetingAction.bind(null, {});
-
-export function DealActionItemsSection({ items, allMeetingActionItems, editable }: Props) {
+export function DealActionItemsSection({ actionItems, dealId, orgUsers, editable }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newDescription, setNewDescription] = useState("");
+  const [newAssigneeId, setNewAssigneeId] = useState("");
+  const [newDueDate, setNewDueDate] = useState("");
+  const [addError, setAddError] = useState<string | null>(null);
 
-  function handleToggle(meetingId: string, dealId: string, index: number) {
+  function handleToggle(actionItemId: string) {
     if (!editable || isPending) return;
-    const meetingData = allMeetingActionItems.find((m) => m.meetingId === meetingId);
-    if (!meetingData) return;
-
-    const updatedItems = meetingData.actionItems.map((item, i) =>
-      i === index ? { ...item, done: !item.done } : item
-    );
-
     startTransition(async () => {
-      const formData = new FormData();
-      formData.set("meetingId", meetingId);
-      formData.set("dealId", dealId);
-      formData.set("actionItems", JSON.stringify(updatedItems));
-      await boundUpdateMeetingAction(formData);
+      await toggleActionItemAction({ id: actionItemId });
       router.refresh();
     });
   }
 
-  if (items.length === 0) {
-    return <p className="text-xs text-text-muted">アクションアイテムはありません</p>;
+  function handleAdd() {
+    if (!newDescription.trim()) {
+      setAddError("内容は必須です");
+      return;
+    }
+    setAddError(null);
+
+    startTransition(async () => {
+      const result = await createActionItemAction({
+        description: newDescription.trim(),
+        assigneeId: newAssigneeId || undefined,
+        dueDate: newDueDate || undefined,
+        dealId,
+      });
+      if (result.message) {
+        setAddError(result.message);
+        return;
+      }
+      setNewDescription("");
+      setNewAssigneeId("");
+      setNewDueDate("");
+      setShowAddForm(false);
+      router.refresh();
+    });
+  }
+
+  function formatDueDate(date: Date | null): string | null {
+    if (!date) return null;
+    return date.toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  }
+
+  function resolveAssigneeName(assigneeId: string | null): string {
+    if (!assigneeId) return "未設定";
+    const user = orgUsers.find((u) => u.id === assigneeId);
+    return user?.name ?? "未設定";
   }
 
   return (
-    <ul className="text-xs space-y-1">
-      {items.map((flat) => (
-        <li key={`${flat.meetingId}-${flat.index}`} className="flex gap-2 items-start">
-          <input
-            type="checkbox"
-            checked={flat.actionItem.done}
-            disabled={!editable || isPending}
-            onChange={() => handleToggle(flat.meetingId, flat.dealId, flat.index)}
-            className="mt-0.5 cursor-pointer disabled:cursor-default"
-          />
-          <span
-            className={
-              flat.actionItem.done
-                ? "text-text-muted line-through flex-1"
-                : "text-text flex-1"
-            }
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-xs font-bold text-text">アクションアイテム</h2>
+        {editable && !showAddForm && (
+          <button
+            type="button"
+            onClick={() => setShowAddForm(true)}
+            className="text-xs font-bold px-3 py-1 bg-green-600 text-white cursor-pointer"
           >
-            {flat.actionItem.description}
-          </span>
-          <span className="text-text-muted shrink-0">（{flat.actionItem.assignee}）</span>
-          {flat.actionItem.dueDate && (
-            <span className="text-text-muted shrink-0">{flat.actionItem.dueDate}</span>
-          )}
-          <span className="text-text-muted shrink-0 ml-1">[{flat.meetingLabel}]</span>
-        </li>
-      ))}
-    </ul>
+            追加
+          </button>
+        )}
+      </div>
+
+      {actionItems.length === 0 && !showAddForm && (
+        <p className="text-xs text-text-muted">アクションアイテムはありません</p>
+      )}
+
+      {actionItems.length > 0 && (
+        <ul className="text-xs space-y-1">
+          {actionItems.map((item) => (
+            <li key={item.id} className="flex gap-2 items-start">
+              <input
+                type="checkbox"
+                checked={item.done}
+                disabled={!editable || isPending}
+                onChange={() => handleToggle(item.id)}
+                className="mt-0.5 cursor-pointer disabled:cursor-default"
+              />
+              <span
+                className={
+                  item.done
+                    ? "text-text-muted line-through flex-1"
+                    : "text-text flex-1"
+                }
+              >
+                {item.description}
+              </span>
+              <span className="text-text-muted shrink-0">（{resolveAssigneeName(item.assigneeId)}）</span>
+              {item.dueDate && (
+                <span className="text-text-muted shrink-0">{formatDueDate(item.dueDate)}</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {showAddForm && (
+        <div className="mt-2 border border-border p-2 space-y-1" onKeyDown={(e) => { if (e.key === "Enter") e.preventDefault(); }}>
+          {addError && <p className="text-danger text-xs">{addError}</p>}
+          <div className="flex gap-2 items-center">
+            <label className="text-xs text-text-muted w-16 shrink-0">内容</label>
+            <Input
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              placeholder="アクションアイテムの内容"
+              disabled={isPending}
+            />
+          </div>
+          <div className="flex gap-2 items-center">
+            <label className="text-xs text-text-muted w-16 shrink-0">担当者</label>
+            <select
+              value={newAssigneeId}
+              onChange={(e) => setNewAssigneeId(e.target.value)}
+              disabled={isPending}
+              className="text-xs border border-border px-2 py-1 flex-1 bg-bg-page text-text"
+            >
+              <option value="">未設定</option>
+              {orgUsers.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex gap-2 items-center">
+            <label className="text-xs text-text-muted w-16 shrink-0">期日</label>
+            <Input
+              type="date"
+              value={newDueDate}
+              onChange={(e) => setNewDueDate(e.target.value)}
+              disabled={isPending}
+            />
+          </div>
+          <div className="flex gap-2 mt-1">
+            <button
+              type="button"
+              onClick={handleAdd}
+              disabled={isPending}
+              className="text-xs font-bold px-3 py-1 bg-green-600 text-white cursor-pointer disabled:opacity-50"
+            >
+              {isPending ? "追加中..." : "追加"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowAddForm(false);
+                setAddError(null);
+                setNewDescription("");
+                setNewAssigneeId("");
+                setNewDueDate("");
+              }}
+              disabled={isPending}
+              className="text-xs font-bold px-3 py-1 bg-bg-toolbar border border-border text-text cursor-pointer disabled:opacity-50"
+            >
+              キャンセル
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
