@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "7b20afe1-95f4-43cb-b618-c4391544abdb",
   "createdAt": "2026-06-26T11:20:26.485Z",
-  "updatedAt": "2026-06-26T11:20:30.164Z",
+  "updatedAt": "2026-06-26T11:24:08.248Z",
   "request": {
     "title": "アクションアイテム UI の action_items テーブル切り替え",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "request-review",
+  "step": "design",
   "status": "running",
   "branch": "change/action-items-ui-7b20afe1",
   "error": null,
@@ -34,7 +34,9 @@
     }
   ],
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 5,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
