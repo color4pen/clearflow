@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { createActionItemAction, toggleActionItemAction } from "@/app/actions/actionItems";
+import { createActionItemAction } from "@/app/actions/actionItems";
 import { Input } from "@/app/components";
+import { ActionItemRow } from "@/app/(dashboard)/components/ActionItemRow";
 import type { ActionItem } from "@/domain/models/actionItem";
 
 type Props = {
@@ -22,14 +23,6 @@ export function MeetingActionItemsSection({ meetingId, dealId, actionItems, orgU
   const [newAssigneeId, setNewAssigneeId] = useState("");
   const [newDueDate, setNewDueDate] = useState("");
   const [addError, setAddError] = useState<string | null>(null);
-
-  function handleToggle(id: string) {
-    if (!editable || isPending) return;
-    startTransition(async () => {
-      await toggleActionItemAction({ id });
-      router.refresh();
-    });
-  }
 
   function handleAdd() {
     if (!newDescription.trim()) {
@@ -58,21 +51,6 @@ export function MeetingActionItemsSection({ meetingId, dealId, actionItems, orgU
     });
   }
 
-  function formatDueDate(date: Date | null): string | null {
-    if (!date) return null;
-    return date.toLocaleDateString("ja-JP", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-  }
-
-  function resolveAssigneeName(assigneeId: string | null): string {
-    if (!assigneeId) return "未設定";
-    const user = orgUsers.find((u) => u.id === assigneeId);
-    return user?.name ?? "未設定";
-  }
-
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
@@ -95,22 +73,14 @@ export function MeetingActionItemsSection({ meetingId, dealId, actionItems, orgU
       {actionItems.length > 0 && (
         <ul className="text-xs space-y-1">
           {actionItems.map((item) => (
-            <li key={item.id} className="flex gap-2 items-start">
-              <input
-                type="checkbox"
-                checked={item.done}
-                disabled={!editable || isPending}
-                onChange={() => handleToggle(item.id)}
-                className="mt-0.5 cursor-pointer disabled:cursor-default"
-              />
-              <span className={item.done ? "text-text-muted line-through flex-1" : "text-text flex-1"}>
-                {item.description}
-              </span>
-              <span className="text-text-muted shrink-0">（{resolveAssigneeName(item.assigneeId)}）</span>
-              {item.dueDate && (
-                <span className="text-text-muted shrink-0">{formatDueDate(item.dueDate)}</span>
-              )}
-            </li>
+            <ActionItemRow
+              key={item.id}
+              item={item}
+              orgUsers={orgUsers}
+              editable={editable}
+              canDelete={editable}
+              showSource={false}
+            />
           ))}
         </ul>
       )}

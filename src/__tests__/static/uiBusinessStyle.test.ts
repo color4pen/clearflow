@@ -190,3 +190,41 @@ describe("styles.ts constants — TC-032 and TC-033", () => {
     expect(content).not.toContain("rounded-none");
   });
 });
+
+// ---------------------------------------------------------------------------
+// ActionItemRow UI パターン — T-10
+// ---------------------------------------------------------------------------
+
+describe("ActionItemRow UI パターン — T-10", () => {
+  /**
+   * ActionItemRow.tsx に updateActionItemAction の呼び出しが含まれる
+   */
+  it("ActionItemRow.tsx に updateActionItemAction の呼び出しが含まれる", async () => {
+    const content = await readSrc("app/(dashboard)/components/ActionItemRow.tsx");
+    expect(content).toContain("updateActionItemAction");
+  });
+
+  /**
+   * ActionItemRow.tsx に deleteActionItemAction の呼び出しが含まれる
+   */
+  it("ActionItemRow.tsx に deleteActionItemAction の呼び出しが含まれる", async () => {
+    const content = await readSrc("app/(dashboard)/components/ActionItemRow.tsx");
+    expect(content).toContain("deleteActionItemAction");
+  });
+
+  /**
+   * ActionItemRow.tsx に ConfirmDialog の使用が含まれる
+   */
+  it("ActionItemRow.tsx に ConfirmDialog の使用が含まれる", async () => {
+    const content = await readSrc("app/(dashboard)/components/ActionItemRow.tsx");
+    expect(content).toContain("ConfirmDialog");
+  });
+
+  /**
+   * ActionItemRow.tsx に toggleActionItemAction の呼び出しが含まれる
+   */
+  it("ActionItemRow.tsx に toggleActionItemAction の呼び出しが含まれる", async () => {
+    const content = await readSrc("app/(dashboard)/components/ActionItemRow.tsx");
+    expect(content).toContain("toggleActionItemAction");
+  });
+});

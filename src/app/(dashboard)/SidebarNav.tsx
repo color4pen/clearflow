@@ -15,6 +15,7 @@ const navItems: NavItem[] = [
   { href: "/clients", label: "顧客" },
   { href: "/inquiries", label: "引き合い" },
   { href: "/deals", label: "案件" },
+  { href: "/tasks", label: "タスク" },
   { href: "/contracts", label: "契約" },
   { href: "/revenue", label: "売上" },
   { href: "/requests", label: "申請一覧", hasBadge: true },
