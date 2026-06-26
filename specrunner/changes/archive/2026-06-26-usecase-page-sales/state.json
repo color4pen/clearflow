@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "109dc74a-af9b-456f-a158-03d94810bfea",
   "createdAt": "2026-06-26T07:47:00.787Z",
-  "updatedAt": "2026-06-26T08:30:56.926Z",
+  "updatedAt": "2026-06-26T08:37:00.618Z",
   "request": {
     "title": "営業系ページの repository 直接呼び出しを usecase 経由に移行",
     "type": "refactor",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/usecase-page-sales-109dc74a",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-26T08:30:56.912Z"
   },
   "_journal": {
-    "historyCount": 57,
+    "historyCount": 58,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
