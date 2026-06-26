@@ -6,12 +6,12 @@
   - `id`: uuid, primaryKey, defaultRandom
   - `organizationId`: uuid, notNull, FK → organizations.id
   - `description`: text, notNull
-  - `assigneeId`: uuid, nullable, FK → users.id
+  - `assigneeId`: uuid, nullable, FK → users.id, `onDelete: "set null"`
   - `dueDate`: timestamp (timestamptz), nullable
   - `done`: boolean, notNull, default false
-  - `meetingId`: uuid, nullable, FK → meetings.id
-  - `dealId`: uuid, nullable, FK → deals.id
-  - `inquiryId`: uuid, nullable, FK → inquiries.id
+  - `meetingId`: uuid, nullable, FK → meetings.id, `onDelete: "set null"`
+  - `dealId`: uuid, nullable, FK → deals.id, `onDelete: "set null"`
+  - `inquiryId`: uuid, nullable, FK → inquiries.id, `onDelete: "set null"`
   - `createdById`: uuid, notNull, FK → users.id
   - `createdAt`: timestamp, notNull, defaultNow
   - `updatedAt`: timestamp, notNull, defaultNow
@@ -83,7 +83,7 @@
 - [ ] `create(data, tx?)` を実装: 必須フィールド + nullable FK を受け取り、INSERT → returning で `ActionItem` を返す
 - [ ] `findById(id, organizationId, tx?)` を実装: `id` AND `organizationId` で検索、見つからなければ null
 - [ ] `findByOrganization(organizationId, filters?)` を実装:
-  - filters: `{ done?: boolean, assigneeId?: string, dealId?: string, meetingId?: string }`
+  - filters: `{ done?: boolean, assigneeId?: string, dealId?: string, meetingId?: string, inquiryId?: string }`
   - 各フィルタが指定されている場合のみ AND 条件に追加
   - `createdAt` の降順でソート
 - [ ] `update(id, organizationId, data, tx?)` を実装: Partial な更新データを受け取り、`updatedAt` を現在時刻に設定。返り値は `ActionItem | null`
@@ -155,6 +155,7 @@
 - [ ] `createActionItemAction` を実装:
   - `auth()` で認証チェック
   - `canPerform(role, "actionItem", "create")` で認可チェック
+  - `checkRateLimit({ key: \`createActionItem:${session.user.id}\`, limit: RATE_LIMITS.createRequest.limit, windowMs: RATE_LIMITS.createRequest.windowMs })` でレート制限チェック（allowed が false なら早期リターン）
   - zod スキーマでバリデーション: description (string, min 1), assigneeId (uuid, optional), dueDate (string ISO, optional), meetingId (uuid, optional), dealId (uuid, optional), inquiryId (uuid, optional)
   - `createActionItem` ユースケースを呼び出す
   - revalidatePath: `/dashboard` を常に含め、dealId があれば `/deals/[dealId]`、meetingId がある場合は meeting を取得して dealId を確認し `/deals/[dealId]/meetings/[meetingId]` も再検証
@@ -225,7 +226,8 @@
   FROM meetings m,
        jsonb_array_elements(m.action_items) AS item
   WHERE jsonb_typeof(m.action_items) = 'array'
-    AND jsonb_array_length(m.action_items) > 0;
+    AND jsonb_array_length(m.action_items) > 0
+    AND m.created_by_id IS NOT NULL;
   ```
 - [ ] `meetings.action_items` カラムを削除しないことを確認（SQL に DROP COLUMN が含まれていない）
 
