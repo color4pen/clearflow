@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { contractRepository, invoiceRepository, requestRepository } from "@/infrastructure/repositories";
+import { getContract, listInvoicesByContract, hasPendingApproval } from "@/application/usecases";
 import { SectionCard } from "@/app/components";
 import { ContractStatusActions } from "./ContractStatusActions";
 import { InvoiceSection } from "./InvoiceSection";
@@ -18,7 +18,7 @@ export default async function ContractDetailPage({
   const session = await auth();
   const organizationId = session!.user.organizationId;
 
-  const contract = await contractRepository.findById(id, organizationId);
+  const contract = await getContract({ contractId: id, organizationId });
   if (!contract) {
     notFound();
   }
@@ -27,10 +27,10 @@ export default async function ContractDetailPage({
     session!.user.role === "admin" || session!.user.role === "manager";
   const isTerminal = contract.status === "completed" || contract.status === "cancelled";
 
-  const invoices = await invoiceRepository.findAllByContract(id, organizationId);
-  let hasPendingApproval = false;
+  const invoices = await listInvoicesByContract({ contractId: id, organizationId });
+  let isPending = false;
   try {
-    hasPendingApproval = await requestRepository.existsPendingByTriggerEntityId(organizationId, id);
+    isPending = await hasPendingApproval(organizationId, id);
   } catch {
     // DB エラー時はバナー非表示で degradation
   }
@@ -45,7 +45,7 @@ export default async function ContractDetailPage({
         </span>
       </div>
 
-      {hasPendingApproval && (
+      {isPending && (
         <div className="bg-amber-50 border border-amber-300 px-3 py-2 text-xs text-amber-800 mb-2">
           この契約には承認待ちの申請があります
         </div>

@@ -1,13 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import {
-  inquiryRepository,
-  clientRepository,
-  dealRepository,
-  meetingRepository,
-  requestRepository,
-} from "@/infrastructure/repositories";
+import { getInquiry, getClient, getDealByInquiry, listClients, listMeetingsByInquiry, findPendingApprovalByTrigger } from "@/application/usecases";
 import { SectionCard } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
 import { DeleteInquiryButton } from "./DeleteInquiryButton";
@@ -26,21 +20,21 @@ export default async function InquiryDetailPage({
   const session = await auth();
   const organizationId = session!.user.organizationId;
 
-  const inquiry = await inquiryRepository.findById(id, organizationId);
+  const inquiry = await getInquiry({ inquiryId: id, organizationId });
   if (!inquiry) {
     notFound();
   }
 
   const [client, deal, clients, meetings, pendingRequest] = await Promise.all([
     inquiry.clientId
-      ? clientRepository.findById(inquiry.clientId, organizationId)
+      ? getClient(inquiry.clientId, organizationId)
       : Promise.resolve(null),
-    dealRepository.findByInquiryId(id, organizationId),
+    getDealByInquiry(id, organizationId),
     inquiry.clientId
       ? Promise.resolve([])
-      : clientRepository.findAllByOrganization(organizationId),
-    meetingRepository.findAllByInquiry(id, organizationId),
-    requestRepository.findByOriginTriggerEntity(organizationId, "inquiry.convert", id),
+      : listClients(organizationId),
+    listMeetingsByInquiry(id, organizationId),
+    findPendingApprovalByTrigger(organizationId, "inquiry.convert", id),
   ]);
 
   const canChangeStatus =

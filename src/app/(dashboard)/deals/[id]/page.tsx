@@ -1,14 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import {
-  dealRepository,
-  inquiryRepository,
-  clientRepository,
-  meetingRepository,
-  dealContactRepository,
-  contractRepository,
-} from "@/infrastructure/repositories";
+import { getDeal, getInquiry, listMeetings, listDealContacts, listContractsByDeal, getClient, listClientContacts } from "@/application/usecases";
 import { SectionCard, DataTable } from "@/app/components";
 import { DealContactsSection } from "./DealContactsSection";
 import { DealNotesSection } from "./DealNotesSection";
@@ -34,20 +27,20 @@ export default async function DealDetailPage({
   const session = await auth();
   const organizationId = session!.user.organizationId;
 
-  const deal = await dealRepository.findById(id, organizationId);
+  const deal = await getDeal(id, organizationId);
   if (!deal) {
     notFound();
   }
 
   const [inquiry, dealMeetings, dealContacts, dealContracts] = await Promise.all([
-    deal.inquiryId ? inquiryRepository.findById(deal.inquiryId, organizationId) : null,
-    meetingRepository.findAllByDeal(deal.id, organizationId),
-    dealContactRepository.findByDeal(deal.id, organizationId),
-    contractRepository.findAllByDealId(deal.id, organizationId),
+    deal.inquiryId ? getInquiry({ inquiryId: deal.inquiryId, organizationId }) : null,
+    listMeetings(deal.id, organizationId),
+    listDealContacts(deal.id, organizationId),
+    listContractsByDeal(deal.id, organizationId),
   ]);
 
-  const client = await clientRepository.findById(deal.clientId, organizationId);
-  const clientContacts = await clientRepository.findContactsByClientId(deal.clientId);
+  const client = await getClient(deal.clientId, organizationId);
+  const clientContacts = await listClientContacts(deal.clientId);
 
   const canChangePhase =
     session!.user.role === "admin" || session!.user.role === "manager";

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { listInquiries } from "@/application/usecases";
-import { dealRepository } from "@/infrastructure/repositories";
+import { listInquiries, listDeals } from "@/application/usecases";
 import { PageToolbar, ToolbarActions } from "@/app/components";
 import { sourceLabels } from "@/app/(dashboard)/labels";
 import { InquiryListView } from "./InquiryListView";
@@ -12,7 +11,7 @@ export default async function InquiriesPage() {
 
   const [allInquiries, deals] = await Promise.all([
     listInquiries(organizationId),
-    dealRepository.findAllByOrganization(organizationId),
+    listDeals(organizationId),
   ]);
 
   // inquiryId → dealId マップ

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { contractRepository, invoiceRepository } from "@/infrastructure/repositories";
+import { getContract, getInvoiceSumByContract } from "@/application/usecases";
 import { canPerform } from "@/domain/authorization";
 import { SectionCard } from "@/app/components";
 import { NewInvoiceForm } from "./NewInvoiceForm";
@@ -19,7 +19,7 @@ export default async function NewInvoicePage({
     notFound();
   }
 
-  const contract = await contractRepository.findById(contractId, organizationId);
+  const contract = await getContract({ contractId, organizationId });
   if (!contract) {
     notFound();
   }
@@ -28,7 +28,7 @@ export default async function NewInvoicePage({
 
   let remainingAmount: number | null = null;
   if (isActive && contract.renewalType === "one_time" && contract.amount > 0) {
-    const existingTotal = await invoiceRepository.sumAmountByContract(contractId, organizationId);
+    const existingTotal = await getInvoiceSumByContract(contractId, organizationId);
     remainingAmount = contract.amount - existingTotal;
   }
 
