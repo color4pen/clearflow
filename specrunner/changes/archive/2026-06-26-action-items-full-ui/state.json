@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "c359db4b-bb97-4bcf-ba94-e77b3ade3088",
   "createdAt": "2026-06-26T12:25:17.819Z",
-  "updatedAt": "2026-06-26T13:14:11.032Z",
+  "updatedAt": "2026-06-26T13:16:31.766Z",
   "request": {
     "title": "アクションアイテムの編集 UI・タスク一覧ページ・サイドバーメニュー追加",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/action-items-full-ui-c359db4b",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-26T13:14:11.023Z"
   },
   "_journal": {
-    "historyCount": 57,
+    "historyCount": 58,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
