@@ -36,8 +36,7 @@ export type CreateActionItemState = {
 };
 
 export async function createActionItemAction(
-  prevState: CreateActionItemState,
-  formData: FormData
+  data: unknown
 ): Promise<CreateActionItemState> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -57,14 +56,7 @@ export async function createActionItemAction(
     return { message: "リクエスト数の上限に達しました。しばらく待ってから再試行してください" };
   }
 
-  const parsed = createActionItemSchema.safeParse({
-    description: formData.get("description"),
-    assigneeId: formData.get("assigneeId") || undefined,
-    dueDate: formData.get("dueDate") || undefined,
-    meetingId: formData.get("meetingId") || undefined,
-    dealId: formData.get("dealId") || undefined,
-    inquiryId: formData.get("inquiryId") || undefined,
-  });
+  const parsed = createActionItemSchema.safeParse(data);
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
@@ -117,8 +109,7 @@ export type ToggleActionItemState = {
 };
 
 export async function toggleActionItemAction(
-  prevState: ToggleActionItemState,
-  formData: FormData
+  data: unknown
 ): Promise<ToggleActionItemState> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -129,9 +120,7 @@ export async function toggleActionItemAction(
     return { message: "この操作を実行する権限がありません" };
   }
 
-  const parsed = toggleActionItemSchema.safeParse({
-    id: formData.get("id"),
-  });
+  const parsed = toggleActionItemSchema.safeParse(data);
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
@@ -196,8 +185,7 @@ export type UpdateActionItemState = {
 };
 
 export async function updateActionItemAction(
-  prevState: UpdateActionItemState,
-  formData: FormData
+  data: unknown
 ): Promise<UpdateActionItemState> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -208,21 +196,7 @@ export async function updateActionItemAction(
     return { message: "この操作を実行する権限がありません" };
   }
 
-  const dueDateRaw = formData.get("dueDate");
-  const assigneeIdRaw = formData.get("assigneeId");
-  const meetingIdRaw = formData.get("meetingId");
-  const dealIdRaw = formData.get("dealId");
-  const inquiryIdRaw = formData.get("inquiryId");
-
-  const parsed = updateActionItemSchema.safeParse({
-    id: formData.get("id"),
-    description: formData.get("description") || undefined,
-    assigneeId: assigneeIdRaw === "" ? null : (assigneeIdRaw || undefined),
-    dueDate: dueDateRaw === "" ? null : (dueDateRaw || undefined),
-    meetingId: meetingIdRaw === "" ? null : (meetingIdRaw || undefined),
-    dealId: dealIdRaw === "" ? null : (dealIdRaw || undefined),
-    inquiryId: inquiryIdRaw === "" ? null : (inquiryIdRaw || undefined),
-  });
+  const parsed = updateActionItemSchema.safeParse(data);
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };
@@ -279,8 +253,7 @@ export type DeleteActionItemState = {
 };
 
 export async function deleteActionItemAction(
-  prevState: DeleteActionItemState,
-  formData: FormData
+  data: unknown
 ): Promise<DeleteActionItemState> {
   const session = await auth();
   if (!session?.user?.id) {
@@ -291,9 +264,7 @@ export async function deleteActionItemAction(
     return { message: "この操作を実行する権限がありません" };
   }
 
-  const parsed = deleteActionItemSchema.safeParse({
-    id: formData.get("id"),
-  });
+  const parsed = deleteActionItemSchema.safeParse(data);
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors };

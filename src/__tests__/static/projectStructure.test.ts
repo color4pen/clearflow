@@ -1586,3 +1586,154 @@ describe("経路ラベル追加 — sourceLabels and sourceOptions", () => {
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// アクションアイテム スキーマ — TC-001, TC-002
+// ---------------------------------------------------------------------------
+
+describe("アクションアイテム スキーマ — action_items table", () => {
+  /**
+   * TC-001: action_items テーブルに 6 つの FK 制約が存在する
+   * organizations, users (assigneeId), users (createdById), meetings, deals, inquiries
+   */
+  it("TC-001: schema.ts の actionItems テーブルに 6 つの FK 参照が存在する", async () => {
+    const content = await readSrc("infrastructure/schema.ts");
+    // actionItems テーブル定義ブロックを抽出する
+    const tableStart = content.indexOf("export const actionItems = pgTable(");
+    expect(tableStart).toBeGreaterThan(-1);
+    // 次の pgTable 定義の前まで（accounts テーブル）
+    const tableEnd = content.indexOf("export const accounts = pgTable(", tableStart);
+    const block = content.slice(tableStart, tableEnd);
+
+    // 各 FK 参照の存在を確認する
+    expect(block).toContain("references(() => organizations.id)");       // organization_id FK
+    expect(block).toContain("references(() => users.id, { onDelete: \"set null\" })"); // assignee_id FK
+    expect(block).toContain("references(() => meetings.id, { onDelete: \"set null\" })"); // meeting_id FK
+    expect(block).toContain("references(() => deals.id, { onDelete: \"set null\" })");    // deal_id FK
+    expect(block).toContain("references(() => inquiries.id, { onDelete: \"set null\" })"); // inquiry_id FK
+    expect(block).toContain("references(() => users.id)");               // created_by_id FK (without onDelete)
+
+    // .references( の出現回数が 6 であることを確認する
+    const refCount = (block.match(/\.references\(/g) ?? []).length;
+    expect(refCount).toBe(6);
+  });
+
+  /**
+   * TC-002: action_items テーブルに 3 つのインデックスが定義されている
+   * (organization_id, done), (meeting_id), (deal_id)
+   */
+  it("TC-002: schema.ts の actionItems テーブルに 3 つのインデックスが定義されている", async () => {
+    const content = await readSrc("infrastructure/schema.ts");
+    expect(content).toContain("action_items_org_done_idx");
+    expect(content).toContain("action_items_meeting_id_idx");
+    expect(content).toContain("action_items_deal_id_idx");
+
+    // インデックス定義ブロック内にインデックスが 3 つ存在することを確認する
+    const tableStart = content.indexOf("export const actionItems = pgTable(");
+    const tableEnd = content.indexOf("export const accounts = pgTable(", tableStart);
+    const block = content.slice(tableStart, tableEnd);
+    const indexCount = (block.match(/index\(/g) ?? []).length;
+    expect(indexCount).toBe(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// アクションアイテム モデル — TC-004, TC-005, TC-006
+// ---------------------------------------------------------------------------
+
+describe("アクションアイテム モデル — ActionItem domain model", () => {
+  /**
+   * TC-004: ActionItem ドメインモデル型が全フィールドを含んで定義されている
+   */
+  it("TC-004: actionItem.ts に ActionItem 型の全フィールドが定義されている", async () => {
+    const content = await readSrc("domain/models/actionItem.ts");
+    expect(content).toContain("ActionItem");
+    expect(content).toContain("id");
+    expect(content).toContain("organizationId");
+    expect(content).toContain("description");
+    expect(content).toContain("assigneeId");
+    expect(content).toContain("dueDate");
+    expect(content).toContain("done");
+    expect(content).toContain("meetingId");
+    expect(content).toContain("dealId");
+    expect(content).toContain("inquiryId");
+    expect(content).toContain("createdById");
+    expect(content).toContain("createdAt");
+    expect(content).toContain("updatedAt");
+    expect(content).toContain("export type ActionItem");
+  });
+
+  /**
+   * TC-005: ActionItem モデルに infrastructure 層への import がない
+   */
+  it("TC-005: actionItem.ts に @/infrastructure への import がない", async () => {
+    const content = await readSrc("domain/models/actionItem.ts");
+    expect(content).not.toContain("@/infrastructure");
+    expect(content).not.toContain("../infrastructure");
+    expect(content).not.toContain("drizzle");
+  });
+
+  /**
+   * TC-006: ActionItem がドメインモデルのバレルファイルから re-export されている
+   */
+  it("TC-006: domain/models/index.ts が ActionItem を re-export している", async () => {
+    const content = await readSrc("domain/models/index.ts");
+    expect(content).toContain("ActionItem");
+    expect(content).toContain("actionItem");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// アクションアイテム リポジトリ・ユースケース・サーバーアクション — TC-029, TC-033, TC-034
+// ---------------------------------------------------------------------------
+
+describe("アクションアイテム リポジトリ・ユースケース・サーバーアクション", () => {
+  /**
+   * TC-029: actionItemRepository がリポジトリのバレルファイルから export されている
+   */
+  it("TC-029: infrastructure/repositories/index.ts が actionItemRepository を export している", async () => {
+    const content = await readSrc("infrastructure/repositories/index.ts");
+    expect(content).toContain("actionItemRepository");
+  });
+
+  /**
+   * TC-033: 全ユースケースがバレルファイルから export されている
+   */
+  it("TC-033: application/usecases/index.ts が全アクションアイテム usecase を export している", async () => {
+    const content = await readSrc("application/usecases/index.ts");
+    expect(content).toContain("createActionItem");
+    expect(content).toContain("toggleActionItemDone");
+    expect(content).toContain("updateActionItem");
+    expect(content).toContain("deleteActionItem");
+    expect(content).toContain("listActionItemsByDeal");
+    expect(content).toContain("listActionItemsByMeeting");
+  });
+
+  /**
+   * TC-034: 全サーバーアクションに "use server" ディレクティブがある
+   */
+  it("TC-034: app/actions/actionItems.ts が use server ディレクティブで始まる", async () => {
+    const content = await readSrc("app/actions/actionItems.ts");
+    expect(content.trimStart().startsWith('"use server"')).toBe(true);
+  });
+
+  it("TC-034: app/actions/actionItems.ts に createActionItemAction, toggleActionItemAction, updateActionItemAction, deleteActionItemAction が定義されている", async () => {
+    const content = await readSrc("app/actions/actionItems.ts");
+    expect(content).toContain("createActionItemAction");
+    expect(content).toContain("toggleActionItemAction");
+    expect(content).toContain("updateActionItemAction");
+    expect(content).toContain("deleteActionItemAction");
+  });
+
+  it("actionItemRepository.ts が存在する", async () => {
+    const exists = await fileExists(
+      "src/infrastructure/repositories/actionItemRepository.ts"
+    );
+    expect(exists).toBe(true);
+  });
+
+  it("actionItemRepository.ts に organizationId 条件が含まれる", async () => {
+    const content = await readSrc("infrastructure/repositories/actionItemRepository.ts");
+    expect(content).toContain("organizationId");
+  });
+});

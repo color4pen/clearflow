@@ -365,6 +365,71 @@ describe("canPerform - 組織管理 (organization)", () => {
   });
 });
 
+describe("canPerform - アクションアイテム (actionItem)", () => {
+  /**
+   * TC-007: canPerform("member", "actionItem", "create") が true を返す
+   */
+  it("TC-007: create: member が許可される", () => {
+    expect(canPerform("member", "actionItem", "create")).toBe(true);
+  });
+
+  /**
+   * TC-008: canPerform("member", "actionItem", "delete") が false を返す
+   */
+  it("TC-008: delete: member が拒否される", () => {
+    expect(canPerform("member", "actionItem", "delete")).toBe(false);
+  });
+
+  /**
+   * TC-009: canPerform("finance", "actionItem", "create") が false を返す
+   */
+  it("TC-009: create: finance が拒否される", () => {
+    expect(canPerform("finance", "actionItem", "create")).toBe(false);
+  });
+
+  /**
+   * TC-010: canPerform("admin", "actionItem", "delete") が true を返す
+   */
+  it("TC-010: delete: admin が許可される", () => {
+    expect(canPerform("admin", "actionItem", "delete")).toBe(true);
+  });
+
+  it("create: admin/manager/member が許可され、finance は拒否される", () => {
+    expect(canPerform("admin", "actionItem", "create")).toBe(true);
+    expect(canPerform("manager", "actionItem", "create")).toBe(true);
+    expect(canPerform("member", "actionItem", "create")).toBe(true);
+    expect(canPerform("finance", "actionItem", "create")).toBe(false);
+  });
+
+  it("edit: admin/manager/member が許可され、finance は拒否される", () => {
+    expect(canPerform("admin", "actionItem", "edit")).toBe(true);
+    expect(canPerform("manager", "actionItem", "edit")).toBe(true);
+    expect(canPerform("member", "actionItem", "edit")).toBe(true);
+    expect(canPerform("finance", "actionItem", "edit")).toBe(false);
+  });
+
+  it("toggle: admin/manager/member が許可され、finance は拒否される", () => {
+    expect(canPerform("admin", "actionItem", "toggle")).toBe(true);
+    expect(canPerform("manager", "actionItem", "toggle")).toBe(true);
+    expect(canPerform("member", "actionItem", "toggle")).toBe(true);
+    expect(canPerform("finance", "actionItem", "toggle")).toBe(false);
+  });
+
+  it("delete: admin/manager のみ許可される", () => {
+    expect(canPerform("admin", "actionItem", "delete")).toBe(true);
+    expect(canPerform("manager", "actionItem", "delete")).toBe(true);
+    expect(canPerform("finance", "actionItem", "delete")).toBe(false);
+    expect(canPerform("member", "actionItem", "delete")).toBe(false);
+  });
+
+  it("list/view: 全ロールが許可される", () => {
+    for (const role of ALL_ROLES) {
+      expect(canPerform(role, "actionItem", "list")).toBe(true);
+      expect(canPerform(role, "actionItem", "view")).toBe(true);
+    }
+  });
+});
+
 describe("canPerform - deny-by-default", () => {
   it("未定義の操作は false を返す", () => {
     expect(canPerform("admin", "inquiry", "unknownOp")).toBe(false);
