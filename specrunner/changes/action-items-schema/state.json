@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "b0ee552d-18d1-4d5b-a789-b7ad86accf32",
   "createdAt": "2026-06-26T09:42:28.174Z",
-  "updatedAt": "2026-06-26T10:34:24.647Z",
+  "updatedAt": "2026-06-26T10:37:38.097Z",
   "request": {
     "title": "アクションアイテムのテーブル・モデル・リポジトリ・ユースケース新設",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/action-items-schema-b0ee552d",
   "error": null,
@@ -36,8 +36,8 @@
   "reviewerStatuses": [
     {
       "name": "domain-invariants",
-      "status": "pending",
-      "approvedAtCommit": null,
+      "status": "approved",
+      "approvedAtCommit": "895bfd21d11a1d1ee6002b3774b8d53749cd965c",
       "activationPaths": [
         "src/application/**",
         "src/infrastructure/repositories/**",
@@ -48,7 +48,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 49,
+    "historyCount": 54,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -59,8 +59,8 @@
       "verification": 1,
       "code-review": 1,
       "code-fixer": 2,
-      "domain-invariants": 1,
-      "custom-reviewers": 1
+      "domain-invariants": 2,
+      "custom-reviewers": 2
     }
   }
 }
