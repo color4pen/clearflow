@@ -10,7 +10,8 @@ export type Entity =
   | "approval"
   | "approvalSettings"
   | "organization"
-  | "revenue";
+  | "revenue"
+  | "actionItem";
 
 type PermissionMatrix = Record<Entity, Record<string, Role[]>>;
 
@@ -124,6 +125,16 @@ const PERMISSION_MATRIX: PermissionMatrix = {
     view: ALL_ROLES,
     setTarget: ADMIN_MANAGER,
     export: ADMIN_MANAGER_FINANCE,
+  },
+
+  // 3.11 アクションアイテム (ActionItem)
+  actionItem: {
+    list: ALL_ROLES,
+    view: ALL_ROLES,
+    create: ADMIN_MANAGER_MEMBER,
+    edit: ADMIN_MANAGER_MEMBER,
+    toggle: ADMIN_MANAGER_MEMBER,
+    delete: ADMIN_MANAGER,
   },
 };
 

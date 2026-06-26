@@ -484,6 +484,34 @@ export const revenueTargets = pgTable("revenue_targets", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Action items table (アクションアイテム)
+export const actionItems = pgTable(
+  "action_items",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    description: text("description").notNull(),
+    assigneeId: uuid("assignee_id").references(() => users.id, { onDelete: "set null" }),
+    dueDate: timestamp("due_date"),
+    done: boolean("done").notNull().default(false),
+    meetingId: uuid("meeting_id").references(() => meetings.id, { onDelete: "set null" }),
+    dealId: uuid("deal_id").references(() => deals.id, { onDelete: "set null" }),
+    inquiryId: uuid("inquiry_id").references(() => inquiries.id, { onDelete: "set null" }),
+    createdById: uuid("created_by_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("action_items_org_done_idx").on(table.organizationId, table.done),
+    index("action_items_meeting_id_idx").on(table.meetingId),
+    index("action_items_deal_id_idx").on(table.dealId),
+  ]
+);
+
 // Auth.js adapter tables
 export const accounts = pgTable(
   "accounts",
@@ -542,6 +570,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   contracts: many(contracts),
   invoices: many(invoices),
   revenueTargets: many(revenueTargets),
+  actionItems: many(actionItems),
 }));
 
 export const revenueTargetsRelations = relations(revenueTargets, ({ one }) => ({
@@ -575,6 +604,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   dealsAsTechnicalLead: many(deals, { relationName: "dealsAsTechnicalLead" }),
   stepsApprovedBy: many(approvalSteps, { relationName: "stepsApprovedBy" }),
   stepsAssignedApprover: many(approvalSteps, { relationName: "stepsAssignedApprover" }),
+  actionItemsAsAssignee: many(actionItems, { relationName: "actionItemsAsAssignee" }),
+  actionItemsAsCreator: many(actionItems, { relationName: "actionItemsAsCreator" }),
 }));
 
 export const approvalPoliciesRelations = relations(approvalPolicies, ({ one }) => ({
@@ -737,9 +768,10 @@ export const inquiriesRelations = relations(inquiries, ({ one, many }) => ({
   }),
   deals: many(deals),
   meetings: many(meetings),
+  actionItems: many(actionItems),
 }));
 
-export const meetingsRelations = relations(meetings, ({ one }) => ({
+export const meetingsRelations = relations(meetings, ({ one, many }) => ({
   organization: one(organizations, {
     fields: [meetings.organizationId],
     references: [organizations.id],
@@ -756,6 +788,7 @@ export const meetingsRelations = relations(meetings, ({ one }) => ({
     fields: [meetings.createdById],
     references: [users.id],
   }),
+  actionItemsRef: many(actionItems),
 }));
 
 export const dealsRelations = relations(deals, ({ one, many }) => ({
@@ -784,6 +817,7 @@ export const dealsRelations = relations(deals, ({ one, many }) => ({
   meetings: many(meetings),
   dealContacts: many(dealContacts),
   contracts: many(contracts),
+  actionItems: many(actionItems),
 }));
 
 export const dealContactsRelations = relations(dealContacts, ({ one }) => ({
@@ -821,5 +855,34 @@ export const invoicesRelations = relations(invoices, ({ one }) => ({
   contract: one(contracts, {
     fields: [invoices.contractId],
     references: [contracts.id],
+  }),
+}));
+
+export const actionItemsRelations = relations(actionItems, ({ one }) => ({
+  organization: one(organizations, {
+    fields: [actionItems.organizationId],
+    references: [organizations.id],
+  }),
+  assignee: one(users, {
+    fields: [actionItems.assigneeId],
+    references: [users.id],
+    relationName: "actionItemsAsAssignee",
+  }),
+  meeting: one(meetings, {
+    fields: [actionItems.meetingId],
+    references: [meetings.id],
+  }),
+  deal: one(deals, {
+    fields: [actionItems.dealId],
+    references: [deals.id],
+  }),
+  inquiry: one(inquiries, {
+    fields: [actionItems.inquiryId],
+    references: [inquiries.id],
+  }),
+  createdBy: one(users, {
+    fields: [actionItems.createdById],
+    references: [users.id],
+    relationName: "actionItemsAsCreator",
   }),
 }));
