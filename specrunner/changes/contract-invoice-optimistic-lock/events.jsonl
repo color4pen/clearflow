@@ -65,3 +65,9 @@
 {"type":"transition","ts":"2026-06-27T01:07:27.403Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-27T01:07:27.404Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-27T01:07:27.407Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-27T01:08:09.568Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"fc92bc3f-587b-474e-96f6-afb0784bacb4","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-27T01:07:27.415Z","endedAt":"2026-06-27T01:08:08.154Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-27T01:08:08.154Z","outputs":[{"path":"specrunner/changes/contract-invoice-optimistic-lock","hash":null}],"inputs":[{"path":"specrunner/changes/contract-invoice-optimistic-lock/review-feedback-001.md","hash":"sha256:b3ad4ad89ca67c1741083424e40246f1e2978b7fd17ae478c156b238600c646a"}]}
+{"type":"transition","ts":"2026-06-27T01:08:09.577Z","step":"step-transition","status":"ok","message":"code-fixer → domain-invariants"}
+{"type":"transition","ts":"2026-06-27T01:08:09.579Z","step":"domain-invariants","status":"started","message":"domain-invariants iteration 1 started"}
+{"type":"transition","ts":"2026-06-27T01:08:09.582Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
