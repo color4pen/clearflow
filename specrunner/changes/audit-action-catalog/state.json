@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "37f69adb-18a7-489e-9644-f54ddb1a71e1",
   "createdAt": "2026-06-27T12:42:22.838Z",
-  "updatedAt": "2026-06-27T13:15:03.421Z",
+  "updatedAt": "2026-06-27T13:19:33.083Z",
   "request": {
     "title": "監査ログ action / targetType の型カタログ化",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-review",
+  "step": "domain-invariants",
   "status": "running",
   "branch": "change/audit-action-catalog-37f69adb",
   "error": null,
@@ -34,7 +34,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 33,
+    "historyCount": 38,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -42,7 +42,8 @@
       "spec-fixer": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 1,
+      "code-review": 1
     }
   }
 }
