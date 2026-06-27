@@ -1,12 +1,13 @@
 import { inquiryRepository, clientRepository } from "@/infrastructure/repositories";
+import type { LinkTargetResult } from "./searchDeals";
 
 export async function searchInquiries(
   organizationId: string,
   query: string
-): Promise<{ id: string; label: string }[]> {
+): Promise<LinkTargetResult[]> {
   const inquiries = await inquiryRepository.searchByTitle(organizationId, query);
 
-  // 引合タイトルだけでは顧客の区別が付かないため、ラベルに顧客名を添える（顧客未確定の引合もあるため null 許容）
+  // タイトルだけでは顧客の区別が付かないため顧客名を解決する（顧客未確定の引合もあるため null 許容）
   const clientIds = [
     ...new Set(
       inquiries
@@ -22,13 +23,12 @@ export async function searchInquiries(
     if (client) clientNameById.set(client.id, client.name);
   }
 
-  return inquiries.map((inquiry) => {
-    const clientName = inquiry.clientId
-      ? clientNameById.get(inquiry.clientId)
-      : undefined;
-    return {
-      id: inquiry.id,
-      label: clientName ? `${clientName} / ${inquiry.title}` : inquiry.title,
-    };
-  });
+  return inquiries.map((inquiry) => ({
+    id: inquiry.id,
+    primary: inquiry.title,
+    secondary: inquiry.clientId
+      ? clientNameById.get(inquiry.clientId) ?? null
+      : null,
+    href: `/inquiries/${inquiry.id}`,
+  }));
 }

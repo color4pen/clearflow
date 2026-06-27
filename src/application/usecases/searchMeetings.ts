@@ -1,33 +1,33 @@
 import { meetingRepository, dealRepository, inquiryRepository } from "@/infrastructure/repositories";
 import { formatDateJP } from "@/lib/dateUtils";
 import { meetingTypeLabels } from "@/lib/meetingLabels";
+import type { LinkTargetResult } from "./searchDeals";
 
 export async function searchMeetings(
   organizationId: string,
   query: string
-): Promise<{ id: string; label: string }[]> {
+): Promise<LinkTargetResult[]> {
   const meetings = await meetingRepository.searchBySummary(organizationId, query);
 
-  const results: { id: string; label: string }[] = [];
+  const results: LinkTargetResult[] = [];
 
   for (const meeting of meetings) {
-    const dateStr = formatDateJP(meeting.date);
-    const typeLabel = meetingTypeLabels[meeting.type];
-    let label = `${dateStr} ${typeLabel}`;
+    const primary = `${formatDateJP(meeting.date)} ${meetingTypeLabels[meeting.type]}`;
+    let secondary: string | null = null;
+    // 会議画面は案件配下にのみ存在する（引合直下の会議はリンク先なし）
+    const href = meeting.dealId
+      ? `/deals/${meeting.dealId}/meetings/${meeting.id}`
+      : null;
 
     if (meeting.dealId) {
       const deal = await dealRepository.findById(meeting.dealId, organizationId);
-      if (deal) {
-        label += `（${deal.title}）`;
-      }
+      if (deal) secondary = deal.title;
     } else if (meeting.inquiryId) {
       const inquiry = await inquiryRepository.findById(meeting.inquiryId, organizationId);
-      if (inquiry) {
-        label += `（${inquiry.title}）`;
-      }
+      if (inquiry) secondary = inquiry.title;
     }
 
-    results.push({ id: meeting.id, label });
+    results.push({ id: meeting.id, primary, secondary, href });
   }
 
   return results;

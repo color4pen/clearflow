@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { searchLinkTargetsAction } from "@/app/actions/actionItems";
+import { DataTable } from "@/app/components";
+import type { LinkTargetResult } from "@/application/usecases";
 
 export type LinkTarget = {
   type: "deal" | "inquiry" | "meeting";
@@ -51,7 +53,7 @@ function LinkTargetPickerContent({ initialValue, onConfirm, onCancel }: ContentP
     initialValue?.type ?? "deal"
   );
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<{ id: string; label: string }[]>([]);
+  const [results, setResults] = useState<LinkTargetResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
@@ -74,6 +76,45 @@ function LinkTargetPickerContent({ initialValue, onConfirm, onCancel }: ContentP
     setQuery("");
     setResults([]);
   }
+
+  function handleSelect(row: LinkTargetResult) {
+    onConfirm({
+      type: activeTab,
+      id: row.id,
+      label: row.secondary ? `${row.secondary} / ${row.primary}` : row.primary,
+    });
+  }
+
+  const columns = [
+    {
+      key: "secondary",
+      header: activeTab === "meeting" ? "案件 / 引合" : "顧客",
+      render: (row: LinkTargetResult) => row.secondary ?? "—",
+    },
+    {
+      key: "primary",
+      header: activeTab === "meeting" ? "日時・種別" : "タイトル",
+      render: (row: LinkTargetResult) => row.primary,
+    },
+    {
+      key: "open",
+      header: "",
+      align: "right" as const,
+      // 行クリックは選択。リンクは別タブで対象画面を開く（選択と競合させない）
+      render: (row: LinkTargetResult) =>
+        row.href ? (
+          <a
+            href={row.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-primary underline whitespace-nowrap"
+          >
+            開く ↗
+          </a>
+        ) : null,
+    },
+  ];
 
   return (
     <div
@@ -125,21 +166,12 @@ function LinkTargetPickerContent({ initialValue, onConfirm, onCancel }: ContentP
               {query ? "該当する結果がありません" : "キーワードを入力して検索してください"}
             </p>
           ) : (
-            <ul className="divide-y divide-border-light">
-              {results.map((item) => (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      onConfirm({ type: activeTab, id: item.id, label: item.label })
-                    }
-                    className="w-full text-left text-xs px-2 py-2 hover:bg-bg-surface-alt text-text cursor-pointer"
-                  >
-                    {item.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
+            <DataTable<LinkTargetResult>
+              columns={columns}
+              rows={results}
+              rowKey={(row) => row.id}
+              onRowClick={handleSelect}
+            />
           )}
         </div>
 

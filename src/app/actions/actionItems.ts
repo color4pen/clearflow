@@ -11,6 +11,7 @@ import {
   searchDeals,
   searchInquiries,
   searchMeetings,
+  type LinkTargetResult,
 } from "@/application/usecases";
 import { actionItemRepository } from "@/infrastructure/repositories";
 import { meetingRepository } from "@/infrastructure/repositories";
@@ -319,7 +320,7 @@ const searchLinkTargetsSchema = z.object({
 
 export async function searchLinkTargetsAction(
   data: unknown
-): Promise<{ data?: { id: string; label: string }[]; message?: string }> {
+): Promise<{ data?: LinkTargetResult[]; message?: string }> {
   const session = await auth();
   if (!session?.user?.id) {
     return { message: "認証が必要です" };
@@ -346,7 +347,7 @@ export async function searchLinkTargetsAction(
   const { type, query } = parsed.data;
   const organizationId = session.user.organizationId;
 
-  let results: { id: string; label: string }[];
+  let results: LinkTargetResult[];
 
   if (type === "deal") {
     results = await searchDeals(organizationId, query);
