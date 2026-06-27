@@ -82,3 +82,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/optimistic-lock-remaining-entities/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-27T03:47:45.805Z","endedAt":"2026-06-27T03:47:47.755Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-27T03:47:47.755Z","outputs":[{"path":"specrunner/changes/optimistic-lock-remaining-entities/pr-create-result.md","hash":"sha256:ac31883d080932b90ecfa602069ea3a9329e906ee2060860c24692315cc6c9ab"}],"inputs":[{"path":"feat/optimistic-lock-remaining-entities-df4f6247","hash":null}]}
 {"type":"transition","ts":"2026-06-27T03:47:47.762Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-27T03:52:07.869Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
