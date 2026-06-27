@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "4e4ba1c3-fd55-4cbe-8582-29c4605536f2",
   "createdAt": "2026-06-27T13:39:04.210Z",
-  "updatedAt": "2026-06-27T14:58:42.701Z",
+  "updatedAt": "2026-06-27T15:01:51.272Z",
   "request": {
     "title": "監査ログ記録の型付きヘルパへの集約",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/audit-record-helper-4e4ba1c3",
   "error": null,
   "pipelineId": "standard",
@@ -34,8 +34,13 @@
     }
   ],
   "resumePoint": null,
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/121",
+    "number": 121,
+    "createdAt": "2026-06-27T15:01:51.260Z"
+  },
   "_journal": {
-    "historyCount": 64,
+    "historyCount": 69,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -47,7 +52,9 @@
       "code-review": 1,
       "domain-invariants": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
