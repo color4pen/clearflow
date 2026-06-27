@@ -61,3 +61,10 @@
 {"type":"transition","ts":"2026-06-27T03:43:49.977Z","step":"step-transition","status":"ok","message":"domain-invariants → regression-gate"}
 {"type":"transition","ts":"2026-06-27T03:43:49.980Z","step":"regression-gate","status":"started","message":"regression-gate iteration 1 started"}
 {"type":"transition","ts":"2026-06-27T03:43:49.981Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
+{"type":"transition","ts":"2026-06-27T03:44:20.974Z","step":"regression-gate-verdict","status":"ok","message":"regression-gate verdict: approved"}
+{"type":"step-attempt","step":"regression-gate","sessionId":"4e1306fe-7c38-4580-a18f-6014c0ece5c9","outcome":{"verdict":"approved","findingsPath":"specrunner/changes/optimistic-lock-remaining-entities/regression-gate-result-001.md","error":null,"toolResult":{"ok":true,"approved":true,"findings":[]},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-06-27T03:43:49.996Z","endedAt":"2026-06-27T03:44:18.854Z"}
+{"type":"lineage","step":"regression-gate","ts":"2026-06-27T03:44:18.854Z","outputs":[{"path":"specrunner/changes/optimistic-lock-remaining-entities/regression-gate-result-002.md","hash":null}],"inputs":[{"path":".","hash":null}]}
+{"type":"transition","ts":"2026-06-27T03:44:20.983Z","step":"regression-gate","status":"ok","message":"regression-gate iteration 1 completed with verdict: approved"}
+{"type":"transition","ts":"2026-06-27T03:44:20.984Z","step":"step-transition","status":"ok","message":"regression-gate → conformance"}
+{"type":"transition","ts":"2026-06-27T03:44:20.986Z","step":"conformance","status":"started","message":"conformance iteration 1 started"}
+{"type":"transition","ts":"2026-06-27T03:44:20.988Z","step":"conformance-started","status":"started","message":"Starting conformance step"}
