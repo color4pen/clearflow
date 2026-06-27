@@ -99,6 +99,26 @@
       },
       "jobId": "690e77d5-1284-4599-8298-e73aa1f25b3c",
       "stepName": "implementer"
+    },
+    {
+      "command": "job",
+      "timestamp": "2026-06-27T09:35:45.501Z",
+      "modelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 4799,
+          "outputTokens": 13,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "claude-sonnet-4-6": {
+          "inputTokens": 20,
+          "outputTokens": 13823,
+          "cacheReadInputTokens": 920451,
+          "cacheCreationInputTokens": 91790
+        }
+      },
+      "jobId": "690e77d5-1284-4599-8298-e73aa1f25b3c",
+      "stepName": "code-review"
     }
   ]
 }
