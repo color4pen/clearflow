@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "df4f6247-fbaf-414c-bce0-27b04237f41d",
   "createdAt": "2026-06-27T03:00:48.805Z",
-  "updatedAt": "2026-06-27T03:39:47.817Z",
+  "updatedAt": "2026-06-27T03:43:49.981Z",
   "request": {
     "title": "残りの更新系エンティティの楽観的ロック（会議・アクションアイテム・売上目標）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/optimistic-lock-remaining-entities-df4f6247",
   "error": null,
@@ -34,7 +34,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 38,
+    "historyCount": 43,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -43,7 +43,8 @@
       "test-case-gen": 1,
       "implementer": 1,
       "verification": 1,
-      "code-review": 1
+      "code-review": 1,
+      "domain-invariants": 1
     }
   }
 }
