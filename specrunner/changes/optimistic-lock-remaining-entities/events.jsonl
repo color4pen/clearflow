@@ -74,3 +74,11 @@
 {"type":"transition","ts":"2026-06-27T03:47:23.947Z","step":"conformance","status":"ok","message":"conformance iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-27T03:47:23.948Z","step":"step-transition","status":"ok","message":"conformance → adr-gen"}
 {"type":"transition","ts":"2026-06-27T03:47:23.951Z","step":"adr-gen-started","status":"started","message":"Starting adr-gen step"}
+{"type":"transition","ts":"2026-06-27T03:47:45.790Z","step":"adr-gen-verdict","status":"ok","message":"adr-gen verdict: success"}
+{"type":"step-attempt","step":"adr-gen","sessionId":"73d969c6-406a-4a35-b5a5-8da8eea05190","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-27T03:47:23.965Z","endedAt":"2026-06-27T03:47:44.354Z"}
+{"type":"transition","ts":"2026-06-27T03:47:45.798Z","step":"step-transition","status":"ok","message":"adr-gen → pr-create"}
+{"type":"transition","ts":"2026-06-27T03:47:45.803Z","step":"step-transition","status":"ok","message":"Transitioning to pr-create step"}
+{"type":"transition","ts":"2026-06-27T03:47:47.756Z","step":"pr-create-verdict","status":"ok","message":"pr-create verdict: success"}
+{"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/optimistic-lock-remaining-entities/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-27T03:47:45.805Z","endedAt":"2026-06-27T03:47:47.755Z"}
+{"type":"lineage","step":"pr-create","ts":"2026-06-27T03:47:47.755Z","outputs":[{"path":"specrunner/changes/optimistic-lock-remaining-entities/pr-create-result.md","hash":"sha256:ac31883d080932b90ecfa602069ea3a9329e906ee2060860c24692315cc6c9ab"}],"inputs":[{"path":"feat/optimistic-lock-remaining-entities-df4f6247","hash":null}]}
+{"type":"transition","ts":"2026-06-27T03:47:47.762Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
