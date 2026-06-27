@@ -32,7 +32,7 @@ Meeting モデルには `title` が無く、`type`（列挙）/ `date` / `summar
 
 - 案件・引合・会議をサーバー検索（部分一致、上限 20 件）で絞り込める再利用可能なピッカーモーダルを新設する
 - タスクの新規作成・編集の双方でピッカーを使い、紐づけ先を選択・変更・クリアできるようにする
-- 単一紐づけセマンティクスを導入し、3 FK のうち最大 1 つだけが非 null であることを usecase で保証する
+- 単一紐づけセマンティクスを導入し、ピッカー経由のタスク作成・編集では選んだ type の FK のみをセットし他 2 つを null にする（usecase での不変条件強制は行わない）
 - 既存の全件 `<select>` プルダウンを廃止し、`TaskList` ページからの全件ロード（`listDeals` / `listInquiries`）を除去する
 
 **Non-Goals**:
@@ -45,11 +45,11 @@ Meeting モデルには `title` が無く、`type`（列挙）/ `date` / `summar
 
 ## Decisions
 
-### D1: 単一紐づけに統一し、3 FK のうち最大 1 つが非 null である不変条件を usecase で保証する
+### D1: 単一紐づけはピッカー経由に限定し、呼び出し元（Server Action / UI）で FK マッピングを行う
 
-**Rationale**: ピッカーで「案件/引合/会議のいずれか 1 つを選ぶ」という UI が明快であり、会議は案件/引合に属するため親も辿れる。usecase レイヤー（createActionItem / updateActionItem）で、選択された type の FK のみセットし他 2 つを null にすることで不変条件を強制する。
+**Rationale**: ピッカーで「案件/引合/会議のいずれか 1 つを選ぶ」という UI が明快であり、会議は案件/引合に属するため親も辿れる。ただし単一紐づけの強制は usecase レイヤーには追加しない。理由は、MeetingActionItemsSection などのコンテキスト作成は meetingId と dealId を同時に送信しており、usecase に「最大 1 FK」の不変条件を追加するとこれを壊し、会議タスク一覧の「親案件名表示」が失われるためである。代わりに、ピッカーを使う経路（TaskList 新規作成・ActionItemModal 編集）の呼び出し元（Server Action または UI コンポーネント）が linkTarget を FK にマッピングする際に、選択された type の FK のみをセットし他 2 つを null にする。usecase は既存のシグネチャ（dealId / inquiryId / meetingId を独立に受け取る）を維持する。
 
-**Alternatives considered**: 現状の独立した複数 FK 維持 — 却下。UI が煩雑で「案件と引合の両方に紐づく」意味が曖昧。DB スキーマの CHECK 制約追加 — 却下。既存データへの影響リスクがあり、usecase での保証で十分。
+**Alternatives considered**: usecase で「最大 1 FK」不変条件を強制 — 却下。MeetingActionItemsSection（meetingId+dealId 同時送信）が壊れ、会議タスクの一覧表示が「案件名」→「会議日付」に変わる。DB スキーマの CHECK 制約追加 — 却下。既存データへの影響リスクがあり、呼び出し元でのマッピングで十分。
 
 ### D2: サーバー検索を採用し、クライアント全件ロードを廃止する
 
@@ -83,7 +83,7 @@ Meeting モデルには `title` が無く、`type`（列挙）/ `date` / `summar
 
 ## Risks / Trade-offs
 
-[Risk] 単一紐づけへの移行で、既存データに複数 FK が同時にセットされた行が存在する可能性 → **Mitigation**: usecase の不変条件は新規作成・更新時のみ適用する。既存データの一括クリーンアップはスコープ外とし、表示時は既存の `listActionItems` の優先ロジック（`dealId → meetingId → inquiryId`）で 1 つだけ表示される。
+[Risk] 単一紐づけへの移行で、既存データに複数 FK が同時にセットされた行が存在する可能性 → **Mitigation**: ピッカー経由の作成・更新では呼び出し元が FK を単一化して送るため、新規操作は単一紐づけになる。既存データの一括クリーンアップはスコープ外とし、表示時は既存の `listActionItems` の優先ロジック（`dealId → meetingId → inquiryId`）で 1 つだけ表示される。MeetingActionItemsSection からの作成は引き続き meetingId+dealId を保持するため、会議タスクの一覧「親案件名表示」も維持される。
 
 [Risk] `ilike` による部分一致検索のパフォーマンス → **Mitigation**: LIMIT 20 で結果を制限し、organizationId のインデックスでテナント絞り込みが先に効く。大量データでの `ilike` 性能問題はスコープ外の将来課題とする。
 

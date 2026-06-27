@@ -40,20 +40,33 @@
   - シグネチャ: `searchInquiries(organizationId: string, query: string): Promise<{ id: string; label: string }[]>`
   - `inquiryRepository.searchByTitle(organizationId, query)` を呼び出す
   - 結果を `{ id: inquiry.id, label: inquiry.title }` にマッピングして返す
+- [ ] `src/lib/dateUtils.ts` に `formatDateJP` 関数を切り出す（新規作成または既存ファイルへの追記）
+  - `listActionItems.ts` の private `formatDateJP` 実装をここへ移動する
+  - export: `export function formatDateJP(date: Date | string): string`
+  - `listActionItems.ts` は `src/lib/dateUtils.ts` から import するよう修正する
+- [ ] `src/lib/meetingLabels.ts` に `meetingTypeLabels` を切り出す（新規作成）
+  - `src/app/(dashboard)/labels.ts` に定義されている `meetingTypeLabels` マップをここへ移動する
+  - export: `export const meetingTypeLabels: Record<MeetingType, string> = { ... }`
+  - `src/app/(dashboard)/labels.ts` は `src/lib/meetingLabels.ts` から re-export するよう修正する
 - [ ] `src/application/usecases/searchMeetings.ts` を新規作成する
   - シグネチャ: `searchMeetings(organizationId: string, query: string): Promise<{ id: string; label: string }[]>`
   - `meetingRepository.searchBySummary(organizationId, query)` を呼び出す
   - 会議ごとに label を組み立てる:
+    - `formatDateJP` は `src/lib/dateUtils.ts` からインポートする（重複実装禁止）
+    - `meetingTypeLabels` は `src/lib/meetingLabels.ts` からインポートする（UI 層 `src/app/(dashboard)/` からのインポート禁止）
     - `formatDateJP(meeting.date)` と `meetingTypeLabels[meeting.type]` を結合
     - meeting に `dealId` がある場合は `dealRepository.findById(meeting.dealId, organizationId)` で親案件の title を取得し `（${deal.title}）` を追記
     - meeting に `inquiryId` がある場合は `inquiryRepository.findById(meeting.inquiryId, organizationId)` で親引合の title を取得し `（${inquiry.title}）` を追記
-    - `formatDateJP` は `listActionItems.ts` と同じロジック（重複を避けるため共通化を検討するが、スコープ内では各ファイル内にヘルパーとして定義する）
-    - `meetingTypeLabels` は `src/app/(dashboard)/labels.ts` からインポートする
   - 結果を `{ id: meeting.id, label }` にマッピングして返す
 - [ ] `src/application/usecases/index.ts` に `searchDeals` / `searchInquiries` / `searchMeetings` の 3 export を追加する
 
 **Acceptance Criteria**:
+- `src/lib/dateUtils.ts` に `formatDateJP` が export されている
+- `src/lib/meetingLabels.ts` に `meetingTypeLabels` が export されている
+- `listActionItems.ts` が `src/lib/dateUtils.ts` から `formatDateJP` を import している（ファイル内 private 定義を削除）
+- `src/app/(dashboard)/labels.ts` が `src/lib/meetingLabels.ts` から re-export している
 - 3 つの usecase ファイルが存在する
+- searchMeetings.ts が `src/lib/dateUtils.ts` と `src/lib/meetingLabels.ts` から import しており、`src/app/(dashboard)/` 以下からは import していない
 - searchMeetings の label が「日付 種別（親名）」形式である
 - usecases/index.ts から export されている
 - `typecheck` が green
@@ -64,6 +77,7 @@
   - 入力スキーマ: `z.object({ type: z.enum(["deal", "inquiry", "meeting"]), query: z.string() })`
   - 戻り型: `Promise<{ data?: { id: string; label: string }[]; message?: string }>`
   - 認証チェック: `auth()` でセッション確認。未認証なら `{ message: "認証が必要です" }` を返す
+  - レートリミット: 認証確認直後に `checkRateLimit(session.user.id)` を呼び出す。既存の `createActionItemAction` 等と同じパターンで実装する。超過時は `{ message: "リクエストが多すぎます。しばらく待ってから再試行してください。" }` を返す
   - 権限チェック: `canPerform(session.user.role, "actionItem", "create")` — タスクの作成/編集が可能なユーザーのみ検索を許可する
   - type に応じて `searchDeals` / `searchInquiries` / `searchMeetings` を `session.user.organizationId` と `parsed.data.query` で呼び出す
   - 結果を `{ data: results }` で返す
@@ -71,32 +85,33 @@
 **Acceptance Criteria**:
 - Server Action が `"use server"` 宣言を持つ
 - 認証・権限チェックが含まれる
+- `checkRateLimit` の呼び出しが含まれる（他の actionItems アクションと同様）
 - organizationId はセッションから取得している（リクエストボディから受け取っていない）
 - type 別に正しい usecase を呼んでいる
 - `typecheck` が green
 
-## T-04: 単一紐づけの不変条件を usecase に追加する
+## T-04: 単一紐づけ FK マッピングを呼び出し元（Server Action / UI）で行う
 
-- [ ] `src/application/usecases/createActionItem.ts` を修正する
-  - 入力パラメータの型は変更しない（既存の `meetingId` / `dealId` / `inquiryId` をそのまま使う）
-  - FK セット前に、3 FK のうち非 null のものが最大 1 つであることをバリデーションする
-  - 複数の FK が同時に非 null で渡された場合は `{ ok: false, reason: "紐づけ先は1つだけ指定できます" }` を返す
-  - （注意: DealActionItemsSection は dealId のみ、MeetingActionItemsSection は meetingId + dealId を渡すが、meetingId + dealId の同時セットは既存動作であるため、この不変条件は「dealId のみ」「inquiryId のみ」「meetingId のみ」「meetingId + dealId のみ（会議の親案件）」を許容するか、要件に忠実に「最大 1 つ」のみ許容するか判断が必要）
-  - 要件「タスクは案件・引合・会議のいずれか1つにのみ紐づく」に従い、3 FK のうち最大 1 つが非 null であることをチェックする。MeetingActionItemsSection は meetingId と dealId を同時に渡しているが、これはスコープ外のため、createActionItem の不変条件では「meetingId が指定された場合は dealId / inquiryId を無視する」ように調整する。具体的には:
-    - `meetingId` が指定された場合: `dealId = null`, `inquiryId = null` として保存
-    - `dealId` が指定された場合: `meetingId = null`, `inquiryId = null` として保存
-    - `inquiryId` が指定された場合: `meetingId = null`, `dealId = null` として保存
-    - いずれも指定されない場合: すべて null
-  - この優先ロジックにより MeetingActionItemsSection の既存動作（meetingId + dealId 同時送信）を壊さず meetingId 優先で保存する
-- [ ] `src/application/usecases/updateActionItem.ts` を修正する
-  - 同様に、更新時に渡された FK から単一紐づけを強制する
-  - `linkTarget` 情報（`type` + `id`）が渡された場合に、対象 type の FK をセットし他 2 つを null にするロジックを追加する
-  - ただし usecase のシグネチャは既存のまま（`dealId` / `inquiryId` / `meetingId` を個別に受け取る）とし、呼び出し元（Server Action）で type に応じた FK マッピングを行う
+createActionItem および updateActionItem usecase は変更しない。単一紐づけの FK マッピングは、ピッカーを使う経路の呼び出し元が一貫して担う。
+
+- [ ] `src/application/usecases/createActionItem.ts` は変更しない
+  - usecase は `dealId` / `inquiryId` / `meetingId` を既存のまま独立に受け取り、渡された値をそのまま保存する
+  - 単一紐づけの強制を usecase 内に追加しない（MeetingActionItemsSection が meetingId+dealId を同時送信する動作を保持するため）
+- [ ] `src/application/usecases/updateActionItem.ts` は変更しない
+  - 同様に、usecase のシグネチャと保存ロジックは既存のまま維持する
+- [ ] ピッカー経由のタスク作成（TaskList → createActionItemAction）で FK マッピングを行う（T-08 で実装）
+  - `linkTarget.type === "deal"`: `dealId: linkTarget.id, inquiryId: null, meetingId: null`
+  - `linkTarget.type === "inquiry"`: `inquiryId: linkTarget.id, dealId: null, meetingId: null`
+  - `linkTarget.type === "meeting"`: `meetingId: linkTarget.id, dealId: null, inquiryId: null`
+  - `linkTarget === null`: `dealId: null, inquiryId: null, meetingId: null`
+- [ ] ピッカー経由のタスク更新（ActionItemRow → updateActionItemAction）で FK マッピングを行う（T-07 で実装）
+  - 同上の FK マッピングロジックを適用する
+- [ ] MeetingActionItemsSection は引き続き `createActionItemAction({ meetingId, dealId, ... })` を同時送信し、usecase がその値をそのまま保存することを確認する
 
 **Acceptance Criteria**:
-- createActionItem で 3 FK のうち最大 1 つが非 null になるように保証されている
-- updateActionItem でも同様の保証がある
-- MeetingActionItemsSection の既存動作（meetingId + dealId 同時送信）が壊れない
+- `createActionItem.ts` と `updateActionItem.ts` に FK 排他ロジック・優先ロジックが追加されていない
+- ピッカー経由の作成・更新では呼び出し元が単一の FK のみをセットして送信する
+- MeetingActionItemsSection からの作成で meetingId+dealId が両方保持される
 - `typecheck` が green
 
 ## T-05: LinkTargetPicker モーダルコンポーネントを新設する
@@ -119,16 +134,26 @@
     - `results`: `{ id: string; label: string }[]`
     - `isSearching`: 検索中フラグ
   - タブ UI: 「案件」「引合」「会議」の 3 タブ。タブ切り替えで query をリセットし results をクリアする
-  - 検索ボックス: テキスト入力、300ms デバウンスで `searchLinkTargetsAction({ type: activeTab, query })` を呼び出す
+  - 検索ボックス: テキスト入力、300ms デバウンスで `searchLinkTargetsAction({ type: activeTab, query })` を呼び出す。デバウンスは `useEffect` で管理し、cleanup 関数内で `clearTimeout` を呼ぶ（コンポーネントのアンマウント時やクエリ変更時にタイマーをキャンセルする）
   - 結果一覧: `results` を `<ul>` でリスト表示。各項目をクリックで `onConfirm({ type: activeTab, id: item.id, label: item.label })` を呼ぶ
   - 「なし」ボタン: `onConfirm(null)` を呼ぶ（紐づけ解除）
   - モーダル外クリックまたはキャンセルボタンで `onCancel()` を呼ぶ
   - スタイリング: 既存のモーダルパターン（ActionItemModal と同じ `fixed inset-0 bg-black/40` オーバーレイ、`bg-bg-surface` パネル）に準拠
   - デバウンスは `setTimeout` / `clearTimeout` で実装する（外部ライブラリ不使用）
+  - 実装パターン:
+    ```ts
+    useEffect(() => {
+      const timerId = setTimeout(() => {
+        // searchLinkTargetsAction を呼ぶ
+      }, 300);
+      return () => clearTimeout(timerId); // cleanup: アンマウント時・query 変更時にタイマーキャンセル
+    }, [query, activeTab]);
+    ```
 
 **Acceptance Criteria**:
 - 3 タブ（案件/引合/会議）が表示される
 - 検索入力がデバウンスされ searchLinkTargetsAction を呼ぶ
+- デバウンスの `useEffect` に cleanup 関数（`clearTimeout`）が存在する
 - 結果項目クリックで `{ type, id, label }` が onConfirm に渡される
 - 「なし」で null が onConfirm に渡される
 - `typecheck` が green
@@ -197,11 +222,11 @@
     - 「選択」ボタンで LinkTargetPicker を開く
   - `showPicker` state を追加して LinkTargetPicker の開閉を管理する
   - `handleOpenAdd` で `linkTarget` を null にリセットする
-  - `handleAdd` の `createActionItemAction` 呼び出しを修正する:
-    - `linkTarget?.type === "deal"`: `dealId: linkTarget.id`
-    - `linkTarget?.type === "inquiry"`: `inquiryId: linkTarget.id`
-    - `linkTarget?.type === "meeting"`: `meetingId: linkTarget.id`
-    - `linkTarget === null`: FK を渡さない
+  - `handleAdd` の `createActionItemAction` 呼び出しを修正する（T-07 と同じ FK マッピングパターンで他の FK を明示的に null にする）:
+    - `linkTarget?.type === "deal"`: `dealId: linkTarget.id, inquiryId: null, meetingId: null`
+    - `linkTarget?.type === "inquiry"`: `inquiryId: linkTarget.id, dealId: null, meetingId: null`
+    - `linkTarget?.type === "meeting"`: `meetingId: linkTarget.id, dealId: null, inquiryId: null`
+    - `linkTarget === null`: `dealId: null, inquiryId: null, meetingId: null`
   - LinkTargetPicker コンポーネントをインポートする
 - [ ] `src/app/(dashboard)/tasks/page.tsx` を修正する
   - `listDeals` / `listInquiries` のインポートを削除する
@@ -238,8 +263,18 @@
   - **searchLinkTargetsAction テスト**:
     - `actionItems.ts` に `searchLinkTargetsAction` が存在する
     - `searchLinkTargetsAction` 内に認証チェック（`auth()`）が含まれる
-  - **単一紐づけテスト**:
-    - `createActionItem.ts` に 3 FK の排他ロジックが含まれる（`meetingId` / `dealId` / `inquiryId` の null 設定コードが存在する）
+  - **単一紐づけ（呼び出し元）テスト**:
+    - `TaskList.tsx` のコード内で `linkTarget` から `dealId` / `inquiryId` / `meetingId` をマッピングするコードが存在する（呼び出し元での FK マッピング）
+    - `ActionItemRow.tsx` のコード内で `linkTarget` から `dealId` / `inquiryId` / `meetingId` をマッピングするコードが存在する（呼び出し元での FK マッピング）
+  - **MeetingActionItemsSection 保護テスト**:
+    - `createActionItem.ts` に `meetingId` を優先して `dealId` を `null` にするロジックが存在しない（MeetingActionItemsSection の dealId 保持を壊すリグレッション防止）
+    - `createActionItem.ts` に `dealId` / `inquiryId` / `meetingId` の優先ロジック（片方を null にするコード）が存在しない
+  - **アーキテクチャ境界テスト**:
+    - `searchMeetings.ts` が `src/app/(dashboard)/` 以下のファイルを import していない
+    - `searchMeetings.ts` が `src/lib/dateUtils` を import している
+    - `searchMeetings.ts` が `src/lib/meetingLabels` を import している
+  - **デバウンス cleanup テスト**:
+    - `LinkTargetPicker.tsx` 内に `clearTimeout` が存在する（アンマウント時のタイマーキャンセル）
   - **UI 旧プルダウン除去テスト**:
     - `TaskList.tsx` に `dealOptions` が存在しない
     - `TaskList.tsx` に `inquiryOptions` が存在しない
@@ -249,6 +284,9 @@
 **Acceptance Criteria**:
 - 全テストが `bun test src/__tests__/usecases/linkTargetSearch.test.ts` で green
 - テストがソースコードの静的解析パターンに従っている
+- MeetingActionItemsSection 保護テストが `createActionItem.ts` の usecase 内に dealId=null ロジックが無いことを確認している
+- アーキテクチャ境界テストが searchMeetings.ts の import パスを検証している
+- デバウンス cleanup テストが `LinkTargetPicker.tsx` 内に `clearTimeout` が存在することを確認している
 
 ## T-10: 最終検証
 
