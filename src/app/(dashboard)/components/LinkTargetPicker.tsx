@@ -157,22 +157,22 @@ function LinkTargetPickerContent({ initialValue, onConfirm, onCancel }: ContentP
           />
         </div>
 
-        {/* 結果一覧 */}
+        {/* 結果一覧。ヘッダーを常時表示するためテーブルは常に描画し、
+            取得中・該当なしの状態はテーブルを差し替えず下にメッセージとして出す */}
         <div className="h-[360px] overflow-y-auto">
+          <DataTable<LinkTargetResult>
+            columns={columns}
+            rows={results}
+            rowKey={(row) => row.id}
+            onRowClick={handleSelect}
+          />
           {isSearching ? (
             <p className="text-xs text-text-muted px-1 py-2">検索中...</p>
           ) : results.length === 0 ? (
             <p className="text-xs text-text-muted px-1 py-2">
               {query ? "該当する結果がありません" : "キーワードを入力して検索してください"}
             </p>
-          ) : (
-            <DataTable<LinkTargetResult>
-              columns={columns}
-              rows={results}
-              rowKey={(row) => row.id}
-              onRowClick={handleSelect}
-            />
-          )}
+          ) : null}
         </div>
 
         {/* アクションボタン */}
