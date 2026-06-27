@@ -158,7 +158,7 @@ function LinkTargetPickerContent({ initialValue, onConfirm, onCancel }: ContentP
         </div>
 
         {/* 結果一覧 */}
-        <div className="min-h-[120px] max-h-[240px] overflow-y-auto">
+        <div className="h-[360px] overflow-y-auto">
           {isSearching ? (
             <p className="text-xs text-text-muted px-1 py-2">検索中...</p>
           ) : results.length === 0 ? (
