@@ -1,8 +1,9 @@
 import {
   dealRepository,
   contractRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import { validateContractAmount, validateContractDates } from "@/domain/services/contractValidation";
 import { dispatcher } from "@/domain/events";
@@ -66,7 +67,7 @@ export async function createContract(data: {
           tx
         );
 
-        await auditLogRepository.create(
+        await recordAudit(
           {
             action: "contract.create",
             targetType: "contract",

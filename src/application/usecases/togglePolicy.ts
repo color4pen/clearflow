@@ -1,7 +1,8 @@
 import {
   approvalPolicyRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { ApprovalPolicy } from "@/domain/models/approvalPolicy";
 
@@ -35,7 +36,7 @@ export async function togglePolicy(data: {
 
       if (!p) return null;
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: newIsActive ? "policy.activate" : "policy.deactivate",
           targetType: "approvalPolicy",

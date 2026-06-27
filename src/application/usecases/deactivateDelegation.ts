@@ -1,7 +1,8 @@
 import {
   approvalDelegationRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 
 export type DeactivateDelegationResult =
@@ -30,7 +31,7 @@ export async function deactivateDelegation(data: {
         throw new Error(NOT_FOUND);
       }
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "delegation.deactivate",
           targetType: "delegation",

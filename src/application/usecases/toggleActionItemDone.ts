@@ -1,4 +1,6 @@
-import { actionItemRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { actionItemRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { ActionItem } from "@/domain/models/actionItem";
 
@@ -27,7 +29,7 @@ export async function toggleActionItemDone(data: {
       );
       if (!updated) return null;
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "action_item.toggle",
           targetType: "action_item",

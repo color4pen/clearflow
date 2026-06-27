@@ -1,7 +1,8 @@
 import {
   invoiceRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import { validateInvoiceTransition } from "@/domain/services/invoiceTransition";
 import { dispatcher } from "@/domain/events";
@@ -52,7 +53,7 @@ export async function updateInvoiceStatus(data: {
           return null;
         }
 
-        await auditLogRepository.create(
+        await recordAudit(
           {
             action: "invoice.update_status",
             targetType: "invoice",

@@ -42,7 +42,7 @@ describe("createDelegation usecase — static analysis", () => {
 
   it("records audit log on success", async () => {
     const src = await readSrc("application/usecases/createDelegation.ts");
-    expect(src).toContain("auditLogRepository");
+    expect(src).toContain("recordAudit");
     expect(src).toContain("delegation.create");
   });
 });
@@ -97,7 +97,7 @@ describe("deactivateDelegation usecase — static analysis", () => {
 
   it("records audit log on success", async () => {
     const src = await readSrc("application/usecases/deactivateDelegation.ts");
-    expect(src).toContain("auditLogRepository");
+    expect(src).toContain("recordAudit");
     expect(src).toContain("delegation.deactivate");
   });
 });

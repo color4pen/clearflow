@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "4e4ba1c3-fd55-4cbe-8582-29c4605536f2",
   "createdAt": "2026-06-27T13:39:04.210Z",
-  "updatedAt": "2026-06-27T14:01:45.123Z",
+  "updatedAt": "2026-06-27T14:03:39.576Z",
   "request": {
     "title": "監査ログ記録の型付きヘルパへの集約",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "change/audit-record-helper-4e4ba1c3",
   "error": null,
@@ -35,11 +35,12 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 17,
+    "historyCount": 20,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
-      "spec-review": 1
+      "spec-review": 1,
+      "test-case-gen": 1
     }
   }
 }

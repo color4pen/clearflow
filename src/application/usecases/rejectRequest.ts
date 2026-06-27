@@ -1,8 +1,9 @@
 import {
   requestRepository,
-  auditLogRepository,
   approvalStepRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { validateTransition } from "@/domain/services/requestTransition";
 import { getCurrentStep, isStepExpired } from "@/domain/services/approvalStepService";
 import { db } from "@/infrastructure/db";
@@ -82,7 +83,7 @@ export async function rejectRequest(data: {
             throw new Error(OPTIMISTIC_LOCK_ERROR);
           }
 
-          await auditLogRepository.create(
+          await recordAudit(
             {
               action: "approval_step.reject",
               targetType: "request",
@@ -178,7 +179,7 @@ export async function rejectRequest(data: {
           throw new Error(OPTIMISTIC_LOCK_ERROR);
         }
 
-        await auditLogRepository.create(
+        await recordAudit(
           {
             action: "request.reject",
             targetType: "request",

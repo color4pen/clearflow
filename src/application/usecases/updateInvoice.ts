@@ -1,8 +1,9 @@
 import {
   contractRepository,
   invoiceRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import { validateInvoiceDates } from "@/domain/services/invoiceValidation";
 import type { Invoice } from "@/domain/models/invoice";
@@ -78,7 +79,7 @@ export async function updateInvoice(data: {
         return null;
       }
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "invoice.update",
           targetType: "invoice",

@@ -1,4 +1,6 @@
-import { clientRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { clientRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import { validatePrimaryUniqueness } from "@/application/services/clientContactService";
 import type { ClientContact } from "@/domain/models/client";
@@ -47,7 +49,7 @@ export async function createClientContact(data: {
         tx
       );
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "client_contact.create",
           targetType: "client_contact",

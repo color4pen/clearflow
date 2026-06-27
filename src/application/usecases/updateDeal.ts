@@ -1,4 +1,6 @@
-import { dealRepository, auditLogRepository, userRepository } from "@/infrastructure/repositories";
+import { dealRepository, userRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { Deal, ContractType } from "@/domain/models/deal";
 
@@ -71,7 +73,7 @@ export async function updateDeal(data: {
         ...(data.notes !== undefined && { notes: data.notes }),
       });
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "deal.update",
           targetType: "deal",

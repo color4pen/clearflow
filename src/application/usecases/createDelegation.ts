@@ -1,8 +1,9 @@
 import {
   approvalDelegationRepository,
   userRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { ApprovalDelegation } from "@/domain/models/approvalDelegation";
 
@@ -83,7 +84,7 @@ export async function createDelegation(data: {
       tx
     );
 
-    await auditLogRepository.create(
+    await recordAudit(
       {
         action: "delegation.create",
         targetType: "delegation",

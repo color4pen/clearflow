@@ -1,4 +1,6 @@
-import { meetingRepository, dealRepository, inquiryRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { meetingRepository, dealRepository, inquiryRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { Meeting, MeetingType, HearingData, ActionItem, MeetingAttendee } from "@/domain/models/meeting";
 
@@ -62,7 +64,7 @@ export async function createMeeting(data: {
         tx
       );
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "meeting.create",
           targetType: "meeting",

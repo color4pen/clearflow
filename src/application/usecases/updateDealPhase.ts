@@ -1,7 +1,8 @@
 import {
   dealRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import { canDealTransition } from "@/domain/services";
 import { dispatcher } from "@/domain/events";
@@ -38,7 +39,7 @@ export async function updateDealPhase(data: {
           tx
         );
 
-        await auditLogRepository.create(
+        await recordAudit(
           {
             action: "deal.updatePhase",
             targetType: "deal",

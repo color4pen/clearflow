@@ -184,9 +184,9 @@ describe("createInvoice usecase 静的検証", () => {
     expect(content).toContain("invoiceRepository.create");
   });
 
-  it("TC-023: auditLogRepository.create の呼び出しが含まれる（監査ログ記録）", async () => {
+  it("TC-023: recordAudit の呼び出しが含まれる（監査ログ記録）", async () => {
     const content = await readSrc("application/usecases/createInvoice.ts");
-    expect(content).toContain("auditLogRepository.create");
+    expect(content).toContain("recordAudit");
     expect(content).toContain('"invoice.create"');
   });
 

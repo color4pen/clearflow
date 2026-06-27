@@ -1239,14 +1239,14 @@ describe("UI動線改善 — tenant isolation, audit log, and label tests", () =
     expect(content).toContain("session.user.organizationId");
   });
 
-  it("addDealContact usecase calls auditLogRepository", async () => {
+  it("addDealContact usecase calls recordAudit", async () => {
     const content = await readSrc("application/usecases/addDealContact.ts");
-    expect(content).toContain("auditLogRepository");
+    expect(content).toContain("recordAudit");
   });
 
-  it("removeDealContact usecase calls auditLogRepository", async () => {
+  it("removeDealContact usecase calls recordAudit", async () => {
     const content = await readSrc("application/usecases/removeDealContact.ts");
-    expect(content).toContain("auditLogRepository");
+    expect(content).toContain("recordAudit");
   });
 
   it("createClientContact usecase calls findById and createContact", async () => {
@@ -1468,17 +1468,17 @@ describe("Tenant isolation — delete operations", () => {
 
   it("deleteInquiry records audit log", async () => {
     const content = await readSrc("application/usecases/deleteInquiry.ts");
-    expect(content).toContain("auditLogRepository.create");
+    expect(content).toContain("recordAudit");
   });
 
   it("deleteDeal records audit log", async () => {
     const content = await readSrc("application/usecases/deleteDeal.ts");
-    expect(content).toContain("auditLogRepository.create");
+    expect(content).toContain("recordAudit");
   });
 
   it("deleteContract records audit log", async () => {
     const content = await readSrc("application/usecases/deleteContract.ts");
-    expect(content).toContain("auditLogRepository.create");
+    expect(content).toContain("recordAudit");
   });
 });
 

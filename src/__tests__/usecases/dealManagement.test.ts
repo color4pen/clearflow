@@ -35,11 +35,11 @@ describe("createDeal usecase 静的検証", () => {
     expect(content).toContain("dealRepository.findByInquiryId");
   });
 
-  it("auditLogRepository.create の呼び出しが含まれる（監査ログ記録）", async () => {
+  it("recordAudit の呼び出しが含まれる（監査ログ記録）", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createDeal.ts");
     // 実行・検証 - 監査ログ記録がある
-    expect(content).toContain("auditLogRepository.create");
+    expect(content).toContain("recordAudit");
   });
 
   it("clientId なし（inquiryId なし）の場合にエラーを返す分岐がある", async () => {
@@ -59,11 +59,11 @@ describe("updateDealPhase usecase 静的検証", () => {
     expect(content.includes("canDealTransition") || content.includes("canTransition")).toBe(true);
   });
 
-  it("auditLogRepository.create の呼び出しが含まれる（監査ログ記録）", async () => {
+  it("recordAudit の呼び出しが含まれる（監査ログ記録）", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/updateDealPhase.ts");
     // 実行・検証 - 監査ログ記録がある
-    expect(content).toContain("auditLogRepository.create");
+    expect(content).toContain("recordAudit");
   });
 
   it("requestRepository.create が呼ばれない（estimate_approval 分岐の撤去確認）", async () => {
@@ -123,11 +123,11 @@ describe("dealTransition 静的検証", () => {
 });
 
 describe("updateDeal usecase 静的検証", () => {
-  it("auditLogRepository.create の呼び出しが含まれる（監査ログ記録）", async () => {
+  it("recordAudit の呼び出しが含まれる（監査ログ記録）", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/updateDeal.ts");
     // 実行・検証 - 監査ログ記録がある
-    expect(content).toContain("auditLogRepository.create");
+    expect(content).toContain("recordAudit");
   });
 });
 

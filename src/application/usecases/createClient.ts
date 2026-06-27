@@ -1,4 +1,6 @@
-import { clientRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { clientRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { Client } from "@/domain/models/client";
 
@@ -54,7 +56,7 @@ export async function createClient(data: {
         }
       }
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "client.create",
           targetType: "client",

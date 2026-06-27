@@ -1,7 +1,8 @@
 import {
   contractRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import { canContractTransition } from "@/domain/services";
 import { dispatcher } from "@/domain/events";
@@ -44,7 +45,7 @@ export async function updateContractStatus(data: {
           return null;
         }
 
-        await auditLogRepository.create(
+        await recordAudit(
           {
             action: "contract.updateStatus",
             targetType: "contract",
