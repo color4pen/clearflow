@@ -6,6 +6,8 @@ export const RATE_LIMITS = {
   createRequest: { limit: 10, windowMs: 60_000 },
   approveReject: { limit: 30, windowMs: 60_000 },
   webhookManage: { limit: 10, windowMs: 60_000 },
+  // 検索（読み取り・結果上限あり）はインクリメンタル入力で多発するため緩く設定する
+  search: { limit: 120, windowMs: 60_000 },
 } as const;
 
 export async function checkRateLimit(params: {
