@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { listActionItems, listOrganizationUsers, listDeals, listInquiries } from "@/application/usecases";
+import { listActionItems, listOrganizationUsers } from "@/application/usecases";
 import { canPerform } from "@/domain/authorization";
 import { PageToolbar, SectionCard } from "@/app/components";
 import { TaskList } from "./TaskList";
@@ -19,20 +19,16 @@ export default async function TasksPage({
   const isDone = status === "done";
   const showAll = assignee === "all";
 
-  const [items, users, deals, inquiries] = await Promise.all([
+  const [items, users] = await Promise.all([
     listActionItems({
       organizationId,
       done: isDone,
       assigneeId: showAll ? undefined : currentUserId,
     }),
     listOrganizationUsers({ organizationId }),
-    listDeals(organizationId),
-    listInquiries(organizationId),
   ]);
 
   const orgUsers = users.map((u) => ({ id: u.id, name: u.name }));
-  const dealOptions = deals.map((d) => ({ id: d.id, title: d.title }));
-  const inquiryOptions = inquiries.map((i) => ({ id: i.id, title: i.title }));
 
   return (
     <div>
@@ -91,8 +87,6 @@ export default async function TasksPage({
           orgUsers={orgUsers}
           currentUserId={currentUserId}
           canDelete={canDelete}
-          dealOptions={dealOptions}
-          inquiryOptions={inquiryOptions}
         />
       </SectionCard>
     </div>

@@ -88,3 +88,6 @@ export { listActionItemsByDeal } from "./listActionItemsByDeal";
 export { listActionItemsByMeeting } from "./listActionItemsByMeeting";
 export { listActionItems } from "./listActionItems";
 export type { ActionItemWithSource } from "./listActionItems";
+export { searchDeals } from "./searchDeals";
+export { searchInquiries } from "./searchInquiries";
+export { searchMeetings } from "./searchMeetings";

@@ -1,8 +1,10 @@
-import { eq, and, sql, desc } from "drizzle-orm";
+import { eq, and, sql, desc, ilike } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { inquiries, clients } from "../schema";
 import type { Inquiry, InquiryWithClient, InquiryStatus } from "@/domain/models/inquiry";
+
+const LINK_SEARCH_LIMIT = 20;
 
 function mapRow(row: typeof inquiries.$inferSelect): Inquiry {
   return {
@@ -157,6 +159,24 @@ export async function deleteById(
   await queryRunner
     .delete(inquiries)
     .where(and(eq(inquiries.id, id), eq(inquiries.organizationId, organizationId)));
+}
+
+export async function searchByTitle(
+  organizationId: string,
+  query: string
+): Promise<Inquiry[]> {
+  const result = await db
+    .select()
+    .from(inquiries)
+    .where(
+      and(
+        eq(inquiries.organizationId, organizationId),
+        ilike(inquiries.title, `%${query}%`)
+      )
+    )
+    .orderBy(desc(inquiries.createdAt))
+    .limit(LINK_SEARCH_LIMIT);
+  return result.map(mapRow);
 }
 
 /**

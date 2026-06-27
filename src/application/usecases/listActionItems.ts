@@ -5,18 +5,12 @@ import {
   inquiryRepository,
 } from "@/infrastructure/repositories";
 import type { ActionItem } from "@/domain/models/actionItem";
+import { formatDateJP } from "@/lib/dateUtils";
 
 export type ActionItemWithSource = ActionItem & {
   sourceName: string;
   sourceHref: string | null;
 };
-
-function formatDateJP(date: Date): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}/${m}/${d}`;
-}
 
 export async function listActionItems(data: {
   organizationId: string;
