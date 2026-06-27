@@ -1,4 +1,4 @@
-import { eq, and, asc, desc } from "drizzle-orm";
+import { eq, and, asc, desc, sql } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { meetings } from "../schema";
@@ -20,6 +20,7 @@ function mapRow(row: typeof meetings.$inferSelect): Meeting {
     createdById: row.createdById,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    version: row.version,
   };
 }
 
@@ -111,13 +112,14 @@ export async function update(
     actionItems: ActionItem[];
     hearingData: HearingData | null;
   }>,
+  expectedVersion: number,
   tx?: Transaction
 ): Promise<Meeting | null> {
   const queryRunner = tx ?? db;
   const result = await queryRunner
     .update(meetings)
-    .set({ ...data, updatedAt: new Date() })
-    .where(and(eq(meetings.id, id), eq(meetings.organizationId, organizationId)))
+    .set({ ...data, updatedAt: new Date(), version: sql`version + 1` })
+    .where(and(eq(meetings.id, id), eq(meetings.organizationId, organizationId), eq(meetings.version, expectedVersion)))
     .returning();
   return result[0] ? mapRow(result[0]) : null;
 }

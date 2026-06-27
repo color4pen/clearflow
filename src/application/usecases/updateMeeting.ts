@@ -42,11 +42,12 @@ export async function updateMeeting(data: {
           ...(data.actionItems !== undefined && { actionItems: data.actionItems }),
           hearingData,
         },
+        existing.version,
         tx
       );
 
       if (!updated) {
-        throw new Error("商談の更新に失敗しました");
+        return null;
       }
 
       await auditLogRepository.create(
@@ -63,6 +64,9 @@ export async function updateMeeting(data: {
       return updated;
     });
 
+    if (!result) {
+      return { ok: false, reason: "この商談は他のユーザーによって更新されました。画面を更新してください" };
+    }
     return { ok: true, meeting: result };
   } catch (err) {
     return {

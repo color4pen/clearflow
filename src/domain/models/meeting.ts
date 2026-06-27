@@ -38,4 +38,5 @@ export type Meeting = {
   createdById: string;
   createdAt: Date;
   updatedAt: Date;
+  version: number;
 };

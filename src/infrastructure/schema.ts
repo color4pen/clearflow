@@ -362,6 +362,7 @@ export const meetings = pgTable(
       .references(() => users.id),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    version: integer("version").notNull().default(1),
   },
   (table) => [
     check(
@@ -484,6 +485,7 @@ export const revenueTargets = pgTable("revenue_targets", {
   targetAmount: integer("target_amount").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  version: integer("version").notNull().default(1),
 });
 
 // Action items table (アクションアイテム)
@@ -506,6 +508,7 @@ export const actionItems = pgTable(
       .references(() => users.id),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    version: integer("version").notNull().default(1),
   },
   (table) => [
     index("action_items_org_done_idx").on(table.organizationId, table.done),

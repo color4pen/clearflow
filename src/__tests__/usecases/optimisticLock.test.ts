@@ -351,3 +351,167 @@ describe("requestRepository.findById supports Transaction parameter", () => {
     expect(queryRunnerIdx).toBeGreaterThan(findByIdIdx);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Schema: version columns (meetings / action_items / revenue_targets)
+// ---------------------------------------------------------------------------
+
+describe("Schema: version columns (remaining entities)", () => {
+  it("meetings table has version column in schema.ts", async () => {
+    const src = await readSrc("infrastructure/schema.ts");
+    const meetingsTableStart = src.indexOf('pgTable(\n  "meetings"');
+    const meetingsTableEnd = src.indexOf(");", meetingsTableStart);
+    const meetingsTable = src.substring(meetingsTableStart, meetingsTableEnd);
+    expect(meetingsTable).toContain('integer("version")');
+    expect(meetingsTable).toContain(".notNull()");
+    expect(meetingsTable).toContain(".default(1)");
+  });
+
+  it("action_items table has version column in schema.ts", async () => {
+    const src = await readSrc("infrastructure/schema.ts");
+    const actionItemsTableStart = src.indexOf('pgTable(\n  "action_items"');
+    const actionItemsTableEnd = src.indexOf(");", actionItemsTableStart);
+    const actionItemsTable = src.substring(actionItemsTableStart, actionItemsTableEnd);
+    expect(actionItemsTable).toContain('integer("version")');
+    expect(actionItemsTable).toContain(".notNull()");
+    expect(actionItemsTable).toContain(".default(1)");
+  });
+
+  it("revenue_targets table has version column in schema.ts", async () => {
+    const src = await readSrc("infrastructure/schema.ts");
+    const revenueTargetsTableStart = src.indexOf('pgTable("revenue_targets"');
+    const revenueTargetsTableEnd = src.indexOf("});", revenueTargetsTableStart);
+    const revenueTargetsTable = src.substring(revenueTargetsTableStart, revenueTargetsTableEnd);
+    expect(revenueTargetsTable).toContain('integer("version")');
+    expect(revenueTargetsTable).toContain(".notNull()");
+    expect(revenueTargetsTable).toContain(".default(1)");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Domain model: version field (meetings / action_items / revenue_targets)
+// ---------------------------------------------------------------------------
+
+describe("Domain model: version field (remaining entities)", () => {
+  it("Meeting type has version: number field", async () => {
+    const src = await readSrc("domain/models/meeting.ts");
+    expect(src).toContain("version: number");
+  });
+
+  it("ActionItem type has version: number field", async () => {
+    const src = await readSrc("domain/models/actionItem.ts");
+    expect(src).toContain("version: number");
+  });
+
+  it("RevenueTarget type has version: number field", async () => {
+    const src = await readSrc("domain/models/revenueTarget.ts");
+    expect(src).toContain("version: number");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Repository: optimistic lock WHERE clause (meetings / action_items / revenue_targets)
+// ---------------------------------------------------------------------------
+
+describe("Repository: optimistic lock WHERE clause (remaining entities)", () => {
+  it("meetingRepository.update includes version in WHERE condition", async () => {
+    const src = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    expect(src).toContain("eq(meetings.version, expectedVersion)");
+  });
+
+  it("actionItemRepository.update includes version in WHERE condition", async () => {
+    const src = await readSrc("infrastructure/repositories/actionItemRepository.ts");
+    expect(src).toContain("eq(actionItems.version, expectedVersion)");
+  });
+
+  it("revenueTargetRepository.update includes version in WHERE condition", async () => {
+    const src = await readSrc("infrastructure/repositories/revenueTargetRepository.ts");
+    expect(src).toContain("eq(revenueTargets.version, expectedVersion)");
+  });
+
+  it("meetingRepository.update increments version on update", async () => {
+    const src = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    expect(src).toContain("version: sql`version + 1`");
+  });
+
+  it("actionItemRepository.update increments version on update", async () => {
+    const src = await readSrc("infrastructure/repositories/actionItemRepository.ts");
+    expect(src).toContain("version: sql`version + 1`");
+  });
+
+  it("revenueTargetRepository.update increments version on update", async () => {
+    const src = await readSrc("infrastructure/repositories/revenueTargetRepository.ts");
+    expect(src).toContain("version: sql`version + 1`");
+  });
+
+  it("meetingRepository.mapRow includes version field", async () => {
+    const src = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    expect(src).toContain("version: row.version");
+  });
+
+  it("actionItemRepository.mapRow includes version field", async () => {
+    const src = await readSrc("infrastructure/repositories/actionItemRepository.ts");
+    expect(src).toContain("version: row.version");
+  });
+
+  it("revenueTargetRepository.mapRow includes version field", async () => {
+    const src = await readSrc("infrastructure/repositories/revenueTargetRepository.ts");
+    expect(src).toContain("version: row.version");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Usecase: version passed to repository (remaining entities)
+// ---------------------------------------------------------------------------
+
+describe("Usecase: version passed to repository (remaining entities)", () => {
+  it("updateMeeting passes existing.version to meetingRepository.update", async () => {
+    const src = await readSrc("application/usecases/updateMeeting.ts");
+    expect(src).toContain("existing.version");
+    expect(src).toContain("meetingRepository.update");
+  });
+
+  it("updateActionItem passes existing.version to actionItemRepository.update", async () => {
+    const src = await readSrc("application/usecases/updateActionItem.ts");
+    expect(src).toContain("existing.version");
+    expect(src).toContain("actionItemRepository.update");
+  });
+
+  it("toggleActionItemDone passes existing.version to actionItemRepository.update", async () => {
+    const src = await readSrc("application/usecases/toggleActionItemDone.ts");
+    expect(src).toContain("existing.version");
+    expect(src).toContain("actionItemRepository.update");
+  });
+
+  it("updateRevenueTarget passes existing.version to revenueTargetRepository.update", async () => {
+    const src = await readSrc("application/usecases/updateRevenueTarget.ts");
+    expect(src).toContain("existing.version");
+    expect(src).toContain("revenueTargetRepository.update");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Usecase: optimistic lock failure message (remaining entities)
+// ---------------------------------------------------------------------------
+
+describe("Usecase: optimistic lock failure message (remaining entities)", () => {
+  it("updateMeeting contains meeting optimistic lock failure message", async () => {
+    const src = await readSrc("application/usecases/updateMeeting.ts");
+    expect(src).toContain("この商談は他のユーザーによって更新されました");
+  });
+
+  it("updateActionItem contains action item optimistic lock failure message", async () => {
+    const src = await readSrc("application/usecases/updateActionItem.ts");
+    expect(src).toContain("このアクションアイテムは他のユーザーによって更新されました");
+  });
+
+  it("toggleActionItemDone contains action item optimistic lock failure message", async () => {
+    const src = await readSrc("application/usecases/toggleActionItemDone.ts");
+    expect(src).toContain("このアクションアイテムは他のユーザーによって更新されました");
+  });
+
+  it("updateRevenueTarget contains revenue target optimistic lock failure message", async () => {
+    const src = await readSrc("application/usecases/updateRevenueTarget.ts");
+    expect(src).toContain("この売上目標は他のユーザーによって更新されました");
+  });
+});

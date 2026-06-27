@@ -52,8 +52,13 @@ export async function updateRevenueTarget(data: {
         id,
         organizationId,
         { periodStart, periodEnd, targetAmount },
+        existing.version,
         tx
       );
+
+      if (!result) {
+        return null;
+      }
 
       await auditLogRepository.create(
         {
@@ -82,7 +87,7 @@ export async function updateRevenueTarget(data: {
     });
 
     if (!updated) {
-      return { ok: false, reason: "売上目標の更新に失敗しました" };
+      return { ok: false, reason: "この売上目標は他のユーザーによって更新されました。画面を更新してください" };
     }
 
     return { ok: true, target: updated };
