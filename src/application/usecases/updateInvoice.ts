@@ -70,8 +70,13 @@ export async function updateInvoice(data: {
           dueDate: data.dueDate,
           notes: data.notes,
         },
+        invoice.version,
         tx
       );
+
+      if (!updatedInvoice) {
+        return null;
+      }
 
       await auditLogRepository.create(
         {
@@ -88,7 +93,7 @@ export async function updateInvoice(data: {
     }, { isolationLevel: 'serializable' });
 
     if (!updated) {
-      return { ok: false, reason: "請求の更新に失敗しました" };
+      return { ok: false, reason: "この請求は他のユーザーによって更新されました。画面を更新してください" };
     }
 
     return { ok: true, invoice: updated };

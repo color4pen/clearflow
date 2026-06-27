@@ -36,8 +36,13 @@ export async function updateContractStatus(data: {
           data.contractId,
           data.organizationId,
           { status: data.newStatus },
+          contract.version,
           tx
         );
+
+        if (!updatedContract) {
+          return null;
+        }
 
         await auditLogRepository.create(
           {
@@ -76,7 +81,7 @@ export async function updateContractStatus(data: {
       });
 
       if (!updated) {
-        return { ok: false, reason: "ステータスの更新に失敗しました" };
+        return { ok: false, reason: "この契約は他のユーザーによって更新されました。画面を更新してください" };
       }
 
       dispatcher.flushAsync();

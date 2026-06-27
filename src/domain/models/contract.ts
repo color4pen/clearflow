@@ -18,6 +18,7 @@ export type Contract = {
   status: ContractStatus;
   createdAt: Date;
   updatedAt: Date;
+  version: number;
 };
 
 /** 一覧表示用: クライアント名と案件名を含む */

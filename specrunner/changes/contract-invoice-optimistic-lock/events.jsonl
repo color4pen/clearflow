@@ -29,3 +29,8 @@
 {"type":"transition","ts":"2026-06-27T00:42:03.856Z","step":"spec-review","status":"ok","message":"spec-review iteration 2 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-27T00:42:03.857Z","step":"step-transition","status":"ok","message":"spec-review → test-case-gen"}
 {"type":"transition","ts":"2026-06-27T00:42:03.861Z","step":"test-case-gen-started","status":"started","message":"Starting test-case-gen step"}
+{"type":"transition","ts":"2026-06-27T00:46:16.717Z","step":"test-case-gen-verdict","status":"ok","message":"test-case-gen verdict: success"}
+{"type":"step-attempt","step":"test-case-gen","sessionId":"40b182c9-e00c-4851-a9a1-8b11fbc3d975","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-27T00:42:03.876Z","endedAt":"2026-06-27T00:46:15.481Z"}
+{"type":"lineage","step":"test-case-gen","ts":"2026-06-27T00:46:15.481Z","outputs":[{"path":"specrunner/changes/contract-invoice-optimistic-lock/test-cases.md","hash":"sha256:5bfa6661f1c60aa0f5c6197f6a41fb52eca0654b592d9367197cb846f914f8f9"}],"inputs":[{"path":"specrunner/changes/contract-invoice-optimistic-lock/design.md","hash":"sha256:66a515e14211d0438bd1fb130fb69800d709279e0b7db4478a0b215868c48039"},{"path":"specrunner/changes/contract-invoice-optimistic-lock/tasks.md","hash":"sha256:0702a94f89295a92779c4f229b9d0efd6998d180c33e002ef55e252bdfae0d76"}]}
+{"type":"transition","ts":"2026-06-27T00:46:16.725Z","step":"step-transition","status":"ok","message":"spec-review complete → implementer (iter 2)"}
+{"type":"transition","ts":"2026-06-27T00:46:16.729Z","step":"implementer-started","status":"started","message":"Starting implementer step"}

@@ -14,4 +14,5 @@ export type Invoice = {
   notes: string | null;
   createdAt: Date;
   updatedAt: Date;
+  version: number;
 };

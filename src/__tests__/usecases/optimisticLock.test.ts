@@ -174,6 +174,166 @@ describe("Schema: version columns", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Contracts / Invoices: optimistic lock — Repository WHERE clause
+// ---------------------------------------------------------------------------
+
+describe("Repository: contract/invoice optimistic lock WHERE clause", () => {
+  it("contractRepository.update includes version in WHERE condition", async () => {
+    const src = await readSrc("infrastructure/repositories/contractRepository.ts");
+    expect(src).toContain("eq(contracts.version, expectedVersion)");
+  });
+
+  it("invoiceRepository.update includes version in WHERE condition", async () => {
+    const src = await readSrc("infrastructure/repositories/invoiceRepository.ts");
+    expect(src).toContain("eq(invoices.version, expectedVersion)");
+  });
+
+  it("invoiceRepository.updateStatus includes version in WHERE condition", async () => {
+    const src = await readSrc("infrastructure/repositories/invoiceRepository.ts");
+    // updateStatus function should have eq(invoices.version, expectedVersion)
+    const updateStatusIdx = src.indexOf("export async function updateStatus");
+    const versionWhereIdx = src.indexOf("eq(invoices.version, expectedVersion)", updateStatusIdx);
+    expect(updateStatusIdx).toBeGreaterThan(-1);
+    expect(versionWhereIdx).toBeGreaterThan(updateStatusIdx);
+  });
+
+  it("contractRepository.update increments version on update", async () => {
+    const src = await readSrc("infrastructure/repositories/contractRepository.ts");
+    expect(src).toContain("version: sql`version + 1`");
+  });
+
+  it("invoiceRepository.update increments version on update", async () => {
+    const src = await readSrc("infrastructure/repositories/invoiceRepository.ts");
+    // update function should have version: sql`version + 1`
+    const updateIdx = src.indexOf("export async function update");
+    const versionIncrIdx = src.indexOf("version: sql`version + 1`", updateIdx);
+    expect(updateIdx).toBeGreaterThan(-1);
+    expect(versionIncrIdx).toBeGreaterThan(updateIdx);
+  });
+
+  it("invoiceRepository.updateStatus increments version on update", async () => {
+    const src = await readSrc("infrastructure/repositories/invoiceRepository.ts");
+    const updateStatusIdx = src.indexOf("export async function updateStatus");
+    const versionIncrIdx = src.indexOf("version: sql`version + 1`", updateStatusIdx);
+    expect(updateStatusIdx).toBeGreaterThan(-1);
+    expect(versionIncrIdx).toBeGreaterThan(updateStatusIdx);
+  });
+
+  it("contractRepository.mapRow includes version field", async () => {
+    const src = await readSrc("infrastructure/repositories/contractRepository.ts");
+    expect(src).toContain("version: row.version");
+  });
+
+  it("invoiceRepository.mapRow includes version field", async () => {
+    const src = await readSrc("infrastructure/repositories/invoiceRepository.ts");
+    expect(src).toContain("version: row.version");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Contracts / Invoices: optimistic lock — Usecase version passing
+// ---------------------------------------------------------------------------
+
+describe("Usecase: contract/invoice version passed to repository", () => {
+  it("updateContract passes contract.version to contractRepository.update", async () => {
+    const src = await readSrc("application/usecases/updateContract.ts");
+    expect(src).toContain("contract.version");
+    expect(src).toContain("contractRepository.update");
+  });
+
+  it("updateContractStatus passes contract.version to contractRepository.update", async () => {
+    const src = await readSrc("application/usecases/updateContractStatus.ts");
+    expect(src).toContain("contract.version");
+    expect(src).toContain("contractRepository.update");
+  });
+
+  it("updateInvoice passes invoice.version to invoiceRepository.update (not freshInvoice.version)", async () => {
+    const src = await readSrc("application/usecases/updateInvoice.ts");
+    // Should reference invoice.version
+    expect(src).toContain("invoice.version");
+    // freshInvoice.version should NOT be passed as expectedVersion
+    expect(src).not.toContain("freshInvoice.version");
+  });
+
+  it("updateInvoiceStatus passes invoice.version to invoiceRepository.updateStatus", async () => {
+    const src = await readSrc("application/usecases/updateInvoiceStatus.ts");
+    expect(src).toContain("invoice.version");
+    expect(src).toContain("invoiceRepository.updateStatus");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Contracts / Invoices: optimistic lock failure message
+// ---------------------------------------------------------------------------
+
+describe("Usecase: contract/invoice optimistic lock failure message", () => {
+  const CONTRACT_MESSAGE = "この契約は他のユーザーによって更新されました";
+  const INVOICE_MESSAGE = "この請求は他のユーザーによって更新されました";
+
+  it("updateContract contains contract optimistic lock failure message", async () => {
+    const src = await readSrc("application/usecases/updateContract.ts");
+    expect(src).toContain(CONTRACT_MESSAGE);
+  });
+
+  it("updateContractStatus contains contract optimistic lock failure message", async () => {
+    const src = await readSrc("application/usecases/updateContractStatus.ts");
+    expect(src).toContain(CONTRACT_MESSAGE);
+  });
+
+  it("updateInvoice contains invoice optimistic lock failure message", async () => {
+    const src = await readSrc("application/usecases/updateInvoice.ts");
+    expect(src).toContain(INVOICE_MESSAGE);
+  });
+
+  it("updateInvoiceStatus contains invoice optimistic lock failure message", async () => {
+    const src = await readSrc("application/usecases/updateInvoiceStatus.ts");
+    expect(src).toContain(INVOICE_MESSAGE);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Contracts / Invoices: Domain model version field
+// ---------------------------------------------------------------------------
+
+describe("Domain model: contract/invoice version field", () => {
+  it("Contract type has version: number field", async () => {
+    const src = await readSrc("domain/models/contract.ts");
+    expect(src).toContain("version: number");
+  });
+
+  it("Invoice type has version: number field", async () => {
+    const src = await readSrc("domain/models/invoice.ts");
+    expect(src).toContain("version: number");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Contracts / Invoices: Schema version columns
+// ---------------------------------------------------------------------------
+
+describe("Schema: contract/invoice version columns", () => {
+  it("contracts table has version column in schema.ts", async () => {
+    const src = await readSrc("infrastructure/schema.ts");
+    const contractsTableStart = src.indexOf('pgTable(\n  "contracts"');
+    const contractsTableEnd = src.indexOf(");", contractsTableStart);
+    const contractsTable = src.substring(contractsTableStart, contractsTableEnd);
+    expect(contractsTable).toContain('integer("version")');
+    expect(contractsTable).toContain(".notNull()");
+    expect(contractsTable).toContain(".default(1)");
+  });
+
+  it("invoices table has version column in schema.ts", async () => {
+    const src = await readSrc("infrastructure/schema.ts");
+    const invoicesTableStart = src.indexOf('pgTable("invoices"');
+    const invoicesTableEnd = src.indexOf("});", invoicesTableStart);
+    const invoicesTable = src.substring(invoicesTableStart, invoicesTableEnd);
+    expect(invoicesTable).toContain('integer("version")');
+    expect(invoicesTable).toContain(".notNull()");
+    expect(invoicesTable).toContain(".default(1)");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // requestRepository.findById supports Transaction parameter (T-11)
 // ---------------------------------------------------------------------------
 

@@ -447,6 +447,7 @@ export const contracts = pgTable(
     status: contractStatusEnum("status").notNull().default("active"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
+    version: integer("version").notNull().default(1),
   },
 );
 
@@ -469,6 +470,7 @@ export const invoices = pgTable("invoices", {
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  version: integer("version").notNull().default(1),
 });
 
 // Revenue targets table (売上目標)
