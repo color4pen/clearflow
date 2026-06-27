@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "9c1e2aed-6c42-4f11-8e6d-9b5bc951d638",
   "createdAt": "2026-06-27T00:17:30.016Z",
-  "updatedAt": "2026-06-27T01:12:22.691Z",
+  "updatedAt": "2026-06-27T01:16:22.594Z",
   "request": {
     "title": "契約・請求の楽観的ロック",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "regression-gate",
+  "step": "conformance",
   "status": "running",
   "branch": "feat/contract-invoice-optimistic-lock-9c1e2aed",
   "error": null,
@@ -34,7 +34,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 54,
+    "historyCount": 59,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -46,7 +46,8 @@
       "build-fixer": 1,
       "code-review": 1,
       "code-fixer": 1,
-      "domain-invariants": 1
+      "domain-invariants": 1,
+      "regression-gate": 1
     }
   }
 }
