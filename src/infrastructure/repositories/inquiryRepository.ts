@@ -1,10 +1,10 @@
 import { eq, and, sql, desc, ilike } from "drizzle-orm";
-
-const LINK_SEARCH_LIMIT = 20;
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { inquiries, clients } from "../schema";
 import type { Inquiry, InquiryWithClient, InquiryStatus } from "@/domain/models/inquiry";
+
+const LINK_SEARCH_LIMIT = 20;
 
 function mapRow(row: typeof inquiries.$inferSelect): Inquiry {
   return {

@@ -367,7 +367,7 @@
 **Priority**: should
 **Source**: design.md > D4 / tasks.md > T-02
 
-**GIVEN** organizationId=O1 に date=2026-03-10, type="kickoff", summary="キックオフ確認", inquiryId=I1（title="引合Y"）の meeting が存在する
+**GIVEN** organizationId=O1 に date=2026-03-10, type="hearing", summary="キックオフ確認", inquiryId=I1（title="引合Y"）の meeting が存在する
 **WHEN** 認証済みユーザーが `searchLinkTargetsAction({ type: "meeting", query: "キックオフ" })` を呼ぶ
 **THEN** label が `"2026/03/10 キックオフ（引合Y）"` の形式で返される
 

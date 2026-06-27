@@ -1,10 +1,10 @@
 import { eq, and, asc, desc, sql, ilike, isNotNull } from "drizzle-orm";
-
-const LINK_SEARCH_LIMIT = 20;
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { meetings } from "../schema";
 import type { Meeting, MeetingType, HearingData, ActionItem, MeetingAttendee } from "@/domain/models/meeting";
+
+const LINK_SEARCH_LIMIT = 20;
 
 function mapRow(row: typeof meetings.$inferSelect): Meeting {
   return {

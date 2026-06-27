@@ -325,6 +325,10 @@ export async function searchLinkTargetsAction(
     return { message: "認証が必要です" };
   }
 
+  if (!canPerform(session.user.role, "actionItem", "create")) {
+    return { message: "この操作を実行する権限がありません" };
+  }
+
   const rateCheck = await checkRateLimit({
     key: `searchLinkTargets:${session.user.id}`,
     limit: RATE_LIMITS.createRequest.limit,
@@ -332,10 +336,6 @@ export async function searchLinkTargetsAction(
   });
   if (!rateCheck.allowed) {
     return { message: "リクエストが多すぎます。しばらく待ってから再試行してください。" };
-  }
-
-  if (!canPerform(session.user.role, "actionItem", "create")) {
-    return { message: "この操作を実行する権限がありません" };
   }
 
   const parsed = searchLinkTargetsSchema.safeParse(data);

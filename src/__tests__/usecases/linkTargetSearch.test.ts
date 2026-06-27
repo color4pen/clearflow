@@ -135,6 +135,7 @@ describe("検索対象フィールド", () => {
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 500);
     expect(body).toContain("meetings.summary");
+    expect(body).toContain("isNotNull");
   });
 });
 

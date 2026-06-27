@@ -1,11 +1,11 @@
 import { eq, and, desc, sql, ilike } from "drizzle-orm";
-
-const LINK_SEARCH_LIMIT = 20;
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { deals, inquiries, clients, users } from "../schema";
 import type { Deal, DealWithDetails, DealPhase, ContractType } from "@/domain/models/deal";
+
+const LINK_SEARCH_LIMIT = 20;
 
 function mapRow(row: typeof deals.$inferSelect): Deal {
   return {
