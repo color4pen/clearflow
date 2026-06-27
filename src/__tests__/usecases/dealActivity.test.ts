@@ -24,6 +24,11 @@ describe("getDealActivity usecase 静的検証", () => {
     expect(content).toContain("contractRepository.findAllByDealId");
   });
 
+  it("invoiceRepository.findAllByContract の呼び出しが含まれる（請求は契約経由で解決）", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("invoiceRepository.findAllByContract");
+  });
+
   it("actionItemRepository.findByDeal の呼び出しが含まれる", async () => {
     const content = await readSrc("application/usecases/getDealActivity.ts");
     expect(content).toContain("actionItemRepository.findByDeal");

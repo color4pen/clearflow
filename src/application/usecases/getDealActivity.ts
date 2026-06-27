@@ -1,5 +1,6 @@
 import * as meetingRepository from "@/infrastructure/repositories/meetingRepository";
 import * as contractRepository from "@/infrastructure/repositories/contractRepository";
+import * as invoiceRepository from "@/infrastructure/repositories/invoiceRepository";
 import * as actionItemRepository from "@/infrastructure/repositories/actionItemRepository";
 import * as dealContactRepository from "@/infrastructure/repositories/dealContactRepository";
 import * as auditLogRepository from "@/infrastructure/repositories/auditLogRepository";
@@ -19,10 +20,18 @@ export async function getDealActivity(params: {
     dealContactRepository.findByDeal(dealId, organizationId),
   ]);
 
+  // 請求は案件に直接紐づかず契約経由（invoice.contractId）のため、契約解決後にまとめて取得する。
+  const invoices = (
+    await Promise.all(
+      contracts.map((c) => invoiceRepository.findAllByContract(c.id, organizationId))
+    )
+  ).flat();
+
   const targets: Array<{ targetType: string; targetId: string }> = [
     { targetType: "deal", targetId: dealId },
     ...meetings.map((m) => ({ targetType: "meeting", targetId: m.id })),
     ...contracts.map((c) => ({ targetType: "contract", targetId: c.id })),
+    ...invoices.map((inv) => ({ targetType: "invoice", targetId: inv.id })),
     ...actionItems.map((ai) => ({ targetType: "action_item", targetId: ai.id })),
     ...dealContacts.map((dc) => ({ targetType: "deal_contact", targetId: dc.id })),
   ];
