@@ -17,3 +17,9 @@
 {"type":"transition","ts":"2026-06-27T00:32:45.588Z","step":"spec-review","status":"warning","message":"spec-review iteration 1 completed with verdict: needs-fix"}
 {"type":"transition","ts":"2026-06-27T00:32:45.589Z","step":"step-transition","status":"ok","message":"spec-review → spec-fixer"}
 {"type":"transition","ts":"2026-06-27T00:32:45.593Z","step":"spec-fixer-started","status":"started","message":"Starting spec-fixer step"}
+{"type":"transition","ts":"2026-06-27T00:34:09.441Z","step":"spec-fixer-verdict","status":"ok","message":"spec-fixer verdict: approved"}
+{"type":"step-attempt","step":"spec-fixer","sessionId":"846f8b91-08e3-4441-a505-fc145ba6601a","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-27T00:32:45.607Z","endedAt":"2026-06-27T00:34:08.184Z"}
+{"type":"lineage","step":"spec-fixer","ts":"2026-06-27T00:34:08.184Z","outputs":[{"path":"specrunner/changes/contract-invoice-optimistic-lock/design.md","hash":"sha256:66a515e14211d0438bd1fb130fb69800d709279e0b7db4478a0b215868c48039"},{"path":"specrunner/changes/contract-invoice-optimistic-lock/spec.md","hash":"sha256:d7d2a0c2f1292e36782b53fc0051211d710d316b61806ae547801359384b888a"}],"inputs":[{"path":"specrunner/changes/contract-invoice-optimistic-lock/spec-review-result-001.md","hash":"sha256:006603f15bfe580c6306f35acbf95b2b6837bab712978add0ceaef26069f64bf"}]}
+{"type":"transition","ts":"2026-06-27T00:34:09.449Z","step":"step-transition","status":"ok","message":"spec-review complete → spec-review (iter 2)"}
+{"type":"transition","ts":"2026-06-27T00:34:09.450Z","step":"spec-review","status":"started","message":"spec-review iteration 2 started"}
+{"type":"transition","ts":"2026-06-27T00:34:09.451Z","step":"spec-review-started","status":"started","message":"Starting spec-review step"}
