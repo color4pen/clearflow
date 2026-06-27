@@ -83,3 +83,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/deal-activity-timeline/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-27T09:52:05.279Z","endedAt":"2026-06-27T09:52:07.121Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-27T09:52:07.121Z","outputs":[{"path":"specrunner/changes/deal-activity-timeline/pr-create-result.md","hash":"sha256:306f35f4d595d6a3a3f5be470b1dbff0d462959c6501b3de56b65e6ae69417c0"}],"inputs":[{"path":"feat/deal-activity-timeline-690e77d5","hash":null}]}
 {"type":"transition","ts":"2026-06-27T09:52:07.131Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-27T11:24:56.028Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
