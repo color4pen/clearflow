@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { getDeal, getInquiry, listMeetings, listDealContacts, listContractsByDeal, getClient, listClientContacts, listActionItemsByDeal, listOrganizationUsers } from "@/application/usecases";
+import { getDeal, getInquiry, listMeetings, listDealContacts, listContractsByDeal, getClient, listClientContacts, listActionItemsByDeal, listOrganizationUsers, getDealActivity } from "@/application/usecases";
 import { SectionCard, DataTable } from "@/app/components";
 import { DealContactsSection } from "./DealContactsSection";
 import { DealNotesSection } from "./DealNotesSection";
 import { DealInfoSection } from "./DealInfoSection";
 import { DealActionItemsSection } from "./DealActionItemsSection";
+import { DealActivitySection } from "./DealActivitySection";
 import { DealPhaseActions } from "./DealPhaseActions";
 import { DealHeaderActions } from "./DealHeaderActions";
 import { DeleteDealButton } from "./DeleteDealButton";
@@ -16,6 +17,7 @@ import {
   contractStatusLabels,
   phaseLabels,
 } from "@/app/(dashboard)/labels";
+import { isActivityFeedEnabled } from "@/lib/activityConfig";
 import type { Meeting } from "@/domain/models/meeting";
 
 export default async function DealDetailPage({
@@ -32,17 +34,24 @@ export default async function DealDetailPage({
     notFound();
   }
 
-  const [inquiry, dealMeetings, dealContacts, dealContracts, actionItemsResult, users] = await Promise.all([
+  const activityEnabled = isActivityFeedEnabled();
+
+  const [inquiry, dealMeetings, dealContacts, dealContracts, actionItemsResult, users, activities] = await Promise.all([
     deal.inquiryId ? getInquiry({ inquiryId: deal.inquiryId, organizationId }) : null,
     listMeetings(deal.id, organizationId),
     listDealContacts(deal.id, organizationId),
     listContractsByDeal(deal.id, organizationId),
     listActionItemsByDeal({ dealId: deal.id, organizationId }),
     listOrganizationUsers({ organizationId }),
+    activityEnabled ? getDealActivity({ dealId: deal.id, organizationId }) : Promise.resolve([]),
   ]);
 
   const client = await getClient(deal.clientId, organizationId);
   const clientContacts = await listClientContacts(deal.clientId);
+
+  const userMap: Record<string, string> = Object.fromEntries(
+    users.map((u) => [u.id, u.name])
+  );
 
   const canChangePhase =
     session!.user.role === "admin" || session!.user.role === "manager";
@@ -281,6 +290,14 @@ export default async function DealDetailPage({
               editable={canChangePhase}
             />
           </SectionCard>
+
+          {/* アクティビティ */}
+          {activityEnabled && (
+            <SectionCard className="p-3">
+              <h2 className="text-xs font-bold text-text mb-2">アクティビティ</h2>
+              <DealActivitySection activities={activities} userMap={userMap} />
+            </SectionCard>
+          )}
         </div>
       </div>
 

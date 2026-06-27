@@ -165,20 +165,27 @@ export const requests = pgTable("requests", {
 ]);
 
 // Audit logs table
-export const auditLogs = pgTable("audit_logs", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  action: text("action").notNull(),
-  targetType: text("target_type").notNull(),
-  targetId: text("target_id").notNull(),
-  actorId: uuid("actor_id")
-    .notNull()
-    .references(() => users.id),
-  organizationId: uuid("organization_id")
-    .notNull()
-    .references(() => organizations.id),
-  metadata: jsonb("metadata"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    action: text("action").notNull(),
+    targetType: text("target_type").notNull(),
+    targetId: text("target_id").notNull(),
+    actorId: uuid("actor_id")
+      .notNull()
+      .references(() => users.id),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("audit_logs_org_created_at_idx").on(table.organizationId, table.createdAt),
+    index("audit_logs_target_type_id_idx").on(table.targetType, table.targetId),
+  ]
+);
 
 // Approval steps table
 export const approvalSteps = pgTable("approval_steps", {

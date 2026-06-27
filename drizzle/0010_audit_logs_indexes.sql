@@ -1,0 +1,2 @@
+CREATE INDEX "audit_logs_org_created_at_idx" ON "audit_logs" USING btree ("organization_id","created_at");--> statement-breakpoint
+CREATE INDEX "audit_logs_target_type_id_idx" ON "audit_logs" USING btree ("target_type","target_id");

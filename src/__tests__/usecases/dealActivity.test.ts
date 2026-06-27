@@ -1,0 +1,56 @@
+/**
+ * getDealActivity usecase の静的検証テスト。
+ * ソースファイルの内容を静的解析し、重要なパターンが含まれることを確認する。
+ */
+
+import { describe, it, expect } from "bun:test";
+import path from "path";
+import { readFile } from "fs/promises";
+
+const ROOT = path.join(import.meta.dir, "../../..");
+
+async function readSrc(relPath: string): Promise<string> {
+  return readFile(path.join(ROOT, "src", relPath), "utf-8");
+}
+
+describe("getDealActivity usecase 静的検証", () => {
+  it("meetingRepository.findAllByDeal の呼び出しが含まれる", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("meetingRepository.findAllByDeal");
+  });
+
+  it("contractRepository.findAllByDealId の呼び出しが含まれる", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("contractRepository.findAllByDealId");
+  });
+
+  it("actionItemRepository.findByDeal の呼び出しが含まれる", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("actionItemRepository.findByDeal");
+  });
+
+  it("dealContactRepository.findByDeal の呼び出しが含まれる", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("dealContactRepository.findByDeal");
+  });
+
+  it("auditLogRepository.findByTargets の呼び出しが含まれる", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("auditLogRepository.findByTargets");
+  });
+
+  it("ACTIVITY_TIMELINE_LIMIT の参照が含まれる", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("ACTIVITY_TIMELINE_LIMIT");
+  });
+
+  it("getHiddenActions の呼び出しが含まれる", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("getHiddenActions");
+  });
+
+  it("Promise.all が含まれる（並列取得）", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("Promise.all");
+  });
+});
