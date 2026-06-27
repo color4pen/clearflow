@@ -7,6 +7,7 @@
   - `ALTER TABLE "action_items" ADD COLUMN "version" integer DEFAULT 1 NOT NULL;--> statement-breakpoint`
   - `ALTER TABLE "revenue_targets" ADD COLUMN "version" integer DEFAULT 1 NOT NULL;`
 - [ ] `drizzle/meta/_journal.json` に idx=9, tag=`0010_remaining_entity_version` のエントリを追加する
+- [ ] `drizzle/meta/0009_snapshot.json` を作成する（`drizzle/meta/0008_snapshot.json` をベースに、meetings / action_items / revenue_targets 各テーブル定義の columns に version カラムエントリを追加した内容にする）
 - [ ] `src/infrastructure/schema.ts` の `meetings` テーブル定義に `version: integer("version").notNull().default(1)` を追加する（`updatedAt` の後）
 - [ ] `src/infrastructure/schema.ts` の `actionItems` テーブル定義に `version: integer("version").notNull().default(1)` を追加する（`updatedAt` の後）
 - [ ] `src/infrastructure/schema.ts` の `revenueTargets` テーブル定義に `version: integer("version").notNull().default(1)` を追加する（`updatedAt` の後）
@@ -101,6 +102,7 @@
 
 - [ ] `src/application/usecases/updateRevenueTarget.ts` を修正:
   - `revenueTargetRepository.update` 呼び出しに `existing.version` を `expectedVersion` として渡す（`{ periodStart, periodEnd, targetAmount }` の後、`tx` の前）
+  - トランザクション内で `result` が null の場合（version 不一致）、`auditLogRepository.create` を実行する前に null を return する（参照実装 `updateContract.ts` の `if (!updatedContract) { return null; }` パターンに倣い、`update` 直後・`auditLogRepository.create` より前に配置する）
   - トランザクション結果が null の場合に `{ ok: false, reason: "この売上目標は他のユーザーによって更新されました。画面を更新してください" }` を返す（既存の null チェックロジックを楽観的ロック失敗メッセージに変更）
 
 **Acceptance Criteria**:
