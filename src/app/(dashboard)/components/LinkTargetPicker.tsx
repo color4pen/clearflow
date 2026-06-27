@@ -82,7 +82,7 @@ function LinkTargetPickerContent({ initialValue, onConfirm, onCancel }: ContentP
     >
       <div
         className="bg-bg-surface border border-border rounded p-4 shadow-md w-full"
-        style={{ maxWidth: 480 }}
+        style={{ maxWidth: 640 }}
         onClick={(e) => e.stopPropagation()}
       >
         <p className="text-sm font-bold text-text mb-3">紐づけ先を選択</p>

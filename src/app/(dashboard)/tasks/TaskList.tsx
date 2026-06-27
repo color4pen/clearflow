@@ -75,7 +75,7 @@ export function TaskList({ items, orgUsers, currentUserId, canDelete }: Props) {
     <div>
       {showAddModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setShowAddModal(false)}>
-          <div className="bg-bg-surface border border-border rounded p-4 shadow-md w-full" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
+          <div className="bg-bg-surface border border-border rounded p-4 shadow-md w-full" style={{ maxWidth: 560 }} onClick={(e) => e.stopPropagation()}>
             <p className="text-sm font-bold text-text mb-3">タスクを作成</p>
             <div className="space-y-2">
               {error && <p className="text-danger text-xs">{error}</p>}

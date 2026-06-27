@@ -178,7 +178,7 @@ export function ActionItemRow({
       {showSource && (
         <span className="text-text-muted truncate">
           {sourceHref ? (
-            <Link href={sourceHref} className="text-primary underline">
+            <Link href={sourceHref} target="_blank" rel="noopener noreferrer" className="text-primary underline">
               {sourceName ?? "—"}
             </Link>
           ) : (
