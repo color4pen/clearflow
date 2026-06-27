@@ -332,8 +332,8 @@ export async function searchLinkTargetsAction(
 
   const rateCheck = await checkRateLimit({
     key: `searchLinkTargets:${session.user.id}`,
-    limit: RATE_LIMITS.createRequest.limit,
-    windowMs: RATE_LIMITS.createRequest.windowMs,
+    limit: RATE_LIMITS.search.limit,
+    windowMs: RATE_LIMITS.search.windowMs,
   });
   if (!rateCheck.allowed) {
     return { message: "リクエストが多すぎます。しばらく待ってから再試行してください。" };
