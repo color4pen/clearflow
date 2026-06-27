@@ -121,12 +121,12 @@
 ## T-12: updateInvoice usecase に楽観的ロックを統合する
 
 - [ ] `src/application/usecases/updateInvoice.ts` で findById から取得した `invoice.version` を保持する
-- [ ] `invoiceRepository.update` 呼び出し時に `invoice.version` を `expectedVersion` として渡す
-- [ ] トランザクション内で freshInvoice を再取得するパスでは `freshInvoice.version` を使用する（金額検証で freshInvoice を取得するため、そちらの version が最新）
+- [ ] `invoiceRepository.update` 呼び出し時に `invoice.version` を `expectedVersion` として渡す（金額検証で freshInvoice を再取得するパスでも、expectedVersion には必ずトランザクション開始前に取得した `invoice.version` を使用する。freshInvoice.version はトランザクション内の最新値であり、楽観的ロックの競合検出に使用してはならない）
 - [ ] `updatedInvoice` が null の場合に `{ ok: false, reason: "この請求は他のユーザーによって更新されました。画面を更新してください" }` を返す
 
 **Acceptance Criteria**:
-- `invoice.version`（または金額検証パスでは `freshInvoice.version`）が `invoiceRepository.update` に渡されている
+- トランザクション開始前に findById で取得した `invoice.version` が、金額変更パスを含む全パスで `invoiceRepository.update` の `expectedVersion` に渡されている
+- `freshInvoice.version` は `expectedVersion` として使用しない（freshInvoice は金額検証にのみ使用する）
 - ロック失敗時に「この請求は他のユーザーによって更新されました。画面を更新してください」が返る
 - typecheck が通る
 
@@ -155,7 +155,7 @@
 - [ ] **Repository mapRow**: `invoiceRepository.mapRow` に `version: row.version` が含まれることを検証
 - [ ] **Usecase version passing**: `updateContract` が `contract.version` を参照していることを検証
 - [ ] **Usecase version passing**: `updateContractStatus` が `contract.version` を参照していることを検証
-- [ ] **Usecase version passing**: `updateInvoice` が `invoice.version` または `freshInvoice.version` を参照していることを検証
+- [ ] **Usecase version passing**: `updateInvoice` が `invoice.version` を `expectedVersion` として `invoiceRepository.update` に渡していることを検証（`freshInvoice.version` を expectedVersion に使用していないことも確認）
 - [ ] **Usecase version passing**: `updateInvoiceStatus` が `invoice.version` を参照していることを検証
 - [ ] **Usecase failure message**: 4 usecase に「他のユーザーによって更新されました」が含まれることを検証
 - [ ] **Domain model**: Contract 型に `version: number` が含まれることを検証
