@@ -11,7 +11,7 @@
 
 ## 背景
 
-監査ログの記録は 44 箇所の usecase / handler が `auditLogRepository.create` を直接呼び出している。action / targetType の型は既にカタログ化されているが（[[AuditAction]] / [[AuditTargetType]]）、記録の呼び出し自体は各サイトに重複して散在し、単一の集約点が無い。このため (a) 記録時の横断的関心事（metadata の型強制、共通処理）を一箇所で扱えず、(b) 将来のイベント駆動化（記録責務を usecase から剥がす）への土台が無い。記録を型付きの単一ヘルパに集約し、44 サイトをそれ経由にする。挙動は一切変えない。
+監査ログの記録は 44 ファイル（usecase + `infrastructure/handlers/auditLogHandler.ts`、約 50 呼び出し箇所）が `auditLogRepository.create` を直接呼び出している。action / targetType の型は既にカタログ化されているが（[[AuditAction]] / [[AuditTargetType]]）、記録の呼び出し自体は各サイトに重複して散在し、単一の集約点が無い。このため (a) 記録時の横断的関心事（metadata の型強制、共通処理）を一箇所で扱えず、(b) 将来のイベント駆動化（記録責務を usecase から剥がす）への土台が無い。記録を型付きの単一ヘルパに集約し、44 サイトをそれ経由にする。挙動は一切変えない。
 
 ## 現状コードの前提
 
@@ -23,9 +23,9 @@
 
 ## 要件
 
-1. **型付き記録ヘルパの新設**: 監査ログ記録の単一エントリポイントを設ける。`action: AuditAction` / `targetType: AuditTargetType` / `targetId` / `actorId` / `organizationId` / `metadata?` を受け、`tx?` を引き回し、内部で `auditLogRepository.create` を呼ぶ。配置層は既存のサービス慣例に従う
-2. **metadata の型強制**: `AuditMetadataMap` に既知形がある action（最低限 `action_item.toggle` の `{ done: boolean }`）について、ヘルパの metadata 引数を型で要求する。未定義の action は従来通り任意 metadata を許す
-3. **44 記録サイトの移行**: 既存の `auditLogRepository.create` 直接呼び出しを、すべて新ヘルパ経由に置き換える（usecase + infrastructure/handlers の両方）。tx の引き回しを維持する
+1. **型付き記録ヘルパの新設**: 監査ログ記録の単一エントリポイントを設ける。`action: AuditAction` / `targetType: AuditTargetType` / `targetId` / `actorId` / `organizationId` / `metadata?` を受け、`tx?` を引き回し、内部で `auditLogRepository.create` を呼ぶ。配置は **`src/application/services/`** とする（repository を呼べる非 usecase 層。domain/services は infrastructure を import できないため不可）
+2. **metadata の型強制**: `AuditMetadataMap` に既知形がある action（最低限 `action_item.toggle` の `{ done: boolean }`）について、ヘルパの metadata 引数を型で要求する。`AuditMetadataMap` 未登録の action の metadata 型は `Record<string, unknown> | null | undefined` とする（`never` にしない）
+3. **全記録サイトの移行**: 既存の `auditLogRepository.create` 直接呼び出し（44 ファイル・約 50 箇所）を、すべて新ヘルパ経由に置き換える（usecase + infrastructure/handlers の両方）。`bulkApprove.ts` のように他 usecase へ委譲して間接記録するものは対象外。tx の引き回しを維持する
 4. **挙動不変**: 記録される action / targetType / metadata の値・記録対象・件数・トランザクション境界は現状と完全に同一に保つ
 
 ## スコープ外
@@ -36,8 +36,9 @@
 
 ## 受け入れ基準
 
-- [ ] 監査記録の単一ヘルパが定義され、`AuditAction` / `AuditTargetType` を型に持つことを静的検証テストで固定する
+- [ ] 監査記録の単一ヘルパが `src/application/services/` に定義され、`AuditAction` / `AuditTargetType` を型に持つことを静的検証テストで固定する
 - [ ] `action_item.toggle` の記録時に metadata が `{ done: boolean }` を要求されることを型テストで固定する
-- [ ] `auditLogRepository.create` の直接呼び出しが、ヘルパ実装以外のアプリ/インフラのコードに残っていないことをテストで固定する
-- [ ] 記録される値・挙動が不変のため、既存テストが無変更で green であることを確認する
+- [ ] **ヘルパ実装ファイル以外**のアプリ/インフラのソースに `auditLogRepository.create(` の**呼び出し構文**が 0 件であることをテストで固定する（行コメント内の言及は false positive として除外する。例: `src/domain/events/dispatcher.ts` のコメントは検出しない）
+- [ ] 既存の静的テストのうち、特定の usecase ファイルに `auditLogRepository.create` が存在することを assert しているもの（`dealManagement` / `inquiryManagement` / `meetingManagement` / `templateManagement` / `userManagement` / `invoiceManagement` / `projectStructure` 等の static テスト）を、新ヘルパ経由で記録されることを assert する形に更新する
+- [ ] 記録される action / targetType / metadata の値・件数・tx 境界が（移行後の）テストで不変であることを保証する
 - [ ] typecheck / lint が green であることを確認する

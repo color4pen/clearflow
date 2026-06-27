@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "4e4ba1c3-fd55-4cbe-8582-29c4605536f2",
   "createdAt": "2026-06-27T13:39:04.210Z",
-  "updatedAt": "2026-06-27T13:39:06.174Z",
+  "updatedAt": "2026-06-27T13:46:56.422Z",
   "request": {
     "title": "監査ログ記録の型付きヘルパへの集約",
     "type": "spec-change",
@@ -33,8 +33,11 @@
       ]
     }
   ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 6,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
