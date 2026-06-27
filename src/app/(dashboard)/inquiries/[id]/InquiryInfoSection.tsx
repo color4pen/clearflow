@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateInquiryAction } from "@/app/actions/inquiries";
-import { Input, Select, Textarea, MarkdownTextarea, preventEnterSubmit } from "@/app/components";
+import { Input, Select, MarkdownTextarea, preventEnterSubmit } from "@/app/components";
 import { sourceLabels } from "@/app/(dashboard)/labels";
 
 type Props = {

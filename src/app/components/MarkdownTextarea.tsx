@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkBreaks from "remark-breaks";
-import { Textarea } from "./FormField";
 
 type Props = {
   name?: string;

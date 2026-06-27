@@ -1,4 +1,4 @@
-import type { ReactNode, FormEvent, KeyboardEvent as ReactKeyboardEvent } from "react";
+import type { ReactNode, KeyboardEvent as ReactKeyboardEvent } from "react";
 
 type Props = {
   label: ReactNode;
