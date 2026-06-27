@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 26.2s | 0 |
-| 2 | typecheck | passed | 3.5s | 0 |
+| 1 | build | passed | 20.5s | 0 |
+| 2 | typecheck | passed | 1.1s | 0 |
 | 3 | test | passed | 0.4s | 0 |
-| 4 | lint | failed | 5.6s | 1 |
+| 4 | lint | failed | 4.6s | 1 |
 
 ## Phase: build
 
@@ -17,7 +17,7 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 20.5s
+✓ Compiled successfully in 14.9s
   Running TypeScript ...
   Finished TypeScript in 4.0s ...
   Collecting page data using 7 workers ...
@@ -25,7 +25,7 @@
   Generating static pages using 7 workers (7/31) 
   Generating static pages using 7 workers (15/31) 
   Generating static pages using 7 workers (23/31) 
-✓ Generating static pages using 7 workers (31/31) in 153ms
+✓ Generating static pages using 7 workers (31/31) in 141ms
   Finalizing page optimization ...
 
 Route (app)
@@ -119,7 +119,7 @@ src/__tests__/usecases/approvalPolicyFlow.test.ts:
  1079 pass
  0 fail
  2296 expect() calls
-Ran 1079 tests across 52 files. [421.00ms]
+Ran 1079 tests across 52 files. [403.00ms]
 
 ```
 
@@ -130,24 +130,46 @@ Step 'lint' failed
 ```
 
 src/app/(dashboard)/components/LinkTargetPicker.tsx
-  35:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+  37:15  error  Error: Cannot access refs during render
 
-Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
-* Update external systems with the latest state from React.
-* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
 
-Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+src/app/(dashboard)/components/LinkTargetPicker.tsx:37:15
+  35 |   // render cycle that synchronous setState inside useEffect would cause.
+  36 |   const prevOpenRef = useRef(open);
+> 37 |   if (open && !prevOpenRef.current) {
+     |               ^^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  38 |     setActiveTab(initialValue?.type ?? "deal");
+  39 |     setQuery("");
+  40 |     setResults([]);                                                                                                                               react-hooks/refs
+  37:16  error  Error: Cannot access refs during render
 
-src/app/(dashboard)/components/LinkTargetPicker.tsx:35:5
-  33 |   useEffect(() => {
-  34 |     if (!open) return;
-> 35 |     setActiveTab(initialValue?.type ?? "deal");
-     |     ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
-  36 |     setQuery("");
-  37 |     setResults([]);
-  38 |   }, [open, initialValue?.type]);  react-hooks/set-state-in-effect
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
 
-✖ 1 problem (1 error, 0 warnings)
+src/app/(dashboard)/components/LinkTargetPicker.tsx:37:16
+  35 |   // render cycle that synchronous setState inside useEffect would cause.
+  36 |   const prevOpenRef = useRef(open);
+> 37 |   if (open && !prevOpenRef.current) {
+     |                ^^^^^^^^^^^^^^^^^^^ Cannot access ref value during render
+  38 |     setActiveTab(initialValue?.type ?? "deal");
+  39 |     setQuery("");
+  40 |     setResults([]);
+
+To initialize a ref only once, check that the ref is null with the pattern `if (ref.current == null) { ref.current = ... }`  react-hooks/refs
+  42:3   error  Error: Cannot access refs during render
+
+React refs are values that are not needed for rendering. Refs should only be accessed outside of render, such as in event handlers or effects. Accessing a ref value (the `current` property) during render can cause your component not to update as expected (https://react.dev/reference/react/useRef).
+
+src/app/(dashboard)/components/LinkTargetPicker.tsx:42:3
+  40 |     setResults([]);
+  41 |   }
+> 42 |   prevOpenRef.current = open;
+     |   ^^^^^^^^^^^^^^^^^^^ Cannot update ref during render
+  43 |
+  44 |   useEffect(() => {
+  45 |     if (!open) return;                                                                                                                                                                                                                                                                                            react-hooks/refs
+
+✖ 3 problems (3 errors, 0 warnings)
 
 
 $ eslint
