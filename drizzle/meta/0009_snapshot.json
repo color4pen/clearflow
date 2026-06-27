@@ -1,6 +1,6 @@
 {
-  "id": "remaining-entity-version-migration-0010",
-  "prevId": "contract-invoice-version-migration-0009",
+  "id": "contract-invoice-version-migration-0009",
+  "prevId": "migrate-action-items-data-0008",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -184,13 +184,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
         }
       },
       "indexes": {
@@ -1969,13 +1962,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
         }
       },
       "indexes": {},
@@ -2341,13 +2327,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "version": {
-          "name": "version",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
         }
       },
       "indexes": {},

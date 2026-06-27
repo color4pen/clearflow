@@ -1,6 +1,6 @@
 {
-  "id": "remaining-entity-version-migration-0010",
-  "prevId": "contract-invoice-version-migration-0009",
+  "id": "333aaba2-e016-473c-8323-4f0b1c9c9cdf",
+  "prevId": "remaining-entity-version-migration-0010",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -881,7 +881,50 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "audit_logs_org_created_at_idx": {
+          "name": "audit_logs_org_created_at_idx",
+          "columns": [
+            {
+              "expression": "organization_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "audit_logs_target_type_id_idx": {
+          "name": "audit_logs_target_type_id_idx",
+          "columns": [
+            {
+              "expression": "target_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "target_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "audit_logs_actor_id_users_id_fk": {
           "name": "audit_logs_actor_id_users_id_fk",

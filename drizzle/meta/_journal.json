@@ -61,19 +61,26 @@
     {
       "idx": 8,
       "version": "7",
+      "when": 1782500000000,
+      "tag": "0008_migrate_action_items_data",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
       "when": 1782558000000,
       "tag": "0009_contract_invoice_version",
       "breakpoints": true
     },
     {
-      "idx": 9,
+      "idx": 10,
       "version": "7",
       "when": 1782644400000,
       "tag": "0010_remaining_entity_version",
       "breakpoints": true
     },
     {
-      "idx": 10,
+      "idx": 11,
       "version": "7",
       "when": 1782730800000,
       "tag": "0011_audit_logs_indexes",
