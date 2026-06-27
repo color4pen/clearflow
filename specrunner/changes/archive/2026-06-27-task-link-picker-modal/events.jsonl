@@ -137,3 +137,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/task-link-picker-modal/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-27T07:01:47.285Z","endedAt":"2026-06-27T07:01:49.636Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-27T07:01:49.636Z","outputs":[{"path":"specrunner/changes/task-link-picker-modal/pr-create-result.md","hash":"sha256:bd5ab23b79228f7b790f47ea05e29b72cd464048d71c99c7ebb646ae71ee78c7"}],"inputs":[{"path":"feat/task-link-picker-modal-05e2b449","hash":null}]}
 {"type":"transition","ts":"2026-06-27T07:01:49.648Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-27T07:11:55.888Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
