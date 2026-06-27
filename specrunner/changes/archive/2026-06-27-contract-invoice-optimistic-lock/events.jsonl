@@ -106,3 +106,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/contract-invoice-optimistic-lock/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-27T01:21:54.724Z","endedAt":"2026-06-27T01:21:59.129Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-27T01:21:59.129Z","outputs":[{"path":"specrunner/changes/contract-invoice-optimistic-lock/pr-create-result.md","hash":"sha256:c4b74e91d661bcdb1e173e2408bbf4c097f1d787031a0716e3f654f7bff2ec03"}],"inputs":[{"path":"feat/contract-invoice-optimistic-lock-9c1e2aed","hash":null}]}
 {"type":"transition","ts":"2026-06-27T01:21:59.141Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-27T01:32:13.500Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
