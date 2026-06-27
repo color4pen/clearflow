@@ -69,3 +69,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/lint-warning-cleanup/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-27T03:20:12.979Z","endedAt":"2026-06-27T03:20:14.744Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-27T03:20:14.744Z","outputs":[{"path":"specrunner/changes/lint-warning-cleanup/pr-create-result.md","hash":"sha256:287ffbba21d342cee31f7ef333b89b75eec3fe8b549785149b7ce0eb67335a80"}],"inputs":[{"path":"change/lint-warning-cleanup-5f292859","hash":null}]}
 {"type":"transition","ts":"2026-06-27T03:20:14.754Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-27T03:23:25.514Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
