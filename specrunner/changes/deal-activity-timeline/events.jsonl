@@ -54,3 +54,10 @@
 {"type":"transition","ts":"2026-06-27T09:40:01.182Z","step":"step-transition","status":"ok","message":"domain-invariants → regression-gate"}
 {"type":"transition","ts":"2026-06-27T09:40:01.184Z","step":"regression-gate","status":"started","message":"regression-gate iteration 1 started"}
 {"type":"transition","ts":"2026-06-27T09:40:01.186Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
+{"type":"transition","ts":"2026-06-27T09:43:12.315Z","step":"regression-gate-verdict","status":"ok","message":"regression-gate verdict: approved"}
+{"type":"step-attempt","step":"regression-gate","sessionId":"bd21dead-d151-4ecb-b4d1-f6a67865621a","outcome":{"verdict":"approved","findingsPath":"specrunner/changes/deal-activity-timeline/regression-gate-result-001.md","error":null,"toolResult":{"ok":true,"approved":true,"findings":[],"observations":[{"severity":"low","file":"src/app/(dashboard)/deals/[id]/DealActivitySection.tsx","title":"タイムライン行の目的語重複が残存（Fix=no・受け入れ済み）","rationale":"フォーマット {targetLabel} を {actionLabel} により 'John が 案件 を 案件を更新' のような重複表現が発生する。review-feedback-001.md で Fix=no（スコープ外）と明示されており、review verdict も approved 済み。リグレッションではなく既知の受け入れ事項。後続イテレーションでの対応を推奨。","line":34}]},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-27T09:40:01.198Z","endedAt":"2026-06-27T09:43:10.919Z"}
+{"type":"lineage","step":"regression-gate","ts":"2026-06-27T09:43:10.919Z","outputs":[{"path":"specrunner/changes/deal-activity-timeline/regression-gate-result-002.md","hash":null}],"inputs":[{"path":".","hash":null}]}
+{"type":"transition","ts":"2026-06-27T09:43:12.322Z","step":"regression-gate","status":"ok","message":"regression-gate iteration 1 completed with verdict: approved"}
+{"type":"transition","ts":"2026-06-27T09:43:12.322Z","step":"step-transition","status":"ok","message":"regression-gate → conformance"}
+{"type":"transition","ts":"2026-06-27T09:43:12.323Z","step":"conformance","status":"started","message":"conformance iteration 1 started"}
+{"type":"transition","ts":"2026-06-27T09:43:12.325Z","step":"conformance-started","status":"started","message":"Starting conformance step"}
