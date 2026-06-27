@@ -1,4 +1,6 @@
-import { clientRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { clientRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 
 export type DeleteClientContactResult =
   | { ok: true }
@@ -22,7 +24,7 @@ export async function deleteClientContact(data: {
       return { ok: false, reason: "担当者が見つかりません" };
     }
 
-    await auditLogRepository.create({
+    await recordAudit({
       action: "client_contact.delete",
       targetType: "client_contact",
       targetId: data.contactId,

@@ -132,7 +132,7 @@ describe("Audit logs", () => {
 
     // auditLogHandler records action=request.submit for request.submitted events
     const handlerSrc = await readSrc("infrastructure/handlers/auditLogHandler.ts");
-    expect(handlerSrc).toContain("auditLogRepository");
+    expect(handlerSrc).toContain("recordAudit");
     expect(handlerSrc).toContain("request.submit");
     expect(handlerSrc).toContain("targetType");
     expect(handlerSrc).toContain("actorId");
@@ -143,7 +143,7 @@ describe("Audit logs", () => {
    */
   it("TC-012: approveRequest creates audit log with action=request.approve", async () => {
     const src = await readSrc("application/usecases/approveRequest.ts");
-    expect(src).toContain("auditLogRepository");
+    expect(src).toContain("recordAudit");
     expect(src).toContain("request.approve");
     expect(src).toContain("targetType");
     expect(src).toContain("actorId");
@@ -154,7 +154,7 @@ describe("Audit logs", () => {
    */
   it("TC-013: rejectRequest creates audit log with action=request.reject", async () => {
     const src = await readSrc("application/usecases/rejectRequest.ts");
-    expect(src).toContain("auditLogRepository");
+    expect(src).toContain("recordAudit");
     expect(src).toContain("request.reject");
     expect(src).toContain("targetType");
     expect(src).toContain("actorId");
@@ -238,9 +238,9 @@ describe("Multi-stage approval usecase structure", () => {
   /**
    * TC-062: resubmitRequest usecase が auditLogRepository を使用する
    */
-  it("TC-062: resubmitRequest usecase uses auditLogRepository", async () => {
+  it("TC-062: resubmitRequest usecase uses recordAudit", async () => {
     const src = await readSrc("application/usecases/resubmitRequest.ts");
-    expect(src).toContain("auditLogRepository");
+    expect(src).toContain("recordAudit");
   });
 
   /**
@@ -314,7 +314,7 @@ describe("Backward-compatible single-step approval", () => {
     const approvedIdx = src.indexOf('"approved"', noStepsIdx);
     expect(approvedIdx).toBeGreaterThan(-1);
     // Must still record an audit log in the no-steps path
-    const auditIdx = src.indexOf("auditLogRepository", noStepsIdx);
+    const auditIdx = src.indexOf("recordAudit", noStepsIdx);
     expect(auditIdx).toBeGreaterThan(-1);
   });
 });

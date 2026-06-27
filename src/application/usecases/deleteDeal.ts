@@ -4,8 +4,9 @@ import {
   dealRepository,
   dealContactRepository,
   inquiryRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 
 export type DeleteDealResult =
@@ -58,7 +59,7 @@ export async function deleteDeal(data: {
       // 案件を削除する
       await dealRepository.deleteById(data.id, data.organizationId, tx);
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "deal.delete",
           targetType: "deal",

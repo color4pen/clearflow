@@ -1,9 +1,10 @@
 import {
   requestRepository,
-  auditLogRepository,
   approvalTemplateRepository,
   approvalStepRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import { filterStepsByCondition } from "@/domain/services";
 import { dispatcher } from "@/domain/events";
@@ -64,7 +65,7 @@ export async function createRequest(data: {
           tx
         );
 
-        await auditLogRepository.create(
+        await recordAudit(
           {
             action: "request.create",
             targetType: "request",

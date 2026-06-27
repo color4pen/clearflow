@@ -1,4 +1,6 @@
-import { revenueTargetRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { revenueTargetRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { RevenueTarget } from "@/domain/models/revenueTarget";
 
@@ -40,7 +42,7 @@ export async function setRevenueTarget(data: {
         tx
       );
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "revenue_target.create",
           targetType: "revenue_target",

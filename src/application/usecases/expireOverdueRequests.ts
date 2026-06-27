@@ -1,8 +1,9 @@
 import {
   requestRepository,
-  auditLogRepository,
   approvalStepRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { validateTransition } from "@/domain/services/requestTransition";
 import { db } from "@/infrastructure/db";
 
@@ -58,7 +59,7 @@ export async function expireOverdueRequests(): Promise<ExpireOverdueRequestsResu
           );
         }
 
-        await auditLogRepository.create(
+        await recordAudit(
           {
             action: "request.expire",
             targetType: "request",

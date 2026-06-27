@@ -1,7 +1,8 @@
 import {
   userRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { Role } from "@/domain/models/user";
 
@@ -44,7 +45,7 @@ export async function updateUserRole(data: {
         throw new Error("ユーザーの更新に失敗しました");
       }
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "user.updateRole",
           targetType: "user",

@@ -1,7 +1,8 @@
 import {
   approvalTemplateRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { ApprovalTemplate, ApprovalTemplateStep, TemplateField } from "@/domain/models/approvalTemplate";
 
@@ -28,7 +29,7 @@ export async function createTemplate(data: {
         tx
       );
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "template.create",
           targetType: "template",

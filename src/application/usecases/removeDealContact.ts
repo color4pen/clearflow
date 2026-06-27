@@ -1,4 +1,6 @@
-import { dealContactRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { dealContactRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 
 export type RemoveDealContactResult =
@@ -20,7 +22,7 @@ export async function removeDealContact(data: {
         tx
       );
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "deal_contact.delete",
           targetType: "deal_contact",

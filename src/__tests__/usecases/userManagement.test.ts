@@ -37,12 +37,12 @@ describe("updateUserRole usecase", () => {
     expect(src).toContain("db.transaction");
   });
 
-  it("calls auditLogRepository.create inside the transaction", async () => {
+  it("calls recordAudit inside the transaction", async () => {
     const src = await readSrc("application/usecases/updateUserRole.ts");
-    expect(src).toContain("auditLogRepository.create");
-    // audit log create must appear after db.transaction
+    expect(src).toContain("recordAudit");
+    // audit log call must appear after db.transaction
     const txIdx = src.indexOf("db.transaction");
-    const auditIdx = src.indexOf("auditLogRepository.create");
+    const auditIdx = src.indexOf("await recordAudit(");
     expect(txIdx).toBeGreaterThan(-1);
     expect(auditIdx).toBeGreaterThan(-1);
     expect(txIdx).toBeLessThan(auditIdx);

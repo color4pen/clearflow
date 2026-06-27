@@ -51,11 +51,11 @@ describe("createMeeting usecase 静的検証", () => {
     expect(content).toContain("inquiryId:");
   });
 
-  it("auditLogRepository.create の呼び出しが含まれる（監査ログ記録）", async () => {
+  it("recordAudit の呼び出しが含まれる（監査ログ記録）", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createMeeting.ts");
     // 実行・検証 - 監査ログ記録がある
-    expect(content).toContain("auditLogRepository.create");
+    expect(content).toContain("recordAudit");
   });
 
   it("db.transaction の呼び出しが含まれる（トランザクション内処理）", async () => {
@@ -82,11 +82,11 @@ describe("updateMeeting usecase 静的検証", () => {
     expect(content).toContain("meetingRepository.findById");
   });
 
-  it("auditLogRepository.create の呼び出しが含まれる（監査ログ記録）", async () => {
+  it("recordAudit の呼び出しが含まれる（監査ログ記録）", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/updateMeeting.ts");
     // 実行・検証 - 監査ログ記録がある
-    expect(content).toContain("auditLogRepository.create");
+    expect(content).toContain("recordAudit");
   });
 
   it("db.transaction の呼び出しが含まれる（トランザクション内処理）", async () => {

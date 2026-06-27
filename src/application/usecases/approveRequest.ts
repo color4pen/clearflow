@@ -1,9 +1,10 @@
 import {
   requestRepository,
-  auditLogRepository,
   approvalStepRepository,
   approvalDelegationRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { validateTransition } from "@/domain/services/requestTransition";
 import {
   getCurrentStep,
@@ -64,7 +65,7 @@ export async function approveRequest(data: {
             throw new Error(OPTIMISTIC_LOCK_ERROR);
           }
 
-          await auditLogRepository.create(
+          await recordAudit(
             {
               action: "request.approve",
               targetType: "request",
@@ -208,7 +209,7 @@ export async function approveRequest(data: {
           auditMetadata.delegatedFrom = txCheck.delegation.fromUserId;
         }
 
-        await auditLogRepository.create(
+        await recordAudit(
           {
             action: "approval_step.approve",
             targetType: "request",
@@ -265,7 +266,7 @@ export async function approveRequest(data: {
             throw new Error(OPTIMISTIC_LOCK_ERROR);
           }
 
-          await auditLogRepository.create(
+          await recordAudit(
             {
               action: "request.approve",
               targetType: "request",

@@ -21,11 +21,11 @@ describe("updateInquiryStatus usecase 静的検証", () => {
     expect(content).toContain("canTransition");
   });
 
-  it("auditLogRepository.create の呼び出しが含まれる（監査ログ記録）", async () => {
+  it("recordAudit の呼び出しが含まれる（監査ログ記録）", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/updateInquiryStatus.ts");
     // 実行・検証 - 監査ログ記録がある
-    expect(content).toContain("auditLogRepository.create");
+    expect(content).toContain("recordAudit");
   });
 
   it("dealRepository.create の呼び出しが含まれる（converted 時の案件直接作成）", async () => {
@@ -44,11 +44,11 @@ describe("updateInquiryStatus usecase 静的検証", () => {
 });
 
 describe("createInquiry usecase 静的検証", () => {
-  it("auditLogRepository.create の呼び出しが含まれる（監査ログ記録）", async () => {
+  it("recordAudit の呼び出しが含まれる（監査ログ記録）", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createInquiry.ts");
     // 実行・検証 - 監査ログ記録がある
-    expect(content).toContain("auditLogRepository.create");
+    expect(content).toContain("recordAudit");
   });
 
   it("clientRepository.findById の呼び出しが含まれる（顧客存在確認）", async () => {
@@ -60,11 +60,11 @@ describe("createInquiry usecase 静的検証", () => {
 });
 
 describe("createClient usecase 静的検証", () => {
-  it("auditLogRepository.create の呼び出しが含まれる（監査ログ記録）", async () => {
+  it("recordAudit の呼び出しが含まれる（監査ログ記録）", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createClient.ts");
     // 実行・検証 - 監査ログ記録がある
-    expect(content).toContain("auditLogRepository.create");
+    expect(content).toContain("recordAudit");
   });
 
   it("db.transaction の呼び出しが含まれる（トランザクション内処理）", async () => {

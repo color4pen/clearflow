@@ -1,10 +1,11 @@
 import {
   inquiryRepository,
   dealRepository,
-  auditLogRepository,
   userRepository,
   clientRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { Deal } from "@/domain/models/deal";
 import type { ContractType } from "@/domain/models/deal";
@@ -97,7 +98,7 @@ export async function createDeal(data: {
         tx
       );
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "deal.create",
           targetType: "deal",

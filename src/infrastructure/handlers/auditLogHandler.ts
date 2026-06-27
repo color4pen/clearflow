@@ -1,4 +1,5 @@
-import { auditLogRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import type { Transaction } from "@/infrastructure/db";
 import type { DomainEvent, DispatchOptions } from "@/domain/events";
 
@@ -9,7 +10,7 @@ export async function handleAuditLog(event: DomainEvent, options?: DispatchOptio
 
   const tx = options?.tx as Transaction | undefined;
 
-  await auditLogRepository.create(
+  await recordAudit(
     {
       action: "request.submit",
       targetType: "request",

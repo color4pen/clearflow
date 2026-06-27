@@ -29,12 +29,12 @@ describe("createTemplate usecase", () => {
     expect(src).toContain("db.transaction");
   });
 
-  it("calls auditLogRepository.create inside the transaction", async () => {
+  it("calls recordAudit inside the transaction", async () => {
     const src = await readSrc("application/usecases/createTemplate.ts");
-    expect(src).toContain("auditLogRepository.create");
-    // auditLogRepository.create must appear after db.transaction in source
+    expect(src).toContain("recordAudit");
+    // recordAudit call must appear after db.transaction in source
     const txIdx = src.indexOf("db.transaction");
-    const auditIdx = src.indexOf("auditLogRepository.create");
+    const auditIdx = src.indexOf("await recordAudit(");
     expect(txIdx).toBeGreaterThan(-1);
     expect(auditIdx).toBeGreaterThan(-1);
     expect(txIdx).toBeLessThan(auditIdx);
@@ -63,7 +63,7 @@ describe("deleteTemplate usecase", () => {
   it("calls db.transaction for delete + audit log", async () => {
     const src = await readSrc("application/usecases/deleteTemplate.ts");
     expect(src).toContain("db.transaction");
-    expect(src).toContain("auditLogRepository.create");
+    expect(src).toContain("recordAudit");
   });
 
   it("uses action 'template.delete'", async () => {
@@ -87,9 +87,9 @@ describe("updateTemplate usecase", () => {
     expect(src).toContain("db.transaction");
   });
 
-  it("calls auditLogRepository.create inside the transaction", async () => {
+  it("calls recordAudit inside the transaction", async () => {
     const src = await readSrc("application/usecases/updateTemplate.ts");
-    expect(src).toContain("auditLogRepository.create");
+    expect(src).toContain("recordAudit");
   });
 
   it("uses action 'template.update'", async () => {

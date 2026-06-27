@@ -1,8 +1,9 @@
 import {
   requestRepository,
-  auditLogRepository,
   approvalStepRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { validateTransition } from "@/domain/services/requestTransition";
 import { getStepsToReset } from "@/domain/services/approvalStepService";
 import { db } from "@/infrastructure/db";
@@ -69,7 +70,7 @@ export async function resubmitRequest(data: {
           throw new Error(OPTIMISTIC_LOCK_ERROR);
         }
 
-        await auditLogRepository.create(
+        await recordAudit(
           {
             action: "request.resubmit",
             targetType: "request",

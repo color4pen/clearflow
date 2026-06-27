@@ -1,8 +1,9 @@
 import {
   approvalPolicyRepository,
   approvalTemplateRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { ApprovalPolicy, ConditionOperator } from "@/domain/models/approvalPolicy";
 
@@ -50,7 +51,7 @@ export async function updatePolicy(data: {
 
       if (!p) return null;
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "policy.update",
           targetType: "approvalPolicy",

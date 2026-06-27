@@ -1,4 +1,6 @@
-import { actionItemRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { actionItemRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 
 export type DeleteActionItemResult =
@@ -20,7 +22,7 @@ export async function deleteActionItem(data: {
       const deleted = await actionItemRepository.deleteById(data.id, data.organizationId, tx);
       if (!deleted) throw new Error("アクションアイテムの削除に失敗しました");
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "action_item.delete",
           targetType: "action_item",

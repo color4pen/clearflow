@@ -4,8 +4,9 @@ import {
   meetingRepository,
   inquiryRepository,
   userRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { ActionItem } from "@/domain/models/actionItem";
 
@@ -68,7 +69,7 @@ export async function createActionItem(data: {
         tx
       );
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "action_item.create",
           targetType: "action_item",

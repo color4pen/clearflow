@@ -1,11 +1,12 @@
 import {
   inquiryRepository,
-  auditLogRepository,
   dealRepository,
   approvalTemplateRepository,
   approvalStepRepository,
   requestRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import { canTransition } from "@/domain/services";
 import { dispatcher } from "@/domain/events";
@@ -116,7 +117,7 @@ export async function updateInquiryStatus(
                   );
                 }
 
-                await auditLogRepository.create(
+                await recordAudit(
                   {
                     action: "request.create",
                     targetType: "request",
@@ -129,7 +130,7 @@ export async function updateInquiryStatus(
                 );
 
                 // 引合側の監査証跡：誰がいつ案件化を試みてポリシーゲートが発動したかを記録
-                await auditLogRepository.create(
+                await recordAudit(
                   {
                     action: "inquiry.conversionPending",
                     targetType: "inquiry",
@@ -202,7 +203,7 @@ export async function updateInquiryStatus(
             tx
           );
 
-          await auditLogRepository.create(
+          await recordAudit(
             {
               action: "inquiry.updateStatus",
               targetType: "inquiry",
@@ -257,7 +258,7 @@ export async function updateInquiryStatus(
           tx
         );
 
-        await auditLogRepository.create(
+        await recordAudit(
           {
             action: "inquiry.updateStatus",
             targetType: "inquiry",

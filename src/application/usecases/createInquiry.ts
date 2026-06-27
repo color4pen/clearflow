@@ -1,4 +1,6 @@
-import { clientRepository, inquiryRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { clientRepository, inquiryRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { Inquiry } from "@/domain/models/inquiry";
 
@@ -43,7 +45,7 @@ export async function createInquiry(data: {
         tx
       );
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "inquiry.create",
           targetType: "inquiry",

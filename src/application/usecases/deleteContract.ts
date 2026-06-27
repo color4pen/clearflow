@@ -1,4 +1,6 @@
-import { invoiceRepository, contractRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { invoiceRepository, contractRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 
 export type DeleteContractResult =
@@ -20,7 +22,7 @@ export async function deleteContract(data: {
     await db.transaction(async (tx) => {
       await contractRepository.deleteById(data.id, data.organizationId, tx);
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "contract.delete",
           targetType: "contract",

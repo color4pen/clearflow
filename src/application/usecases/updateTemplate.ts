@@ -1,7 +1,8 @@
 import {
   approvalTemplateRepository,
-  auditLogRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 import type { ApprovalTemplate, ApprovalTemplateStep, TemplateField } from "@/domain/models/approvalTemplate";
 
@@ -34,7 +35,7 @@ export async function updateTemplate(data: {
         throw new Error("テンプレートが見つかりません");
       }
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "template.update",
           targetType: "template",

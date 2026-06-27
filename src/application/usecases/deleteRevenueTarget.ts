@@ -1,4 +1,6 @@
-import { revenueTargetRepository, auditLogRepository } from "@/infrastructure/repositories";
+import { revenueTargetRepository } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 
 export type DeleteRevenueTargetResult = { ok: true } | { ok: false; reason: string };
@@ -19,7 +21,7 @@ export async function deleteRevenueTarget(data: {
     await db.transaction(async (tx) => {
       await revenueTargetRepository.deleteById(id, organizationId, tx);
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "revenue_target.delete",
           targetType: "revenue_target",

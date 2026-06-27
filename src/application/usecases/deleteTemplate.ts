@@ -1,8 +1,9 @@
 import {
   approvalTemplateRepository,
-  auditLogRepository,
   requestRepository,
 } from "@/infrastructure/repositories";
+import { recordAudit } from "@/application/services/auditRecorder";
+
 import { db } from "@/infrastructure/db";
 
 export type DeleteTemplateResult =
@@ -31,7 +32,7 @@ export async function deleteTemplate(data: {
     await db.transaction(async (tx) => {
       await approvalTemplateRepository.deleteById(data.id, data.organizationId, tx);
 
-      await auditLogRepository.create(
+      await recordAudit(
         {
           action: "template.delete",
           targetType: "template",
