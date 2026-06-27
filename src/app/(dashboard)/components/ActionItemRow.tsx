@@ -92,9 +92,6 @@ export function ActionItemRow({
     linkTarget: LinkTarget | null;
   }) {
     const { linkTarget } = values;
-    const dealId = linkTarget?.type === "deal" ? linkTarget.id : null;
-    const inquiryId = linkTarget?.type === "inquiry" ? linkTarget.id : null;
-    const meetingId = linkTarget?.type === "meeting" ? linkTarget.id : null;
 
     startTransition(async () => {
       const result = await updateActionItemAction({
@@ -102,9 +99,15 @@ export function ActionItemRow({
         description: values.description,
         assigneeId: values.assigneeId,
         dueDate: values.dueDate,
-        dealId,
-        inquiryId,
-        meetingId,
+        // 紐づけ先ピッカーを表示する一覧（showSource=true）でのみ単一紐づけを反映する。
+        // 案件/会議ページ（showSource=false）では link を送らず、既存の紐づけ（会議由来の dealId+meetingId 等）を保持する
+        ...(showSource
+          ? {
+              dealId: linkTarget?.type === "deal" ? linkTarget.id : null,
+              inquiryId: linkTarget?.type === "inquiry" ? linkTarget.id : null,
+              meetingId: linkTarget?.type === "meeting" ? linkTarget.id : null,
+            }
+          : {}),
       });
       if (result.message) {
         showToast(result.message, "error");
