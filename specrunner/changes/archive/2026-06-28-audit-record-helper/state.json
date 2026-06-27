@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "4e4ba1c3-fd55-4cbe-8582-29c4605536f2",
   "createdAt": "2026-06-27T13:39:04.210Z",
-  "updatedAt": "2026-06-27T15:01:51.272Z",
+  "updatedAt": "2026-06-27T15:05:39.556Z",
   "request": {
     "title": "監査ログ記録の型付きヘルパへの集約",
     "type": "spec-change",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "change/audit-record-helper-4e4ba1c3",
   "error": null,
   "pipelineId": "standard",
@@ -40,7 +40,7 @@
     "createdAt": "2026-06-27T15:01:51.260Z"
   },
   "_journal": {
-    "historyCount": 69,
+    "historyCount": 70,
     "stepCounts": {
       "request-review": 2,
       "design": 1,

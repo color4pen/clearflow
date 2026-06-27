@@ -101,3 +101,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/audit-record-helper/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-27T15:01:49.355Z","endedAt":"2026-06-27T15:01:51.262Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-27T15:01:51.262Z","outputs":[{"path":"specrunner/changes/audit-record-helper/pr-create-result.md","hash":"sha256:1cc7c5d69fab605b8b21cad5213c297cbc0cbe47b33e8a13a643e9864a558dd1"}],"inputs":[{"path":"change/audit-record-helper-4e4ba1c3","hash":null}]}
 {"type":"transition","ts":"2026-06-27T15:01:51.272Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-27T15:05:39.556Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
