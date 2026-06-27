@@ -1,22 +1,24 @@
 import { describe, it, expect } from "bun:test";
-import { getActionLabel, getTargetTypeLabel } from "@/lib/activityLabels";
+import { getActionLabel } from "@/lib/activityLabels";
 
 describe("getActionLabel", () => {
-  it('getActionLabel("deal.create") が "案件を作成" を返す', () => {
-    expect(getActionLabel("deal.create")).toBe("案件を作成");
+  it('deal.create が "案件を作成" を返す', () => {
+    expect(getActionLabel({ action: "deal.create", metadata: null })).toBe("案件を作成");
   });
 
-  it('getActionLabel("unknown.action") がそのまま "unknown.action" を返す（フォールバック）', () => {
-    expect(getActionLabel("unknown.action")).toBe("unknown.action");
-  });
-});
-
-describe("getTargetTypeLabel", () => {
-  it('getTargetTypeLabel("deal") が "案件" を返す', () => {
-    expect(getTargetTypeLabel("deal")).toBe("案件");
+  it('未知 action はそのまま返す（フォールバック）', () => {
+    expect(getActionLabel({ action: "unknown.action", metadata: null })).toBe("unknown.action");
   });
 
-  it('getTargetTypeLabel("unknown") がそのまま "unknown" を返す（フォールバック）', () => {
-    expect(getTargetTypeLabel("unknown")).toBe("unknown");
+  it('action_item.toggle + done:true で "アクションアイテムを完了" を返す', () => {
+    expect(
+      getActionLabel({ action: "action_item.toggle", metadata: { done: true } })
+    ).toBe("アクションアイテムを完了");
+  });
+
+  it('action_item.toggle + done:false で "アクションアイテムの完了を取り消し" を返す', () => {
+    expect(
+      getActionLabel({ action: "action_item.toggle", metadata: { done: false } })
+    ).toBe("アクションアイテムの完了を取り消し");
   });
 });
