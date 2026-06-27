@@ -198,7 +198,7 @@ export function ActionItemRow({
     ) : (
       // 案件/商談ページの狭いカード: 説明を1行目に広く取り、担当者・期日を下段に縦積みする。行クリックで編集
       <li
-        className={`flex items-center gap-2 text-base-app px-3.5 py-2.5 hover:bg-bg-surface-alt ${
+        className={`flex items-center gap-3 text-base-app px-2 py-2.5 hover:bg-bg-surface-alt ${
           editable ? "cursor-pointer" : ""
         }`}
         onClick={editable ? () => setShowEditModal(true) : undefined}
