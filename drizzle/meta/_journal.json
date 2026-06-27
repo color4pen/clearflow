@@ -71,6 +71,13 @@
       "when": 1782644400000,
       "tag": "0010_remaining_entity_version",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1782730800000,
+      "tag": "0011_audit_logs_indexes",
+      "breakpoints": true
     }
   ]
 }

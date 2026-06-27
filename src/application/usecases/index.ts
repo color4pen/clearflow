@@ -92,3 +92,4 @@ export { searchDeals } from "./searchDeals";
 export type { LinkTargetResult } from "./searchDeals";
 export { searchInquiries } from "./searchInquiries";
 export { searchMeetings } from "./searchMeetings";
+export { getDealActivity } from "./getDealActivity";

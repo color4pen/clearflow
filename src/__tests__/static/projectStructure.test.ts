@@ -1739,6 +1739,67 @@ describe("アクションアイテム リポジトリ・ユースケース・サ
 });
 
 // ---------------------------------------------------------------------------
+// auditLogRepository.findByTargets — T-08
+// ---------------------------------------------------------------------------
+
+describe("auditLogRepository.findByTargets — テナント分離・複数ターゲット・降順ソート", () => {
+  it("findByTargets のソースに organizationId が含まれる（テナント分離）", async () => {
+    const content = await readSrc("infrastructure/repositories/auditLogRepository.ts");
+    const idx = content.indexOf("export async function findByTargets(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx);
+    expect(body).toContain("organizationId");
+  });
+
+  it("findByTargets のソースに or( が含まれる（複数ターゲットの OR 結合）", async () => {
+    const content = await readSrc("infrastructure/repositories/auditLogRepository.ts");
+    const idx = content.indexOf("export async function findByTargets(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx);
+    expect(body).toContain("or(");
+  });
+
+  it("findByTargets のソースに desc(auditLogs.createdAt) が含まれる（降順ソート）", async () => {
+    const content = await readSrc("infrastructure/repositories/auditLogRepository.ts");
+    const idx = content.indexOf("export async function findByTargets(");
+    expect(idx).toBeGreaterThan(-1);
+    const body = content.slice(idx);
+    expect(body).toContain("desc(auditLogs.createdAt)");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// フィーチャーフラグと除外フィルタ — T-09
+// ---------------------------------------------------------------------------
+
+describe("フィーチャーフラグと除外フィルタ — T-09", () => {
+  it("deals/[id]/page.tsx のソースに isActivityFeedEnabled の呼び出しが含まれる", async () => {
+    const content = await readSrc("app/(dashboard)/deals/[id]/page.tsx");
+    expect(content).toContain("isActivityFeedEnabled");
+  });
+
+  it("activityConfig.ts のソースに ACTIVITY_FEED_ENABLED の参照が含まれる", async () => {
+    const content = await readSrc("lib/activityConfig.ts");
+    expect(content).toContain("ACTIVITY_FEED_ENABLED");
+  });
+
+  it("activityConfig.ts のソースに ACTIVITY_HIDDEN_ACTIONS の参照が含まれる", async () => {
+    const content = await readSrc("lib/activityConfig.ts");
+    expect(content).toContain("ACTIVITY_HIDDEN_ACTIONS");
+  });
+
+  it("schema.ts の auditLogs テーブル定義に audit_logs_org_created_at_idx インデックス名が含まれる", async () => {
+    const content = await readSrc("infrastructure/schema.ts");
+    expect(content).toContain("audit_logs_org_created_at_idx");
+  });
+
+  it("schema.ts の auditLogs テーブル定義に audit_logs_target_type_id_idx インデックス名が含まれる", async () => {
+    const content = await readSrc("infrastructure/schema.ts");
+    expect(content).toContain("audit_logs_target_type_id_idx");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // アクションアイテム full-UI — T-02, T-07, T-01
 // ---------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-import { eq, and, desc, gte, lte } from "drizzle-orm";
+import { eq, and, desc, gte, lte, or, notInArray } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { auditLogs } from "../schema";
@@ -81,6 +81,54 @@ export async function findByOrganization(
   }
   if (options?.offset !== undefined) {
     query = query.offset(options.offset) as typeof query;
+  }
+
+  const result = await query;
+  return result.map((row) => ({
+    id: row.id,
+    action: row.action,
+    targetType: row.targetType,
+    targetId: row.targetId,
+    actorId: row.actorId,
+    organizationId: row.organizationId,
+    metadata: row.metadata as Record<string, unknown> | null,
+    createdAt: row.createdAt,
+  }));
+}
+
+export async function findByTargets(
+  organizationId: string,
+  targets: Array<{ targetType: string; targetId: string }>,
+  options?: {
+    limit?: number;
+    excludeActions?: string[];
+  }
+): Promise<AuditLog[]> {
+  if (targets.length === 0) {
+    return [];
+  }
+
+  const targetConditions = targets.map((t) =>
+    and(eq(auditLogs.targetType, t.targetType), eq(auditLogs.targetId, t.targetId))
+  );
+
+  const conditions = [
+    eq(auditLogs.organizationId, organizationId),
+    or(...targetConditions),
+  ];
+
+  if (options?.excludeActions && options.excludeActions.length > 0) {
+    conditions.push(notInArray(auditLogs.action, options.excludeActions));
+  }
+
+  let query = db
+    .select()
+    .from(auditLogs)
+    .where(and(...conditions))
+    .orderBy(desc(auditLogs.createdAt));
+
+  if (options?.limit !== undefined) {
+    query = query.limit(options.limit) as typeof query;
   }
 
   const result = await query;
