@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { searchLinkTargetsAction } from "@/app/actions/actionItems";
 
 export type LinkTarget = {
@@ -16,13 +16,37 @@ type Props = {
   onCancel: () => void;
 };
 
+type ContentProps = {
+  initialValue: LinkTarget | null;
+  onConfirm: (value: LinkTarget | null) => void;
+  onCancel: () => void;
+};
+
 const TAB_LABELS: Record<"deal" | "inquiry" | "meeting", string> = {
   deal: "案件",
   inquiry: "引合",
   meeting: "会議",
 };
 
+/**
+ * Outer wrapper: conditionally renders the modal content.
+ * When `open` is false the inner component unmounts, so its state resets
+ * automatically. When it reopens it mounts fresh with the correct initial
+ * values — no effect-based reset or render-time ref access required.
+ */
 export function LinkTargetPicker({ open, initialValue, onConfirm, onCancel }: Props) {
+  if (!open) return null;
+  return (
+    <LinkTargetPickerContent
+      initialValue={initialValue}
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+    />
+  );
+}
+
+/** Inner component: always mounted when the modal is visible. */
+function LinkTargetPickerContent({ initialValue, onConfirm, onCancel }: ContentProps) {
   const [activeTab, setActiveTab] = useState<"deal" | "inquiry" | "meeting">(
     initialValue?.type ?? "deal"
   );
@@ -30,20 +54,7 @@ export function LinkTargetPicker({ open, initialValue, onConfirm, onCancel }: Pr
   const [results, setResults] = useState<{ id: string; label: string }[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Reset state when the modal transitions from closed to open.
-  // Calling setState during render (guarded by a ref) avoids the extra
-  // render cycle that synchronous setState inside useEffect would cause.
-  const prevOpenRef = useRef(open);
-  if (open && !prevOpenRef.current) {
-    setActiveTab(initialValue?.type ?? "deal");
-    setQuery("");
-    setResults([]);
-  }
-  prevOpenRef.current = open;
-
   useEffect(() => {
-    if (!open) return;
-
     const timerId = setTimeout(async () => {
       setIsSearching(true);
       const result = await searchLinkTargetsAction({ type: activeTab, query });
@@ -56,9 +67,7 @@ export function LinkTargetPicker({ open, initialValue, onConfirm, onCancel }: Pr
     }, 300);
 
     return () => clearTimeout(timerId);
-  }, [query, activeTab, open]);
-
-  if (!open) return null;
+  }, [query, activeTab]);
 
   function handleTabChange(tab: "deal" | "inquiry" | "meeting") {
     setActiveTab(tab);
