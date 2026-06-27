@@ -2,12 +2,12 @@ import { eq, and, desc, gte, lte, or, notInArray } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { auditLogs } from "../schema";
-import type { AuditLog } from "@/domain/models/auditLog";
+import type { AuditLog, AuditAction, AuditTargetType } from "@/domain/models/auditLog";
 
 export async function create(
   data: {
-    action: string;
-    targetType: string;
+    action: AuditAction;
+    targetType: AuditTargetType;
     targetId: string;
     actorId: string;
     organizationId: string;
@@ -30,8 +30,8 @@ export async function create(
   const row = result[0];
   return {
     id: row.id,
-    action: row.action,
-    targetType: row.targetType,
+    action: row.action as AuditAction,
+    targetType: row.targetType as AuditTargetType,
     targetId: row.targetId,
     actorId: row.actorId,
     organizationId: row.organizationId,
@@ -86,8 +86,8 @@ export async function findByOrganization(
   const result = await query;
   return result.map((row) => ({
     id: row.id,
-    action: row.action,
-    targetType: row.targetType,
+    action: row.action as AuditAction,
+    targetType: row.targetType as AuditTargetType,
     targetId: row.targetId,
     actorId: row.actorId,
     organizationId: row.organizationId,
@@ -134,8 +134,8 @@ export async function findByTargets(
   const result = await query;
   return result.map((row) => ({
     id: row.id,
-    action: row.action,
-    targetType: row.targetType,
+    action: row.action as AuditAction,
+    targetType: row.targetType as AuditTargetType,
     targetId: row.targetId,
     actorId: row.actorId,
     organizationId: row.organizationId,

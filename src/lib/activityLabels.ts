@@ -1,7 +1,7 @@
-import type { AuditLog } from "@/domain/models/auditLog";
+import type { AuditAction } from "@/domain/models/auditLog";
 
 // キーは実際に監査ログへ記録される action 文字列と一致させること。
-const ACTION_LABELS: Record<string, string> = {
+const ACTION_LABELS: Partial<Record<AuditAction, string>> = {
   "deal.create": "案件を作成",
   "deal.update": "案件を更新",
   "deal.updatePhase": "フェーズを変更",
@@ -24,11 +24,11 @@ const ACTION_LABELS: Record<string, string> = {
 
 // 監査ログ1件を人間可読なアクション文に変換する。文には対象の名詞を含む。
 // action_item.toggle は metadata.done で「完了」「完了を取り消し」を区別する。
-export function getActionLabel(log: Pick<AuditLog, "action" | "metadata">): string {
+export function getActionLabel(log: { action: string; metadata: Record<string, unknown> | null }): string {
   if (log.action === "action_item.toggle") {
     return log.metadata?.done === true
       ? "アクションアイテムを完了"
       : "アクションアイテムの完了を取り消し";
   }
-  return ACTION_LABELS[log.action] ?? log.action;
+  return ACTION_LABELS[log.action as AuditAction] ?? log.action;
 }
