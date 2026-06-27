@@ -64,6 +64,13 @@
       "when": 1782558000000,
       "tag": "0009_contract_invoice_version",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1782644400000,
+      "tag": "0010_remaining_entity_version",
+      "breakpoints": true
     }
   ]
 }

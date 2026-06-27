@@ -1,4 +1,4 @@
-import { eq, and, lte, gte, asc, lt, gt, ne } from "drizzle-orm";
+import { eq, and, lte, gte, asc, lt, gt, ne, sql } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { revenueTargets } from "../schema";
@@ -13,6 +13,7 @@ function mapRow(row: typeof revenueTargets.$inferSelect): RevenueTarget {
     targetAmount: row.targetAmount,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    version: row.version,
   };
 }
 
@@ -129,16 +130,18 @@ export async function update(
     periodEnd: Date;
     targetAmount: number;
   }>,
+  expectedVersion: number,
   tx?: Transaction
 ): Promise<RevenueTarget | null> {
   const queryRunner = tx ?? db;
   const result = await queryRunner
     .update(revenueTargets)
-    .set({ ...data, updatedAt: new Date() })
+    .set({ ...data, updatedAt: new Date(), version: sql`version + 1` })
     .where(
       and(
         eq(revenueTargets.id, id),
-        eq(revenueTargets.organizationId, organizationId)
+        eq(revenueTargets.organizationId, organizationId),
+        eq(revenueTargets.version, expectedVersion)
       )
     )
     .returning();

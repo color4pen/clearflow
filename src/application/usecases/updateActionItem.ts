@@ -86,9 +86,10 @@ export async function updateActionItem(data: {
         data.id,
         data.organizationId,
         updateData,
+        existing.version,
         tx
       );
-      if (!updated) throw new Error("アクションアイテムの更新に失敗しました");
+      if (!updated) return null;
 
       await auditLogRepository.create(
         {
@@ -105,6 +106,9 @@ export async function updateActionItem(data: {
       return updated;
     });
 
+    if (!actionItem) {
+      return { ok: false, reason: "このアクションアイテムは他のユーザーによって更新されました。画面を更新してください" };
+    }
     return { ok: true, actionItem };
   } catch (err) {
     return {

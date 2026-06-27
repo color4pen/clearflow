@@ -6,4 +6,5 @@ export type RevenueTarget = {
   targetAmount: number;
   createdAt: Date;
   updatedAt: Date;
+  version: number;
 };
