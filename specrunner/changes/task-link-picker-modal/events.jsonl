@@ -83,3 +83,9 @@
 {"type":"transition","ts":"2026-06-27T06:41:54.329Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-06-27T06:41:54.329Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-06-27T06:41:54.333Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-27T06:42:21.059Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"68a78d5b-71bd-430b-8cdb-fc327d4548ce","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-27T06:41:54.347Z","endedAt":"2026-06-27T06:42:19.634Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-27T06:42:19.634Z","outputs":[{"path":"specrunner/changes/task-link-picker-modal","hash":null}],"inputs":[{"path":"specrunner/changes/task-link-picker-modal/review-feedback-001.md","hash":"sha256:801505c514394bf0b6d058a046d83e7547afdb7cb961026e29fc8ae52bd17430"}]}
+{"type":"transition","ts":"2026-06-27T06:42:21.068Z","step":"step-transition","status":"ok","message":"code-fixer → domain-invariants"}
+{"type":"transition","ts":"2026-06-27T06:42:21.071Z","step":"domain-invariants","status":"started","message":"domain-invariants iteration 1 started"}
+{"type":"transition","ts":"2026-06-27T06:42:21.073Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
