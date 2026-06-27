@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "690e77d5-1284-4599-8298-e73aa1f25b3c",
   "createdAt": "2026-06-27T09:02:53.949Z",
-  "updatedAt": "2026-06-27T09:21:55.339Z",
+  "updatedAt": "2026-06-27T09:30:33.357Z",
   "request": {
     "title": "案件アクティビティ・タイムライン",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "implementer",
+  "step": "code-review",
   "status": "running",
   "branch": "feat/deal-activity-timeline-690e77d5",
   "error": null,
@@ -34,12 +34,14 @@
     }
   ],
   "_journal": {
-    "historyCount": 16,
+    "historyCount": 25,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
       "spec-review": 1,
-      "test-case-gen": 1
+      "test-case-gen": 1,
+      "implementer": 1,
+      "verification": 1
     }
   }
 }
