@@ -46,3 +46,16 @@
 {"type":"transition","ts":"2026-06-27T00:54:01.097Z","step":"verification","status":"warning","message":"verification iteration 1 completed with verdict: failed"}
 {"type":"transition","ts":"2026-06-27T00:54:01.097Z","step":"step-transition","status":"ok","message":"verification → build-fixer"}
 {"type":"transition","ts":"2026-06-27T00:54:01.099Z","step":"build-fixer-started","status":"started","message":"Starting build-fixer step"}
+{"type":"transition","ts":"2026-06-27T00:57:57.120Z","step":"build-fixer-verdict","status":"ok","message":"build-fixer verdict: success"}
+{"type":"step-attempt","step":"build-fixer","sessionId":"8a23578e-7342-4c1a-923d-6e7ac9285e95","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-27T00:54:01.111Z","endedAt":"2026-06-27T00:57:55.748Z"}
+{"type":"lineage","step":"build-fixer","ts":"2026-06-27T00:57:55.748Z","outputs":[{"path":"specrunner/changes/contract-invoice-optimistic-lock","hash":null}],"inputs":[{"path":"specrunner/changes/contract-invoice-optimistic-lock/verification-result.md","hash":"sha256:8bfbb43b0f3a3b949c89703f6e68335fd853fc9e2f05dbc1cbcaaa754d44db92"}]}
+{"type":"transition","ts":"2026-06-27T00:57:57.130Z","step":"step-transition","status":"ok","message":"build-fixer → verification"}
+{"type":"transition","ts":"2026-06-27T00:57:57.133Z","step":"verification","status":"started","message":"verification iteration 2 started"}
+{"type":"transition","ts":"2026-06-27T00:57:57.135Z","step":"step-transition","status":"ok","message":"Transitioning to verification step"}
+{"type":"transition","ts":"2026-06-27T00:59:19.364Z","step":"verification-verdict","status":"ok","message":"verification verdict: passed"}
+{"type":"step-attempt","step":"verification","sessionId":null,"outcome":{"verdict":"passed","findingsPath":"specrunner/changes/contract-invoice-optimistic-lock/verification-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-27T00:57:57.137Z","endedAt":"2026-06-27T00:59:19.361Z"}
+{"type":"lineage","step":"verification","ts":"2026-06-27T00:59:19.361Z","outputs":[{"path":"specrunner/changes/contract-invoice-optimistic-lock/verification-result.md","hash":"sha256:b381372b10420569957817ae422256d50d48a60cfa4710391aaaed2884a912cb"}],"inputs":[{"path":".","hash":null}]}
+{"type":"transition","ts":"2026-06-27T00:59:19.374Z","step":"verification","status":"ok","message":"verification iteration 2 completed with verdict: passed"}
+{"type":"transition","ts":"2026-06-27T00:59:19.374Z","step":"step-transition","status":"ok","message":"verification → code-review"}
+{"type":"transition","ts":"2026-06-27T00:59:19.376Z","step":"code-review","status":"started","message":"code-review iteration 1 started"}
+{"type":"transition","ts":"2026-06-27T00:59:19.379Z","step":"code-review-started","status":"started","message":"Starting code-review step"}
