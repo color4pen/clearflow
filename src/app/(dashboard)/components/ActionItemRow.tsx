@@ -149,33 +149,32 @@ export function ActionItemRow({
       onCancel={() => setShowEditModal(false)}
       onDelete={canDelete ? () => setShowDeleteConfirm(true) : undefined}
     />
-    <li
-      className="grid items-center text-base-app px-3.5 py-2.5 hover:bg-bg-surface-alt"
-      style={{ gridTemplateColumns: showSource ? "24px 1fr 100px 100px 140px 50px" : "24px 1fr 100px 100px 50px" }}
-    >
-      <input
-        type="checkbox"
-        checked={item.done}
-        disabled={isPending}
-        onChange={handleToggle}
-        className="cursor-pointer disabled:cursor-default"
-      />
-      <span
-        className={
-          item.done
-            ? "text-text-muted line-through truncate"
-            : "text-text truncate"
-        }
+    {showSource ? (
+      // グローバルなタスク一覧: ヘッダーと整列する表形式の行
+      <li
+        className="grid items-center text-base-app px-3.5 py-2.5 hover:bg-bg-surface-alt"
+        style={{ gridTemplateColumns: "24px 1fr 100px 100px 140px 50px" }}
       >
-        {item.description}
-      </span>
-      <span className="text-text-muted truncate">
-        {resolveAssigneeName(item.assigneeId)}
-      </span>
-      <span className="text-text-muted font-mono">
-        {item.dueDate ? formatDueDate(item.dueDate) : "—"}
-      </span>
-      {showSource && (
+        <input
+          type="checkbox"
+          checked={item.done}
+          disabled={isPending}
+          onChange={handleToggle}
+          className="cursor-pointer disabled:cursor-default"
+        />
+        <span
+          className={`min-w-0 truncate ${
+            item.done ? "text-text-muted line-through" : "text-text"
+          }`}
+        >
+          {item.description}
+        </span>
+        <span className="text-text-muted truncate">
+          {resolveAssigneeName(item.assigneeId)}
+        </span>
+        <span className="text-text-muted font-mono">
+          {item.dueDate ? formatDueDate(item.dueDate) : "—"}
+        </span>
         <span className="text-text-muted truncate">
           {sourceHref ? (
             <Link href={sourceHref} target="_blank" rel="noopener noreferrer" className="text-primary underline">
@@ -185,20 +184,57 @@ export function ActionItemRow({
             sourceName ?? "—"
           )}
         </span>
-      )}
-      <span className="flex justify-end">
-        {editable && (
-          <button
-            type="button"
-            onClick={() => setShowEditModal(true)}
-            disabled={isPending}
-            className="text-xs text-primary underline cursor-pointer disabled:opacity-50"
+        <span className="flex justify-end">
+          {editable && (
+            <button
+              type="button"
+              onClick={() => setShowEditModal(true)}
+              disabled={isPending}
+              className="text-xs text-primary underline cursor-pointer disabled:opacity-50"
+            >
+              編集
+            </button>
+          )}
+        </span>
+      </li>
+    ) : (
+      // 案件/商談ページの狭いカード: 説明を1行目に広く取り、担当者・期日・編集を下段に縦積みする
+      <li className="flex items-start gap-2 text-base-app px-3.5 py-2.5 hover:bg-bg-surface-alt">
+        <input
+          type="checkbox"
+          checked={item.done}
+          disabled={isPending}
+          onChange={handleToggle}
+          className="mt-0.5 cursor-pointer disabled:cursor-default"
+        />
+        <div className="flex-1 min-w-0">
+          <p
+            className={`break-words ${
+              item.done ? "text-text-muted line-through" : "text-text"
+            }`}
           >
-            編集
-          </button>
-        )}
-      </span>
-    </li>
+            {item.description}
+          </p>
+          <div className="flex items-center gap-2 mt-0.5 text-xs text-text-muted">
+            <span className="truncate">{resolveAssigneeName(item.assigneeId)}</span>
+            <span>·</span>
+            <span className="font-mono whitespace-nowrap">
+              {item.dueDate ? formatDueDate(item.dueDate) : "—"}
+            </span>
+            {editable && (
+              <button
+                type="button"
+                onClick={() => setShowEditModal(true)}
+                disabled={isPending}
+                className="ml-auto whitespace-nowrap text-primary underline cursor-pointer disabled:opacity-50"
+              >
+                編集
+              </button>
+            )}
+          </div>
+        </div>
+      </li>
+    )}
     {canDelete && (
       <ConfirmDialog
         open={showDeleteConfirm}
