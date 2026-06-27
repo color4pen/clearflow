@@ -27,7 +27,7 @@ type ContentProps = {
 const TAB_LABELS: Record<"deal" | "inquiry" | "meeting", string> = {
   deal: "案件",
   inquiry: "引合",
-  meeting: "会議",
+  meeting: "商談",
 };
 
 /**

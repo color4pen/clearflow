@@ -11,7 +11,7 @@ import type { ActionItemWithSource } from "@/application/usecases/listActionItem
 const TYPE_LABEL: Record<"deal" | "inquiry" | "meeting", string> = {
   deal: "案件",
   inquiry: "引合",
-  meeting: "会議",
+  meeting: "商談",
 };
 
 type Props = {

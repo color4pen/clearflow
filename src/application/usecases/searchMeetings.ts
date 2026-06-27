@@ -14,7 +14,7 @@ export async function searchMeetings(
   for (const meeting of meetings) {
     const primary = `${formatDateJP(meeting.date)} ${meetingTypeLabels[meeting.type]}`;
     let secondary: string | null = null;
-    // 会議画面は案件配下にのみ存在する（引合直下の会議はリンク先なし）
+    // 商談画面は案件配下にのみ存在する（引合直下の商談はリンク先なし）
     const href = meeting.dealId
       ? `/deals/${meeting.dealId}/meetings/${meeting.id}`
       : null;
