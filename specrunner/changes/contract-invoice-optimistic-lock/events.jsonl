@@ -98,3 +98,11 @@
 {"type":"transition","ts":"2026-06-27T01:21:32.936Z","step":"verification","status":"ok","message":"verification iteration 1 completed with verdict: passed"}
 {"type":"transition","ts":"2026-06-27T01:21:32.936Z","step":"step-transition","status":"ok","message":"verification → adr-gen"}
 {"type":"transition","ts":"2026-06-27T01:21:32.937Z","step":"adr-gen-started","status":"started","message":"Starting adr-gen step"}
+{"type":"transition","ts":"2026-06-27T01:21:54.708Z","step":"adr-gen-verdict","status":"ok","message":"adr-gen verdict: success"}
+{"type":"step-attempt","step":"adr-gen","sessionId":"ad26350b-9ebb-4439-9093-5839e644269a","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-27T01:21:32.944Z","endedAt":"2026-06-27T01:21:53.175Z"}
+{"type":"transition","ts":"2026-06-27T01:21:54.716Z","step":"step-transition","status":"ok","message":"adr-gen → pr-create"}
+{"type":"transition","ts":"2026-06-27T01:21:54.722Z","step":"step-transition","status":"ok","message":"Transitioning to pr-create step"}
+{"type":"transition","ts":"2026-06-27T01:21:59.131Z","step":"pr-create-verdict","status":"ok","message":"pr-create verdict: success"}
+{"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/contract-invoice-optimistic-lock/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-27T01:21:54.724Z","endedAt":"2026-06-27T01:21:59.129Z"}
+{"type":"lineage","step":"pr-create","ts":"2026-06-27T01:21:59.129Z","outputs":[{"path":"specrunner/changes/contract-invoice-optimistic-lock/pr-create-result.md","hash":"sha256:c4b74e91d661bcdb1e173e2408bbf4c097f1d787031a0716e3f654f7bff2ec03"}],"inputs":[{"path":"feat/contract-invoice-optimistic-lock-9c1e2aed","hash":null}]}
+{"type":"transition","ts":"2026-06-27T01:21:59.141Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
