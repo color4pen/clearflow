@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { searchLinkTargetsAction } from "@/app/actions/actionItems";
 
 export type LinkTarget = {
@@ -30,12 +30,16 @@ export function LinkTargetPicker({ open, initialValue, onConfirm, onCancel }: Pr
   const [results, setResults] = useState<{ id: string; label: string }[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  useEffect(() => {
-    if (!open) return;
+  // Reset state when the modal transitions from closed to open.
+  // Calling setState during render (guarded by a ref) avoids the extra
+  // render cycle that synchronous setState inside useEffect would cause.
+  const prevOpenRef = useRef(open);
+  if (open && !prevOpenRef.current) {
     setActiveTab(initialValue?.type ?? "deal");
     setQuery("");
     setResults([]);
-  }, [open, initialValue?.type]);
+  }
+  prevOpenRef.current = open;
 
   useEffect(() => {
     if (!open) return;
