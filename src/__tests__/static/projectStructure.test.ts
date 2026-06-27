@@ -1828,3 +1828,79 @@ describe("アクションアイテム full-UI — タスク一覧・サイドバ
     expect(exists).toBe(true);
   });
 });
+
+// ---------------------------------------------------------------------------
+// 監査ログ action/targetType 型カタログ — audit-action-catalog
+// ---------------------------------------------------------------------------
+
+describe("監査ログ action/targetType 型カタログ", () => {
+  /**
+   * テスト1: AuditAction 型が src/domain/models/auditLog.ts に export 定義されている
+   */
+  it("AuditAction 型が domain/models/auditLog.ts に export されている", async () => {
+    const content = await readSrc("domain/models/auditLog.ts");
+    expect(content).toContain("export type AuditAction");
+  });
+
+  /**
+   * テスト2: AuditTargetType 型が src/domain/models/auditLog.ts に export 定義されている
+   */
+  it("AuditTargetType 型が domain/models/auditLog.ts に export されている", async () => {
+    const content = await readSrc("domain/models/auditLog.ts");
+    expect(content).toContain("export type AuditTargetType");
+  });
+
+  /**
+   * テスト3: AuditLog 型の action フィールドが AuditAction 型を使用している
+   */
+  it("AuditLog.action フィールドが AuditAction 型を使用している", async () => {
+    const content = await readSrc("domain/models/auditLog.ts");
+    expect(content).toContain("action: AuditAction");
+  });
+
+  /**
+   * テスト4: AuditLog 型の targetType フィールドが AuditTargetType 型を使用している
+   */
+  it("AuditLog.targetType フィールドが AuditTargetType 型を使用している", async () => {
+    const content = await readSrc("domain/models/auditLog.ts");
+    expect(content).toContain("targetType: AuditTargetType");
+  });
+
+  /**
+   * テスト5: auditLogRepository.create の action / targetType パラメータがカタログ型を使用している
+   */
+  it("auditLogRepository.create の action / targetType パラメータがカタログ型を使用している", async () => {
+    const content = await readSrc("infrastructure/repositories/auditLogRepository.ts");
+    const createIdx = content.indexOf("export async function create(");
+    expect(createIdx).toBeGreaterThan(-1);
+    // create 関数のシグネチャ周辺（300文字）を抽出
+    const signature = content.slice(createIdx, createIdx + 300);
+    expect(signature).toContain("action: AuditAction");
+    expect(signature).toContain("targetType: AuditTargetType");
+  });
+
+  /**
+   * テスト6: activityLabels.ts の ACTION_LABELS が Partial<Record<AuditAction, string>> 型を使用している
+   */
+  it("activityLabels.ts の ACTION_LABELS が Partial<Record<AuditAction, string>> 型を使用している", async () => {
+    const content = await readSrc("lib/activityLabels.ts");
+    expect(content).toContain("Partial<Record<AuditAction, string>>");
+  });
+
+  /**
+   * テスト7: AuditMetadataMap 型が src/domain/models/auditLog.ts に export 定義されている
+   */
+  it("AuditMetadataMap 型が domain/models/auditLog.ts に export されている", async () => {
+    const content = await readSrc("domain/models/auditLog.ts");
+    expect(content).toContain("export type AuditMetadataMap");
+  });
+
+  /**
+   * テスト8: AuditMetadataMap に "action_item.toggle" キーが含まれ、done: boolean を持つ
+   */
+  it('AuditMetadataMap に "action_item.toggle" キーが含まれ、done: boolean を持つ', async () => {
+    const content = await readSrc("domain/models/auditLog.ts");
+    expect(content).toContain('"action_item.toggle"');
+    expect(content).toContain("done: boolean");
+  });
+});
