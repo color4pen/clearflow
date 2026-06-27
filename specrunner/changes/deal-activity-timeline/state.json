@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "690e77d5-1284-4599-8298-e73aa1f25b3c",
   "createdAt": "2026-06-27T09:02:53.949Z",
-  "updatedAt": "2026-06-27T09:48:59.141Z",
+  "updatedAt": "2026-06-27T09:52:07.131Z",
   "request": {
     "title": "案件アクティビティ・タイムライン",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/deal-activity-timeline-690e77d5",
   "error": null,
   "pipelineId": "standard",
@@ -33,8 +33,13 @@
       ]
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/117",
+    "number": 117,
+    "createdAt": "2026-06-27T09:52:07.120Z"
+  },
   "_journal": {
-    "historyCount": 52,
+    "historyCount": 57,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -46,7 +51,9 @@
       "code-fixer": 1,
       "domain-invariants": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
