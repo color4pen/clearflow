@@ -514,7 +514,7 @@ async function seed() {
     })
     .returning();
 
-  const [greenContact1] = await db
+  await db
     .insert(clientContacts)
     .values({
       clientId: greenEnergy.id,
@@ -555,7 +555,7 @@ async function seed() {
   console.log("✅ Created client contacts (9 total)");
 
   // Create inquiries (各ステータスを網羅: new×2, in_progress×2, converted×2, declined×1)
-  const [newInquiry1] = await db.insert(inquiries).values({
+  await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: techClient.id,
     title: "基幹システム刷新に関する問い合わせ",
@@ -564,7 +564,7 @@ async function seed() {
     status: "new",
   }).returning();
 
-  const [newInquiry2] = await db.insert(inquiries).values({
+  await db.insert(inquiries).values({
     organizationId: org.id,
     title: "配送管理システムの相談",
     description: "展示会ブースで名刺交換。配送ルート最適化に興味",
@@ -572,7 +572,7 @@ async function seed() {
     status: "new",
   }).returning();
 
-  const [inProgressInquiry1] = await db.insert(inquiries).values({
+  await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: yamato.id,
     title: "工事管理ツールの導入検討",
@@ -582,7 +582,7 @@ async function seed() {
     assigneeId: managerUser.id,
   }).returning();
 
-  const [inProgressInquiry2] = await db.insert(inquiries).values({
+  await db.insert(inquiries).values({
     organizationId: org.id,
     clientId: nihonFinance.id,
     title: "リスク管理ダッシュボード構築",

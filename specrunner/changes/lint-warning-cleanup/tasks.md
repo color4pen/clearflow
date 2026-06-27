@@ -4,9 +4,9 @@
 
 3 ファイルから未使用の import シンボルを削除する。
 
-- [ ] `src/app/(dashboard)/inquiries/[id]/InquiryInfoSection.tsx` L6: named import リストから `Textarea` を除去する。変更後: `import { Input, Select, MarkdownTextarea, preventEnterSubmit } from "@/app/components";`
-- [ ] `src/app/components/FormField.tsx` L1: `import type` から `FormEvent` を除去する。変更後: `import type { ReactNode, KeyboardEvent as ReactKeyboardEvent } from "react";`
-- [ ] `src/app/components/MarkdownTextarea.tsx` L6: `import { Textarea } from "./FormField";` の行全体を削除する（コンポーネント内で `Textarea` は一切使用されていない）
+- [x] `src/app/(dashboard)/inquiries/[id]/InquiryInfoSection.tsx` L6: named import リストから `Textarea` を除去する。変更後: `import { Input, Select, MarkdownTextarea, preventEnterSubmit } from "@/app/components";`
+- [x] `src/app/components/FormField.tsx` L1: `import type` から `FormEvent` を除去する。変更後: `import type { ReactNode, KeyboardEvent as ReactKeyboardEvent } from "react";`
+- [x] `src/app/components/MarkdownTextarea.tsx` L6: `import { Textarea } from "./FormField";` の行全体を削除する（コンポーネント内で `Textarea` は一切使用されていない）
 
 **Acceptance Criteria**:
 - 上記 3 ファイルから未使用 import が消えている
@@ -17,7 +17,7 @@
 
 `eslint.config.mjs` に `@typescript-eslint/no-unused-vars` のルールオーバーライドを追加し、`_` プレフィックス引数を許容する。
 
-- [ ] `eslint.config.mjs` の `defineConfig` 配列に、`@typescript-eslint/no-unused-vars` を `"warn"` + `argsIgnorePattern: "^_"` で上書きするルール設定オブジェクトを追加する。既存の `...nextVitals`, `...nextTs`, `globalIgnores(...)` の後に配置する
+- [x] `eslint.config.mjs` の `defineConfig` 配列に、`@typescript-eslint/no-unused-vars` を `"warn"` + `argsIgnorePattern: "^_"` で上書きするルール設定オブジェクトを追加する。既存の `...nextVitals`, `...nextTs`, `globalIgnores(...)` の後に配置する
 
 設定例:
 ```js
@@ -39,11 +39,11 @@
 
 `src/infrastructure/seed.ts` の 5 箇所で、`const [varName] =` の束縛を除去し `await` 式のみ残す。insert の副作用（データ投入）は維持する。
 
-- [ ] L517: `const [greenContact1] = await db` → `await db`
-- [ ] L558: `const [newInquiry1] = await db.insert(inquiries).values({` → `await db.insert(inquiries).values({`（`.returning()` はそのまま残す）
-- [ ] L567: `const [newInquiry2] = await db.insert(inquiries).values({` → `await db.insert(inquiries).values({`
-- [ ] L575: `const [inProgressInquiry1] = await db.insert(inquiries).values({` → `await db.insert(inquiries).values({`
-- [ ] L585: `const [inProgressInquiry2] = await db.insert(inquiries).values({` → `await db.insert(inquiries).values({`
+- [x] L517: `const [greenContact1] = await db` → `await db`
+- [x] L558: `const [newInquiry1] = await db.insert(inquiries).values({` → `await db.insert(inquiries).values({`（`.returning()` はそのまま残す）
+- [x] L567: `const [newInquiry2] = await db.insert(inquiries).values({` → `await db.insert(inquiries).values({`
+- [x] L575: `const [inProgressInquiry1] = await db.insert(inquiries).values({` → `await db.insert(inquiries).values({`
+- [x] L585: `const [inProgressInquiry2] = await db.insert(inquiries).values({` → `await db.insert(inquiries).values({`
 
 **Acceptance Criteria**:
 - seed.ts の 5 件の warning が消えている
@@ -54,9 +54,9 @@
 
 全変更完了後にプロジェクト全体の品質ゲートを通す。
 
-- [ ] `bun run lint` が 0 error / 0 warning であること
-- [ ] `bun run build` が成功すること
-- [ ] `bun test` が green であること（テストが存在する場合）
+- [x] `bun run lint` が 0 error / 0 warning であること
+- [x] `bun run build` が成功すること
+- [x] `bun test` が green であること（テストが存在する場合）
 
 **Acceptance Criteria**:
 - 上記 3 コマンドがすべて成功する
