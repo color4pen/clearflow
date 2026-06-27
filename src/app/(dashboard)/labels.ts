@@ -14,13 +14,7 @@ export const sourceLabels: Record<string, string> = {
   other: "その他",
 };
 
-export const meetingTypeLabels: Record<string, string> = {
-  hearing: "ヒアリング",
-  proposal: "提案",
-  negotiation: "交渉",
-  closing: "クロージング",
-  followup: "フォローアップ",
-};
+export { meetingTypeLabels } from "@/lib/meetingLabels";
 
 export const phaseLabels: Record<string, string> = {
   proposal_prep: "提案準備",

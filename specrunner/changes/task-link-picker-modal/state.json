@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "05e2b449-9a51-42de-936a-3b547c1413ea",
   "createdAt": "2026-06-27T04:59:27.157Z",
-  "updatedAt": "2026-06-27T06:16:20.197Z",
+  "updatedAt": "2026-06-27T06:20:24.437Z",
   "request": {
     "title": "タスク紐づけ先の検索選択モーダル（案件・引合・会議）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "feat/task-link-picker-modal-05e2b449",
   "error": null,
@@ -35,12 +35,13 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 25,
+    "historyCount": 28,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
       "spec-review": 2,
-      "spec-fixer": 1
+      "spec-fixer": 1,
+      "test-case-gen": 1
     }
   }
 }

@@ -8,6 +8,9 @@ import {
   toggleActionItemDone,
   updateActionItem,
   deleteActionItem,
+  searchDeals,
+  searchInquiries,
+  searchMeetings,
 } from "@/application/usecases";
 import { actionItemRepository } from "@/infrastructure/repositories";
 import { meetingRepository } from "@/infrastructure/repositories";
@@ -307,4 +310,51 @@ export async function deleteActionItemAction(
   }
 
   return {};
+}
+
+const searchLinkTargetsSchema = z.object({
+  type: z.enum(["deal", "inquiry", "meeting"]),
+  query: z.string(),
+});
+
+export async function searchLinkTargetsAction(
+  data: unknown
+): Promise<{ data?: { id: string; label: string }[]; message?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { message: "認証が必要です" };
+  }
+
+  const rateCheck = await checkRateLimit({
+    key: `searchLinkTargets:${session.user.id}`,
+    limit: RATE_LIMITS.createRequest.limit,
+    windowMs: RATE_LIMITS.createRequest.windowMs,
+  });
+  if (!rateCheck.allowed) {
+    return { message: "リクエストが多すぎます。しばらく待ってから再試行してください。" };
+  }
+
+  if (!canPerform(session.user.role, "actionItem", "create")) {
+    return { message: "この操作を実行する権限がありません" };
+  }
+
+  const parsed = searchLinkTargetsSchema.safeParse(data);
+  if (!parsed.success) {
+    return { message: "入力データが不正です" };
+  }
+
+  const { type, query } = parsed.data;
+  const organizationId = session.user.organizationId;
+
+  let results: { id: string; label: string }[];
+
+  if (type === "deal") {
+    results = await searchDeals(organizationId, query);
+  } else if (type === "inquiry") {
+    results = await searchInquiries(organizationId, query);
+  } else {
+    results = await searchMeetings(organizationId, query);
+  }
+
+  return { data: results };
 }

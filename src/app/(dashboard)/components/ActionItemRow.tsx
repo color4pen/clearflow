@@ -10,6 +10,7 @@ import {
 } from "@/app/actions/actionItems";
 import { ConfirmDialog, useToast } from "@/app/components";
 import { ActionItemModal } from "./ActionItemModal";
+import type { LinkTarget } from "./LinkTargetPicker";
 import type { ActionItem } from "@/domain/models/actionItem";
 
 type Props = {
@@ -59,6 +60,19 @@ export function ActionItemRow({
     return user?.name ?? "未設定";
   }
 
+  function buildLinkTarget(): LinkTarget | null {
+    if (item.dealId) {
+      return { type: "deal", id: item.dealId, label: sourceName ?? item.dealId };
+    }
+    if (item.meetingId) {
+      return { type: "meeting", id: item.meetingId, label: sourceName ?? item.meetingId };
+    }
+    if (item.inquiryId) {
+      return { type: "inquiry", id: item.inquiryId, label: sourceName ?? item.inquiryId };
+    }
+    return null;
+  }
+
   function handleToggle() {
     if (isPending) return;
     startTransition(async () => {
@@ -71,13 +85,26 @@ export function ActionItemRow({
     });
   }
 
-  function handleSave(values: { description: string; assigneeId: string | null; dueDate: string | null }) {
+  function handleSave(values: {
+    description: string;
+    assigneeId: string | null;
+    dueDate: string | null;
+    linkTarget: LinkTarget | null;
+  }) {
+    const { linkTarget } = values;
+    const dealId = linkTarget?.type === "deal" ? linkTarget.id : null;
+    const inquiryId = linkTarget?.type === "inquiry" ? linkTarget.id : null;
+    const meetingId = linkTarget?.type === "meeting" ? linkTarget.id : null;
+
     startTransition(async () => {
       const result = await updateActionItemAction({
         id: item.id,
         description: values.description,
         assigneeId: values.assigneeId,
         dueDate: values.dueDate,
+        dealId,
+        inquiryId,
+        meetingId,
       });
       if (result.message) {
         showToast(result.message, "error");
@@ -111,7 +138,9 @@ export function ActionItemRow({
         description: item.description,
         assigneeId: item.assigneeId ?? "",
         dueDate: item.dueDate ? formatDateForInput(item.dueDate) : "",
+        linkTarget: buildLinkTarget(),
       }}
+      showLinkTarget={showSource === true}
       loading={isPending}
       onSubmit={handleSave}
       onCancel={() => setShowEditModal(false)}

@@ -5,35 +5,39 @@ import { useRouter } from "next/navigation";
 import { createActionItemAction } from "@/app/actions/actionItems";
 import { Input, useToast } from "@/app/components";
 import { ActionItemRow } from "@/app/(dashboard)/components/ActionItemRow";
+import { LinkTargetPicker, type LinkTarget } from "@/app/(dashboard)/components/LinkTargetPicker";
 import type { ActionItemWithSource } from "@/application/usecases/listActionItems";
+
+const TYPE_LABEL: Record<"deal" | "inquiry" | "meeting", string> = {
+  deal: "案件",
+  inquiry: "引合",
+  meeting: "会議",
+};
 
 type Props = {
   items: ActionItemWithSource[];
   orgUsers: { id: string; name: string }[];
   currentUserId: string;
   canDelete: boolean;
-  dealOptions: { id: string; title: string }[];
-  inquiryOptions: { id: string; title: string }[];
 };
 
-export function TaskList({ items, orgUsers, currentUserId, canDelete, dealOptions, inquiryOptions }: Props) {
+export function TaskList({ items, orgUsers, currentUserId, canDelete }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
   const [description, setDescription] = useState("");
   const [assigneeId, setAssigneeId] = useState(currentUserId);
   const [dueDate, setDueDate] = useState("");
-  const [dealId, setDealId] = useState("");
-  const [inquiryId, setInquiryId] = useState("");
+  const [linkTarget, setLinkTarget] = useState<LinkTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   function handleOpenAdd() {
     setDescription("");
     setAssigneeId(currentUserId);
     setDueDate("");
-    setDealId("");
-    setInquiryId("");
+    setLinkTarget(null);
     setError(null);
     setShowAddModal(true);
   }
@@ -44,13 +48,19 @@ export function TaskList({ items, orgUsers, currentUserId, canDelete, dealOption
       return;
     }
     setError(null);
+
+    const dealId = linkTarget?.type === "deal" ? linkTarget.id : null;
+    const inquiryId = linkTarget?.type === "inquiry" ? linkTarget.id : null;
+    const meetingId = linkTarget?.type === "meeting" ? linkTarget.id : null;
+
     startTransition(async () => {
       const result = await createActionItemAction({
         description: description.trim(),
         assigneeId: assigneeId || undefined,
         dueDate: dueDate || undefined,
-        dealId: dealId || undefined,
-        inquiryId: inquiryId || undefined,
+        dealId: dealId ?? undefined,
+        inquiryId: inquiryId ?? undefined,
+        meetingId: meetingId ?? undefined,
       });
       if (result.message) {
         showToast(result.message, "error");
@@ -85,18 +95,22 @@ export function TaskList({ items, orgUsers, currentUserId, canDelete, dealOption
                 <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} disabled={isPending} />
               </div>
               <div>
-                <label className="text-xs text-text-muted block mb-0.5">案件</label>
-                <select value={dealId} onChange={(e) => setDealId(e.target.value)} disabled={isPending} className="w-full text-xs border border-border rounded px-2 py-1.5 bg-bg-surface text-text">
-                  <option value="">なし</option>
-                  {dealOptions.map((d) => (<option key={d.id} value={d.id}>{d.title}</option>))}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs text-text-muted block mb-0.5">引合</label>
-                <select value={inquiryId} onChange={(e) => setInquiryId(e.target.value)} disabled={isPending} className="w-full text-xs border border-border rounded px-2 py-1.5 bg-bg-surface text-text">
-                  <option value="">なし</option>
-                  {inquiryOptions.map((i) => (<option key={i.id} value={i.id}>{i.title}</option>))}
-                </select>
+                <label className="text-xs text-text-muted block mb-0.5">紐づけ先</label>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-text flex-1 truncate">
+                    {linkTarget
+                      ? `${TYPE_LABEL[linkTarget.type]}: ${linkTarget.label}`
+                      : "なし"}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowPicker(true)}
+                    disabled={isPending}
+                    className="text-xs text-primary underline cursor-pointer disabled:opacity-50 shrink-0"
+                  >
+                    選択
+                  </button>
+                </div>
               </div>
             </div>
             <div className="flex gap-2 justify-end mt-4">
@@ -106,6 +120,16 @@ export function TaskList({ items, orgUsers, currentUserId, canDelete, dealOption
           </div>
         </div>
       )}
+
+      <LinkTargetPicker
+        open={showPicker}
+        initialValue={linkTarget}
+        onConfirm={(value) => {
+          setLinkTarget(value);
+          setShowPicker(false);
+        }}
+        onCancel={() => setShowPicker(false)}
+      />
 
       <div className="flex items-center justify-between px-3.5 py-2">
         <span className="text-xs text-text-muted">{items.length} 件</span>

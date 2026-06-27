@@ -1,4 +1,6 @@
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, desc, sql, ilike } from "drizzle-orm";
+
+const LINK_SEARCH_LIMIT = 20;
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "../db";
 import type { Transaction } from "../db";
@@ -172,6 +174,24 @@ export async function deleteById(
   await queryRunner
     .delete(deals)
     .where(and(eq(deals.id, id), eq(deals.organizationId, organizationId)));
+}
+
+export async function searchByTitle(
+  organizationId: string,
+  query: string
+): Promise<Deal[]> {
+  const result = await db
+    .select()
+    .from(deals)
+    .where(
+      and(
+        eq(deals.organizationId, organizationId),
+        ilike(deals.title, `%${query}%`)
+      )
+    )
+    .orderBy(desc(deals.createdAt))
+    .limit(LINK_SEARCH_LIMIT);
+  return result.map(mapRow);
 }
 
 export async function updatePhase(

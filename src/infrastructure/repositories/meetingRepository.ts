@@ -1,4 +1,6 @@
-import { eq, and, asc, desc, sql } from "drizzle-orm";
+import { eq, and, asc, desc, sql, ilike, isNotNull } from "drizzle-orm";
+
+const LINK_SEARCH_LIMIT = 20;
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { meetings } from "../schema";
@@ -122,6 +124,25 @@ export async function update(
     .where(and(eq(meetings.id, id), eq(meetings.organizationId, organizationId), eq(meetings.version, expectedVersion)))
     .returning();
   return result[0] ? mapRow(result[0]) : null;
+}
+
+export async function searchBySummary(
+  organizationId: string,
+  query: string
+): Promise<Meeting[]> {
+  const result = await db
+    .select()
+    .from(meetings)
+    .where(
+      and(
+        eq(meetings.organizationId, organizationId),
+        isNotNull(meetings.summary),
+        ilike(meetings.summary, `%${query}%`)
+      )
+    )
+    .orderBy(desc(meetings.date))
+    .limit(LINK_SEARCH_LIMIT);
+  return result.map(mapRow);
 }
 
 /**
