@@ -39,6 +39,7 @@ export function ActionItemModal({
 
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- resetting controlled form state on modal open is intentional
       setDescription(defaultValues?.description ?? "");
       setAssigneeId(defaultValues?.assigneeId ?? "");
       setDueDate(defaultValues?.dueDate ?? "");

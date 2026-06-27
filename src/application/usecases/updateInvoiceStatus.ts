@@ -44,8 +44,13 @@ export async function updateInvoiceStatus(data: {
           data.organizationId,
           data.newStatus,
           additionalFields,
+          invoice.version,
           tx
         );
+
+        if (!updatedInvoice) {
+          return null;
+        }
 
         await auditLogRepository.create(
           {
@@ -87,7 +92,7 @@ export async function updateInvoiceStatus(data: {
       });
 
       if (!updated) {
-        return { ok: false, reason: "請求の更新に失敗しました" };
+        return { ok: false, reason: "この請求は他のユーザーによって更新されました。画面を更新してください" };
       }
 
       dispatcher.flushAsync();

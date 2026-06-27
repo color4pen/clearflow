@@ -56,8 +56,13 @@ export async function updateContract(data: {
           renewalType: data.renewalType,
           renewalCycle: data.renewalCycle,
         },
+        contract.version,
         tx
       );
+
+      if (!updatedContract) {
+        return null;
+      }
 
       await auditLogRepository.create(
         {
@@ -74,7 +79,7 @@ export async function updateContract(data: {
     });
 
     if (!updated) {
-      return { ok: false, reason: "契約の更新に失敗しました" };
+      return { ok: false, reason: "この契約は他のユーザーによって更新されました。画面を更新してください" };
     }
     return { ok: true, contract: updated };
   } catch (err) {

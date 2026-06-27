@@ -19,6 +19,7 @@ function mapRow(row: typeof invoices.$inferSelect): Invoice {
     notes: row.notes ?? null,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    version: row.version,
   };
 }
 
@@ -88,13 +89,14 @@ export async function update(
     dueDate: Date;
     notes: string | null;
   }>,
+  expectedVersion: number,
   tx?: Transaction
 ): Promise<Invoice | null> {
   const queryRunner = tx ?? db;
   const result = await queryRunner
     .update(invoices)
-    .set({ ...data, updatedAt: new Date() })
-    .where(and(eq(invoices.id, id), eq(invoices.organizationId, organizationId)))
+    .set({ ...data, updatedAt: new Date(), version: sql`version + 1` })
+    .where(and(eq(invoices.id, id), eq(invoices.organizationId, organizationId), eq(invoices.version, expectedVersion)))
     .returning();
   return result[0] ? mapRow(result[0]) : null;
 }
@@ -103,14 +105,15 @@ export async function updateStatus(
   id: string,
   organizationId: string,
   status: InvoiceStatus,
-  additionalFields?: Partial<{ invoicedAt: Date; paidAt: Date }>,
+  additionalFields: Partial<{ invoicedAt: Date; paidAt: Date }> | undefined,
+  expectedVersion: number,
   tx?: Transaction
 ): Promise<Invoice | null> {
   const queryRunner = tx ?? db;
   const result = await queryRunner
     .update(invoices)
-    .set({ status, ...additionalFields, updatedAt: new Date() })
-    .where(and(eq(invoices.id, id), eq(invoices.organizationId, organizationId)))
+    .set({ status, ...additionalFields, updatedAt: new Date(), version: sql`version + 1` })
+    .where(and(eq(invoices.id, id), eq(invoices.organizationId, organizationId), eq(invoices.version, expectedVersion)))
     .returning();
   return result[0] ? mapRow(result[0]) : null;
 }
