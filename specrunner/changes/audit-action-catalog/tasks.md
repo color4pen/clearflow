@@ -4,8 +4,9 @@
 
 `src/domain/models/auditLog.ts` に `AuditAction` と `AuditTargetType` の文字列リテラルユニオン型を定義する。
 
-- [ ] `AuditAction` 型を定義する。全 46 種を網羅すること。既存の命名（`invoice.update_status` 等）はそのまま含める：
+- [ ] `AuditAction` 型を定義する。全 48 種を網羅すること。既存の命名（`invoice.update_status` 等）はそのまま含める：
   - `deal.create` / `deal.update` / `deal.updatePhase` / `deal.delete`
+  - `deal_contact.create` / `deal_contact.delete`
   - `contract.create` / `contract.update` / `contract.updateStatus` / `contract.delete`
   - `invoice.create` / `invoice.update` / `invoice.update_status`
   - `meeting.create` / `meeting.update`
@@ -31,7 +32,7 @@
 - [ ] 全型を `export` する
 
 **Acceptance Criteria**:
-- `AuditAction` が 46 種の文字列リテラルユニオンとして定義されている
+- `AuditAction` が 48 種の文字列リテラルユニオンとして定義されている
 - `AuditTargetType` が 15 種の文字列リテラルユニオンとして定義されている
 - `AuditMetadataMap["action_item.toggle"]` が `{ done: boolean }` である
 - 全型が `src/domain/models/auditLog.ts` から export されている

@@ -48,8 +48,8 @@
 
 本変更により、`audit_logs` テーブルに実際に INSERT される `action` / `targetType` の文字列値、記録対象、記録件数は現行と完全に同一でなければならない（MUST）。型制約の追加はコンパイル時のみの変更であり、ランタイム挙動に影響を与えない。
 
-#### Scenario: 既存の usecase テストが変更なしで通過する
+#### Scenario: 型制約追加後も audit_logs に記録される文字列値が変化しない
 
-**Given** 本変更が型制約の追加のみである
-**When** 既存のテストスイートを実行する
-**Then** 全テストが変更なしで green になる
+**Given** `deal.create` usecase が実行される
+**When** `auditLogRepository.create` が呼び出される
+**Then** `audit_logs` テーブルに `action = "deal.create"` / `targetType = "deal"` として INSERT される（型変更前と同一の文字列値）
