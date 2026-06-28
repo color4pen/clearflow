@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "15964b3c-74b5-45ee-a767-a69effb945bd",
   "createdAt": "2026-06-28T03:11:33.574Z",
-  "updatedAt": "2026-06-28T08:14:25.148Z",
+  "updatedAt": "2026-06-28T08:18:38.764Z",
   "request": {
     "title": "案件の watch とアクティビティ通知（監査ログから派生）",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/deal-watch-notifications-15964b3c",
   "error": null,
   "pipelineId": "standard",
@@ -34,8 +34,13 @@
     }
   ],
   "resumePoint": null,
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/127",
+    "number": 127,
+    "createdAt": "2026-06-28T08:18:38.753Z"
+  },
   "_journal": {
-    "historyCount": 64,
+    "historyCount": 69,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -47,7 +52,9 @@
       "code-fixer": 2,
       "domain-invariants": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
