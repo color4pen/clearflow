@@ -82,3 +82,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/deal-activity-enrich/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-28T03:02:37.131Z","endedAt":"2026-06-28T03:02:39.198Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-28T03:02:39.198Z","outputs":[{"path":"specrunner/changes/deal-activity-enrich/pr-create-result.md","hash":"sha256:60e2fba6e592086e64db81918eeea1bd149633c5661111fbf2375bb35d002c8f"}],"inputs":[{"path":"change/deal-activity-enrich-541040f4","hash":null}]}
 {"type":"transition","ts":"2026-06-28T03:02:39.226Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-28T03:06:45.295Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
