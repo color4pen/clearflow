@@ -70,3 +70,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/index-coverage/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-28T18:29:40.788Z","endedAt":"2026-06-28T18:29:43.194Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-28T18:29:43.194Z","outputs":[{"path":"specrunner/changes/index-coverage/pr-create-result.md","hash":"sha256:cd6ffc075ed3190c7c6cd21b33f8c403b623edbd3fba5a8cf7144fd312ed9f37"}],"inputs":[{"path":"change/index-coverage-85f2c5e3","hash":null}]}
 {"type":"transition","ts":"2026-06-28T18:29:43.202Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-28T18:31:18.742Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
