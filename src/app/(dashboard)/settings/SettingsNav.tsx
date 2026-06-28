@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
+  { href: "/settings/organization", label: "組織" },
   { href: "/settings/policies", label: "承認ポリシー" },
   { href: "/settings/templates", label: "テンプレート" },
   { href: "/settings/users", label: "ユーザー" },

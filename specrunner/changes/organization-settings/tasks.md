@@ -2,8 +2,8 @@
 
 ## T-01: 監査カタログに organization を追加
 
-- [ ] `src/domain/models/auditLog.ts` の `AuditAction` 型に `"organization.update"` を追加する
-- [ ] `src/domain/models/auditLog.ts` の `AuditTargetType` 型に `"organization"` を追加する
+- [x] `src/domain/models/auditLog.ts` の `AuditAction` 型に `"organization.update"` を追加する
+- [x] `src/domain/models/auditLog.ts` の `AuditTargetType` 型に `"organization"` を追加する
 
 **Acceptance Criteria**:
 - `AuditAction` に `"organization.update"` が含まれる
@@ -12,7 +12,7 @@
 
 ## T-02: 認可マトリクスに `updateOrganization` を追加
 
-- [ ] `src/domain/authorization.ts` の `PERMISSION_MATRIX.organization` に `updateOrganization: ADMIN_ONLY` を追加する
+- [x] `src/domain/authorization.ts` の `PERMISSION_MATRIX.organization` に `updateOrganization: ADMIN_ONLY` を追加する
 
 **Acceptance Criteria**:
 - `canPerform("admin", "organization", "updateOrganization")` が `true` を返す
@@ -22,11 +22,11 @@
 
 ## T-03: `organizationRepository.update` を追加
 
-- [ ] `src/infrastructure/repositories/organizationRepository.ts` に `update(id, organizationId, data: { name: string }, tx?: Transaction)` 関数を追加する
-- [ ] WHERE 条件は `eq(organizations.id, id)` AND `eq(organizations.id, organizationId)` で自組織のみ更新可能にする（`findById` の既存パターンに合わせる）
-- [ ] `.set({ name: data.name })` で name のみ更新する
-- [ ] `.returning()` で更新後の `Organization` を返す。更新対象がなければ `null` を返す
-- [ ] `tx ?? db` パターンでトランザクション対応する（`userRepository.updateRole` と同パターン）
+- [x] `src/infrastructure/repositories/organizationRepository.ts` に `update(id, organizationId, data: { name: string }, tx?: Transaction)` 関数を追加する
+- [x] WHERE 条件は `eq(organizations.id, id)` AND `eq(organizations.id, organizationId)` で自組織のみ更新可能にする（`findById` の既存パターンに合わせる）
+- [x] `.set({ name: data.name })` で name のみ更新する
+- [x] `.returning()` で更新後の `Organization` を返す。更新対象がなければ `null` を返す
+- [x] `tx ?? db` パターンでトランザクション対応する（`userRepository.updateRole` と同パターン）
 
 **Acceptance Criteria**:
 - `update` 関数が export されている
@@ -36,15 +36,15 @@
 
 ## T-04: `updateOrganization` usecase を新設
 
-- [ ] `src/application/usecases/updateOrganization.ts` を新規作成する
-- [ ] 引数型: `{ organizationId: string; actorId: string; name: string }`
-- [ ] 戻り値型: `{ ok: true } | { ok: false; reason: string }`（`UpdateOrganizationResult`）
-- [ ] `db.transaction` 内で以下を順に実行する:
+- [x] `src/application/usecases/updateOrganization.ts` を新規作成する
+- [x] 引数型: `{ organizationId: string; actorId: string; name: string }`
+- [x] 戻り値型: `{ ok: true } | { ok: false; reason: string }`（`UpdateOrganizationResult`）
+- [x] `db.transaction` 内で以下を順に実行する:
   1. `organizationRepository.update(organizationId, organizationId, { name }, tx)` を呼ぶ
   2. 更新結果が null なら `throw new Error("組織が見つかりません")`
   3. `recordAudit({ action: "organization.update", targetType: "organization", targetId: organizationId, actorId, organizationId, metadata: { name } }, tx)` を呼ぶ
-- [ ] try-catch で `{ ok: false, reason }` を返す
-- [ ] `src/application/usecases/index.ts` に `export { updateOrganization } from "./updateOrganization"` を追加する
+- [x] try-catch で `{ ok: false, reason }` を返す
+- [x] `src/application/usecases/index.ts` に `export { updateOrganization } from "./updateOrganization"` を追加する
 
 **Acceptance Criteria**:
 - usecase ファイルが存在し、`updateOrganization` 関数が export されている
@@ -55,17 +55,17 @@
 
 ## T-05: `updateOrganizationAction` Server Action を追加
 
-- [ ] `src/app/actions/organization.ts` を新規作成する
-- [ ] `"use server"` ディレクティブを先頭に記述する
-- [ ] `updateOrganizationSchema` を zod で定義: `name: z.string().min(1, "組織名は必須です").max(100, "組織名は100文字以内で入力してください")`
-- [ ] `UpdateOrganizationState` 型を export: `null | { success: false; message: string } | { success: true }`
-- [ ] `updateOrganizationAction(prevState, formData)` 関数を実装:
+- [x] `src/app/actions/organization.ts` を新規作成する
+- [x] `"use server"` ディレクティブを先頭に記述する
+- [x] `updateOrganizationSchema` を zod で定義: `name: z.string().min(1, "組織名は必須です").max(100, "組織名は100文字以内で入力してください")`
+- [x] `UpdateOrganizationState` 型を export: `null | { success: false; message: string } | { success: true }`
+- [x] `updateOrganizationAction(prevState, formData)` 関数を実装:
   1. `auth()` で session を取得。未認証なら `{ success: false, message: "認証が必要です" }` を返す
   2. `canPerform(session.user.role, "organization", "updateOrganization")` で認可。失敗なら `{ success: false, message: "この操作を実行する権限がありません" }` を返す
   3. `formData.get("name")` を取得して zod で検証
   4. `updateOrganization({ organizationId: session.user.organizationId, actorId: session.user.id, name })` を呼ぶ
   5. 成功時は `revalidatePath("/settings/organization")` してから `{ success: true }` を返す
-- [ ] `getOrganizationAction` 関数を追加: `auth()` → `organizationRepository.findById(organizationId, organizationId)` → 組織データを返す
+- [x] `getOrganizationAction` 関数を追加: `auth()` → `organizationRepository.findById(organizationId, organizationId)` → 組織データを返す
 
 **Acceptance Criteria**:
 - `"use server"` ディレクティブが含まれる
@@ -77,12 +77,12 @@
 
 ## T-06: 組織設定画面を追加
 
-- [ ] `src/app/(dashboard)/settings/organization/page.tsx` を新規作成する（Server Component）
+- [x] `src/app/(dashboard)/settings/organization/page.tsx` を新規作成する（Server Component）
   - `auth()` でセッション取得、admin 以外は `/requests` にリダイレクト
   - `getOrganizationAction()` で組織データを取得
   - `PageToolbar` に title "組織設定" を設定
   - `SectionCard` 内に `OrganizationForm` を配置し、組織データを props で渡す
-- [ ] `src/app/(dashboard)/settings/organization/OrganizationForm.tsx` を新規作成する（Client Component）
+- [x] `src/app/(dashboard)/settings/organization/OrganizationForm.tsx` を新規作成する（Client Component）
   - `"use client"` ディレクティブ
   - `useActionState` で `updateOrganizationAction` を呼ぶ
   - `FormField` / `Input` / `SubmitButton` コンポーネントを使用（既存の共通コンポーネント）
@@ -97,7 +97,7 @@
 
 ## T-07: SettingsNav に「組織」タブを追加
 
-- [ ] `src/app/(dashboard)/settings/SettingsNav.tsx` の `NAV_ITEMS` 配列の先頭に `{ href: "/settings/organization", label: "組織" }` を追加する
+- [x] `src/app/(dashboard)/settings/SettingsNav.tsx` の `NAV_ITEMS` 配列の先頭に `{ href: "/settings/organization", label: "組織" }` を追加する
 
 **Acceptance Criteria**:
 - SettingsNav に「組織」タブが表示される
@@ -106,21 +106,21 @@
 
 ## T-08: テストを追加
 
-- [ ] `src/__tests__/usecases/organizationManagement.test.ts` を新規作成する（静的コード解析テスト）
+- [x] `src/__tests__/usecases/organizationManagement.test.ts` を新規作成する（静的コード解析テスト）
   - `updateOrganization` usecase が `db.transaction` を使用していること
   - `recordAudit` がトランザクション内で呼ばれること（`db.transaction` の後に `recordAudit` が出現）
   - `action` が `"organization.update"` であること
   - `targetType` が `"organization"` であること
   - metadata に `name` が含まれること
   - 組織が見つからない場合のエラーメッセージ "組織が見つかりません" が含まれること
-- [ ] `src/__tests__/settings/organizationSettingsActions.test.ts` を新規作成する（静的コード解析テスト）
+- [x] `src/__tests__/settings/organizationSettingsActions.test.ts` を新規作成する（静的コード解析テスト）
   - `updateOrganizationAction` が存在すること
   - `"use server"` ディレクティブが含まれること
   - `canPerform` で `"updateOrganization"` 権限チェックを行うこと
   - `organizationId` / `actorId` が session 由来であること（`formData.get("organizationId")` / `formData.get("actorId")` が含まれないこと）
-  - zod で `name` を検証すること（`z.string()`, `.min(1`, `.max(100`）
+  - zod で `name` を検証すること（`.string()`, `.min(1`, `.max(100`）
   - 成功後に `/settings/organization` を revalidatePath すること
-- [ ] `src/__tests__/domain/authorization.test.ts` に `updateOrganization` の権限テストを追加する（既存ファイルに追記）
+- [x] `src/__tests__/domain/authorization.test.ts` に `updateOrganization` の権限テストを追加する（既存ファイルに追記）
   - `canPerform("admin", "organization", "updateOrganization")` が `true`
   - `canPerform("manager", "organization", "updateOrganization")` が `false`
   - `canPerform("finance", "organization", "updateOrganization")` が `false`

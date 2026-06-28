@@ -99,3 +99,5 @@ export { unwatchDeal } from "./unwatchDeal";
 export { getWatchStatus } from "./getWatchStatus";
 export { getNotifications } from "./getNotifications";
 export { markNotificationsAsRead } from "./markNotificationsAsRead";
+export { updateOrganization } from "./updateOrganization";
+export type { UpdateOrganizationResult } from "./updateOrganization";

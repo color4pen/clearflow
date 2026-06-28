@@ -119,6 +119,7 @@ const PERMISSION_MATRIX: PermissionMatrix = {
     createUser: ADMIN_ONLY,
     exportAuditLog: ADMIN_ONLY,
     manageWebhooks: ADMIN_ONLY,
+    updateOrganization: ADMIN_ONLY,
   },
 
   // 3.10 売上 (Revenue)
