@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f2fb684d-7318-4ed9-b4af-319c4023cd00",
   "createdAt": "2026-06-28T15:58:42.886Z",
-  "updatedAt": "2026-06-28T16:38:46.640Z",
+  "updatedAt": "2026-06-28T16:40:41.241Z",
   "request": {
     "title": "管理者によるユーザー作成",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/user-creation-f2fb684d",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-28T16:38:46.630Z"
   },
   "_journal": {
-    "historyCount": 73,
+    "historyCount": 74,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
