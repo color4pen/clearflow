@@ -83,3 +83,62 @@ describe("TC-010: updateUserRoleAction — ロール変更がサーバーに送�
     expect(src).toContain('"ロール"');
   });
 });
+
+// ---------------------------------------------------------------------------
+// createUserAction
+// ---------------------------------------------------------------------------
+
+describe("createUserAction — 静的コード解析", () => {
+  it("createUserAction が存在する", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    expect(src).toContain("createUserAction");
+  });
+
+  it("canPerform で createUser 権限チェックを行う", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    expect(src).toContain('"createUser"');
+    const actionIdx = src.indexOf("createUserAction");
+    const guardIdx = src.indexOf('"createUser"', actionIdx);
+    expect(guardIdx).toBeGreaterThan(-1);
+  });
+
+  it("zod で email を email 形式で検証する", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    expect(src).toContain("z.string().email");
+  });
+
+  it("zod で name を必須で検証する（min(1)）", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    expect(src).toContain('z.string().min(1');
+  });
+
+  it("zod で role を enum で検証する", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    // createUserSchema に z.enum が含まれる
+    const schemaIdx = src.indexOf("createUserSchema");
+    const enumIdx = src.indexOf("z.enum", schemaIdx);
+    expect(enumIdx).toBeGreaterThan(-1);
+  });
+
+  it("zod で password を最小8文字で検証する", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    expect(src).toContain("パスワードは8文字以上で入力してください");
+    expect(src).toContain(".min(8");
+  });
+
+  it("成功後に /settings/users を revalidatePath する", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    expect(src).toContain("revalidatePath");
+    expect(src).toContain('"/settings/users"');
+  });
+
+  it("CreateUserState 型が export されている", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    expect(src).toContain("export type CreateUserState");
+  });
+
+  it("settings/users ページが CreateUserForm を利用する", async () => {
+    const src = await readSrc("app/(dashboard)/settings/users/page.tsx");
+    expect(src).toContain("CreateUserForm");
+  });
+});

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
 import { listUsersAction } from "@/app/actions/users";
 import { UserRoleSelect } from "./UserRoleSelect";
+import { CreateUserForm } from "./CreateUserForm";
 import { PageToolbar, DataTable, SectionCard } from "@/app/components";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -24,6 +25,11 @@ export default async function UsersPage() {
     <div>
       {/* Toolbar */}
       <PageToolbar title="ユーザー管理" />
+
+      {/* User creation form */}
+      <SectionCard>
+        <CreateUserForm />
+      </SectionCard>
 
       {users.length === 0 ? (
         <SectionCard>

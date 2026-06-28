@@ -125,6 +125,11 @@ describe("AuditRecordParams — action_item.toggle の metadata 型強制", () =
     };
     expect(withoutMetadata.action).toBe("deal.create");
   });
+
+  it("user.create が AuditAction 型に存在する（静的検証）", async () => {
+    const src = await readSrc("domain/models/auditLog.ts");
+    expect(src).toContain('"user.create"');
+  });
 });
 
 // ---------------------------------------------------------------------------
