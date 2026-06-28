@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "15964b3c-74b5-45ee-a767-a69effb945bd",
   "createdAt": "2026-06-28T03:11:33.574Z",
-  "updatedAt": "2026-06-28T03:16:03.823Z",
+  "updatedAt": "2026-06-28T03:21:24.066Z",
   "request": {
     "title": "案件の watch とアクティビティ通知（監査ログから派生）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "design",
+  "step": "spec-review",
   "status": "running",
   "branch": "feat/deal-watch-notifications-15964b3c",
   "error": null,
@@ -34,9 +34,10 @@
     }
   ],
   "_journal": {
-    "historyCount": 5,
+    "historyCount": 9,
     "stepCounts": {
-      "request-review": 1
+      "request-review": 1,
+      "design": 1
     }
   }
 }
