@@ -57,6 +57,10 @@ CREATE TYPE approval_step_status AS ENUM (
 CREATE TYPE user_role AS ENUM (
   'admin', 'manager', 'finance', 'member'
 );
+
+CREATE TYPE webhook_delivery_status AS ENUM (
+  'pending', 'delivered', 'failed'
+);
 ```
 
 text 型で管理する値（pgEnum にしない）:
@@ -447,14 +451,14 @@ CHECK (
 | カラム | 型 | NULL | 制約 | 説明 |
 |---|---|---|---|---|
 | id | uuid | NO | PK, DEFAULT gen_random_uuid() | |
-| endpoint_id | uuid | NO | FK → webhook_endpoints.id | エンドポイント |
+| endpoint_id | uuid | NO | FK → webhook_endpoints.id ON DELETE CASCADE | エンドポイント |
 | event | text | NO | | イベント種別 |
 | payload | jsonb | NO | | 配信ペイロード |
-| status | text | NO | DEFAULT 'pending' | 配信状態 |
-| response_status | integer | YES | | レスポンスコード |
-| response_body | text | YES | | レスポンスボディ |
+| status | webhook_delivery_status | NO | DEFAULT 'pending' | 配信状態 |
+| status_code | integer | YES | | レスポンスのステータスコード |
 | attempts | integer | NO | DEFAULT 0 | 試行回数 |
-| delivered_at | timestamptz | YES | | 配信完了日時 |
+| last_attempt_at | timestamptz | YES | | 最終試行日時 |
+| next_retry_at | timestamptz | YES | | 次回リトライ予定日時 |
 | created_at | timestamptz | NO | DEFAULT now() | |
 
 #### watches
