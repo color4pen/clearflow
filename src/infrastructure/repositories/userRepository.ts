@@ -148,3 +148,74 @@ export async function updateNotificationsLastSeenAt(
     .set({ notificationsLastSeenAt: timestamp })
     .where(and(eq(users.id, userId), eq(users.organizationId, organizationId)));
 }
+
+export async function findByIdForAuth(
+  id: string,
+  organizationId: string
+): Promise<UserWithPassword | null> {
+  const result = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.id, id), eq(users.organizationId, organizationId)))
+    .limit(1);
+  if (!result[0]) return null;
+  const row = result[0];
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    organizationId: row.organizationId,
+    role: row.role,
+    notificationsLastSeenAt: row.notificationsLastSeenAt,
+    createdAt: row.createdAt,
+    hashedPassword: row.hashedPassword,
+  };
+}
+
+export async function updateProfile(
+  id: string,
+  organizationId: string,
+  data: { name: string },
+  tx?: Transaction
+): Promise<User | null> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
+    .update(users)
+    .set({ name: data.name })
+    .where(
+      and(
+        eq(users.id, id),
+        eq(users.organizationId, organizationId)
+      )
+    )
+    .returning({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      organizationId: users.organizationId,
+      role: users.role,
+      notificationsLastSeenAt: users.notificationsLastSeenAt,
+      createdAt: users.createdAt,
+    });
+  return result[0] ?? null;
+}
+
+export async function updatePassword(
+  id: string,
+  organizationId: string,
+  hashedPassword: string,
+  tx?: Transaction
+): Promise<boolean> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
+    .update(users)
+    .set({ hashedPassword })
+    .where(
+      and(
+        eq(users.id, id),
+        eq(users.organizationId, organizationId)
+      )
+    )
+    .returning({ id: users.id });
+  return result.length > 0;
+}
