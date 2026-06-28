@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "6e843a9f-4188-4741-a175-c4f409c0a47b",
   "createdAt": "2026-06-28T17:22:13.475Z",
-  "updatedAt": "2026-06-28T17:56:05.346Z",
+  "updatedAt": "2026-06-28T17:56:35.903Z",
   "request": {
     "title": "アカウント設定（プロフィール編集・パスワード変更）",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/account-settings-6e843a9f",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/137",
+    "number": 137,
+    "createdAt": "2026-06-28T17:56:35.895Z"
+  },
   "_journal": {
-    "historyCount": 44,
+    "historyCount": 49,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -60,7 +65,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
