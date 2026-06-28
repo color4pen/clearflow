@@ -31,7 +31,7 @@ export async function createClientContact(data: {
 
     const contact = await db.transaction(async (tx) => {
       // isPrimary 一意性検証（SELECT と INSERT を同一トランザクション内で実行して TOCTOU を防ぐ）
-      const validation = await validatePrimaryUniqueness(data.clientId, null, isPrimary, tx);
+      const validation = await validatePrimaryUniqueness(data.clientId, data.organizationId, null, isPrimary, tx);
       if (!validation.ok) {
         throw new Error(validation.reason);
       }

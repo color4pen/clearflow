@@ -134,26 +134,29 @@ export async function createContact(
 
 /**
  * 指定顧客の担当者一覧を取得する。
- * テナント分離の前提: 呼び出し前に findById で clientId が organizationId に属することを確認すること。
+ * organizationId による innerJoin でテナント分離を repository 自身で強制する。
  */
 export async function findContactsByClientId(
   clientId: string,
+  organizationId: string,
   tx?: Transaction
 ): Promise<ClientContact[]> {
   const queryRunner = tx ?? db;
-  const result = await queryRunner
-    .select()
+  const rows = await queryRunner
+    .select({ contact: clientContacts })
     .from(clientContacts)
-    .where(eq(clientContacts.clientId, clientId));
-  return result.map(mapContactRow);
+    .innerJoin(clients, eq(clientContacts.clientId, clients.id))
+    .where(and(eq(clientContacts.clientId, clientId), eq(clients.organizationId, organizationId)));
+  return rows.map((r) => mapContactRow(r.contact));
 }
 
 /**
  * 複数顧客の担当者数を1クエリで一括取得する（GROUP BY）。
- * N+1 回避用。
+ * N+1 回避用。organizationId による innerJoin でテナント分離を repository 自身で強制する。
  */
 export async function countContactsByClientIds(
-  clientIds: string[]
+  clientIds: string[],
+  organizationId: string
 ): Promise<Map<string, number>> {
   if (clientIds.length === 0) return new Map();
   const rows = await db
@@ -162,18 +165,20 @@ export async function countContactsByClientIds(
       total: count(),
     })
     .from(clientContacts)
-    .where(inArray(clientContacts.clientId, clientIds))
+    .innerJoin(clients, eq(clientContacts.clientId, clients.id))
+    .where(and(inArray(clientContacts.clientId, clientIds), eq(clients.organizationId, organizationId)))
     .groupBy(clientContacts.clientId);
   return new Map(rows.map((r) => [r.clientId, r.total]));
 }
 
 /**
  * 担当者を更新する。
- * テナント分離の前提: 呼び出し前に findById で clientId が organizationId に属することを確認すること。
+ * organizationId による条件でテナント分離を repository 自身で強制する。
  */
 export async function updateContact(
   contactId: string,
   clientId: string,
+  organizationId: string,
   data: Partial<{
     name: string;
     department: string | null;
@@ -188,18 +193,28 @@ export async function updateContact(
   const result = await queryRunner
     .update(clientContacts)
     .set(data)
-    .where(and(eq(clientContacts.id, contactId), eq(clientContacts.clientId, clientId)))
+    .where(
+      and(
+        eq(clientContacts.id, contactId),
+        eq(clientContacts.clientId, clientId),
+        inArray(
+          clientContacts.clientId,
+          db.select({ id: clients.id }).from(clients).where(eq(clients.organizationId, organizationId))
+        )
+      )
+    )
     .returning();
   return result[0] ? mapContactRow(result[0]) : null;
 }
 
 /**
  * 担当者を削除する。
- * テナント分離の前提: 呼び出し前に findById で clientId が organizationId に属することを確認すること。
+ * organizationId による条件でテナント分離を repository 自身で強制する。
  */
 export async function deleteContact(
   contactId: string,
   clientId: string,
+  organizationId: string,
   tx?: Transaction
 ): Promise<boolean> {
   const queryRunner = tx ?? db;
@@ -208,7 +223,11 @@ export async function deleteContact(
     .where(
       and(
         eq(clientContacts.id, contactId),
-        eq(clientContacts.clientId, clientId)
+        eq(clientContacts.clientId, clientId),
+        inArray(
+          clientContacts.clientId,
+          db.select({ id: clients.id }).from(clients).where(eq(clients.organizationId, organizationId))
+        )
       )
     )
     .returning();

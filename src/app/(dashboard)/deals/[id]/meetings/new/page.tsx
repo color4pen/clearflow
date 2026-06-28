@@ -19,7 +19,7 @@ export default async function DealMeetingNewPage({
   }
 
   const [contacts, users] = await Promise.all([
-    deal.clientId ? listClientContacts(deal.clientId) : Promise.resolve([]),
+    deal.clientId ? listClientContacts(deal.clientId, organizationId) : Promise.resolve([]),
     listOrganizationUsers({ organizationId }),
   ]);
 

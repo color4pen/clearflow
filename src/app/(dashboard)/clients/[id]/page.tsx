@@ -21,7 +21,7 @@ export default async function ClientDetailPage({
   const [client, contacts, relatedInquiries, relatedDeals, relatedContracts] =
     await Promise.all([
       getClient(id, organizationId),
-      listClientContacts(id),
+      listClientContacts(id, organizationId),
       listInquiriesByClient(id, organizationId),
       listDealsByClient(id, organizationId),
       listContractsByClient(id, organizationId),

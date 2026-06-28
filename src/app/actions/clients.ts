@@ -289,12 +289,12 @@ export async function updateClientContactAction(
   }
 
   const isPrimary = parsed.data.isPrimary ?? false;
-  const primaryValidation = await validatePrimaryUniqueness(clientId, contactId, isPrimary);
+  const primaryValidation = await validatePrimaryUniqueness(clientId, session.user.organizationId, contactId, isPrimary);
   if (!primaryValidation.ok) {
     return { success: false, message: primaryValidation.reason };
   }
 
-  const updated = await clientRepository.updateContact(contactId, clientId, {
+  const updated = await clientRepository.updateContact(contactId, clientId, session.user.organizationId, {
     name: parsed.data.name,
     department: parsed.data.department ?? null,
     position: parsed.data.position ?? null,

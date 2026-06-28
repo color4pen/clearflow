@@ -31,7 +31,7 @@ export default async function DealMeetingDetailPage({
   const deal = await getDeal(id, organizationId);
   const [users, contacts, actionItemsResult] = await Promise.all([
     listOrganizationUsers({ organizationId }),
-    deal?.clientId ? listClientContacts(deal.clientId) : Promise.resolve([]),
+    deal?.clientId ? listClientContacts(deal.clientId, organizationId) : Promise.resolve([]),
     listActionItemsByMeeting({ meetingId, organizationId }),
   ]);
 
