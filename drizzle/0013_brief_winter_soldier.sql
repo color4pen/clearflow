@@ -1,0 +1,1 @@
+ALTER TABLE "deals" ADD CONSTRAINT "deals_inquiry_id_unique" UNIQUE("inquiry_id");
