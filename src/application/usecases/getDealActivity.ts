@@ -5,13 +5,25 @@ import * as actionItemRepository from "@/infrastructure/repositories/actionItemR
 import * as dealContactRepository from "@/infrastructure/repositories/dealContactRepository";
 import * as auditLogRepository from "@/infrastructure/repositories/auditLogRepository";
 import { ACTIVITY_TIMELINE_LIMIT, getHiddenActions } from "@/lib/activityConfig";
+import { meetingTypeLabels } from "@/lib/meetingLabels";
 import type { AuditLog } from "@/domain/models/auditLog";
+
+export type TargetInfo = {
+  label: string;
+  href?: string;
+};
+
+export type DealActivityResult = {
+  logs: AuditLog[];
+  targetInfoMap: Record<string, TargetInfo>;
+};
 
 export async function getDealActivity(params: {
   dealId: string;
   organizationId: string;
-}): Promise<AuditLog[]> {
-  const { dealId, organizationId } = params;
+  dealTitle: string;
+}): Promise<DealActivityResult> {
+  const { dealId, organizationId, dealTitle } = params;
 
   const [meetings, contracts, actionItems, dealContacts] = await Promise.all([
     meetingRepository.findAllByDeal(dealId, organizationId),
@@ -38,8 +50,43 @@ export async function getDealActivity(params: {
 
   const excludeActions = getHiddenActions();
 
-  return auditLogRepository.findByTargets(organizationId, targets, {
+  const result = await auditLogRepository.findByTargets(organizationId, targets, {
     limit: ACTIVITY_TIMELINE_LIMIT,
     ...(excludeActions.length > 0 ? { excludeActions } : {}),
   });
+
+  // 既に取得済みのエンティティから targetInfoMap を構築する（新規リポジトリ取得なし）
+  const targetInfoMap: Record<string, TargetInfo> = {
+    [`deal:${dealId}`]: { label: dealTitle, href: `/deals/${dealId}` },
+    ...Object.fromEntries(
+      meetings.map((m) => [
+        `meeting:${m.id}`,
+        {
+          label: `${meetingTypeLabels[m.type] ?? m.type} ${m.date.toLocaleDateString("ja-JP")}`,
+          href: `/deals/${dealId}/meetings/${m.id}`,
+        },
+      ])
+    ),
+    ...Object.fromEntries(
+      contracts.map((c) => [
+        `contract:${c.id}`,
+        { label: c.title, href: `/contracts/${c.id}` },
+      ])
+    ),
+    ...Object.fromEntries(
+      invoices.map((inv) => [
+        `invoice:${inv.id}`,
+        { label: inv.title },
+      ])
+    ),
+    ...Object.fromEntries(
+      actionItems.map((ai) => [
+        `action_item:${ai.id}`,
+        { label: ai.description },
+      ])
+    ),
+    // deal_contact はマップに含めない（contactId → 氏名の追加解決をしないため）
+  };
+
+  return { logs: result, targetInfoMap };
 }

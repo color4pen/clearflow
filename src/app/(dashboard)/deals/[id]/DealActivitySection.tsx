@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { AuditLog } from "@/domain/models/auditLog";
 import { formatRelativeTime } from "@/app/(dashboard)/dashboard/dashboardUtils";
 import { getActionLabel } from "@/lib/activityLabels";
@@ -5,9 +6,10 @@ import { getActionLabel } from "@/lib/activityLabels";
 interface Props {
   activities: AuditLog[];
   userMap: Record<string, string>;
+  targetInfoMap: Record<string, { label: string; href?: string }>;
 }
 
-export function DealActivitySection({ activities, userMap }: Props) {
+export function DealActivitySection({ activities, userMap, targetInfoMap }: Props) {
   if (activities.length === 0) {
     return (
       <p className="text-xs text-text-muted">アクティビティはありません</p>
@@ -21,6 +23,7 @@ export function DealActivitySection({ activities, userMap }: Props) {
           userMap[log.actorId] ?? log.actorId.slice(0, 8);
         const actionLabel = getActionLabel(log);
         const relativeTime = formatRelativeTime(log.createdAt);
+        const targetInfo = targetInfoMap[`${log.targetType}:${log.targetId}`];
 
         return (
           <li
@@ -31,6 +34,18 @@ export function DealActivitySection({ activities, userMap }: Props) {
             <span className="text-text font-medium shrink-0">{actorName}</span>
             <span className="text-text-muted">が</span>
             <span className="text-text">{actionLabel}</span>
+            {targetInfo && (
+              <>
+                <span className="text-text-muted">：</span>
+                {targetInfo.href ? (
+                  <Link href={targetInfo.href} className="text-primary underline">
+                    {targetInfo.label}
+                  </Link>
+                ) : (
+                  <span>{targetInfo.label}</span>
+                )}
+              </>
+            )}
           </li>
         );
       })}

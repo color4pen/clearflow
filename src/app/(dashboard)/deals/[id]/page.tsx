@@ -36,15 +36,16 @@ export default async function DealDetailPage({
 
   const activityEnabled = isActivityFeedEnabled();
 
-  const [inquiry, dealMeetings, dealContacts, dealContracts, actionItemsResult, users, activities] = await Promise.all([
+  const [inquiry, dealMeetings, dealContacts, dealContracts, actionItemsResult, users, activityResult] = await Promise.all([
     deal.inquiryId ? getInquiry({ inquiryId: deal.inquiryId, organizationId }) : null,
     listMeetings(deal.id, organizationId),
     listDealContacts(deal.id, organizationId),
     listContractsByDeal(deal.id, organizationId),
     listActionItemsByDeal({ dealId: deal.id, organizationId }),
     listOrganizationUsers({ organizationId }),
-    activityEnabled ? getDealActivity({ dealId: deal.id, organizationId }) : Promise.resolve([]),
+    activityEnabled ? getDealActivity({ dealId: deal.id, organizationId, dealTitle: deal.title }) : Promise.resolve({ logs: [], targetInfoMap: {} }),
   ]);
+  const { logs: activities, targetInfoMap } = activityResult;
 
   const client = await getClient(deal.clientId, organizationId);
   const clientContacts = await listClientContacts(deal.clientId);
@@ -300,7 +301,7 @@ export default async function DealDetailPage({
       {activityEnabled && (
         <SectionCard className="p-3">
           <h2 className="text-xs font-bold text-text mb-2">アクティビティ</h2>
-          <DealActivitySection activities={activities} userMap={userMap} />
+          <DealActivitySection activities={activities} userMap={userMap} targetInfoMap={targetInfoMap} />
         </SectionCard>
       )}
     </div>
