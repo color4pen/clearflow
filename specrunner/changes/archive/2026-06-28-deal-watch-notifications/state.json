@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "15964b3c-74b5-45ee-a767-a69effb945bd",
   "createdAt": "2026-06-28T03:11:33.574Z",
-  "updatedAt": "2026-06-28T08:18:38.764Z",
+  "updatedAt": "2026-06-28T08:36:11.781Z",
   "request": {
     "title": "案件の watch とアクティビティ通知（監査ログから派生）",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/deal-watch-notifications-15964b3c",
   "error": null,
   "pipelineId": "standard",
@@ -40,7 +40,7 @@
     "createdAt": "2026-06-28T08:18:38.753Z"
   },
   "_journal": {
-    "historyCount": 69,
+    "historyCount": 70,
     "stepCounts": {
       "request-review": 1,
       "design": 1,

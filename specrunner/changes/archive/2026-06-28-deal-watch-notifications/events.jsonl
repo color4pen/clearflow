@@ -100,3 +100,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/deal-watch-notifications/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-28T08:18:36.781Z","endedAt":"2026-06-28T08:18:38.754Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-28T08:18:38.754Z","outputs":[{"path":"specrunner/changes/deal-watch-notifications/pr-create-result.md","hash":"sha256:3e3bccbc62019875066f5d0a8597630cd671f1c74213189a04f7e6f48d0ed232"}],"inputs":[{"path":"feat/deal-watch-notifications-15964b3c","hash":null}]}
 {"type":"transition","ts":"2026-06-28T08:18:38.764Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-28T08:36:11.781Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
