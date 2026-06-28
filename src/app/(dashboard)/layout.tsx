@@ -25,11 +25,11 @@ export default async function DashboardLayout({
           <div className="text-2xs text-text-sidebar-muted">案件管理</div>
         </div>
 
-        <div className="px-4 py-2">
+        <SidebarNav isAdmin={isAdmin} />
+
+        <div className="border-t border-white/10">
           <NotificationBell />
         </div>
-
-        <SidebarNav isAdmin={isAdmin} />
 
         <div className="border-t border-white/10 px-4 py-3 flex flex-col gap-2">
           <div className="text-xs text-text-on-dark-disabled">
