@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { createUserAction } from "@/app/actions/users";
 import type { CreateUserState } from "@/app/actions/users";
 import { FormField, Input, Select, SubmitButton, preventEnterSubmit } from "@/app/components";
@@ -13,9 +13,11 @@ export function CreateUserForm() {
   );
 
   // Reset form on success
-  if (state?.success === true && formRef.current) {
-    formRef.current.reset();
-  }
+  useEffect(() => {
+    if (state?.success === true) {
+      formRef.current?.reset();
+    }
+  }, [state]);
 
   return (
     <div>
