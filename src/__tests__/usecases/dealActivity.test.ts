@@ -58,4 +58,45 @@ describe("getDealActivity usecase 静的検証", () => {
     const content = await readSrc("application/usecases/getDealActivity.ts");
     expect(content).toContain("Promise.all");
   });
+
+  // T-05: 新規テスト — targetInfoMap / TargetInfo / dealTitle の検証
+
+  it("targetInfoMap の文字列が含まれる", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("targetInfoMap");
+  });
+
+  it("TargetInfo 型の定義が含まれる", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("TargetInfo");
+  });
+
+  it("dealTitle パラメータが含まれる", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("dealTitle");
+  });
+
+  it("meetingTypeLabels の参照が含まれる（meeting ラベル構築に使用）", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("meetingTypeLabels");
+  });
+
+  it('"/deals/" のパスパターンが含まれる（deal / meeting の href 構築）', async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("/deals/");
+  });
+
+  it('"/contracts/" のパスパターンが含まれる（contract の href 構築）', async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("/contracts/");
+  });
+
+  it("deal_contact が targetInfoMap のキーとして設定されていない", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    // deal_contact は targets 配列には含まれるが、targetInfoMap のキーとして設定する記述が無いことを確認
+    // `deal_contact:` というマップキー構築パターンが存在しないことを検証
+    expect(content).not.toContain("`deal_contact:");
+    expect(content).not.toContain('"deal_contact:');
+    expect(content).not.toContain("'deal_contact:");
+  });
 });
