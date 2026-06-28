@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "362f7e21-c161-4959-8ed0-1445fc204fc5",
   "createdAt": "2026-06-28T15:11:04.764Z",
-  "updatedAt": "2026-06-28T15:39:17.403Z",
+  "updatedAt": "2026-06-28T15:39:43.720Z",
   "request": {
     "title": "認可の一貫性とロックアウト防止",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/authorization-consistency-362f7e21",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/133",
+    "number": 133,
+    "createdAt": "2026-06-28T15:39:43.711Z"
+  },
   "_journal": {
-    "historyCount": 44,
+    "historyCount": 49,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -60,7 +65,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
