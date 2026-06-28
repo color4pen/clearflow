@@ -3,6 +3,7 @@ import {
   dealRepository,
   userRepository,
   clientRepository,
+  watchRepository,
 } from "@/infrastructure/repositories";
 import { recordAudit } from "@/application/services/auditRecorder";
 
@@ -104,6 +105,15 @@ export async function createDeal(data: {
           targetType: "deal",
           targetId: newDeal.id,
           actorId: data.actorId,
+          organizationId: data.organizationId,
+        },
+        tx
+      );
+
+      await watchRepository.create(
+        {
+          userId: data.actorId,
+          dealId: newDeal.id,
           organizationId: data.organizationId,
         },
         tx

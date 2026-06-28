@@ -89,6 +89,7 @@ export const users = pgTable("users", {
     .notNull()
     .references(() => organizations.id),
   role: roleEnum("role").notNull().default("member"),
+  notificationsLastSeenAt: timestamp("notifications_last_seen_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -563,6 +564,28 @@ export const verificationTokens = pgTable(
   (table) => [primaryKey({ columns: [table.identifier, table.token] })]
 );
 
+// Watches table (案件 watch)
+export const watches = pgTable(
+  "watches",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    dealId: uuid("deal_id")
+      .notNull()
+      .references(() => deals.id),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    unique("watches_user_deal_unique").on(table.userId, table.dealId),
+    index("watches_org_user_idx").on(table.organizationId, table.userId),
+  ]
+);
+
 // Relations
 export const organizationsRelations = relations(organizations, ({ many }) => ({
   users: many(users),
@@ -583,6 +606,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   invoices: many(invoices),
   revenueTargets: many(revenueTargets),
   actionItems: many(actionItems),
+  watches: many(watches),
 }));
 
 export const revenueTargetsRelations = relations(revenueTargets, ({ one }) => ({
@@ -618,6 +642,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   stepsAssignedApprover: many(approvalSteps, { relationName: "stepsAssignedApprover" }),
   actionItemsAsAssignee: many(actionItems, { relationName: "actionItemsAsAssignee" }),
   actionItemsAsCreator: many(actionItems, { relationName: "actionItemsAsCreator" }),
+  watches: many(watches),
 }));
 
 export const approvalPoliciesRelations = relations(approvalPolicies, ({ one }) => ({
@@ -830,6 +855,7 @@ export const dealsRelations = relations(deals, ({ one, many }) => ({
   dealContacts: many(dealContacts),
   contracts: many(contracts),
   actionItems: many(actionItems),
+  watches: many(watches),
 }));
 
 export const dealContactsRelations = relations(dealContacts, ({ one }) => ({
@@ -896,5 +922,20 @@ export const actionItemsRelations = relations(actionItems, ({ one }) => ({
     fields: [actionItems.createdById],
     references: [users.id],
     relationName: "actionItemsAsCreator",
+  }),
+}));
+
+export const watchesRelations = relations(watches, ({ one }) => ({
+  user: one(users, {
+    fields: [watches.userId],
+    references: [users.id],
+  }),
+  deal: one(deals, {
+    fields: [watches.dealId],
+    references: [deals.id],
+  }),
+  organization: one(organizations, {
+    fields: [watches.organizationId],
+    references: [organizations.id],
   }),
 }));

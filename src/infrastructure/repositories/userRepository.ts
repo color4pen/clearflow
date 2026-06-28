@@ -16,6 +16,7 @@ export async function findByOrganization(
       name: users.name,
       organizationId: users.organizationId,
       role: users.role,
+      notificationsLastSeenAt: users.notificationsLastSeenAt,
       createdAt: users.createdAt,
     })
     .from(users)
@@ -45,6 +46,7 @@ export async function updateRole(
       name: users.name,
       organizationId: users.organizationId,
       role: users.role,
+      notificationsLastSeenAt: users.notificationsLastSeenAt,
       createdAt: users.createdAt,
     });
   return result[0] ?? null;
@@ -66,6 +68,7 @@ export async function findByEmailForAuth(
     name: row.name,
     organizationId: row.organizationId,
     role: row.role,
+    notificationsLastSeenAt: row.notificationsLastSeenAt,
     createdAt: row.createdAt,
     hashedPassword: row.hashedPassword,
   };
@@ -76,7 +79,15 @@ export async function findById(
   organizationId: string
 ): Promise<User | null> {
   const result = await db
-    .select()
+    .select({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      organizationId: users.organizationId,
+      role: users.role,
+      notificationsLastSeenAt: users.notificationsLastSeenAt,
+      createdAt: users.createdAt,
+    })
     .from(users)
     .where(and(eq(users.id, id), eq(users.organizationId, organizationId)))
     .limit(1);
@@ -88,6 +99,20 @@ export async function findById(
     name: row.name,
     organizationId: row.organizationId,
     role: row.role,
+    notificationsLastSeenAt: row.notificationsLastSeenAt,
     createdAt: row.createdAt,
   };
+}
+
+export async function updateNotificationsLastSeenAt(
+  userId: string,
+  organizationId: string,
+  timestamp: Date,
+  tx?: Transaction
+): Promise<void> {
+  const queryRunner = tx ?? db;
+  await queryRunner
+    .update(users)
+    .set({ notificationsLastSeenAt: timestamp })
+    .where(and(eq(users.id, userId), eq(users.organizationId, organizationId)));
 }

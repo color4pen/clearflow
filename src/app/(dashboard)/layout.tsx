@@ -3,6 +3,7 @@ import { auth, signOut } from "@/infrastructure/auth";
 import { ThemeToggle } from "./ThemeToggle";
 import { SidebarNav } from "./SidebarNav";
 import { DashboardProviders } from "./DashboardProviders";
+import { NotificationBell } from "./NotificationBell";
 
 export default async function DashboardLayout({
   children,
@@ -22,6 +23,10 @@ export default async function DashboardLayout({
         <div className="px-4 py-4">
           <div className="text-[15px] font-bold text-white">Clearflow</div>
           <div className="text-2xs text-text-sidebar-muted">案件管理</div>
+        </div>
+
+        <div className="px-4 py-2">
+          <NotificationBell />
         </div>
 
         <SidebarNav isAdmin={isAdmin} />

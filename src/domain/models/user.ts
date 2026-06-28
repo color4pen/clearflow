@@ -6,5 +6,6 @@ export type User = {
   name: string;
   organizationId: string;
   role: Role;
+  notificationsLastSeenAt: Date | null;
   createdAt: Date;
 };

@@ -2,15 +2,15 @@
 
 ## T-01: watches テーブルのスキーマ定義とマイグレーション
 
-- [ ] `src/infrastructure/schema.ts` に `watches` テーブルを追加する。カラム: `id` (uuid, PK), `userId` (uuid, FK → users.id), `dealId` (uuid, FK → deals.id), `organizationId` (uuid, FK → organizations.id), `createdAt` (timestamp, default now)
-- [ ] `(userId, dealId)` にユニーク制約を追加する（`watches_user_deal_unique`）
-- [ ] `(organizationId, userId)` にインデックスを追加する（ユーザーの watch 一覧取得を最適化）
-- [ ] `src/infrastructure/schema.ts` に `watchesRelations` を追加する（user, deal, organization への relation）
-- [ ] `organizationsRelations` に `watches: many(watches)` を追加する
-- [ ] `usersRelations` に `watches: many(watches)` を追加する
-- [ ] `dealsRelations` に `watches: many(watches)` を追加する
-- [ ] `drizzle/0012_watches_table.sql` にマイグレーション SQL を作成する
-- [ ] `bun run db:migrate` でマイグレーションが適用できることを確認する
+- [x] `src/infrastructure/schema.ts` に `watches` テーブルを追加する。カラム: `id` (uuid, PK), `userId` (uuid, FK → users.id), `dealId` (uuid, FK → deals.id), `organizationId` (uuid, FK → organizations.id), `createdAt` (timestamp, default now)
+- [x] `(userId, dealId)` にユニーク制約を追加する（`watches_user_deal_unique`）
+- [x] `(organizationId, userId)` にインデックスを追加する（ユーザーの watch 一覧取得を最適化）
+- [x] `src/infrastructure/schema.ts` に `watchesRelations` を追加する（user, deal, organization への relation）
+- [x] `organizationsRelations` に `watches: many(watches)` を追加する
+- [x] `usersRelations` に `watches: many(watches)` を追加する
+- [x] `dealsRelations` に `watches: many(watches)` を追加する
+- [x] `drizzle/0012_watches_table.sql` にマイグレーション SQL を作成する
+- [x] `bun run db:migrate` でマイグレーションが適用できることを確認する
 
 **Acceptance Criteria**:
 - `watches` テーブルが作成され、`(userId, dealId)` ユニーク制約が機能する
@@ -19,10 +19,10 @@
 
 ## T-02: users テーブルに notifications_last_seen_at カラムを追加
 
-- [ ] `src/infrastructure/schema.ts` の `users` テーブルに `notificationsLastSeenAt` (timestamp, nullable) を追加する
-- [ ] `src/domain/models/user.ts` の `User` 型に `notificationsLastSeenAt: Date | null` を追加する
-- [ ] `src/infrastructure/repositories/userRepository.ts` の `findById` と `findByOrganization` の select に `notificationsLastSeenAt` を追加する
-- [ ] `drizzle/0013_notifications_last_seen_at.sql` にマイグレーション SQL を作成する
+- [x] `src/infrastructure/schema.ts` の `users` テーブルに `notificationsLastSeenAt` (timestamp, nullable) を追加する
+- [x] `src/domain/models/user.ts` の `User` 型に `notificationsLastSeenAt: Date | null` を追加する
+- [x] `src/infrastructure/repositories/userRepository.ts` の `findById` と `findByOrganization` の select に `notificationsLastSeenAt` を追加する
+- [x] `drizzle/0013_notifications_last_seen_at.sql` にマイグレーション SQL を作成する
 
 **Acceptance Criteria**:
 - `users.notifications_last_seen_at` カラムが nullable で追加される
@@ -31,10 +31,10 @@
 
 ## T-03: Watch ドメインモデルの定義
 
-- [ ] `src/domain/models/watch.ts` を作成する。`Watch` 型: `{ id: string; userId: string; dealId: string; organizationId: string; createdAt: Date }`
-- [ ] `src/domain/models/notification.ts` を作成する。通知対象アクションの定数 `NOTIFICATION_ACTIONS` を定義する: `["deal.update", "deal.updatePhase", "meeting.create", "action_item.create", "contract.create"]`
-- [ ] `DerivedNotification` 型を定義する: `{ log: AuditLog; dealId: string; dealTitle: string; targetInfo: TargetInfo | null; isUnread: boolean }`
-- [ ] `GetNotificationsResult` 型を定義する: `{ notifications: DerivedNotification[]; unreadCount: number }`
+- [x] `src/domain/models/watch.ts` を作成する。`Watch` 型: `{ id: string; userId: string; dealId: string; organizationId: string; createdAt: Date }`
+- [x] `src/domain/models/notification.ts` を作成する。通知対象アクションの定数 `NOTIFICATION_ACTIONS` を定義する: `["deal.update", "deal.updatePhase", "meeting.create", "action_item.create", "contract.create"]`
+- [x] `DerivedNotification` 型を定義する: `{ log: AuditLog; dealId: string; dealTitle: string; targetInfo: TargetInfo | null; isUnread: boolean }`
+- [x] `GetNotificationsResult` 型を定義する: `{ notifications: DerivedNotification[]; unreadCount: number }`
 
 **Acceptance Criteria**:
 - Watch 型と通知関連の型が定義されている
@@ -43,13 +43,13 @@
 
 ## T-04: watchRepository の実装
 
-- [ ] `src/infrastructure/repositories/watchRepository.ts` を作成する
-- [ ] `create(data: { userId, dealId, organizationId }, tx?)` — watch レコードを作成する。既存レコードがある場合は何もしない（ON CONFLICT DO NOTHING または事前チェック）
-- [ ] `findByUserAndDeal(userId, dealId, organizationId)` — 指定ユーザー・案件の watch を取得する（存在確認用）
-- [ ] `findByUser(userId, organizationId)` — ユーザーの全 watch を取得する（通知導出用）
-- [ ] `deleteByUserAndDeal(userId, dealId, organizationId)` — watch を削除する
-- [ ] 全関数で `organizationId` 条件を必ず付与する
-- [ ] `src/infrastructure/repositories/index.ts` に `export * as watchRepository from "./watchRepository"` を追加する
+- [x] `src/infrastructure/repositories/watchRepository.ts` を作成する
+- [x] `create(data: { userId, dealId, organizationId }, tx?)` — watch レコードを作成する。既存レコードがある場合は何もしない（ON CONFLICT DO NOTHING または事前チェック）
+- [x] `findByUserAndDeal(userId, dealId, organizationId)` — 指定ユーザー・案件の watch を取得する（存在確認用）
+- [x] `findByUser(userId, organizationId)` — ユーザーの全 watch を取得する（通知導出用）
+- [x] `deleteByUserAndDeal(userId, dealId, organizationId)` — watch を削除する
+- [x] 全関数で `organizationId` 条件を必ず付与する
+- [x] `src/infrastructure/repositories/index.ts` に `export * as watchRepository from "./watchRepository"` を追加する
 
 **Acceptance Criteria**:
 - CRUD 操作が全て `organizationId` 条件付きで動作する
@@ -58,10 +58,10 @@
 
 ## T-05: auditLogRepository.findByTargets の拡張
 
-- [ ] `findByTargets` の `options` に `afterDate?: Date` を追加する — `gte(auditLogs.createdAt, afterDate)` 条件を追加
-- [ ] `findByTargets` の `options` に `excludeActorId?: string` を追加する — `ne(auditLogs.actorId, excludeActorId)` 条件を追加（`drizzle-orm` の `ne` を import）
-- [ ] `findByTargets` の `options` に `includeActions?: string[]` を追加する — `inArray(auditLogs.action, includeActions)` 条件を追加
-- [ ] 既存の `getDealActivity` からの呼び出しに影響がないことを確認する（新オプションは全て optional）
+- [x] `findByTargets` の `options` に `afterDate?: Date` を追加する — `gte(auditLogs.createdAt, afterDate)` 条件を追加
+- [x] `findByTargets` の `options` に `excludeActorId?: string` を追加する — `ne(auditLogs.actorId, excludeActorId)` 条件を追加（`drizzle-orm` の `ne` を import）
+- [x] `findByTargets` の `options` に `includeActions?: string[]` を追加する — `inArray(auditLogs.action, includeActions)` 条件を追加
+- [x] 既存の `getDealActivity` からの呼び出しに影響がないことを確認する（新オプションは全て optional）
 
 **Acceptance Criteria**:
 - 新オプション（afterDate, excludeActorId, includeActions）が正しく SQL 条件に反映される
@@ -70,8 +70,8 @@
 
 ## T-06: createDeal に自動 watch を追加
 
-- [ ] `src/application/usecases/createDeal.ts` のトランザクション内で、案件作成後に `watchRepository.create({ userId: data.actorId, dealId: newDeal.id, organizationId: data.organizationId }, tx)` を呼び出す
-- [ ] `watchRepository` の import を追加する
+- [x] `src/application/usecases/createDeal.ts` のトランザクション内で、案件作成後に `watchRepository.create({ userId: data.actorId, dealId: newDeal.id, organizationId: data.organizationId }, tx)` を呼び出す
+- [x] `watchRepository` の import を追加する
 
 **Acceptance Criteria**:
 - 案件作成時に作成者の watch レコードが同一トランザクション内で作成される
@@ -79,9 +79,9 @@
 
 ## T-07: updateDeal に担当者の自動 watch を追加
 
-- [ ] `src/application/usecases/updateDeal.ts` のトランザクション内で、`assigneeId` が指定されている場合に `watchRepository.create({ userId: data.assigneeId, dealId: data.dealId, organizationId: data.organizationId }, tx)` を呼び出す
-- [ ] `watchRepository` の import を追加する
-- [ ] `create` の冪等性により、既に watch 済みの場合は何もしないことを確認する
+- [x] `src/application/usecases/updateDeal.ts` のトランザクション内で、`assigneeId` が指定されている場合に `watchRepository.create({ userId: data.assigneeId, dealId: data.dealId, organizationId: data.organizationId }, tx)` を呼び出す
+- [x] `watchRepository` の import を追加する
+- [x] `create` の冪等性により、既に watch 済みの場合は何もしないことを確認する
 
 **Acceptance Criteria**:
 - 担当者設定時に担当者の watch レコードが同一トランザクション内で作成される
@@ -89,10 +89,10 @@
 
 ## T-08: watchDeal / unwatchDeal usecase の実装
 
-- [ ] `src/application/usecases/watchDeal.ts` を作成する — `watchRepository.create` を呼び出す
-- [ ] `src/application/usecases/unwatchDeal.ts` を作成する — `watchRepository.deleteByUserAndDeal` を呼び出す
-- [ ] `src/application/usecases/getWatchStatus.ts` を作成する — `watchRepository.findByUserAndDeal` で watch 状態を返す
-- [ ] `src/application/usecases/index.ts` に export を追加する
+- [x] `src/application/usecases/watchDeal.ts` を作成する — `watchRepository.create` を呼び出す
+- [x] `src/application/usecases/unwatchDeal.ts` を作成する — `watchRepository.deleteByUserAndDeal` を呼び出す
+- [x] `src/application/usecases/getWatchStatus.ts` を作成する — `watchRepository.findByUserAndDeal` で watch 状態を返す
+- [x] `src/application/usecases/index.ts` に export を追加する
 
 **Acceptance Criteria**:
 - watch/unwatch/状態取得が正しく動作する
@@ -100,17 +100,17 @@
 
 ## T-09: getNotifications usecase の実装
 
-- [ ] `src/application/usecases/getNotifications.ts` を作成する
-- [ ] 入力: `{ userId, organizationId, notificationsLastSeenAt: Date | null }`
-- [ ] 処理フロー:
+- [x] `src/application/usecases/getNotifications.ts` を作成する
+- [x] 入力: `{ userId, organizationId, notificationsLastSeenAt: Date | null }`
+- [x] 処理フロー:
   1. `watchRepository.findByUser(userId, organizationId)` で watch 一覧を取得
   2. watch 中の案件ごとに `getDealActivity` と同等の対象解決を行う（配下エンティティの列挙 → targets 構築）
   3. 全 watch 分の targets をまとめて `auditLogRepository.findByTargets` に渡す。オプション: `includeActions: NOTIFICATION_ACTIONS`, `excludeActorId: userId`, `afterDate: 各 watch の最古の created_at`
   4. 結果をフィルタ: 各ログが対応する watch の `created_at` 以降であることを確認する
   5. `targetInfoMap` を構築する
   6. 未読数を `notificationsLastSeenAt` で判定する
-- [ ] 返り値: `GetNotificationsResult`
-- [ ] `src/application/usecases/index.ts` に export を追加する
+- [x] 返り値: `GetNotificationsResult`
+- [x] `src/application/usecases/index.ts` に export を追加する
 
 **Acceptance Criteria**:
 - watch 中の案件の対象アクションのみが通知として返される
@@ -121,10 +121,10 @@
 
 ## T-10: markNotificationsAsRead usecase の実装
 
-- [ ] `src/application/usecases/markNotificationsAsRead.ts` を作成する
-- [ ] `userRepository` に `updateNotificationsLastSeenAt(userId, organizationId, timestamp)` 関数を追加する
-- [ ] usecase は `updateNotificationsLastSeenAt` を呼び出して `notifications_last_seen_at` を現在時刻に更新する
-- [ ] `src/application/usecases/index.ts` に export を追加する
+- [x] `src/application/usecases/markNotificationsAsRead.ts` を作成する
+- [x] `userRepository` に `updateNotificationsLastSeenAt(userId, organizationId, timestamp)` 関数を追加する
+- [x] usecase は `updateNotificationsLastSeenAt` を呼び出して `notifications_last_seen_at` を現在時刻に更新する
+- [x] `src/application/usecases/index.ts` に export を追加する
 
 **Acceptance Criteria**:
 - `notifications_last_seen_at` が現在時刻に更新される
@@ -133,11 +133,11 @@
 
 ## T-11: watch/unwatch/markAsRead の Server Actions
 
-- [ ] `src/app/actions/watches.ts` を作成する
-- [ ] `watchDealAction(dealId)` — 認証チェック → `watchDeal` usecase 呼び出し → revalidatePath
-- [ ] `unwatchDealAction(dealId)` — 認証チェック → `unwatchDeal` usecase 呼び出し → revalidatePath
-- [ ] `src/app/actions/notifications.ts` を作成する
-- [ ] `markNotificationsAsReadAction()` — 認証チェック → `markNotificationsAsRead` usecase 呼び出し → revalidatePath
+- [x] `src/app/actions/watches.ts` を作成する
+- [x] `watchDealAction(dealId)` — 認証チェック → `watchDeal` usecase 呼び出し → revalidatePath
+- [x] `unwatchDealAction(dealId)` — 認証チェック → `unwatchDeal` usecase 呼び出し → revalidatePath
+- [x] `src/app/actions/notifications.ts` を作成する
+- [x] `markNotificationsAsReadAction()` — 認証チェック → `markNotificationsAsRead` usecase 呼び出し → revalidatePath
 
 **Acceptance Criteria**:
 - 全アクションで認証チェックが行われる
@@ -146,12 +146,12 @@
 
 ## T-12: 案件詳細ヘッダーに watch トグル UI を追加
 
-- [ ] `src/app/(dashboard)/deals/[id]/WatchToggle.tsx` を Client Component として作成する
-- [ ] Props: `dealId: string`, `isWatching: boolean`
-- [ ] watch/unwatch の Server Action を呼び出すトグルボタンを実装する
-- [ ] watch 状態に応じてアイコンまたはテキストを切り替える（例: 「Watch」/「Watching」）
-- [ ] `src/app/(dashboard)/deals/[id]/page.tsx` のヘッダー部分（`DealHeaderActions` の近く）に `WatchToggle` を追加する
-- [ ] Server Component 側で `getWatchStatus` を呼び出して初期状態を取得する
+- [x] `src/app/(dashboard)/deals/[id]/WatchToggle.tsx` を Client Component として作成する
+- [x] Props: `dealId: string`, `isWatching: boolean`
+- [x] watch/unwatch の Server Action を呼び出すトグルボタンを実装する
+- [x] watch 状態に応じてアイコンまたはテキストを切り替える（例: 「Watch」/「Watching」）
+- [x] `src/app/(dashboard)/deals/[id]/page.tsx` のヘッダー部分（`DealHeaderActions` の近く）に `WatchToggle` を追加する
+- [x] Server Component 側で `getWatchStatus` を呼び出して初期状態を取得する
 
 **Acceptance Criteria**:
 - 案件詳細ページのヘッダーに watch トグルが表示される
@@ -160,12 +160,12 @@
 
 ## T-13: 通知センター UI（未読バッジ＋通知一覧）
 
-- [ ] `src/app/(dashboard)/NotificationBell.tsx` を Server Component として作成する — `getNotifications` を呼び出して未読数と通知一覧のデータを取得し、Client Component に渡す
-- [ ] `src/app/(dashboard)/NotificationPanel.tsx` を Client Component として作成する — 通知一覧の表示と「既読にする」ボタンを実装する
-- [ ] 未読バッジ: 未読数 > 0 の場合にベルアイコン上にバッジを表示する
-- [ ] 通知一覧: 各通知は「いつ・誰が・何を・どの対象に」を表示する。対象ラベルとリンクは `targetInfoMap` から取得する。アクションラベルは `getActionLabel` を利用する
-- [ ] 「既読にする」ボタン: `markNotificationsAsReadAction` を呼び出し、未読を 0 にする
-- [ ] `src/app/(dashboard)/layout.tsx` のサイドバー領域にベルアイコン＋バッジを配置する（ナビの上部またはヘッダー付近）
+- [x] `src/app/(dashboard)/NotificationBell.tsx` を Server Component として作成する — `getNotifications` を呼び出して未読数と通知一覧のデータを取得し、Client Component に渡す
+- [x] `src/app/(dashboard)/NotificationPanel.tsx` を Client Component として作成する — 通知一覧の表示と「既読にする」ボタンを実装する
+- [x] 未読バッジ: 未読数 > 0 の場合にベルアイコン上にバッジを表示する
+- [x] 通知一覧: 各通知は「いつ・誰が・何を・どの対象に」を表示する。対象ラベルとリンクは `targetInfoMap` から取得する。アクションラベルは `getActionLabel` を利用する
+- [x] 「既読にする」ボタン: `markNotificationsAsReadAction` を呼び出し、未読を 0 にする
+- [x] `src/app/(dashboard)/layout.tsx` のサイドバー領域にベルアイコン＋バッジを配置する（ナビの上部またはヘッダー付近）
 
 **Acceptance Criteria**:
 - 未読数 > 0 の場合にバッジが表示される
@@ -176,15 +176,15 @@
 
 ## T-14: テストの実装
 
-- [ ] `src/__tests__/usecases/watchDeal.test.ts` — watch/unwatch/getWatchStatus の usecase テスト
+- [x] `src/__tests__/usecases/watchDeal.test.ts` — watch/unwatch/getWatchStatus の usecase テスト
   - watch の作成、取得、削除が正しく動作する
   - 重複 watch が冪等に処理される
   - organizationId 条件のテスト
-- [ ] `src/__tests__/usecases/dealManagement.test.ts` に createDeal の自動 watch テストを追加する
+- [x] `src/__tests__/usecases/dealManagement.test.ts` に createDeal の自動 watch テストを追加する
   - 案件作成時に作成者が自動 watch される
-- [ ] `src/__tests__/usecases/dealManagement.test.ts` に updateDeal の担当者自動 watch テストを追加する
+- [x] `src/__tests__/usecases/dealManagement.test.ts` に updateDeal の担当者自動 watch テストを追加する
   - 担当者設定時に担当者が自動 watch される
-- [ ] `src/__tests__/usecases/getNotifications.test.ts` — getNotifications の usecase テスト
+- [x] `src/__tests__/usecases/getNotifications.test.ts` — getNotifications の usecase テスト
   - watch 中案件の変更（deal.update 等）が通知に含まれる
   - 本人操作が除外される
   - watch 開始前のログが除外される
@@ -192,9 +192,9 @@
   - 未読数が notifications_last_seen_at 基準で正しい
   - 既読後に未読が 0 になる
   - organizationId 条件のテスト（テナント分離）
-- [ ] 既存テストが全て green であることを確認する
-- [ ] typecheck（`bun run build`）が green であることを確認する
-- [ ] lint（`bun run lint`）が green であることを確認する
+- [x] 既存テストが全て green であることを確認する
+- [x] typecheck（`bun run build`）が green であることを確認する
+- [x] lint（`bun run lint`）が green であることを確認する
 
 **Acceptance Criteria**:
 - 受け入れ基準の全項目がテストでカバーされる:

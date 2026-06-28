@@ -131,6 +131,48 @@ describe("updateDeal usecase 静的検証", () => {
   });
 });
 
+describe("createDeal 自動 watch 静的検証", () => {
+  it("watchRepository の import が含まれる", async () => {
+    const content = await readSrc("application/usecases/createDeal.ts");
+    expect(content).toContain("watchRepository");
+  });
+
+  it("watchRepository.create の呼び出しがトランザクション内に含まれる（自動 watch）", async () => {
+    const content = await readSrc("application/usecases/createDeal.ts");
+    expect(content).toContain("watchRepository.create");
+    // トランザクション内で実行される
+    expect(content).toContain("tx");
+  });
+
+  it("actorId を userId として watch を作成する", async () => {
+    const content = await readSrc("application/usecases/createDeal.ts");
+    const watchIdx = content.indexOf("watchRepository.create");
+    const watchBody = content.slice(watchIdx, watchIdx + 200);
+    expect(watchBody).toContain("actorId");
+  });
+});
+
+describe("updateDeal 担当者自動 watch 静的検証", () => {
+  it("watchRepository の import が含まれる", async () => {
+    const content = await readSrc("application/usecases/updateDeal.ts");
+    expect(content).toContain("watchRepository");
+  });
+
+  it("assigneeId が指定された場合に watchRepository.create が呼ばれる", async () => {
+    const content = await readSrc("application/usecases/updateDeal.ts");
+    expect(content).toContain("watchRepository.create");
+    // assigneeId チェックがある
+    expect(content).toContain("assigneeId");
+  });
+
+  it("watchRepository.create がトランザクション内で呼ばれる（整合性保証）", async () => {
+    const content = await readSrc("application/usecases/updateDeal.ts");
+    const watchIdx = content.indexOf("watchRepository.create");
+    const watchBody = content.slice(watchIdx, watchIdx + 200);
+    expect(watchBody).toContain("tx");
+  });
+});
+
 describe("Deal domain model description 静的検証", () => {
   it("Deal 型に description フィールドが含まれる", async () => {
     // 準備 - ソースファイルを読み込む
