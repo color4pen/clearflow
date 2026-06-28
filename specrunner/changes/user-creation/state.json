@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f2fb684d-7318-4ed9-b4af-319c4023cd00",
   "createdAt": "2026-06-28T15:58:42.886Z",
-  "updatedAt": "2026-06-28T16:01:49.096Z",
+  "updatedAt": "2026-06-28T16:06:49.443Z",
   "request": {
     "title": "管理者によるユーザー作成",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "design",
+  "step": "spec-review",
   "status": "running",
   "branch": "feat/user-creation-f2fb684d",
   "error": null,
@@ -34,9 +34,10 @@
     }
   ],
   "_journal": {
-    "historyCount": 5,
+    "historyCount": 9,
     "stepCounts": {
-      "request-review": 1
+      "request-review": 1,
+      "design": 1
     }
   }
 }
