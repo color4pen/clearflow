@@ -74,3 +74,11 @@
 {"type":"transition","ts":"2026-06-28T03:02:19.201Z","step":"verification","status":"ok","message":"verification iteration 1 completed with verdict: passed"}
 {"type":"transition","ts":"2026-06-28T03:02:19.201Z","step":"step-transition","status":"ok","message":"verification → adr-gen"}
 {"type":"transition","ts":"2026-06-28T03:02:19.206Z","step":"adr-gen-started","status":"started","message":"Starting adr-gen step"}
+{"type":"transition","ts":"2026-06-28T03:02:37.115Z","step":"adr-gen-verdict","status":"ok","message":"adr-gen verdict: success"}
+{"type":"step-attempt","step":"adr-gen","sessionId":"6b557406-acf4-4704-8c94-0ebed076a55e","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-28T03:02:19.223Z","endedAt":"2026-06-28T03:02:35.820Z"}
+{"type":"transition","ts":"2026-06-28T03:02:37.125Z","step":"step-transition","status":"ok","message":"adr-gen → pr-create"}
+{"type":"transition","ts":"2026-06-28T03:02:37.129Z","step":"step-transition","status":"ok","message":"Transitioning to pr-create step"}
+{"type":"transition","ts":"2026-06-28T03:02:39.200Z","step":"pr-create-verdict","status":"ok","message":"pr-create verdict: success"}
+{"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/deal-activity-enrich/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-28T03:02:37.131Z","endedAt":"2026-06-28T03:02:39.198Z"}
+{"type":"lineage","step":"pr-create","ts":"2026-06-28T03:02:39.198Z","outputs":[{"path":"specrunner/changes/deal-activity-enrich/pr-create-result.md","hash":"sha256:60e2fba6e592086e64db81918eeea1bd149633c5661111fbf2375bb35d002c8f"}],"inputs":[{"path":"change/deal-activity-enrich-541040f4","hash":null}]}
+{"type":"transition","ts":"2026-06-28T03:02:39.226Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
