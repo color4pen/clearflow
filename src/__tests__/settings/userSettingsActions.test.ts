@@ -94,6 +94,31 @@ describe("createUserAction — 静的コード解析", () => {
     expect(src).toContain("createUserAction");
   });
 
+  // TC-010: 認証されていないユーザーからの呼び出し
+  it("TC-010: 未認証時に「認証が必要です」を返す分岐が存在する", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    const actionIdx = src.indexOf("createUserAction");
+    expect(actionIdx).toBeGreaterThan(-1);
+    const afterFn = src.slice(actionIdx);
+    // session が無い場合の認証チェック
+    expect(afterFn).toContain("session?.user?.id");
+    expect(afterFn).toContain("認証が必要です");
+  });
+
+  // TC-018: organizationId と actorId をセッションから取得する
+  it("TC-018: organizationId と actorId が formData からではなくセッションから参照される", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    const actionIdx = src.indexOf("createUserAction");
+    expect(actionIdx).toBeGreaterThan(-1);
+    const afterFn = src.slice(actionIdx);
+    // セッション由来であることを確認
+    expect(afterFn).toContain("session.user.organizationId");
+    expect(afterFn).toContain("session.user.id");
+    // formData から organizationId や actorId を取得していないことを確認
+    expect(afterFn).not.toContain('formData.get("organizationId"');
+    expect(afterFn).not.toContain('formData.get("actorId"');
+  });
+
   it("canPerform で createUser 権限チェックを行う", async () => {
     const src = await readSrc("app/actions/users.ts");
     expect(src).toContain('"createUser"');
