@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f2fb684d-7318-4ed9-b4af-319c4023cd00",
   "createdAt": "2026-06-28T15:58:42.886Z",
-  "updatedAt": "2026-06-28T16:38:28.188Z",
+  "updatedAt": "2026-06-28T16:38:46.640Z",
   "request": {
     "title": "管理者によるユーザー作成",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/user-creation-f2fb684d",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/135",
+    "number": 135,
+    "createdAt": "2026-06-28T16:38:46.630Z"
+  },
   "_journal": {
-    "historyCount": 68,
+    "historyCount": 73,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -62,7 +67,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
