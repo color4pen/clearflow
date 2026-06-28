@@ -46,7 +46,7 @@ CREATE TYPE invoice_status AS ENUM (
   'scheduled', 'invoiced', 'paid', 'overdue'
 );
 
-CREATE TYPE approval_request_status AS ENUM (
+CREATE TYPE request_status AS ENUM (
   'draft', 'pending', 'approved', 'rejected', 'revision', 'expired'
 );
 
@@ -54,8 +54,8 @@ CREATE TYPE approval_step_status AS ENUM (
   'pending', 'approved', 'rejected'
 );
 
-CREATE TYPE user_role AS ENUM (
-  'admin', 'manager', 'finance', 'member'
+CREATE TYPE role AS ENUM (
+  'admin', 'member', 'manager', 'finance'
 );
 
 CREATE TYPE webhook_delivery_status AS ENUM (
@@ -93,7 +93,7 @@ text 型で管理する値（pgEnum にしない）:
 | email_verified | timestamptz | YES | | メール確認日時（Auth.js 互換） |
 | image | text | YES | | プロフィール画像 URL（Auth.js 互換） |
 | hashed_password | text | NO | | パスワードハッシュ |
-| role | user_role | NO | DEFAULT 'member' | ロール |
+| role | role | NO | DEFAULT 'member' | ロール |
 | notifications_last_seen_at | timestamptz | YES | | 通知を最後に確認した時刻（未読判定の基準） |
 | created_at | timestamptz | NO | DEFAULT now() | |
 
@@ -120,7 +120,7 @@ text 型で管理する値（pgEnum にしない）:
 | カラム | 型 | NULL | 制約 | 説明 |
 |---|---|---|---|---|
 | id | uuid | NO | PK, DEFAULT gen_random_uuid() | |
-| client_id | uuid | NO | FK → clients.id ON DELETE CASCADE | |
+| client_id | uuid | NO | FK → clients.id | |
 | name | text | NO | | 氏名 |
 | department | text | YES | | 部署 |
 | position | text | YES | | 役職 |
@@ -247,12 +247,12 @@ CHECK (deal_id IS NOT NULL OR inquiry_id IS NOT NULL)
 | id | uuid | NO | PK, DEFAULT gen_random_uuid() | |
 | organization_id | uuid | NO | FK → organizations.id | テナント |
 | description | text | NO | | 内容 |
-| assignee_id | uuid | YES | FK → users.id | 担当者 |
+| assignee_id | uuid | YES | FK → users.id ON DELETE SET NULL | 担当者 |
 | due_date | timestamptz | YES | | 期日 |
 | done | boolean | NO | DEFAULT false | 完了状態 |
-| meeting_id | uuid | YES | FK → meetings.id | 商談 |
-| deal_id | uuid | YES | FK → deals.id | 案件 |
-| inquiry_id | uuid | YES | FK → inquiries.id | 引合 |
+| meeting_id | uuid | YES | FK → meetings.id ON DELETE SET NULL | 商談 |
+| deal_id | uuid | YES | FK → deals.id ON DELETE SET NULL | 案件 |
+| inquiry_id | uuid | YES | FK → inquiries.id ON DELETE SET NULL | 引合 |
 | created_by_id | uuid | NO | FK → users.id | 作成者 |
 | created_at | timestamptz | NO | DEFAULT now() | |
 | updated_at | timestamptz | NO | DEFAULT now() | |
@@ -341,19 +341,19 @@ CHECK (
 | fields | jsonb | NO | DEFAULT '[]' | フォームフィールド定義 |
 | created_at | timestamptz | NO | DEFAULT now() | |
 
-#### approval_requests
+#### requests
 
 | カラム | 型 | NULL | 制約 | 説明 |
 |---|---|---|---|---|
 | id | uuid | NO | PK, DEFAULT gen_random_uuid() | |
 | organization_id | uuid | NO | FK → organizations.id | |
-| template_id | uuid | NO | FK → approval_templates.id | テンプレート |
+| template_id | uuid | YES | FK → approval_templates.id ON DELETE SET NULL | テンプレート |
 | title | text | NO | | 件名 |
 | creator_id | uuid | NO | FK → users.id | 申請者 |
-| status | approval_request_status | NO | DEFAULT 'draft' | 状態 |
+| status | request_status | NO | DEFAULT 'draft' | 状態 |
 | form_data | jsonb | NO | DEFAULT '{}' | 申請データ |
 | origin_type | text | NO | DEFAULT 'manual' | 起動パターン |
-| origin_policy_id | uuid | YES | FK → approval_policies.id ON DELETE RESTRICT | 適用ポリシー |
+| origin_policy_id | uuid | YES | FK → approval_policies.id | 適用ポリシー |
 | origin_trigger_action | text | YES | | トリガーアクション |
 | origin_trigger_entity_id | uuid | YES | | 対象エンティティ ID |
 | created_at | timestamptz | NO | DEFAULT now() | |
@@ -363,7 +363,9 @@ CHECK (
 **制約**:
 ```sql
 CHECK (
-  (origin_type = 'manual' AND origin_policy_id IS NULL) OR
+  (origin_type = 'manual' AND origin_policy_id IS NULL
+    AND origin_trigger_action IS NULL
+    AND origin_trigger_entity_id IS NULL) OR
   (origin_type = 'system' AND origin_policy_id IS NOT NULL
     AND origin_trigger_action IS NOT NULL
     AND origin_trigger_entity_id IS NOT NULL)
@@ -375,14 +377,15 @@ CHECK (
 | カラム | 型 | NULL | 制約 | 説明 |
 |---|---|---|---|---|
 | id | uuid | NO | PK, DEFAULT gen_random_uuid() | |
-| request_id | uuid | NO | FK → approval_requests.id ON DELETE CASCADE | 承認リクエスト |
+| request_id | uuid | NO | FK → requests.id | 承認リクエスト |
 | step_order | integer | NO | | 実行順序 |
 | name | text | YES | | ステップ名 |
-| approver_role | user_role | YES | | 承認者ロール |
+| approver_role | text | NO | | 承認者ロール |
 | approver_id | uuid | YES | FK → users.id | 承認者ユーザー |
 | status | approval_step_status | NO | DEFAULT 'pending' | 状態 |
 | approved_by | uuid | YES | FK → users.id | 実際の承認者 |
 | comment | text | YES | | コメント |
+| organization_id | uuid | NO | FK → organizations.id | テナント |
 | deadline | timestamptz | YES | | 承認期限 |
 | approved_at | timestamptz | YES | | 承認日時 |
 | version | integer | NO | DEFAULT 1 | 楽観的ロック |
@@ -431,7 +434,7 @@ CHECK (
 | actor_id | uuid | NO | FK → users.id | 操作者 |
 | action | text | NO | | 操作種別 |
 | target_type | text | NO | | 対象種別 |
-| target_id | uuid | NO | | 対象 ID |
+| target_id | text | NO | | 対象 ID |
 | metadata | jsonb | YES | | 追加情報 |
 | created_at | timestamptz | NO | DEFAULT now() | |
 
@@ -564,7 +567,7 @@ organizations ─┬── users
                ├── contracts ──── invoices
                ├── approval_policies
                ├── approval_templates
-               ├── approval_requests ──── approval_steps
+               ├── requests ──── approval_steps
                ├── approval_delegations
                ├── audit_logs
                ├── revenue_targets
@@ -582,9 +585,9 @@ contracts ──→ deals
 contracts ──→ clients (非正規化)
 invoices ──→ contracts
 approval_policies ──→ approval_templates
-approval_requests ──→ approval_templates
-approval_requests ──→ approval_policies (システム連動の場合)
-deals ──→ approval_requests (見積承認, 任意)
+requests ──→ approval_templates
+requests ──→ approval_policies (システム連動の場合)
+deals ──→ requests (見積承認, 任意)
 action_items ──→ meetings (任意)
 action_items ──→ deals (任意)
 action_items ──→ inquiries (任意)
