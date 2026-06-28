@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "6e843a9f-4188-4741-a175-c4f409c0a47b",
   "createdAt": "2026-06-28T17:22:13.475Z",
-  "updatedAt": "2026-06-28T17:25:19.455Z",
+  "updatedAt": "2026-06-28T17:30:25.531Z",
   "request": {
     "title": "アカウント設定（プロフィール編集・パスワード変更）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "design",
+  "step": "spec-review",
   "status": "running",
   "branch": "feat/account-settings-6e843a9f",
   "error": null,
@@ -34,9 +34,10 @@
     }
   ],
   "_journal": {
-    "historyCount": 5,
+    "historyCount": 9,
     "stepCounts": {
-      "request-review": 1
+      "request-review": 1,
+      "design": 1
     }
   }
 }
