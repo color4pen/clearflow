@@ -88,6 +88,7 @@ text 型で管理する値（pgEnum にしない）:
 | email | text | NO | UNIQUE | メールアドレス |
 | password_hash | text | NO | | パスワードハッシュ |
 | role | user_role | NO | DEFAULT 'member' | ロール |
+| notifications_last_seen_at | timestamptz | YES | | 通知を最後に確認した時刻（未読判定の基準） |
 | created_at | timestamptz | NO | DEFAULT now() | |
 
 ---
