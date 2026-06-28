@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "7d6cd6da-e061-475b-a7e8-fe892d4837f0",
   "createdAt": "2026-06-28T15:08:13.043Z",
-  "updatedAt": "2026-06-28T15:42:28.666Z",
+  "updatedAt": "2026-06-28T15:45:50.766Z",
   "request": {
     "title": "顧客担当者（clientContact）のテナント分離を repository で強制する",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "conformance",
+  "step": "adr-gen",
   "status": "running",
   "branch": "change/client-contact-tenant-isolation-7d6cd6da",
   "error": null,
@@ -48,7 +48,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 40,
+    "historyCount": 44,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -59,7 +59,8 @@
       "code-review": 1,
       "domain-invariants": 1,
       "custom-reviewers": 1,
-      "regression-gate": 1
+      "regression-gate": 1,
+      "conformance": 1
     }
   }
 }
