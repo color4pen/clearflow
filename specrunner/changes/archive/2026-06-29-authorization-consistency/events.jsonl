@@ -71,3 +71,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/authorization-consistency/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-28T15:39:41.816Z","endedAt":"2026-06-28T15:39:43.712Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-28T15:39:43.712Z","outputs":[{"path":"specrunner/changes/authorization-consistency/pr-create-result.md","hash":"sha256:05135790e216fd7303955b38d37fc5013fa27d04d3ab2d84c0983fdd7ff6d72f"}],"inputs":[{"path":"change/authorization-consistency-362f7e21","hash":null}]}
 {"type":"transition","ts":"2026-06-28T15:39:43.720Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-28T15:49:36.869Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
