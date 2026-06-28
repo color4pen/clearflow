@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "362f7e21-c161-4959-8ed0-1445fc204fc5",
   "createdAt": "2026-06-28T15:11:04.764Z",
-  "updatedAt": "2026-06-28T15:36:20.026Z",
+  "updatedAt": "2026-06-28T15:39:17.403Z",
   "request": {
     "title": "認可の一貫性とロックアウト防止",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "conformance",
+  "step": "adr-gen",
   "status": "running",
   "branch": "change/authorization-consistency-362f7e21",
   "error": null,
@@ -48,7 +48,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 40,
+    "historyCount": 44,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -59,7 +59,8 @@
       "code-review": 1,
       "domain-invariants": 1,
       "custom-reviewers": 1,
-      "regression-gate": 1
+      "regression-gate": 1,
+      "conformance": 1
     }
   }
 }
