@@ -50,7 +50,7 @@ export default async function DealDetailPage({
   const { logs: activities, targetInfoMap } = activityResult;
 
   const client = await getClient(deal.clientId, organizationId);
-  const clientContacts = await listClientContacts(deal.clientId);
+  const clientContacts = await listClientContacts(deal.clientId, organizationId);
 
   const userMap: Record<string, string> = Object.fromEntries(
     users.map((u) => [u.id, u.name])

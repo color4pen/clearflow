@@ -19,7 +19,7 @@ export async function deleteClientContact(data: {
       return { ok: false, reason: "顧客が見つかりません" };
     }
 
-    const deleted = await clientRepository.deleteContact(data.contactId, data.clientId);
+    const deleted = await clientRepository.deleteContact(data.contactId, data.clientId, data.organizationId);
     if (!deleted) {
       return { ok: false, reason: "担当者が見つかりません" };
     }
