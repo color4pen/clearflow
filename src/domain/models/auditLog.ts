@@ -47,7 +47,8 @@ export type AuditAction =
   | "client_contact.create"
   | "client_contact.delete"
   | "user.create"
-  | "user.updateRole";
+  | "user.updateRole"
+  | "organization.update";
 
 export type AuditTargetType =
   | "action_item"
@@ -61,6 +62,7 @@ export type AuditTargetType =
   | "inquiry"
   | "invoice"
   | "meeting"
+  | "organization"
   | "request"
   | "revenue_target"
   | "template"

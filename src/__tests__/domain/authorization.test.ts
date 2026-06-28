@@ -437,6 +437,15 @@ describe("canPerform - アクションアイテム (actionItem)", () => {
   });
 });
 
+describe("canPerform - 組織設定 updateOrganization", () => {
+  it("admin のみ updateOrganization が許可される", () => {
+    expect(canPerform("admin", "organization", "updateOrganization")).toBe(true);
+    expect(canPerform("manager", "organization", "updateOrganization")).toBe(false);
+    expect(canPerform("finance", "organization", "updateOrganization")).toBe(false);
+    expect(canPerform("member", "organization", "updateOrganization")).toBe(false);
+  });
+});
+
 describe("canPerform - deny-by-default", () => {
   it("未定義の操作は false を返す", () => {
     expect(canPerform("admin", "inquiry", "unknownOp")).toBe(false);
