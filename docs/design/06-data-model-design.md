@@ -445,6 +445,20 @@ CHECK (
 | delivered_at | timestamptz | YES | | 配信完了日時 |
 | created_at | timestamptz | NO | DEFAULT now() | |
 
+#### watches
+
+ユーザーが案件を購読（ウォッチ）し、その案件配下の更新を通知として受け取るための登録。
+
+| カラム | 型 | NULL | 制約 | 説明 |
+|---|---|---|---|---|
+| id | uuid | NO | PK, DEFAULT gen_random_uuid() | |
+| user_id | uuid | NO | FK → users.id | 購読するユーザー |
+| deal_id | uuid | NO | FK → deals.id | 対象の案件 |
+| organization_id | uuid | NO | FK → organizations.id | テナント |
+| created_at | timestamptz | NO | DEFAULT now() | |
+
+**制約**: `(user_id, deal_id)` UNIQUE（同一ユーザーの同一案件への重複ウォッチを防ぐ）
+
 ## 5. ER 図（概要）
 
 ```
@@ -461,7 +475,8 @@ organizations ─┬── users
                ├── approval_delegations
                ├── audit_logs
                ├── revenue_targets
-               └── webhook_endpoints ──── webhook_deliveries
+               ├── webhook_endpoints ──── webhook_deliveries
+               └── watches
 
 inquiries ──→ clients (任意)
 deals ──→ clients (必須)
@@ -481,4 +496,6 @@ action_items ──→ deals (任意)
 action_items ──→ inquiries (任意)
 action_items ──→ users (担当者, 任意)
 action_items ──→ users (作成者, 必須)
+watches ──→ users
+watches ──→ deals
 ```
