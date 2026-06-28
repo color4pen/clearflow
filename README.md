@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Clearflow
 
-## Getting Started
+受託開発企業向けの案件管理 SaaS。引合の受付から案件化・契約・請求・売上管理までの営業プロセスと、業務に横断的に挟まる承認ワークフローを管理する。マルチテナント対応。
 
-First, run the development server:
+SpecRunner による AI 駆動開発のショーケースプロジェクト。
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 技術スタック
+
+- **ランタイム**: Bun
+- **フレームワーク**: Next.js 16 (App Router / RSC / Server Actions)
+- **言語**: TypeScript (strict)
+- **CSS**: Tailwind CSS 4
+- **ORM**: Drizzle ORM
+- **DB**: PostgreSQL
+- **認証**: Auth.js v5
+
+## アーキテクチャ
+
+レイヤードアーキテクチャ。依存方向は上から下への一方向。
+
+```
+src/
+  app/actions/                 — Server Actions: 入力検証・認証・エラー変換・ユースケース呼び出し
+  app/(dashboard)/             — ダッシュボード配下の画面（UI）
+  application/usecases/         — オーケストレーション（repository と domain の協調、トランザクション境界）。1 ユースケース 1 関数
+  application/services/         — 複数ユースケースで共有するアプリケーションサービス（監査記録・検証など）
+  domain/models/               — 型定義・状態遷移ルール・値オブジェクト（副作用なし）
+  domain/services/             — 複数 model にまたがる純粋なビジネスルール
+  infrastructure/repositories/ — Drizzle 経由の DB 操作
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- すべてのテーブル・リポジトリ操作は `organizationId` でテナント分離する。
+- ドメイン層は永続化を知らない（repository を呼ばない）。usecase が domain と infrastructure を協調させる。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## セットアップ
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+前提: [Bun](https://bun.sh) と Docker（PostgreSQL 用）。
 
-## Learn More
+1. 依存をインストール
+   ```bash
+   bun install
+   ```
+2. 環境変数を用意（`.env.example` をコピー）
+   ```bash
+   cp .env.example .env.local
+   ```
+   `AUTH_SECRET` を生成して設定する。その他の変数は `.env.example` のコメントを参照。
+   ```bash
+   bunx auth secret
+   ```
+3. PostgreSQL を起動
+   ```bash
+   docker compose up -d
+   ```
+4. スキーマを適用
+   ```bash
+   bun run db:migrate
+   ```
+5. 開発用の初期データを投入（任意。**既存データを削除して再投入する**ため開発環境のみで使う）
+   ```bash
+   bun run db:seed
+   ```
+6. 開発サーバーを起動して http://localhost:3000 を開く
+   ```bash
+   bun dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+シード投入後は次のアカウントでログインできる（パスワードはいずれも `password123`）。
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| メール | ロール |
+|---|---|
+| admin@example.com | admin |
+| manager@example.com | manager |
+| member@example.com | member |
+| finance@example.com | finance |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## コマンド
 
-## Deploy on Vercel
+```bash
+bun dev             # 開発サーバー起動
+bun run build       # プロダクションビルド
+bun run lint        # ESLint
+bun run typecheck   # 型チェック (tsc --noEmit)
+bun test            # テスト
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+bun run db:generate # スキーマからマイグレーション生成
+bun run db:migrate  # マイグレーション適用
+bun run db:seed     # 初期データ投入（既存データを削除して再投入）
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ドキュメント
+
+- `docs/design/` — ドメイン設計・データモデル・承認/認可設計・UX ジャーニー・ユビキタス言語辞書・画面仕様（`screens/`）
+- `docs/usecases/` — ユーザーゴール単位のユースケース
+- `specrunner/adr/` — アーキテクチャ決定記録（ADR）
