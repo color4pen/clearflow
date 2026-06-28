@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "951f0568-6630-4f90-8268-d3ef42295bb8",
   "createdAt": "2026-06-28T16:45:34.704Z",
-  "updatedAt": "2026-06-28T16:52:07.797Z",
+  "updatedAt": "2026-06-28T16:57:05.169Z",
   "request": {
     "title": "組織設定（組織名の編集）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "spec-review",
+  "step": "test-case-gen",
   "status": "running",
   "branch": "feat/organization-settings-951f0568",
   "error": null,
@@ -34,10 +34,11 @@
     }
   ],
   "_journal": {
-    "historyCount": 9,
+    "historyCount": 13,
     "stepCounts": {
       "request-review": 1,
-      "design": 1
+      "design": 1,
+      "spec-review": 1
     }
   }
 }
