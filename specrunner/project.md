@@ -8,9 +8,9 @@
 - **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript (strict)
 - **CSS**: Tailwind CSS 4
-- **ORM**: Drizzle ORM (予定)
-- **DB**: PostgreSQL (予定)
-- **Auth**: Auth.js v5 (予定)
+- **ORM**: Drizzle ORM
+- **DB**: PostgreSQL
+- **Auth**: Auth.js v5
 
 ## Architecture
 
@@ -21,6 +21,7 @@ src/
   app/actions/           — Server Actions: validation, auth, error変換, usecase呼び出し
   app/(routes)/          — Pages (UI のみ)
   application/usecases/  — オーケストレーション: repository + domain service の協調, トランザクション境界
+  application/services/  — 複数ユースケースで共有するアプリケーションサービス（監査記録・検証など）
   domain/models/         — 型定義, 状態遷移ルール, 値オブジェクト
   domain/services/       — 複数 model にまたがる純粋なビジネスルール
   infrastructure/repositories/ — Drizzle 経由の DB 操作
@@ -34,9 +35,13 @@ src/
 ## Commands
 
 ```bash
-bun dev          # 開発サーバー起動
-bun run build    # プロダクションビルド
-bun run lint     # ESLint 実行
+bun dev             # 開発サーバー起動
+bun run build       # プロダクションビルド
+bun run lint        # ESLint 実行
+bun run typecheck   # 型チェック (tsc --noEmit)
+bun test            # テスト実行
+bun run db:migrate  # マイグレーション適用
+bun run db:generate # スキーマからマイグレーション生成
 ```
 
 ## Conventions
