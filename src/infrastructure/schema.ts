@@ -163,6 +163,7 @@ export const requests = pgTable("requests", {
     "requests_origin_check",
     sql`(${table.originType} = 'manual' AND ${table.originPolicyId} IS NULL AND ${table.originTriggerAction} IS NULL AND ${table.originTriggerEntityId} IS NULL) OR (${table.originType} = 'system' AND ${table.originPolicyId} IS NOT NULL AND ${table.originTriggerAction} IS NOT NULL AND ${table.originTriggerEntityId} IS NOT NULL)`
   ),
+  index("requests_org_trigger_entity_id_idx").on(table.organizationId, table.originTriggerEntityId),
 ]);
 
 // Audit logs table
@@ -207,7 +208,9 @@ export const approvalSteps = pgTable("approval_steps", {
   deadline: timestamp("deadline"),
   name: text("name"),
   approverId: uuid("approver_id").references(() => users.id),
-});
+}, (table) => [
+  index("approval_steps_request_id_idx").on(table.requestId),
+]);
 
 // Idempotency keys table
 export const idempotencyKeys = pgTable("idempotency_keys", {
@@ -263,7 +266,9 @@ export const webhookDeliveries = pgTable("webhook_deliveries", {
   lastAttemptAt: timestamp("last_attempt_at"),
   nextRetryAt: timestamp("next_retry_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("webhook_deliveries_endpoint_id_idx").on(table.endpointId),
+]);
 
 // Approval delegations table
 export const approvalDelegations = pgTable(
@@ -307,7 +312,9 @@ export const clients = pgTable("clients", {
   notes: text("notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("clients_org_created_at_idx").on(table.organizationId, table.createdAt),
+]);
 
 // Client contacts table (顧客担当者)
 export const clientContacts = pgTable("client_contacts", {
@@ -322,7 +329,9 @@ export const clientContacts = pgTable("client_contacts", {
   phone: text("phone"),
   isPrimary: boolean("is_primary").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+}, (table) => [
+  index("client_contacts_client_id_idx").on(table.clientId),
+]);
 
 // Inquiries table (引き合い)
 export const inquiries = pgTable("inquiries", {
@@ -344,7 +353,9 @@ export const inquiries = pgTable("inquiries", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   // 楽観ロック: converted 遷移で重複 Deal 作成を防ぐ
   version: integer("version").notNull().default(1),
-});
+}, (table) => [
+  index("inquiries_org_created_at_idx").on(table.organizationId, table.createdAt),
+]);
 
 // Meetings table (商談記録)
 export const meetings = pgTable(
@@ -377,6 +388,8 @@ export const meetings = pgTable(
       "meetings_deal_or_inquiry_check",
       sql`${table.dealId} IS NOT NULL OR ${table.inquiryId} IS NOT NULL`
     ),
+    index("meetings_org_deal_id_idx").on(table.organizationId, table.dealId),
+    index("meetings_org_inquiry_id_idx").on(table.organizationId, table.inquiryId),
   ]
 );
 
@@ -411,7 +424,9 @@ export const deals = pgTable("deals", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   // 楽観ロック: フェーズ遷移で重複更新を防ぐ
   version: integer("version").notNull().default(1),
-});
+}, (table) => [
+  index("deals_org_created_at_idx").on(table.organizationId, table.createdAt),
+]);
 
 // Deal contacts table (案件ごとの顧客担当者と役割)
 export const dealContacts = pgTable(
@@ -460,6 +475,10 @@ export const contracts = pgTable(
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
     version: integer("version").notNull().default(1),
   },
+  (table) => [
+    index("contracts_org_deal_id_idx").on(table.organizationId, table.dealId),
+    index("contracts_org_client_id_idx").on(table.organizationId, table.clientId),
+  ]
 );
 
 // Invoices table (請求)
@@ -482,7 +501,9 @@ export const invoices = pgTable("invoices", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   version: integer("version").notNull().default(1),
-});
+}, (table) => [
+  index("invoices_org_contract_id_idx").on(table.organizationId, table.contractId),
+]);
 
 // Revenue targets table (売上目標)
 export const revenueTargets = pgTable("revenue_targets", {
@@ -496,7 +517,9 @@ export const revenueTargets = pgTable("revenue_targets", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   version: integer("version").notNull().default(1),
-});
+}, (table) => [
+  index("revenue_targets_org_period_start_idx").on(table.organizationId, table.periodStart),
+]);
 
 // Action items table (アクションアイテム)
 export const actionItems = pgTable(

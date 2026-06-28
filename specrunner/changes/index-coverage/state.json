@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "85f2c5e3-11a9-4a4e-b72a-95c83ee7dcf5",
   "createdAt": "2026-06-28T18:04:24.617Z",
-  "updatedAt": "2026-06-28T18:13:44.063Z",
+  "updatedAt": "2026-06-28T18:16:07.027Z",
   "request": {
     "title": "主要テーブルのインデックス整備",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "change/index-coverage-85f2c5e3",
   "error": null,
@@ -34,11 +34,12 @@
     }
   ],
   "_journal": {
-    "historyCount": 13,
+    "historyCount": 16,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1
+      "spec-review": 1,
+      "test-case-gen": 1
     }
   }
 }
