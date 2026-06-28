@@ -101,3 +101,7 @@ export { getNotifications } from "./getNotifications";
 export { markNotificationsAsRead } from "./markNotificationsAsRead";
 export { updateOrganization } from "./updateOrganization";
 export type { UpdateOrganizationResult } from "./updateOrganization";
+export { updateOwnProfile } from "./updateOwnProfile";
+export type { UpdateOwnProfileResult } from "./updateOwnProfile";
+export { changeOwnPassword } from "./changeOwnPassword";
+export type { ChangeOwnPasswordResult } from "./changeOwnPassword";

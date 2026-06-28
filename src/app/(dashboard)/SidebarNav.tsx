@@ -19,6 +19,7 @@ const navItems: NavItem[] = [
   { href: "/contracts", label: "契約" },
   { href: "/revenue", label: "売上" },
   { href: "/requests", label: "申請一覧", hasBadge: true },
+  { href: "/account", label: "アカウント" },
   { href: "/settings/templates", label: "設定", adminOnly: true },
   { href: "/settings/audit-logs", label: "監査ログ", adminOnly: true },
 ];

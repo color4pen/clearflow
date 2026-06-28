@@ -48,6 +48,7 @@ export type AuditAction =
   | "client_contact.delete"
   | "user.create"
   | "user.updateRole"
+  | "user.updatePassword"
   | "organization.update";
 
 export type AuditTargetType =
