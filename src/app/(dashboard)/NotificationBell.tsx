@@ -1,5 +1,6 @@
 import { auth } from "@/infrastructure/auth";
 import { getNotifications, listOrganizationUsers } from "@/application/usecases";
+import { userRepository } from "@/infrastructure/repositories";
 import { NotificationPanel } from "./NotificationPanel";
 
 export async function NotificationBell() {
@@ -8,10 +9,12 @@ export async function NotificationBell() {
 
   const { userId, organizationId } = { userId: session.user.id, organizationId: session.user.organizationId };
 
-  // notificationsLastSeenAt はセッションには含まれないため、userRepository 経由で取得する必要があるが、
-  // 既存の listOrganizationUsers からユーザー情報を取得してキャッシュを活用する
-  const users = await listOrganizationUsers({ organizationId });
-  const currentUser = users.find((u) => u.id === userId);
+  // current user の notificationsLastSeenAt は findById で直接取得する
+  // actorNames マップ用には引き続き listOrganizationUsers を使用する
+  const [currentUser, orgUsers] = await Promise.all([
+    userRepository.findById(userId, organizationId),
+    listOrganizationUsers({ organizationId }),
+  ]);
   const notificationsLastSeenAt = currentUser?.notificationsLastSeenAt ?? null;
 
   const { notifications, unreadCount } = await getNotifications({
@@ -21,7 +24,7 @@ export async function NotificationBell() {
   });
 
   const actorNames: Record<string, string> = Object.fromEntries(
-    users.map((u) => [u.id, u.name])
+    orgUsers.map((u) => [u.id, u.name])
   );
 
   return (
