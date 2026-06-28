@@ -363,6 +363,13 @@ describe("canPerform - 組織管理 (organization)", () => {
     expect(canPerform("finance", "organization", "manageWebhooks")).toBe(false);
     expect(canPerform("member", "organization", "manageWebhooks")).toBe(false);
   });
+
+  it("createUser: admin のみ許可される", () => {
+    expect(canPerform("admin", "organization", "createUser")).toBe(true);
+    expect(canPerform("manager", "organization", "createUser")).toBe(false);
+    expect(canPerform("finance", "organization", "createUser")).toBe(false);
+    expect(canPerform("member", "organization", "createUser")).toBe(false);
+  });
 });
 
 describe("canPerform - アクションアイテム (actionItem)", () => {

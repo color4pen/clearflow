@@ -107,6 +107,58 @@ describe("updateUserRole 最後の admin ガード", () => {
 });
 
 // ---------------------------------------------------------------------------
+// createUser usecase
+// ---------------------------------------------------------------------------
+
+describe("createUser usecase", () => {
+  it("createUser usecase ファイルが存在する", async () => {
+    const src = await readSrc("application/usecases/createUser.ts");
+    expect(src).toContain("createUser");
+  });
+
+  it("findByEmailForAuth による email 重複チェックがある", async () => {
+    const src = await readSrc("application/usecases/createUser.ts");
+    expect(src).toContain("findByEmailForAuth");
+  });
+
+  it("email 重複時のエラーメッセージが含まれる", async () => {
+    const src = await readSrc("application/usecases/createUser.ts");
+    expect(src).toContain("このメールアドレスは既に使用されています");
+  });
+
+  it("bcrypt.hash によるパスワードハッシュがある（salt round 12）", async () => {
+    const src = await readSrc("application/usecases/createUser.ts");
+    expect(src).toContain("bcrypt.hash");
+    expect(src).toContain("12");
+  });
+
+  it("db.transaction でトランザクションが使われている", async () => {
+    const src = await readSrc("application/usecases/createUser.ts");
+    expect(src).toContain("db.transaction");
+  });
+
+  it("recordAudit がトランザクション内で呼び出される", async () => {
+    const src = await readSrc("application/usecases/createUser.ts");
+    expect(src).toContain("recordAudit");
+    const txIdx = src.indexOf("db.transaction");
+    const auditIdx = src.indexOf("await recordAudit(");
+    expect(txIdx).toBeGreaterThan(-1);
+    expect(auditIdx).toBeGreaterThan(-1);
+    expect(txIdx).toBeLessThan(auditIdx);
+  });
+
+  it('action が "user.create" である', async () => {
+    const src = await readSrc("application/usecases/createUser.ts");
+    expect(src).toContain('"user.create"');
+  });
+
+  it("index.ts に createUser が export されている", async () => {
+    const src = await readSrc("application/usecases/index.ts");
+    expect(src).toContain('createUser');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Server Actions admin guard
 // ---------------------------------------------------------------------------
 

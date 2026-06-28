@@ -116,6 +116,7 @@ const PERMISSION_MATRIX: PermissionMatrix = {
     listUsers: ADMIN_MANAGER,
     viewAuditLog: ADMIN_MANAGER,
     changeRole: ADMIN_ONLY,
+    createUser: ADMIN_ONLY,
     exportAuditLog: ADMIN_ONLY,
     manageWebhooks: ADMIN_ONLY,
   },

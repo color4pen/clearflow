@@ -104,6 +104,38 @@ export async function findById(
   };
 }
 
+export async function create(
+  data: {
+    organizationId: string;
+    email: string;
+    name: string;
+    role: Role;
+    hashedPassword: string;
+  },
+  tx?: Transaction
+): Promise<User> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
+    .insert(users)
+    .values({
+      organizationId: data.organizationId,
+      email: data.email,
+      name: data.name,
+      role: data.role,
+      hashedPassword: data.hashedPassword,
+    })
+    .returning({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      organizationId: users.organizationId,
+      role: users.role,
+      notificationsLastSeenAt: users.notificationsLastSeenAt,
+      createdAt: users.createdAt,
+    });
+  return result[0];
+}
+
 export async function updateNotificationsLastSeenAt(
   userId: string,
   organizationId: string,
