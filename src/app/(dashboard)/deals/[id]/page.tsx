@@ -97,54 +97,6 @@ export default async function DealDetailPage({
             )}
           </SectionCard>
 
-          {/* 関連情報 */}
-          <SectionCard className="p-3">
-            <h2 className="text-xs font-bold text-text mb-2">関連情報</h2>
-            <dl className="text-xs space-y-1">
-              {deal.inquiryId && (
-                <div className="flex gap-2">
-                  <dt className="text-text-muted w-24 shrink-0">引き合い</dt>
-                  <dd className="text-text px-2 py-1">
-                    <Link
-                      href={`/inquiries/${deal.inquiryId}`}
-                      className="text-primary underline text-xs"
-                    >
-                      {inquiry?.title ?? deal.inquiryId}
-                    </Link>
-                  </dd>
-                </div>
-              )}
-              <div className="flex gap-2">
-                <dt className="text-text-muted w-24 shrink-0">顧客</dt>
-                <dd className="text-text px-2 py-1">
-                  {client ? (
-                    <Link
-                      href={`/clients/${client.id}`}
-                      className="text-primary underline text-xs"
-                    >
-                      {client.name}
-                    </Link>
-                  ) : (
-                    "-"
-                  )}
-                </dd>
-              </div>
-              {deal.estimateRequestId && (
-                <div className="flex gap-2">
-                  <dt className="text-text-muted w-24 shrink-0">見積承認</dt>
-                  <dd className="text-text px-2 py-1">
-                    <Link
-                      href={`/requests/${deal.estimateRequestId}`}
-                      className="text-primary underline text-xs"
-                    >
-                      承認リクエストを表示
-                    </Link>
-                  </dd>
-                </div>
-              )}
-            </dl>
-          </SectionCard>
-
           {/* フェーズ変更 */}
           {canChangePhase && deal.phase !== "won" && deal.phase !== "lost" && (
             <SectionCard className="p-3">
@@ -210,6 +162,27 @@ export default async function DealDetailPage({
 
         {/* 右カラム */}
         <div className="space-y-3">
+          {/* 担当者 */}
+          <SectionCard className="p-3">
+            <h2 className="text-xs font-bold text-text mb-2">担当者</h2>
+            <DealContactsSection
+              dealId={deal.id}
+              dealContacts={dealContacts}
+              clientContacts={clientContacts}
+              clientId={deal.clientId}
+            />
+          </SectionCard>
+
+          {/* アクションアイテム */}
+          <SectionCard className="p-3">
+            <DealActionItemsSection
+              actionItems={actionItemsResult.ok ? actionItemsResult.actionItems : []}
+              dealId={deal.id}
+              orgUsers={users.map((u) => ({ id: u.id, name: u.name }))}
+              editable={canChangePhase}
+            />
+          </SectionCard>
+
           {/* 契約 */}
           <SectionCard className="p-3">
             <div className="flex items-center justify-between bg-[#eef7f1] px-3 py-2 -mx-3 -mt-3 mb-2 rounded-t">
@@ -270,39 +243,66 @@ export default async function DealDetailPage({
             )}
           </SectionCard>
 
-          {/* 担当者 */}
+          {/* 関連情報 */}
           <SectionCard className="p-3">
-            <h2 className="text-xs font-bold text-text mb-2">担当者</h2>
-            <DealContactsSection
-              dealId={deal.id}
-              dealContacts={dealContacts}
-              clientContacts={clientContacts}
-              clientId={deal.clientId}
-            />
+            <h2 className="text-xs font-bold text-text mb-2">関連情報</h2>
+            <dl className="text-xs space-y-1">
+              {deal.inquiryId && (
+                <div className="flex gap-2">
+                  <dt className="text-text-muted w-24 shrink-0">引き合い</dt>
+                  <dd className="text-text px-2 py-1">
+                    <Link
+                      href={`/inquiries/${deal.inquiryId}`}
+                      className="text-primary underline text-xs"
+                    >
+                      {inquiry?.title ?? deal.inquiryId}
+                    </Link>
+                  </dd>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <dt className="text-text-muted w-24 shrink-0">顧客</dt>
+                <dd className="text-text px-2 py-1">
+                  {client ? (
+                    <Link
+                      href={`/clients/${client.id}`}
+                      className="text-primary underline text-xs"
+                    >
+                      {client.name}
+                    </Link>
+                  ) : (
+                    "-"
+                  )}
+                </dd>
+              </div>
+              {deal.estimateRequestId && (
+                <div className="flex gap-2">
+                  <dt className="text-text-muted w-24 shrink-0">見積承認</dt>
+                  <dd className="text-text px-2 py-1">
+                    <Link
+                      href={`/requests/${deal.estimateRequestId}`}
+                      className="text-primary underline text-xs"
+                    >
+                      承認リクエストを表示
+                    </Link>
+                  </dd>
+                </div>
+              )}
+            </dl>
           </SectionCard>
-
-          {/* アクションアイテム */}
-          <SectionCard className="p-3">
-            <DealActionItemsSection
-              actionItems={actionItemsResult.ok ? actionItemsResult.actionItems : []}
-              dealId={deal.id}
-              orgUsers={users.map((u) => ({ id: u.id, name: u.name }))}
-              editable={canChangePhase}
-            />
-          </SectionCard>
-
-          {/* アクティビティ */}
-          {activityEnabled && (
-            <SectionCard className="p-3">
-              <h2 className="text-xs font-bold text-text mb-2">アクティビティ</h2>
-              <DealActivitySection activities={activities} userMap={userMap} />
-            </SectionCard>
-          )}
         </div>
       </div>
 
       {/* 備考（グリッド外） */}
       <DealNotesSection dealId={deal.id} notes={deal.notes} editable={canChangePhase} />
+
+      {/* アクティビティ（グリッド外・全幅・最下部） */}
+      {activityEnabled && (
+        <SectionCard className="p-3">
+          <h2 className="text-xs font-bold text-text mb-2">アクティビティ</h2>
+          <DealActivitySection activities={activities} userMap={userMap} />
+        </SectionCard>
+      )}
     </div>
   );
 }
