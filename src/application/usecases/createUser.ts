@@ -55,16 +55,10 @@ export async function createUser(data: {
     return { ok: true, user: createdUser! };
   } catch (err) {
     // PostgreSQL UNIQUE constraint violation
-    if (
-      err instanceof Error &&
-      "code" in err &&
-      (err as NodeJS.ErrnoException & { code: string }).code === "23505"
-    ) {
+    if ((err as { code?: string }).code === "23505") {
       return { ok: false, reason: "このメールアドレスは既に使用されています" };
     }
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "ユーザーの作成に失敗しました",
-    };
+    console.error("[createUser] unexpected error:", err);
+    return { ok: false, reason: "ユーザーの作成に失敗しました" };
   }
 }
