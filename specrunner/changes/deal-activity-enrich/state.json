@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "541040f4-bdba-4ea0-8535-3a281b546155",
   "createdAt": "2026-06-28T02:25:32.518Z",
-  "updatedAt": "2026-06-28T02:47:02.721Z",
+  "updatedAt": "2026-06-28T02:51:05.846Z",
   "request": {
     "title": "案件アクティビティに対象エンティティ名とリンクを表示",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-review",
+  "step": "code-fixer",
   "status": "running",
   "branch": "change/deal-activity-enrich-541040f4",
   "error": null,
@@ -34,14 +34,15 @@
     }
   ],
   "_journal": {
-    "historyCount": 25,
+    "historyCount": 29,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
       "spec-review": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 1,
+      "code-review": 1
     }
   }
 }
