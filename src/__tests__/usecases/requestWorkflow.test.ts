@@ -183,34 +183,46 @@ describe("Authorization in Server Actions", () => {
    * TC-018: manager/finance が申請を承認できる
    * TC-019: member が申請を承認しようとすると拒否される
    */
-  it("TC-018 TC-019: approveRequestAction rejects member role", async () => {
+  it("TC-018 TC-019: approveRequestAction rejects member role via canPerform", async () => {
     const src = await readSrc("app/actions/requests.ts");
-    // approveRequestAction must check role before calling usecase
-    expect(src).toContain('session.user.role === "member"');
+    // approveRequestAction must check role via canPerform before calling usecase
+    const fnStart = src.indexOf("export async function approveRequestAction");
+    expect(fnStart).toBeGreaterThan(-1);
+    const fnEnd = src.indexOf("export async function", fnStart + 1);
+    const fnBody = fnEnd > -1 ? src.slice(fnStart, fnEnd) : src.slice(fnStart);
+    expect(fnBody).toContain('canPerform');
+    expect(fnBody).toContain('"approval"');
+    expect(fnBody).toContain('"approve"');
   });
 
   /**
    * TC-020: member が申請を却下しようとすると拒否される
    */
-  it("TC-020: rejectRequestAction rejects member role", async () => {
+  it("TC-020: rejectRequestAction rejects member role via canPerform", async () => {
     const src = await readSrc("app/actions/requests.ts");
-    expect(src).toContain('session.user.role === "member"');
-    // rejectRequest usecase should only be called after the role check
-    const roleCheckIdx = src.lastIndexOf('role === "member"');
-    const rejectIdx = src.indexOf("rejectRequest(");
-    expect(roleCheckIdx).toBeLessThan(rejectIdx);
+    const fnStart = src.indexOf("export async function rejectRequestAction");
+    expect(fnStart).toBeGreaterThan(-1);
+    const fnEnd = src.indexOf("export async function", fnStart + 1);
+    const fnBody = fnEnd > -1 ? src.slice(fnStart, fnEnd) : src.slice(fnStart);
+    expect(fnBody).toContain('canPerform');
+    expect(fnBody).toContain('"approval"');
+    expect(fnBody).toContain('"reject"');
+    // canPerform check must appear before rejectRequest usecase call
+    const canPerformIdx = fnStart + fnBody.indexOf('canPerform');
+    const rejectIdx = src.indexOf("rejectRequest(", canPerformIdx);
+    expect(canPerformIdx).toBeLessThan(rejectIdx);
   });
 
   /**
-   * TC-023: approveRequestAction と rejectRequestAction で member ロールの拒否チェックが行われる
+   * TC-023: approveRequestAction と rejectRequestAction で canPerform によるロールチェックが行われる
    */
-  it("TC-023: member role rejection check present in approveRequestAction and rejectRequestAction", async () => {
+  it("TC-023: canPerform role check present in approveRequestAction and rejectRequestAction", async () => {
     const src = await readSrc("app/actions/requests.ts");
     expect(src).toContain("approveRequestAction");
     expect(src).toContain("rejectRequestAction");
-    // Both actions reference the member role check
-    const memberCheckCount = (src.match(/role === "member"/g) || []).length;
-    expect(memberCheckCount).toBeGreaterThanOrEqual(2);
+    // Both actions use canPerform for role authorization
+    expect(src).toContain('canPerform');
+    expect(src).toContain('@/domain/authorization');
   });
 });
 
@@ -403,12 +415,14 @@ describe("bulkApproveAction Server Action", () => {
     expect(bulkBody).toContain("await auth()");
   });
 
-  it("bulkApproveAction checks for member role", async () => {
+  it("bulkApproveAction checks role via canPerform", async () => {
     const src = await readSrc("app/actions/requests.ts");
     const bulkIdx = src.indexOf("async function bulkApproveAction");
     expect(bulkIdx).toBeGreaterThan(-1);
     const bulkBody = src.slice(bulkIdx);
-    expect(bulkBody).toContain('role === "member"');
+    expect(bulkBody).toContain('canPerform');
+    expect(bulkBody).toContain('"approval"');
+    expect(bulkBody).toContain('"approve"');
   });
 
   it("requests.ts contains requestIds upper limit of 20", async () => {

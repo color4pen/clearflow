@@ -15,6 +15,7 @@ import {
 import { approvalTemplateRepository } from "@/infrastructure/repositories";
 import { idempotencyKeyRepository } from "@/infrastructure/repositories";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
+import { canPerform } from "@/domain/authorization";
 
 const createRequestSchema = z.object({
   title: z.string().min(1, "タイトルは必須です"),
@@ -213,7 +214,7 @@ export async function approveRequestAction(
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
   }
-  if (session.user.role === "member") {
+  if (!canPerform(session.user.role, "approval", "approve")) {
     return { success: false, message: "権限がありません" };
   }
 
@@ -283,7 +284,7 @@ export async function bulkApproveAction(
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
   }
-  if (session.user.role === "member") {
+  if (!canPerform(session.user.role, "approval", "approve")) {
     return { success: false, message: "権限がありません" };
   }
 
@@ -319,7 +320,7 @@ export async function rejectRequestAction(
   if (!session?.user?.id) {
     return { success: false, message: "認証が必要です" };
   }
-  if (session.user.role === "member") {
+  if (!canPerform(session.user.role, "approval", "reject")) {
     return { success: false, message: "権限がありません" };
   }
 

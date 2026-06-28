@@ -32,6 +32,17 @@ export async function updateUserRole(data: {
 
   const oldRole = currentUser.role;
 
+  // Last admin guard: prevent demoting the only remaining admin in the organization
+  if (currentUser.role === "admin" && data.newRole !== "admin") {
+    const orgUsers = await userRepository.findByOrganization(data.organizationId);
+    const otherAdmins = orgUsers.filter(
+      (u) => u.role === "admin" && u.id !== data.targetUserId
+    );
+    if (otherAdmins.length === 0) {
+      return { ok: false, reason: "組織に最低1人の管理者が必要です" };
+    }
+  }
+
   try {
     await db.transaction(async (tx) => {
       const updated = await userRepository.updateRole(

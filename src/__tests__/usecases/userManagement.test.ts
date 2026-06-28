@@ -72,6 +72,41 @@ describe("updateUserRole usecase", () => {
 });
 
 // ---------------------------------------------------------------------------
+// Last admin guard
+// ---------------------------------------------------------------------------
+
+describe("updateUserRole 最後の admin ガード", () => {
+  it("findByOrganization を使ってガードを実装している", async () => {
+    const src = await readSrc("application/usecases/updateUserRole.ts");
+    expect(src).toContain("findByOrganization");
+  });
+
+  it('"組織に最低1人の管理者が必要です" エラーメッセージが含まれる', async () => {
+    const src = await readSrc("application/usecases/updateUserRole.ts");
+    expect(src).toContain("組織に最低1人の管理者が必要です");
+  });
+
+  it("最後の admin ガードが currentUser.role === \"admin\" 条件でのみ実行される", async () => {
+    const src = await readSrc("application/usecases/updateUserRole.ts");
+    expect(src).toMatch(/currentUser\.role\s*===\s*["']admin["']/);
+  });
+
+  it("自己降格ガード \"自分自身のロールは変更できません\" が引き続き存在する", async () => {
+    const src = await readSrc("application/usecases/updateUserRole.ts");
+    expect(src).toContain("自分自身のロールは変更できません");
+  });
+
+  it("自己降格ガードが最後の admin ガードより先に評価される", async () => {
+    const src = await readSrc("application/usecases/updateUserRole.ts");
+    const selfGuardIdx = src.indexOf("自分自身のロールは変更できません");
+    const lastAdminIdx = src.indexOf("組織に最低1人の管理者が必要です");
+    expect(selfGuardIdx).toBeGreaterThan(-1);
+    expect(lastAdminIdx).toBeGreaterThan(-1);
+    expect(selfGuardIdx).toBeLessThan(lastAdminIdx);
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Server Actions admin guard
 // ---------------------------------------------------------------------------
 
