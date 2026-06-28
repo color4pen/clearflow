@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "6e843a9f-4188-4741-a175-c4f409c0a47b",
   "createdAt": "2026-06-28T17:22:13.475Z",
-  "updatedAt": "2026-06-28T17:50:08.308Z",
+  "updatedAt": "2026-06-28T17:52:37.896Z",
   "request": {
     "title": "アカウント設定（プロフィール編集・パスワード変更）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/account-settings-6e843a9f",
   "error": null,
@@ -33,8 +33,22 @@
       ]
     }
   ],
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "094eee9337ef21f6b763e12a4da01d265de4706c",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 30,
+    "historyCount": 35,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -42,7 +56,9 @@
       "test-case-gen": 1,
       "implementer": 1,
       "verification": 1,
-      "code-review": 1
+      "code-review": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
