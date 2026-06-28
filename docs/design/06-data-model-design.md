@@ -90,7 +90,9 @@ text 型で管理する値（pgEnum にしない）:
 | organization_id | uuid | NO | FK → organizations.id | |
 | name | text | NO | | ユーザー名 |
 | email | text | NO | UNIQUE | メールアドレス |
-| password_hash | text | NO | | パスワードハッシュ |
+| email_verified | timestamptz | YES | | メール確認日時（Auth.js 互換） |
+| image | text | YES | | プロフィール画像 URL（Auth.js 互換） |
+| hashed_password | text | NO | | パスワードハッシュ |
 | role | user_role | NO | DEFAULT 'member' | ロール |
 | notifications_last_seen_at | timestamptz | YES | | 通知を最後に確認した時刻（未読判定の基準） |
 | created_at | timestamptz | NO | DEFAULT now() | |
@@ -475,6 +477,81 @@ CHECK (
 
 **制約**: `(user_id, deal_id)` UNIQUE（同一ユーザーの同一案件への重複ウォッチを防ぐ）
 
+---
+
+### 4.8 認証・基盤
+
+認証（Auth.js アダプタ）と基盤機能（冪等性・レート制限）のテーブル。Auth.js アダプタ系とレート制限は framework・横断機能の都合上 `organization_id` を持たない（§2 方針の例外）。
+
+#### accounts
+
+Auth.js アダプタ用。外部プロバイダのアカウント連携を保持する。
+
+| カラム | 型 | NULL | 制約 | 説明 |
+|---|---|---|---|---|
+| user_id | uuid | NO | FK → users.id ON DELETE CASCADE | |
+| type | text | NO | | |
+| provider | text | NO | | プロバイダ |
+| provider_account_id | text | NO | | プロバイダ側アカウント ID |
+| refresh_token | text | YES | | |
+| access_token | text | YES | | |
+| expires_at | integer | YES | | |
+| token_type | text | YES | | |
+| scope | text | YES | | |
+| id_token | text | YES | | |
+| session_state | text | YES | | |
+
+**制約**: PRIMARY KEY `(provider, provider_account_id)`
+
+#### sessions
+
+Auth.js アダプタ用のセッション。
+
+| カラム | 型 | NULL | 制約 | 説明 |
+|---|---|---|---|---|
+| session_token | text | NO | PK | セッショントークン |
+| user_id | uuid | NO | FK → users.id ON DELETE CASCADE | |
+| expires | timestamptz | NO | | 有効期限 |
+
+#### verification_tokens
+
+Auth.js アダプタ用の検証トークン。
+
+| カラム | 型 | NULL | 制約 | 説明 |
+|---|---|---|---|---|
+| identifier | text | NO | | |
+| token | text | NO | | |
+| expires | timestamptz | NO | | 有効期限 |
+
+**制約**: PRIMARY KEY `(identifier, token)`
+
+#### idempotency_keys
+
+操作の冪等性を保証するための記録。
+
+| カラム | 型 | NULL | 制約 | 説明 |
+|---|---|---|---|---|
+| id | uuid | NO | PK, DEFAULT gen_random_uuid() | |
+| key | text | NO | | 冪等キー |
+| action | text | NO | | 対象アクション |
+| result | jsonb | NO | | 実行結果（再実行時に返す） |
+| organization_id | uuid | NO | FK → organizations.id | テナント |
+| created_at | timestamptz | NO | DEFAULT now() | |
+
+**制約**: `(key, organization_id)` UNIQUE
+
+#### rate_limit_records
+
+レート制限のカウンタ。
+
+| カラム | 型 | NULL | 制約 | 説明 |
+|---|---|---|---|---|
+| id | uuid | NO | PK, DEFAULT gen_random_uuid() | |
+| key | text | NO | UNIQUE | レート制限キー |
+| count | integer | NO | | カウント |
+| window_start | timestamptz | NO | | ウィンドウ開始時刻 |
+| created_at | timestamptz | NO | DEFAULT now() | |
+
 ## 5. ER 図（概要）
 
 ```
@@ -492,6 +569,7 @@ organizations ─┬── users
                ├── audit_logs
                ├── revenue_targets
                ├── webhook_endpoints ──── webhook_deliveries
+               ├── idempotency_keys
                └── watches
 
 inquiries ──→ clients (任意)
@@ -514,4 +592,8 @@ action_items ──→ users (担当者, 任意)
 action_items ──→ users (作成者, 必須)
 watches ──→ users
 watches ──→ deals
+accounts ──→ users (Auth.js アダプタ)
+sessions ──→ users (Auth.js アダプタ)
+idempotency_keys ──→ organizations
+verification_tokens / rate_limit_records は FK を持たない独立テーブル
 ```
