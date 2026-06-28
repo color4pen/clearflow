@@ -386,8 +386,10 @@ export const deals = pgTable("deals", {
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id),
+  // 1 引合 1 案件を DB レベルで担保（nullable のため直接作成案件は影響なし）
   inquiryId: uuid("inquiry_id")
-    .references(() => inquiries.id),
+    .references(() => inquiries.id)
+    .unique("deals_inquiry_id_unique"),
   clientId: uuid("client_id")
     .notNull()
     .references(() => clients.id),
