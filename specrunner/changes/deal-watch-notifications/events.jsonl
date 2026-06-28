@@ -65,3 +65,9 @@
 {"type":"transition","ts":"2026-06-28T08:06:59.786Z","step":"regression-gate","status":"warning","message":"regression-gate iteration 1 completed with verdict: needs-fix"}
 {"type":"transition","ts":"2026-06-28T08:06:59.786Z","step":"step-transition","status":"ok","message":"regression-gate → code-fixer"}
 {"type":"transition","ts":"2026-06-28T08:06:59.790Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-06-28T08:07:50.519Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"f45ec188-c208-4ab2-8b91-00699f892354","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-06-28T08:06:59.803Z","endedAt":"2026-06-28T08:07:48.981Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-06-28T08:07:48.981Z","outputs":[{"path":"specrunner/changes/deal-watch-notifications","hash":null}],"inputs":[{"path":"specrunner/changes/deal-watch-notifications/regression-gate-result-001.md","hash":"sha256:ed1c03d3ffa2eb57625819e263eba30c7af455cef0a113f3cf0bc374ac6da656"}]}
+{"type":"transition","ts":"2026-06-28T08:07:50.529Z","step":"step-transition","status":"ok","message":"code-fixer → regression-gate"}
+{"type":"transition","ts":"2026-06-28T08:07:50.531Z","step":"regression-gate","status":"started","message":"regression-gate iteration 2 started"}
+{"type":"transition","ts":"2026-06-28T08:07:50.533Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
