@@ -107,6 +107,7 @@ text 型で管理する値（pgEnum にしない）:
 | address | text | YES | | 所在地 |
 | notes | text | YES | | 備考 |
 | created_at | timestamptz | NO | DEFAULT now() | |
+| updated_at | timestamptz | NO | DEFAULT now() | |
 
 #### client_contacts
 
@@ -200,6 +201,7 @@ text 型で管理する値（pgEnum にしない）:
 | created_by_id | uuid | NO | FK → users.id | 作成者 |
 | created_at | timestamptz | NO | DEFAULT now() | |
 | updated_at | timestamptz | NO | DEFAULT now() | |
+| version | integer | NO | DEFAULT 1 | 楽観的ロック |
 
 **制約**:
 ```sql
@@ -248,6 +250,7 @@ CHECK (deal_id IS NOT NULL OR inquiry_id IS NOT NULL)
 | created_by_id | uuid | NO | FK → users.id | 作成者 |
 | created_at | timestamptz | NO | DEFAULT now() | |
 | updated_at | timestamptz | NO | DEFAULT now() | |
+| version | integer | NO | DEFAULT 1 | 楽観的ロック |
 
 ---
 
@@ -272,6 +275,7 @@ CHECK (deal_id IS NOT NULL OR inquiry_id IS NOT NULL)
 | status | contract_status | NO | DEFAULT 'active' | 状態 |
 | created_at | timestamptz | NO | DEFAULT now() | |
 | updated_at | timestamptz | NO | DEFAULT now() | |
+| version | integer | NO | DEFAULT 1 | 楽観的ロック |
 
 #### invoices
 
@@ -290,6 +294,7 @@ CHECK (deal_id IS NOT NULL OR inquiry_id IS NOT NULL)
 | notes | text | YES | | 備考 |
 | created_at | timestamptz | NO | DEFAULT now() | |
 | updated_at | timestamptz | NO | DEFAULT now() | |
+| version | integer | NO | DEFAULT 1 | 楽観的ロック |
 
 ---
 
@@ -346,6 +351,8 @@ CHECK (
 | origin_trigger_action | text | YES | | トリガーアクション |
 | origin_trigger_entity_id | uuid | YES | | 対象エンティティ ID |
 | created_at | timestamptz | NO | DEFAULT now() | |
+| updated_at | timestamptz | NO | DEFAULT now() | |
+| version | integer | NO | DEFAULT 1 | 楽観的ロック |
 
 **制約**:
 ```sql
@@ -372,6 +379,7 @@ CHECK (
 | comment | text | YES | | コメント |
 | deadline | timestamptz | YES | | 承認期限 |
 | approved_at | timestamptz | YES | | 承認日時 |
+| version | integer | NO | DEFAULT 1 | 楽観的ロック |
 
 #### approval_delegations
 
@@ -401,6 +409,8 @@ CHECK (
 | period_end | timestamptz | NO | | 期間終了 |
 | target_amount | integer | NO | | 目標金額 |
 | created_at | timestamptz | NO | DEFAULT now() | |
+| updated_at | timestamptz | NO | DEFAULT now() | |
+| version | integer | NO | DEFAULT 1 | 楽観的ロック |
 
 ---
 
@@ -430,6 +440,7 @@ CHECK (
 | secret | text | NO | | 署名検証用シークレット |
 | is_active | boolean | NO | DEFAULT true | 有効/無効 |
 | created_at | timestamptz | NO | DEFAULT now() | |
+| updated_at | timestamptz | NO | DEFAULT now() | |
 
 #### webhook_deliveries
 
