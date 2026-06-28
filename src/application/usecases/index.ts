@@ -93,3 +93,8 @@ export type { LinkTargetResult } from "./searchDeals";
 export { searchInquiries } from "./searchInquiries";
 export { searchMeetings } from "./searchMeetings";
 export { getDealActivity } from "./getDealActivity";
+export { watchDeal } from "./watchDeal";
+export { unwatchDeal } from "./unwatchDeal";
+export { getWatchStatus } from "./getWatchStatus";
+export { getNotifications } from "./getNotifications";
+export { markNotificationsAsRead } from "./markNotificationsAsRead";

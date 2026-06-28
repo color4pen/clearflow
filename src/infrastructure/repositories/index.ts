@@ -19,3 +19,4 @@ export * as invoiceRepository from "./invoiceRepository";
 export * as revenueRepository from "./revenueRepository";
 export * as revenueTargetRepository from "./revenueTargetRepository";
 export * as actionItemRepository from "./actionItemRepository";
+export * as watchRepository from "./watchRepository";

@@ -1,4 +1,4 @@
-import { dealRepository, userRepository } from "@/infrastructure/repositories";
+import { dealRepository, userRepository, watchRepository } from "@/infrastructure/repositories";
 import { recordAudit } from "@/application/services/auditRecorder";
 
 import { db } from "@/infrastructure/db";
@@ -84,6 +84,17 @@ export async function updateDeal(data: {
         },
         tx
       );
+
+      if (data.assigneeId) {
+        await watchRepository.create(
+          {
+            userId: data.assigneeId,
+            dealId: data.dealId,
+            organizationId: data.organizationId,
+          },
+          tx
+        );
+      }
 
       return updated;
     });

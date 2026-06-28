@@ -1,4 +1,4 @@
-import { eq, and, desc, gte, lte, or, notInArray } from "drizzle-orm";
+import { eq, and, desc, gte, lte, or, notInArray, ne, inArray } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { auditLogs } from "../schema";
@@ -102,6 +102,9 @@ export async function findByTargets(
   options?: {
     limit?: number;
     excludeActions?: string[];
+    afterDate?: Date;
+    excludeActorId?: string;
+    includeActions?: string[];
   }
 ): Promise<AuditLog[]> {
   if (targets.length === 0) {
@@ -119,6 +122,18 @@ export async function findByTargets(
 
   if (options?.excludeActions && options.excludeActions.length > 0) {
     conditions.push(notInArray(auditLogs.action, options.excludeActions));
+  }
+
+  if (options?.afterDate) {
+    conditions.push(gte(auditLogs.createdAt, options.afterDate));
+  }
+
+  if (options?.excludeActorId) {
+    conditions.push(ne(auditLogs.actorId, options.excludeActorId));
+  }
+
+  if (options?.includeActions && options.includeActions.length > 0) {
+    conditions.push(inArray(auditLogs.action, options.includeActions));
   }
 
   let query = db

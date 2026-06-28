@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { getDeal, getInquiry, listMeetings, listDealContacts, listContractsByDeal, getClient, listClientContacts, listActionItemsByDeal, listOrganizationUsers, getDealActivity } from "@/application/usecases";
+import { getDeal, getInquiry, listMeetings, listDealContacts, listContractsByDeal, getClient, listClientContacts, listActionItemsByDeal, listOrganizationUsers, getDealActivity, getWatchStatus } from "@/application/usecases";
 import { SectionCard, DataTable } from "@/app/components";
 import { DealContactsSection } from "./DealContactsSection";
 import { DealNotesSection } from "./DealNotesSection";
@@ -10,6 +10,7 @@ import { DealActionItemsSection } from "./DealActionItemsSection";
 import { DealActivitySection } from "./DealActivitySection";
 import { DealPhaseActions } from "./DealPhaseActions";
 import { DealHeaderActions } from "./DealHeaderActions";
+import { WatchToggle } from "./WatchToggle";
 import { DeleteDealButton } from "./DeleteDealButton";
 import {
   contractTypeLabels,
@@ -36,7 +37,7 @@ export default async function DealDetailPage({
 
   const activityEnabled = isActivityFeedEnabled();
 
-  const [inquiry, dealMeetings, dealContacts, dealContracts, actionItemsResult, users, activityResult] = await Promise.all([
+  const [inquiry, dealMeetings, dealContacts, dealContracts, actionItemsResult, users, activityResult, watchStatus] = await Promise.all([
     deal.inquiryId ? getInquiry({ inquiryId: deal.inquiryId, organizationId }) : null,
     listMeetings(deal.id, organizationId),
     listDealContacts(deal.id, organizationId),
@@ -44,6 +45,7 @@ export default async function DealDetailPage({
     listActionItemsByDeal({ dealId: deal.id, organizationId }),
     listOrganizationUsers({ organizationId }),
     activityEnabled ? getDealActivity({ dealId: deal.id, organizationId, dealTitle: deal.title }) : Promise.resolve({ logs: [], targetInfoMap: {} }),
+    getWatchStatus({ userId: session!.user.id, dealId: deal.id, organizationId }),
   ]);
   const { logs: activities, targetInfoMap } = activityResult;
 
@@ -74,11 +76,14 @@ export default async function DealDetailPage({
             {client?.name ?? "-"} · {phaseLabels[deal.phase] ?? deal.phase}
           </div>
         </div>
-        <DealHeaderActions
-          dealId={deal.id}
-          dealPhase={deal.phase}
-          canChangePhase={canChangePhase}
-        />
+        <div className="flex items-center gap-2">
+          <WatchToggle dealId={deal.id} isWatching={watchStatus.isWatching} />
+          <DealHeaderActions
+            dealId={deal.id}
+            dealPhase={deal.phase}
+            canChangePhase={canChangePhase}
+          />
+        </div>
       </div>
 
       {/* 2カラムグリッド: 1.5fr : 1fr */}
