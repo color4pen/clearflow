@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "adaf8068-d0ee-45b7-af5c-457bc272d4b3",
   "createdAt": "2026-06-29T05:10:25.956Z",
-  "updatedAt": "2026-06-29T06:20:15.675Z",
+  "updatedAt": "2026-06-29T06:24:01.816Z",
   "request": {
     "title": "アクションアイテムの作業ステータス（L1）",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/action-item-status-adaf8068",
   "error": null,
   "pipelineId": "standard",
@@ -54,7 +54,7 @@
     "createdAt": "2026-06-29T06:20:15.664Z"
   },
   "_journal": {
-    "historyCount": 69,
+    "historyCount": 70,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
