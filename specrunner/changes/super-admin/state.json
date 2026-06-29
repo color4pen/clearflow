@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "3a8a032e-5817-4eb9-978a-884f3452986d",
   "createdAt": "2026-06-29T03:50:10.440Z",
-  "updatedAt": "2026-06-29T04:42:25.631Z",
+  "updatedAt": "2026-06-29T04:47:06.364Z",
   "request": {
     "title": "スーパー管理者による組織プロビジョニング",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/super-admin-3a8a032e",
   "error": null,
@@ -33,8 +33,22 @@
       ]
     }
   ],
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "9c63e09a24c4ecd4c76377bae5cf14bdd215929c",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 33,
+    "historyCount": 38,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -43,7 +57,9 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 1,
-      "code-fixer": 1
+      "code-fixer": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
