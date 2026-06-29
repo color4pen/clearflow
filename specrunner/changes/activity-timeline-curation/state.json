@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "18c52eda-3089-4789-a9c2-d0ba0a4ecca5",
   "createdAt": "2026-06-29T14:57:43.812Z",
-  "updatedAt": "2026-06-29T15:55:40.988Z",
+  "updatedAt": "2026-06-29T15:56:04.667Z",
   "request": {
     "title": "案件アクティビティの厳選表示（タイムライン）",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/activity-timeline-curation-18c52eda",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/147",
+    "number": 147,
+    "createdAt": "2026-06-29T15:56:04.656Z"
+  },
   "_journal": {
-    "historyCount": 60,
+    "historyCount": 65,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -61,7 +66,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }

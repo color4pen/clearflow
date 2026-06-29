@@ -87,3 +87,11 @@
 {"type":"transition","ts":"2026-06-29T15:55:40.986Z","step":"verification","status":"ok","message":"verification iteration 1 completed with verdict: passed"}
 {"type":"transition","ts":"2026-06-29T15:55:40.986Z","step":"step-transition","status":"ok","message":"verification → adr-gen"}
 {"type":"transition","ts":"2026-06-29T15:55:40.988Z","step":"adr-gen-started","status":"started","message":"Starting adr-gen step"}
+{"type":"transition","ts":"2026-06-29T15:56:02.268Z","step":"adr-gen-verdict","status":"ok","message":"adr-gen verdict: success"}
+{"type":"step-attempt","step":"adr-gen","sessionId":"bad6e9bf-7f29-4147-ab27-ea1c1435659a","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-06-29T15:55:41.000Z","endedAt":"2026-06-29T15:56:00.550Z"}
+{"type":"transition","ts":"2026-06-29T15:56:02.275Z","step":"step-transition","status":"ok","message":"adr-gen → pr-create"}
+{"type":"transition","ts":"2026-06-29T15:56:02.278Z","step":"step-transition","status":"ok","message":"Transitioning to pr-create step"}
+{"type":"transition","ts":"2026-06-29T15:56:04.659Z","step":"pr-create-verdict","status":"ok","message":"pr-create verdict: success"}
+{"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/activity-timeline-curation/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-29T15:56:02.280Z","endedAt":"2026-06-29T15:56:04.658Z"}
+{"type":"lineage","step":"pr-create","ts":"2026-06-29T15:56:04.658Z","outputs":[{"path":"specrunner/changes/activity-timeline-curation/pr-create-result.md","hash":"sha256:2461496b7c12a6b7057e09a2f4c76f51276f60b250c6a279c340777bf48a9db8"}],"inputs":[{"path":"change/activity-timeline-curation-18c52eda","hash":null}]}
+{"type":"transition","ts":"2026-06-29T15:56:04.667Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
