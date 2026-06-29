@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "5603dd70-2a18-411f-a388-c52117106730",
   "createdAt": "2026-06-29T20:48:35.243Z",
-  "updatedAt": "2026-06-29T22:13:00.354Z",
+  "updatedAt": "2026-06-29T22:16:06.916Z",
   "request": {
     "title": "商談（Meeting）を顧客接点（Interaction）に一般化",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "change/interaction-generalization-5603dd70",
   "error": null,
@@ -33,8 +33,22 @@
       ]
     }
   ],
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "04d1102df8319a51b06fda7f28c1c7a5930ea83c",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 33,
+    "historyCount": 38,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -43,7 +57,9 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 1,
-      "code-fixer": 1
+      "code-fixer": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
