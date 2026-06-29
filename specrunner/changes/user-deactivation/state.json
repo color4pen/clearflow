@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "84a28b02-fd59-40a5-b5d3-8774a45ab4c9",
   "createdAt": "2026-06-29T02:40:04.148Z",
-  "updatedAt": "2026-06-29T03:36:46.975Z",
+  "updatedAt": "2026-06-29T03:41:07.685Z",
   "request": {
     "title": "ユーザーの無効化・再有効化",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "conformance",
+  "step": "adr-gen",
   "status": "running",
   "branch": "feat/user-deactivation-84a28b02",
   "error": null,
@@ -48,7 +48,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 51,
+    "historyCount": 60,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -56,12 +56,13 @@
       "spec-fixer": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1,
+      "verification": 2,
       "code-review": 1,
       "code-fixer": 1,
       "domain-invariants": 1,
       "custom-reviewers": 1,
-      "regression-gate": 1
+      "regression-gate": 1,
+      "conformance": 1
     }
   }
 }
