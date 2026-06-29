@@ -1,12 +1,14 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { getContract, listInvoicesByContract, hasPendingApproval } from "@/application/usecases";
+import { getContract, listInvoicesByContract, hasPendingApproval, listInteractionsByContract } from "@/application/usecases";
+import { canPerform } from "@/domain/authorization";
 import { SectionCard } from "@/app/components";
 import { ContractStatusActions } from "./ContractStatusActions";
 import { InvoiceSection } from "./InvoiceSection";
 import { DeleteContractButton } from "./DeleteContractButton";
 import { ContractInfoSection } from "./ContractInfoSection";
+import { ContractInteractionSection } from "./ContractInteractionSection";
 import { contractStatusLabels } from "@/app/(dashboard)/labels";
 
 export default async function ContractDetailPage({
@@ -27,13 +29,18 @@ export default async function ContractDetailPage({
     session!.user.role === "admin" || session!.user.role === "manager" || session!.user.role === "finance";
   const isTerminal = contract.status === "completed" || contract.status === "cancelled";
 
-  const invoices = await listInvoicesByContract({ contractId: id, organizationId });
+  const [invoices, contractInteractions] = await Promise.all([
+    listInvoicesByContract({ contractId: id, organizationId }),
+    listInteractionsByContract(id, organizationId),
+  ]);
   let isPending = false;
   try {
     isPending = await hasPendingApproval(organizationId, id);
   } catch {
     // DB エラー時はバナー非表示で degradation
   }
+
+  const canRecord = canPerform(session!.user.role, "interaction", "recordContractAdjustment");
 
   return (
     <div>
@@ -112,6 +119,11 @@ export default async function ContractDetailPage({
             canManage={canManage}
             contractAmount={contract.amount}
             renewalType={contract.renewalType}
+          />
+          <ContractInteractionSection
+            contractId={contract.id}
+            interactions={contractInteractions}
+            canRecord={canRecord}
           />
         </div>
       </div>

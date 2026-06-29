@@ -42,6 +42,16 @@ export async function getDealActivity(params: {
     )
   ).flat();
 
+  // 契約・請求に紐づく顧客接点（contract_adjustment / invoice_adjustment）を並列取得する。
+  const [contractInteractions, invoiceInteractions] = await Promise.all([
+    Promise.all(
+      contracts.map((c) => interactionRepository.findAllByContract(c.id, organizationId))
+    ).then((results) => results.flat()),
+    Promise.all(
+      invoices.map((inv) => interactionRepository.findAllByInvoice(inv.id, organizationId))
+    ).then((results) => results.flat()),
+  ]);
+
   const targets: Array<{ targetType: string; targetId: string }> = [
     { targetType: "deal", targetId: dealId },
     // 新規ログ（interaction.*）と旧ログ（meeting.*）の両方を対象とする
@@ -51,6 +61,9 @@ export async function getDealActivity(params: {
     ]),
     ...contracts.map((c) => ({ targetType: "contract", targetId: c.id })),
     ...invoices.map((inv) => ({ targetType: "invoice", targetId: inv.id })),
+    // 契約・請求経由の顧客接点をタイムライン対象に追加する
+    ...contractInteractions.map((i) => ({ targetType: "interaction", targetId: i.id })),
+    ...invoiceInteractions.map((i) => ({ targetType: "interaction", targetId: i.id })),
   ];
 
   // DB レベルで表示対象アクションのみ取得する（limit は渡さない）
@@ -96,6 +109,32 @@ export async function getDealActivity(params: {
         `invoice:${inv.id}`,
         { label: inv.title, href: `/contracts/${inv.contractId}/invoices/${inv.id}` },
       ])
+    ),
+    // 契約調整の顧客接点
+    ...Object.fromEntries(
+      contractInteractions.map((i) => [
+        `interaction:${i.id}`,
+        {
+          label: `契約調整 ${i.date.toLocaleDateString("ja-JP")}`,
+          href: i.contractId ? `/contracts/${i.contractId}` : `/contracts`,
+        } as TargetInfo,
+      ])
+    ),
+    // 請求調整の顧客接点（invoiceId から contractId を逆引き）
+    ...Object.fromEntries(
+      invoiceInteractions.map((i) => {
+        const relatedInvoice = invoices.find((inv) => inv.id === i.invoiceId);
+        return [
+          `interaction:${i.id}`,
+          {
+            label: `請求調整 ${i.date.toLocaleDateString("ja-JP")}`,
+            href:
+              relatedInvoice && i.invoiceId
+                ? `/contracts/${relatedInvoice.contractId}/invoices/${i.invoiceId}`
+                : `/contracts`,
+          } as TargetInfo,
+        ];
+      })
     ),
   };
 

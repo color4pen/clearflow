@@ -190,3 +190,39 @@ export async function findAllByInquiry(
     .orderBy(asc(interactions.date));
   return result.map(mapRow);
 }
+
+/**
+ * 指定契約に直接紐づく顧客接点を取得する。organizationId でテナント分離。
+ * 新しい順（date DESC）で返す。
+ */
+export async function findAllByContract(
+  contractId: string,
+  organizationId: string
+): Promise<Interaction[]> {
+  const result = await db
+    .select()
+    .from(interactions)
+    .where(
+      and(eq(interactions.contractId, contractId), eq(interactions.organizationId, organizationId))
+    )
+    .orderBy(desc(interactions.date));
+  return result.map(mapRow);
+}
+
+/**
+ * 指定請求に直接紐づく顧客接点を取得する。organizationId でテナント分離。
+ * 新しい順（date DESC）で返す。
+ */
+export async function findAllByInvoice(
+  invoiceId: string,
+  organizationId: string
+): Promise<Interaction[]> {
+  const result = await db
+    .select()
+    .from(interactions)
+    .where(
+      and(eq(interactions.invoiceId, invoiceId), eq(interactions.organizationId, organizationId))
+    )
+    .orderBy(desc(interactions.date));
+  return result.map(mapRow);
+}
