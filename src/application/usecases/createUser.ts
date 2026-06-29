@@ -17,9 +17,9 @@ export async function createUser(data: {
   role: Role;
   password: string;
 }): Promise<CreateUserResult> {
-  // Email uniqueness pre-check
-  const existing = await userRepository.findByEmailForAuth(data.email);
-  if (existing) {
+  // Email uniqueness pre-check (includes deactivated users — email is still reserved)
+  const emailTaken = await userRepository.existsByEmail(data.email);
+  if (emailTaken) {
     return { ok: false, reason: "このメールアドレスは既に使用されています" };
   }
 

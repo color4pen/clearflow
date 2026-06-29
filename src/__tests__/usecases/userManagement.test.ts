@@ -116,9 +116,9 @@ describe("createUser usecase", () => {
     expect(src).toContain("createUser");
   });
 
-  it("findByEmailForAuth による email 重複チェックがある", async () => {
+  it("existsByEmail による email 重複チェックがある（無効化済みユーザーのメールも予約済みと判定）", async () => {
     const src = await readSrc("application/usecases/createUser.ts");
-    expect(src).toContain("findByEmailForAuth");
+    expect(src).toContain("existsByEmail");
   });
 
   it("email 重複時のエラーメッセージが含まれる", async () => {

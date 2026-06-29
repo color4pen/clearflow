@@ -54,6 +54,15 @@ export async function updateRole(
   return result[0] ?? null;
 }
 
+export async function existsByEmail(email: string): Promise<boolean> {
+  const result = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+  return result.length > 0;
+}
+
 export async function findByEmailForAuth(
   email: string
 ): Promise<UserWithPassword | null> {
