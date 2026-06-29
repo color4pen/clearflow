@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "18c52eda-3089-4789-a9c2-d0ba0a4ecca5",
   "createdAt": "2026-06-29T14:57:43.812Z",
-  "updatedAt": "2026-06-29T15:13:01.768Z",
+  "updatedAt": "2026-06-29T15:16:43.203Z",
   "request": {
     "title": "案件アクティビティの厳選表示（タイムライン）",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "change/activity-timeline-curation-18c52eda",
   "error": null,
@@ -34,11 +34,12 @@
     }
   ],
   "_journal": {
-    "historyCount": 13,
+    "historyCount": 16,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1
+      "spec-review": 1,
+      "test-case-gen": 1
     }
   }
 }

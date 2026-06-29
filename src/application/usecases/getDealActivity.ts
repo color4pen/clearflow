@@ -1,12 +1,17 @@
 import * as meetingRepository from "@/infrastructure/repositories/meetingRepository";
 import * as contractRepository from "@/infrastructure/repositories/contractRepository";
 import * as invoiceRepository from "@/infrastructure/repositories/invoiceRepository";
-import * as actionItemRepository from "@/infrastructure/repositories/actionItemRepository";
-import * as dealContactRepository from "@/infrastructure/repositories/dealContactRepository";
 import * as auditLogRepository from "@/infrastructure/repositories/auditLogRepository";
-import { ACTIVITY_TIMELINE_LIMIT, getHiddenActions } from "@/lib/activityConfig";
+import {
+  ACTIVITY_TIMELINE_LIMIT,
+  TIMELINE_ACTIONS,
+  getHiddenActions,
+} from "@/lib/activityConfig";
+import { aggregateTimeline } from "@/lib/activityAggregator";
 import { meetingTypeLabels } from "@/lib/meetingLabels";
-import type { AuditLog } from "@/domain/models/auditLog";
+import type { TimelineEntry } from "@/lib/activityAggregator";
+
+export type { TimelineEntry };
 
 export type TargetInfo = {
   label: string;
@@ -14,7 +19,7 @@ export type TargetInfo = {
 };
 
 export type DealActivityResult = {
-  logs: AuditLog[];
+  logs: TimelineEntry[];
   targetInfoMap: Record<string, TargetInfo>;
 };
 
@@ -25,11 +30,9 @@ export async function getDealActivity(params: {
 }): Promise<DealActivityResult> {
   const { dealId, organizationId, dealTitle } = params;
 
-  const [meetings, contracts, actionItems, dealContacts] = await Promise.all([
+  const [meetings, contracts] = await Promise.all([
     meetingRepository.findAllByDeal(dealId, organizationId),
     contractRepository.findAllByDealId(dealId, organizationId),
-    actionItemRepository.findByDeal(dealId, organizationId),
-    dealContactRepository.findByDeal(dealId, organizationId),
   ]);
 
   // 請求は案件に直接紐づかず契約経由（invoice.contractId）のため、契約解決後にまとめて取得する。
@@ -44,16 +47,23 @@ export async function getDealActivity(params: {
     ...meetings.map((m) => ({ targetType: "meeting", targetId: m.id })),
     ...contracts.map((c) => ({ targetType: "contract", targetId: c.id })),
     ...invoices.map((inv) => ({ targetType: "invoice", targetId: inv.id })),
-    ...actionItems.map((ai) => ({ targetType: "action_item", targetId: ai.id })),
-    ...dealContacts.map((dc) => ({ targetType: "deal_contact", targetId: dc.id })),
   ];
 
-  const excludeActions = getHiddenActions();
-
-  const result = await auditLogRepository.findByTargets(organizationId, targets, {
-    limit: ACTIVITY_TIMELINE_LIMIT,
-    ...(excludeActions.length > 0 ? { excludeActions } : {}),
+  // DB レベルで表示対象アクションのみ取得する（limit は渡さない）
+  const allLogs = await auditLogRepository.findByTargets(organizationId, targets, {
+    includeActions: TIMELINE_ACTIONS,
   });
+
+  // 環境変数による追加除外をアプリケーション層で適用する（集約前）
+  const hiddenActions = getHiddenActions();
+  const filteredLogs =
+    hiddenActions.length > 0
+      ? allLogs.filter((log) => !hiddenActions.includes(log.action))
+      : allLogs;
+
+  // 集約してから件数上限を適用する
+  const aggregated = aggregateTimeline(filteredLogs);
+  const logs = aggregated.slice(0, ACTIVITY_TIMELINE_LIMIT);
 
   // 既に取得済みのエンティティから targetInfoMap を構築する（新規リポジトリ取得なし）
   const targetInfoMap: Record<string, TargetInfo> = {
@@ -79,14 +89,7 @@ export async function getDealActivity(params: {
         { label: inv.title },
       ])
     ),
-    ...Object.fromEntries(
-      actionItems.map((ai) => [
-        `action_item:${ai.id}`,
-        { label: ai.description },
-      ])
-    ),
-    // deal_contact はマップに含めない（contactId → 氏名の追加解決をしないため）
   };
 
-  return { logs: result, targetInfoMap };
+  return { logs, targetInfoMap };
 }

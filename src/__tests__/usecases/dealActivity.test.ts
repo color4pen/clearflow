@@ -29,14 +29,14 @@ describe("getDealActivity usecase 静的検証", () => {
     expect(content).toContain("invoiceRepository.findAllByContract");
   });
 
-  it("actionItemRepository.findByDeal の呼び出しが含まれる", async () => {
+  it("actionItemRepository.findByDeal の呼び出しが含まれない（取得対象から除外）", async () => {
     const content = await readSrc("application/usecases/getDealActivity.ts");
-    expect(content).toContain("actionItemRepository.findByDeal");
+    expect(content).not.toContain("actionItemRepository");
   });
 
-  it("dealContactRepository.findByDeal の呼び出しが含まれる", async () => {
+  it("dealContactRepository.findByDeal の呼び出しが含まれない（取得対象から除外）", async () => {
     const content = await readSrc("application/usecases/getDealActivity.ts");
-    expect(content).toContain("dealContactRepository.findByDeal");
+    expect(content).not.toContain("dealContactRepository");
   });
 
   it("auditLogRepository.findByTargets の呼び出しが含まれる", async () => {
@@ -58,8 +58,6 @@ describe("getDealActivity usecase 静的検証", () => {
     const content = await readSrc("application/usecases/getDealActivity.ts");
     expect(content).toContain("Promise.all");
   });
-
-  // T-05: 新規テスト — targetInfoMap / TargetInfo / dealTitle の検証
 
   it("targetInfoMap の文字列が含まれる", async () => {
     const content = await readSrc("application/usecases/getDealActivity.ts");
@@ -93,10 +91,37 @@ describe("getDealActivity usecase 静的検証", () => {
 
   it("deal_contact が targetInfoMap のキーとして設定されていない", async () => {
     const content = await readSrc("application/usecases/getDealActivity.ts");
-    // deal_contact は targets 配列には含まれるが、targetInfoMap のキーとして設定する記述が無いことを確認
-    // `deal_contact:` というマップキー構築パターンが存在しないことを検証
     expect(content).not.toContain("`deal_contact:");
     expect(content).not.toContain('"deal_contact:');
     expect(content).not.toContain("'deal_contact:");
+  });
+
+  it("TIMELINE_ACTIONS が includeActions として渡されている", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("TIMELINE_ACTIONS");
+    expect(content).toContain("includeActions");
+  });
+
+  it("aggregateTimeline の呼び出しが含まれる（集約ロジック）", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("aggregateTimeline");
+  });
+
+  it("findByTargets に limit が渡されていない（集約前に上限で切らない）", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    // findByTargets の呼び出しに limit: が含まれていないことを確認
+    // (ACTIVITY_TIMELINE_LIMIT は slice で適用される)
+    const findByTargetsBlock = content.match(/findByTargets\([^;]+\)/s)?.[0] ?? "";
+    expect(findByTargetsBlock).not.toContain("limit");
+  });
+
+  it("slice で ACTIVITY_TIMELINE_LIMIT を適用している（集約後に上限）", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("slice(0, ACTIVITY_TIMELINE_LIMIT)");
+  });
+
+  it("DealActivityResult の logs が TimelineEntry[] になっている", async () => {
+    const content = await readSrc("application/usecases/getDealActivity.ts");
+    expect(content).toContain("TimelineEntry");
   });
 });
