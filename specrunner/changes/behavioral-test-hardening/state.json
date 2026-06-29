@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "b49563b2-7263-48cd-8f1e-a210fefeaee3",
   "createdAt": "2026-06-29T05:10:11.922Z",
-  "updatedAt": "2026-06-29T06:04:27.893Z",
+  "updatedAt": "2026-06-29T06:04:46.588Z",
   "request": {
     "title": "重要な振る舞いの behavioral テスト補強",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/behavioral-test-hardening-b49563b2",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/142",
+    "number": 142,
+    "createdAt": "2026-06-29T06:04:46.579Z"
+  },
   "_journal": {
-    "historyCount": 44,
+    "historyCount": 49,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -60,7 +65,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
