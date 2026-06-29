@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "3a8a032e-5817-4eb9-978a-884f3452986d",
   "createdAt": "2026-06-29T03:50:10.440Z",
-  "updatedAt": "2026-06-29T04:56:35.603Z",
+  "updatedAt": "2026-06-29T04:59:49.148Z",
   "request": {
     "title": "スーパー管理者による組織プロビジョニング",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/super-admin-3a8a032e",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/141",
+    "number": 141,
+    "createdAt": "2026-06-29T04:59:49.134Z"
+  },
   "_journal": {
-    "historyCount": 52,
+    "historyCount": 57,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -61,7 +66,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
