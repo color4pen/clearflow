@@ -28,9 +28,11 @@ export default async function UsersPage() {
       <PageToolbar title="ユーザー管理" />
 
       {/* User creation form */}
-      <SectionCard>
-        <CreateUserForm />
-      </SectionCard>
+      <div className="max-w-2xl mb-4">
+        <SectionCard className="p-5">
+          <CreateUserForm />
+        </SectionCard>
+      </div>
 
       {users.length === 0 ? (
         <SectionCard>

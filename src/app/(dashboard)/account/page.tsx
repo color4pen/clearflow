@@ -14,12 +14,12 @@ export default async function AccountPage() {
     <div>
       <PageToolbar title="アカウント設定" />
 
-      <div className="space-y-4">
-        <SectionCard>
+      <div className="max-w-2xl space-y-4">
+        <SectionCard className="p-5">
           <ProfileForm currentName={session.user.name ?? ""} />
         </SectionCard>
 
-        <SectionCard>
+        <SectionCard className="p-5">
           <PasswordForm />
         </SectionCard>
       </div>

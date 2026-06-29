@@ -17,9 +17,11 @@ export default async function OrganizationSettingsPage() {
     <div>
       <PageToolbar title="組織設定" />
 
-      <SectionCard>
-        <OrganizationForm currentName={organization?.name ?? ""} />
-      </SectionCard>
+      <div className="max-w-2xl">
+        <SectionCard className="p-5">
+          <OrganizationForm currentName={organization?.name ?? ""} />
+        </SectionCard>
+      </div>
     </div>
   );
 }

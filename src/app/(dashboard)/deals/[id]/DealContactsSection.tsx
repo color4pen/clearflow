@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { addDealContactAction, removeDealContactAction } from "@/app/actions/dealContacts";
 import { dealContactRoleLabels } from "@/app/(dashboard)/labels";
 import { preventEnterSubmit } from "@/app/components";
@@ -19,18 +20,19 @@ export function DealContactsSection({
   clientContacts,
   clientId,
 }: Props) {
+  const [adding, setAdding] = useState(false);
+
   const contactMap = new Map(clientContacts.map((c) => [c.id, c]));
   const registeredContactIds = new Set(dealContacts.map((dc) => dc.contactId));
 
   const availableContacts = clientContacts.filter(
     (c) => !registeredContactIds.has(c.id)
   );
+  const canAdd = !!clientId && availableContacts.length > 0;
 
   return (
     <div>
-      {dealContacts.length === 0 ? (
-        <p className="text-xs text-text-muted">担当者が登録されていません</p>
-      ) : (
+      {dealContacts.length > 0 ? (
         <div className="space-y-1">
           {dealContacts.map((dc) => {
             const contact = contactMap.get(dc.contactId);
@@ -58,13 +60,28 @@ export function DealContactsSection({
             );
           })}
         </div>
+      ) : (
+        !adding && (
+          <p className="text-xs text-text-muted">担当者が登録されていません</p>
+        )
       )}
 
-      {/* 追加フォーム（clientId が null の場合は非表示） */}
-      {clientId && availableContacts.length > 0 && (
+      {/* 追加導線: 普段はCTAボタン、押すとインラインフォームを開く */}
+      {canAdd && !adding && (
+        <button
+          type="button"
+          onClick={() => setAdding(true)}
+          className="mt-2 text-xs text-primary underline cursor-pointer"
+        >
+          + 担当者を追加
+        </button>
+      )}
+
+      {canAdd && adding && (
         <form
           action={async (formData: FormData) => {
             await addDealContactAction(dealId, formData);
+            setAdding(false);
           }}
           onKeyDown={preventEnterSubmit}
           className="mt-3 flex gap-2 items-end"
@@ -105,6 +122,13 @@ export function DealContactsSection({
             className="text-xs bg-primary text-white px-3 py-1 rounded"
           >
             追加
+          </button>
+          <button
+            type="button"
+            onClick={() => setAdding(false)}
+            className="text-xs text-text-muted underline"
+          >
+            キャンセル
           </button>
         </form>
       )}
