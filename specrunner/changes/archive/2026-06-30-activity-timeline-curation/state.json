@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "18c52eda-3089-4789-a9c2-d0ba0a4ecca5",
   "createdAt": "2026-06-29T14:57:43.812Z",
-  "updatedAt": "2026-06-29T15:56:04.667Z",
+  "updatedAt": "2026-06-29T16:00:20.733Z",
   "request": {
     "title": "案件アクティビティの厳選表示（タイムライン）",
     "type": "spec-change",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "change/activity-timeline-curation-18c52eda",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-29T15:56:04.656Z"
   },
   "_journal": {
-    "historyCount": 65,
+    "historyCount": 66,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
