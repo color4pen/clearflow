@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "b49563b2-7263-48cd-8f1e-a210fefeaee3",
   "createdAt": "2026-06-29T05:10:11.922Z",
-  "updatedAt": "2026-06-29T05:55:19.084Z",
+  "updatedAt": "2026-06-29T06:00:59.922Z",
   "request": {
     "title": "重要な振る舞いの behavioral テスト補強",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-review",
+  "step": "regression-gate",
   "status": "running",
   "branch": "change/behavioral-test-hardening-b49563b2",
   "error": null,
@@ -33,15 +33,32 @@
       ]
     }
   ],
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "skipped",
+      "approvedAtCommit": null,
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 25,
+    "historyCount": 35,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
       "spec-review": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 1,
+      "code-review": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
