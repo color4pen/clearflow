@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "84a28b02-fd59-40a5-b5d3-8774a45ab4c9",
   "createdAt": "2026-06-29T02:40:04.148Z",
-  "updatedAt": "2026-06-29T03:41:29.066Z",
+  "updatedAt": "2026-06-29T03:44:48.190Z",
   "request": {
     "title": "ユーザーの無効化・再有効化",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/user-deactivation-84a28b02",
   "error": null,
   "pipelineId": "standard",
@@ -53,7 +53,7 @@
     "createdAt": "2026-06-29T03:41:29.056Z"
   },
   "_journal": {
-    "historyCount": 65,
+    "historyCount": 66,
     "stepCounts": {
       "request-review": 1,
       "design": 1,

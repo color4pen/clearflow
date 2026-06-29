@@ -95,3 +95,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/user-deactivation/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-06-29T03:41:27.429Z","endedAt":"2026-06-29T03:41:29.057Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-06-29T03:41:29.057Z","outputs":[{"path":"specrunner/changes/user-deactivation/pr-create-result.md","hash":"sha256:d2b6edeb336f8e464ba2b96992351796ce11a3dbc25712f082b16566e34ebd86"}],"inputs":[{"path":"feat/user-deactivation-84a28b02","hash":null}]}
 {"type":"transition","ts":"2026-06-29T03:41:29.066Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-06-29T03:44:48.190Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
