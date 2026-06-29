@@ -4,7 +4,7 @@ import type { Transaction } from "../db";
 import { actionItems } from "../schema";
 import type { ActionItem, ActionItemStatus } from "@/domain/models/actionItem";
 
-function mapRow(row: typeof actionItems.$inferSelect): ActionItem {
+export function mapRow(row: typeof actionItems.$inferSelect): ActionItem {
   return {
     id: row.id,
     organizationId: row.organizationId,

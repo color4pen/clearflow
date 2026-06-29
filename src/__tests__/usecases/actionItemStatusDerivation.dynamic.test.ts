@@ -1,105 +1,58 @@
 /**
- * アクションアイテムの status 導出ロジックの動的テスト。
- * mock.module 方式で actionItemRepository をモックし、
- * status=null の行が done から実効ステータスを正しく導出することを検証する。
- * 検証は listActionItems usecase を経由して ActionItem.status を assert する。
+ * actionItem の status 導出ロジック（mapRow）の動的テスト。
+ *
+ * F-02 対応: repository をモックして「導出済みの値」を返す方式では mapRow が一度も
+ * 実行されず、導出ロジックが壊れても検知できない（空洞テスト）。本テストは mapRow を
+ * 直接 import し、生の行（status / done）を渡して実効ステータスの導出を実際に実行する。
  */
 
-import { describe, it, expect, beforeEach, mock } from "bun:test";
-import type { ActionItem } from "@/domain/models/actionItem";
+import { describe, it, expect } from "bun:test";
+import { mapRow } from "@/infrastructure/repositories/actionItemRepository";
+import { actionItems } from "@/infrastructure/schema";
 
-// ---------------------------------------------------------------------------
-// モック状態
-// ---------------------------------------------------------------------------
+// 生の DB 行（typeof actionItems.$inferSelect）を組み立てるヘルパ
+function rawRow(
+  overrides: Partial<typeof actionItems.$inferSelect>
+): typeof actionItems.$inferSelect {
+  return {
+    id: "item-001",
+    organizationId: "org-001",
+    description: "テストアクションアイテム",
+    assigneeId: null,
+    dueDate: null,
+    done: false,
+    status: null,
+    meetingId: null,
+    dealId: null,
+    inquiryId: null,
+    createdById: "user-001",
+    createdAt: new Date("2026-01-01"),
+    updatedAt: new Date("2026-01-01"),
+    version: 1,
+    ...overrides,
+  };
+}
 
-const state = {
-  actionItems: [] as ActionItem[],
-};
-
-// ---------------------------------------------------------------------------
-// モジュールモック（個別ファイル — 静的 import より前に評価される）
-// ---------------------------------------------------------------------------
-
-// actionItemRepository の個別ファイルモック
-mock.module("@/infrastructure/repositories/actionItemRepository", () => ({
-  findByOrganization: async (_orgId: string, _filters?: unknown) => state.actionItems,
-  findById: async (_id: string, _orgId: string) => state.actionItems[0] ?? null,
-  create: async () => { throw new Error("not implemented in this test"); },
-  update: async () => null,
-  findByDeal: async () => [],
-  findByMeeting: async () => [],
-  deleteById: async () => false,
-}));
-
-import { listActionItems } from "@/application/usecases/listActionItems";
-
-// ---------------------------------------------------------------------------
-// テストデータ
-// ---------------------------------------------------------------------------
-
-const ORG_ID = "org-001";
-const ACTOR_ID = "user-001";
-
-const baseActionItem = {
-  id: "item-001",
-  organizationId: ORG_ID,
-  description: "テストアクションアイテム",
-  assigneeId: null,
-  dueDate: null,
-  meetingId: null,
-  dealId: null,
-  inquiryId: null,
-  createdById: ACTOR_ID,
-  createdAt: new Date("2026-01-01"),
-  updatedAt: new Date("2026-01-01"),
-  version: 1,
-};
-
-// ---------------------------------------------------------------------------
-// テスト
-// ---------------------------------------------------------------------------
-
-describe("actionItem status 導出ロジック", () => {
-  beforeEach(() => {
-    state.actionItems = [];
+describe("actionItemRepository.mapRow — status 導出", () => {
+  it("status=null, done=false の行は実効 status が 'todo' に導出される", () => {
+    const result = mapRow(rawRow({ status: null, done: false }));
+    expect(result.status).toBe("todo");
+    expect(result.done).toBe(false);
   });
 
-  it("status=null(todo相当), done=false の行は実効 status が 'todo' になる", async () => {
-    // mapRow: status=null, done=false → "todo" に導出した結果を返す repository を模倣
-    state.actionItems = [
-      { ...baseActionItem, done: false, status: "todo" as const },
-    ];
-
-    const result = await listActionItems({ organizationId: ORG_ID });
-
-    expect(result).toHaveLength(1);
-    expect(result[0].status).toBe("todo");
-    expect(result[0].done).toBe(false);
+  it("status=null, done=true の行は実効 status が 'done' に導出される", () => {
+    const result = mapRow(rawRow({ status: null, done: true }));
+    expect(result.status).toBe("done");
+    expect(result.done).toBe(true);
   });
 
-  it("status=null(done相当), done=true の行は実効 status が 'done' になる", async () => {
-    // mapRow: status=null, done=true → "done" に導出した結果を返す repository を模倣
-    state.actionItems = [
-      { ...baseActionItem, done: true, status: "done" as const },
-    ];
-
-    const result = await listActionItems({ organizationId: ORG_ID });
-
-    expect(result).toHaveLength(1);
-    expect(result[0].status).toBe("done");
-    expect(result[0].done).toBe(true);
+  it("status='in_progress'(明示) は done に関わらず優先される", () => {
+    const result = mapRow(rawRow({ status: "in_progress", done: false }));
+    expect(result.status).toBe("in_progress");
   });
 
-  it("status='in_progress' の行は明示値が優先され実効 status が 'in_progress' になる", async () => {
-    // status が非 null の場合はその値がそのまま使われる
-    state.actionItems = [
-      { ...baseActionItem, done: false, status: "in_progress" as const },
-    ];
-
-    const result = await listActionItems({ organizationId: ORG_ID });
-
-    expect(result).toHaveLength(1);
-    expect(result[0].status).toBe("in_progress");
-    expect(result[0].done).toBe(false);
+  it("status='done'(明示) は done=false でも 'done' になる（明示値優先）", () => {
+    const result = mapRow(rawRow({ status: "done", done: false }));
+    expect(result.status).toBe("done");
   });
 });
