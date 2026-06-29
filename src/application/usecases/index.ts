@@ -109,3 +109,6 @@ export { deactivateUser } from "./deactivateUser";
 export type { DeactivateUserResult } from "./deactivateUser";
 export { reactivateUser } from "./reactivateUser";
 export type { ReactivateUserResult } from "./reactivateUser";
+export { provisionOrganization } from "./provisionOrganization";
+export type { ProvisionOrganizationResult } from "./provisionOrganization";
+export { listAllOrganizations } from "./listAllOrganizations";
