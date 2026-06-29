@@ -116,7 +116,7 @@ export async function getDealActivity(params: {
         `interaction:${i.id}`,
         {
           label: `契約調整 ${i.date.toLocaleDateString("ja-JP")}`,
-          href: `/contracts/${i.contractId}`,
+          href: i.contractId ? `/contracts/${i.contractId}` : `/contracts`,
         } as TargetInfo,
       ])
     ),
@@ -128,9 +128,10 @@ export async function getDealActivity(params: {
           `interaction:${i.id}`,
           {
             label: `請求調整 ${i.date.toLocaleDateString("ja-JP")}`,
-            href: relatedInvoice
-              ? `/contracts/${relatedInvoice.contractId}/invoices/${i.invoiceId}`
-              : `/contracts`,
+            href:
+              relatedInvoice && i.invoiceId
+                ? `/contracts/${relatedInvoice.contractId}/invoices/${i.invoiceId}`
+                : `/contracts`,
           } as TargetInfo,
         ];
       })
