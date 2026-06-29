@@ -84,6 +84,7 @@ export { hasPendingApproval } from "./hasPendingApproval";
 export { createActionItem } from "./createActionItem";
 export { toggleActionItemDone } from "./toggleActionItemDone";
 export { updateActionItem } from "./updateActionItem";
+export { updateActionItemStatus } from "./updateActionItemStatus";
 export { deleteActionItem } from "./deleteActionItem";
 export { listActionItemsByDeal } from "./listActionItemsByDeal";
 export { listActionItemsByMeeting } from "./listActionItemsByMeeting";

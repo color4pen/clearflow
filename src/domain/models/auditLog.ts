@@ -18,6 +18,7 @@ export type AuditAction =
   | "action_item.update"
   | "action_item.delete"
   | "action_item.toggle"
+  | "action_item.updateStatus"
   | "inquiry.create"
   | "inquiry.update"
   | "inquiry.updateStatus"
@@ -74,6 +75,7 @@ export type AuditTargetType =
 
 export type AuditMetadataMap = {
   "action_item.toggle": { done: boolean };
+  "action_item.updateStatus": { status: string };
 };
 
 export type AuditLog = {
