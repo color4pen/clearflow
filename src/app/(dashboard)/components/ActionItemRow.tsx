@@ -13,6 +13,7 @@ import { ConfirmDialog, useToast } from "@/app/components";
 import { ActionItemModal } from "./ActionItemModal";
 import type { LinkTarget } from "./LinkTargetPicker";
 import type { ActionItem } from "@/domain/models/actionItem";
+import { StatusChipSelect } from "./StatusChipSelect";
 
 type Props = {
   item: ActionItem;
@@ -156,26 +157,14 @@ export function ActionItemRow({
         className={`grid items-center text-base-app px-3.5 py-2.5 hover:bg-bg-surface-alt ${
           editable ? "cursor-pointer" : ""
         }`}
-        style={{ gridTemplateColumns: "120px 1fr 100px 100px 140px" }}
+        style={{ gridTemplateColumns: "100px 1fr 100px 100px 140px" }}
         onClick={editable ? () => setShowEditModal(true) : undefined}
       >
-        <select
+        <StatusChipSelect
           value={item.status}
           disabled={isPending || !editable}
-          onChange={(e) => handleStatusChange(e.target.value as ActionItemStatus)}
-          onClick={(e) => e.stopPropagation()}
-          className={`text-sm border rounded px-1 py-0.5 cursor-pointer disabled:cursor-default ${
-            item.status === "done"
-              ? "text-text-muted bg-bg-surface"
-              : item.status === "in_progress"
-              ? "text-primary bg-bg-surface"
-              : "text-text bg-bg-surface"
-          }`}
-        >
-          <option value="todo">未着手</option>
-          <option value="in_progress">対応中</option>
-          <option value="done">完了</option>
-        </select>
+          onChange={handleStatusChange}
+        />
         <span
           className={`min-w-0 truncate ${
             item.status === "done" ? "text-text-muted line-through" : "text-text"
@@ -213,23 +202,12 @@ export function ActionItemRow({
         }`}
         onClick={editable ? () => setShowEditModal(true) : undefined}
       >
-        <select
+        <StatusChipSelect
           value={item.status}
           disabled={isPending || !editable}
-          onChange={(e) => handleStatusChange(e.target.value as ActionItemStatus)}
-          onClick={(e) => e.stopPropagation()}
-          className={`text-sm border rounded px-1 py-0.5 cursor-pointer disabled:cursor-default flex-shrink-0 ${
-            item.status === "done"
-              ? "text-text-muted bg-bg-surface"
-              : item.status === "in_progress"
-              ? "text-primary bg-bg-surface"
-              : "text-text bg-bg-surface"
-          }`}
-        >
-          <option value="todo">未着手</option>
-          <option value="in_progress">対応中</option>
-          <option value="done">完了</option>
-        </select>
+          onChange={handleStatusChange}
+          className="flex-shrink-0"
+        />
         <div className="flex-1 min-w-0">
           <p
             className={`break-words ${

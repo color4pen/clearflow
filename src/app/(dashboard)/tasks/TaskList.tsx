@@ -142,8 +142,8 @@ export function TaskList({ items, orgUsers, currentUserId, canDelete }: Props) {
         <p className="text-xs text-text-muted px-3.5 py-4">タスクはありません</p>
       ) : (
         <div>
-          <div className="grid text-table-head font-medium text-text-secondary bg-bg-table-head px-3.5 py-2" style={{ gridTemplateColumns: "24px 1fr 100px 100px 140px" }}>
-            <span></span>
+          <div className="grid text-table-head font-medium text-text-secondary bg-bg-table-head px-3.5 py-2" style={{ gridTemplateColumns: "100px 1fr 100px 100px 140px" }}>
+            <span>状態</span>
             <span>内容</span>
             <span>担当者</span>
             <span>期日</span>
