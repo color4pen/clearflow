@@ -43,20 +43,23 @@
 - `status` enum カラム → 現時点では active/deactivated の 2 状態のみ。nullable timestamp のほうがシンプルかつ日時情報を保持できる
 - `is_active` boolean → 無効化日時が失われる
 
-### D2: 認証ゲートは `findByEmailForAuth` で強制
+### D2: 認証ゲートは `findByEmailForAuth` および `findByIdForAuth` で強制
 
-`findByEmailForAuth` の WHERE 句に `deactivated_at IS NULL` を追加し、無効化済みユーザーを認証経路から除外する。
+`findByEmailForAuth` と `findByIdForAuth` の WHERE 句に `deactivated_at IS NULL` を追加し、無効化済みユーザーを全ての認証経路から除外する。
 
-**Rationale**: 認証の最上流で遮断することで、UI やアクション層に散在するガードを不要にする。`authorize` コールバックの前段（DB 問い合わせ）でユーザーが返らなくなるため、パスワード照合にすら到達しない。
+**Rationale**: 認証の最上流で遮断することで、UI やアクション層に散在するガードを不要にする。`authorize` コールバックの前段（DB 問い合わせ）でユーザーが返らなくなるため、パスワード照合にすら到達しない。`findByIdForAuth` は `changeOwnPassword` 等の認証目的 usecase でも使用されるため、同様のフィルターを適用して対称性を保つ。発行済み JWT が有効な間は `findByIdForAuth` 経由の操作（パスワード変更等）も遮断されるため、無効化直後から保護が有効になる。
 
 **Alternatives considered**:
 - `authorize` コールバック内での `deactivated_at` チェック → `findByEmailForAuth` が UserWithPassword を返した後に判定することも可能だが、不要なデータを取得するコストがあり、WHERE で絞るほうがクリーン
+- `findByIdForAuth` のみ除外しない → 無効化済みユーザーが JWT 寿命内にパスワードを変更できる非対称な状態となり、セキュリティ上望ましくない
 
-### D3: ロックアウト防止ガードを `updateUserRole` と共有
+### D3: ロックアウト防止ガードを `updateUserRole` と共有し、無効化済み admin を除外する
 
-`deactivateUser` usecase で「自己無効化不可」「組織で最後の admin の無効化不可」を実装する。ガード条件は `updateUserRole` の最後の admin ガードと同一ロジック（`findByOrganization` で他 admin を数える）。
+`deactivateUser` usecase で「自己無効化不可」「組織で最後の active admin の無効化不可」を実装する。ガード条件は `updateUserRole` の最後の admin ガードと対称的なロジック（`findByOrganization` で他の有効な admin を数える）。
 
-**Rationale**: admin が 1 人しかいない状態でその admin を無効化すると組織がロックアウトされる。同じ不変条件を別の usecase でも適用する。ロジック重複は少量のため、現時点では共通関数への抽出は不要。
+`updateUserRole` の `otherAdmins` フィルターにも `deactivatedAt === null` 条件を追加し、無効化済み admin をカウント対象から除外する。これにより、deactivated admin が有効な JWT を保持している間でも、active admin の唯一性ガードが正しく機能する。
+
+**Rationale**: admin が 1 人しかいない状態でその admin を無効化・降格すると組織がロックアウトされる。同じ不変条件を両 usecase に適用する。`deactivateUser`（deactivatedAt === null フィルターあり）と `updateUserRole`（フィルターなし）の非対称性を解消することで、deactivated admin が active admin を降格できるセキュリティギャップを塞ぐ。ロジック重複は少量のため、現時点では共通関数への抽出は不要。
 
 **Alternatives considered**:
 - domain service として不変条件を共通化 → 現時点では 2 箇所のみで、ロジックも単純。共通化の複雑さに対してメリットが薄い

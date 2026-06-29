@@ -25,14 +25,17 @@
 - `bun run typecheck` が通る
 - 既存テスト（`bun test`）が変更なしで green
 
-## T-03: findByEmailForAuth に無効化ユーザー除外条件を追加する
+## T-03: findByEmailForAuth と findByIdForAuth に無効化ユーザー除外条件を追加する
 
 - [ ] `src/infrastructure/repositories/userRepository.ts` の `findByEmailForAuth` の WHERE 句に `isNull(users.deactivatedAt)` 条件を追加する（`and(eq(users.email, email), isNull(users.deactivatedAt))`）
+- [ ] `src/infrastructure/repositories/userRepository.ts` の `findByIdForAuth` の WHERE 句に `isNull(users.deactivatedAt)` 条件を追加する（`and(eq(users.id, id), eq(users.organizationId, organizationId), isNull(users.deactivatedAt))`）
 - [ ] `drizzle-orm` から `isNull` をインポートする
 
 **Acceptance Criteria**:
 - `findByEmailForAuth` は `deactivated_at IS NULL` のユーザーのみ返す
+- `findByIdForAuth` は `deactivated_at IS NULL` のユーザーのみ返す
 - 無効化済みユーザーは `findByEmailForAuth` で null が返る
+- 無効化済みユーザーは `findByIdForAuth` で null が返る（パスワード変更等の認証用途でも遮断される）
 - `bun run typecheck` が通る
 
 ## T-04: userRepository に deactivate / reactivate メソッドを追加する
@@ -86,18 +89,31 @@
 - `db.transaction` 内でリポジトリ更新と監査記録が実行される
 - `bun run typecheck` が通る
 
+## T-07b: updateUserRole の otherAdmins フィルターに無効化済みユーザー除外条件を追加する
+
+- [ ] `src/application/usecases/updateUserRole.ts` の `otherAdmins` フィルター条件に `&& u.deactivatedAt === null` を追加する（`u.role === "admin" && u.id !== data.targetUserId && u.deactivatedAt === null`）
+- [ ] `findByOrganization` が `deactivatedAt` を含む `User` を返すこと（T-02 完了後に有効）を前提とする
+
+**Acceptance Criteria**:
+- `updateUserRole` の `otherAdmins` フィルターは `deactivatedAt === null` の admin のみをカウントする
+- deactivated admin のみが残る組織で active admin を降格しようとすると「組織に最低1人の管理者が必要です」エラーが返る
+- deactivated admin A（有効な JWT を保持）と active admin B（唯一の有効 admin）がいる状態で A が B を降格しようとした場合、ガードが A を除外して B だけをカウントし、降格を拒否する
+- `bun run typecheck` が通る
+
 ## T-08: reactivateUser usecase を作成する
 
 - [ ] `src/application/usecases/reactivateUser.ts` を作成する
 - [ ] 入力型: `{ actorId: string; targetUserId: string; organizationId: string }`
 - [ ] 戻り値型: `ReactivateUserResult = { ok: true } | { ok: false; reason: string }`
 - [ ] `findById(targetUserId, organizationId)` で対象ユーザーを取得。見つからなければ `{ ok: false, reason: "ユーザーが見つかりません" }`
+- [ ] 取得したユーザーの `deactivatedAt` が null（すでに有効）の場合は早期リターンで `{ ok: false, reason: "ユーザーはすでに有効です" }` を返す（no-op 実行と監査ログ記録を防ぐ）
 - [ ] `db.transaction` 内で `userRepository.reactivate(targetUserId, organizationId, tx)` と `recordAudit({ action: "user.reactivate", targetType: "user", targetId: targetUserId, actorId, organizationId }, tx)` を実行する
 - [ ] `src/application/usecases/index.ts` に `export { reactivateUser } from "./reactivateUser"` を追加する
 
 **Acceptance Criteria**:
 - 存在しないユーザーの再有効化が拒否される
-- 正常系で `deactivated_at` が null に設定され、`user.reactivate` 監査ログが記録される
+- すでに有効なユーザーを再有効化しようとすると「ユーザーはすでに有効です」エラーが返り、DB 更新も監査ログ記録も行われない
+- 正常系（deactivatedAt が non-null のユーザー）で `deactivated_at` が null に設定され、`user.reactivate` 監査ログが記録される
 - `db.transaction` 内でリポジトリ更新と監査記録が実行される
 - `bun run typecheck` が通る
 
@@ -160,6 +176,7 @@
   - `recordAudit` がトランザクション内で呼ばれる
   - `action` が `"user.reactivate"` である
   - ユーザーが見つからない場合のエラーメッセージ
+  - すでに有効なユーザーへの再有効化拒否（early return ガード、「ユーザーはすでに有効です」メッセージ）
 - [ ] `src/__tests__/settings/userSettingsActions.test.ts` に `deactivateUserAction` / `reactivateUserAction` の静的コード解析テストを追加する
   - `canPerform` で `"deactivateUser"` 権限チェックの存在
   - `"use server"` ディレクティブ
@@ -168,7 +185,8 @@
   - `revalidatePath` の呼び出し
 - [ ] `src/__tests__/domain/authorization.test.ts` に `deactivateUser` 権限テストを追加する
   - admin のみが `deactivateUser` 操作を実行できることを検証
-- [ ] 認証ゲートのテストを追加する（`findByEmailForAuth` が `deactivated_at IS NULL` で絞ることの静的コード解析）
+- [ ] 認証ゲートのテストを追加する（`findByEmailForAuth` と `findByIdForAuth` が `deactivated_at IS NULL` で絞ることの静的コード解析）
+- [ ] `updateUserRole` の `otherAdmins` フィルターに `deactivatedAt === null` 条件が含まれることの静的コード解析テストを追加する（`src/__tests__/usecases/userManagement.test.ts`）
 
 **Acceptance Criteria**:
 - 全テスト（`bun test`）が green
