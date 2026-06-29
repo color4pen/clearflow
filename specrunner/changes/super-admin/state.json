@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "3a8a032e-5817-4eb9-978a-884f3452986d",
   "createdAt": "2026-06-29T03:50:10.440Z",
-  "updatedAt": "2026-06-29T04:00:05.199Z",
+  "updatedAt": "2026-06-29T04:06:20.028Z",
   "request": {
     "title": "スーパー管理者による組織プロビジョニング",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "spec-review",
+  "step": "test-case-gen",
   "status": "running",
   "branch": "feat/super-admin-3a8a032e",
   "error": null,
@@ -34,10 +34,11 @@
     }
   ],
   "_journal": {
-    "historyCount": 9,
+    "historyCount": 13,
     "stepCounts": {
       "request-review": 1,
-      "design": 1
+      "design": 1,
+      "spec-review": 1
     }
   }
 }
