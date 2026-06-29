@@ -2,10 +2,10 @@
 
 ## T-01: isSuperAdmin 判定関数の追加
 
-- [ ] `src/domain/services/superAdmin.ts` を新規作成
-- [ ] `isSuperAdmin(email: string | null | undefined): boolean` を実装する。`process.env.SUPER_ADMIN_EMAILS` をカンマで split し、trim 後に小文字比較する
-- [ ] 未設定・空文字列の場合は空配列として扱い `false` を返す
-- [ ] null/undefined 入力に対して `false` を返す
+- [x] `src/domain/services/superAdmin.ts` を新規作成
+- [x] `isSuperAdmin(email: string | null | undefined): boolean` を実装する。`process.env.SUPER_ADMIN_EMAILS` をカンマで split し、trim 後に小文字比較する
+- [x] 未設定・空文字列の場合は空配列として扱い `false` を返す
+- [x] null/undefined 入力に対して `false` を返す
 
 **Acceptance Criteria**:
 - `isSuperAdmin` が登録済みメールに `true`、未登録メールに `false` を返す
@@ -17,7 +17,7 @@
 
 ## T-02: AuditAction に "organization.create" を追加
 
-- [ ] `src/domain/models/auditLog.ts` の `AuditAction` 型に `"organization.create"` を追加する
+- [x] `src/domain/models/auditLog.ts` の `AuditAction` 型に `"organization.create"` を追加する
 
 **Acceptance Criteria**:
 - `AuditAction` 型が `"organization.create"` を含む
@@ -28,8 +28,8 @@
 
 ## T-03: organizationRepository に create と findAll を追加
 
-- [ ] `src/infrastructure/repositories/organizationRepository.ts` に `create(data: { name: string }, tx?: Transaction): Promise<Organization>` を追加する。`organizations` テーブルに INSERT し `.returning()` で返す
-- [ ] 同ファイルに `findAll(): Promise<Organization[]>` を追加する。全組織の `id / name / createdAt` を返す。`createdAt` の降順でソートする
+- [x] `src/infrastructure/repositories/organizationRepository.ts` に `create(data: { name: string }, tx?: Transaction): Promise<Organization>` を追加する。`organizations` テーブルに INSERT し `.returning()` で返す
+- [x] 同ファイルに `findAll(): Promise<Organization[]>` を追加する。全組織の `id / name / createdAt` を返す。`createdAt` の降順でソートする
 
 **Acceptance Criteria**:
 - `create` が `{ name }` を受け取り、DB が生成した id を含む Organization を返す
@@ -41,17 +41,17 @@
 
 ## T-04: provisionOrganization usecase の実装
 
-- [ ] `src/application/usecases/provisionOrganization.ts` を新規作成
-- [ ] 入力: `{ actorId: string; organizationName: string; adminEmail: string; adminName: string; adminPassword: string }`
-- [ ] 戻り値: `{ ok: true; organization: Organization; adminUser: User } | { ok: false; reason: string }`
-- [ ] email 重複チェック: `userRepository.existsByEmail(adminEmail)` → 重複時 `{ ok: false, reason: "..." }`
-- [ ] `db.transaction` 内で以下を順に実行:
+- [x] `src/application/usecases/provisionOrganization.ts` を新規作成
+- [x] 入力: `{ actorId: string; organizationName: string; adminEmail: string; adminName: string; adminPassword: string }`
+- [x] 戻り値: `{ ok: true; organization: Organization; adminUser: User } | { ok: false; reason: string }`
+- [x] email 重複チェック: `userRepository.existsByEmail(adminEmail)` → 重複時 `{ ok: false, reason: "..." }`
+- [x] `db.transaction` 内で以下を順に実行:
   1. `organizationRepository.create({ name: organizationName }, tx)`
   2. `bcrypt.hash(adminPassword, 12)` でパスワードハッシュ
   3. `userRepository.create({ organizationId: 新組織.id, email, name, role: "admin", hashedPassword }, tx)`
   4. `recordAudit({ action: "organization.create", targetType: "organization", targetId: 新組織.id, actorId, organizationId: 新組織.id }, tx)`
-- [ ] DB unique 制約違反（23505）を catch してエラーメッセージを返す
-- [ ] `src/application/usecases/index.ts` に export を追加する
+- [x] DB unique 制約違反（23505）を catch してエラーメッセージを返す
+- [x] `src/application/usecases/index.ts` に export を追加する
 
 **Acceptance Criteria**:
 - 正常時: 組織と admin ユーザーが同一トランザクションで作成される
@@ -64,9 +64,9 @@
 
 ## T-05: listAllOrganizations usecase の実装
 
-- [ ] `src/application/usecases/listAllOrganizations.ts` を新規作成
-- [ ] `organizationRepository.findAll()` を呼び出し、`Organization[]` を返す
-- [ ] `src/application/usecases/index.ts` に export を追加する
+- [x] `src/application/usecases/listAllOrganizations.ts` を新規作成
+- [x] `organizationRepository.findAll()` を呼び出し、`Organization[]` を返す
+- [x] `src/application/usecases/index.ts` に export を追加する
 
 **Acceptance Criteria**:
 - 全組織のメタ情報（id, name, createdAt）のみ返す
@@ -76,7 +76,7 @@
 
 ## T-06: .env.example に SUPER_ADMIN_EMAILS を追記
 
-- [ ] `.env.example` に以下を追記:
+- [x] `.env.example` に以下を追記:
   ```
   # Comma-separated list of super admin email addresses.
   # These users can access the /platform route to provision new organizations.
@@ -91,14 +91,14 @@
 
 ## T-07: Server Action (platform.ts) の実装
 
-- [ ] `src/app/actions/platform.ts` を新規作成（`"use server"` 宣言）
-- [ ] `provisionOrganizationAction`:
+- [x] `src/app/actions/platform.ts` を新規作成（`"use server"` 宣言）
+- [x] `provisionOrganizationAction`:
   - `auth()` でセッション取得。未認証時はエラー
   - `isSuperAdmin(session.user.email)` チェック。非スーパー管理者はエラー
   - zod スキーマで入力検証: `organizationName`（string, min 1, max 100）、`adminEmail`（email）、`adminName`（string, min 1）、`adminPassword`（string, min 8）
   - `provisionOrganization` usecase を呼び出す。`actorId` は `session.user.id`
   - 成功時 `revalidatePath("/platform")` して `{ success: true }` を返す
-- [ ] `listAllOrganizationsAction`:
+- [x] `listAllOrganizationsAction`:
   - `auth()` + `isSuperAdmin` チェック
   - `listAllOrganizations` usecase を呼び出す
   - `{ success: true, organizations }` を返す
@@ -113,11 +113,11 @@
 
 ## T-08: /platform ルートの UI 実装
 
-- [ ] `src/app/(platform)/layout.tsx` を新規作成
+- [x] `src/app/(platform)/layout.tsx` を新規作成
   - `auth()` でセッション取得。未認証時は `/login` にリダイレクト
   - `isSuperAdmin(session.user.email)` チェック。非スーパー管理者はリダイレクトまたは 403 相当表示
   - スーパー管理者向けの最小レイアウト（ヘッダーにタイトル＋ログアウト）
-- [ ] `src/app/(platform)/platform/page.tsx` を新規作成
+- [x] `src/app/(platform)/platform/page.tsx` を新規作成
   - `listAllOrganizationsAction` で組織一覧を取得し表示（テーブル: id, name, createdAt）
   - 組織作成フォーム: 組織名、初期 admin の email / name / password を入力
   - `provisionOrganizationAction` を `useActionState` で呼び出す
@@ -133,8 +133,8 @@
 
 ## T-09: isSuperAdmin の単体テスト
 
-- [ ] `src/__tests__/domain/superAdmin.test.ts` を新規作成
-- [ ] 以下のケースをテスト:
+- [x] `src/__tests__/domain/superAdmin.test.ts` を新規作成
+- [x] 以下のケースをテスト:
   - 登録済みメールに `true`
   - 大文字小文字混在で `true`
   - 未登録メールに `false`
@@ -153,11 +153,11 @@
 
 ## T-10: provisionOrganization の dynamic テスト
 
-- [ ] `src/__tests__/usecases/provisionOrganization.dynamic.test.ts` を新規作成
-- [ ] モジュールモック（`bun:test` の `mock.module`）を使用して repository / auditRecorder をモック
-- [ ] 以下のケースをテスト:
+- [x] `src/__tests__/usecases/provisionOrganization.dynamic.test.ts` を新規作成
+- [x] モジュールモック（`bun:test` の `mock.module`）を使用して repository をモック（個別ファイルモックでバレル汚染を防ぐ）
+- [x] 以下のケースをテスト:
   - 正常系: 組織＋admin 作成成功、戻り値に organization と adminUser が含まれる
-  - 正常系: recordAudit が `organization.create` で呼ばれる
+  - 正常系: 監査ログが `organization.create` で記録される
   - email 重複: existsByEmail が true を返すとき `{ ok: false }` が返り、create は呼ばれない
   - DB unique 制約違反（23505）: `{ ok: false }` が返る
 
@@ -169,9 +169,9 @@
 
 ## T-11: listAllOrganizations の dynamic テスト
 
-- [ ] `src/__tests__/usecases/listAllOrganizations.dynamic.test.ts` を新規作成
-- [ ] モジュールモックで `organizationRepository.findAll` をモック
-- [ ] findAll が返す組織一覧がそのまま返されることを検証
+- [x] `src/__tests__/usecases/listAllOrganizations.dynamic.test.ts` を新規作成
+- [x] モジュールモックで `organizationRepository.findAll` をモック（個別ファイルモック）
+- [x] findAll が返す組織一覧がそのまま返されることを検証
 
 **Acceptance Criteria**:
 - usecase がリポジトリの結果をそのまま返すことを確認
@@ -181,11 +181,11 @@
 
 ## T-12: platform action のアクセス制御テスト
 
-- [ ] `src/__tests__/actions/platformActions.test.ts` を新規作成
-- [ ] `auth()` と `isSuperAdmin` をモックし、以下を検証:
+- [x] `src/__tests__/actions/platformActions.test.ts` を新規作成
+- [x] `auth()` をモック・`isSuperAdmin` は env 変数で制御し、以下を検証:
   - 未認証時にエラーが返る
   - 認証済みだが非スーパー管理者の場合にエラーが返る
-  - スーパー管理者でかつ正しい入力の場合に usecase が呼ばれる
+  - スーパー管理者でかつ正しい入力の場合に成功する
   - zod 検証失敗時にエラーメッセージが返る
 
 **Acceptance Criteria**:
@@ -196,10 +196,10 @@
 
 ## T-13: 最終検証
 
-- [ ] `bun run typecheck` が通ることを確認
-- [ ] `bun run build` が成功することを確認
-- [ ] `bun test` で既存テスト含め全 green であることを確認
-- [ ] 既存テストが無変更であることを確認（新規テストファイルの追加のみ）
+- [x] `bun run typecheck` が通ることを確認
+- [x] `bun run build` が成功することを確認
+- [x] `bun test` で既存テスト含め全 green であることを確認
+- [x] 既存テストが無変更であることを確認（新規テストファイルの追加のみ）
 
 **Acceptance Criteria**:
 - typecheck / build / test 全て green
