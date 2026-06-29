@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "adaf8068-d0ee-45b7-af5c-457bc272d4b3",
   "createdAt": "2026-06-29T05:10:25.956Z",
-  "updatedAt": "2026-06-29T05:47:20.122Z",
+  "updatedAt": "2026-06-29T06:02:56.477Z",
   "request": {
     "title": "アクションアイテムの作業ステータス（L1）",
     "type": "new-feature",
@@ -35,7 +35,7 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 31,
+    "historyCount": 37,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -43,7 +43,7 @@
       "test-case-gen": 1,
       "implementer": 1,
       "verification": 1,
-      "code-review": 1
+      "code-review": 2
     }
   }
 }
