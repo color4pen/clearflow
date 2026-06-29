@@ -864,6 +864,18 @@ export const interactionsRelations = relations(interactions, ({ one, many }) => 
     fields: [interactions.inquiryId],
     references: [inquiries.id],
   }),
+  contract: one(contracts, {
+    fields: [interactions.contractId],
+    references: [contracts.id],
+  }),
+  invoice: one(invoices, {
+    fields: [interactions.invoiceId],
+    references: [invoices.id],
+  }),
+  client: one(clients, {
+    fields: [interactions.clientId],
+    references: [clients.id],
+  }),
   createdBy: one(users, {
     fields: [interactions.createdById],
     references: [users.id],
