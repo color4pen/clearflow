@@ -1,4 +1,4 @@
-import { meetingRepository, dealRepository, inquiryRepository } from "@/infrastructure/repositories";
+import { interactionRepository, dealRepository, inquiryRepository } from "@/infrastructure/repositories";
 import { formatDateJP } from "@/lib/dateUtils";
 import { meetingTypeLabels } from "@/lib/meetingLabels";
 import type { LinkTargetResult } from "./searchDeals";
@@ -7,12 +7,13 @@ export async function searchMeetings(
   organizationId: string,
   query: string
 ): Promise<LinkTargetResult[]> {
-  const meetings = await meetingRepository.searchBySummary(organizationId, query);
+  const meetings = await interactionRepository.searchBySummary(organizationId, query);
 
   const results: LinkTargetResult[] = [];
 
   for (const meeting of meetings) {
-    const primary = `${formatDateJP(meeting.date)} ${meetingTypeLabels[meeting.type]}`;
+    const typeLabel = meeting.meetingType ? meetingTypeLabels[meeting.meetingType] : "";
+    const primary = `${formatDateJP(meeting.date)} ${typeLabel}`.trim();
     let secondary: string | null = null;
     // 商談画面は案件配下にのみ存在する（引合直下の商談はリンク先なし）
     const href = meeting.dealId

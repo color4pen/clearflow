@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createMeetingAction } from "@/app/actions/meetings";
 import { FormField, Input, Select, Textarea, SubmitButton, preventEnterSubmit } from "@/app/components";
-import type { ActionItem, HearingData } from "@/domain/models/meeting";
+import type { LegacyMeetingActionItem, HearingData } from "@/domain/models/interaction";
 
 type ExternalAttendee = {
   name: string;
@@ -44,7 +44,7 @@ export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers =
   const [externalAttendees, setExternalAttendees] = useState<ExternalAttendee[]>([
     { name: "", registerAsContact: false },
   ]);
-  const [actionItems, setActionItems] = useState<ActionItem[]>([]);
+  const [actionItems, setActionItems] = useState<LegacyMeetingActionItem[]>([]);
   const [hearingData, setHearingData] = useState<HearingData>({ ...emptyHearingData });
 
   const [state, formAction, isPending] = useActionState(
@@ -131,7 +131,7 @@ export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers =
     setActionItems((prev) => prev.filter((_, i) => i !== idx));
   }
 
-  function updateActionItem(idx: number, field: keyof ActionItem, value: string | boolean | null) {
+  function updateActionItem(idx: number, field: keyof LegacyMeetingActionItem, value: string | boolean | null) {
     setActionItems((prev) =>
       prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item))
     );

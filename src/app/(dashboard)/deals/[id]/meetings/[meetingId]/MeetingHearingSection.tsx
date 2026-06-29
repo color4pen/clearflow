@@ -4,24 +4,24 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateMeetingAction } from "@/app/actions/meetings";
 import { SectionCard, Input, Textarea, preventEnterSubmit } from "@/app/components";
-import type { HearingData } from "@/domain/models/meeting";
+import type { HearingData } from "@/domain/models/interaction";
 
 type Props = {
   meetingId: string;
   dealId: string;
-  hearingData: HearingData | null;
+  details: HearingData | null;
   editable: boolean;
 };
 
 export function MeetingHearingSection({
   meetingId,
   dealId,
-  hearingData: initialHearingData,
+  details: initialDetails,
   editable,
 }: Props) {
   const router = useRouter();
   const [hearingData, setHearingData] = useState<HearingData>(
-    initialHearingData ?? {
+    initialDetails ?? {
       challenge: null,
       budget: null,
       decisionMaker: null,

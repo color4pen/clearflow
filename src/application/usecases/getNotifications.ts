@@ -1,6 +1,6 @@
 import * as watchRepository from "@/infrastructure/repositories/watchRepository";
 import * as dealRepository from "@/infrastructure/repositories/dealRepository";
-import * as meetingRepository from "@/infrastructure/repositories/meetingRepository";
+import * as interactionRepository from "@/infrastructure/repositories/interactionRepository";
 import * as contractRepository from "@/infrastructure/repositories/contractRepository";
 import * as invoiceRepository from "@/infrastructure/repositories/invoiceRepository";
 import * as actionItemRepository from "@/infrastructure/repositories/actionItemRepository";
@@ -33,7 +33,7 @@ export async function getNotifications(params: {
       if (!deal) return null;
 
       const [meetings, contracts, actionItems, dealContacts] = await Promise.all([
-        meetingRepository.findAllByDeal(watch.dealId, organizationId),
+        interactionRepository.findAllByDeal(watch.dealId, organizationId),
         contractRepository.findAllByDealId(watch.dealId, organizationId),
         actionItemRepository.findByDeal(watch.dealId, organizationId),
         dealContactRepository.findByDeal(watch.dealId, organizationId),
@@ -47,24 +47,32 @@ export async function getNotifications(params: {
 
       const targets: Array<{ targetType: string; targetId: string }> = [
         { targetType: "deal", targetId: watch.dealId },
-        ...meetings.map((m) => ({ targetType: "meeting", targetId: m.id })),
+        // 新規ログ（interaction.*）と旧ログ（meeting.*）の両方を対象とする
+        ...meetings.flatMap((m) => [
+          { targetType: "interaction", targetId: m.id },
+          { targetType: "meeting", targetId: m.id },
+        ]),
         ...contracts.map((c) => ({ targetType: "contract", targetId: c.id })),
         ...invoices.map((inv) => ({ targetType: "invoice", targetId: inv.id })),
         ...actionItems.map((ai) => ({ targetType: "action_item", targetId: ai.id })),
         ...dealContacts.map((dc) => ({ targetType: "deal_contact", targetId: dc.id })),
       ];
 
+      // interaction と meeting の両キーを登録し、新旧両方のログに対応する
+      const meetingEntries = meetings.flatMap((m) => {
+        const typeLabel = m.meetingType ? meetingTypeLabels[m.meetingType] : "";
+        const label = `${typeLabel} ${m.date.toLocaleDateString("ja-JP")}`.trim();
+        const href = `/deals/${watch.dealId}/meetings/${m.id}`;
+        const info: TargetInfo = { label, href };
+        return [
+          [`interaction:${m.id}`, info],
+          [`meeting:${m.id}`, info],
+        ] as [string, TargetInfo][];
+      });
+
       const targetInfoMap: Record<string, TargetInfo> = {
         [`deal:${watch.dealId}`]: { label: deal.title, href: `/deals/${watch.dealId}` },
-        ...Object.fromEntries(
-          meetings.map((m) => [
-            `meeting:${m.id}`,
-            {
-              label: `${meetingTypeLabels[m.type] ?? m.type} ${m.date.toLocaleDateString("ja-JP")}`,
-              href: `/deals/${watch.dealId}/meetings/${m.id}`,
-            },
-          ])
-        ),
+        ...Object.fromEntries(meetingEntries),
         ...Object.fromEntries(
           contracts.map((c) => [
             `contract:${c.id}`,

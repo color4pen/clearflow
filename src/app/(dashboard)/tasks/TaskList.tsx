@@ -51,7 +51,7 @@ export function TaskList({ items, orgUsers, currentUserId, canDelete }: Props) {
 
     const dealId = linkTarget?.type === "deal" ? linkTarget.id : null;
     const inquiryId = linkTarget?.type === "inquiry" ? linkTarget.id : null;
-    const meetingId = linkTarget?.type === "meeting" ? linkTarget.id : null;
+    const interactionId = linkTarget?.type === "meeting" ? linkTarget.id : null;
 
     startTransition(async () => {
       const result = await createActionItemAction({
@@ -60,7 +60,7 @@ export function TaskList({ items, orgUsers, currentUserId, canDelete }: Props) {
         dueDate: dueDate || undefined,
         dealId: dealId ?? undefined,
         inquiryId: inquiryId ?? undefined,
-        meetingId: meetingId ?? undefined,
+        interactionId: interactionId ?? undefined,
       });
       if (result.message) {
         showToast(result.message, "error");

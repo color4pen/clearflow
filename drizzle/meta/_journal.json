@@ -120,6 +120,13 @@
       "when": 1782710879901,
       "tag": "0016_eminent_sway",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1782770630759,
+      "tag": "0017_interaction_generalization",
+      "breakpoints": true
     }
   ]
 }

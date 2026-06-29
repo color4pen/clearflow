@@ -18,7 +18,7 @@ import {
   clients,
   clientContacts,
   inquiries,
-  meetings,
+  interactions,
   deals,
   dealContacts,
   contracts,
@@ -45,8 +45,8 @@ async function seed() {
   await db.delete(invoices);
   // contracts must be deleted before deals (FK: dealId)
   await db.delete(contracts);
-  // meetings.dealId FK: meetings must be deleted before deals
-  await db.delete(meetings);
+  // interactions.dealId FK: interactions must be deleted before deals
+  await db.delete(interactions);
   // deals.inquiryId FK: deals must be deleted before inquiries
   await db.delete(deals);
   await db.delete(inquiries);
@@ -728,97 +728,107 @@ async function seed() {
   console.log("✅ Created deals (6 total: proposal_prep×2, won×3, lost)");
 
   // Create deal meetings (案件直紐づきの商談)
-  await db.insert(meetings).values({
+  await db.insert(interactions).values({
     organizationId: org.id,
+    kind: "meeting",
     dealId: wonDeal2.id,
-    type: "proposal",
+    meetingType: "proposal",
     date: new Date("2026-06-20T14:00:00"),
     location: "大和建設株式会社 会議室",
-    attendees: {
-      internal: [managerUser.name, memberUser.name],
-      external: ["田中 一郎"],
-    },
+    attendees: [
+      { userId: managerUser.id, name: managerUser.name, isExternal: false },
+      { userId: memberUser.id, name: memberUser.name, isExternal: false },
+      { name: "田中 一郎", isExternal: true },
+    ],
     summary: "案件化後の提案会議。詳細スコープと費用感を確認した。",
     actionItems: [
       { description: "詳細見積書を作成する", assignee: managerUser.name, dueDate: "2026-07-05", done: false },
       { description: "技術要件を整理する", assignee: memberUser.name, dueDate: "2026-07-05", done: false },
     ],
-    hearingData: null,
+    details: null,
     createdById: managerUser.id,
   });
 
-  await db.insert(meetings).values({
+  await db.insert(interactions).values({
     organizationId: org.id,
+    kind: "meeting",
     dealId: wonDeal.id,
-    type: "closing",
+    meetingType: "closing",
     date: new Date("2026-06-10T10:00:00"),
     location: "株式会社テック商事 応接室",
-    attendees: {
-      internal: [adminUser.name, managerUser.name],
-      external: ["山田 太郎", "鈴木 花子"],
-    },
+    attendees: [
+      { userId: adminUser.id, name: adminUser.name, isExternal: false },
+      { userId: managerUser.id, name: managerUser.name, isExternal: false },
+      { name: "山田 太郎", isExternal: true },
+      { name: "鈴木 花子", isExternal: true },
+    ],
     summary: "契約条件の最終確認。準委任契約で合意。7月1日キックオフ予定。",
     actionItems: [
       { description: "契約書のドラフトを送付する", assignee: adminUser.name, dueDate: "2026-06-15", done: true },
       { description: "プロジェクト体制図を作成する", assignee: managerUser.name, dueDate: "2026-06-25", done: true },
     ],
-    hearingData: null,
+    details: null,
     createdById: adminUser.id,
   });
 
-  await db.insert(meetings).values({
+  await db.insert(interactions).values({
     organizationId: org.id,
+    kind: "meeting",
     dealId: wonDeal.id,
-    type: "followup",
+    meetingType: "followup",
     date: new Date("2026-06-28T14:00:00"),
     location: "オンライン（Zoom）",
-    attendees: {
-      internal: [managerUser.name, memberUser.name],
-      external: ["山田 太郎"],
-    },
+    attendees: [
+      { userId: managerUser.id, name: managerUser.name, isExternal: false },
+      { userId: memberUser.id, name: memberUser.name, isExternal: false },
+      { name: "山田 太郎", isExternal: true },
+    ],
     summary: "キックオフ前の最終打ち合わせ。開発環境のセットアップ手順を共有。",
     actionItems: [
       { description: "VPN接続情報を提供する", assignee: "山田 太郎", dueDate: "2026-06-30", done: false },
     ],
-    hearingData: null,
+    details: null,
     createdById: managerUser.id,
   });
   console.log("✅ Created deal meetings (initial 3)");
 
   // Create deal meetings for new deals
-  await db.insert(meetings).values({
+  await db.insert(interactions).values({
     organizationId: org.id,
+    kind: "meeting",
     dealId: wonDeal3.id,
-    type: "negotiation",
+    meetingType: "negotiation",
     date: new Date("2026-07-10T13:00:00"),
     location: "さくら物流株式会社 本社",
-    attendees: {
-      internal: [adminUser.name],
-      external: ["高橋 美咲", "中村 健太"],
-    },
+    attendees: [
+      { userId: adminUser.id, name: adminUser.name, isExternal: false },
+      { name: "高橋 美咲", isExternal: true },
+      { name: "中村 健太", isExternal: true },
+    ],
     summary: "配送ルート最適化の価格交渉。SES契約での提案を検討中。",
     actionItems: [
       { description: "SES単価の最終提示", assignee: adminUser.name, dueDate: "2026-07-15", done: false },
     ],
-    hearingData: null,
+    details: null,
     createdById: adminUser.id,
   });
   // 案件フェーズ前の商談（inquiryId 廃止により対応する案件に紐づけ直し）
-  await db.insert(meetings).values({
+  await db.insert(interactions).values({
     organizationId: org.id,
+    kind: "meeting",
     dealId: wonDeal2.id,
-    type: "hearing",
+    meetingType: "hearing",
     date: new Date("2026-04-15T10:00:00"),
     location: "大和建設株式会社 第1会議室",
-    attendees: {
-      internal: [managerUser.name],
-      external: ["田中 一郎"],
-    },
+    attendees: [
+      { userId: managerUser.id, name: managerUser.name, isExternal: false },
+      { name: "田中 一郎", isExternal: true },
+    ],
     summary: "初回ヒアリング。工事進捗管理の現状課題をヒアリングした。",
     actionItems: [
       { description: "他社事例をまとめて次回提示する", assignee: managerUser.name, dueDate: "2026-04-30", done: true },
     ],
-    hearingData: {
+    details: {
       challenge: "工事進捗の可視化と承認フロー整備が課題",
       budget: "1500万円〜2000万円",
       decisionMaker: "取締役 工事本部長",
@@ -829,40 +839,46 @@ async function seed() {
     createdById: managerUser.id,
   });
 
-  await db.insert(meetings).values({
+  await db.insert(interactions).values({
     organizationId: org.id,
+    kind: "meeting",
     dealId: wonDeal2.id,
-    type: "proposal",
+    meetingType: "proposal",
     date: new Date("2026-05-20T10:00:00"),
     location: "大和建設株式会社 第2会議室",
-    attendees: {
-      internal: [managerUser.name, memberUser.name],
-      external: ["田中 一郎", "佐藤 次郎"],
-    },
+    attendees: [
+      { userId: managerUser.id, name: managerUser.name, isExternal: false },
+      { userId: memberUser.id, name: memberUser.name, isExternal: false },
+      { name: "田中 一郎", isExternal: true },
+      { name: "佐藤 次郎", isExternal: true },
+    ],
     summary: "工事管理ツールの提案書を提示。承認フロー機能を中心にデモを実施した。",
     actionItems: [
       { description: "カスタマイズ要件をまとめた提案書改訂版を提出する", assignee: managerUser.name, dueDate: "2026-06-05", done: false },
     ],
-    hearingData: null,
+    details: null,
     createdById: managerUser.id,
   });
 
-  await db.insert(meetings).values({
+  await db.insert(interactions).values({
     organizationId: org.id,
+    kind: "meeting",
     dealId: prepDeal.id,
-    type: "hearing",
+    meetingType: "hearing",
     date: new Date("2026-05-25T15:00:00"),
     location: "オンライン（Teams）",
-    attendees: {
-      internal: [adminUser.name, memberUser.name],
-      external: ["渡辺 浩二", "伊藤 恵"],
-    },
+    attendees: [
+      { userId: adminUser.id, name: adminUser.name, isExternal: false },
+      { userId: memberUser.id, name: memberUser.name, isExternal: false },
+      { name: "渡辺 浩二", isExternal: true },
+      { name: "伊藤 恵", isExternal: true },
+    ],
     summary: "リスク管理ダッシュボードの要件ヒアリング。リアルタイム性と可視化の粒度を確認。",
     actionItems: [
       { description: "技術検証の結果レポートを提出する", assignee: memberUser.name, dueDate: "2026-06-08", done: false },
       { description: "概算見積を作成する", assignee: adminUser.name, dueDate: "2026-06-15", done: false },
     ],
-    hearingData: {
+    details: {
       challenge: "リスク指標のリアルタイム監視ができていない",
       budget: "5000万円〜1億円",
       decisionMaker: "CTO",
@@ -873,21 +889,22 @@ async function seed() {
     createdById: adminUser.id,
   });
 
-  await db.insert(meetings).values({
+  await db.insert(interactions).values({
     organizationId: org.id,
+    kind: "meeting",
     dealId: wonDeal.id,
-    type: "followup",
+    meetingType: "followup",
     date: new Date("2026-06-15T11:00:00"),
     location: "株式会社テック商事 本社",
-    attendees: {
-      internal: [adminUser.name],
-      external: ["山田 太郎"],
-    },
+    attendees: [
+      { userId: adminUser.id, name: adminUser.name, isExternal: false },
+      { name: "山田 太郎", isExternal: true },
+    ],
     summary: "受注後のフォローアップ訪問。プロジェクト開始スケジュールを確認した。",
     actionItems: [
       { description: "キックオフ会議の日程を調整する", assignee: adminUser.name, dueDate: "2026-06-20", done: false },
     ],
-    hearingData: null,
+    details: null,
     createdById: adminUser.id,
   });
   console.log("✅ Created deal meetings (8 total)");

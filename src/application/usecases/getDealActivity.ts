@@ -1,4 +1,4 @@
-import * as meetingRepository from "@/infrastructure/repositories/meetingRepository";
+import * as interactionRepository from "@/infrastructure/repositories/interactionRepository";
 import * as contractRepository from "@/infrastructure/repositories/contractRepository";
 import * as invoiceRepository from "@/infrastructure/repositories/invoiceRepository";
 import * as auditLogRepository from "@/infrastructure/repositories/auditLogRepository";
@@ -31,7 +31,7 @@ export async function getDealActivity(params: {
   const { dealId, organizationId, dealTitle } = params;
 
   const [meetings, contracts] = await Promise.all([
-    meetingRepository.findAllByDeal(dealId, organizationId),
+    interactionRepository.findAllByDeal(dealId, organizationId),
     contractRepository.findAllByDealId(dealId, organizationId),
   ]);
 
@@ -44,7 +44,11 @@ export async function getDealActivity(params: {
 
   const targets: Array<{ targetType: string; targetId: string }> = [
     { targetType: "deal", targetId: dealId },
-    ...meetings.map((m) => ({ targetType: "meeting", targetId: m.id })),
+    // 新規ログ（interaction.*）と旧ログ（meeting.*）の両方を対象とする
+    ...meetings.flatMap((m) => [
+      { targetType: "interaction", targetId: m.id },
+      { targetType: "meeting", targetId: m.id },
+    ]),
     ...contracts.map((c) => ({ targetType: "contract", targetId: c.id })),
     ...invoices.map((inv) => ({ targetType: "invoice", targetId: inv.id })),
   ];
@@ -66,17 +70,21 @@ export async function getDealActivity(params: {
   const logs = aggregated.slice(0, ACTIVITY_TIMELINE_LIMIT);
 
   // 既に取得済みのエンティティから targetInfoMap を構築する（新規リポジトリ取得なし）
+  // interaction と meeting の両キーを登録し、新旧両方のログに対応する
+  const meetingEntries = meetings.flatMap((m) => {
+    const typeLabel = m.meetingType ? meetingTypeLabels[m.meetingType] : "";
+    const label = `${typeLabel} ${m.date.toLocaleDateString("ja-JP")}`.trim();
+    const href = `/deals/${dealId}/meetings/${m.id}`;
+    const info: TargetInfo = { label, href };
+    return [
+      [`interaction:${m.id}`, info],
+      [`meeting:${m.id}`, info],
+    ] as [string, TargetInfo][];
+  });
+
   const targetInfoMap: Record<string, TargetInfo> = {
     [`deal:${dealId}`]: { label: dealTitle, href: `/deals/${dealId}` },
-    ...Object.fromEntries(
-      meetings.map((m) => [
-        `meeting:${m.id}`,
-        {
-          label: `${meetingTypeLabels[m.type] ?? m.type} ${m.date.toLocaleDateString("ja-JP")}`,
-          href: `/deals/${dealId}/meetings/${m.id}`,
-        },
-      ])
-    ),
+    ...Object.fromEntries(meetingEntries),
     ...Object.fromEntries(
       contracts.map((c) => [
         `contract:${c.id}`,

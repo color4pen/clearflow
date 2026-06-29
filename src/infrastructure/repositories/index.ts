@@ -11,7 +11,7 @@ export * as idempotencyKeyRepository from "./idempotencyKeyRepository";
 export * as approvalDelegationRepository from "./approvalDelegationRepository";
 export * as clientRepository from "./clientRepository";
 export * as inquiryRepository from "./inquiryRepository";
-export * as meetingRepository from "./meetingRepository";
+export * as interactionRepository from "./interactionRepository";
 export * as dealRepository from "./dealRepository";
 export * as dealContactRepository from "./dealContactRepository";
 export * as contractRepository from "./contractRepository";

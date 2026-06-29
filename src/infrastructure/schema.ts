@@ -46,6 +46,13 @@ export const meetingTypeEnum = pgEnum("meeting_type", [
   "closing",
   "followup",
 ]);
+export const interactionKindEnum = pgEnum("interaction_kind", [
+  "meeting",
+  "call",
+  "email",
+  "contract_adjustment",
+  "invoice_adjustment",
+]);
 export const dealPhaseEnum = pgEnum("deal_phase", [
   "proposal_prep",
   "proposed",
@@ -358,17 +365,22 @@ export const inquiries = pgTable("inquiries", {
   index("inquiries_org_created_at_idx").on(table.organizationId, table.createdAt),
 ]);
 
-// Meetings table (商談記録)
-export const meetings = pgTable(
-  "meetings",
+// Interactions table (顧客接点: 商談・電話・メール等)
+export const interactions = pgTable(
+  "interactions",
   {
     id: uuid("id").primaryKey().defaultRandom(),
     organizationId: uuid("organization_id")
       .notNull()
       .references(() => organizations.id),
+    kind: interactionKindEnum("kind").notNull().default("meeting"),
     dealId: uuid("deal_id").references(() => deals.id),
     inquiryId: uuid("inquiry_id").references(() => inquiries.id),
-    type: meetingTypeEnum("type").notNull(),
+    contractId: uuid("contract_id").references(() => contracts.id),
+    invoiceId: uuid("invoice_id").references(() => invoices.id),
+    clientId: uuid("client_id").references(() => clients.id),
+    // 商談種別（kind=meeting のときのみ非 null）
+    meetingType: meetingTypeEnum("meeting_type"),
     date: timestamp("date").notNull(),
     location: text("location"),
     // Array<{ userId: string | null, contactId: string | null, name: string, isExternal: boolean }>
@@ -376,7 +388,8 @@ export const meetings = pgTable(
     summary: text("summary"),
     // Array<{ description: string, assignee: string, dueDate: string | null, done: boolean }>
     actionItems: jsonb("action_items").notNull().default([]),
-    hearingData: jsonb("hearing_data"),
+    // kind 固有データ（kind=meeting のときは HearingData）
+    details: jsonb("details"),
     createdById: uuid("created_by_id")
       .notNull()
       .references(() => users.id),
@@ -386,11 +399,14 @@ export const meetings = pgTable(
   },
   (table) => [
     check(
-      "meetings_deal_or_inquiry_check",
-      sql`${table.dealId} IS NOT NULL OR ${table.inquiryId} IS NOT NULL`
+      "interactions_related_entity_check",
+      sql`${table.dealId} IS NOT NULL OR ${table.inquiryId} IS NOT NULL OR ${table.contractId} IS NOT NULL OR ${table.invoiceId} IS NOT NULL OR ${table.clientId} IS NOT NULL`
     ),
-    index("meetings_org_deal_id_idx").on(table.organizationId, table.dealId),
-    index("meetings_org_inquiry_id_idx").on(table.organizationId, table.inquiryId),
+    index("interactions_org_deal_id_idx").on(table.organizationId, table.dealId),
+    index("interactions_org_inquiry_id_idx").on(table.organizationId, table.inquiryId),
+    index("interactions_org_contract_id_idx").on(table.organizationId, table.contractId),
+    index("interactions_org_invoice_id_idx").on(table.organizationId, table.invoiceId),
+    index("interactions_org_client_id_idx").on(table.organizationId, table.clientId),
   ]
 );
 
@@ -535,7 +551,7 @@ export const actionItems = pgTable(
     dueDate: timestamp("due_date"),
     done: boolean("done").notNull().default(false),
     status: text("status"),
-    meetingId: uuid("meeting_id").references(() => meetings.id, { onDelete: "set null" }),
+    interactionId: uuid("interaction_id").references(() => interactions.id, { onDelete: "set null" }),
     dealId: uuid("deal_id").references(() => deals.id, { onDelete: "set null" }),
     inquiryId: uuid("inquiry_id").references(() => inquiries.id, { onDelete: "set null" }),
     createdById: uuid("created_by_id")
@@ -547,7 +563,7 @@ export const actionItems = pgTable(
   },
   (table) => [
     index("action_items_org_done_idx").on(table.organizationId, table.done),
-    index("action_items_meeting_id_idx").on(table.meetingId),
+    index("action_items_interaction_id_idx").on(table.interactionId),
     index("action_items_deal_id_idx").on(table.dealId),
   ]
 );
@@ -626,7 +642,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   approvalDelegations: many(approvalDelegations),
   clients: many(clients),
   inquiries: many(inquiries),
-  meetings: many(meetings),
+  interactions: many(interactions),
   deals: many(deals),
   dealContacts: many(dealContacts),
   contracts: many(contracts),
@@ -662,7 +678,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   delegationsFrom: many(approvalDelegations, { relationName: "delegationsFrom" }),
   delegationsTo: many(approvalDelegations, { relationName: "delegationsTo" }),
   inquiries: many(inquiries),
-  meetings: many(meetings),
+  interactions: many(interactions),
   dealsAsAssignee: many(deals, { relationName: "dealsAsAssignee" }),
   dealsAsTechnicalLead: many(deals, { relationName: "dealsAsTechnicalLead" }),
   stepsApprovedBy: many(approvalSteps, { relationName: "stepsApprovedBy" }),
@@ -831,25 +847,37 @@ export const inquiriesRelations = relations(inquiries, ({ one, many }) => ({
     references: [users.id],
   }),
   deals: many(deals),
-  meetings: many(meetings),
+  interactions: many(interactions),
   actionItems: many(actionItems),
 }));
 
-export const meetingsRelations = relations(meetings, ({ one, many }) => ({
+export const interactionsRelations = relations(interactions, ({ one, many }) => ({
   organization: one(organizations, {
-    fields: [meetings.organizationId],
+    fields: [interactions.organizationId],
     references: [organizations.id],
   }),
   deal: one(deals, {
-    fields: [meetings.dealId],
+    fields: [interactions.dealId],
     references: [deals.id],
   }),
   inquiry: one(inquiries, {
-    fields: [meetings.inquiryId],
+    fields: [interactions.inquiryId],
     references: [inquiries.id],
   }),
+  contract: one(contracts, {
+    fields: [interactions.contractId],
+    references: [contracts.id],
+  }),
+  invoice: one(invoices, {
+    fields: [interactions.invoiceId],
+    references: [invoices.id],
+  }),
+  client: one(clients, {
+    fields: [interactions.clientId],
+    references: [clients.id],
+  }),
   createdBy: one(users, {
-    fields: [meetings.createdById],
+    fields: [interactions.createdById],
     references: [users.id],
   }),
   actionItemsRef: many(actionItems),
@@ -878,7 +906,7 @@ export const dealsRelations = relations(deals, ({ one, many }) => ({
     fields: [deals.estimateRequestId],
     references: [requests.id],
   }),
-  meetings: many(meetings),
+  interactions: many(interactions),
   dealContacts: many(dealContacts),
   contracts: many(contracts),
   actionItems: many(actionItems),
@@ -933,9 +961,9 @@ export const actionItemsRelations = relations(actionItems, ({ one }) => ({
     references: [users.id],
     relationName: "actionItemsAsAssignee",
   }),
-  meeting: one(meetings, {
-    fields: [actionItems.meetingId],
-    references: [meetings.id],
+  interaction: one(interactions, {
+    fields: [actionItems.interactionId],
+    references: [interactions.id],
   }),
   deal: one(deals, {
     fields: [actionItems.dealId],

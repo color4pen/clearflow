@@ -40,9 +40,9 @@ describe("listActionItems ユースケース 静的検証", () => {
     expect(content).toContain("dealRepository");
   });
 
-  it("meetingRepository の参照が含まれる（紐づけ先名前解決）", async () => {
+  it("interactionRepository の参照が含まれる（紐づけ先名前解決）", async () => {
     const content = await readSrc("application/usecases/listActionItems.ts");
-    expect(content).toContain("meetingRepository");
+    expect(content).toContain("interactionRepository");
   });
 
   it("inquiryRepository の参照が含まれる（紐づけ先名前解決）", async () => {

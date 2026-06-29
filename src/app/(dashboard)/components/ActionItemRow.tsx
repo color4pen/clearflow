@@ -66,8 +66,8 @@ export function ActionItemRow({
     if (item.dealId) {
       return { type: "deal", id: item.dealId, label: sourceName ?? item.dealId };
     }
-    if (item.meetingId) {
-      return { type: "meeting", id: item.meetingId, label: sourceName ?? item.meetingId };
+    if (item.interactionId) {
+      return { type: "meeting", id: item.interactionId, label: sourceName ?? item.interactionId };
     }
     if (item.inquiryId) {
       return { type: "inquiry", id: item.inquiryId, label: sourceName ?? item.inquiryId };
@@ -102,12 +102,12 @@ export function ActionItemRow({
         assigneeId: values.assigneeId,
         dueDate: values.dueDate,
         // 紐づけ先ピッカーを表示する一覧（showSource=true）でのみ単一紐づけを反映する。
-        // 案件/商談ページ（showSource=false）では link を送らず、既存の紐づけ（商談由来の dealId+meetingId 等）を保持する
+        // 案件/商談ページ（showSource=false）では link を送らず、既存の紐づけ（商談由来の dealId+interactionId 等）を保持する
         ...(showSource
           ? {
               dealId: linkTarget?.type === "deal" ? linkTarget.id : null,
               inquiryId: linkTarget?.type === "inquiry" ? linkTarget.id : null,
-              meetingId: linkTarget?.type === "meeting" ? linkTarget.id : null,
+              interactionId: linkTarget?.type === "meeting" ? linkTarget.id : null,
             }
           : {}),
       });

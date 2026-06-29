@@ -51,7 +51,7 @@ const base: ActionItem = {
   dueDate: null,
   done: false,
   status: "todo",
-  meetingId: null,
+  interactionId: null,
   dealId: null,
   inquiryId: null,
   createdById: "user-001",

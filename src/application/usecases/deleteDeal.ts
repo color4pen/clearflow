@@ -1,5 +1,5 @@
 import {
-  meetingRepository,
+  interactionRepository,
   contractRepository,
   dealRepository,
   dealContactRepository,
@@ -19,7 +19,7 @@ export async function deleteDeal(data: {
   actorId: string;
 }): Promise<DeleteDealResult> {
   // 商談の存在を確認する
-  const meetings = await meetingRepository.findAllByDeal(data.id, data.organizationId);
+  const meetings = await interactionRepository.findAllByDeal(data.id, data.organizationId);
   if (meetings.length > 0) {
     return { ok: false, reason: "商談が紐づいている案件は削除できません" };
   }

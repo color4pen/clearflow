@@ -83,9 +83,9 @@ describe("getNotifications usecase 静的検証", () => {
     expect(content).not.toContain("notificationRepository");
   });
 
-  it("meetingRepository.findAllByDeal の呼び出しが含まれる（配下エンティティの列挙）", async () => {
+  it("interactionRepository.findAllByDeal の呼び出しが含まれる（配下エンティティの列挙）", async () => {
     const content = await readSrc("application/usecases/getNotifications.ts");
-    expect(content).toContain("meetingRepository.findAllByDeal");
+    expect(content).toContain("interactionRepository.findAllByDeal");
   });
 
   it("contractRepository.findAllByDealId の呼び出しが含まれる", async () => {

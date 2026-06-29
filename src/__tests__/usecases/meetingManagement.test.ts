@@ -43,7 +43,7 @@ describe("createMeeting usecase 静的検証", () => {
     expect(content).toContain("dealRepository.findById");
   });
 
-  it("T-03: meetingRepository.create 呼び出しに dealId と inquiryId が含まれる", async () => {
+  it("T-03: interactionRepository.create 呼び出しに dealId と inquiryId が含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/createMeeting.ts");
     // 実行・検証 - dealId と inquiryId が create に渡される
@@ -75,11 +75,11 @@ describe("createMeeting usecase 静的検証", () => {
 });
 
 describe("updateMeeting usecase 静的検証", () => {
-  it("meetingRepository.findById の呼び出しが含まれる（存在確認）", async () => {
+  it("interactionRepository.findById の呼び出しが含まれる（存在確認）", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/updateMeeting.ts");
     // 実行・検証 - 商談存在確認がある
-    expect(content).toContain("meetingRepository.findById");
+    expect(content).toContain("interactionRepository.findById");
   });
 
   it("recordAudit の呼び出しが含まれる（監査ログ記録）", async () => {
@@ -106,19 +106,19 @@ describe("updateMeeting usecase 静的検証", () => {
 });
 
 describe("listMeetings usecase 静的検証", () => {
-  it("meetingRepository.findAllByDeal の呼び出しが含まれる", async () => {
+  it("interactionRepository.findAllByDeal の呼び出しが含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("application/usecases/listMeetings.ts");
     // 実行・検証 - リポジトリ呼び出しがある
-    expect(content).toContain("meetingRepository.findAllByDeal");
+    expect(content).toContain("interactionRepository.findAllByDeal");
   });
 });
 
-describe("Meeting domain model 静的検証", () => {
+describe("Interaction domain model 静的検証（旧 Meeting domain model）", () => {
   it("MeetingAttendee 型が userId / contactId / name / isExternal を持つ", async () => {
-    // 準備 - ソースファイルを読み込む
-    const content = await readSrc("domain/models/meeting.ts");
-    // 実行・検証 - 新 MeetingAttendee 型が定義されている
+    // 準備 - ソースファイルを読み込む（Meeting = Interaction のため interaction.ts を検証）
+    const content = await readSrc("domain/models/interaction.ts");
+    // 実行・検証 - MeetingAttendee 型が定義されている
     expect(content).toContain("MeetingAttendee");
     expect(content).toContain("userId");
     expect(content).toContain("contactId");
@@ -127,39 +127,47 @@ describe("Meeting domain model 静的検証", () => {
     expect(content).not.toContain("MeetingAttendees");
   });
 
-  it("Meeting 型の attendees が MeetingAttendee[] 型である", async () => {
+  it("Interaction 型の attendees が MeetingAttendee[] 型である", async () => {
     // 準備 - ソースファイルを読み込む
-    const content = await readSrc("domain/models/meeting.ts");
+    const content = await readSrc("domain/models/interaction.ts");
     // 実行・検証 - attendees が配列型
     expect(content).toContain("attendees: MeetingAttendee[]");
   });
 
-  it("Meeting 型の dealId が nullable である", async () => {
+  it("Interaction 型の dealId が nullable である", async () => {
     // 準備 - ソースファイルを読み込む
-    const content = await readSrc("domain/models/meeting.ts");
+    const content = await readSrc("domain/models/interaction.ts");
     // 実行・検証 - dealId が string | null
     expect(content).toContain("dealId: string | null");
   });
 
-  it("Meeting 型に inquiryId が含まれる", async () => {
+  it("Interaction 型に inquiryId が含まれる", async () => {
     // 準備 - ソースファイルを読み込む
-    const content = await readSrc("domain/models/meeting.ts");
+    const content = await readSrc("domain/models/interaction.ts");
     // 実行・検証 - inquiryId が string | null
     expect(content).toContain("inquiryId: string | null");
   });
+
+  it("meeting.ts が Interaction を Meeting として再エクスポートしている", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("domain/models/meeting.ts");
+    // 実行・検証 - re-export が含まれる
+    expect(content).toContain("MeetingAttendee");
+    expect(content).toContain("interaction");
+  });
 });
 
-describe("meetingRepository 静的検証", () => {
+describe("interactionRepository 静的検証（旧 meetingRepository）", () => {
   it("findAllByInquiry が実装されている", async () => {
     // 準備 - ソースファイルを読み込む
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    const content = await readSrc("infrastructure/repositories/interactionRepository.ts");
     // 実行・検証 - findAllByInquiry メソッドが存在する
     expect(content).toContain("findAllByInquiry");
   });
 
   it("MeetingAttendee 型を使用している（MeetingAttendees ではない）", async () => {
     // 準備 - ソースファイルを読み込む
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+    const content = await readSrc("infrastructure/repositories/interactionRepository.ts");
     // 実行・検証 - 新型が使われている
     expect(content).toContain("MeetingAttendee");
     expect(content).not.toContain("MeetingAttendees");

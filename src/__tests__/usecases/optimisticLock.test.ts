@@ -357,14 +357,14 @@ describe("requestRepository.findById supports Transaction parameter", () => {
 // ---------------------------------------------------------------------------
 
 describe("Schema: version columns (remaining entities)", () => {
-  it("meetings table has version column in schema.ts", async () => {
+  it("interactions table has version column in schema.ts", async () => {
     const src = await readSrc("infrastructure/schema.ts");
-    const meetingsTableStart = src.indexOf('pgTable(\n  "meetings"');
-    const meetingsTableEnd = src.indexOf(");", meetingsTableStart);
-    const meetingsTable = src.substring(meetingsTableStart, meetingsTableEnd);
-    expect(meetingsTable).toContain('integer("version")');
-    expect(meetingsTable).toContain(".notNull()");
-    expect(meetingsTable).toContain(".default(1)");
+    const interactionsTableStart = src.indexOf('pgTable(\n  "interactions"');
+    const interactionsTableEnd = src.indexOf(");", interactionsTableStart);
+    const interactionsTable = src.substring(interactionsTableStart, interactionsTableEnd);
+    expect(interactionsTable).toContain('integer("version")');
+    expect(interactionsTable).toContain(".notNull()");
+    expect(interactionsTable).toContain(".default(1)");
   });
 
   it("action_items table has version column in schema.ts", async () => {
@@ -393,8 +393,8 @@ describe("Schema: version columns (remaining entities)", () => {
 // ---------------------------------------------------------------------------
 
 describe("Domain model: version field (remaining entities)", () => {
-  it("Meeting type has version: number field", async () => {
-    const src = await readSrc("domain/models/meeting.ts");
+  it("Interaction type has version: number field", async () => {
+    const src = await readSrc("domain/models/interaction.ts");
     expect(src).toContain("version: number");
   });
 
@@ -414,9 +414,9 @@ describe("Domain model: version field (remaining entities)", () => {
 // ---------------------------------------------------------------------------
 
 describe("Repository: optimistic lock WHERE clause (remaining entities)", () => {
-  it("meetingRepository.update includes version in WHERE condition", async () => {
-    const src = await readSrc("infrastructure/repositories/meetingRepository.ts");
-    expect(src).toContain("eq(meetings.version, expectedVersion)");
+  it("interactionRepository.update includes version in WHERE condition", async () => {
+    const src = await readSrc("infrastructure/repositories/interactionRepository.ts");
+    expect(src).toContain("eq(interactions.version, expectedVersion)");
   });
 
   it("actionItemRepository.update includes version in WHERE condition", async () => {
@@ -429,8 +429,8 @@ describe("Repository: optimistic lock WHERE clause (remaining entities)", () => 
     expect(src).toContain("eq(revenueTargets.version, expectedVersion)");
   });
 
-  it("meetingRepository.update increments version on update", async () => {
-    const src = await readSrc("infrastructure/repositories/meetingRepository.ts");
+  it("interactionRepository.update increments version on update", async () => {
+    const src = await readSrc("infrastructure/repositories/interactionRepository.ts");
     expect(src).toContain("version: sql`version + 1`");
   });
 
@@ -444,8 +444,8 @@ describe("Repository: optimistic lock WHERE clause (remaining entities)", () => 
     expect(src).toContain("version: sql`version + 1`");
   });
 
-  it("meetingRepository.mapRow includes version field", async () => {
-    const src = await readSrc("infrastructure/repositories/meetingRepository.ts");
+  it("interactionRepository.mapRow includes version field", async () => {
+    const src = await readSrc("infrastructure/repositories/interactionRepository.ts");
     expect(src).toContain("version: row.version");
   });
 
@@ -465,10 +465,10 @@ describe("Repository: optimistic lock WHERE clause (remaining entities)", () => 
 // ---------------------------------------------------------------------------
 
 describe("Usecase: version passed to repository (remaining entities)", () => {
-  it("updateMeeting passes existing.version to meetingRepository.update", async () => {
+  it("updateMeeting passes existing.version to interactionRepository.update", async () => {
     const src = await readSrc("application/usecases/updateMeeting.ts");
     expect(src).toContain("existing.version");
-    expect(src).toContain("meetingRepository.update");
+    expect(src).toContain("interactionRepository.update");
   });
 
   it("updateActionItem passes existing.version to actionItemRepository.update", async () => {

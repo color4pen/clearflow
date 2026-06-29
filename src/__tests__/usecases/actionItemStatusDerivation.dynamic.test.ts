@@ -22,7 +22,7 @@ function rawRow(
     dueDate: null,
     done: false,
     status: null,
-    meetingId: null,
+    interactionId: null,
     dealId: null,
     inquiryId: null,
     createdById: "user-001",

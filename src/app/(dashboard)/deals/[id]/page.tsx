@@ -17,7 +17,7 @@ import {
   contractStatusLabels,
 } from "@/app/(dashboard)/labels";
 import { isActivityFeedEnabled } from "@/lib/activityConfig";
-import type { Meeting } from "@/domain/models/meeting";
+import type { Interaction } from "@/domain/models/interaction";
 
 export default async function DealDetailPage({
   params,
@@ -124,14 +124,14 @@ export default async function DealDetailPage({
             {dealMeetings.length === 0 ? (
               <p className="text-xs text-text-muted">商談記録がありません</p>
             ) : (
-              <DataTable<Meeting>
+              <DataTable<Interaction>
                 columns={[
                   {
-                    key: "type",
+                    key: "meetingType",
                     header: "種別",
                     render: (row) => (
                       <span className="text-2xs bg-primary/10 text-primary rounded px-1.5 py-0.5">
-                        {meetingTypeLabels[row.type] ?? row.type}
+                        {row.meetingType ? meetingTypeLabels[row.meetingType] ?? row.meetingType : ""}
                       </span>
                     ),
                   },

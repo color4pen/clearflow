@@ -15,6 +15,8 @@ const ACTION_LABELS: Partial<Record<AuditAction, string>> = {
   "contract.update": "契約を更新",
   "contract.updateStatus": "契約ステータスを変更",
   "contract.delete": "契約を削除",
+  "interaction.create": "商談を記録",
+  "interaction.update": "商談を更新",
   "meeting.create": "商談を記録",
   "meeting.update": "商談を更新",
   "action_item.create": "アクションアイテムを追加",

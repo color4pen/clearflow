@@ -12,6 +12,8 @@ export type AuditAction =
   | "invoice.create"
   | "invoice.update"
   | "invoice.update_status"
+  | "interaction.create"
+  | "interaction.update"
   | "meeting.create"
   | "meeting.update"
   | "action_item.create"
@@ -65,6 +67,7 @@ export type AuditTargetType =
   | "deal_contact"
   | "delegation"
   | "inquiry"
+  | "interaction"
   | "invoice"
   | "meeting"
   | "organization"
@@ -79,6 +82,8 @@ export type AuditMetadataMap = {
   "deal.updatePhase": { fromPhase: string; toPhase: string };
   "contract.updateStatus": { fromStatus: string; toStatus: string };
   "invoice.update_status": { fromStatus: string; toStatus: string };
+  "interaction.create": { kind: string };
+  "interaction.update": { kind: string };
 };
 
 export type AuditLog = {

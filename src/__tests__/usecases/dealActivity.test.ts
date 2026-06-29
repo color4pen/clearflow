@@ -14,9 +14,9 @@ async function readSrc(relPath: string): Promise<string> {
 }
 
 describe("getDealActivity usecase 静的検証", () => {
-  it("meetingRepository.findAllByDeal の呼び出しが含まれる", async () => {
+  it("interactionRepository.findAllByDeal の呼び出しが含まれる", async () => {
     const content = await readSrc("application/usecases/getDealActivity.ts");
-    expect(content).toContain("meetingRepository.findAllByDeal");
+    expect(content).toContain("interactionRepository.findAllByDeal");
   });
 
   it("contractRepository.findAllByDealId の呼び出しが含まれる", async () => {
