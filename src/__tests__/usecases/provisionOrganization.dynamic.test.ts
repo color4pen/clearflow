@@ -21,6 +21,7 @@ const state = {
   userCreateArgs: null as Record<string, unknown> | null,
   auditCreateArgs: null as Record<string, unknown> | null,
   throwCode: null as string | null,
+  failAtUserCreate: false,
 };
 
 // ---------------------------------------------------------------------------
@@ -58,6 +59,7 @@ mock.module("@/infrastructure/repositories/userRepository", () => ({
   existsByEmail: async (_email: string) => state.emailExists,
   create: async (data: Record<string, unknown>, _tx?: unknown) => {
     state.userCreateArgs = data;
+    if (state.failAtUserCreate) throw new Error("userRepository.create failed (simulated)");
     if (!state.createdUser) throw new Error("user not set");
     return state.createdUser;
   },
@@ -135,6 +137,7 @@ describe("provisionOrganization usecase", () => {
     state.userCreateArgs = null;
     state.auditCreateArgs = null;
     state.throwCode = null;
+    state.failAtUserCreate = false;
   });
 
   it("正常系: 組織と admin ユーザーが作成され、戻り値に organization と adminUser が含まれる", async () => {
@@ -215,5 +218,32 @@ describe("provisionOrganization usecase", () => {
     if (!result.ok) {
       expect(result.reason).toContain("メールアドレス");
     }
+  });
+
+  it("TC-019: 中間ステップ失敗（userRepository.create エラー）→ 全ロールバック相当・{ ok: false } が返る", async () => {
+    // organizationRepository.create は成功するが userRepository.create がエラーをスローする
+    state.createdOrganization = baseOrganization;
+    state.failAtUserCreate = true;
+
+    const result = await provisionOrganization({
+      actorId: ACTOR_ID,
+      organizationName: "TestOrg",
+      adminEmail: "admin@testorg.com",
+      adminName: "Test Admin",
+      adminPassword: "securepass123",
+    });
+
+    // usecase は ok: false を返す（例外を外に伝播させない）
+    expect(result.ok).toBe(false);
+
+    // org create は呼ばれた（中間ステップに到達済み）
+    expect(state.orgCreateArgs).not.toBeNull();
+    expect(state.orgCreateArgs?.name).toBe("TestOrg");
+
+    // user create は試みられた（エラーが発生したステップ）
+    expect(state.userCreateArgs).not.toBeNull();
+
+    // audit log は記録されなかった（user create 失敗後のステップには到達していない）
+    expect(state.auditCreateArgs).toBeNull();
   });
 });
