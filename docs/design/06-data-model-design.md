@@ -30,6 +30,11 @@ CREATE TYPE deal_phase AS ENUM (
   'proposal_prep', 'proposed', 'negotiation', 'won', 'lost'
 );
 
+CREATE TYPE interaction_kind AS ENUM (
+  'meeting', 'call', 'email', 'contract_adjustment', 'invoice_adjustment'
+);
+
+-- meeting_type は kind = meeting（商談）の商談種別を表す。
 CREATE TYPE meeting_type AS ENUM (
   'hearing', 'proposal', 'negotiation', 'closing', 'followup'
 );
@@ -189,30 +194,40 @@ text 型で管理する値（pgEnum にしない）:
 
 **制約**: `(deal_id, contact_id)` UNIQUE
 
-#### meetings
+#### interactions（顧客接点）
+
+顧客との接点（商談・電話・メール・契約調整・請求調整など）を記録する。商談は `kind = meeting` の一種で、既存 `meetings` テーブルを一般化したもの。
 
 | カラム | 型 | NULL | 制約 | 説明 |
 |---|---|---|---|---|
 | id | uuid | NO | PK, DEFAULT gen_random_uuid() | |
 | organization_id | uuid | NO | FK → organizations.id | |
-| deal_id | uuid | YES | FK → deals.id | 案件 |
-| inquiry_id | uuid | YES | FK → inquiries.id | 引合 |
-| type | meeting_type | NO | | 商談種別 |
+| kind | interaction_kind | NO | | 接点種別（meeting = 商談 / call = 電話 / email = メール / contract_adjustment = 契約調整 / invoice_adjustment = 請求調整） |
+| deal_id | uuid | YES | FK → deals.id | 関連先: 案件 |
+| inquiry_id | uuid | YES | FK → inquiries.id | 関連先: 引合 |
+| contract_id | uuid | YES | FK → contracts.id | 関連先: 契約 |
+| invoice_id | uuid | YES | FK → invoices.id | 関連先: 請求 |
+| client_id | uuid | YES | FK → clients.id | 関連先: 顧客 |
+| meeting_type | meeting_type | YES | | 商談種別（kind = meeting のときのみ。ヒアリング/提案/交渉/クロージング/フォローアップ） |
 | date | timestamptz | NO | | 実施日時 |
 | location | text | YES | | 場所 |
-| attendees | jsonb | NO | DEFAULT '[]' | 出席者 |
-| summary | text | YES | | 議事要旨（Markdown） |
-| action_items | jsonb | NO | DEFAULT '[]' | アクションアイテム（非推奨: action_items テーブルに移行済み。後方互換のため残置） |
-| hearing_data | jsonb | YES | | ヒアリング固有情報 |
+| attendees | jsonb | NO | DEFAULT '[]' | 参加者 |
+| summary | text | YES | | 要旨（Markdown） |
+| details | jsonb | YES | | kind 固有情報（商談のヒアリング情報など） |
 | created_by_id | uuid | NO | FK → users.id | 作成者 |
 | created_at | timestamptz | NO | DEFAULT now() | |
 | updated_at | timestamptz | NO | DEFAULT now() | |
 | version | integer | NO | DEFAULT 1 | 楽観的ロック |
 
-**制約**:
+**制約**: 関連先（deal / inquiry / contract / invoice / client）のうち少なくとも 1 つが NOT NULL（CHECK）。既存 `meetings` の `deal_id OR inquiry_id` を関連先全体へ一般化したもの。
+
 ```sql
-CHECK (deal_id IS NOT NULL OR inquiry_id IS NOT NULL)
+CHECK (deal_id IS NOT NULL OR inquiry_id IS NOT NULL OR contract_id IS NOT NULL OR invoice_id IS NOT NULL OR client_id IS NOT NULL)
 ```
+
+なお `kind = contract_adjustment` は `contract_id`、`kind = invoice_adjustment` は `invoice_id` を要する（DB の CHECK では表現せず、アプリケーション層で検証する）。
+
+**移行（データ不可侵）**: 既存 `meetings` を `kind = meeting` として `interactions` に移行する。`deal_id`/`inquiry_id`・`type → meeting_type`・`date`・`location`・`attendees`・`summary` はそのまま、`hearing_data → details` に保持する。列挙した以外の共通列（`organization_id` / `created_by_id` / `created_at` / `updated_at` / `version` 等）はそのまま継承し、新規の関連先列（`contract_id` / `invoice_id` / `client_id`）は `kind = meeting` の移行行では NULL とする。レガシーの `meetings.action_items`（jsonb）は移さない（`action_items` テーブルが正）。`action_items.meeting_id` は `interaction_id` に置き換える。監査ログは追記専用のため既存 `meeting.*` 行は書き換えず、`kind = meeting` の顧客接点として扱う（新規は `interaction.create` / `interaction.update` に kind を付して記録）。
 
 **JSON 構造: attendees**
 ```json
@@ -250,7 +265,7 @@ CHECK (deal_id IS NOT NULL OR inquiry_id IS NOT NULL)
 | assignee_id | uuid | YES | FK → users.id ON DELETE SET NULL | 担当者 |
 | due_date | timestamptz | YES | | 期日 |
 | done | boolean | NO | DEFAULT false | 完了状態 |
-| meeting_id | uuid | YES | FK → meetings.id ON DELETE SET NULL | 商談 |
+| interaction_id | uuid | YES | FK → interactions.id ON DELETE SET NULL | 顧客接点（商談） |
 | deal_id | uuid | YES | FK → deals.id ON DELETE SET NULL | 案件 |
 | inquiry_id | uuid | YES | FK → inquiries.id ON DELETE SET NULL | 引合 |
 | created_by_id | uuid | NO | FK → users.id | 作成者 |
@@ -562,7 +577,7 @@ organizations ─┬── users
                ├── clients ──── client_contacts
                ├── inquiries
                ├── deals ──── deal_contacts
-               ├── meetings
+               ├── interactions
                ├── action_items
                ├── contracts ──── invoices
                ├── approval_policies
@@ -579,8 +594,7 @@ inquiries ──→ clients (任意)
 deals ──→ clients (必須)
 deals ──→ inquiries (任意, 1:1)
 deal_contacts ──→ client_contacts
-meetings ──→ deals (任意)
-meetings ──→ inquiries (任意, CHECK で少なくとも一方必須)
+interactions ──→ deals / inquiries / contracts / invoices / clients (各任意, CHECK で少なくとも 1 つ必須)
 contracts ──→ deals
 contracts ──→ clients (非正規化)
 invoices ──→ contracts
@@ -588,7 +602,7 @@ approval_policies ──→ approval_templates
 requests ──→ approval_templates
 requests ──→ approval_policies (システム連動の場合)
 deals ──→ requests (見積承認, 任意)
-action_items ──→ meetings (任意)
+action_items ──→ interactions (任意)
 action_items ──→ deals (任意)
 action_items ──→ inquiries (任意)
 action_items ──→ users (担当者, 任意)
