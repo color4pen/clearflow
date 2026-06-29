@@ -86,7 +86,7 @@ export async function getDealActivity(params: {
     ...Object.fromEntries(
       invoices.map((inv) => [
         `invoice:${inv.id}`,
-        { label: inv.title },
+        { label: inv.title, href: `/contracts/${inv.contractId}/invoices/${inv.id}` },
       ])
     ),
   };
