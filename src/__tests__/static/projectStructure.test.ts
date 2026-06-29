@@ -1068,41 +1068,41 @@ describe("Tenant isolation — client/inquiry", () => {
 // Tenant isolation — meeting
 // ---------------------------------------------------------------------------
 
-describe("Tenant isolation — meeting", () => {
-  it("meetingRepository.create includes organizationId", async () => {
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+describe("Tenant isolation — interaction (旧 meeting)", () => {
+  it("interactionRepository.create includes organizationId", async () => {
+    const content = await readSrc("infrastructure/repositories/interactionRepository.ts");
     const idx = content.indexOf("export async function create(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 600);
     expect(body).toContain("organizationId");
   });
 
-  it("meetingRepository.findById includes organizationId condition", async () => {
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+  it("interactionRepository.findById includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/interactionRepository.ts");
     const idx = content.indexOf("export async function findById(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 400);
     expect(body).toContain("organizationId");
   });
 
-  it("meetingRepository.findAllByOrganization includes organizationId condition", async () => {
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+  it("interactionRepository.findAllByOrganization includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/interactionRepository.ts");
     const idx = content.indexOf("export async function findAllByOrganization(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 400);
     expect(body).toContain("organizationId");
   });
 
-  it("meetingRepository.findAllByDeal includes organizationId condition", async () => {
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+  it("interactionRepository.findAllByDeal includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/interactionRepository.ts");
     const idx = content.indexOf("export async function findAllByDeal(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 400);
     expect(body).toContain("organizationId");
   });
 
-  it("meetingRepository.update includes organizationId condition", async () => {
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+  it("interactionRepository.update includes organizationId condition", async () => {
+    const content = await readSrc("infrastructure/repositories/interactionRepository.ts");
     const idx = content.indexOf("export async function update(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 500);
@@ -1594,7 +1594,7 @@ describe("経路ラベル追加 — sourceLabels and sourceOptions", () => {
 describe("アクションアイテム スキーマ — action_items table", () => {
   /**
    * TC-001: action_items テーブルに 6 つの FK 制約が存在する
-   * organizations, users (assigneeId), users (createdById), meetings, deals, inquiries
+   * organizations, users (assigneeId), users (createdById), interactions, deals, inquiries
    */
   it("TC-001: schema.ts の actionItems テーブルに 6 つの FK 参照が存在する", async () => {
     const content = await readSrc("infrastructure/schema.ts");
@@ -1608,7 +1608,7 @@ describe("アクションアイテム スキーマ — action_items table", () =
     // 各 FK 参照の存在を確認する
     expect(block).toContain("references(() => organizations.id)");       // organization_id FK
     expect(block).toContain("references(() => users.id, { onDelete: \"set null\" })"); // assignee_id FK
-    expect(block).toContain("references(() => meetings.id, { onDelete: \"set null\" })"); // meeting_id FK
+    expect(block).toContain("references(() => interactions.id, { onDelete: \"set null\" })"); // interaction_id FK
     expect(block).toContain("references(() => deals.id, { onDelete: \"set null\" })");    // deal_id FK
     expect(block).toContain("references(() => inquiries.id, { onDelete: \"set null\" })"); // inquiry_id FK
     expect(block).toContain("references(() => users.id)");               // created_by_id FK (without onDelete)
@@ -1625,7 +1625,7 @@ describe("アクションアイテム スキーマ — action_items table", () =
   it("TC-002: schema.ts の actionItems テーブルに 3 つのインデックスが定義されている", async () => {
     const content = await readSrc("infrastructure/schema.ts");
     expect(content).toContain("action_items_org_done_idx");
-    expect(content).toContain("action_items_meeting_id_idx");
+    expect(content).toContain("action_items_interaction_id_idx");
     expect(content).toContain("action_items_deal_id_idx");
 
     // インデックス定義ブロック内にインデックスが 3 つ存在することを確認する
@@ -1654,7 +1654,7 @@ describe("アクションアイテム モデル — ActionItem domain model", ()
     expect(content).toContain("assigneeId");
     expect(content).toContain("dueDate");
     expect(content).toContain("done");
-    expect(content).toContain("meetingId");
+    expect(content).toContain("interactionId");
     expect(content).toContain("dealId");
     expect(content).toContain("inquiryId");
     expect(content).toContain("createdById");

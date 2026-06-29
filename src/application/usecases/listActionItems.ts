@@ -1,7 +1,7 @@
 import {
   actionItemRepository,
   dealRepository,
-  meetingRepository,
+  interactionRepository,
   inquiryRepository,
 } from "@/infrastructure/repositories";
 import type { ActionItem } from "@/domain/models/actionItem";
@@ -24,13 +24,13 @@ export async function listActionItems(data: {
 
   // Extract unique IDs for related entities
   const dealIds = [...new Set(items.map((i) => i.dealId).filter((id): id is string => id !== null))];
-  const meetingIds = [...new Set(items.map((i) => i.meetingId).filter((id): id is string => id !== null))];
+  const interactionIds = [...new Set(items.map((i) => i.interactionId).filter((id): id is string => id !== null))];
   const inquiryIds = [...new Set(items.map((i) => i.inquiryId).filter((id): id is string => id !== null))];
 
   // Fetch all related entities in parallel
-  const [dealResults, meetingResults, inquiryResults] = await Promise.all([
+  const [dealResults, interactionResults, inquiryResults] = await Promise.all([
     Promise.all(dealIds.map((id) => dealRepository.findById(id, data.organizationId))),
-    Promise.all(meetingIds.map((id) => meetingRepository.findById(id, data.organizationId))),
+    Promise.all(interactionIds.map((id) => interactionRepository.findById(id, data.organizationId))),
     Promise.all(inquiryIds.map((id) => inquiryRepository.findById(id, data.organizationId))),
   ]);
 
@@ -40,8 +40,8 @@ export async function listActionItems(data: {
       .filter((d): d is NonNullable<typeof d> => d !== null)
       .map((d) => [d.id, d])
   );
-  const meetingMap = new Map(
-    meetingResults
+  const interactionMap = new Map(
+    interactionResults
       .filter((m): m is NonNullable<typeof m> => m !== null)
       .map((m) => [m.id, m])
   );
@@ -59,15 +59,15 @@ export async function listActionItems(data: {
       const deal = dealMap.get(item.dealId);
       sourceName = deal?.title ?? item.dealId;
       sourceHref = `/deals/${item.dealId}`;
-    } else if (item.meetingId) {
-      const meeting = meetingMap.get(item.meetingId);
-      if (meeting) {
-        sourceName = formatDateJP(meeting.date);
-        sourceHref = meeting.dealId
-          ? `/deals/${meeting.dealId}/meetings/${item.meetingId}`
+    } else if (item.interactionId) {
+      const interaction = interactionMap.get(item.interactionId);
+      if (interaction) {
+        sourceName = formatDateJP(interaction.date);
+        sourceHref = interaction.dealId
+          ? `/deals/${interaction.dealId}/meetings/${item.interactionId}`
           : null;
       } else {
-        sourceName = item.meetingId;
+        sourceName = item.interactionId;
         sourceHref = null;
       }
     } else if (item.inquiryId) {

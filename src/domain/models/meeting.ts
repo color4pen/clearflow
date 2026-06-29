@@ -1,42 +1,17 @@
-export type MeetingType = "hearing" | "proposal" | "negotiation" | "closing" | "followup";
+// 商談（Meeting）は kind=meeting の 顧客接点（Interaction）として一般化された。
+// このファイルは後方互換のために Interaction 型を Meeting として再エクスポートする。
 
-export type HearingData = {
-  challenge: string | null;
-  budget: string | null;
-  decisionMaker: string | null;
-  timeline: string | null;
-  competitors: string | null;
-  notes: string | null;
-};
+export type {
+  MeetingType,
+  HearingData,
+  LegacyMeetingActionItem,
+  MeetingAttendee,
+  InteractionKind,
+  Interaction,
+} from "./interaction";
 
-export type ActionItem = {
-  description: string;
-  assignee: string;
-  dueDate: string | null;
-  done: boolean;
-};
+// Meeting は Interaction の別名（kind=meeting の顧客接点）
+export type { Interaction as Meeting } from "./interaction";
 
-export type MeetingAttendee = {
-  userId: string | null;
-  contactId: string | null;
-  name: string;
-  isExternal: boolean;
-};
-
-export type Meeting = {
-  id: string;
-  organizationId: string;
-  dealId: string | null;
-  inquiryId: string | null;
-  type: MeetingType;
-  date: Date;
-  location: string | null;
-  attendees: MeetingAttendee[];
-  summary: string | null;
-  actionItems: ActionItem[];
-  hearingData: HearingData | null;
-  createdById: string;
-  createdAt: Date;
-  updatedAt: Date;
-  version: number;
-};
+// 旧 ActionItem（JSONB 構造）は LegacyMeetingActionItem に改名。後方互換のみ。
+export type { LegacyMeetingActionItem as ActionItem } from "./interaction";

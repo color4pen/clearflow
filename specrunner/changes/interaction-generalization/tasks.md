@@ -2,20 +2,20 @@
 
 ## T-01: スキーマ定義の一般化（schema.ts）
 
-- [ ] `pgEnum("interaction_kind", ["meeting", "call", "email", "contract_adjustment", "invoice_adjustment"])` を追加する
-- [ ] `meetings` テーブル定義を `interactions` にリネームする（テーブル名: `"interactions"`）
-- [ ] `kind` カラム（`interactionKindEnum("kind").notNull().default("meeting")`）を追加する
-- [ ] `type` カラムを `meetingType`（`meetingTypeEnum("meeting_type")`）にリネームする。nullable にする（kind=meeting 以外では null のため）
-- [ ] `hearingData` カラムを `details`（`jsonb("details")`）にリネームする
-- [ ] `contractId` FK（`uuid("contract_id").references(() => contracts.id)`、nullable）を追加する
-- [ ] `invoiceId` FK（`uuid("invoice_id").references(() => invoices.id)`、nullable）を追加する
-- [ ] `clientId` FK（`uuid("client_id").references(() => clients.id)`、nullable）を追加する
-- [ ] CHECK 制約を `"interactions_related_entity_check"` に変更: `deal_id IS NOT NULL OR inquiry_id IS NOT NULL OR contract_id IS NOT NULL OR invoice_id IS NOT NULL OR client_id IS NOT NULL`
-- [ ] index を維持/追加: `(org, deal_id)` / `(org, inquiry_id)` は維持。`(org, contract_id)` / `(org, invoice_id)` / `(org, client_id)` を追加する
-- [ ] `action_items` テーブルの `meetingId` を `interactionId`（`uuid("interaction_id").references(() => interactions.id, { onDelete: "set null" })`）にリネームする
-- [ ] `action_items` テーブルの index `action_items_meeting_id_idx` を `action_items_interaction_id_idx` に更新する
-- [ ] Drizzle relations を更新する: `meetingsRelations` &rarr; `interactionsRelations`。`actionItemsRelations` の `meeting` を `interaction` に変更する
-- [ ] `organizationsRelations`、`usersRelations`、`inquiriesRelations`、`dealsRelations` 内の `meetings` 参照を `interactions` に更新する
+- [x] `pgEnum("interaction_kind", ["meeting", "call", "email", "contract_adjustment", "invoice_adjustment"])` を追加する
+- [x] `meetings` テーブル定義を `interactions` にリネームする（テーブル名: `"interactions"`）
+- [x] `kind` カラム（`interactionKindEnum("kind").notNull().default("meeting")`）を追加する
+- [x] `type` カラムを `meetingType`（`meetingTypeEnum("meeting_type")`）にリネームする。nullable にする（kind=meeting 以外では null のため）
+- [x] `hearingData` カラムを `details`（`jsonb("details")`）にリネームする
+- [x] `contractId` FK（`uuid("contract_id").references(() => contracts.id)`、nullable）を追加する
+- [x] `invoiceId` FK（`uuid("invoice_id").references(() => invoices.id)`、nullable）を追加する
+- [x] `clientId` FK（`uuid("client_id").references(() => clients.id)`、nullable）を追加する
+- [x] CHECK 制約を `"interactions_related_entity_check"` に変更: `deal_id IS NOT NULL OR inquiry_id IS NOT NULL OR contract_id IS NOT NULL OR invoice_id IS NOT NULL OR client_id IS NOT NULL`
+- [x] index を維持/追加: `(org, deal_id)` / `(org, inquiry_id)` は維持。`(org, contract_id)` / `(org, invoice_id)` / `(org, client_id)` を追加する
+- [x] `action_items` テーブルの `meetingId` を `interactionId`（`uuid("interaction_id").references(() => interactions.id, { onDelete: "set null" })`）にリネームする
+- [x] `action_items` テーブルの index `action_items_meeting_id_idx` を `action_items_interaction_id_idx` に更新する
+- [x] Drizzle relations を更新する: `meetingsRelations` &rarr; `interactionsRelations`。`actionItemsRelations` の `meeting` を `interaction` に変更する
+- [x] `organizationsRelations`、`usersRelations`、`inquiriesRelations`、`dealsRelations` 内の `meetings` 参照を `interactions` に更新する
 
 **Acceptance Criteria**:
 - `bun run typecheck` が成功する
@@ -25,18 +25,18 @@
 
 ## T-02: ドメインモデルの一般化（domain/models）
 
-- [ ] `src/domain/models/interaction.ts` を新規作成する
+- [x] `src/domain/models/interaction.ts` を新規作成する
   - `InteractionKind = "meeting" | "call" | "email" | "contract_adjustment" | "invoice_adjustment"` 型を定義する
   - `Interaction` 型を定義する: `id`, `organizationId`, `kind`, `dealId`, `inquiryId`, `contractId`, `invoiceId`, `clientId`, `meetingType`(MeetingType | null), `date`, `location`, `attendees`(MeetingAttendee[]), `summary`, `actionItems`(LegacyMeetingActionItem[]), `details`(HearingData | null), `createdById`, `createdAt`, `updatedAt`, `version`
   - `MeetingType`, `HearingData`, `MeetingAttendee` 型を re-export する（互換性のため）
   - `LegacyMeetingActionItem` 型を定義する（旧 `ActionItem` jsonb 構造: `{ description, assignee, dueDate, done }`）
   - 将来 kind 追加時に `details` を discriminated union 等で拡張する方針のコメントを残す
-- [ ] `src/domain/models/meeting.ts` を更新する
+- [x] `src/domain/models/meeting.ts` を更新する
   - `ActionItem` を `LegacyMeetingActionItem` に改名する
   - `Meeting` 型を `Interaction` 型の re-export に変更する（後方互換）、もしくは `Meeting` 型を削除し利用箇所を `Interaction` に置き換える
-- [ ] `src/domain/models/actionItem.ts` を更新する
+- [x] `src/domain/models/actionItem.ts` を更新する
   - `meetingId` を `interactionId` に変更する
-- [ ] `src/domain/models/auditLog.ts` を更新する
+- [x] `src/domain/models/auditLog.ts` を更新する
   - `AuditAction` に `"interaction.create"` と `"interaction.update"` を追加する
   - `AuditTargetType` に `"interaction"` を追加する
   - `AuditMetadataMap` に `"interaction.create": { kind: string }` と `"interaction.update": { kind: string }` を追加する
@@ -50,7 +50,7 @@
 
 ## T-03: interactionRepository の作成
 
-- [ ] `src/infrastructure/repositories/interactionRepository.ts` を新規作成する
+- [x] `src/infrastructure/repositories/interactionRepository.ts` を新規作成する
   - `mapRow` 関数: `interactions` テーブルの行を `Interaction` 型にマップする
   - `create`: kind/meetingType/details/contractId/invoiceId/clientId を含む Interaction を作成する
   - `findById`: organizationId でテナント分離
@@ -60,8 +60,8 @@
   - `update`: 楽観ロック（version）付き更新。meetingType/details を含む
   - `searchBySummary`: ilike 検索
   - 各関数で kind フィルタは追加しない。将来 kind 追加時のフィルタ追加 TODO コメントを残す
-- [ ] `src/infrastructure/repositories/meetingRepository.ts` を削除する
-- [ ] `src/infrastructure/repositories/index.ts` を更新する
+- [x] `src/infrastructure/repositories/meetingRepository.ts` を削除する
+- [x] `src/infrastructure/repositories/index.ts` を更新する
   - `meetingRepository` を `interactionRepository` に置き換える
 
 **Acceptance Criteria**:
@@ -71,12 +71,12 @@
 
 ## T-04: actionItemRepository の更新
 
-- [ ] `src/infrastructure/repositories/actionItemRepository.ts` を更新する
+- [x] `src/infrastructure/repositories/actionItemRepository.ts` を更新する
   - `meetingId` 参照を `interactionId` に変更する（スキーマの `actionItems.interactionId` を使用）
   - `findByMeeting` を `findByInteraction` にリネームする
   - `create` 関数のパラメータで `meetingId` を `interactionId` に変更する
   - index 参照を更新する
-- [ ] `actionItemRepository` を利用している全ファイルで `meetingId` &rarr; `interactionId`、`findByMeeting` &rarr; `findByInteraction` に更新する
+- [x] `actionItemRepository` を利用している全ファイルで `meetingId` &rarr; `interactionId`、`findByMeeting` &rarr; `findByInteraction` に更新する
 
 **Acceptance Criteria**:
 - `actionItemRepository` に `meetingId` 参照が残っていない
@@ -85,28 +85,28 @@
 
 ## T-05: usecase の更新（商談 CRUD）
 
-- [ ] `src/application/usecases/createMeeting.ts` を更新する
+- [x] `src/application/usecases/createMeeting.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える
   - create 呼び出しに `kind: "meeting"` を追加する
   - 監査ログを `action: "interaction.create"`, `targetType: "interaction"`, `metadata: { kind: "meeting" }` に変更する
   - import を `Interaction` 型に切り替える（返り値の型注釈）
-- [ ] `src/application/usecases/updateMeeting.ts` を更新する
+- [x] `src/application/usecases/updateMeeting.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える
   - 監査ログを `action: "interaction.update"`, `targetType: "interaction"`, `metadata: { kind: "meeting" }` に変更する
   - import を `Interaction` 型に切り替える
-- [ ] `src/application/usecases/getMeeting.ts` を更新する
+- [x] `src/application/usecases/getMeeting.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える
   - 返り値型を `Interaction` に切り替える
-- [ ] `src/application/usecases/listMeetings.ts` を更新する
+- [x] `src/application/usecases/listMeetings.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える
   - 返り値型を `Interaction[]` に切り替える
-- [ ] `src/application/usecases/listMeetingsByInquiry.ts` を更新する
+- [x] `src/application/usecases/listMeetingsByInquiry.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える
   - 返り値型を `Interaction[]` に切り替える
-- [ ] `src/application/usecases/searchMeetings.ts` を更新する
+- [x] `src/application/usecases/searchMeetings.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える
   - `meeting.type` を `interaction.meetingType` に変更する
-- [ ] `src/application/usecases/listActionItemsByMeeting.ts` を更新する
+- [x] `src/application/usecases/listActionItemsByMeeting.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える
   - `actionItemRepository.findByMeeting` &rarr; `findByInteraction` に切り替える
 
@@ -118,17 +118,17 @@
 
 ## T-06: usecase の更新（タイムライン・通知）
 
-- [ ] `src/lib/activityConfig.ts` を更新する
+- [x] `src/lib/activityConfig.ts` を更新する
   - `TIMELINE_ACTIONS` に `"interaction.create"` を追加する（`"meeting.create"` は維持する）
-- [ ] `src/domain/models/notification.ts` を更新する
+- [x] `src/domain/models/notification.ts` を更新する
   - `NOTIFICATION_ACTIONS` に `"interaction.create"` を追加する（`"meeting.create"` は維持する）
-- [ ] `src/domain/models/auditLog.ts` の `AuditAction` に `"interaction.create"` と `"interaction.update"` を追加する（T-02 と同時に実施可能）
-- [ ] `src/application/usecases/getDealActivity.ts` を更新する
+- [x] `src/domain/models/auditLog.ts` の `AuditAction` に `"interaction.create"` と `"interaction.update"` を追加する（T-02 と同時に実施可能）
+- [x] `src/application/usecases/getDealActivity.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える（import 先変更）
   - targets 配列に各 interaction について `{ targetType: "interaction", targetId }` と `{ targetType: "meeting", targetId }` の**両方**を追加する
   - `targetInfoMap` に `interaction:<id>` と `meeting:<id>` の両キーを登録する
   - `meetingTypeLabels` の参照を `interaction.meetingType` に合わせて更新する
-- [ ] `src/application/usecases/getNotifications.ts` を更新する
+- [x] `src/application/usecases/getNotifications.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える（import 先変更）
   - targets 配列に各 interaction について `{ targetType: "interaction", targetId }` と `{ targetType: "meeting", targetId }` の**両方**を追加する
   - `targetInfoMap` に `interaction:<id>` と `meeting:<id>` の両キーを登録する
@@ -144,18 +144,18 @@
 
 ## T-07: usecase の更新（アクションアイテム関連）
 
-- [ ] `src/application/usecases/createActionItem.ts` を更新する
+- [x] `src/application/usecases/createActionItem.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える
   - `meetingId` パラメータを `interactionId` に変更する（存在確認も interactionRepository.findById に切り替え）
   - 引数の型定義と内部ロジックを更新する
-- [ ] `src/application/usecases/updateActionItem.ts` を更新する
+- [x] `src/application/usecases/updateActionItem.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える
   - `meetingId` 参照を `interactionId` に変更する
-- [ ] `src/application/usecases/listActionItems.ts` を更新する
+- [x] `src/application/usecases/listActionItems.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える
   - `meetingIds` / `meetingMap` を `interactionIds` / `interactionMap` に変更する
   - `item.meetingId` を `item.interactionId` に変更する
-- [ ] `src/application/usecases/deleteDeal.ts` を更新する
+- [x] `src/application/usecases/deleteDeal.ts` を更新する
   - `meetingRepository` &rarr; `interactionRepository` に切り替える
   - `meetingRepository.findAllByDeal` &rarr; `interactionRepository.findAllByDeal` に変更する
   - エラーメッセージ「商談が紐づいている案件は削除できません」は維持する（UI 表記は「商談」）
@@ -168,11 +168,11 @@
 
 ## T-08: Server Action の更新
 
-- [ ] `src/app/actions/meetings.ts` を更新する
+- [x] `src/app/actions/meetings.ts` を更新する
   - `createMeeting`/`updateMeeting` の import を更新する（型が `Interaction` になるため）
   - `hearingData` パラメータ名は維持するが、usecase への受け渡し時は `details` として渡す（usecase 側で mapping）
   - `canPerform(session.user.role, "meeting", ...)` は維持する（D9）
-- [ ] `src/app/actions/actionItems.ts` を更新する
+- [x] `src/app/actions/actionItems.ts` を更新する
   - `meetingId` 参照を `interactionId` に変更する
   - `meetingRepository.findById` &rarr; `interactionRepository.findById` に切り替える
   - revalidatePath の `/meetings/` パスは維持する（UI ルートは変更しない）
@@ -185,37 +185,37 @@
 
 ## T-09: UI コンポーネントの更新
 
-- [ ] `src/app/(dashboard)/deals/[id]/page.tsx` を更新する
+- [x] `src/app/(dashboard)/deals/[id]/page.tsx` を更新する
   - `Meeting` 型の import を `Interaction` に変更する
   - `listMeetings` の返り値型が `Interaction[]` になるため型参照を更新する
   - `meetingTypeLabels[row.type]` を `meetingTypeLabels[row.meetingType!]` に変更する（kind=meeting では non-null）
-- [ ] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/page.tsx` を更新する
+- [x] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/page.tsx` を更新する
   - `getMeeting` の返り値型が `Interaction` になるため型参照を更新する
-- [ ] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/MeetingInfoSection.tsx` を更新する
+- [x] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/MeetingInfoSection.tsx` を更新する
   - `Meeting` 型を `Interaction` に変更する
   - `type` プロパティ参照を `meetingType` に変更する
-- [ ] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/MeetingHearingSection.tsx` を更新する
+- [x] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/MeetingHearingSection.tsx` を更新する
   - `hearingData` 参照を `details` に変更する
-- [ ] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/MeetingAttendeesSection.tsx` を更新する
+- [x] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/MeetingAttendeesSection.tsx` を更新する
   - `Meeting` 型を `Interaction` に変更する
-- [ ] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/MeetingSummarySection.tsx` を更新する
+- [x] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/MeetingSummarySection.tsx` を更新する
   - 型参照を更新する（必要に応じて）
-- [ ] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/MeetingActionItemsSection.tsx` を更新する
+- [x] `src/app/(dashboard)/deals/[id]/meetings/[meetingId]/MeetingActionItemsSection.tsx` を更新する
   - 型参照を更新する（必要に応じて）
-- [ ] `src/app/(dashboard)/deals/[id]/meetings/new/DealMeetingForm.tsx` を更新する
+- [x] `src/app/(dashboard)/deals/[id]/meetings/new/DealMeetingForm.tsx` を更新する
   - `Meeting` / `MeetingType` 型の import を `Interaction` / `MeetingType` に変更する
   - `hearingData` フォームフィールドの送信は維持する（Server Action の互換性）
-- [ ] `src/app/(dashboard)/inquiries/[id]/page.tsx` を更新する
+- [x] `src/app/(dashboard)/inquiries/[id]/page.tsx` を更新する
   - `listMeetingsByInquiry` の返り値型が `Interaction[]` になるため型参照を更新する
-- [ ] `src/app/(dashboard)/inquiries/[id]/MeetingTable.tsx` を更新する
+- [x] `src/app/(dashboard)/inquiries/[id]/MeetingTable.tsx` を更新する
   - `Meeting` 型を `Interaction` に変更する
   - `type` プロパティ参照を `meetingType` に変更する
-- [ ] `src/app/(dashboard)/inquiries/[id]/InquiryMeetingSection.tsx` を更新する
+- [x] `src/app/(dashboard)/inquiries/[id]/InquiryMeetingSection.tsx` を更新する
   - 型参照を更新する
-- [ ] `src/lib/meetingLabels.ts` を更新する
+- [x] `src/lib/meetingLabels.ts` を更新する
   - `MeetingType` の import 元を `interaction` モデルに変更する（re-export 経由であれば不要）
-- [ ] `src/domain/authorization.ts` は `"meeting"` エンティティを維持する（D9: 変更しない）
-- [ ] UI の日本語表記「商談」はすべて維持する
+- [x] `src/domain/authorization.ts` は `"meeting"` エンティティを維持する（D9: 変更しない）
+- [x] UI の日本語表記「商談」はすべて維持する
 
 **Acceptance Criteria**:
 - UI コンポーネントが `Interaction` 型を使用している
@@ -226,7 +226,7 @@
 
 ## T-10: usecase index の更新
 
-- [ ] `src/application/usecases/index.ts` を更新する
+- [x] `src/application/usecases/index.ts` を更新する
   - `meetingRepository` を使用していた re-export が正しく動作することを確認する
   - 必要に応じて型の re-export を追加する（`Interaction` 型など）
 
@@ -236,27 +236,27 @@
 
 ## T-11: 既存テストの更新
 
-- [ ] `src/__tests__/usecases/dealActivity.dynamic.test.ts` を更新する
+- [x] `src/__tests__/usecases/dealActivity.dynamic.test.ts` を更新する
   - `mock.module("@/infrastructure/repositories/meetingRepository", ...)` を `mock.module("@/infrastructure/repositories/interactionRepository", ...)` に変更する
   - `Meeting` 型を `Interaction` 型に変更する
   - `state.meetings` のテストデータに `kind: "meeting"` を追加する
   - targets 配列に `interaction` と `meeting` の両 targetType が含まれることを検証するテストを追加する
   - `targetInfoMap` に `interaction:<id>` と `meeting:<id>` の両キーが含まれることを検証する
   - `TIMELINE_ACTIONS` に `"interaction.create"` が含まれることを検証する
-- [ ] `src/__tests__/usecases/getNotifications.dynamic.test.ts` を更新する
+- [x] `src/__tests__/usecases/getNotifications.dynamic.test.ts` を更新する
   - `mock.module("@/infrastructure/repositories/meetingRepository", ...)` を `mock.module("@/infrastructure/repositories/interactionRepository", ...)` に変更する
   - targets 配列に `interaction` と `meeting` の両 targetType が含まれることを検証するテストを追加する
   - `NOTIFICATION_ACTIONS` に `"interaction.create"` が含まれることを検証する
-- [ ] `src/__tests__/usecases/meetingManagement.test.ts` を更新する
+- [x] `src/__tests__/usecases/meetingManagement.test.ts` を更新する
   - `meetingRepository` のモックを `interactionRepository` に変更する
   - テストデータの `Meeting` 型を `Interaction` 型に変更する
-- [ ] `src/__tests__/usecases/actionItemManagement.test.ts` を更新する
+- [x] `src/__tests__/usecases/actionItemManagement.test.ts` を更新する
   - `meetingId` 参照を `interactionId` に変更する
-- [ ] `src/__tests__/usecases/optimisticLock.test.ts` を更新する
+- [x] `src/__tests__/usecases/optimisticLock.test.ts` を更新する
   - `meetingRepository` のモックを `interactionRepository` に変更する（該当箇所があれば）
-- [ ] `src/__tests__/usecases/linkTargetSearch.test.ts` を更新する
+- [x] `src/__tests__/usecases/linkTargetSearch.test.ts` を更新する
   - `meetingRepository` のモックを `interactionRepository` に変更する（該当箇所があれば）
-- [ ] `src/__tests__/static/projectStructure.test.ts` を更新する
+- [x] `src/__tests__/static/projectStructure.test.ts` を更新する
   - `meetingRepository` の参照が含まれていれば `interactionRepository` に変更する
 
 **Acceptance Criteria**:
@@ -265,7 +265,7 @@
 
 ## T-12: 新規 dynamic テストの作成
 
-- [ ] `src/__tests__/usecases/interactionManagement.dynamic.test.ts` を新規作成する
+- [x] `src/__tests__/usecases/interactionManagement.dynamic.test.ts` を新規作成する
   - mock.module 方式で interactionRepository / dealRepository / inquiryRepository / auditLogRepository をモックする
   - **createMeeting テスト**: kind=meeting の Interaction が作成され、`interaction.create` 監査ログが `metadata: { kind: "meeting" }` 付きで記録されることを assert する
   - **updateMeeting テスト**: kind=meeting の Interaction が更新され、`interaction.update` 監査ログが `metadata: { kind: "meeting" }` 付きで記録されることを assert する
@@ -273,14 +273,14 @@
   - **listMeetingsByInquiry テスト**: 引合配下の kind=meeting Interaction が返されることを assert する
   - **getMeeting テスト**: kind=meeting の Interaction が返されることを assert する
   - **バリデーションテスト**: dealId/inquiryId 両方未指定時に ok: false が返ることを assert する
-- [ ] `src/__tests__/usecases/interactionActionItems.dynamic.test.ts` を新規作成する
+- [x] `src/__tests__/usecases/interactionActionItems.dynamic.test.ts` を新規作成する
   - mock.module 方式で interactionRepository / actionItemRepository をモックする
   - **listActionItemsByMeeting テスト**: interactionRepository.findById で存在確認し、actionItemRepository.findByInteraction で取得することを assert する
   - **createActionItem テスト**: interactionId が interactionRepository.findById で検証されることを assert する
-- [ ] `src/__tests__/usecases/dealActivity.dynamic.test.ts` に interaction 固有テストを追加する
+- [x] `src/__tests__/usecases/dealActivity.dynamic.test.ts` に interaction 固有テストを追加する
   - targets に `{ targetType: "interaction" }` と `{ targetType: "meeting" }` の両方が含まれることを assert する
   - targetInfoMap に `interaction:<id>` と `meeting:<id>` の両キーが含まれることを assert する
-- [ ] `src/__tests__/usecases/getNotifications.dynamic.test.ts` に interaction 固有テストを追加する
+- [x] `src/__tests__/usecases/getNotifications.dynamic.test.ts` に interaction 固有テストを追加する
   - targets に `{ targetType: "interaction" }` と `{ targetType: "meeting" }` の両方が含まれることを assert する
 
 **Acceptance Criteria**:
@@ -292,12 +292,12 @@
 
 ## T-13: ビルド・型チェック・lint の通過確認
 
-- [ ] `bun run typecheck` が成功することを確認する
-- [ ] `bun run build` が成功することを確認する
-- [ ] `bun run lint` が成功することを確認する
-- [ ] `bun test` が全テスト green であることを確認する
-- [ ] `meetingRepository` への参照がソースコード内に残っていないことを確認する（テストの mock.module パスを含む）
-- [ ] `from "@/domain/models/meeting"` への import がなくなっている、または `meeting.ts` が `interaction.ts` への re-export のみになっていることを確認する
+- [x] `bun run typecheck` が成功することを確認する
+- [x] `bun run build` が成功することを確認する
+- [x] `bun run lint` が成功することを確認する
+- [x] `bun test` が全テスト green であることを確認する（1528 pass, 0 fail）
+- [x] `meetingRepository` への参照がソースコード内に残っていないことを確認する（テストの mock.module パスを含む）
+- [x] `from "@/domain/models/meeting"` への import がなくなっている、または `meeting.ts` が `interaction.ts` への re-export のみになっていることを確認する
 
 **Acceptance Criteria**:
 - `bun run typecheck` / `bun run build` / `bun run lint` / `bun test` がすべて成功する

@@ -1,7 +1,7 @@
 import {
   actionItemRepository,
   dealRepository,
-  meetingRepository,
+  interactionRepository,
   inquiryRepository,
   userRepository,
 } from "@/infrastructure/repositories";
@@ -21,7 +21,7 @@ export async function updateActionItem(data: {
   description?: string;
   assigneeId?: string | null;
   dueDate?: Date | null;
-  meetingId?: string | null;
+  interactionId?: string | null;
   dealId?: string | null;
   inquiryId?: string | null;
 }): Promise<UpdateActionItemResult> {
@@ -47,10 +47,10 @@ export async function updateActionItem(data: {
     }
   }
 
-  if (data.meetingId !== undefined && data.meetingId !== existing.meetingId) {
-    if (data.meetingId !== null) {
-      const meeting = await meetingRepository.findById(data.meetingId, data.organizationId);
-      if (!meeting) {
+  if (data.interactionId !== undefined && data.interactionId !== existing.interactionId) {
+    if (data.interactionId !== null) {
+      const interaction = await interactionRepository.findById(data.interactionId, data.organizationId);
+      if (!interaction) {
         return { ok: false, reason: "商談が見つかりません" };
       }
     }
@@ -69,7 +69,7 @@ export async function updateActionItem(data: {
     description: string;
     assigneeId: string | null;
     dueDate: Date | null;
-    meetingId: string | null;
+    interactionId: string | null;
     dealId: string | null;
     inquiryId: string | null;
   }> = {};
@@ -77,7 +77,7 @@ export async function updateActionItem(data: {
   if (data.description !== undefined) updateData.description = data.description;
   if (data.assigneeId !== undefined) updateData.assigneeId = data.assigneeId;
   if (data.dueDate !== undefined) updateData.dueDate = data.dueDate;
-  if (data.meetingId !== undefined) updateData.meetingId = data.meetingId;
+  if (data.interactionId !== undefined) updateData.interactionId = data.interactionId;
   if (data.dealId !== undefined) updateData.dealId = data.dealId;
   if (data.inquiryId !== undefined) updateData.inquiryId = data.inquiryId;
 

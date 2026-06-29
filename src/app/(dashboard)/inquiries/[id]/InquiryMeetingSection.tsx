@@ -3,7 +3,7 @@ import { meetingTypeLabels } from "@/app/(dashboard)/labels";
 
 type MeetingRow = {
   id: string;
-  type: string;
+  meetingType: string | null;
   date: Date;
   summary: string | null;
   dealId: string | null;
@@ -44,8 +44,9 @@ export function InquiryMeetingSection({ meetings, dealMeetingNewPath }: Props) {
             const summary = m.summary ?? "";
             const truncatedSummary =
               summary.length > 40 ? `${summary.slice(0, 40)}...` : summary;
-            const typeLabel =
-              meetingTypeLabels[m.type as keyof typeof meetingTypeLabels] ?? m.type;
+            const typeLabel = m.meetingType
+              ? meetingTypeLabels[m.meetingType as keyof typeof meetingTypeLabels] ?? m.meetingType
+              : "";
 
             const content = (
               <div className="flex gap-2 text-xs py-[10px] px-[14px] border border-border bg-bg-surface hover:bg-bg-toolbar">

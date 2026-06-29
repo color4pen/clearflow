@@ -43,7 +43,7 @@ export default async function DealMeetingDetailPage({
       <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2 flex items-center justify-between">
         <div>
           <span className="text-sm font-bold text-text">
-            {meetingTypeLabels[meeting.type] ?? meeting.type}
+            {meeting.meetingType ? meetingTypeLabels[meeting.meetingType] : ""}
           </span>
           <span className="text-text-muted text-xs ml-2">
             <Link href="/deals" className="text-primary underline">案件一覧</Link>
@@ -60,7 +60,7 @@ export default async function DealMeetingDetailPage({
           meetingId={meetingId}
           dealId={id}
           meeting={{
-            type: meeting.type,
+            meetingType: meeting.meetingType,
             date: meeting.date,
             location: meeting.location,
           }}
@@ -84,11 +84,11 @@ export default async function DealMeetingDetailPage({
             />
           </SectionCard>
 
-          {meeting.type === "hearing" && (
+          {meeting.meetingType === "hearing" && (
             <MeetingHearingSection
               meetingId={meetingId}
               dealId={id}
-              hearingData={meeting.hearingData}
+              details={meeting.details}
               editable={editable}
             />
           )}
@@ -108,7 +108,7 @@ export default async function DealMeetingDetailPage({
 
           <SectionCard className="p-3">
             <MeetingActionItemsSection
-              meetingId={meetingId}
+              interactionId={meetingId}
               dealId={id}
               actionItems={actionItemsResult.ok ? actionItemsResult.actionItems : []}
               orgUsers={users.map((u) => ({ id: u.id, name: u.name }))}

@@ -1,4 +1,4 @@
-import { meetingRepository, actionItemRepository } from "@/infrastructure/repositories";
+import { interactionRepository, actionItemRepository } from "@/infrastructure/repositories";
 import type { ActionItem } from "@/domain/models/actionItem";
 
 export type ListActionItemsByMeetingResult =
@@ -9,11 +9,11 @@ export async function listActionItemsByMeeting(data: {
   meetingId: string;
   organizationId: string;
 }): Promise<ListActionItemsByMeetingResult> {
-  const meeting = await meetingRepository.findById(data.meetingId, data.organizationId);
+  const meeting = await interactionRepository.findById(data.meetingId, data.organizationId);
   if (!meeting) {
     return { ok: false, reason: "商談が見つかりません" };
   }
 
-  const actionItems = await actionItemRepository.findByMeeting(data.meetingId, data.organizationId);
+  const actionItems = await actionItemRepository.findByInteraction(data.meetingId, data.organizationId);
   return { ok: true, actionItems };
 }

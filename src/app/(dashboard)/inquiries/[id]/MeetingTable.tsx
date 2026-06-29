@@ -6,7 +6,7 @@ import { meetingTypeLabels } from "@/app/(dashboard)/labels";
 
 type MeetingRow = {
   id: string;
-  type: string;
+  meetingType: string | null;
   date: string;
   location: string | null;
   summary: string | null;
@@ -21,7 +21,9 @@ export function MeetingTable({ meetings, basePath }: { meetings: MeetingRow[]; b
         {
           key: "type",
           header: "種別",
-          render: (row) => meetingTypeLabels[row.type as keyof typeof meetingTypeLabels] ?? row.type,
+          render: (row) => row.meetingType
+            ? meetingTypeLabels[row.meetingType as keyof typeof meetingTypeLabels] ?? row.meetingType
+            : "",
         },
         {
           key: "date",

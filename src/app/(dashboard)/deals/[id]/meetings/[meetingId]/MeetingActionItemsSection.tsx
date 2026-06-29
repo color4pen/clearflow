@@ -8,14 +8,14 @@ import { ActionItemRow } from "@/app/(dashboard)/components/ActionItemRow";
 import type { ActionItem } from "@/domain/models/actionItem";
 
 type Props = {
-  meetingId: string;
+  interactionId: string;
   dealId: string;
   actionItems: ActionItem[];
   orgUsers: { id: string; name: string }[];
   editable: boolean;
 };
 
-export function MeetingActionItemsSection({ meetingId, dealId, actionItems, orgUsers, editable }: Props) {
+export function MeetingActionItemsSection({ interactionId, dealId, actionItems, orgUsers, editable }: Props) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [showAddForm, setShowAddForm] = useState(false);
@@ -36,7 +36,7 @@ export function MeetingActionItemsSection({ meetingId, dealId, actionItems, orgU
         description: newDescription.trim(),
         assigneeId: newAssigneeId || undefined,
         dueDate: newDueDate || undefined,
-        meetingId,
+        interactionId,
         dealId,
       });
       if (result.message) {

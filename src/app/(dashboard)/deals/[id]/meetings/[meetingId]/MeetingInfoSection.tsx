@@ -15,7 +15,7 @@ type Props = {
   meetingId: string;
   dealId: string;
   meeting: {
-    type: string;
+    meetingType: string | null;
     date: Date;
     location: string | null;
   };
@@ -32,14 +32,14 @@ export function MeetingInfoSection({ meetingId, dealId, meeting, editable }: Pro
   const router = useRouter();
 
   const [mode, setMode] = useState<"display" | "edit">("display");
-  const [type, setType] = useState(meeting.type);
+  const [type, setType] = useState(meeting.meetingType ?? "");
   const [date, setDate] = useState(toDatetimeLocalValue(meeting.date));
   const [location, setLocation] = useState(meeting.location ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function handleCancel() {
-    setType(meeting.type);
+    setType(meeting.meetingType ?? "");
     setDate(toDatetimeLocalValue(meeting.date));
     setLocation(meeting.location ?? "");
     setError(null);

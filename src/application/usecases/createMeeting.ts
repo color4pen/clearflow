@@ -1,25 +1,33 @@
-import { meetingRepository, dealRepository, inquiryRepository } from "@/infrastructure/repositories";
+import { interactionRepository, dealRepository, inquiryRepository } from "@/infrastructure/repositories";
 import { recordAudit } from "@/application/services/auditRecorder";
 
 import { db } from "@/infrastructure/db";
-import type { Meeting, MeetingType, HearingData, ActionItem, MeetingAttendee } from "@/domain/models/meeting";
+import type {
+  Interaction,
+  InteractionKind,
+  MeetingType,
+  HearingData,
+  LegacyMeetingActionItem,
+  MeetingAttendee,
+} from "@/domain/models/interaction";
 
 export type CreateMeetingResult =
-  | { ok: true; meeting: Meeting }
+  | { ok: true; meeting: Interaction }
   | { ok: false; reason: string };
 
 export async function createMeeting(data: {
   organizationId: string;
   actorId: string;
+  kind: InteractionKind;
   dealId?: string | null;
   inquiryId?: string | null;
-  type: MeetingType;
+  meetingType?: MeetingType | null;
   date: Date;
   location?: string | null;
   attendees: MeetingAttendee[];
   summary?: string | null;
-  actionItems: ActionItem[];
-  hearingData?: HearingData | null;
+  actionItems: LegacyMeetingActionItem[];
+  details?: HearingData | null;
 }): Promise<CreateMeetingResult> {
   // dealId または inquiryId のいずれかが必須
   if (!data.dealId && !data.inquiryId) {
@@ -42,23 +50,24 @@ export async function createMeeting(data: {
     }
   }
 
-  // hearing 以外の type では hearingData を null に強制する
-  const hearingData = data.type === "hearing" ? (data.hearingData ?? null) : null;
+  // hearing 以外の meetingType では details を null に強制する
+  const details = data.meetingType === "hearing" ? (data.details ?? null) : null;
 
   try {
     const meeting = await db.transaction(async (tx) => {
-      const newMeeting = await meetingRepository.create(
+      const newMeeting = await interactionRepository.create(
         {
           organizationId: data.organizationId,
+          kind: data.kind,
           dealId: data.dealId ?? null,
           inquiryId: data.inquiryId ?? null,
-          type: data.type,
+          meetingType: data.meetingType ?? null,
           date: data.date,
           location: data.location,
           attendees: data.attendees,
           summary: data.summary,
           actionItems: data.actionItems,
-          hearingData,
+          details,
           createdById: data.actorId,
         },
         tx
@@ -66,11 +75,12 @@ export async function createMeeting(data: {
 
       await recordAudit(
         {
-          action: "meeting.create",
-          targetType: "meeting",
+          action: "interaction.create",
+          targetType: "interaction",
           targetId: newMeeting.id,
           actorId: data.actorId,
           organizationId: data.organizationId,
+          metadata: { kind: data.kind },
         },
         tx
       );

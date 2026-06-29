@@ -41,8 +41,8 @@ describe("リポジトリ検索メソッドの存在", () => {
     expect(content).toContain("export async function searchByTitle(");
   });
 
-  it("meetingRepository.ts に searchBySummary 関数が存在する", async () => {
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+  it("interactionRepository.ts に searchBySummary 関数が存在する", async () => {
+    const content = await readSrc("infrastructure/repositories/interactionRepository.ts");
     expect(content).toContain("searchBySummary");
     expect(content).toContain("export async function searchBySummary(");
   });
@@ -69,8 +69,8 @@ describe("検索メソッドのテナント分離", () => {
     expect(body).toContain("organizationId");
   });
 
-  it("meetingRepository.ts の searchBySummary 内に organizationId の条件が含まれる", async () => {
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+  it("interactionRepository.ts の searchBySummary 内に organizationId の条件が含まれる", async () => {
+    const content = await readSrc("infrastructure/repositories/interactionRepository.ts");
     const idx = content.indexOf("export async function searchBySummary(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 500);
@@ -99,8 +99,8 @@ describe("検索上限（LINK_SEARCH_LIMIT）", () => {
     expect(body).toContain(".limit(");
   });
 
-  it("meetingRepository.ts の searchBySummary に .limit( が含まれる", async () => {
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+  it("interactionRepository.ts の searchBySummary に .limit( が含まれる", async () => {
+    const content = await readSrc("infrastructure/repositories/interactionRepository.ts");
     const idx = content.indexOf("export async function searchBySummary(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 500);
@@ -129,12 +129,12 @@ describe("検索対象フィールド", () => {
     expect(body).toContain("inquiries.title");
   });
 
-  it("meetingRepository.ts の searchBySummary に meetings.summary への検索条件が含まれる", async () => {
-    const content = await readSrc("infrastructure/repositories/meetingRepository.ts");
+  it("interactionRepository.ts の searchBySummary に interactions.summary への検索条件が含まれる", async () => {
+    const content = await readSrc("infrastructure/repositories/interactionRepository.ts");
     const idx = content.indexOf("export async function searchBySummary(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx, idx + 500);
-    expect(body).toContain("meetings.summary");
+    expect(body).toContain("interactions.summary");
     expect(body).toContain("isNotNull");
   });
 });
@@ -164,20 +164,20 @@ describe("searchLinkTargetsAction", () => {
 // ---------------------------------------------------------------------------
 
 describe("単一紐づけ — 呼び出し元での FK マッピング", () => {
-  it("TaskList.tsx のコード内で linkTarget から dealId をマッピングするコードが存在する", async () => {
+  it("TaskList.tsx のコード内で linkTarget から dealId / interactionId をマッピングするコードが存在する", async () => {
     const content = await readSrc("app/(dashboard)/tasks/TaskList.tsx");
     expect(content).toContain("linkTarget");
     expect(content).toContain("dealId");
     expect(content).toContain("inquiryId");
-    expect(content).toContain("meetingId");
+    expect(content).toContain("interactionId");
   });
 
-  it("ActionItemRow.tsx のコード内で linkTarget から dealId をマッピングするコードが存在する", async () => {
+  it("ActionItemRow.tsx のコード内で linkTarget から dealId / interactionId をマッピングするコードが存在する", async () => {
     const content = await readSrc("app/(dashboard)/components/ActionItemRow.tsx");
     expect(content).toContain("linkTarget");
     expect(content).toContain("dealId");
     expect(content).toContain("inquiryId");
-    expect(content).toContain("meetingId");
+    expect(content).toContain("interactionId");
   });
 });
 

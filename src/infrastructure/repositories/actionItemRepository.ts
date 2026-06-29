@@ -13,7 +13,7 @@ export function mapRow(row: typeof actionItems.$inferSelect): ActionItem {
     dueDate: row.dueDate ?? null,
     done: row.done,
     status: (row.status as ActionItemStatus | null) ?? (row.done ? "done" : "todo"),
-    meetingId: row.meetingId ?? null,
+    interactionId: row.interactionId ?? null,
     dealId: row.dealId ?? null,
     inquiryId: row.inquiryId ?? null,
     createdById: row.createdById,
@@ -31,7 +31,7 @@ export async function create(
     dueDate?: Date | null;
     done?: boolean;
     status?: ActionItemStatus;
-    meetingId?: string | null;
+    interactionId?: string | null;
     dealId?: string | null;
     inquiryId?: string | null;
     createdById: string;
@@ -48,7 +48,7 @@ export async function create(
       dueDate: data.dueDate ?? null,
       done: data.done ?? false,
       status: data.status,
-      meetingId: data.meetingId ?? null,
+      interactionId: data.interactionId ?? null,
       dealId: data.dealId ?? null,
       inquiryId: data.inquiryId ?? null,
       createdById: data.createdById,
@@ -77,7 +77,7 @@ export async function findByOrganization(
     done?: boolean;
     assigneeId?: string;
     dealId?: string;
-    meetingId?: string;
+    interactionId?: string;
     inquiryId?: string;
   }
 ): Promise<ActionItem[]> {
@@ -92,8 +92,8 @@ export async function findByOrganization(
   if (filters?.dealId !== undefined) {
     conditions.push(eq(actionItems.dealId, filters.dealId));
   }
-  if (filters?.meetingId !== undefined) {
-    conditions.push(eq(actionItems.meetingId, filters.meetingId));
+  if (filters?.interactionId !== undefined) {
+    conditions.push(eq(actionItems.interactionId, filters.interactionId));
   }
   if (filters?.inquiryId !== undefined) {
     conditions.push(eq(actionItems.inquiryId, filters.inquiryId));
@@ -116,7 +116,7 @@ export async function update(
     dueDate: Date | null;
     done: boolean;
     status: ActionItemStatus;
-    meetingId: string | null;
+    interactionId: string | null;
     dealId: string | null;
     inquiryId: string | null;
   }>,
@@ -157,14 +157,16 @@ export async function findByDeal(
   return result.map(mapRow);
 }
 
-export async function findByMeeting(
-  meetingId: string,
+export async function findByInteraction(
+  interactionId: string,
   organizationId: string
 ): Promise<ActionItem[]> {
   const result = await db
     .select()
     .from(actionItems)
-    .where(and(eq(actionItems.meetingId, meetingId), eq(actionItems.organizationId, organizationId)))
+    .where(
+      and(eq(actionItems.interactionId, interactionId), eq(actionItems.organizationId, organizationId))
+    )
     .orderBy(desc(actionItems.createdAt));
   return result.map(mapRow);
 }

@@ -182,15 +182,16 @@ export async function createMeetingAction(
   const result = await createMeeting({
     organizationId: session.user.organizationId,
     actorId: session.user.id,
+    kind: "meeting",
     dealId: parsed.data.dealId ?? null,
     inquiryId: parsed.data.inquiryId ?? null,
-    type: parsed.data.type,
+    meetingType: parsed.data.type,
     date: new Date(parsed.data.date),
     location: parsed.data.location ?? null,
     attendees,
     summary: parsed.data.summary ?? null,
     actionItems: parsed.data.actionItems,
-    hearingData: parsed.data.hearingData ?? null,
+    details: parsed.data.hearingData ?? null,
   });
 
   if (!result.ok) {
@@ -348,13 +349,13 @@ export async function updateMeetingAction(
     meetingId: parsed.data.meetingId,
     organizationId: session.user.organizationId,
     actorId: session.user.id,
-    type: parsed.data.type,
+    meetingType: parsed.data.type,
     date: parsed.data.date ? new Date(parsed.data.date) : undefined,
     location: parsed.data.location,
     attendees,
     summary: parsed.data.summary,
     actionItems: parsed.data.actionItems,
-    hearingData: parsed.data.hearingData,
+    details: parsed.data.hearingData,
   });
 
   if (!result.ok) {

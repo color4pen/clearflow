@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateMeetingAction } from "@/app/actions/meetings";
 import { SectionCard, Input, Select, preventEnterSubmit } from "@/app/components";
-import type { MeetingAttendee } from "@/domain/models/meeting";
+import type { MeetingAttendee } from "@/domain/models/interaction";
 
 type Props = {
   meetingId: string;

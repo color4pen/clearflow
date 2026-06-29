@@ -49,22 +49,15 @@ mock.module("@/infrastructure/repositories/actionItemRepository", () => ({
   create: async () => { throw new Error("not implemented in this test"); },
   findByOrganization: async () => [],
   findByDeal: async () => [],
-  findByMeeting: async () => [],
+  findByInteraction: async () => [],
   deleteById: async () => false,
 }));
 
-// auditLogRepository の個別ファイルモック
-mock.module("@/infrastructure/repositories/auditLogRepository", () => ({
-  create: async (data: Record<string, unknown>, _tx?: unknown) => {
+// auditRecorder を直接モック（auditLogRepository のバレル経由の干渉を避ける）
+mock.module("@/application/services/auditRecorder", () => ({
+  recordAudit: async (data: Record<string, unknown>, _tx?: unknown) => {
     state.auditCreateArgs = data;
-    return {
-      id: "audit-001",
-      ...data,
-      createdAt: new Date(),
-    };
   },
-  findByOrganization: async () => [],
-  findByTargets: async () => [],
 }));
 
 import { updateActionItemStatus } from "@/application/usecases/updateActionItemStatus";
@@ -85,7 +78,7 @@ const baseActionItem: ActionItem = {
   dueDate: null,
   done: false,
   status: "todo",
-  meetingId: null,
+  interactionId: null,
   dealId: null,
   inquiryId: null,
   createdById: ACTOR_ID,

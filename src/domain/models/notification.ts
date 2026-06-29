@@ -3,6 +3,7 @@ import type { AuditLog } from "./auditLog";
 export const NOTIFICATION_ACTIONS = [
   "deal.update",
   "deal.updatePhase",
+  "interaction.create",
   "meeting.create",
   "action_item.create",
   "contract.create",

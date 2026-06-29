@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "5603dd70-2a18-411f-a388-c52117106730",
   "createdAt": "2026-06-29T20:48:35.243Z",
-  "updatedAt": "2026-06-29T21:08:11.199Z",
+  "updatedAt": "2026-06-29T21:11:22.588Z",
   "request": {
     "title": "商談（Meeting）を顧客接点（Interaction）に一般化",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "change/interaction-generalization-5603dd70",
   "error": null,
@@ -34,11 +34,12 @@
     }
   ],
   "_journal": {
-    "historyCount": 13,
+    "historyCount": 16,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1
+      "spec-review": 1,
+      "test-case-gen": 1
     }
   }
 }

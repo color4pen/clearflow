@@ -16,7 +16,7 @@ import {
 } from "@/application/usecases";
 import { ACTION_ITEM_STATUSES } from "@/domain/models/actionItem";
 import { actionItemRepository } from "@/infrastructure/repositories";
-import { meetingRepository } from "@/infrastructure/repositories";
+import { interactionRepository } from "@/infrastructure/repositories";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import { canPerform } from "@/domain/authorization";
 
@@ -24,7 +24,7 @@ const createActionItemSchema = z.object({
   description: z.string().min(1, "説明は必須です"),
   assigneeId: z.string().uuid("担当者IDが不正です").optional(),
   dueDate: z.string().optional(),
-  meetingId: z.string().uuid("商談IDが不正です").optional(),
+  interactionId: z.string().uuid("商談IDが不正です").optional(),
   dealId: z.string().uuid("案件IDが不正です").optional(),
   inquiryId: z.string().uuid("引合IDが不正です").optional(),
 });
@@ -34,7 +34,7 @@ export type CreateActionItemState = {
     description?: string[];
     assigneeId?: string[];
     dueDate?: string[];
-    meetingId?: string[];
+    interactionId?: string[];
     dealId?: string[];
     inquiryId?: string[];
   };
@@ -74,7 +74,7 @@ export async function createActionItemAction(
     description: parsed.data.description,
     assigneeId: parsed.data.assigneeId ?? null,
     dueDate: parsed.data.dueDate ? new Date(parsed.data.dueDate) : null,
-    meetingId: parsed.data.meetingId ?? null,
+    interactionId: parsed.data.interactionId ?? null,
     dealId: parsed.data.dealId ?? null,
     inquiryId: parsed.data.inquiryId ?? null,
   });
@@ -90,14 +90,14 @@ export async function createActionItemAction(
     revalidatePath(`/deals/${parsed.data.dealId}`);
   }
 
-  if (parsed.data.meetingId) {
+  if (parsed.data.interactionId) {
     // 商談から dealId を取得して meeting ページも再検証する
-    const meeting = await meetingRepository.findById(
-      parsed.data.meetingId,
+    const interaction = await interactionRepository.findById(
+      parsed.data.interactionId,
       session.user.organizationId
     );
-    if (meeting?.dealId) {
-      revalidatePath(`/deals/${meeting.dealId}/meetings/${parsed.data.meetingId}`);
+    if (interaction?.dealId) {
+      revalidatePath(`/deals/${interaction.dealId}/meetings/${parsed.data.interactionId}`);
     }
   }
 
@@ -156,13 +156,13 @@ export async function toggleActionItemAction(
     revalidatePath(`/deals/${existing.dealId}`);
   }
 
-  if (existing?.meetingId) {
-    const meeting = await meetingRepository.findById(
-      existing.meetingId,
+  if (existing?.interactionId) {
+    const interaction = await interactionRepository.findById(
+      existing.interactionId,
       session.user.organizationId
     );
-    if (meeting?.dealId) {
-      revalidatePath(`/deals/${meeting.dealId}/meetings/${existing.meetingId}`);
+    if (interaction?.dealId) {
+      revalidatePath(`/deals/${interaction.dealId}/meetings/${existing.interactionId}`);
     }
   }
 
@@ -174,7 +174,7 @@ const updateActionItemSchema = z.object({
   description: z.string().min(1, "説明は必須です").optional(),
   assigneeId: z.string().uuid("担当者IDが不正です").nullable().optional(),
   dueDate: z.string().nullable().optional(),
-  meetingId: z.string().uuid("商談IDが不正です").nullable().optional(),
+  interactionId: z.string().uuid("商談IDが不正です").nullable().optional(),
   dealId: z.string().uuid("案件IDが不正です").nullable().optional(),
   inquiryId: z.string().uuid("引合IDが不正です").nullable().optional(),
 });
@@ -185,7 +185,7 @@ export type UpdateActionItemState = {
     description?: string[];
     assigneeId?: string[];
     dueDate?: string[];
-    meetingId?: string[];
+    interactionId?: string[];
     dealId?: string[];
     inquiryId?: string[];
   };
@@ -219,7 +219,7 @@ export async function updateActionItemAction(
     dueDate: parsed.data.dueDate !== undefined
       ? (parsed.data.dueDate ? new Date(parsed.data.dueDate) : null)
       : undefined,
-    meetingId: parsed.data.meetingId,
+    interactionId: parsed.data.interactionId,
     dealId: parsed.data.dealId,
     inquiryId: parsed.data.inquiryId,
   });
@@ -237,13 +237,13 @@ export async function updateActionItemAction(
     revalidatePath(`/deals/${updatedItem.dealId}`);
   }
 
-  if (updatedItem.meetingId) {
-    const meeting = await meetingRepository.findById(
-      updatedItem.meetingId,
+  if (updatedItem.interactionId) {
+    const interaction = await interactionRepository.findById(
+      updatedItem.interactionId,
       session.user.organizationId
     );
-    if (meeting?.dealId) {
-      revalidatePath(`/deals/${meeting.dealId}/meetings/${updatedItem.meetingId}`);
+    if (interaction?.dealId) {
+      revalidatePath(`/deals/${interaction.dealId}/meetings/${updatedItem.interactionId}`);
     }
   }
 
@@ -302,13 +302,13 @@ export async function deleteActionItemAction(
     revalidatePath(`/deals/${existing.dealId}`);
   }
 
-  if (existing?.meetingId) {
-    const meeting = await meetingRepository.findById(
-      existing.meetingId,
+  if (existing?.interactionId) {
+    const interaction = await interactionRepository.findById(
+      existing.interactionId,
       session.user.organizationId
     );
-    if (meeting?.dealId) {
-      revalidatePath(`/deals/${meeting.dealId}/meetings/${existing.meetingId}`);
+    if (interaction?.dealId) {
+      revalidatePath(`/deals/${interaction.dealId}/meetings/${existing.interactionId}`);
     }
   }
 
@@ -370,13 +370,13 @@ export async function updateActionItemStatusAction(
     revalidatePath(`/deals/${existing.dealId}`);
   }
 
-  if (existing?.meetingId) {
-    const meeting = await meetingRepository.findById(
-      existing.meetingId,
+  if (existing?.interactionId) {
+    const interaction = await interactionRepository.findById(
+      existing.interactionId,
       session.user.organizationId
     );
-    if (meeting?.dealId) {
-      revalidatePath(`/deals/${meeting.dealId}/meetings/${existing.meetingId}`);
+    if (interaction?.dealId) {
+      revalidatePath(`/deals/${interaction.dealId}/meetings/${existing.interactionId}`);
     }
   }
 

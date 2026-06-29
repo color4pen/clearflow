@@ -7,6 +7,8 @@ import { describe, it, expect, beforeEach, mock } from "bun:test";
 import type { Watch } from "@/domain/models/watch";
 import type { Deal } from "@/domain/models/deal";
 import type { AuditLog } from "@/domain/models/auditLog";
+import type { Interaction } from "@/domain/models/interaction";
+import { NOTIFICATION_ACTIONS } from "@/domain/models/notification";
 
 // ---------------------------------------------------------------------------
 // モック状態
@@ -15,6 +17,7 @@ import type { AuditLog } from "@/domain/models/auditLog";
 const state = {
   watches: [] as Watch[],
   deal: null as Deal | null,
+  interactions: [] as Interaction[],
   logs: [] as AuditLog[],
   findByTargetsCallArgs: null as {
     organizationId: string;
@@ -39,8 +42,8 @@ mock.module("@/infrastructure/repositories/dealRepository", () => ({
   findById: async () => state.deal,
 }));
 
-mock.module("@/infrastructure/repositories/meetingRepository", () => ({
-  findAllByDeal: async () => [],
+mock.module("@/infrastructure/repositories/interactionRepository", () => ({
+  findAllByDeal: async () => state.interactions,
 }));
 
 mock.module("@/infrastructure/repositories/contractRepository", () => ({
@@ -138,6 +141,7 @@ describe("getNotifications watch 0 件の場合", () => {
   beforeEach(() => {
     state.watches = [];
     state.deal = makeDeal();
+    state.interactions = [];
     state.logs = [];
     state.findByTargetsCallArgs = null;
   });
@@ -373,5 +377,91 @@ describe("watch している案件の deal が見つからない場合", () => {
 
     expect(result.notifications).toHaveLength(0);
     expect(result.unreadCount).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// NOTIFICATION_ACTIONS に interaction.create が含まれる
+// ---------------------------------------------------------------------------
+
+describe("NOTIFICATION_ACTIONS に interaction.create / meeting.create の両方が含まれる", () => {
+  it("NOTIFICATION_ACTIONS に interaction.create が含まれる", () => {
+    expect(NOTIFICATION_ACTIONS).toContain("interaction.create");
+  });
+
+  it("NOTIFICATION_ACTIONS に meeting.create が含まれる（後方互換）", () => {
+    expect(NOTIFICATION_ACTIONS).toContain("meeting.create");
+  });
+
+  it("getNotifications が findByTargets に interaction.create を含む includeActions を渡す", async () => {
+    state.watches = [makeWatch()];
+    state.deal = makeDeal();
+    state.interactions = [];
+    state.logs = [];
+    state.findByTargetsCallArgs = null;
+
+    await getNotifications({
+      userId: USER_ID,
+      organizationId: ORG_ID,
+      notificationsLastSeenAt: null,
+    });
+
+    const includeActions = state.findByTargetsCallArgs?.opts.includeActions ?? [];
+    expect(includeActions).toContain("interaction.create");
+    expect(includeActions).toContain("meeting.create");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// デュアルターゲットテスト: interaction と meeting の両 targetType が targets に含まれる
+// ---------------------------------------------------------------------------
+
+describe("デュアルターゲットテスト: interaction と meeting の両 targetType が targets に含まれる", () => {
+  it("interactions が 1 件ある場合、targets に interaction:<id> と meeting:<id> の両方が含まれる", async () => {
+    const MEETING_ID = "meeting-001";
+    state.watches = [makeWatch()];
+    state.deal = makeDeal();
+    state.interactions = [
+      {
+        id: MEETING_ID,
+        kind: "meeting" as const,
+        dealId: DEAL_ID,
+        inquiryId: null,
+        contractId: null,
+        invoiceId: null,
+        clientId: null,
+        organizationId: ORG_ID,
+        meetingType: null,
+        date: new Date("2026-01-15"),
+        location: null,
+        attendees: [],
+        summary: null,
+        actionItems: [],
+        details: null,
+        createdById: OTHER_USER_ID,
+        version: 1,
+        createdAt: new Date("2026-01-15"),
+        updatedAt: new Date("2026-01-15"),
+      },
+    ];
+    state.logs = [];
+    state.findByTargetsCallArgs = null;
+
+    await getNotifications({
+      userId: USER_ID,
+      organizationId: ORG_ID,
+      notificationsLastSeenAt: null,
+    });
+
+    const targets = state.findByTargetsCallArgs?.targets ?? [];
+    const interactionTarget = targets.find(
+      (t) => t.targetType === "interaction" && t.targetId === MEETING_ID
+    );
+    const meetingTarget = targets.find(
+      (t) => t.targetType === "meeting" && t.targetId === MEETING_ID
+    );
+
+    expect(interactionTarget).toBeDefined();
+    expect(meetingTarget).toBeDefined();
   });
 });

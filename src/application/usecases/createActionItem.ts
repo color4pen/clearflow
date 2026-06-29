@@ -1,7 +1,7 @@
 import {
   actionItemRepository,
   dealRepository,
-  meetingRepository,
+  interactionRepository,
   inquiryRepository,
   userRepository,
 } from "@/infrastructure/repositories";
@@ -20,7 +20,7 @@ export async function createActionItem(data: {
   description: string;
   assigneeId?: string | null;
   dueDate?: Date | null;
-  meetingId?: string | null;
+  interactionId?: string | null;
   dealId?: string | null;
   inquiryId?: string | null;
 }): Promise<CreateActionItemResult> {
@@ -39,9 +39,9 @@ export async function createActionItem(data: {
     }
   }
 
-  if (data.meetingId) {
-    const meeting = await meetingRepository.findById(data.meetingId, data.organizationId);
-    if (!meeting) {
+  if (data.interactionId) {
+    const interaction = await interactionRepository.findById(data.interactionId, data.organizationId);
+    if (!interaction) {
       return { ok: false, reason: "商談が見つかりません" };
     }
   }
@@ -61,7 +61,7 @@ export async function createActionItem(data: {
           description: data.description,
           assigneeId: data.assigneeId ?? null,
           dueDate: data.dueDate ?? null,
-          meetingId: data.meetingId ?? null,
+          interactionId: data.interactionId ?? null,
           dealId: data.dealId ?? null,
           inquiryId: data.inquiryId ?? null,
           createdById: data.actorId,

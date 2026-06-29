@@ -10,8 +10,12 @@ describe("getActionLabel", () => {
     expect(getActionLabel({ action: "unknown.action" })).toBe("unknown.action");
   });
 
-  // タイムライン対象の 7 アクションすべてにラベルが定義されていることを確認する
-  it('meeting.create が "商談を記録" を返す', () => {
+  // タイムライン対象のアクションすべてにラベルが定義されていることを確認する
+  it('interaction.create が "商談を記録" を返す', () => {
+    expect(getActionLabel({ action: "interaction.create" })).toBe("商談を記録");
+  });
+
+  it('meeting.create が "商談を記録" を返す（後方互換）', () => {
     expect(getActionLabel({ action: "meeting.create" })).toBe("商談を記録");
   });
 
@@ -75,9 +79,10 @@ describe("getActionLabel", () => {
     ).toBe("フェーズを変更");
   });
 
-  // タイムライン対象 7 アクションに生キーが漏れないことを確認する
-  it("タイムライン対象の 7 アクションすべてに日本語ラベルが定義されている（生キーにフォールバックしない）", () => {
+  // タイムライン対象 8 アクションに生キーが漏れないことを確認する
+  it("タイムライン対象の 8 アクションすべてに日本語ラベルが定義されている（生キーにフォールバックしない）", () => {
     const timelineActions = [
+      "interaction.create",
       "meeting.create",
       "deal.create",
       "deal.updatePhase",

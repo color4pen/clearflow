@@ -10,7 +10,7 @@ export type ActionItem = {
   dueDate: Date | null;
   done: boolean;
   status: ActionItemStatus;
-  meetingId: string | null;
+  interactionId: string | null;
   dealId: string | null;
   inquiryId: string | null;
   createdById: string;

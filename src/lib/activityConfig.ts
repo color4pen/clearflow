@@ -18,6 +18,7 @@ export function isActivityFeedEnabled(): boolean {
 
 /** タイムラインに表示する対象アクションのホワイトリスト（顧客接点 + 業務イベント） */
 export const TIMELINE_ACTIONS: AuditAction[] = [
+  "interaction.create",
   "meeting.create",
   "deal.create",
   "deal.updatePhase",
