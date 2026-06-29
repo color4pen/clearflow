@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "350b4b5d-5ab2-4d3e-bad1-cb9cbf4473a7",
   "createdAt": "2026-06-29T22:36:55.892Z",
-  "updatedAt": "2026-06-29T23:55:15.838Z",
+  "updatedAt": "2026-06-29T23:55:41.125Z",
   "request": {
     "title": "契約調整・請求調整の顧客接点を契約/請求から記録する",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/interaction-contract-invoice-350b4b5d",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/149",
+    "number": 149,
+    "createdAt": "2026-06-29T23:55:41.112Z"
+  },
   "_journal": {
-    "historyCount": 60,
+    "historyCount": 65,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -61,7 +66,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
