@@ -1,22 +1,20 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { getDeal, getInquiry, listMeetings, listDealContacts, listContractsByDeal, getClient, listClientContacts, listActionItemsByDeal, listOrganizationUsers, getDealActivity, getWatchStatus } from "@/application/usecases";
+import { getDeal, listMeetings, listDealContacts, listContractsByDeal, getClient, listClientContacts, listActionItemsByDeal, listOrganizationUsers, getDealActivity, getWatchStatus } from "@/application/usecases";
 import { SectionCard, DataTable } from "@/app/components";
 import { DealContactsSection } from "./DealContactsSection";
 import { DealNotesSection } from "./DealNotesSection";
 import { DealInfoSection } from "./DealInfoSection";
 import { DealActionItemsSection } from "./DealActionItemsSection";
 import { DealActivitySection } from "./DealActivitySection";
-import { DealPhaseActions } from "./DealPhaseActions";
-import { DealHeaderActions } from "./DealHeaderActions";
+import { DealPhaseStepper } from "./DealPhaseStepper";
 import { WatchToggle } from "./WatchToggle";
 import { DeleteDealButton } from "./DeleteDealButton";
 import {
   contractTypeLabels,
   meetingTypeLabels,
   contractStatusLabels,
-  phaseLabels,
 } from "@/app/(dashboard)/labels";
 import { isActivityFeedEnabled } from "@/lib/activityConfig";
 import type { Meeting } from "@/domain/models/meeting";
@@ -37,8 +35,7 @@ export default async function DealDetailPage({
 
   const activityEnabled = isActivityFeedEnabled();
 
-  const [inquiry, dealMeetings, dealContacts, dealContracts, actionItemsResult, users, activityResult, watchStatus] = await Promise.all([
-    deal.inquiryId ? getInquiry({ inquiryId: deal.inquiryId, organizationId }) : null,
+  const [dealMeetings, dealContacts, dealContracts, actionItemsResult, users, activityResult, watchStatus] = await Promise.all([
     listMeetings(deal.id, organizationId),
     listDealContacts(deal.id, organizationId),
     listContractsByDeal(deal.id, organizationId),
@@ -61,30 +58,40 @@ export default async function DealDetailPage({
 
   return (
     <div>
-      {/* ヘッダー: パンくず + タイトル + 受注/失注ボタン */}
-      <div className="flex items-start justify-between mb-3">
-        <div>
-          <div className="text-xs text-text-muted mb-0.5">
-            <Link href="/deals" className="text-primary underline">
-              案件一覧
+      {/* ヘッダー: パンくず + タイトル */}
+      <div className="mb-3">
+        <div className="text-xs text-text-muted mb-0.5">
+          <Link href="/deals" className="text-primary underline">
+            案件一覧
+          </Link>
+          {" > "}
+          {deal.title}
+        </div>
+        <div className="text-lg font-bold text-text">{deal.title}</div>
+        {deal.estimateRequestId && (
+          <div className="text-xs mt-0.5">
+            <Link
+              href={`/requests/${deal.estimateRequestId}`}
+              className="text-primary underline"
+            >
+              見積承認を表示
             </Link>
-            {" > "}
-            {deal.title}
           </div>
-          <div className="text-lg font-bold text-text">{deal.title}</div>
-          <div className="text-sm text-text-muted">
-            {client?.name ?? "-"} · {phaseLabels[deal.phase] ?? deal.phase}
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <WatchToggle dealId={deal.id} isWatching={watchStatus.isWatching} />
-          <DealHeaderActions
-            dealId={deal.id}
-            dealPhase={deal.phase}
-            canChangePhase={canChangePhase}
-          />
-        </div>
+        )}
       </div>
+
+      {/* フェーズ進捗: 提案準備 → 提案済 → 交渉中 →（受注/失注）を一本化したステッパー */}
+      <SectionCard className="px-4 py-3 mb-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <DealPhaseStepper
+            dealId={deal.id}
+            phase={deal.phase}
+            canChangePhase={canChangePhase}
+            inquiryId={deal.inquiryId}
+          />
+          <WatchToggle dealId={deal.id} isWatching={watchStatus.isWatching} />
+        </div>
+      </SectionCard>
 
       {/* 2カラムグリッド: 1.5fr : 1fr */}
       <div
@@ -102,13 +109,6 @@ export default async function DealDetailPage({
               </div>
             )}
           </SectionCard>
-
-          {/* フェーズ変更 */}
-          {canChangePhase && deal.phase !== "won" && deal.phase !== "lost" && (
-            <SectionCard className="p-3">
-              <DealPhaseActions deal={deal} canChangePhase={canChangePhase} />
-            </SectionCard>
-          )}
 
           {/* 商談記録 */}
           <SectionCard className="p-3">
@@ -168,15 +168,28 @@ export default async function DealDetailPage({
 
         {/* 右カラム */}
         <div className="space-y-3">
-          {/* 担当者 */}
+          {/* 顧客（会社 + 顧客担当者） */}
           <SectionCard className="p-3">
-            <h2 className="text-xs font-bold text-text mb-2">担当者</h2>
-            <DealContactsSection
-              dealId={deal.id}
-              dealContacts={dealContacts}
-              clientContacts={clientContacts}
-              clientId={deal.clientId}
-            />
+            <h2 className="text-xs font-bold text-text mb-2">顧客</h2>
+            {client ? (
+              <Link
+                href={`/clients/${client.id}`}
+                className="text-sm text-primary underline"
+              >
+                {client.name}
+              </Link>
+            ) : (
+              <span className="text-xs text-text-muted">-</span>
+            )}
+            <div className="mt-3 pt-3 border-t border-border">
+              <h3 className="text-xs font-bold text-text-muted mb-1.5">顧客担当者</h3>
+              <DealContactsSection
+                dealId={deal.id}
+                dealContacts={dealContacts}
+                clientContacts={clientContacts}
+                clientId={deal.clientId}
+              />
+            </div>
           </SectionCard>
 
           {/* アクションアイテム */}
@@ -191,19 +204,23 @@ export default async function DealDetailPage({
 
           {/* 契約 */}
           <SectionCard className="p-3">
-            <div className="flex items-center justify-between bg-[#eef7f1] px-3 py-2 -mx-3 -mt-3 mb-2 rounded-t">
-              <h2 className="text-xs font-bold text-[#1a8a4a]">契約</h2>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-xs font-bold text-text">契約</h2>
               {deal.phase === "won" && canChangePhase && (
                 <Link
                   href={`/contracts/new?dealId=${deal.id}`}
-                  className="text-xs bg-primary text-white font-bold px-4 py-1.5"
+                  className="text-xs text-primary underline"
                 >
                   契約を作成
                 </Link>
               )}
             </div>
             {dealContracts.length === 0 ? (
-              <p className="text-xs text-text-muted">契約がありません</p>
+              <p className="text-xs text-text-muted">
+                {deal.phase === "won"
+                  ? "契約がありません"
+                  : "契約がありません（受注後に作成できます）"}
+              </p>
             ) : (
               <DataTable
                 columns={[
@@ -249,53 +266,6 @@ export default async function DealDetailPage({
             )}
           </SectionCard>
 
-          {/* 関連情報 */}
-          <SectionCard className="p-3">
-            <h2 className="text-xs font-bold text-text mb-2">関連情報</h2>
-            <dl className="text-xs space-y-1">
-              {deal.inquiryId && (
-                <div className="flex gap-2">
-                  <dt className="text-text-muted w-24 shrink-0">引き合い</dt>
-                  <dd className="text-text px-2 py-1">
-                    <Link
-                      href={`/inquiries/${deal.inquiryId}`}
-                      className="text-primary underline text-xs"
-                    >
-                      {inquiry?.title ?? deal.inquiryId}
-                    </Link>
-                  </dd>
-                </div>
-              )}
-              <div className="flex gap-2">
-                <dt className="text-text-muted w-24 shrink-0">顧客</dt>
-                <dd className="text-text px-2 py-1">
-                  {client ? (
-                    <Link
-                      href={`/clients/${client.id}`}
-                      className="text-primary underline text-xs"
-                    >
-                      {client.name}
-                    </Link>
-                  ) : (
-                    "-"
-                  )}
-                </dd>
-              </div>
-              {deal.estimateRequestId && (
-                <div className="flex gap-2">
-                  <dt className="text-text-muted w-24 shrink-0">見積承認</dt>
-                  <dd className="text-text px-2 py-1">
-                    <Link
-                      href={`/requests/${deal.estimateRequestId}`}
-                      className="text-primary underline text-xs"
-                    >
-                      承認リクエストを表示
-                    </Link>
-                  </dd>
-                </div>
-              )}
-            </dl>
-          </SectionCard>
         </div>
       </div>
 

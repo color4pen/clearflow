@@ -66,6 +66,18 @@ export function DealInfoSection({ deal, editable }: Props) {
 
   // 表示モード
   if (!isEditing) {
+    // 空欄は "-" ではなく、その場で編集モードに入れる入力導線にする
+    const emptyHint = editable ? (
+      <button
+        type="button"
+        onClick={() => setIsEditing(true)}
+        className="text-text-placeholder hover:text-primary underline decoration-dotted cursor-pointer"
+      >
+        未入力（クリックで追加）
+      </button>
+    ) : (
+      <span className="text-text-muted">未設定</span>
+    );
     return (
       <div>
         <div className="flex items-center justify-between mb-2">
@@ -90,7 +102,7 @@ export function DealInfoSection({ deal, editable }: Props) {
             <span className="text-text flex-1">
               {deal.estimatedAmount != null
                 ? `¥${deal.estimatedAmount.toLocaleString("ja-JP")}`
-                : "-"}
+                : emptyHint}
             </span>
           </div>
           <div className="flex gap-2">
@@ -98,7 +110,7 @@ export function DealInfoSection({ deal, editable }: Props) {
             <span className="text-text flex-1">
               {deal.estimatedStartDate
                 ? deal.estimatedStartDate.toLocaleDateString("ja-JP")
-                : "-"}
+                : emptyHint}
             </span>
           </div>
           <div className="flex gap-2">
@@ -106,7 +118,7 @@ export function DealInfoSection({ deal, editable }: Props) {
             <span className="text-text flex-1">
               {deal.estimatedEndDate
                 ? deal.estimatedEndDate.toLocaleDateString("ja-JP")
-                : "-"}
+                : emptyHint}
             </span>
           </div>
           <div className="flex gap-2">
@@ -114,7 +126,7 @@ export function DealInfoSection({ deal, editable }: Props) {
             <span className="text-text flex-1">
               {deal.contractType
                 ? contractTypeLabels[deal.contractType] ?? deal.contractType
-                : "-"}
+                : emptyHint}
             </span>
           </div>
           <div className="flex gap-2">
