@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
-import { getInvoice } from "@/application/usecases";
+import { getInvoice, listInteractionsByInvoice } from "@/application/usecases";
 import { canPerform } from "@/domain/authorization";
 import { SectionCard } from "@/app/components";
 import { invoiceStatusLabels } from "@/app/(dashboard)/labels";
 import { InvoiceActions } from "./InvoiceActions";
+import { InvoiceInteractionSection } from "./InvoiceInteractionSection";
 
 export default async function InvoiceDetailPage({
   params,
@@ -28,6 +29,9 @@ export default async function InvoiceDetailPage({
   }
 
   const canChangeStatus = canPerform(session!.user.role, "invoice", "changeStatus");
+  const canRecord = canPerform(session!.user.role, "interaction", "recordInvoiceAdjustment");
+
+  const invoiceInteractions = await listInteractionsByInvoice(invoiceId, organizationId);
 
   const formatDate = (date: Date | null) =>
     date ? date.toLocaleDateString("ja-JP") : "-";
@@ -105,6 +109,13 @@ export default async function InvoiceDetailPage({
             </div>
           )}
         </SectionCard>
+
+        <InvoiceInteractionSection
+          invoiceId={invoiceId}
+          contractId={contractId}
+          interactions={invoiceInteractions}
+          canRecord={canRecord}
+        />
       </div>
     </div>
   );

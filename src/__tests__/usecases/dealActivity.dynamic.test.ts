@@ -18,6 +18,8 @@ const state = {
   meetings: [] as Interaction[],
   contracts: [] as Contract[],
   invoices: [] as Invoice[],
+  contractInteractions: [] as Interaction[],
+  invoiceInteractions: [] as Interaction[],
   logs: [] as AuditLog[],
   findByTargetsCallArgs: null as {
     organizationId: string;
@@ -36,6 +38,8 @@ const state = {
 
 mock.module("@/infrastructure/repositories/interactionRepository", () => ({
   findAllByDeal: async () => state.meetings,
+  findAllByContract: async () => state.contractInteractions,
+  findAllByInvoice: async () => state.invoiceInteractions,
 }));
 
 mock.module("@/infrastructure/repositories/contractRepository", () => ({
@@ -107,6 +111,8 @@ beforeEach(() => {
   state.meetings = [];
   state.contracts = [];
   state.invoices = [];
+  state.contractInteractions = [];
+  state.invoiceInteractions = [];
   state.logs = [];
   state.findByTargetsCallArgs = null;
   delete process.env.ACTIVITY_HIDDEN_ACTIONS;
@@ -937,5 +943,291 @@ describe("デュアルターゲットテスト: interaction と meeting の両 t
   it("TIMELINE_ACTIONS に interaction.create が含まれる", () => {
     expect(TIMELINE_ACTIONS).toContain("interaction.create");
     expect(TIMELINE_ACTIONS).toContain("meeting.create");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// 契約・請求経由の顧客接点タイムライン統合テスト
+// ---------------------------------------------------------------------------
+
+describe("タイムライン統合テスト: 契約・請求経由の顧客接点が targets に含まれる", () => {
+  it("契約調整の顧客接点が targets に含まれる", async () => {
+    const CONTRACT_ID = "contract-001";
+    const INTERACTION_ID = "ci-001";
+
+    state.contracts = [
+      {
+        id: CONTRACT_ID,
+        dealId: DEAL_ID,
+        organizationId: ORG_ID,
+        clientId: "client-001",
+        title: "テスト契約",
+        contractType: null,
+        amount: 1000000,
+        startDate: new Date("2026-01-01"),
+        endDate: null,
+        paymentTerms: null,
+        renewalType: "one_time",
+        renewalCycle: null,
+        status: "active",
+        createdAt: new Date("2026-01-01"),
+        updatedAt: new Date("2026-01-01"),
+        version: 1,
+      },
+    ];
+    state.contractInteractions = [
+      {
+        id: INTERACTION_ID,
+        organizationId: ORG_ID,
+        kind: "contract_adjustment" as const,
+        dealId: null,
+        inquiryId: null,
+        contractId: CONTRACT_ID,
+        invoiceId: null,
+        clientId: null,
+        meetingType: null,
+        date: new Date("2026-06-01"),
+        location: null,
+        attendees: [],
+        summary: "条件変更の交渉",
+        actionItems: [],
+        details: null,
+        createdById: ACTOR_A,
+        version: 1,
+        createdAt: new Date("2026-06-01"),
+        updatedAt: new Date("2026-06-01"),
+      },
+    ];
+
+    await getDealActivity({
+      dealId: DEAL_ID,
+      organizationId: ORG_ID,
+      dealTitle: "テスト案件",
+    });
+
+    const targets = state.findByTargetsCallArgs?.targets ?? [];
+    const contractInteractionTarget = targets.find(
+      (t) => t.targetType === "interaction" && t.targetId === INTERACTION_ID
+    );
+    expect(contractInteractionTarget).toBeDefined();
+  });
+
+  it("請求調整の顧客接点が targets に含まれる", async () => {
+    const CONTRACT_ID = "contract-001";
+    const INVOICE_ID = "invoice-001";
+    const INTERACTION_ID = "ii-001";
+
+    state.contracts = [
+      {
+        id: CONTRACT_ID,
+        dealId: DEAL_ID,
+        organizationId: ORG_ID,
+        clientId: "client-001",
+        title: "テスト契約",
+        contractType: null,
+        amount: 1000000,
+        startDate: new Date("2026-01-01"),
+        endDate: null,
+        paymentTerms: null,
+        renewalType: "one_time",
+        renewalCycle: null,
+        status: "active",
+        createdAt: new Date("2026-01-01"),
+        updatedAt: new Date("2026-01-01"),
+        version: 1,
+      },
+    ];
+    state.invoices = [
+      {
+        id: INVOICE_ID,
+        contractId: CONTRACT_ID,
+        organizationId: ORG_ID,
+        title: "テスト請求",
+        amount: 500000,
+        issueDate: new Date("2026-06-01"),
+        dueDate: new Date("2026-06-30"),
+        status: "invoiced",
+        invoicedAt: new Date("2026-06-01"),
+        paidAt: null,
+        notes: null,
+        createdAt: new Date("2026-06-01"),
+        updatedAt: new Date("2026-06-01"),
+        version: 1,
+      },
+    ];
+    state.invoiceInteractions = [
+      {
+        id: INTERACTION_ID,
+        organizationId: ORG_ID,
+        kind: "invoice_adjustment" as const,
+        dealId: null,
+        inquiryId: null,
+        contractId: null,
+        invoiceId: INVOICE_ID,
+        clientId: null,
+        meetingType: null,
+        date: new Date("2026-06-15"),
+        location: null,
+        attendees: [],
+        summary: "請求金額の調整",
+        actionItems: [],
+        details: null,
+        createdById: ACTOR_A,
+        version: 1,
+        createdAt: new Date("2026-06-15"),
+        updatedAt: new Date("2026-06-15"),
+      },
+    ];
+
+    await getDealActivity({
+      dealId: DEAL_ID,
+      organizationId: ORG_ID,
+      dealTitle: "テスト案件",
+    });
+
+    const targets = state.findByTargetsCallArgs?.targets ?? [];
+    const invoiceInteractionTarget = targets.find(
+      (t) => t.targetType === "interaction" && t.targetId === INTERACTION_ID
+    );
+    expect(invoiceInteractionTarget).toBeDefined();
+  });
+
+  it("契約調整の顧客接点が targetInfoMap に登録される", async () => {
+    const CONTRACT_ID = "contract-001";
+    const INTERACTION_ID = "ci-002";
+
+    state.contracts = [
+      {
+        id: CONTRACT_ID,
+        dealId: DEAL_ID,
+        organizationId: ORG_ID,
+        clientId: "client-001",
+        title: "テスト契約",
+        contractType: null,
+        amount: 1000000,
+        startDate: new Date("2026-01-01"),
+        endDate: null,
+        paymentTerms: null,
+        renewalType: "one_time",
+        renewalCycle: null,
+        status: "active",
+        createdAt: new Date("2026-01-01"),
+        updatedAt: new Date("2026-01-01"),
+        version: 1,
+      },
+    ];
+    state.contractInteractions = [
+      {
+        id: INTERACTION_ID,
+        organizationId: ORG_ID,
+        kind: "contract_adjustment" as const,
+        dealId: null,
+        inquiryId: null,
+        contractId: CONTRACT_ID,
+        invoiceId: null,
+        clientId: null,
+        meetingType: null,
+        date: new Date("2026-06-01"),
+        location: null,
+        attendees: [],
+        summary: "条件変更",
+        actionItems: [],
+        details: null,
+        createdById: ACTOR_A,
+        version: 1,
+        createdAt: new Date("2026-06-01"),
+        updatedAt: new Date("2026-06-01"),
+      },
+    ];
+
+    const result = await getDealActivity({
+      dealId: DEAL_ID,
+      organizationId: ORG_ID,
+      dealTitle: "テスト案件",
+    });
+
+    expect(result.targetInfoMap[`interaction:${INTERACTION_ID}`]).toBeDefined();
+    const info = result.targetInfoMap[`interaction:${INTERACTION_ID}`];
+    expect(info.label).toContain("契約調整");
+    expect(info.href).toContain(`/contracts/${CONTRACT_ID}`);
+  });
+
+  it("請求調整の顧客接点が targetInfoMap に登録される", async () => {
+    const CONTRACT_ID = "contract-001";
+    const INVOICE_ID = "invoice-002";
+    const INTERACTION_ID = "ii-002";
+
+    state.contracts = [
+      {
+        id: CONTRACT_ID,
+        dealId: DEAL_ID,
+        organizationId: ORG_ID,
+        clientId: "client-001",
+        title: "テスト契約",
+        contractType: null,
+        amount: 1000000,
+        startDate: new Date("2026-01-01"),
+        endDate: null,
+        paymentTerms: null,
+        renewalType: "one_time",
+        renewalCycle: null,
+        status: "active",
+        createdAt: new Date("2026-01-01"),
+        updatedAt: new Date("2026-01-01"),
+        version: 1,
+      },
+    ];
+    state.invoices = [
+      {
+        id: INVOICE_ID,
+        contractId: CONTRACT_ID,
+        organizationId: ORG_ID,
+        title: "テスト請求",
+        amount: 300000,
+        issueDate: new Date("2026-06-01"),
+        dueDate: new Date("2026-06-30"),
+        status: "invoiced",
+        invoicedAt: new Date("2026-06-01"),
+        paidAt: null,
+        notes: null,
+        createdAt: new Date("2026-06-01"),
+        updatedAt: new Date("2026-06-01"),
+        version: 1,
+      },
+    ];
+    state.invoiceInteractions = [
+      {
+        id: INTERACTION_ID,
+        organizationId: ORG_ID,
+        kind: "invoice_adjustment" as const,
+        dealId: null,
+        inquiryId: null,
+        contractId: null,
+        invoiceId: INVOICE_ID,
+        clientId: null,
+        meetingType: null,
+        date: new Date("2026-06-20"),
+        location: null,
+        attendees: [],
+        summary: "金額調整",
+        actionItems: [],
+        details: null,
+        createdById: ACTOR_A,
+        version: 1,
+        createdAt: new Date("2026-06-20"),
+        updatedAt: new Date("2026-06-20"),
+      },
+    ];
+
+    const result = await getDealActivity({
+      dealId: DEAL_ID,
+      organizationId: ORG_ID,
+      dealTitle: "テスト案件",
+    });
+
+    expect(result.targetInfoMap[`interaction:${INTERACTION_ID}`]).toBeDefined();
+    const info = result.targetInfoMap[`interaction:${INTERACTION_ID}`];
+    expect(info.label).toContain("請求調整");
+    expect(info.href).toContain(`/contracts/${CONTRACT_ID}/invoices/${INVOICE_ID}`);
   });
 });

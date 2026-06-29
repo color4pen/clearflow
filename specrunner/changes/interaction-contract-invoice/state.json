@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "350b4b5d-5ab2-4d3e-bad1-cb9cbf4473a7",
   "createdAt": "2026-06-29T22:36:55.892Z",
-  "updatedAt": "2026-06-29T22:52:53.932Z",
+  "updatedAt": "2026-06-29T22:55:11.754Z",
   "request": {
     "title": "契約調整・請求調整の顧客接点を契約/請求から記録する",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "change/interaction-contract-invoice-350b4b5d",
   "error": null,
@@ -34,11 +34,12 @@
     }
   ],
   "_journal": {
-    "historyCount": 13,
+    "historyCount": 16,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1
+      "spec-review": 1,
+      "test-case-gen": 1
     }
   }
 }

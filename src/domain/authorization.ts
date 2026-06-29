@@ -11,7 +11,8 @@ export type Entity =
   | "approvalSettings"
   | "organization"
   | "revenue"
-  | "actionItem";
+  | "actionItem"
+  | "interaction";
 
 type PermissionMatrix = Record<Entity, Record<string, Role[]>>;
 
@@ -138,6 +139,12 @@ const PERMISSION_MATRIX: PermissionMatrix = {
     edit: ADMIN_MANAGER_MEMBER,
     toggle: ADMIN_MANAGER_MEMBER,
     delete: ADMIN_MANAGER,
+  },
+
+  // 3.12 顧客接点 (Interaction) — 記録操作のみ。entity 種別ごとに役割を分ける
+  interaction: {
+    recordContractAdjustment: ADMIN_MANAGER_MEMBER,
+    recordInvoiceAdjustment: ADMIN_MANAGER_FINANCE,
   },
 };
 
