@@ -4,10 +4,11 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  toggleActionItemAction,
+  updateActionItemStatusAction,
   updateActionItemAction,
   deleteActionItemAction,
 } from "@/app/actions/actionItems";
+import type { ActionItemStatus } from "@/domain/models/actionItem";
 import { ConfirmDialog, useToast } from "@/app/components";
 import { ActionItemModal } from "./ActionItemModal";
 import type { LinkTarget } from "./LinkTargetPicker";
@@ -73,10 +74,10 @@ export function ActionItemRow({
     return null;
   }
 
-  function handleToggle() {
+  function handleStatusChange(status: ActionItemStatus) {
     if (isPending) return;
     startTransition(async () => {
-      const result = await toggleActionItemAction({ id: item.id });
+      const result = await updateActionItemStatusAction({ id: item.id, status });
       if (result.message) {
         showToast(result.message, "error");
         return;
@@ -155,20 +156,29 @@ export function ActionItemRow({
         className={`grid items-center text-base-app px-3.5 py-2.5 hover:bg-bg-surface-alt ${
           editable ? "cursor-pointer" : ""
         }`}
-        style={{ gridTemplateColumns: "24px 1fr 100px 100px 140px" }}
+        style={{ gridTemplateColumns: "120px 1fr 100px 100px 140px" }}
         onClick={editable ? () => setShowEditModal(true) : undefined}
       >
-        <input
-          type="checkbox"
-          checked={item.done}
-          disabled={isPending}
-          onChange={handleToggle}
+        <select
+          value={item.status}
+          disabled={isPending || !editable}
+          onChange={(e) => handleStatusChange(e.target.value as ActionItemStatus)}
           onClick={(e) => e.stopPropagation()}
-          className="w-[18px] h-[18px] accent-primary cursor-pointer disabled:cursor-default"
-        />
+          className={`text-sm border rounded px-1 py-0.5 cursor-pointer disabled:cursor-default ${
+            item.status === "done"
+              ? "text-text-muted bg-bg-surface"
+              : item.status === "in_progress"
+              ? "text-primary bg-bg-surface"
+              : "text-text bg-bg-surface"
+          }`}
+        >
+          <option value="todo">未着手</option>
+          <option value="in_progress">対応中</option>
+          <option value="done">完了</option>
+        </select>
         <span
           className={`min-w-0 truncate ${
-            item.done ? "text-text-muted line-through" : "text-text"
+            item.status === "done" ? "text-text-muted line-through" : "text-text"
           }`}
         >
           {item.description}
@@ -203,18 +213,27 @@ export function ActionItemRow({
         }`}
         onClick={editable ? () => setShowEditModal(true) : undefined}
       >
-        <input
-          type="checkbox"
-          checked={item.done}
-          disabled={isPending}
-          onChange={handleToggle}
+        <select
+          value={item.status}
+          disabled={isPending || !editable}
+          onChange={(e) => handleStatusChange(e.target.value as ActionItemStatus)}
           onClick={(e) => e.stopPropagation()}
-          className="w-[18px] h-[18px] accent-primary cursor-pointer disabled:cursor-default"
-        />
+          className={`text-sm border rounded px-1 py-0.5 cursor-pointer disabled:cursor-default flex-shrink-0 ${
+            item.status === "done"
+              ? "text-text-muted bg-bg-surface"
+              : item.status === "in_progress"
+              ? "text-primary bg-bg-surface"
+              : "text-text bg-bg-surface"
+          }`}
+        >
+          <option value="todo">未着手</option>
+          <option value="in_progress">対応中</option>
+          <option value="done">完了</option>
+        </select>
         <div className="flex-1 min-w-0">
           <p
             className={`break-words ${
-              item.done ? "text-text-muted line-through" : "text-text"
+              item.status === "done" ? "text-text-muted line-through" : "text-text"
             }`}
           >
             {item.description}

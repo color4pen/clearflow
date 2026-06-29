@@ -221,10 +221,10 @@ describe("ActionItemRow UI パターン — T-10", () => {
   });
 
   /**
-   * ActionItemRow.tsx に toggleActionItemAction の呼び出しが含まれる
+   * ActionItemRow.tsx に updateActionItemStatusAction の呼び出しが含まれる
    */
-  it("ActionItemRow.tsx に toggleActionItemAction の呼び出しが含まれる", async () => {
+  it("ActionItemRow.tsx に updateActionItemStatusAction の呼び出しが含まれる", async () => {
     const content = await readSrc("app/(dashboard)/components/ActionItemRow.tsx");
-    expect(content).toContain("toggleActionItemAction");
+    expect(content).toContain("updateActionItemStatusAction");
   });
 });

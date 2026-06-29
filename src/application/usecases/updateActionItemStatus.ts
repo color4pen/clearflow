@@ -1,18 +1,18 @@
 import { actionItemRepository } from "@/infrastructure/repositories";
 import { recordAudit } from "@/application/services/auditRecorder";
-
 import { db } from "@/infrastructure/db";
-import type { ActionItem } from "@/domain/models/actionItem";
+import type { ActionItem, ActionItemStatus } from "@/domain/models/actionItem";
 
-export type ToggleActionItemDoneResult =
+export type UpdateActionItemStatusResult =
   | { ok: true; actionItem: ActionItem }
   | { ok: false; reason: string };
 
-export async function toggleActionItemDone(data: {
+export async function updateActionItemStatus(data: {
   id: string;
   organizationId: string;
   actorId: string;
-}): Promise<ToggleActionItemDoneResult> {
+  status: ActionItemStatus;
+}): Promise<UpdateActionItemStatusResult> {
   const existing = await actionItemRepository.findById(data.id, data.organizationId);
   if (!existing) {
     return { ok: false, reason: "アクションアイテムが見つかりません" };
@@ -23,7 +23,7 @@ export async function toggleActionItemDone(data: {
       const updated = await actionItemRepository.update(
         data.id,
         data.organizationId,
-        { done: !existing.done, status: !existing.done ? "done" : "todo" },
+        { status: data.status, done: data.status === "done" },
         existing.version,
         tx
       );
@@ -31,12 +31,12 @@ export async function toggleActionItemDone(data: {
 
       await recordAudit(
         {
-          action: "action_item.toggle",
+          action: "action_item.updateStatus",
           targetType: "action_item",
           targetId: data.id,
           actorId: data.actorId,
           organizationId: data.organizationId,
-          metadata: { done: !existing.done },
+          metadata: { status: data.status },
         },
         tx
       );
@@ -51,7 +51,7 @@ export async function toggleActionItemDone(data: {
   } catch (err) {
     return {
       ok: false,
-      reason: err instanceof Error ? err.message : "アクションアイテムのトグルに失敗しました",
+      reason: err instanceof Error ? err.message : "アクションアイテムのステータス更新に失敗しました",
     };
   }
 }

@@ -2,7 +2,7 @@ import { eq, and, desc, sql } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { actionItems } from "../schema";
-import type { ActionItem } from "@/domain/models/actionItem";
+import type { ActionItem, ActionItemStatus } from "@/domain/models/actionItem";
 
 function mapRow(row: typeof actionItems.$inferSelect): ActionItem {
   return {
@@ -12,6 +12,7 @@ function mapRow(row: typeof actionItems.$inferSelect): ActionItem {
     assigneeId: row.assigneeId ?? null,
     dueDate: row.dueDate ?? null,
     done: row.done,
+    status: (row.status as ActionItemStatus | null) ?? (row.done ? "done" : "todo"),
     meetingId: row.meetingId ?? null,
     dealId: row.dealId ?? null,
     inquiryId: row.inquiryId ?? null,
@@ -29,6 +30,7 @@ export async function create(
     assigneeId?: string | null;
     dueDate?: Date | null;
     done?: boolean;
+    status?: ActionItemStatus;
     meetingId?: string | null;
     dealId?: string | null;
     inquiryId?: string | null;
@@ -45,6 +47,7 @@ export async function create(
       assigneeId: data.assigneeId ?? null,
       dueDate: data.dueDate ?? null,
       done: data.done ?? false,
+      status: data.status,
       meetingId: data.meetingId ?? null,
       dealId: data.dealId ?? null,
       inquiryId: data.inquiryId ?? null,
@@ -112,6 +115,7 @@ export async function update(
     assigneeId: string | null;
     dueDate: Date | null;
     done: boolean;
+    status: ActionItemStatus;
     meetingId: string | null;
     dealId: string | null;
     inquiryId: string | null;

@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "adaf8068-d0ee-45b7-af5c-457bc272d4b3",
   "createdAt": "2026-06-29T05:10:25.956Z",
-  "updatedAt": "2026-06-29T05:23:02.409Z",
+  "updatedAt": "2026-06-29T05:26:08.762Z",
   "request": {
     "title": "アクションアイテムの作業ステータス（L1）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "feat/action-item-status-adaf8068",
   "error": null,
@@ -34,11 +34,12 @@
     }
   ],
   "_journal": {
-    "historyCount": 13,
+    "historyCount": 16,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1
+      "spec-review": 1,
+      "test-case-gen": 1
     }
   }
 }

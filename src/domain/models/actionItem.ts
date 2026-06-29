@@ -1,3 +1,7 @@
+export type ActionItemStatus = "todo" | "in_progress" | "done";
+
+export const ACTION_ITEM_STATUSES = ["todo", "in_progress", "done"] as const;
+
 export type ActionItem = {
   id: string;
   organizationId: string;
@@ -5,6 +9,7 @@ export type ActionItem = {
   assigneeId: string | null;
   dueDate: Date | null;
   done: boolean;
+  status: ActionItemStatus;
   meetingId: string | null;
   dealId: string | null;
   inquiryId: string | null;

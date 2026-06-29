@@ -534,6 +534,7 @@ export const actionItems = pgTable(
     assigneeId: uuid("assignee_id").references(() => users.id, { onDelete: "set null" }),
     dueDate: timestamp("due_date"),
     done: boolean("done").notNull().default(false),
+    status: text("status"),
     meetingId: uuid("meeting_id").references(() => meetings.id, { onDelete: "set null" }),
     dealId: uuid("deal_id").references(() => deals.id, { onDelete: "set null" }),
     inquiryId: uuid("inquiry_id").references(() => inquiries.id, { onDelete: "set null" }),

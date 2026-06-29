@@ -7,12 +7,14 @@ import {
   createActionItem,
   toggleActionItemDone,
   updateActionItem,
+  updateActionItemStatus,
   deleteActionItem,
   searchDeals,
   searchInquiries,
   searchMeetings,
   type LinkTargetResult,
 } from "@/application/usecases";
+import { ACTION_ITEM_STATUSES } from "@/domain/models/actionItem";
 import { actionItemRepository } from "@/infrastructure/repositories";
 import { meetingRepository } from "@/infrastructure/repositories";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
@@ -287,6 +289,74 @@ export async function deleteActionItemAction(
     id: parsed.data.id,
     organizationId: session.user.organizationId,
     actorId: session.user.id,
+  });
+
+  if (!result.ok) {
+    return { message: result.reason };
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/tasks");
+
+  if (existing?.dealId) {
+    revalidatePath(`/deals/${existing.dealId}`);
+  }
+
+  if (existing?.meetingId) {
+    const meeting = await meetingRepository.findById(
+      existing.meetingId,
+      session.user.organizationId
+    );
+    if (meeting?.dealId) {
+      revalidatePath(`/deals/${meeting.dealId}/meetings/${existing.meetingId}`);
+    }
+  }
+
+  return {};
+}
+
+const updateActionItemStatusSchema = z.object({
+  id: z.string().uuid("アクションアイテムIDが不正です"),
+  status: z.enum(ACTION_ITEM_STATUSES),
+});
+
+export type UpdateActionItemStatusState = {
+  errors?: {
+    id?: string[];
+    status?: string[];
+  };
+  message?: string;
+};
+
+export async function updateActionItemStatusAction(
+  data: unknown
+): Promise<UpdateActionItemStatusState> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { message: "認証が必要です" };
+  }
+
+  if (!canPerform(session.user.role, "actionItem", "edit")) {
+    return { message: "この操作を実行する権限がありません" };
+  }
+
+  const parsed = updateActionItemStatusSchema.safeParse(data);
+
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors };
+  }
+
+  // 紐づけ先を取得しておく（revalidatePath 用）
+  const existing = await actionItemRepository.findById(
+    parsed.data.id,
+    session.user.organizationId
+  );
+
+  const result = await updateActionItemStatus({
+    id: parsed.data.id,
+    organizationId: session.user.organizationId,
+    actorId: session.user.id,
+    status: parsed.data.status,
   });
 
   if (!result.ok) {
