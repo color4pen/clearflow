@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
 import { listUsersAction } from "@/app/actions/users";
 import { UserRoleSelect } from "./UserRoleSelect";
+import { UserDeactivateButton } from "./UserDeactivateButton";
 import { CreateUserForm } from "./CreateUserForm";
 import { PageToolbar, DataTable, SectionCard } from "@/app/components";
 
@@ -44,7 +45,7 @@ export default async function UsersPage() {
               key: "name",
               header: "名前",
               render: (user) => (
-                <span className="text-text">
+                <span className={user.deactivatedAt ? "text-text-disabled" : "text-text"}>
                   {user.name}
                   {user.id === session.user?.id && (
                     <span className="ml-2 text-xs text-text-disabled">（自分）</span>
@@ -52,7 +53,15 @@ export default async function UsersPage() {
                 </span>
               ),
             },
-            { key: "email", header: "メールアドレス", render: (user) => <span className="text-text">{user.email}</span> },
+            {
+              key: "email",
+              header: "メールアドレス",
+              render: (user) => (
+                <span className={user.deactivatedAt ? "text-text-disabled" : "text-text"}>
+                  {user.email}
+                </span>
+              ),
+            },
             {
               key: "role",
               header: "ロール",
@@ -70,6 +79,31 @@ export default async function UsersPage() {
                   <UserRoleSelect
                     userId={user.id}
                     currentRole={user.role as "admin" | "member" | "manager" | "finance"}
+                    disabled={!!user.deactivatedAt}
+                  />
+                );
+              },
+            },
+            {
+              key: "status",
+              header: "状態",
+              render: (user) => (
+                <span className={`text-xs ${user.deactivatedAt ? "text-text-disabled" : "text-text"}`}>
+                  {user.deactivatedAt ? "無効" : "有効"}
+                </span>
+              ),
+            },
+            {
+              key: "actions",
+              header: "操作",
+              render: (user) => {
+                if (user.id === session.user?.id) {
+                  return null;
+                }
+                return (
+                  <UserDeactivateButton
+                    userId={user.id}
+                    isDeactivated={!!user.deactivatedAt}
                   />
                 );
               },

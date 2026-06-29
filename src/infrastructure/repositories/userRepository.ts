@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNull } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { users } from "../schema";
@@ -18,6 +18,7 @@ export async function findByOrganization(
       role: users.role,
       notificationsLastSeenAt: users.notificationsLastSeenAt,
       createdAt: users.createdAt,
+      deactivatedAt: users.deactivatedAt,
     })
     .from(users)
     .where(eq(users.organizationId, organizationId));
@@ -48,8 +49,18 @@ export async function updateRole(
       role: users.role,
       notificationsLastSeenAt: users.notificationsLastSeenAt,
       createdAt: users.createdAt,
+      deactivatedAt: users.deactivatedAt,
     });
   return result[0] ?? null;
+}
+
+export async function existsByEmail(email: string): Promise<boolean> {
+  const result = await db
+    .select({ id: users.id })
+    .from(users)
+    .where(eq(users.email, email))
+    .limit(1);
+  return result.length > 0;
 }
 
 export async function findByEmailForAuth(
@@ -58,7 +69,7 @@ export async function findByEmailForAuth(
   const result = await db
     .select()
     .from(users)
-    .where(eq(users.email, email))
+    .where(and(eq(users.email, email), isNull(users.deactivatedAt)))
     .limit(1);
   if (!result[0]) return null;
   const row = result[0];
@@ -71,6 +82,7 @@ export async function findByEmailForAuth(
     notificationsLastSeenAt: row.notificationsLastSeenAt,
     createdAt: row.createdAt,
     hashedPassword: row.hashedPassword,
+    deactivatedAt: row.deactivatedAt,
   };
 }
 
@@ -87,6 +99,7 @@ export async function findById(
       role: users.role,
       notificationsLastSeenAt: users.notificationsLastSeenAt,
       createdAt: users.createdAt,
+      deactivatedAt: users.deactivatedAt,
     })
     .from(users)
     .where(and(eq(users.id, id), eq(users.organizationId, organizationId)))
@@ -101,6 +114,7 @@ export async function findById(
     role: row.role,
     notificationsLastSeenAt: row.notificationsLastSeenAt,
     createdAt: row.createdAt,
+    deactivatedAt: row.deactivatedAt,
   };
 }
 
@@ -132,6 +146,7 @@ export async function create(
       role: users.role,
       notificationsLastSeenAt: users.notificationsLastSeenAt,
       createdAt: users.createdAt,
+      deactivatedAt: users.deactivatedAt,
     });
   return result[0];
 }
@@ -156,7 +171,7 @@ export async function findByIdForAuth(
   const result = await db
     .select()
     .from(users)
-    .where(and(eq(users.id, id), eq(users.organizationId, organizationId)))
+    .where(and(eq(users.id, id), eq(users.organizationId, organizationId), isNull(users.deactivatedAt)))
     .limit(1);
   if (!result[0]) return null;
   const row = result[0];
@@ -169,6 +184,7 @@ export async function findByIdForAuth(
     notificationsLastSeenAt: row.notificationsLastSeenAt,
     createdAt: row.createdAt,
     hashedPassword: row.hashedPassword,
+    deactivatedAt: row.deactivatedAt,
   };
 }
 
@@ -196,6 +212,7 @@ export async function updateProfile(
       role: users.role,
       notificationsLastSeenAt: users.notificationsLastSeenAt,
       createdAt: users.createdAt,
+      deactivatedAt: users.deactivatedAt,
     });
   return result[0] ?? null;
 }
@@ -218,4 +235,60 @@ export async function updatePassword(
     )
     .returning({ id: users.id });
   return result.length > 0;
+}
+
+export async function deactivate(
+  id: string,
+  organizationId: string,
+  tx?: Transaction
+): Promise<User | null> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
+    .update(users)
+    .set({ deactivatedAt: new Date() })
+    .where(
+      and(
+        eq(users.id, id),
+        eq(users.organizationId, organizationId)
+      )
+    )
+    .returning({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      organizationId: users.organizationId,
+      role: users.role,
+      notificationsLastSeenAt: users.notificationsLastSeenAt,
+      createdAt: users.createdAt,
+      deactivatedAt: users.deactivatedAt,
+    });
+  return result[0] ?? null;
+}
+
+export async function reactivate(
+  id: string,
+  organizationId: string,
+  tx?: Transaction
+): Promise<User | null> {
+  const queryRunner = tx ?? db;
+  const result = await queryRunner
+    .update(users)
+    .set({ deactivatedAt: null })
+    .where(
+      and(
+        eq(users.id, id),
+        eq(users.organizationId, organizationId)
+      )
+    )
+    .returning({
+      id: users.id,
+      email: users.email,
+      name: users.name,
+      organizationId: users.organizationId,
+      role: users.role,
+      notificationsLastSeenAt: users.notificationsLastSeenAt,
+      createdAt: users.createdAt,
+      deactivatedAt: users.deactivatedAt,
+    });
+  return result[0] ?? null;
 }

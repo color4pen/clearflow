@@ -49,6 +49,8 @@ export type AuditAction =
   | "user.create"
   | "user.updateRole"
   | "user.updatePassword"
+  | "user.deactivate"
+  | "user.reactivate"
   | "organization.update";
 
 export type AuditTargetType =

@@ -105,3 +105,7 @@ export { updateOwnProfile } from "./updateOwnProfile";
 export type { UpdateOwnProfileResult } from "./updateOwnProfile";
 export { changeOwnPassword } from "./changeOwnPassword";
 export type { ChangeOwnPasswordResult } from "./changeOwnPassword";
+export { deactivateUser } from "./deactivateUser";
+export type { DeactivateUserResult } from "./deactivateUser";
+export { reactivateUser } from "./reactivateUser";
+export type { ReactivateUserResult } from "./reactivateUser";

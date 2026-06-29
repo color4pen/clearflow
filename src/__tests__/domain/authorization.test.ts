@@ -446,6 +446,15 @@ describe("canPerform - 組織設定 updateOrganization", () => {
   });
 });
 
+describe("canPerform - 組織管理 deactivateUser", () => {
+  it("deactivateUser: admin のみ許可される", () => {
+    expect(canPerform("admin", "organization", "deactivateUser")).toBe(true);
+    expect(canPerform("manager", "organization", "deactivateUser")).toBe(false);
+    expect(canPerform("finance", "organization", "deactivateUser")).toBe(false);
+    expect(canPerform("member", "organization", "deactivateUser")).toBe(false);
+  });
+});
+
 describe("canPerform - deny-by-default", () => {
   it("未定義の操作は false を返す", () => {
     expect(canPerform("admin", "inquiry", "unknownOp")).toBe(false);

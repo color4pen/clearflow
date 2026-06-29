@@ -85,6 +85,59 @@ describe("TC-010: updateUserRoleAction — ロール変更がサーバーに送�
 });
 
 // ---------------------------------------------------------------------------
+// deactivateUserAction / reactivateUserAction
+// ---------------------------------------------------------------------------
+
+describe("deactivateUserAction / reactivateUserAction — 静的コード解析", () => {
+  it("deactivateUserAction が存在する", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    expect(src).toContain("deactivateUserAction");
+  });
+
+  it("reactivateUserAction が存在する", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    expect(src).toContain("reactivateUserAction");
+  });
+
+  it('"use server" ディレクティブが含まれる', async () => {
+    const src = await readSrc("app/actions/users.ts");
+    expect(src.trimStart().startsWith('"use server"')).toBe(true);
+  });
+
+  it("canPerform で deactivateUser 権限チェックを行う", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    expect(src).toContain('"deactivateUser"');
+    const actionIdx = src.indexOf("deactivateUserAction");
+    const guardIdx = src.indexOf('"deactivateUser"', actionIdx);
+    expect(guardIdx).toBeGreaterThan(-1);
+  });
+
+  it("userId を z.string().uuid() で検証する", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    const deactivateSchemaIdx = src.indexOf("deactivateUserSchema");
+    expect(deactivateSchemaIdx).toBeGreaterThan(-1);
+    const afterSchema = src.slice(deactivateSchemaIdx, deactivateSchemaIdx + 300);
+    expect(afterSchema).toContain("z.string().uuid");
+  });
+
+  it("organizationId と actorId がセッション由来", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    const actionIdx = src.indexOf("deactivateUserAction");
+    const afterFn = src.slice(actionIdx);
+    expect(afterFn).toContain("session.user.organizationId");
+    expect(afterFn).toContain("session.user.id");
+    expect(afterFn).not.toContain('formData.get("organizationId"');
+    expect(afterFn).not.toContain('formData.get("actorId"');
+  });
+
+  it("成功後に /settings/users を revalidatePath する", async () => {
+    const src = await readSrc("app/actions/users.ts");
+    expect(src).toContain("revalidatePath");
+    expect(src).toContain('"/settings/users"');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // createUserAction
 // ---------------------------------------------------------------------------
 
