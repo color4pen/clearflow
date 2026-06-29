@@ -3,22 +3,94 @@ import { getActionLabel } from "@/lib/activityLabels";
 
 describe("getActionLabel", () => {
   it('deal.create が "案件を作成" を返す', () => {
-    expect(getActionLabel({ action: "deal.create", metadata: null })).toBe("案件を作成");
+    expect(getActionLabel({ action: "deal.create" })).toBe("案件を作成");
   });
 
   it('未知 action はそのまま返す（フォールバック）', () => {
-    expect(getActionLabel({ action: "unknown.action", metadata: null })).toBe("unknown.action");
+    expect(getActionLabel({ action: "unknown.action" })).toBe("unknown.action");
   });
 
-  it('action_item.toggle + done:true で "アクションアイテムを完了" を返す', () => {
-    expect(
-      getActionLabel({ action: "action_item.toggle", metadata: { done: true } })
-    ).toBe("アクションアイテムを完了");
+  // タイムライン対象の 7 アクションすべてにラベルが定義されていることを確認する
+  it('meeting.create が "商談を記録" を返す', () => {
+    expect(getActionLabel({ action: "meeting.create" })).toBe("商談を記録");
   });
 
-  it('action_item.toggle + done:false で "アクションアイテムの完了を取り消し" を返す', () => {
+  it('deal.updatePhase が "フェーズを変更" を返す（transition なし）', () => {
+    expect(getActionLabel({ action: "deal.updatePhase" })).toBe("フェーズを変更");
+  });
+
+  it('contract.create が "契約を作成" を返す', () => {
+    expect(getActionLabel({ action: "contract.create" })).toBe("契約を作成");
+  });
+
+  it('contract.updateStatus が "契約ステータスを変更" を返す（transition なし）', () => {
+    expect(getActionLabel({ action: "contract.updateStatus" })).toBe("契約ステータスを変更");
+  });
+
+  it('invoice.create が "請求を作成" を返す', () => {
+    expect(getActionLabel({ action: "invoice.create" })).toBe("請求を作成");
+  });
+
+  it('invoice.update_status が "請求ステータスを変更" を返す（transition なし）', () => {
+    expect(getActionLabel({ action: "invoice.update_status" })).toBe("請求ステータスを変更");
+  });
+
+  // 状態遷移の表示テスト
+  it('deal.updatePhase + transition あり で "フェーズを変更：提案準備 → 交渉中" を返す', () => {
     expect(
-      getActionLabel({ action: "action_item.toggle", metadata: { done: false } })
-    ).toBe("アクションアイテムの完了を取り消し");
+      getActionLabel({
+        action: "deal.updatePhase",
+        transition: { from: "proposal_prep", to: "negotiation" },
+      })
+    ).toBe("フェーズを変更：提案準備 → 交渉中");
+  });
+
+  it('contract.updateStatus + transition あり で "契約ステータスを変更：契約中 → 完了" を返す', () => {
+    expect(
+      getActionLabel({
+        action: "contract.updateStatus",
+        transition: { from: "active", to: "completed" },
+      })
+    ).toBe("契約ステータスを変更：契約中 → 完了");
+  });
+
+  it('invoice.update_status + transition あり で "請求ステータスを変更：予定 → 請求済" を返す', () => {
+    expect(
+      getActionLabel({
+        action: "invoice.update_status",
+        transition: { from: "scheduled", to: "invoiced" },
+      })
+    ).toBe("請求ステータスを変更：予定 → 請求済");
+  });
+
+  it("transition が null の場合は基本ラベルのみ返す", () => {
+    expect(
+      getActionLabel({ action: "deal.updatePhase", transition: null })
+    ).toBe("フェーズを変更");
+  });
+
+  it("transition が undefined の場合は基本ラベルのみ返す", () => {
+    expect(
+      getActionLabel({ action: "deal.updatePhase" })
+    ).toBe("フェーズを変更");
+  });
+
+  // タイムライン対象 7 アクションに生キーが漏れないことを確認する
+  it("タイムライン対象の 7 アクションすべてに日本語ラベルが定義されている（生キーにフォールバックしない）", () => {
+    const timelineActions = [
+      "meeting.create",
+      "deal.create",
+      "deal.updatePhase",
+      "contract.create",
+      "contract.updateStatus",
+      "invoice.create",
+      "invoice.update_status",
+    ];
+    for (const action of timelineActions) {
+      const label = getActionLabel({ action });
+      // 日本語ラベルが返される（生キーではない）ことを確認
+      expect(label).not.toBe(action);
+      expect(label).not.toBe("");
+    }
   });
 });

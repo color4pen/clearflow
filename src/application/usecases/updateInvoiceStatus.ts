@@ -60,6 +60,10 @@ export async function updateInvoiceStatus(data: {
             targetId: data.invoiceId,
             actorId: data.actorId,
             organizationId: data.organizationId,
+            metadata: {
+              fromStatus: invoice.status,
+              toStatus: data.newStatus,
+            },
           },
           tx
         );

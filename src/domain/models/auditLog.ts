@@ -76,6 +76,9 @@ export type AuditTargetType =
 export type AuditMetadataMap = {
   "action_item.toggle": { done: boolean };
   "action_item.updateStatus": { status: string };
+  "deal.updatePhase": { fromPhase: string; toPhase: string };
+  "contract.updateStatus": { fromStatus: string; toStatus: string };
+  "invoice.update_status": { fromStatus: string; toStatus: string };
 };
 
 export type AuditLog = {
