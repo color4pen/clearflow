@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { auth } from "@/infrastructure/auth";
 import { userRepository } from "@/infrastructure/repositories";
-import { updateUserRole, createUser } from "@/application/usecases";
+import { updateUserRole, createUser, deactivateUser, reactivateUser } from "@/application/usecases";
 import { canPerform } from "@/domain/authorization";
 
 const createUserSchema = z.object({
@@ -102,6 +102,76 @@ export async function updateUserRoleAction(formData: FormData) {
     organizationId: session.user.organizationId,
     actorId: session.user.id,
     newRole: validation.data.role,
+  });
+
+  if (!result.ok) {
+    return { success: false as const, message: result.reason };
+  }
+
+  revalidatePath("/settings/users");
+  return { success: true as const };
+}
+
+const deactivateUserSchema = z.object({
+  userId: z.string().uuid("有効なユーザー ID を指定してください"),
+});
+
+export async function deactivateUserAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false as const, message: "認証が必要です" };
+  if (!canPerform(session.user.role, "organization", "deactivateUser"))
+    return { success: false as const, message: "この操作を実行する権限がありません" };
+
+  const rawData = {
+    userId: formData.get("userId") as string,
+  };
+
+  const validation = deactivateUserSchema.safeParse(rawData);
+  if (!validation.success) {
+    const errors = validation.error.flatten();
+    return {
+      success: false as const,
+      message: Object.values(errors.fieldErrors).flat()[0] ?? "入力値が不正です",
+    };
+  }
+
+  const result = await deactivateUser({
+    targetUserId: validation.data.userId,
+    organizationId: session.user.organizationId,
+    actorId: session.user.id,
+  });
+
+  if (!result.ok) {
+    return { success: false as const, message: result.reason };
+  }
+
+  revalidatePath("/settings/users");
+  return { success: true as const };
+}
+
+export async function reactivateUserAction(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false as const, message: "認証が必要です" };
+  if (!canPerform(session.user.role, "organization", "deactivateUser"))
+    return { success: false as const, message: "この操作を実行する権限がありません" };
+
+  const rawData = {
+    userId: formData.get("userId") as string,
+  };
+
+  const validation = deactivateUserSchema.safeParse(rawData);
+  if (!validation.success) {
+    const errors = validation.error.flatten();
+    return {
+      success: false as const,
+      message: Object.values(errors.fieldErrors).flat()[0] ?? "入力値が不正です",
+    };
+  }
+
+  const result = await reactivateUser({
+    targetUserId: validation.data.userId,
+    organizationId: session.user.organizationId,
+    actorId: session.user.id,
   });
 
   if (!result.ok) {

@@ -91,6 +91,7 @@ export const users = pgTable("users", {
   role: roleEnum("role").notNull().default("member"),
   notificationsLastSeenAt: timestamp("notifications_last_seen_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  deactivatedAt: timestamp("deactivated_at"),
 });
 
 // Approval templates table (must be defined before requests due to FK)

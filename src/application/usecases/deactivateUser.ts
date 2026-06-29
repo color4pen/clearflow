@@ -1,69 +1,60 @@
-import {
-  userRepository,
-} from "@/infrastructure/repositories";
+import { userRepository } from "@/infrastructure/repositories";
 import { recordAudit } from "@/application/services/auditRecorder";
-
 import { db } from "@/infrastructure/db";
-import type { Role } from "@/domain/models/user";
 
-export type UpdateUserRoleResult =
+export type DeactivateUserResult =
   | { ok: true }
   | { ok: false; reason: string };
 
-export async function updateUserRole(data: {
+export async function deactivateUser(data: {
+  actorId: string;
   targetUserId: string;
   organizationId: string;
-  actorId: string;
-  newRole: Role;
-}): Promise<UpdateUserRoleResult> {
-  // Self-modification guard
+}): Promise<DeactivateUserResult> {
+  // Guard 1: self-deactivation is not allowed
   if (data.actorId === data.targetUserId) {
-    return { ok: false, reason: "自分自身のロールは変更できません" };
+    return { ok: false, reason: "自分自身は無効化できません" };
   }
 
-  // Fetch current user to get old role and verify existence
-  const currentUser = await userRepository.findById(
+  // Guard 2: target user must exist in the organization
+  const targetUser = await userRepository.findById(
     data.targetUserId,
     data.organizationId
   );
-  if (!currentUser) {
+  if (!targetUser) {
     return { ok: false, reason: "ユーザーが見つかりません" };
   }
 
-  const oldRole = currentUser.role;
-
-  // Last admin guard: prevent demoting the only remaining admin in the organization
-  if (currentUser.role === "admin" && data.newRole !== "admin") {
+  // Guard 3: cannot deactivate the last active admin in the organization
+  if (targetUser.role === "admin") {
     const orgUsers = await userRepository.findByOrganization(data.organizationId);
-    const otherAdmins = orgUsers.filter(
+    const otherActiveAdmins = orgUsers.filter(
       (u) => u.role === "admin" && u.id !== data.targetUserId && u.deactivatedAt === null
     );
-    if (otherAdmins.length === 0) {
+    if (otherActiveAdmins.length === 0) {
       return { ok: false, reason: "組織に最低1人の管理者が必要です" };
     }
   }
 
   try {
     await db.transaction(async (tx) => {
-      const updated = await userRepository.updateRole(
+      const updated = await userRepository.deactivate(
         data.targetUserId,
         data.organizationId,
-        data.newRole,
         tx
       );
 
       if (!updated) {
-        throw new Error("ユーザーの更新に失敗しました");
+        throw new Error("ユーザーの無効化に失敗しました");
       }
 
       await recordAudit(
         {
-          action: "user.updateRole",
+          action: "user.deactivate",
           targetType: "user",
           targetId: data.targetUserId,
           actorId: data.actorId,
           organizationId: data.organizationId,
-          metadata: { oldRole, newRole: data.newRole },
         },
         tx
       );
@@ -73,7 +64,7 @@ export async function updateUserRole(data: {
   } catch (err) {
     return {
       ok: false,
-      reason: err instanceof Error ? err.message : "ロールの変更に失敗しました",
+      reason: err instanceof Error ? err.message : "ユーザーの無効化に失敗しました",
     };
   }
 }

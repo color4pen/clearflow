@@ -8,4 +8,5 @@ export type User = {
   role: Role;
   notificationsLastSeenAt: Date | null;
   createdAt: Date;
+  deactivatedAt: Date | null;
 };
