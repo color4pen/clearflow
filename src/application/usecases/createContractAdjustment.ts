@@ -32,7 +32,9 @@ export async function createContractAdjustment(data: {
           contractId: data.contractId,
           date: data.date ?? new Date(),
           summary: data.summary,
-          details: null,
+          details: data.details != null
+            ? { notes: data.details, challenge: null, budget: null, decisionMaker: null, timeline: null, competitors: null }
+            : null,
           attendees: [],
           actionItems: [],
           createdById: data.actorId,

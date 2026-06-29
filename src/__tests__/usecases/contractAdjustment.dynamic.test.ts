@@ -178,6 +178,42 @@ describe("createContractAdjustment — 正常系", () => {
     expect(state.auditArgs?.metadata).toEqual({ kind: "contract_adjustment" });
   });
 
+  it("details（メモ）を指定した場合、notes フィールドとして repository に渡される", async () => {
+    state.contract = makeContract();
+    state.createdInteraction = makeInteraction();
+
+    await createContractAdjustment({
+      contractId: CONTRACT_ID,
+      organizationId: ORG_ID,
+      actorId: ACTOR_ID,
+      summary: "メモ付き調整",
+      details: "追加メモの内容",
+    });
+
+    expect(state.createArgs?.details).toEqual({
+      notes: "追加メモの内容",
+      challenge: null,
+      budget: null,
+      decisionMaker: null,
+      timeline: null,
+      competitors: null,
+    });
+  });
+
+  it("details を指定しない場合、details は null で渡される", async () => {
+    state.contract = makeContract();
+    state.createdInteraction = makeInteraction();
+
+    await createContractAdjustment({
+      contractId: CONTRACT_ID,
+      organizationId: ORG_ID,
+      actorId: ACTOR_ID,
+      summary: "メモなし調整",
+    });
+
+    expect(state.createArgs?.details).toBeNull();
+  });
+
   it("date を指定した場合、その日付が使用される", async () => {
     state.contract = makeContract();
     const specifiedDate = new Date("2026-05-15T10:00:00Z");

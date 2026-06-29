@@ -177,6 +177,42 @@ describe("createInvoiceAdjustment — 正常系", () => {
     expect(state.auditArgs?.metadata).toEqual({ kind: "invoice_adjustment" });
   });
 
+  it("details（メモ）を指定した場合、notes フィールドとして repository に渡される", async () => {
+    state.invoice = makeInvoice();
+    state.createdInteraction = makeInteraction();
+
+    await createInvoiceAdjustment({
+      invoiceId: INVOICE_ID,
+      organizationId: ORG_ID,
+      actorId: ACTOR_ID,
+      summary: "メモ付き調整",
+      details: "請求に関する追加メモ",
+    });
+
+    expect(state.createArgs?.details).toEqual({
+      notes: "請求に関する追加メモ",
+      challenge: null,
+      budget: null,
+      decisionMaker: null,
+      timeline: null,
+      competitors: null,
+    });
+  });
+
+  it("details を指定しない場合、details は null で渡される", async () => {
+    state.invoice = makeInvoice();
+    state.createdInteraction = makeInteraction();
+
+    await createInvoiceAdjustment({
+      invoiceId: INVOICE_ID,
+      organizationId: ORG_ID,
+      actorId: ACTOR_ID,
+      summary: "メモなし調整",
+    });
+
+    expect(state.createArgs?.details).toBeNull();
+  });
+
   it("date を指定した場合、その日付が使用される", async () => {
     state.invoice = makeInvoice();
     const specifiedDate = new Date("2026-06-10T14:00:00Z");
