@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "5603dd70-2a18-411f-a388-c52117106730",
   "createdAt": "2026-06-29T20:48:35.243Z",
-  "updatedAt": "2026-06-29T22:24:40.233Z",
+  "updatedAt": "2026-06-29T22:28:26.975Z",
   "request": {
     "title": "商談（Meeting）を顧客接点（Interaction）に一般化",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/interaction-generalization-5603dd70",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/148",
+    "number": 148,
+    "createdAt": "2026-06-29T22:28:26.960Z"
+  },
   "_journal": {
-    "historyCount": 60,
+    "historyCount": 65,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -61,7 +66,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
