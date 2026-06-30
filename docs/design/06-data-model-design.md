@@ -30,11 +30,12 @@ CREATE TYPE deal_phase AS ENUM (
   'proposal_prep', 'proposed', 'negotiation', 'won', 'lost'
 );
 
+-- interaction_kind は接点のチャネル（接触手段）を表す。文脈（商談・契約調整・請求調整）は関連先列で表す。
 CREATE TYPE interaction_kind AS ENUM (
-  'meeting', 'call', 'email', 'contract_adjustment', 'invoice_adjustment'
+  'meeting', 'call', 'email', 'note'
 );
 
--- meeting_type は kind = meeting（商談）の商談種別を表す。
+-- meeting_type は商談文脈（関連先が案件/引合）の営業ステージを表す。
 CREATE TYPE meeting_type AS ENUM (
   'hearing', 'proposal', 'negotiation', 'closing', 'followup'
 );
@@ -196,24 +197,24 @@ text 型で管理する値（pgEnum にしない）:
 
 #### interactions（顧客接点）
 
-顧客との接点（商談・電話・メール・契約調整・請求調整など）を記録する。商談は `kind = meeting` の一種で、既存 `meetings` テーブルを一般化したもの。
+顧客との接点を記録する。`kind`（チャネル: meeting / call / email / note）で接触手段を、関連先列（deal / inquiry / contract / invoice / client）で文脈を表す。関連先が案件/引合 のとき商談、契約/請求 のとき契約調整・請求調整となる。既存 `meetings` テーブルを一般化したもの。
 
 | カラム | 型 | NULL | 制約 | 説明 |
 |---|---|---|---|---|
 | id | uuid | NO | PK, DEFAULT gen_random_uuid() | |
 | organization_id | uuid | NO | FK → organizations.id | |
-| kind | interaction_kind | NO | | 接点種別（meeting = 商談 / call = 電話 / email = メール / contract_adjustment = 契約調整 / invoice_adjustment = 請求調整） |
+| kind | interaction_kind | NO | DEFAULT 'meeting' | 接点種別＝チャネル（meeting = 会議 / call = 電話 / email = メール / note = メモ）。文脈は関連先列で表す |
 | deal_id | uuid | YES | FK → deals.id | 関連先: 案件 |
 | inquiry_id | uuid | YES | FK → inquiries.id | 関連先: 引合 |
 | contract_id | uuid | YES | FK → contracts.id | 関連先: 契約 |
 | invoice_id | uuid | YES | FK → invoices.id | 関連先: 請求 |
 | client_id | uuid | YES | FK → clients.id | 関連先: 顧客 |
-| meeting_type | meeting_type | YES | | 商談種別（kind = meeting のときのみ。ヒアリング/提案/交渉/クロージング/フォローアップ） |
+| meeting_type | meeting_type | YES | | 営業ステージ（商談文脈＝関連先が案件/引合 のとき。ヒアリング/提案/交渉/クロージング/フォローアップ。kind とは独立） |
 | date | timestamptz | NO | | 実施日時 |
 | location | text | YES | | 場所 |
 | attendees | jsonb | NO | DEFAULT '[]' | 参加者 |
 | summary | text | YES | | 要旨（Markdown） |
-| details | jsonb | YES | | kind 固有情報（商談のヒアリング情報など） |
+| details | jsonb | YES | | 文脈固有情報（商談のヒアリング情報、契約/請求 文脈の調整内容の要約・メモなど） |
 | created_by_id | uuid | NO | FK → users.id | 作成者 |
 | created_at | timestamptz | NO | DEFAULT now() | |
 | updated_at | timestamptz | NO | DEFAULT now() | |
@@ -225,9 +226,11 @@ text 型で管理する値（pgEnum にしない）:
 CHECK (deal_id IS NOT NULL OR inquiry_id IS NOT NULL OR contract_id IS NOT NULL OR invoice_id IS NOT NULL OR client_id IS NOT NULL)
 ```
 
-なお `kind = contract_adjustment` は `contract_id`、`kind = invoice_adjustment` は `invoice_id` を要する（DB の CHECK では表現せず、アプリケーション層で検証する）。
+kind（チャネル）と関連先（文脈）は独立しており、両者の組み合わせを縛る制約は設けない。
 
 **移行（データ不可侵）**: 既存 `meetings` を `kind = meeting` として `interactions` に移行する。`deal_id`/`inquiry_id`・`type → meeting_type`・`date`・`location`・`attendees`・`summary` はそのまま、`hearing_data → details` に保持する。列挙した以外の共通列（`organization_id` / `created_by_id` / `created_at` / `updated_at` / `version` 等）はそのまま継承し、新規の関連先列（`contract_id` / `invoice_id` / `client_id`）は `kind = meeting` の移行行では NULL とする。レガシーの `meetings.action_items`（jsonb）は移さない（`action_items` テーブルが正）。`action_items.meeting_id` は `interaction_id` に置き換える。監査ログは追記専用のため既存 `meeting.*` 行は書き換えず、`kind = meeting` の顧客接点として扱う（新規は `interaction.create` / `interaction.update` に kind を付して記録）。
+
+`interaction_kind` enum から `contract_adjustment` / `invoice_adjustment` を外す際は、PostgreSQL では enum 値の削除ができないため enum を再作成して列を差し替える。既存の該当行（`kind = contract_adjustment` / `kind = invoice_adjustment`）は `kind = note` に寄せ、文脈を表す関連先（`contract_id` / `invoice_id`）はそのまま保持する。既存データは不可侵とする。
 
 **JSON 構造: attendees**
 ```json

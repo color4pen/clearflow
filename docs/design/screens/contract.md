@@ -73,14 +73,14 @@
 
 | 要素 | 内容 |
 |---|---|
-| 調整タイムライン | この契約に紐づく `kind = contract_adjustment` の顧客接点を新しい順に表示（日時、要約、メモ） |
+| 調整タイムライン | この契約（contractId）に紐づく顧客接点を新しい順に表示（日時、要約、メモ） |
 | 契約調整を記録ボタン | 日時・要約・任意のメモを入力して契約調整を記録する導線 |
 
 ### 操作
 
 | 操作 | 権限 | 結果 |
 |---|---|---|
-| 契約調整を記録 | admin / manager / member | `kind = contract_adjustment`・contractId 設定済みの顧客接点が作成される |
+| 契約調整を記録 | admin / manager / member | kind = note（既定）・contractId 設定済みの顧客接点が作成される |
 
 ---
 

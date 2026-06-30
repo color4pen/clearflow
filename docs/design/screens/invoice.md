@@ -39,14 +39,14 @@
 
 | 要素 | 内容 |
 |---|---|
-| 調整タイムライン | この請求に紐づく `kind = invoice_adjustment` の顧客接点を新しい順に表示（日時、要約、メモ） |
+| 調整タイムライン | この請求（invoiceId）に紐づく顧客接点を新しい順に表示（日時、要約、メモ） |
 | 請求調整を記録ボタン | 日時・要約・任意のメモを入力して請求調整を記録する導線 |
 
 ### 操作
 
 | 操作 | 権限 | 結果 |
 |---|---|---|
-| 請求調整を記録 | admin / manager / finance | `kind = invoice_adjustment`・invoiceId 設定済みの顧客接点が作成される |
+| 請求調整を記録 | admin / manager / finance | kind = note（既定）・invoiceId 設定済みの顧客接点が作成される |
 
 ---
 

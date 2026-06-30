@@ -38,5 +38,5 @@
 - **目的**: 請求内容の修正・調整交渉などのやり取りを記録する
 - **前提**: 請求が存在すること
 - **権限**: admin / manager / finance
-- **結果**: kind = invoice_adjustment の顧客接点が作成される
+- **結果**: kind = note（既定）・関連先 relatedTo = 請求 の顧客接点が作成される
 - **関連**: interaction
