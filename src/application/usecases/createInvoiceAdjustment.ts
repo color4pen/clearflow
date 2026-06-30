@@ -28,7 +28,7 @@ export async function createInvoiceAdjustment(data: {
       const newInteraction = await interactionRepository.create(
         {
           organizationId: data.organizationId,
-          kind: "invoice_adjustment",
+          kind: "note",
           invoiceId: data.invoiceId,
           date: data.date ?? new Date(),
           summary: data.summary,
@@ -49,7 +49,7 @@ export async function createInvoiceAdjustment(data: {
           targetId: newInteraction.id,
           actorId: data.actorId,
           organizationId: data.organizationId,
-          metadata: { kind: "invoice_adjustment" },
+          metadata: { kind: "note" },
         },
         tx
       );

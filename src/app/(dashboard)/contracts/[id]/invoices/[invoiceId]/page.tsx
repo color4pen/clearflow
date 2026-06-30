@@ -29,7 +29,7 @@ export default async function InvoiceDetailPage({
   }
 
   const canChangeStatus = canPerform(session!.user.role, "invoice", "changeStatus");
-  const canRecord = canPerform(session!.user.role, "interaction", "recordInvoiceAdjustment");
+  const canRecord = canPerform(session!.user.role, "interaction", "recordInvoiceInteraction");
 
   const invoiceInteractions = await listInteractionsByInvoice(invoiceId, organizationId);
 

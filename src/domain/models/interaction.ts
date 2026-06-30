@@ -28,12 +28,7 @@ export type MeetingAttendee = {
   isExternal: boolean;
 };
 
-export type InteractionKind =
-  | "meeting"
-  | "call"
-  | "email"
-  | "contract_adjustment"
-  | "invoice_adjustment";
+export type InteractionKind = "meeting" | "call" | "email" | "note";
 
 /**
  * 顧客接点（Interaction）型。

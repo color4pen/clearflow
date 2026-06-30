@@ -50,8 +50,7 @@ export const interactionKindEnum = pgEnum("interaction_kind", [
   "meeting",
   "call",
   "email",
-  "contract_adjustment",
-  "invoice_adjustment",
+  "note",
 ]);
 export const dealPhaseEnum = pgEnum("deal_phase", [
   "proposal_prep",

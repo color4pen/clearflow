@@ -40,7 +40,7 @@ export default async function ContractDetailPage({
     // DB エラー時はバナー非表示で degradation
   }
 
-  const canRecord = canPerform(session!.user.role, "interaction", "recordContractAdjustment");
+  const canRecord = canPerform(session!.user.role, "interaction", "recordContractInteraction");
 
   return (
     <div>
