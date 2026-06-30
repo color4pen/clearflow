@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "bbf75e91-9f78-4a59-87e9-566799853a11",
   "createdAt": "2026-06-30T02:25:47.129Z",
-  "updatedAt": "2026-06-30T03:32:46.336Z",
+  "updatedAt": "2026-06-30T03:37:22.792Z",
   "request": {
     "title": "顧客接点の種別(kind)をチャネルに整理（contract_adjustment/invoice_adjustment 廃止）",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "conformance",
+  "step": "adr-gen",
   "status": "running",
   "branch": "change/interaction-kind-channel-bbf75e91",
   "error": null,
@@ -48,7 +48,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 48,
+    "historyCount": 52,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -60,7 +60,8 @@
       "code-review": 1,
       "domain-invariants": 1,
       "custom-reviewers": 1,
-      "regression-gate": 1
+      "regression-gate": 1,
+      "conformance": 1
     }
   }
 }
