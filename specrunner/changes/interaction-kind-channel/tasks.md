@@ -34,12 +34,15 @@
 - [ ] 各 statement の間に `--> statement-breakpoint` を挿入する（drizzle-kit の慣例に従う）
 - [ ] SQL に `DROP COLUMN` / `DELETE` / `TRUNCATE` が含まれていないことを確認する
 - [ ] drizzle の meta ファイル（`drizzle/meta/_journal.json`）にエントリを追加する（既存パターンに従う）
+- [ ] `drizzle/meta/0018_snapshot.json` を作成する（`drizzle/meta/0017_snapshot.json` を元に `interactionKindEnum` の値を `["meeting", "call", "email", "note"]` に更新したスナップショット）。スナップショットがなければ `drizzle-kit check` が失敗し、`bun run db:generate` が 0017 スナップショットと schema.ts の乖離を新たな差分として検出し重複マイグレーション SQL を生成する
 - [ ] `bun run db:generate` を実行し、追加の差分が生成されないことを確認する（schema.ts と SQL が一致している状態）
 
 **Acceptance Criteria**:
 - `0018_interaction_kind_channel.sql` が存在し、上記 7 ステップの SQL を含むこと
+- `drizzle/meta/0018_snapshot.json` が存在し、`interactionKindEnum` の値が `["meeting", "call", "email", "note"]` であること
 - SQL に DROP COLUMN / DELETE / TRUNCATE が含まれないこと
 - `drizzle-kit check` がエラーなく通過すること
+- `bun run db:generate` で追加差分が生成されないこと
 - 既存の `contract_adjustment` / `invoice_adjustment` 行が `kind = 'note'` に更新され、`contract_id` / `invoice_id` が不変であること（SQL の意図として）
 
 ---
@@ -70,6 +73,8 @@
 
 ## T-06: 認可マトリクスの操作名を relatedTo ベースにリネームする
 
+> **⚠️ 原子的変更**: T-06（authorization.ts）・T-07（interactions.ts）・T-08（contracts/[id]/page.tsx・invoices/[invoiceId]/page.tsx）の計 4 ファイルの変更は**同一コミットで行うこと**。partial リネームの状態でコードが動作すると、canPerform の deny-by-default により未更新ファイルが参照する操作名は全ロールに拒否され機能停止を引き起こす。
+
 - [ ] `src/domain/authorization.ts` の `interaction` エンティティの操作名を変更する:
   - `recordContractAdjustment` → `recordContractInteraction`
   - `recordInvoiceAdjustment` → `recordInvoiceInteraction`
@@ -86,6 +91,8 @@
 
 ## T-07: Server Action の認可チェックを新操作名に追従させる
 
+> **⚠️ 原子的変更**: T-06・T-07・T-08 の 4 ファイル変更を同一コミットで行うこと（T-06 の注記参照）。
+
 - [ ] `src/app/actions/interactions.ts` の `recordContractAdjustmentAction` 内の `canPerform(...)` 呼び出しで `"recordContractAdjustment"` → `"recordContractInteraction"` に変更する
 - [ ] `src/app/actions/interactions.ts` の `recordInvoiceAdjustmentAction` 内の `canPerform(...)` 呼び出しで `"recordInvoiceAdjustment"` → `"recordInvoiceInteraction"` に変更する
 
@@ -96,6 +103,8 @@
 ---
 
 ## T-08: RSC ページの認可チェックを新操作名に追従させる
+
+> **⚠️ 原子的変更**: T-06・T-07・T-08 の 4 ファイル変更を同一コミットで行うこと（T-06 の注記参照）。
 
 - [ ] `src/app/(dashboard)/contracts/[id]/page.tsx` の `canPerform(session!.user.role, "interaction", "recordContractAdjustment")` を `"recordContractInteraction"` に変更する
 - [ ] `src/app/(dashboard)/contracts/[id]/invoices/[invoiceId]/page.tsx` の `canPerform(session!.user.role, "interaction", "recordInvoiceAdjustment")` を `"recordInvoiceInteraction"` に変更する
@@ -206,8 +215,10 @@
 - [ ] `bun run build` が成功すること
 - [ ] `bun test` が全件 green であること
 - [ ] `bun run lint` が成功すること
-- [ ] コードベース全体で `contract_adjustment` / `invoice_adjustment` の文字列が残っていないことを grep で確認する（コメント・テスト説明文も含む。監査ログの過去データに関する注記を除く）
+- [ ] コードベース全体で `contract_adjustment` / `invoice_adjustment` の文字列が残っていないことを grep で確認する（コメント・テスト説明文も含む。マイグレーション SQL 内の UPDATE 文は例外。監査ログの過去データに関する注記を除く）
+- [ ] コードベース全体で旧認可操作名 `recordContractAdjustment` / `recordInvoiceAdjustment` の文字列が残っていないことを grep で確認する（`authorization.ts`・`interactions.ts`・`contracts/[id]/page.tsx`・`invoices/[invoiceId]/page.tsx` の 4 ファイルを重点的に確認する。partial リネームの場合、canPerform の deny-by-default によりその操作は全ロールに拒否される）
 
 **Acceptance Criteria**:
 - typecheck / build / test / lint 全て成功
 - `contract_adjustment` / `invoice_adjustment` がソースコードから除去されていること（マイグレーション SQL 内の UPDATE 文は例外）
+- `recordContractAdjustment` / `recordInvoiceAdjustment` がソースコードから除去されていること

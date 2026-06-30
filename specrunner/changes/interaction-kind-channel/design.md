@@ -118,7 +118,9 @@ PostgreSQL は `ALTER TYPE ... DROP VALUE` を**サポートしない**ため、
 
 ## Migration Plan
 
-1. **コード変更を先行デプロイ**（kind=note で記録開始）— 旧 enum 値 `contract_adjustment` / `invoice_adjustment` は DB にまだ存在するが、新規作成では使用しない
-2. **マイグレーション SQL を精査** — `0018_interaction_kind_channel.sql` の内容を確認し、DROP COLUMN / DELETE / TRUNCATE が含まれないことを検証
-3. **`db:migrate` を実行** — UPDATE で旧値を note に寄せ、enum を再作成
-4. **ロールバック戦略** — マイグレーション前にバックアップを取得。enum の再作成は逆方向（note → contract_adjustment/invoice_adjustment に戻す）の SQL で元に戻せる
+1. **マイグレーション SQL を精査** — `0018_interaction_kind_channel.sql` の内容を確認し、DROP COLUMN / DELETE / TRUNCATE が含まれないことを検証
+2. **`db:migrate` を実行** — UPDATE で旧値を note に寄せ、enum を再作成。これにより DB の `interaction_kind` enum に `'note'` が追加され、旧値 `contract_adjustment` / `invoice_adjustment` が除去される
+3. **コード変更をデプロイ**（kind=note で記録開始）— DB マイグレーション適用後にコードをデプロイする。コードが `kind='note'` を INSERT する前に DB enum が `'note'` を受け付ける状態にしておく必要がある
+4. **ロールバック戦略** — マイグレーション実行前にバックアップを取得。enum の再作成は逆方向（note → contract_adjustment/invoice_adjustment に戻す）の SQL で元に戻せる
+
+> **注意**: マイグレーションよりコードを先行デプロイしてはならない。新コードは `kind='note'` を INSERT するが、マイグレーション未適用の DB enum（`meeting|call|email|contract_adjustment|invoice_adjustment`）には `'note'` が存在しないため、`createContractAdjustment` / `createInvoiceAdjustment` の呼び出しが PostgreSQL エラー（invalid input value for enum interaction_kind: "note"）で失敗し機能停止を引き起こす。
