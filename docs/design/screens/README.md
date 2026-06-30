@@ -37,7 +37,7 @@
 | [inquiry.md](inquiry.md) | 引き合い（一覧 / 詳細 / 登録） |
 | [deal.md](deal.md) | 案件（一覧 / 詳細 / 登録） |
 | [task.md](task.md) | タスク（一覧 / 新規作成 / 編集） |
-| [meeting.md](meeting.md) | 商談（顧客接点 kind = meeting）（詳細 / 登録） |
+| [meeting.md](meeting.md) | 商談（顧客接点・関連先 relatedTo が案件/引合）（詳細 / 登録） |
 | [client.md](client.md) | 顧客（一覧 / 詳細） |
 | [contract.md](contract.md) | 契約（一覧 / 詳細 / 登録） |
 | [invoice.md](invoice.md) | 請求（詳細 / 登録） |

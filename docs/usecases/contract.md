@@ -47,5 +47,5 @@
 - **目的**: 契約内容の見直し・変更交渉などのやり取りを記録する
 - **前提**: 契約が存在すること
 - **権限**: admin / manager / member
-- **結果**: kind = contract_adjustment の顧客接点が作成される
+- **結果**: kind = note（既定）・関連先 relatedTo = 契約 の顧客接点が作成される
 - **関連**: interaction
