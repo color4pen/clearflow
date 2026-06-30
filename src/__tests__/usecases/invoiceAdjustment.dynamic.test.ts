@@ -89,7 +89,7 @@ function makeInteraction(overrides: Partial<Interaction> = {}): Interaction {
   return {
     id: INTERACTION_ID,
     organizationId: ORG_ID,
-    kind: "invoice_adjustment",
+    kind: "note",
     dealId: null,
     inquiryId: null,
     contractId: null,
@@ -126,7 +126,7 @@ beforeEach(() => {
 // ---------------------------------------------------------------------------
 
 describe("createInvoiceAdjustment — 正常系", () => {
-  it("請求が存在する場合、kind=invoice_adjustment の Interaction が作成され ok: true が返る", async () => {
+  it("請求が存在する場合、kind=note の Interaction が作成され ok: true が返る", async () => {
     state.invoice = makeInvoice();
     state.createdInteraction = makeInteraction();
 
@@ -139,12 +139,12 @@ describe("createInvoiceAdjustment — 正常系", () => {
 
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.interaction.kind).toBe("invoice_adjustment");
+      expect(result.interaction.kind).toBe("note");
       expect(result.interaction.id).toBe(INTERACTION_ID);
     }
   });
 
-  it("interactionRepository.create に kind: 'invoice_adjustment' と invoiceId が渡される", async () => {
+  it("interactionRepository.create に kind: 'note' と invoiceId が渡される", async () => {
     state.invoice = makeInvoice();
     state.createdInteraction = makeInteraction();
 
@@ -156,11 +156,11 @@ describe("createInvoiceAdjustment — 正常系", () => {
     });
 
     expect(state.createArgs).not.toBeNull();
-    expect(state.createArgs?.kind).toBe("invoice_adjustment");
+    expect(state.createArgs?.kind).toBe("note");
     expect(state.createArgs?.invoiceId).toBe(INVOICE_ID);
   });
 
-  it("監査ログが interaction.create / targetType: interaction / metadata.kind: invoice_adjustment で記録される", async () => {
+  it("監査ログが interaction.create / targetType: interaction / metadata.kind: note で記録される", async () => {
     state.invoice = makeInvoice();
     state.createdInteraction = makeInteraction();
 
@@ -174,7 +174,7 @@ describe("createInvoiceAdjustment — 正常系", () => {
     expect(state.auditArgs).not.toBeNull();
     expect(state.auditArgs?.action).toBe("interaction.create");
     expect(state.auditArgs?.targetType).toBe("interaction");
-    expect(state.auditArgs?.metadata).toEqual({ kind: "invoice_adjustment" });
+    expect(state.auditArgs?.metadata).toEqual({ kind: "note" });
   });
 
   it("details（メモ）を指定した場合、notes フィールドとして repository に渡される", async () => {

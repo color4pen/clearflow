@@ -2,7 +2,7 @@
 
 ## T-01: ドメイン型 `InteractionKind` を更新する
 
-- [ ] `src/domain/models/interaction.ts` の `InteractionKind` 型を `"meeting" | "call" | "email" | "note"` に変更する（`"contract_adjustment"` / `"invoice_adjustment"` を削除、`"note"` を追加）
+- [x] `src/domain/models/interaction.ts` の `InteractionKind` 型を `"meeting" | "call" | "email" | "note"` に変更する（`"contract_adjustment"` / `"invoice_adjustment"` を削除、`"note"` を追加）
 
 **Acceptance Criteria**:
 - `InteractionKind` が `"meeting" | "call" | "email" | "note"` の 4 値 union であること
@@ -13,7 +13,7 @@
 
 ## T-02: Drizzle スキーマ `interactionKindEnum` を更新する
 
-- [ ] `src/infrastructure/schema.ts` の `interactionKindEnum` を `["meeting", "call", "email", "note"]` に変更する（`"contract_adjustment"` / `"invoice_adjustment"` を削除、`"note"` を追加）
+- [x] `src/infrastructure/schema.ts` の `interactionKindEnum` を `["meeting", "call", "email", "note"]` に変更する（`"contract_adjustment"` / `"invoice_adjustment"` を削除、`"note"` を追加）
 
 **Acceptance Criteria**:
 - `interactionKindEnum` が `["meeting", "call", "email", "note"]` であること
@@ -23,7 +23,7 @@
 
 ## T-03: 手書きマイグレーション SQL を作成する
 
-- [ ] `drizzle/0018_interaction_kind_channel.sql` を以下の手順で作成する:
+- [x] `drizzle/0018_interaction_kind_channel.sql` を以下の手順で作成する:
   1. `UPDATE interactions SET kind = 'note' WHERE kind IN ('contract_adjustment', 'invoice_adjustment')` — 既存行を寄せる（relatedTo は不変）
   2. `ALTER TABLE interactions ALTER COLUMN kind DROP DEFAULT` — DEFAULT を一旦外す
   3. `CREATE TYPE "public"."interaction_kind_new" AS ENUM('meeting', 'call', 'email', 'note')` — 新 enum を作成
@@ -31,11 +31,11 @@
   5. `ALTER TABLE interactions ALTER COLUMN kind SET DEFAULT 'meeting'` — DEFAULT を再設定
   6. `DROP TYPE "public"."interaction_kind"` — 旧 enum を削除
   7. `ALTER TYPE "public"."interaction_kind_new" RENAME TO "interaction_kind"` — 新 enum をリネーム
-- [ ] 各 statement の間に `--> statement-breakpoint` を挿入する（drizzle-kit の慣例に従う）
-- [ ] SQL に `DROP COLUMN` / `DELETE` / `TRUNCATE` が含まれていないことを確認する
-- [ ] drizzle の meta ファイル（`drizzle/meta/_journal.json`）にエントリを追加する（既存パターンに従う）
-- [ ] `drizzle/meta/0018_snapshot.json` を作成する（`drizzle/meta/0017_snapshot.json` を元に `interactionKindEnum` の値を `["meeting", "call", "email", "note"]` に更新したスナップショット）。スナップショットがなければ `drizzle-kit check` が失敗し、`bun run db:generate` が 0017 スナップショットと schema.ts の乖離を新たな差分として検出し重複マイグレーション SQL を生成する
-- [ ] `bun run db:generate` を実行し、追加の差分が生成されないことを確認する（schema.ts と SQL が一致している状態）
+- [x] 各 statement の間に `--> statement-breakpoint` を挿入する（drizzle-kit の慣例に従う）
+- [x] SQL に `DROP COLUMN` / `DELETE` / `TRUNCATE` が含まれていないことを確認する
+- [x] drizzle の meta ファイル（`drizzle/meta/_journal.json`）にエントリを追加する（既存パターンに従う）
+- [x] `drizzle/meta/0018_snapshot.json` を作成する（`drizzle/meta/0017_snapshot.json` を元に `interactionKindEnum` の値を `["meeting", "call", "email", "note"]` に更新したスナップショット）。スナップショットがなければ `drizzle-kit check` が失敗し、`bun run db:generate` が 0017 スナップショットと schema.ts の乖離を新たな差分として検出し重複マイグレーション SQL を生成する
+- [x] `bun run db:generate` を実行し、追加の差分が生成されないことを確認する（schema.ts と SQL が一致している状態）
 
 **Acceptance Criteria**:
 - `0018_interaction_kind_channel.sql` が存在し、上記 7 ステップの SQL を含むこと
@@ -49,8 +49,8 @@
 
 ## T-04: usecase `createContractAdjustment` を `kind: "note"` に変更する
 
-- [ ] `src/application/usecases/createContractAdjustment.ts` の `kind: "contract_adjustment"` を `kind: "note"` に変更する
-- [ ] 同ファイルの `recordAudit` 呼び出しの `metadata: { kind: "contract_adjustment" }` を `metadata: { kind: "note" }` に変更する
+- [x] `src/application/usecases/createContractAdjustment.ts` の `kind: "contract_adjustment"` を `kind: "note"` に変更する
+- [x] 同ファイルの `recordAudit` 呼び出しの `metadata: { kind: "contract_adjustment" }` を `metadata: { kind: "note" }` に変更する
 
 **Acceptance Criteria**:
 - `createContractAdjustment` が `kind: "note"` で Interaction を作成すること
@@ -61,8 +61,8 @@
 
 ## T-05: usecase `createInvoiceAdjustment` を `kind: "note"` に変更する
 
-- [ ] `src/application/usecases/createInvoiceAdjustment.ts` の `kind: "invoice_adjustment"` を `kind: "note"` に変更する
-- [ ] 同ファイルの `recordAudit` 呼び出しの `metadata: { kind: "invoice_adjustment" }` を `metadata: { kind: "note" }` に変更する
+- [x] `src/application/usecases/createInvoiceAdjustment.ts` の `kind: "invoice_adjustment"` を `kind: "note"` に変更する
+- [x] 同ファイルの `recordAudit` 呼び出しの `metadata: { kind: "invoice_adjustment" }` を `metadata: { kind: "note" }` に変更する
 
 **Acceptance Criteria**:
 - `createInvoiceAdjustment` が `kind: "note"` で Interaction を作成すること
@@ -75,10 +75,10 @@
 
 > **⚠️ 原子的変更**: T-06（authorization.ts）・T-07（interactions.ts）・T-08（contracts/[id]/page.tsx・invoices/[invoiceId]/page.tsx）の計 4 ファイルの変更は**同一コミットで行うこと**。partial リネームの状態でコードが動作すると、canPerform の deny-by-default により未更新ファイルが参照する操作名は全ロールに拒否され機能停止を引き起こす。
 
-- [ ] `src/domain/authorization.ts` の `interaction` エンティティの操作名を変更する:
+- [x] `src/domain/authorization.ts` の `interaction` エンティティの操作名を変更する:
   - `recordContractAdjustment` → `recordContractInteraction`
   - `recordInvoiceAdjustment` → `recordInvoiceInteraction`
-- [ ] 権限値は維持する: 契約=`ADMIN_MANAGER_MEMBER`、請求=`ADMIN_MANAGER_FINANCE`
+- [x] 権限値は維持する: 契約=`ADMIN_MANAGER_MEMBER`、請求=`ADMIN_MANAGER_FINANCE`
 
 **Acceptance Criteria**:
 - `canPerform("admin", "interaction", "recordContractInteraction")` が `true` を返すこと
@@ -93,8 +93,8 @@
 
 > **⚠️ 原子的変更**: T-06・T-07・T-08 の 4 ファイル変更を同一コミットで行うこと（T-06 の注記参照）。
 
-- [ ] `src/app/actions/interactions.ts` の `recordContractAdjustmentAction` 内の `canPerform(...)` 呼び出しで `"recordContractAdjustment"` → `"recordContractInteraction"` に変更する
-- [ ] `src/app/actions/interactions.ts` の `recordInvoiceAdjustmentAction` 内の `canPerform(...)` 呼び出しで `"recordInvoiceAdjustment"` → `"recordInvoiceInteraction"` に変更する
+- [x] `src/app/actions/interactions.ts` の `recordContractAdjustmentAction` 内の `canPerform(...)` 呼び出しで `"recordContractAdjustment"` → `"recordContractInteraction"` に変更する
+- [x] `src/app/actions/interactions.ts` の `recordInvoiceAdjustmentAction` 内の `canPerform(...)` 呼び出しで `"recordInvoiceAdjustment"` → `"recordInvoiceInteraction"` に変更する
 
 **Acceptance Criteria**:
 - Server Action の認可チェックが新操作名を使用していること
@@ -106,8 +106,8 @@
 
 > **⚠️ 原子的変更**: T-06・T-07・T-08 の 4 ファイル変更を同一コミットで行うこと（T-06 の注記参照）。
 
-- [ ] `src/app/(dashboard)/contracts/[id]/page.tsx` の `canPerform(session!.user.role, "interaction", "recordContractAdjustment")` を `"recordContractInteraction"` に変更する
-- [ ] `src/app/(dashboard)/contracts/[id]/invoices/[invoiceId]/page.tsx` の `canPerform(session!.user.role, "interaction", "recordInvoiceAdjustment")` を `"recordInvoiceInteraction"` に変更する
+- [x] `src/app/(dashboard)/contracts/[id]/page.tsx` の `canPerform(session!.user.role, "interaction", "recordContractAdjustment")` を `"recordContractInteraction"` に変更する
+- [x] `src/app/(dashboard)/contracts/[id]/invoices/[invoiceId]/page.tsx` の `canPerform(session!.user.role, "interaction", "recordInvoiceAdjustment")` を `"recordInvoiceInteraction"` に変更する
 
 **Acceptance Criteria**:
 - 契約詳細ページで認可チェックが `recordContractInteraction` を使用していること
@@ -117,10 +117,10 @@
 
 ## T-09: `getDealActivity` のラベルとコメントを更新する
 
-- [ ] `src/application/usecases/getDealActivity.ts` のコメント「契約・請求に紐づく顧客接点（contract_adjustment / invoice_adjustment）」を「契約・請求に紐づく顧客接点」に変更する
-- [ ] `targetInfoMap` 内の契約経由接点のラベル `契約調整` → `契約のやり取り` に変更する
-- [ ] `targetInfoMap` 内の請求経由接点のラベル `請求調整` → `請求のやり取り` に変更する
-- [ ] コメント「契約調整の顧客接点」→「契約に紐づく顧客接点」、「請求調整の顧客接点（invoiceId から contractId を逆引き）」→「請求に紐づく顧客接点（invoiceId から contractId を逆引き）」に変更する
+- [x] `src/application/usecases/getDealActivity.ts` のコメント「契約・請求に紐づく顧客接点（contract_adjustment / invoice_adjustment）」を「契約・請求に紐づく顧客接点」に変更する
+- [x] `targetInfoMap` 内の契約経由接点のラベル `契約調整` → `契約のやり取り` に変更する
+- [x] `targetInfoMap` 内の請求経由接点のラベル `請求調整` → `請求のやり取り` に変更する
+- [x] コメント「契約調整の顧客接点」→「契約に紐づく顧客接点」、「請求調整の顧客接点（invoiceId から contractId を逆引き）」→「請求に紐づく顧客接点（invoiceId から contractId を逆引き）」に変更する
 
 **Acceptance Criteria**:
 - `getDealActivity` が契約経由の接点を「契約のやり取り YYYY/MM/DD」のラベルで返すこと
@@ -131,12 +131,12 @@
 
 ## T-10: テスト `contractAdjustment.dynamic.test.ts` を新仕様に更新する
 
-- [ ] `makeInteraction` 内の `kind: "contract_adjustment"` → `kind: "note"` に変更する
-- [ ] テストの assert を更新する:
+- [x] `makeInteraction` 内の `kind: "contract_adjustment"` → `kind: "note"` に変更する
+- [x] テストの assert を更新する:
   - `result.interaction.kind` の期待値を `"note"` に変更
   - `state.createArgs?.kind` の期待値を `"note"` に変更
   - `state.auditArgs?.metadata` の期待値を `{ kind: "note" }` に変更
-- [ ] テスト説明文の `kind=contract_adjustment` → `kind=note` に更新する
+- [x] テスト説明文の `kind=contract_adjustment` → `kind=note` に更新する
 
 **Acceptance Criteria**:
 - テストが `kind: "note"` で assert していること
@@ -146,12 +146,12 @@
 
 ## T-11: テスト `invoiceAdjustment.dynamic.test.ts` を新仕様に更新する
 
-- [ ] `makeInteraction` 内の `kind: "invoice_adjustment"` → `kind: "note"` に変更する
-- [ ] テストの assert を更新する:
+- [x] `makeInteraction` 内の `kind: "invoice_adjustment"` → `kind: "note"` に変更する
+- [x] テストの assert を更新する:
   - `result.interaction.kind` の期待値を `"note"` に変更
   - `state.createArgs?.kind` の期待値を `"note"` に変更
   - `state.auditArgs?.metadata` の期待値を `{ kind: "note" }` に変更
-- [ ] テスト説明文の `kind=invoice_adjustment` → `kind=note` に更新する
+- [x] テスト説明文の `kind=invoice_adjustment` → `kind=note` に更新する
 
 **Acceptance Criteria**:
 - テストが `kind: "note"` で assert していること
@@ -161,8 +161,8 @@
 
 ## T-12: テスト `interactions.dynamic.test.ts` (actions) を新仕様に更新する
 
-- [ ] `makeInteraction` 関数の引数型と内部の `kind` を `"contract_adjustment" | "invoice_adjustment"` → `"note"` に変更する（呼び出し元も `makeInteraction("note")` に統一）
-- [ ] テスト内の `canPerform` モック呼び出しの検証が新操作名（`recordContractInteraction` / `recordInvoiceInteraction`）に対応していることを確認する（Server Action の内部で canPerform を呼ぶため、モック側に変更は不要だが、認可不足のテストケース説明文を更新する）
+- [x] `makeInteraction` 関数の引数型と内部の `kind` を `"contract_adjustment" | "invoice_adjustment"` → `"note"` に変更する（呼び出し元も `makeInteraction("note")` に統一）
+- [x] テスト内の `canPerform` モック呼び出しの検証が新操作名（`recordContractInteraction` / `recordInvoiceInteraction`）に対応していることを確認する（Server Action の内部で canPerform を呼ぶため、モック側に変更は不要だが、認可不足のテストケース説明文を更新する）
 
 **Acceptance Criteria**:
 - テストが `kind: "note"` でモックデータを構築していること
@@ -172,8 +172,8 @@
 
 ## T-13: テスト `interactionByRelation.dynamic.test.ts` を新仕様に更新する
 
-- [ ] `makeInteraction` 内の `kind: "contract_adjustment"` → `kind: "note"` に変更する
-- [ ] 請求テストの `makeInteraction` 呼び出しで `kind: "invoice_adjustment"` → `kind: "note"` に変更する
+- [x] `makeInteraction` 内の `kind: "contract_adjustment"` → `kind: "note"` に変更する
+- [x] 請求テストの `makeInteraction` 呼び出しで `kind: "invoice_adjustment"` → `kind: "note"` に変更する
 
 **Acceptance Criteria**:
 - テストが `kind: "note"` でモックデータを構築していること
@@ -183,9 +183,9 @@
 
 ## T-14: テスト `interactionAuthorization.dynamic.test.ts` を新操作名に更新する
 
-- [ ] `recordContractAdjustment` → `recordContractInteraction` に変更する（テスト名・canPerform 呼び出し両方）
-- [ ] `recordInvoiceAdjustment` → `recordInvoiceInteraction` に変更する（テスト名・canPerform 呼び出し両方）
-- [ ] 各ロールの期待値が維持されていることを確認する（契約=admin/manager/member ok, finance ng、請求=admin/manager/finance ok, member ng）
+- [x] `recordContractAdjustment` → `recordContractInteraction` に変更する（テスト名・canPerform 呼び出し両方）
+- [x] `recordInvoiceAdjustment` → `recordInvoiceInteraction` に変更する（テスト名・canPerform 呼び出し両方）
+- [x] 各ロールの期待値が維持されていることを確認する（契約=admin/manager/member ok, finance ng、請求=admin/manager/finance ok, member ng）
 
 **Acceptance Criteria**:
 - テストが新操作名 `recordContractInteraction` / `recordInvoiceInteraction` で assert していること
@@ -196,9 +196,9 @@
 
 ## T-15: テスト `dealActivity.dynamic.test.ts` を新仕様に更新する
 
-- [ ] テスト内のモックデータで `kind: "contract_adjustment"` → `kind: "note"` に変更する
-- [ ] テスト内のモックデータで `kind: "invoice_adjustment"` → `kind: "note"` に変更する
-- [ ] targetInfoMap のラベル検証を更新する:
+- [x] テスト内のモックデータで `kind: "contract_adjustment"` → `kind: "note"` に変更する
+- [x] テスト内のモックデータで `kind: "invoice_adjustment"` → `kind: "note"` に変更する
+- [x] targetInfoMap のラベル検証を更新する:
   - `契約調整` → `契約のやり取り` を expect する
   - `請求調整` → `請求のやり取り` を expect する
 
@@ -211,12 +211,12 @@
 
 ## T-16: 全体ビルド・テスト・型チェック確認
 
-- [ ] `bun run typecheck` が成功すること
-- [ ] `bun run build` が成功すること
-- [ ] `bun test` が全件 green であること
-- [ ] `bun run lint` が成功すること
-- [ ] コードベース全体で `contract_adjustment` / `invoice_adjustment` の文字列が残っていないことを grep で確認する（コメント・テスト説明文も含む。マイグレーション SQL 内の UPDATE 文は例外。監査ログの過去データに関する注記を除く）
-- [ ] コードベース全体で旧認可操作名 `recordContractAdjustment` / `recordInvoiceAdjustment` の文字列が残っていないことを grep で確認する（`authorization.ts`・`interactions.ts`・`contracts/[id]/page.tsx`・`invoices/[invoiceId]/page.tsx` の 4 ファイルを重点的に確認する。partial リネームの場合、canPerform の deny-by-default によりその操作は全ロールに拒否される）
+- [x] `bun run typecheck` が成功すること
+- [x] `bun run build` が成功すること
+- [x] `bun test` が全件 green であること
+- [x] `bun run lint` が成功すること
+- [x] コードベース全体で `contract_adjustment` / `invoice_adjustment` の文字列が残っていないことを grep で確認する（コメント・テスト説明文も含む。マイグレーション SQL 内の UPDATE 文は例外。監査ログの過去データに関する注記を除く）
+- [x] コードベース全体で旧認可操作名 `recordContractAdjustment` / `recordInvoiceAdjustment` の文字列が残っていないことを grep で確認する（`authorization.ts`・`interactions.ts`・`contracts/[id]/page.tsx`・`invoices/[invoiceId]/page.tsx` の 4 ファイルを重点的に確認する。partial リネームの場合、canPerform の deny-by-default によりその操作は全ロールに拒否される）
 
 **Acceptance Criteria**:
 - typecheck / build / test / lint 全て成功

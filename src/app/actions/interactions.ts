@@ -36,7 +36,7 @@ export async function recordContractAdjustmentAction(
     return { message: "認証が必要です" };
   }
 
-  if (!canPerform(session.user.role, "interaction", "recordContractAdjustment")) {
+  if (!canPerform(session.user.role, "interaction", "recordContractInteraction")) {
     return { message: "この操作を実行する権限がありません" };
   }
 
@@ -100,7 +100,7 @@ export async function recordInvoiceAdjustmentAction(
     return { message: "認証が必要です" };
   }
 
-  if (!canPerform(session.user.role, "interaction", "recordInvoiceAdjustment")) {
+  if (!canPerform(session.user.role, "interaction", "recordInvoiceInteraction")) {
     return { message: "この操作を実行する権限がありません" };
   }
 

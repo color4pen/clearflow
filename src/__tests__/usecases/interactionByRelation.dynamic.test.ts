@@ -50,7 +50,7 @@ function makeInteraction(id: string, overrides: Partial<Interaction> = {}): Inte
   return {
     id,
     organizationId: ORG_ID,
-    kind: "contract_adjustment",
+    kind: "note",
     dealId: null,
     inquiryId: null,
     contractId: CONTRACT_ID,
@@ -128,8 +128,8 @@ describe("listInteractionsByContract — 契約に紐づく顧客接点の一覧
 describe("listInteractionsByInvoice — 請求に紐づく顧客接点の一覧取得", () => {
   it("findAllByInvoice の結果をそのまま返す", async () => {
     state.invoiceInteractions = [
-      makeInteraction("i-101", { kind: "invoice_adjustment", contractId: null, invoiceId: INVOICE_ID }),
-      makeInteraction("i-102", { kind: "invoice_adjustment", contractId: null, invoiceId: INVOICE_ID }),
+      makeInteraction("i-101", { kind: "note", contractId: null, invoiceId: INVOICE_ID }),
+      makeInteraction("i-102", { kind: "note", contractId: null, invoiceId: INVOICE_ID }),
     ];
 
     const result = await listInteractionsByInvoice(INVOICE_ID, ORG_ID);

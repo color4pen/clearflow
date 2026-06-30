@@ -28,7 +28,7 @@ export async function createContractAdjustment(data: {
       const newInteraction = await interactionRepository.create(
         {
           organizationId: data.organizationId,
-          kind: "contract_adjustment",
+          kind: "note",
           contractId: data.contractId,
           date: data.date ?? new Date(),
           summary: data.summary,
@@ -49,7 +49,7 @@ export async function createContractAdjustment(data: {
           targetId: newInteraction.id,
           actorId: data.actorId,
           organizationId: data.organizationId,
-          metadata: { kind: "contract_adjustment" },
+          metadata: { kind: "note" },
         },
         tx
       );

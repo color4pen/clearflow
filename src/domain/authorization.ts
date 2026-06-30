@@ -141,10 +141,10 @@ const PERMISSION_MATRIX: PermissionMatrix = {
     delete: ADMIN_MANAGER,
   },
 
-  // 3.12 顧客接点 (Interaction) — 記録操作のみ。entity 種別ごとに役割を分ける
+  // 3.12 顧客接点 (Interaction) — 記録操作のみ。relatedTo 文脈ごとに役割を分ける
   interaction: {
-    recordContractAdjustment: ADMIN_MANAGER_MEMBER,
-    recordInvoiceAdjustment: ADMIN_MANAGER_FINANCE,
+    recordContractInteraction: ADMIN_MANAGER_MEMBER,
+    recordInvoiceInteraction: ADMIN_MANAGER_FINANCE,
   },
 };
 
