@@ -51,3 +51,9 @@
 {"type":"transition","ts":"2026-07-06T21:26:08.344Z","step":"signal-handler","status":"ok","message":"running → awaiting-resume: Interrupted by signal"}
 {"type":"transition","ts":"2026-07-06T21:26:34.231Z","step":"resume","status":"ok","message":"awaiting-resume → running: Resuming from step 'code-fixer'"}
 {"type":"transition","ts":"2026-07-06T21:26:34.300Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-07-06T21:38:20.166Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"3ee47fb6-5ede-46ad-ba9c-e61a5b898fff","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-06T21:26:34.307Z","endedAt":"2026-07-06T21:38:18.737Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-07-06T21:38:18.737Z","outputs":[{"path":"specrunner/changes/mcp-tools-activity","hash":null}],"inputs":[{"path":"specrunner/changes/mcp-tools-activity/review-feedback-001.md","hash":"sha256:e9d12f32df29a786ece2c010f666c7b5d8a6425808389df2d2f06b910d6c1dd8"}]}
+{"type":"transition","ts":"2026-07-06T21:38:20.171Z","step":"step-transition","status":"ok","message":"code-fixer → code-review"}
+{"type":"transition","ts":"2026-07-06T21:38:20.172Z","step":"code-review","status":"started","message":"code-review iteration 1 started"}
+{"type":"transition","ts":"2026-07-06T21:38:20.173Z","step":"code-review-started","status":"started","message":"Starting code-review step"}
