@@ -61,9 +61,8 @@ export async function createInquiry(data: {
 
     return { ok: true, inquiry };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "引き合いの作成に失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("createInquiry failed", err);
+    return { ok: false, reason: "引き合いの作成に失敗しました" };
   }
 }

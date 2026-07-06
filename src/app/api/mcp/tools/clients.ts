@@ -265,16 +265,20 @@ export function registerClientsTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            // isPrimary の一意性検証（Server Action と同様）
-            const isPrimary = args.isPrimary ?? false;
-            const primaryValidation = await validatePrimaryUniqueness(
-              args.clientId,
-              organizationId,
-              args.contactId,
-              isPrimary
-            );
-            if (!primaryValidation.ok) {
-              return toToolError(primaryValidation.reason);
+            // isPrimary を明示的に true に設定するときのみ一意性を検証する。
+            // 省略時（undefined）は変更なしとして扱い、既存の主担当フラグを保持する
+            // （フォーム経由の Server Action と異なり、フィールド省略は「未指定」であって
+            //  「オフ」ではないため、args.isPrimary ?? false による降格を避ける）。
+            if (args.isPrimary === true) {
+              const primaryValidation = await validatePrimaryUniqueness(
+                args.clientId,
+                organizationId,
+                args.contactId,
+                true
+              );
+              if (!primaryValidation.ok) {
+                return toToolError(primaryValidation.reason);
+              }
             }
 
             const result = await updateClientContact({
@@ -287,7 +291,7 @@ export function registerClientsTools(server: McpServer): void {
                 position: args.position,
                 email: args.email,
                 phone: args.phone,
-                isPrimary,
+                isPrimary: args.isPrimary,
               },
               userId,
             });

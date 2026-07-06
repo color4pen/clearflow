@@ -7,71 +7,85 @@ import { registerDealsTools } from "./tools/deals";
 import { registerClientsTools } from "./tools/clients";
 
 /**
- * MCP サーバーインスタンス（モジュールレベルシングルトン）。
- * ツール登録はモジュールロード時に 1 回だけ行う。
- * transport はリクエストごとに生成する（D8）。
+ * リクエストごとに新しい McpServer + transport を生成する（stateless）。
+ * McpServer は 1 つの transport にしか connect できず、stateless(JSON) パスでは
+ * transport が close されないため、モジュールレベルで使い回すと 2 リクエスト目以降
+ * "Already connected to a transport" で失敗する。よって毎リクエスト生成する。
  */
-const mcpServer = new McpServer({
-  name: "clearflow",
-  version: "1.0.0",
-});
+function createMcpServer(): McpServer {
+  const server = new McpServer({ name: "clearflow", version: "1.0.0" });
+  registerInquiriesTools(server);
+  registerDealsTools(server);
+  registerClientsTools(server);
+  return server;
+}
 
-registerInquiriesTools(mcpServer);
-registerDealsTools(mcpServer);
-registerClientsTools(mcpServer);
-
-export async function POST(request: Request): Promise<Response> {
-  // (1) Bearer 認証
+/** Bearer 認証を検証し、authInfo を構築する。失敗時は 401 Response を返す。 */
+async function authenticate(
+  request: Request
+): Promise<{ authInfo: AuthInfo } | { response: Response }> {
   const authHeader = request.headers.get("Authorization");
   const resolved = await resolveBearer(authHeader);
   if (!resolved) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
+    return {
+      response: new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      }),
+    };
   }
-
-  // (2) authInfo を構築する（D6: AuthInfo の extra に userId/organizationId/role を格納）
-  const authInfo: AuthInfo = {
-    token: authHeader!.slice("Bearer ".length),
-    clientId: resolved.userId,
-    scopes: [],
-    extra: {
-      userId: resolved.userId,
-      organizationId: resolved.organizationId,
-      role: resolved.role,
+  return {
+    authInfo: {
+      token: authHeader!.slice("Bearer ".length),
+      clientId: resolved.userId,
+      scopes: [],
+      extra: {
+        userId: resolved.userId,
+        organizationId: resolved.organizationId,
+        role: resolved.role,
+      },
     },
   };
+}
 
-  // (3) stateless transport を生成する（D2, D5）
+/** transport を生成し、リクエストを処理する。例外は JSON-RPC エラーに包む。 */
+async function handleWithServer(
+  request: Request,
+  options?: { authInfo: AuthInfo }
+): Promise<Response> {
+  const server = createMcpServer();
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true,
   });
+  try {
+    await server.connect(transport);
+    return await transport.handleRequest(request, options);
+  } catch {
+    // トランスポート/接続レベルの例外を素の 500 にせず JSON-RPC エラーで返す
+    return new Response(
+      JSON.stringify({
+        jsonrpc: "2.0",
+        error: { code: -32603, message: "Internal error" },
+        id: null,
+      }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  } finally {
+    await transport.close();
+  }
+}
 
-  // (4) transport を McpServer に接続する
-  await mcpServer.connect(transport);
-
-  // (5) リクエストを処理する
-  return transport.handleRequest(request, { authInfo });
+export async function POST(request: Request): Promise<Response> {
+  const auth = await authenticate(request);
+  if ("response" in auth) return auth.response;
+  return handleWithServer(request, { authInfo: auth.authInfo });
 }
 
 export async function GET(request: Request): Promise<Response> {
-  // POST と同じ Bearer 認証（SDK バージョンアップ時の認証バイパスリスクを防ぐ）
-  const authHeader = request.headers.get("Authorization");
-  const resolved = await resolveBearer(authHeader);
-  if (!resolved) {
-    return new Response(JSON.stringify({ error: "Unauthorized" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  // stateless モードでは GET は 405 を返す（SDK が処理する）
-  const transport = new WebStandardStreamableHTTPServerTransport({
-    sessionIdGenerator: undefined,
-    enableJsonResponse: true,
-  });
-  await mcpServer.connect(transport);
-  return transport.handleRequest(request);
+  // POST と同じ Bearer 認証（SDK バージョンアップ時の認証バイパスリスクを防ぐ）。
+  // stateless モードでは GET は 405 を返す（SDK が処理する）。
+  const auth = await authenticate(request);
+  if ("response" in auth) return auth.response;
+  return handleWithServer(request);
 }

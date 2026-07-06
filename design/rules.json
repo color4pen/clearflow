@@ -221,15 +221,7 @@
     ],
     [
       "mod-mcp",
-      "mod-lib"
-    ],
-    [
-      "mod-mcp",
       "mod-model"
-    ],
-    [
-      "mod-mcp",
-      "mod-repo"
     ],
     [
       "mod-mcp",

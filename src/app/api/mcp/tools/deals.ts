@@ -208,7 +208,7 @@ export function registerDealsTools(server: McpServer): void {
                   : args.estimatedEndDate === null
                     ? null
                     : new Date(args.estimatedEndDate),
-              contractType: args.contractType ?? undefined,
+              contractType: args.contractType,
               assigneeId: args.assigneeId,
               technicalLeadId: args.technicalLeadId,
               notes: args.notes,
