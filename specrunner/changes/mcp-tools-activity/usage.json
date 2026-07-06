@@ -1,0 +1,24 @@
+{
+  "commandInvocations": [
+    {
+      "command": "job",
+      "timestamp": "2026-07-06T20:34:04.617Z",
+      "modelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 1450,
+          "outputTokens": 14,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "claude-sonnet-4-6": {
+          "inputTokens": 23,
+          "outputTokens": 12222,
+          "cacheReadInputTokens": 809680,
+          "cacheCreationInputTokens": 55042
+        }
+      },
+      "jobId": "7dcc7c1c-703a-4e68-b751-4d2d62c95328",
+      "stepName": "request-review"
+    }
+  ]
+}
