@@ -30,3 +30,9 @@
 {"type":"transition","ts":"2026-07-06T22:46:15.445Z","step":"spec-review","status":"warning","message":"spec-review iteration 1 completed with verdict: needs-fix"}
 {"type":"transition","ts":"2026-07-06T22:46:15.446Z","step":"step-transition","status":"ok","message":"spec-review → spec-fixer"}
 {"type":"transition","ts":"2026-07-06T22:46:15.448Z","step":"spec-fixer-started","status":"started","message":"Starting spec-fixer step"}
+{"type":"transition","ts":"2026-07-06T22:54:30.540Z","step":"spec-fixer-verdict","status":"ok","message":"spec-fixer verdict: approved"}
+{"type":"step-attempt","step":"spec-fixer","sessionId":"b1b02992-0ce8-4c97-a87e-dd375ab40c43","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-06T22:46:15.460Z","endedAt":"2026-07-06T22:54:29.252Z"}
+{"type":"lineage","step":"spec-fixer","ts":"2026-07-06T22:54:29.252Z","outputs":[{"path":"specrunner/changes/mcp-tools-finance/design.md","hash":"sha256:e422b0def887711e9d151e1ac8d0ce7e9c9caa06814aa077d2a7fadc66263c10"},{"path":"specrunner/changes/mcp-tools-finance/spec.md","hash":"sha256:ebdf161a75b4d616b3d71f77679b98a807dfeb0cf151c057f4e4c2091adccc0f"}],"inputs":[{"path":"specrunner/changes/mcp-tools-finance/spec-review-result-001.md","hash":"sha256:bfcff6d804297ddaa8b84ab37a4add34986adc0414a774c92684032a383d1fd3"}]}
+{"type":"transition","ts":"2026-07-06T22:54:30.548Z","step":"step-transition","status":"ok","message":"spec-review complete → spec-review (iter 2)"}
+{"type":"transition","ts":"2026-07-06T22:54:30.549Z","step":"spec-review","status":"started","message":"spec-review iteration 2 started"}
+{"type":"transition","ts":"2026-07-06T22:54:30.551Z","step":"spec-review-started","status":"started","message":"Starting spec-review step"}
