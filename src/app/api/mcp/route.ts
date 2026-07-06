@@ -9,6 +9,10 @@ import { registerInteractionsTools } from "./tools/interactions";
 import { registerTasksTools } from "./tools/tasks";
 import { registerWatchesTools } from "./tools/watches";
 import { registerNotificationsTools } from "./tools/notifications";
+import { registerContractsTools } from "./tools/contracts";
+import { registerInvoicesTools } from "./tools/invoices";
+import { registerRevenueTools } from "./tools/revenue";
+import { registerRevenueTargetsTools } from "./tools/revenueTargets";
 
 /**
  * リクエストごとに新しい McpServer + transport を生成する（stateless）。
@@ -25,6 +29,10 @@ function createMcpServer(): McpServer {
   registerTasksTools(server);
   registerWatchesTools(server);
   registerNotificationsTools(server);
+  registerContractsTools(server);
+  registerInvoicesTools(server);
+  registerRevenueTools(server);
+  registerRevenueTargetsTools(server);
   return server;
 }
 

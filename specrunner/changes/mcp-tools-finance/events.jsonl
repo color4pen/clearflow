@@ -42,3 +42,14 @@
 {"type":"transition","ts":"2026-07-06T23:04:06.575Z","step":"spec-review","status":"ok","message":"spec-review iteration 2 completed with verdict: approved"}
 {"type":"transition","ts":"2026-07-06T23:04:06.575Z","step":"step-transition","status":"ok","message":"spec-review → test-case-gen"}
 {"type":"transition","ts":"2026-07-06T23:04:06.577Z","step":"test-case-gen-started","status":"started","message":"Starting test-case-gen step"}
+{"type":"transition","ts":"2026-07-06T23:07:22.685Z","step":"test-case-gen-verdict","status":"ok","message":"test-case-gen verdict: success"}
+{"type":"step-attempt","step":"test-case-gen","sessionId":"3620d0a0-fe85-4586-90f1-46f1628ca5e7","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-06T23:04:06.590Z","endedAt":"2026-07-06T23:07:21.503Z"}
+{"type":"lineage","step":"test-case-gen","ts":"2026-07-06T23:07:21.503Z","outputs":[{"path":"specrunner/changes/mcp-tools-finance/test-cases.md","hash":"sha256:7fd1d97a3e4184c2ce4ddf48552797fe2d4012499a5475320ae23995cc041aba"}],"inputs":[{"path":"specrunner/changes/mcp-tools-finance/design.md","hash":"sha256:e422b0def887711e9d151e1ac8d0ce7e9c9caa06814aa077d2a7fadc66263c10"},{"path":"specrunner/changes/mcp-tools-finance/tasks.md","hash":"sha256:28fdba4dfe0d827ee547d7d9ca221f64edb0019fee677f226f3b4cfd4acfd6dc"}]}
+{"type":"transition","ts":"2026-07-06T23:07:22.692Z","step":"step-transition","status":"ok","message":"spec-review complete → implementer (iter 2)"}
+{"type":"transition","ts":"2026-07-06T23:07:22.694Z","step":"implementer-started","status":"started","message":"Starting implementer step"}
+{"type":"interruption","reason":"signal","ts":"2026-07-06T23:10:24.193Z"}
+{"type":"interruption","reason":"signal","ts":"2026-07-06T23:10:24.193Z"}
+{"type":"transition","ts":"2026-07-06T23:10:24.194Z","step":"signal-handler","status":"ok","message":"running → awaiting-resume: Interrupted by signal"}
+{"type":"transition","ts":"2026-07-06T23:10:24.194Z","step":"signal-handler","status":"ok","message":"running → awaiting-resume: Interrupted by signal"}
+{"type":"transition","ts":"2026-07-06T23:10:38.269Z","step":"resume","status":"ok","message":"awaiting-resume → running: Resuming from step 'implementer'"}
+{"type":"transition","ts":"2026-07-06T23:10:38.330Z","step":"implementer-started","status":"started","message":"Starting implementer step"}
