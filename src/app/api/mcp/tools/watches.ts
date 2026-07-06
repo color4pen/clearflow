@@ -1,0 +1,84 @@
+import { z } from "zod";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import type { ServerRequest, ServerNotification } from "@modelcontextprotocol/sdk/types.js";
+import { watchDeal } from "@/application/usecases/watchDeal";
+import { unwatchDeal } from "@/application/usecases/unwatchDeal";
+import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import type { Role } from "@/domain/models/user";
+
+function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
+  const authExtra = extra.authInfo?.extra as
+    | { userId: string; organizationId: string; role: Role }
+    | undefined;
+  return authExtra ?? null;
+}
+
+const watchSchema = z.object({
+  operation: z.literal("watch"),
+  dealId: z.string().uuid("案件IDが不正です"),
+});
+
+const unwatchSchema = z.object({
+  operation: z.literal("unwatch"),
+  dealId: z.string().uuid("案件IDが不正です"),
+});
+
+const watchesInputSchema = z.discriminatedUnion("operation", [
+  watchSchema,
+  unwatchSchema,
+]);
+
+export function registerWatchesTools(server: McpServer): void {
+  server.registerTool(
+    "watches",
+    {
+      description:
+        "案件（Deal）のウォッチ登録・解除を行います。operation 引数で操作を切り替えます。",
+      inputSchema: watchesInputSchema,
+    },
+    async (args, extra) => {
+      try {
+        const auth = getAuthInfo(extra);
+        if (!auth) {
+          return toToolError("認証情報が取得できません");
+        }
+        const { userId, organizationId } = auth;
+
+        switch (args.operation) {
+          case "watch": {
+            const result = await watchDeal({
+              userId,
+              dealId: args.dealId,
+              organizationId,
+            });
+
+            if (!result.ok) {
+              return toToolError(result.reason);
+            }
+            return toToolSuccess(result.watch);
+          }
+
+          case "unwatch": {
+            const result = await unwatchDeal({
+              userId,
+              dealId: args.dealId,
+              organizationId,
+            });
+
+            if (!result.ok) {
+              return toToolError(result.reason);
+            }
+            return toToolSuccess({ unwatched: true, dealId: args.dealId });
+          }
+
+          default: {
+            return toToolError("不明な operation です");
+          }
+        }
+      } catch (error) {
+        return handleToolError(error);
+      }
+    }
+  );
+}

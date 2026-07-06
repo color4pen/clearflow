@@ -5,6 +5,10 @@ import { resolveBearer } from "@/infrastructure/apiTokenResolver";
 import { registerInquiriesTools } from "./tools/inquiries";
 import { registerDealsTools } from "./tools/deals";
 import { registerClientsTools } from "./tools/clients";
+import { registerInteractionsTools } from "./tools/interactions";
+import { registerTasksTools } from "./tools/tasks";
+import { registerWatchesTools } from "./tools/watches";
+import { registerNotificationsTools } from "./tools/notifications";
 
 /**
  * リクエストごとに新しい McpServer + transport を生成する（stateless）。
@@ -17,6 +21,10 @@ function createMcpServer(): McpServer {
   registerInquiriesTools(server);
   registerDealsTools(server);
   registerClientsTools(server);
+  registerInteractionsTools(server);
+  registerTasksTools(server);
+  registerWatchesTools(server);
+  registerNotificationsTools(server);
   return server;
 }
 
