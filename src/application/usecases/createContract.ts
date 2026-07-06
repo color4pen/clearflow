@@ -95,10 +95,10 @@ export async function createContract(data: {
 
       dispatcher.flushAsync();
       return { ok: true, contract };
-    } catch (err) {
+    } catch {
       return {
         ok: false,
-        reason: err instanceof Error ? err.message : "契約の作成に失敗しました",
+        reason: "契約の作成に失敗しました",
       };
     }
   });

@@ -128,9 +128,11 @@ mcp-server-core（#158）で MCP サーバー基盤と第一弾ツール群（in
 
 ### D10: エラー変換で内部詳細を漏らさない
 
-**決定**: usecase の `{ ok: false, reason }` は制御されたメッセージなので `toToolError(reason)` で返す。予期しない例外（DB エラー等）は `handleToolError(error)` で「内部エラーが発生しました」に変換する。usecase 内で exception が reason に混入する経路（`err.message`）はビジネスメッセージ（金額超過等）であり、DB 接続エラー等の技術詳細ではない。
+**決定**: usecase の catch ブロックは `db.transaction()` 全体を囲んでいるため、PostgreSQL エラー（"duplicate key value violates unique constraint"、"Connection refused" 等）が `err.message` 経由で `reason` に混入する可能性がある。これを防ぐため、`createContract` / `updateContract` / `updateContractStatus` / `deleteContract` / `updateInvoiceStatus` / `setRevenueTarget` / `updateRevenueTarget` / `deleteRevenueTarget` の catch ブロックは `err.message` ではなく固定文言を `reason` に設定する（例: `"契約の作成に失敗しました"`）。固定化後の `{ ok: false, reason }` は制御されたメッセージなので `toToolError(reason)` で返す。MCP ツール外で発生した予期しない例外は `handleToolError(error)` で「内部エラーが発生しました」に変換する。
 
-**Rationale**: #158 の実装上の必須事項 3 に明記。既存ツール群と同一のエラー変換パターン。
+なお `createInvoice` / `updateInvoice` はトランザクション内で金額超過バリデーションを `throw` する設計である（SERIALIZABLE 分離レベルで合計金額チェックと INSERT を原子的に行う必要があるため）。これらの usecase では `err instanceof Error ? err.message : "固定文言"` パターンを維持する。この設計ではビジネスエラーと DB インフラエラーが catch で区別されないリスクが残るが、金額超過は MCP クライアントに伝えるべき業務情報であるため現行を維持し、将来的には `UsecaseBusinessError` 等の専用エラークラスによる区別を検討する。
+
+**Rationale**: #158 の実装上の必須事項 3「usecase の Result reason に例外メッセージが入る経路をツール結果へ素通ししない」に従う。usecase の catch ブロックが `err.message` を reason に設定した場合、DB エラー文字列が `toToolError(result.reason)` 経由で MCP クライアントに露出する。固定文言を使用することでこの経路を塞ぐ。実際の usecase は例外を内部で catch して `{ ok: false, reason }` を返すため、ツールの外側 catch（`handleToolError` 経路）はDB エラーに対しては通らない点に注意する。
 
 ## Risks / Trade-offs
 

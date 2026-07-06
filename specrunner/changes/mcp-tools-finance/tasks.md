@@ -85,6 +85,7 @@
   - `updateInvoiceStatus` usecase を呼び出す（`@/application/usecases/updateInvoiceStatus` から個別 import）
   - invoiceId（UUID）, newStatus（enum: scheduled / invoiced / paid / overdue）は必須
   - paidAt（`YYYY-MM-DD` 文字列, optional）→ `new Date(paidAt)` で変換して usecase に渡す。省略時は undefined（usecase のデフォルトに委ねる）
+  - paidAt が指定された場合、MCP ツールレイヤーで本日以前の日付であることを検証する（Server Action と同一）: `paidAt > todayJST` なら `toToolError("入金日は本日以前の日付を指定してください")` を返す。`todayJST` は `new Intl.DateTimeFormat('sv', { timeZone: 'Asia/Tokyo' }).format(new Date())` で取得
 - [ ] 全 operation の catch で `handleToolError(error)` を使用する
 
 **Acceptance Criteria**:
@@ -284,13 +285,17 @@
 
 既存テストファイル（`mcpContracts.dynamic.test.ts` 等）に追加。
 
-- [ ] `createContract` usecase のモックが DB 例外をスローするよう設定する
-- [ ] ツール結果が `isError: true` で、テキストが「内部エラーが発生しました」であることを assert する
-- [ ] スローされた例外メッセージ（例: "duplicate key value violates unique constraint"）がツール結果に含まれないことを assert する
+**背景**: usecase の catch ブロックは `db.transaction()` 全体を囲んでおり、DB エラーが発生した場合は usecase が内部で catch して `{ ok: false, reason: "固定文言" }` を返す（D10 で規定した修正後の動作）。実際の usecase は例外を throw しないため、ツールの外側 catch（`handleToolError` 経路）は DB エラーに対しては通らない。テストはこの実際のコードパスを検証する。
+
+- [ ] `createContract` usecase のモックが `{ ok: false, reason: "契約の作成に失敗しました" }` を返すよう設定する（usecase catch ブロックが DB 例外を固定文言に変換した後の状態をシミュレート）
+- [ ] ツール結果が `isError: true` であることを assert する
+- [ ] ツール結果のテキストに "duplicate key value violates unique constraint" が含まれないことを assert する（DB エラー詳細が素通りしていないことの確認）
+- [ ] ツール結果のテキストが固定文言（"契約の作成に失敗しました"）であることを assert する
 
 **Acceptance Criteria**:
-- handleToolError で例外が固定文言に変換される
-- DB エラー詳細がクライアントに漏れない
+- usecase catch ブロックが固定文言を返し、DB エラー詳細がクライアントに漏れない
+- テストは実際の動作経路（usecase が `{ ok: false, reason }` を返す → ツールが `toToolError` で変換する）を検証する
+- ツールの外側 catch（`handleToolError`）が DB エラーをマスクするという誤った前提に基づいたテストでない
 
 ## T-14: typecheck・test green の確認
 

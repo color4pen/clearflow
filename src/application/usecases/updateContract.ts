@@ -83,10 +83,10 @@ export async function updateContract(data: {
       return { ok: false, reason: "この契約は他のユーザーによって更新されました。画面を更新してください" };
     }
     return { ok: true, contract: updated };
-  } catch (err) {
+  } catch {
     return {
       ok: false,
-      reason: err instanceof Error ? err.message : "契約の更新に失敗しました",
+      reason: "契約の更新に失敗しました",
     };
   }
 }
