@@ -230,6 +230,10 @@
     ],
     [
       "mod-mcp",
+      "mod-repo"
+    ],
+    [
+      "mod-mcp",
       "mod-usecase"
     ],
     [

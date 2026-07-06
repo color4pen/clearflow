@@ -1,0 +1,394 @@
+/**
+ * MCP 活動系ツールの監査記録・テナント分離の実行検証テスト。
+ *
+ * T-11: 書き込みが監査ログに記録され、他テナントに触れられないことを固定する。
+ *
+ * 1. 監査記録の実行検証（TC-019）:
+ *    tasks create → createActionItem usecase の実装を実際に実行し、
+ *    recordAudit が action_item.create アクションで呼ばれることを直接 assert する。
+ *    （createActionItem を全体モックせず recordAudit のみをモックし呼び出しを検証する）
+ *
+ * 2. テナント分離の実行検証:
+ *    2 つの異なる organizationId で同一操作を呼び、usecase に渡される organizationId が
+ *    それぞれ正しいことを assert する。
+ *    対象ツール: tasks, interactions, watches, notifications（全 4 ツール）
+ *
+ * 受け入れ基準:「書き込みが監査ログに記録され、他テナントに触れられないことをテストで
+ * 固定する」を満たす。
+ */
+
+import { describe, it, expect, mock, beforeEach, afterAll } from "bun:test";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
+import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
+import type { ActionItem } from "@/domain/models/actionItem";
+import type { Interaction } from "@/domain/models/interaction";
+import type { Watch } from "@/domain/models/watch";
+
+const state = {
+  // tasks の監査・テナント分離検証用（createActionItem の実際の実行から得る）
+  actionItemCreateArgs: [] as Record<string, unknown>[],
+  auditCalls: [] as Record<string, unknown>[],
+  // interactions / watches / notifications のテナント分離検証用（usecase モック）
+  createMeetingCalls: [] as unknown[],
+  watchDealCalls: [] as unknown[],
+  markAsReadCalls: [] as unknown[],
+};
+
+// 実装を捕捉してから mock.module を呼ぶ。afterAll で復元する。
+import * as rateLimitModule from "@/infrastructure/rateLimit";
+import * as dbModule from "@/infrastructure/db";
+import * as actionItemRepositoryModule from "@/infrastructure/repositories/actionItemRepository";
+import * as auditRecorderModule from "@/application/services/auditRecorder";
+import * as createMeetingModule from "@/application/usecases/createMeeting";
+import * as watchDealModule from "@/application/usecases/watchDeal";
+import * as markNotificationsAsReadModule from "@/application/usecases/markNotificationsAsRead";
+import * as userRepositoryModule from "@/infrastructure/repositories/userRepository";
+const realRateLimit = {
+  checkRateLimit: rateLimitModule.checkRateLimit,
+  RATE_LIMITS: rateLimitModule.RATE_LIMITS,
+};
+const realDb = { db: dbModule.db };
+const realActionItemRepository = { ...actionItemRepositoryModule };
+const realAuditRecorder = { ...auditRecorderModule };
+const realCreateMeeting = createMeetingModule.createMeeting;
+const realWatchDeal = watchDealModule.watchDeal;
+const realMarkNotificationsAsRead = markNotificationsAsReadModule.markNotificationsAsRead;
+const realUserRepository = { ...userRepositoryModule };
+
+mock.module("@/infrastructure/rateLimit", () => ({
+  checkRateLimit: async () => ({ allowed: true }),
+  RATE_LIMITS: {
+    createRequest: { limit: 100, windowMs: 60_000 },
+    search: { limit: 120, windowMs: 60_000 },
+  },
+}));
+
+// db.transaction をフェイク実装に差し替える（DB 接続不要）
+mock.module("@/infrastructure/db", () => ({
+  db: {
+    transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn({}),
+  },
+}));
+
+// actionItemRepository.create が呼ばれたことを捕捉する（createActionItem の実実装を通す）
+mock.module("@/infrastructure/repositories/actionItemRepository", () => ({
+  create: async (data: Record<string, unknown>) => {
+    state.actionItemCreateArgs.push(data);
+    return {
+      id: "item-1",
+      organizationId: data.organizationId,
+      description: data.description,
+      assigneeId: data.assigneeId ?? null,
+      dueDate: data.dueDate ?? null,
+      done: false,
+      status: "todo",
+      interactionId: data.interactionId ?? null,
+      dealId: data.dealId ?? null,
+      inquiryId: data.inquiryId ?? null,
+      createdById: data.createdById,
+      createdAt: new Date("2026-01-01"),
+      updatedAt: new Date("2026-01-01"),
+      version: 1,
+    };
+  },
+  findById: async () => null,
+  findByOrganization: async () => [],
+  update: async () => null,
+  deleteById: async () => {},
+  findByDeal: async () => [],
+  findByInteraction: async () => [],
+  mapRow: (row: unknown) => row,
+}));
+
+// recordAudit を捕捉する — createActionItem の実実装が呼んだことを直接 assert できる
+mock.module("@/application/services/auditRecorder", () => ({
+  recordAudit: async (data: Record<string, unknown>) => {
+    state.auditCalls.push(data);
+    return { id: "audit-1", ...data };
+  },
+}));
+
+mock.module("@/application/usecases/createMeeting", () => ({
+  createMeeting: async (input: unknown) => {
+    state.createMeetingCalls.push(input);
+    return { ok: true as const, meeting: mockMeeting };
+  },
+}));
+
+mock.module("@/application/usecases/watchDeal", () => ({
+  watchDeal: async (input: unknown) => {
+    state.watchDealCalls.push(input);
+    return { ok: true as const, watch: mockWatch };
+  },
+}));
+
+mock.module("@/application/usecases/markNotificationsAsRead", () => ({
+  markNotificationsAsRead: async (input: unknown) => {
+    state.markAsReadCalls.push(input);
+    return { ok: true as const };
+  },
+}));
+
+// userRepository は notifications.ts から個別 import されるためここでモックする
+mock.module("@/infrastructure/repositories/userRepository", () => ({
+  ...realUserRepository,
+  findById: async (userId: string, orgId: string) => ({
+    id: userId,
+    email: "test@example.com",
+    name: "Test User",
+    organizationId: orgId,
+    role: "member",
+    notificationsLastSeenAt: null,
+    createdAt: new Date("2026-01-01"),
+    deactivatedAt: null,
+  }),
+}));
+
+afterAll(() => {
+  mock.module("@/infrastructure/rateLimit", () => realRateLimit);
+  mock.module("@/infrastructure/db", () => realDb);
+  mock.module("@/infrastructure/repositories/actionItemRepository", () => realActionItemRepository);
+  mock.module("@/application/services/auditRecorder", () => realAuditRecorder);
+  mock.module("@/application/usecases/createMeeting", () => ({
+    createMeeting: realCreateMeeting,
+  }));
+  mock.module("@/application/usecases/watchDeal", () => ({
+    watchDeal: realWatchDeal,
+  }));
+  mock.module("@/application/usecases/markNotificationsAsRead", () => ({
+    markNotificationsAsRead: realMarkNotificationsAsRead,
+  }));
+  mock.module("@/infrastructure/repositories/userRepository", () => realUserRepository);
+});
+
+// モック設定後に import する
+const { registerTasksTools } = await import("../../app/api/mcp/tools/tasks");
+const { registerInteractionsTools } = await import("../../app/api/mcp/tools/interactions");
+const { registerWatchesTools } = await import("../../app/api/mcp/tools/watches");
+const { registerNotificationsTools } = await import("../../app/api/mcp/tools/notifications");
+
+const DEAL_UUID = "123e4567-e89b-12d3-a456-426614174001";
+
+const mockMeeting: Interaction = {
+  id: "meeting-1",
+  organizationId: "org-1",
+  kind: "meeting",
+  dealId: DEAL_UUID,
+  inquiryId: null,
+  contractId: null,
+  invoiceId: null,
+  clientId: null,
+  meetingType: "hearing",
+  date: new Date("2026-01-01"),
+  location: null,
+  attendees: [],
+  summary: null,
+  actionItems: [],
+  details: null,
+  createdById: "user-A",
+  createdAt: new Date("2026-01-01"),
+  updatedAt: new Date("2026-01-01"),
+  version: 1,
+};
+
+const mockWatch: Watch = {
+  id: "watch-1",
+  userId: "user-A",
+  dealId: DEAL_UUID,
+  organizationId: "org-1",
+  createdAt: new Date("2026-01-01"),
+};
+
+async function callTool(
+  toolName: string,
+  registerFn: (server: McpServer) => void,
+  args: Record<string, unknown>,
+  userId: string,
+  organizationId: string,
+  role = "admin"
+): Promise<{ isError?: boolean; text: string }> {
+  const server = new McpServer({ name: "clearflow-test", version: "1.0.0" });
+  registerFn(server);
+  const transport = new WebStandardStreamableHTTPServerTransport({
+    sessionIdGenerator: undefined,
+    enableJsonResponse: true,
+  });
+  await server.connect(transport);
+  const authInfo: AuthInfo = {
+    token: "cfp_test",
+    clientId: userId,
+    scopes: [],
+    extra: { userId, organizationId, role },
+  };
+  const request = new Request("http://localhost/api/mcp", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/call",
+      params: { name: toolName, arguments: args },
+    }),
+  });
+  const response = await transport.handleRequest(request, { authInfo });
+  const body = (await response.json()) as {
+    result?: { isError?: boolean; content?: { text: string }[] };
+  };
+  await transport.close();
+  return {
+    isError: body.result?.isError,
+    text: body.result?.content?.[0]?.text ?? "",
+  };
+}
+
+beforeEach(() => {
+  state.actionItemCreateArgs = [];
+  state.auditCalls = [];
+  state.createMeetingCalls = [];
+  state.watchDealCalls = [];
+  state.markAsReadCalls = [];
+});
+
+describe("MCP 活動系ツール — 監査記録・テナント分離（T-11）", () => {
+  describe("TC-019: 監査記録の実行検証", () => {
+    it("tasks create は createActionItem usecase を通じて recordAudit を action_item.create アクションで呼ぶ", async () => {
+      const result = await callTool(
+        "tasks",
+        registerTasksTools,
+        { operation: "create", description: "テストタスク" },
+        "user-A",
+        "org-1"
+      );
+
+      // ツール成功
+      expect(result.isError).toBeUndefined();
+
+      // actionItemRepository.create が呼ばれた（実際の DB 処理パスを通った）
+      expect(state.actionItemCreateArgs).toHaveLength(1);
+      expect(state.actionItemCreateArgs[0].organizationId).toBe("org-1");
+      expect(state.actionItemCreateArgs[0].createdById).toBe("user-A");
+
+      // recordAudit が action_item.create アクションで呼ばれた（監査記録される）
+      expect(state.auditCalls).toHaveLength(1);
+      expect(state.auditCalls[0].action).toBe("action_item.create");
+      expect(state.auditCalls[0].organizationId).toBe("org-1");
+      expect(state.auditCalls[0].actorId).toBe("user-A");
+    });
+  });
+
+  describe("テナント分離の実行検証（tasks）", () => {
+    it("org-1 と org-2 で tasks create を呼ぶとそれぞれの organizationId が usecase に渡される", async () => {
+      await callTool(
+        "tasks",
+        registerTasksTools,
+        { operation: "create", description: "org-1 タスク" },
+        "user-A",
+        "org-1"
+      );
+      await callTool(
+        "tasks",
+        registerTasksTools,
+        { operation: "create", description: "org-2 タスク" },
+        "user-B",
+        "org-2"
+      );
+
+      expect(state.actionItemCreateArgs).toHaveLength(2);
+      expect(state.actionItemCreateArgs[0].organizationId).toBe("org-1");
+      expect(state.actionItemCreateArgs[1].organizationId).toBe("org-2");
+      // 混在していない
+      expect(state.actionItemCreateArgs[0].organizationId).not.toBe(
+        state.actionItemCreateArgs[1].organizationId
+      );
+    });
+  });
+
+  describe("テナント分離の実行検証（interactions）", () => {
+    it("org-1 と org-2 で interactions create_meeting を呼ぶとそれぞれの organizationId が usecase に渡される", async () => {
+      await callTool(
+        "interactions",
+        registerInteractionsTools,
+        {
+          operation: "create_meeting",
+          dealId: DEAL_UUID,
+          type: "hearing",
+          date: "2026-01-01T00:00:00Z",
+        },
+        "user-A",
+        "org-1"
+      );
+      await callTool(
+        "interactions",
+        registerInteractionsTools,
+        {
+          operation: "create_meeting",
+          dealId: DEAL_UUID,
+          type: "hearing",
+          date: "2026-01-01T00:00:00Z",
+        },
+        "user-B",
+        "org-2"
+      );
+
+      expect(state.createMeetingCalls).toHaveLength(2);
+      const args1 = state.createMeetingCalls[0] as Record<string, unknown>;
+      const args2 = state.createMeetingCalls[1] as Record<string, unknown>;
+      expect(args1.organizationId).toBe("org-1");
+      expect(args2.organizationId).toBe("org-2");
+    });
+  });
+
+  describe("テナント分離の実行検証（watches）", () => {
+    it("org-1 と org-2 で watches watch を呼ぶとそれぞれの organizationId が usecase に渡される", async () => {
+      await callTool(
+        "watches",
+        registerWatchesTools,
+        { operation: "watch", dealId: DEAL_UUID },
+        "user-A",
+        "org-1"
+      );
+      await callTool(
+        "watches",
+        registerWatchesTools,
+        { operation: "watch", dealId: DEAL_UUID },
+        "user-B",
+        "org-2"
+      );
+
+      expect(state.watchDealCalls).toHaveLength(2);
+      const args1 = state.watchDealCalls[0] as Record<string, unknown>;
+      const args2 = state.watchDealCalls[1] as Record<string, unknown>;
+      expect(args1.organizationId).toBe("org-1");
+      expect(args2.organizationId).toBe("org-2");
+    });
+  });
+
+  describe("テナント分離の実行検証（notifications）", () => {
+    it("org-1 と org-2 で notifications mark_as_read を呼ぶとそれぞれの organizationId が usecase に渡される", async () => {
+      await callTool(
+        "notifications",
+        registerNotificationsTools,
+        { operation: "mark_as_read" },
+        "user-A",
+        "org-1"
+      );
+      await callTool(
+        "notifications",
+        registerNotificationsTools,
+        { operation: "mark_as_read" },
+        "user-B",
+        "org-2"
+      );
+
+      expect(state.markAsReadCalls).toHaveLength(2);
+      const args1 = state.markAsReadCalls[0] as Record<string, unknown>;
+      const args2 = state.markAsReadCalls[1] as Record<string, unknown>;
+      expect(args1.organizationId).toBe("org-1");
+      expect(args2.organizationId).toBe("org-2");
+    });
+  });
+});
