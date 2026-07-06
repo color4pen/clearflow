@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "806821c9-cb0e-44ab-90e9-c18695a20cda",
   "createdAt": "2026-07-06T17:53:51.221Z",
-  "updatedAt": "2026-07-06T20:03:58.451Z",
+  "updatedAt": "2026-07-06T20:08:05.990Z",
   "request": {
     "title": "MCP クライアント向け OAuth 2.1 認可サーバー",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/oauth-authorization-server-806821c9",
   "error": null,
   "pipelineId": "standard",
@@ -48,8 +48,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/160",
+    "number": 160,
+    "createdAt": "2026-07-06T20:08:05.979Z"
+  },
   "_journal": {
-    "historyCount": 98,
+    "historyCount": 103,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -64,7 +69,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
