@@ -1,5 +1,10 @@
 {
   "version": 1,
+  "designLayer": {
+    "enabled": true,
+    "command": "node_modules/.bin/aozu",
+    "requireCitationTypes": ["new-feature", "spec-change"]
+  },
   "verification": {
     "commands": [
       { "run": "bun run build", "name": "build" },
