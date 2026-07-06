@@ -152,3 +152,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/oauth-authorization-server/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-06T20:08:03.980Z","endedAt":"2026-07-06T20:08:05.980Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-07-06T20:08:05.980Z","outputs":[{"path":"specrunner/changes/oauth-authorization-server/pr-create-result.md","hash":"sha256:24ad74dee6cc4ea923379f0aae94c2c50e2a7f8a11262c004b73b4db49059404"}],"inputs":[{"path":"feat/oauth-authorization-server-806821c9","hash":null}]}
 {"type":"transition","ts":"2026-07-06T20:08:05.990Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-07-06T20:26:47.282Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
