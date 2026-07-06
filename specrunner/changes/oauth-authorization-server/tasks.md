@@ -179,28 +179,33 @@
   - 成功: 201 + クライアントメタデータ
   - レート制限超過: 429
   - バリデーションエラー: 400
+  - CORS: `Access-Control-Allow-Origin: *`（または claude.ai オリジン）、`Access-Control-Allow-Methods: POST, OPTIONS`、`Access-Control-Allow-Headers: Content-Type` を全レスポンスに付与する
+  - OPTIONS プリフライトリクエストに 204 を返す `export async function OPTIONS()` を実装する
 
 **Acceptance Criteria**:
 - 正常系: 201 + `client_id` を含むレスポンス
 - レート制限超過: 429
 - バリデーションエラー: 400
+- OPTIONS プリフライトに適切な CORS ヘッダ付きの 204 が返る
 - `bun run typecheck` が green
 
 ## T-11: API ルート — 認可エンドポイント + 同意画面
 
 - [ ] `src/app/api/oauth/authorize/route.ts` を作成する
   - GET: クエリパラメータ（response_type, client_id, redirect_uri, code_challenge, code_challenge_method, state, resource）を検証
-    - パラメータ不足・不正: redirect_uri にエラーリダイレクト（`error=invalid_request`）。redirect_uri 自体が不正な場合は 400 エラーページ
+    - パラメータ不足・不正: redirect_uri にエラーリダイレクト（`error=invalid_request`）。redirect_uri 自体が不正または未登録の場合は 400 エラーページ（redirect_uri へリダイレクトしない）
     - Auth.js セッションなし: `/login?callbackUrl=<現在の authorize URL>` へリダイレクト
-    - セッションあり: `/oauth/consent?<パラメータ>` へリダイレクト
+    - セッションあり: OAuth パラメータをサーバーサイドセッションに保存し、`/oauth/consent` へリダイレクト
+    - `organizationId` は Auth.js セッションの organization コンテキストから取得する
   - POST: 同意結果の処理
+    - パラメータはサーバーサイドセッションから復元しバリデーションする（URL パラメータの改ざんリスク回避）
     - 許可: authorizeOAuthClient ユースケースを呼び出し、redirect_uri に `code` と `state` を付与してリダイレクト
     - 拒否: redirect_uri に `error=access_denied&state=...` を付与してリダイレクト
 - [ ] `src/app/(auth)/oauth/consent/page.tsx` を作成する（同意画面）
   - Auth.js セッションでユーザー認証（未ログインなら `/login` へリダイレクト）
   - クライアント名・アクセス内容（「clearflow の MCP ツールへのアクセスを許可」）・ユーザー名・組織名を表示
   - 「許可」「拒否」ボタン → POST /api/oauth/authorize へ送信
-- [ ] パラメータ一式を同意画面 → POST 間で受け渡す（URL パラメータまたはセッション一時保存）
+- [ ] パラメータ一式はサーバーサイドセッション（Auth.js セッションまたは一時的なサーバーサイドストア）に保存する。同意画面には参照用表示データのみを渡し、POST 時はセッションからパラメータを復元してバリデーションする（URL パラメータ渡しは改ざんリスクがあるため禁止）
 
 **Acceptance Criteria**:
 - 未ログインユーザーがログインへ誘導され、ログイン後に認可フローへ戻る
@@ -218,12 +223,15 @@
   - 成功: 200 + `{ access_token, token_type, expires_in, refresh_token }`
   - エラー: 400 + `{ error: "invalid_grant" | "invalid_request" | "unsupported_grant_type" }`
   - `Cache-Control: no-store` と `Pragma: no-cache` ヘッダを設定
+  - CORS: `Access-Control-Allow-Origin: *`（または claude.ai オリジン）、`Access-Control-Allow-Methods: POST, OPTIONS`、`Access-Control-Allow-Headers: Content-Type` を全レスポンスに付与する
+  - OPTIONS プリフライトリクエストに 204 を返す `export async function OPTIONS()` を実装する
 
 **Acceptance Criteria**:
 - 認可コード交換が成功し、トークンが返る
 - リフレッシュトークンローテーションが成功し、新しいトークンペアが返る
 - 各種エラーケースで適切な error コードが返る
 - レスポンスにキャッシュ禁止ヘッダが含まれる
+- OPTIONS プリフライトに適切な CORS ヘッダ付きの 204 が返る
 - `bun run typecheck` が green
 
 ## T-13: MCP エンドポイントの 401 に WWW-Authenticate ヘッダを追加
@@ -239,12 +247,13 @@
 
 ## T-14: proxy.ts の除外パス追加
 
-- [ ] `src/proxy.ts` の認証除外パスに `/.well-known/` と `/api/oauth/` を追加する
-  - `pathname.startsWith("/.well-known/")` または `pathname.startsWith("/api/oauth/")` の場合は `NextResponse.next()` を返す
+- [ ] `src/proxy.ts` の除外ロジックに `pathname.startsWith("/.well-known/")` を追加する
+  - 注意: `/api/` 配下は既存の matcher 設定 `/((?!api|_next/static|_next/image|favicon.ico).*)` によりすでに middleware の対象外となっているため、`/api/oauth/` の明示的な除外は不要。追加が必要なのは `/.well-known/` のみ
+  - `pathname.startsWith("/.well-known/")` の場合は `NextResponse.next()` を返す
 
 **Acceptance Criteria**:
 - `/.well-known/oauth-protected-resource` と `/.well-known/oauth-authorization-server` が未認証でアクセス可能
-- `/api/oauth/register`、`/api/oauth/authorize`、`/api/oauth/token` が未認証でアクセス可能
+- `/api/oauth/register`、`/api/oauth/authorize`、`/api/oauth/token` が未認証でアクセス可能（既存 matcher による除外で担保）
 - 既存の `/api/auth/` の除外は維持される
 - `bun run typecheck` が green
 
@@ -301,6 +310,7 @@
   - PKCE 不正（verifier 不一致）の拒否
   - PKCE code_challenge_method が S256 以外の拒否
   - 認可コード再利用の拒否 + 系列失効
+  - 期限切れ認可コード（10 分超過）の拒否 → 400 invalid_grant
   - リフレッシュトークンローテーション
   - リフレッシュトークン再利用検知 + 系列失効
   - 失効後のアクセストークン・リフレッシュトークンが 401
