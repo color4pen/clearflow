@@ -55,7 +55,9 @@ export type AuditAction =
   | "user.deactivate"
   | "user.reactivate"
   | "organization.update"
-  | "organization.create";
+  | "organization.create"
+  | "api_token.create"
+  | "api_token.revoke";
 
 export type AuditTargetType =
   | "action_item"
@@ -74,7 +76,8 @@ export type AuditTargetType =
   | "request"
   | "revenue_target"
   | "template"
-  | "user";
+  | "user"
+  | "api_token";
 
 export type AuditMetadataMap = {
   "action_item.toggle": { done: boolean };

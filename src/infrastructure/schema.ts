@@ -606,6 +606,31 @@ export const verificationTokens = pgTable(
   (table) => [primaryKey({ columns: [table.identifier, table.token] })]
 );
 
+// API tokens table
+export const apiTokens = pgTable(
+  "api_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    name: text("name").notNull(),
+    tokenHash: text("token_hash").notNull(),
+    tokenPrefix: text("token_prefix").notNull(),
+    lastUsedAt: timestamp("last_used_at"),
+    expiresAt: timestamp("expires_at"),
+    revokedAt: timestamp("revoked_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("api_tokens_org_user_idx").on(table.organizationId, table.userId),
+    unique("api_tokens_token_hash_unique").on(table.tokenHash),
+  ]
+);
+
 // Watches table (案件 watch)
 export const watches = pgTable(
   "watches",
@@ -649,6 +674,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   revenueTargets: many(revenueTargets),
   actionItems: many(actionItems),
   watches: many(watches),
+  apiTokens: many(apiTokens),
 }));
 
 export const revenueTargetsRelations = relations(revenueTargets, ({ one }) => ({
@@ -685,6 +711,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   actionItemsAsAssignee: many(actionItems, { relationName: "actionItemsAsAssignee" }),
   actionItemsAsCreator: many(actionItems, { relationName: "actionItemsAsCreator" }),
   watches: many(watches),
+  apiTokens: many(apiTokens),
 }));
 
 export const approvalPoliciesRelations = relations(approvalPolicies, ({ one }) => ({
@@ -990,6 +1017,17 @@ export const watchesRelations = relations(watches, ({ one }) => ({
   }),
   organization: one(organizations, {
     fields: [watches.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
+export const apiTokensRelations = relations(apiTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [apiTokens.userId],
+    references: [users.id],
+  }),
+  organization: one(organizations, {
+    fields: [apiTokens.organizationId],
     references: [organizations.id],
   }),
 }));

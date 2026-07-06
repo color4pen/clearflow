@@ -29,3 +29,4 @@ export type { RevenueTarget } from "./revenueTarget";
 export type { MonthlyRevenue, CustomerRevenue, DealRevenue, PipelineSummary } from "./revenue";
 export type { DashboardActionItem, PipelineSummaryItem } from "./dashboard";
 export type { ActionItem } from "./actionItem";
+export type { ApiToken } from "./apiToken";

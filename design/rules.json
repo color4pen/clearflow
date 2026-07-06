@@ -30,7 +30,8 @@
       "src/application/services/"
     ],
     "mod-auth": [
-      "src/infrastructure/auth.ts"
+      "src/infrastructure/auth.ts",
+      "src/infrastructure/apiTokenResolver.ts"
     ],
     "mod-authz": [
       "src/domain/authorization.ts"
