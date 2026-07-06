@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type { ServerRequest, ServerNotification } from "@modelcontextprotocol/sdk/types.js";
+import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import { watchDeal } from "@/application/usecases/watchDeal";
 import { unwatchDeal } from "@/application/usecases/unwatchDeal";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
@@ -44,6 +45,15 @@ export function registerWatchesTools(server: McpServer): void {
           return toToolError("認証情報が取得できません");
         }
         const { userId, organizationId } = auth;
+
+        const rateCheck = await checkRateLimit({
+          key: `mcp:watches:${userId}`,
+          limit: RATE_LIMITS.createRequest.limit,
+          windowMs: RATE_LIMITS.createRequest.windowMs,
+        });
+        if (!rateCheck.allowed) {
+          return toToolError("レート制限超過。しばらく待ってから再試行してください");
+        }
 
         switch (args.operation) {
           case "watch": {

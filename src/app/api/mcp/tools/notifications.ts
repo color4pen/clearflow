@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type { ServerRequest, ServerNotification } from "@modelcontextprotocol/sdk/types.js";
+import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import { getNotifications } from "@/application/usecases/getNotifications";
 import { markNotificationsAsRead } from "@/application/usecases/markNotificationsAsRead";
 import * as userRepository from "@/infrastructure/repositories/userRepository";
@@ -59,6 +60,15 @@ export function registerNotificationsTools(server: McpServer): void {
           }
 
           case "mark_as_read": {
+            const rateCheck = await checkRateLimit({
+              key: `mcp:markNotificationsAsRead:${userId}`,
+              limit: RATE_LIMITS.createRequest.limit,
+              windowMs: RATE_LIMITS.createRequest.windowMs,
+            });
+            if (!rateCheck.allowed) {
+              return toToolError("レート制限超過。しばらく待ってから再試行してください");
+            }
+
             const result = await markNotificationsAsRead({
               userId,
               organizationId,

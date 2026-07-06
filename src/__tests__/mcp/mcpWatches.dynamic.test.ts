@@ -30,8 +30,15 @@ const state = {
 // 実装を捕捉してから mock.module を呼ぶ。afterAll で復元する。
 import * as watchDealModule from "@/application/usecases/watchDeal";
 import * as unwatchDealModule from "@/application/usecases/unwatchDeal";
+import * as rateLimitModule from "@/infrastructure/rateLimit";
 const realWatchDeal = watchDealModule.watchDeal;
 const realUnwatchDeal = unwatchDealModule.unwatchDeal;
+const realRateLimit = { checkRateLimit: rateLimitModule.checkRateLimit, RATE_LIMITS: rateLimitModule.RATE_LIMITS };
+
+mock.module("@/infrastructure/rateLimit", () => ({
+  checkRateLimit: async () => ({ allowed: true }),
+  RATE_LIMITS: { createRequest: { limit: 100, windowMs: 60_000 } },
+}));
 
 mock.module("@/application/usecases/watchDeal", () => ({
   watchDeal: async (input: unknown) => {
@@ -48,6 +55,7 @@ mock.module("@/application/usecases/unwatchDeal", () => ({
 }));
 
 afterAll(() => {
+  mock.module("@/infrastructure/rateLimit", () => realRateLimit);
   mock.module("@/application/usecases/watchDeal", () => ({
     watchDeal: realWatchDeal,
   }));

@@ -23,6 +23,11 @@ function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotificatio
   return authExtra ?? null;
 }
 
+/** パース可能な日時文字列（不正な日付を new Date() 前に明確なエラーで弾く）。 */
+const dateString = z
+  .string()
+  .refine((v) => !Number.isNaN(Date.parse(v)), "日時の形式が不正です");
+
 const listSchema = z.object({
   operation: z.literal("list"),
   done: z.boolean().optional(),
@@ -33,7 +38,7 @@ const createSchema = z.object({
   operation: z.literal("create"),
   description: z.string().min(1, "説明は必須です"),
   assigneeId: z.string().uuid().optional(),
-  dueDate: z.string().optional(),
+  dueDate: dateString.optional(),
   interactionId: z.string().uuid().optional(),
   dealId: z.string().uuid().optional(),
   inquiryId: z.string().uuid().optional(),
@@ -44,7 +49,7 @@ const updateSchema = z.object({
   id: z.string().uuid("アクションアイテムIDが不正です"),
   description: z.string().min(1).optional(),
   assigneeId: z.string().uuid().nullable().optional(),
-  dueDate: z.string().nullable().optional(),
+  dueDate: dateString.nullable().optional(),
   interactionId: z.string().uuid().nullable().optional(),
   dealId: z.string().uuid().nullable().optional(),
   inquiryId: z.string().uuid().nullable().optional(),
@@ -209,6 +214,14 @@ export function registerTasksTools(server: McpServer): void {
           case "toggle": {
             if (!canPerform(role, "actionItem", "toggle")) {
               return toToolError("権限がありません");
+            }
+            const rateCheck = await checkRateLimit({
+              key: `mcp:toggleActionItem:${userId}`,
+              limit: RATE_LIMITS.createRequest.limit,
+              windowMs: RATE_LIMITS.createRequest.windowMs,
+            });
+            if (!rateCheck.allowed) {
+              return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
             const result = await toggleActionItemDone({

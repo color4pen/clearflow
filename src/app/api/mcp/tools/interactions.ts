@@ -19,6 +19,11 @@ function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotificatio
   return authExtra ?? null;
 }
 
+/** パース可能な日時文字列（不正な日付を new Date() 前に明確なエラーで弾く）。 */
+const dateString = z
+  .string()
+  .refine((v) => !Number.isNaN(Date.parse(v)), "日時の形式が不正です");
+
 const hearingDataSchema = z.object({
   challenge: z.string().nullable().optional(),
   budget: z.string().nullable().optional(),
@@ -40,7 +45,7 @@ const createMeetingSchema = z.object({
   dealId: z.string().uuid().optional(),
   inquiryId: z.string().uuid().optional(),
   type: z.enum(["hearing", "proposal", "negotiation", "closing", "followup"]),
-  date: z.string().min(1, "日時は必須です"),
+  date: dateString,
   location: z.string().optional(),
   internalAttendees: z.array(z.string()).optional().default([]),
   externalAttendees: z.array(z.string()).optional().default([]),
@@ -53,7 +58,7 @@ const updateMeetingSchema = z.object({
   operation: z.literal("update_meeting"),
   meetingId: z.string().uuid(),
   type: z.enum(["hearing", "proposal", "negotiation", "closing", "followup"]).optional(),
-  date: z.string().optional(),
+  date: dateString.optional(),
   location: z.string().nullable().optional(),
   internalAttendees: z.array(z.string()).nullable().optional(),
   externalAttendees: z.array(z.string()).nullable().optional(),
@@ -66,7 +71,7 @@ const recordContractAdjustmentSchema = z.object({
   operation: z.literal("record_contract_adjustment"),
   contractId: z.string().uuid("契約IDが不正です"),
   summary: z.string().min(1, "要約は必須です"),
-  date: z.string().optional(),
+  date: dateString.optional(),
   details: z.string().optional(),
 });
 
@@ -74,7 +79,7 @@ const recordInvoiceAdjustmentSchema = z.object({
   operation: z.literal("record_invoice_adjustment"),
   invoiceId: z.string().uuid("請求IDが不正です"),
   summary: z.string().min(1, "要約は必須です"),
-  date: z.string().optional(),
+  date: dateString.optional(),
   details: z.string().optional(),
 });
 
