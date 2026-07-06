@@ -10,16 +10,16 @@
 
 ## 現状
 
-- `design/` には書き起こし済みの素材 **74 要素**（mod 15 / act 5 / term 7 / ent 20 / inv 23 / seq 4）があり、2026-06-30 時点のコードと同期している（`aozu check` exit 0）
-- manifest の enabled は **static のみ**（最小構成）。domain / dynamic の素材はファイルとして保持し、読む機械の結線とともに有効化する
+- `design/` は **76 要素**（mod 17 / act 5 / term 7 / ent 20 / inv 23 / seq 4）。static / domain / dynamic を有効化済み（`aozu check` exit 0）
+- 有効型が扱う事実は design/ が正本。既存文書の該当節のポインタ化は、該当領域を触る request の準備として需要駆動で行う（ユビキタス言語辞書と 04 §3 は移管済み）
 
 型ごとの読む機械（結線先）:
 
-| 型 | 読む機械 | 結線ステップ |
+| 型 | 読む機械 | 状態 |
 |---|---|---|
-| static（mod / 許可依存） | `export rules` → architecture test（CI） | Step 1 |
-| domain（term / ent / inv / act）・dynamic（seq） | `check --request`（request 引用ゲート）+ prompt 注入 | Step 2〜3 |
-| permission ビュー | 権限マトリクスと `src/domain/authorization.ts` の突合テスト | Step 4（named consumer が立ったとき） |
+| static（mod / 許可依存） | `export rules` → architecture test（`src/__tests__/static/architecture.test.ts`） | 結線済み |
+| domain（term / ent / inv / act）・dynamic（seq） | `check --request`（spec-runner designLayer の request 引用ゲート） | 結線済み |
+| permission ビュー | 権限マトリクスと `src/domain/authorization.ts` の突合テスト | named consumer が立ったとき（ビュー型は aozu 側未実装） |
 
 ## 資産マップ
 
@@ -27,7 +27,8 @@
 
 | 節 | 対応する型 | 扱い |
 |---|---|---|
-| 全節（エンティティ / 読み取りモデル / タイムライン概念 / 命名 / 担当者の区別 / 表記の注意） | domain（term / ent） | 素材は `design/domain/glossary.md`・`model.md` に転写済み。domain 有効化時にポインタ化 |
+| 意味・定義（エンティティ / 読み取りモデル / タイムライン概念） | domain（term / ent） | `design/domain/` に正本移管済み（ポインタ化済み） |
+| コード識別子の対応 / 命名規約 / 表記規約 | なし（形式に載らない事実） | 本書が正本のまま |
 
 ### docs/design/01-domain-design.md
 
@@ -35,18 +36,18 @@
 |---|---|---|
 | §1 システム概要 | なし（散文） | そのまま残す |
 | §2 ビジネスプロセスの全体像 | dynamic（seq） | 主要 4 シナリオは転写済み。残りは需要駆動 |
-| §3 境界づけられたコンテキスト / §5 ドメイン間の関係 | static（mod）+ domain（ent 参照） | 転写済み。有効化時にポインタ化 |
-| §4 集約定義 | domain（ent / inv） | 転写済み。有効化時にポインタ化 |
+| §3 境界づけられたコンテキスト / §5 ドメイン間の関係 | static（mod）+ domain（ent 参照） | 転写済み（正本は design/）。ポインタ化は該当領域を触る request で行う |
+| §4 集約定義 | domain（ent / inv） | 転写済み（正本は design/）。ポインタ化は該当領域を触る request で行う |
 | §6 ドメインイベント一覧 | domain（`[[ent-domain-event]]`） | 総体は転写済み。イベント個別の形式化は evt ビュー（未実装・需要駆動） |
-| §7 監査ログと派生情報 | domain（`[[ent-audit-log]]` / `[[term-timeline]]`） | 転写済み。有効化時にポインタ化 |
-| §8 用語集 | domain（term） | 転写済み。有効化時にポインタ化 |
+| §7 監査ログと派生情報 | domain（`[[ent-audit-log]]` / `[[term-timeline]]`） | 転写済み（正本は design/）。ポインタ化は該当領域を触る request で行う |
+| §8 用語集 | domain（term） | 転写済み（正本は design/）。ポインタ化は該当領域を触る request で行う |
 
 ### docs/design/02-approval-design.md
 
 | 節 | 対応する型 | 扱い |
 |---|---|---|
-| §2〜5 ポリシー / テンプレート / リクエスト / 委任 | domain（ent） | 転写済み。有効化時にポインタ化 |
-| §6 状態遷移 | domain（inv） | 転写済み。有効化時にポインタ化 |
+| §2〜5 ポリシー / テンプレート / リクエスト / 委任 | domain（ent） | 転写済み（正本は design/）。ポインタ化は該当領域を触る request で行う |
+| §6 状態遷移 | domain（inv） | 転写済み（正本は design/）。ポインタ化は該当領域を触る request で行う |
 | §7 システム連動の承認フロー | dynamic（seq） | `approval-completion` として転写済み |
 | §8 手動申請のフロー | dynamic（seq） | 未転写。該当領域を触る request の準備時に転写 |
 | §9 ドメインイベント | domain | 01 §6 と同じ扱い |
@@ -66,7 +67,7 @@
 
 | 節 | 対応する型 | 扱い |
 |---|---|---|
-| §3 レイヤードアーキテクチャ | static（mod / 許可依存） | `design/static/` に転写済み。**Step 1 のポインタ化対象** |
+| §3 レイヤードアーキテクチャ | static（mod / 許可依存） | `design/static/` に正本移管済み（ポインタ化済み） |
 | §4 ドメインイベントの仕組み | static（`[[mod-event]]` / `[[mod-handler]]`）+ domain | 転写済み |
 | §7 マルチテナント | domain（inv）+ static（`[[mod-repo]]` 責務） | 転写済み |
 | §8 バッチ処理 / §10 Webhook | static（`[[mod-api]]` / `[[mod-webhook]]` 責務） | 転写済み。詳細（リトライ規則等）は実装規約として残す |
@@ -109,7 +110,7 @@
 
 ## 導入ステップとの対応
 
-1. **Step 1**: static の歯の結線 — `export rules` で rules.json を生成し、architecture test を CI に結線（未マップソースは fail-closed）。04 §3 のポインタ化。書き起こしと結線を同一 PR に載せる
-2. **Step 2**: spec-runner の request 検証に `check --request` を結線（入口ゲート）
-3. **Step 3**: domain / dynamic を有効化し、転写済み素材を正本化。上記マップの「有効化時にポインタ化」を該当 request の近傍から実施（term / inv は先行可）
-4. **Step 4**: permission ビュー — `authorization.ts` との突合テストを consumer として有効化を検討（ビュー型追補の最有力候補）
+1. **Step 1（済）**: static の歯の結線 — rules.json + architecture test（未マップソースは fail-closed）。04 §3 のポインタ化
+2. **Step 2（済）**: spec-runner の request 検証に `check --request` を結線（入口ゲート。new-feature / spec-change は引用必須）
+3. **Step 3（有効化まで済）**: domain / dynamic を有効化し design/ を正本化。ユビキタス言語辞書はポインタ化済み。残る節のポインタ化は該当領域を触る request の準備として継続する（定常運用）
+4. **Step 4**: permission ビュー — `authorization.ts` との突合テストを consumer として有効化を検討（ビュー型追補の最有力候補。aozu 側の機構実装が前提）
