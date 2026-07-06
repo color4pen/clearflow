@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "7dcc7c1c-703a-4e68-b751-4d2d62c95328",
   "createdAt": "2026-07-06T20:29:06.658Z",
-  "updatedAt": "2026-07-06T21:44:06.893Z",
+  "updatedAt": "2026-07-06T21:45:43.049Z",
   "request": {
     "title": "MCP ツール: 活動系（顧客接点・タスク・ウォッチ・通知）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-fixer",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/mcp-tools-activity-7dcc7c1c",
   "error": null,
@@ -34,8 +34,22 @@
     }
   ],
   "resumePoint": null,
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "skipped",
+      "approvedAtCommit": null,
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 44,
+    "historyCount": 53,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -44,7 +58,9 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 2,
-      "code-fixer": 1
+      "code-fixer": 2,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
