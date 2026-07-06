@@ -39,16 +39,16 @@ export async function GET(request: Request): Promise<Response> {
     return new Response("Bad Request: redirect_uri is required", { status: 400 });
   }
 
-  let redirectUriParsed: URL;
   try {
-    redirectUriParsed = new URL(redirectUri);
+    new URL(redirectUri);
   } catch {
     return new Response("Bad Request: redirect_uri is not a valid URL", { status: 400 });
   }
 
-  // client_id が必須
+  // client_id が必須。未指定では redirect_uri を検証できないため、
+  // 未検証 URI へはリダイレクトせず 400 を返す（オープンリダイレクト防止・RFC 9700 §4.1.2.1）。
   if (!clientId) {
-    return Response.redirect(buildErrorRedirect(redirectUriParsed.toString(), "invalid_request", state).toString());
+    return new Response("Bad Request: client_id is required", { status: 400 });
   }
 
   // クライアントが存在するか確認
@@ -119,6 +119,22 @@ export async function GET(request: Request): Promise<Response> {
 }
 
 export async function POST(request: Request): Promise<Response> {
+  // CSRF 防御: 同意フォームの POST は同一オリジンからのみ受け付ける。
+  // （SameSite=Lax の Cookie に加えた多層防御。Origin が host と一致しなければ拒否。）
+  const origin = request.headers.get("origin");
+  if (origin) {
+    const host = request.headers.get("host");
+    let originHost: string | null = null;
+    try {
+      originHost = new URL(origin).host;
+    } catch {
+      originHost = null;
+    }
+    if (!host || originHost !== host) {
+      return new Response("Forbidden: cross-origin request rejected", { status: 403 });
+    }
+  }
+
   // セッション確認
   const session = await auth();
   if (!session?.user?.id) {

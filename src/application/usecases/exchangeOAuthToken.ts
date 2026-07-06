@@ -102,40 +102,51 @@ async function exchangeAuthorizationCode(
   const plainAccessToken = generateOAuthAccessToken();
   const plainRefreshToken = generateOAuthRefreshToken();
 
-  await db.transaction(async (tx) => {
-    // 認可コードを使用済みにする
-    await oauthTokenRepository.revokeById(codeId, tx);
+  try {
+    await db.transaction(async (tx) => {
+      // 認可コードを原子的に使用済みにする。並行リクエストに負けた（0 行更新）場合は
+      // トランザクションを中断し、トークンを発行しない（単回使用の保証）。
+      const won = await oauthTokenRepository.revokeById(codeId, tx);
+      if (!won) {
+        throw new CodeAlreadyUsedError();
+      }
 
-    // アクセストークン保存
-    await oauthTokenRepository.create(
-      {
-        type: "access_token",
-        clientId,
-        userId,
-        organizationId,
-        tokenHash: hashOAuthToken(plainAccessToken),
-        tokenPrefix: toOAuthTokenDisplayPrefix(plainAccessToken),
-        familyId,
-        expiresAt: accessTokenExpiresAt,
-      },
-      tx
-    );
+      // アクセストークン保存
+      await oauthTokenRepository.create(
+        {
+          type: "access_token",
+          clientId,
+          userId,
+          organizationId,
+          tokenHash: hashOAuthToken(plainAccessToken),
+          tokenPrefix: toOAuthTokenDisplayPrefix(plainAccessToken),
+          familyId,
+          expiresAt: accessTokenExpiresAt,
+        },
+        tx
+      );
 
-    // リフレッシュトークン保存
-    await oauthTokenRepository.create(
-      {
-        type: "refresh_token",
-        clientId,
-        userId,
-        organizationId,
-        tokenHash: hashOAuthToken(plainRefreshToken),
-        tokenPrefix: toOAuthTokenDisplayPrefix(plainRefreshToken),
-        familyId,
-        expiresAt: refreshTokenExpiresAt,
-      },
-      tx
-    );
-  });
+      // リフレッシュトークン保存
+      await oauthTokenRepository.create(
+        {
+          type: "refresh_token",
+          clientId,
+          userId,
+          organizationId,
+          tokenHash: hashOAuthToken(plainRefreshToken),
+          tokenPrefix: toOAuthTokenDisplayPrefix(plainRefreshToken),
+          familyId,
+          expiresAt: refreshTokenExpiresAt,
+        },
+        tx
+      );
+    });
+  } catch (err) {
+    if (err instanceof CodeAlreadyUsedError) {
+      return { ok: false, error: "invalid_grant" };
+    }
+    throw err;
+  }
 
   return {
     ok: true,
@@ -145,6 +156,9 @@ async function exchangeAuthorizationCode(
     tokenType: "Bearer",
   };
 }
+
+/** 認可コード / リフレッシュトークンが並行リクエストに先に消費されたことを表す内部エラー。 */
+class CodeAlreadyUsedError extends Error {}
 
 async function exchangeRefreshToken(
   input: ExchangeRefreshTokenInput
@@ -185,40 +199,51 @@ async function exchangeRefreshToken(
   const plainAccessToken = generateOAuthAccessToken();
   const plainRefreshToken = generateOAuthRefreshToken();
 
-  await db.transaction(async (tx) => {
-    // 旧リフレッシュトークンを失効させる
-    await oauthTokenRepository.revokeById(tokenId, tx);
+  try {
+    await db.transaction(async (tx) => {
+      // 旧リフレッシュトークンを原子的に失効させる。並行リクエストに負けた場合は中断する
+      // （回転の二重発行を防ぐ）。
+      const won = await oauthTokenRepository.revokeById(tokenId, tx);
+      if (!won) {
+        throw new CodeAlreadyUsedError();
+      }
 
-    // 新アクセストークン保存
-    await oauthTokenRepository.create(
-      {
-        type: "access_token",
-        clientId,
-        userId,
-        organizationId,
-        tokenHash: hashOAuthToken(plainAccessToken),
-        tokenPrefix: toOAuthTokenDisplayPrefix(plainAccessToken),
-        familyId,
-        expiresAt: accessTokenExpiresAt,
-      },
-      tx
-    );
+      // 新アクセストークン保存
+      await oauthTokenRepository.create(
+        {
+          type: "access_token",
+          clientId,
+          userId,
+          organizationId,
+          tokenHash: hashOAuthToken(plainAccessToken),
+          tokenPrefix: toOAuthTokenDisplayPrefix(plainAccessToken),
+          familyId,
+          expiresAt: accessTokenExpiresAt,
+        },
+        tx
+      );
 
-    // 新リフレッシュトークン保存
-    await oauthTokenRepository.create(
-      {
-        type: "refresh_token",
-        clientId,
-        userId,
-        organizationId,
-        tokenHash: hashOAuthToken(plainRefreshToken),
-        tokenPrefix: toOAuthTokenDisplayPrefix(plainRefreshToken),
-        familyId,
-        expiresAt: refreshTokenExpiresAt,
-      },
-      tx
-    );
-  });
+      // 新リフレッシュトークン保存
+      await oauthTokenRepository.create(
+        {
+          type: "refresh_token",
+          clientId,
+          userId,
+          organizationId,
+          tokenHash: hashOAuthToken(plainRefreshToken),
+          tokenPrefix: toOAuthTokenDisplayPrefix(plainRefreshToken),
+          familyId,
+          expiresAt: refreshTokenExpiresAt,
+        },
+        tx
+      );
+    });
+  } catch (err) {
+    if (err instanceof CodeAlreadyUsedError) {
+      return { ok: false, error: "invalid_grant" };
+    }
+    throw err;
+  }
 
   return {
     ok: true,

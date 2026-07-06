@@ -113,13 +113,19 @@ export async function findByTokenHash(tokenHash: string): Promise<OAuthToken | n
   return row ? rowToToken(row) : null;
 }
 
-/** 指定 ID のトークンを失効させる。 */
-export async function revokeById(id: string, tx?: Transaction): Promise<void> {
+/**
+ * 指定 ID の未失効トークンを失効させ、実際に失効させたか（1 行更新したか）を返す。
+ * `revokedAt IS NULL` を条件に含めることで、認可コード単回使用・リフレッシュ回転の
+ * compare-and-set を DB レベルで原子的にする（並行する 2 リクエストのうち一方のみが true）。
+ */
+export async function revokeById(id: string, tx?: Transaction): Promise<boolean> {
   const queryRunner = tx ?? db;
-  await queryRunner
+  const result = await queryRunner
     .update(oauthTokens)
     .set({ revokedAt: new Date() })
-    .where(eq(oauthTokens.id, id));
+    .where(and(eq(oauthTokens.id, id), isNull(oauthTokens.revokedAt)))
+    .returning({ id: oauthTokens.id });
+  return result.length > 0;
 }
 
 /** 同一 familyId の全トークンを失効させる（再利用検知による系列一括失効）。 */

@@ -14,13 +14,25 @@ type RegisterOAuthClientResult =
   | { ok: true; client: OAuthClient }
   | { ok: false; reason: string };
 
-function isValidUrl(url: string): boolean {
+/**
+ * redirect_uri として許可する URL か検証する。
+ * 認可コードの平文流出を防ぐため https を必須とし、開発用途の localhost のみ http を許可する
+ * （javascript: / data: 等の危険スキームも排除される）。
+ */
+function isValidRedirectUri(url: string): boolean {
+  let parsed: URL;
   try {
-    new URL(url);
-    return true;
+    parsed = new URL(url);
   } catch {
     return false;
   }
+  if (parsed.protocol === "https:") {
+    return true;
+  }
+  if (parsed.protocol === "http:") {
+    return parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1" || parsed.hostname === "[::1]";
+  }
+  return false;
 }
 
 export async function registerOAuthClient(
@@ -38,8 +50,11 @@ export async function registerOAuthClient(
   }
 
   for (const uri of redirectUris) {
-    if (!isValidUrl(uri)) {
-      return { ok: false, reason: `redirect_uri is not a valid URL: ${uri}` };
+    if (!isValidRedirectUri(uri)) {
+      return {
+        ok: false,
+        reason: `redirect_uri must be https (or http on localhost): ${uri}`,
+      };
     }
   }
 

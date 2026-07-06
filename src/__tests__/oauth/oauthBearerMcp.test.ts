@@ -82,10 +82,12 @@ mock.module("@/infrastructure/repositories/oauthTokenRepository", () => ({
   revokeById: async (id: string) => {
     for (const [hash, token] of tokenStore.entries()) {
       if (token.id === id) {
+        if (token.revokedAt !== null) return false;
         tokenStore.set(hash, { ...token, revokedAt: new Date() });
-        break;
+        return true;
       }
     }
+    return false;
   },
   revokeByFamilyId: async (familyId: string) => {
     for (const [hash, token] of tokenStore.entries()) {

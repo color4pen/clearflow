@@ -115,10 +115,13 @@ mock.module("@/infrastructure/repositories/oauthTokenRepository", () => ({
   revokeById: async (id: string) => {
     for (const [hash, token] of tokenStore.entries()) {
       if (token.id === id) {
+        // CAS: 未失効のときのみ失効させ true を返す（既失効なら false）
+        if (token.revokedAt !== null) return false;
         tokenStore.set(hash, { ...token, revokedAt: new Date() });
-        break;
+        return true;
       }
     }
+    return false;
   },
   revokeByFamilyId: async (familyId: string) => {
     for (const [hash, token] of tokenStore.entries()) {

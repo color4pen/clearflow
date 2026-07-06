@@ -130,14 +130,6 @@
     ],
     [
       "mod-api",
-      "mod-db"
-    ],
-    [
-      "mod-api",
-      "mod-model"
-    ],
-    [
-      "mod-api",
       "mod-repo"
     ],
     [
