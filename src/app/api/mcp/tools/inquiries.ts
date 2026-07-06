@@ -163,14 +163,14 @@ export function registerInquiriesTools(server: McpServer): void {
               inquiryId: args.inquiryId,
               organizationId,
               actorId: userId,
-              title: args.title ?? "",
-              description: args.description ?? null,
-              contactNote: args.contactNote ?? null,
-              source: args.source ?? "other",
-              clientId: args.clientId ?? null,
-              assigneeId: args.assigneeId ?? null,
-              budget: args.budget ?? null,
-              timeline: args.timeline ?? null,
+              title: args.title,
+              description: args.description,
+              contactNote: args.contactNote,
+              source: args.source,
+              clientId: args.clientId,
+              assigneeId: args.assigneeId,
+              budget: args.budget,
+              timeline: args.timeline,
             });
 
             if (!result.ok) {

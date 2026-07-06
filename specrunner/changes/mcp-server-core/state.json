@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "06f2b8fc-8446-43fd-b01c-effa8c3a85bf",
   "createdAt": "2026-07-06T14:56:47.688Z",
-  "updatedAt": "2026-07-06T15:58:58.209Z",
+  "updatedAt": "2026-07-06T16:17:42.142Z",
   "request": {
     "title": "MCP サーバー基盤とコア CRM ツール（引合・案件・顧客）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-review",
+  "step": "code-fixer",
   "status": "running",
   "branch": "feat/mcp-server-core-06f2b8fc",
   "error": null,
@@ -35,7 +35,7 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 41,
+    "historyCount": 49,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -43,7 +43,8 @@
       "spec-fixer": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 1,
+      "code-review": 1
     }
   }
 }

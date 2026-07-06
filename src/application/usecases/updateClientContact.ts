@@ -56,10 +56,10 @@ export async function updateClientContact(data: {
     }
 
     return { ok: true, contact: updatedContact };
-  } catch (err) {
+  } catch {
     return {
       ok: false,
-      reason: err instanceof Error ? err.message : "担当者の更新に失敗しました",
+      reason: "担当者の更新に失敗しました",
     };
   }
 }

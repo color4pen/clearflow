@@ -53,10 +53,10 @@ export async function updateClient(data: {
     }
 
     return { ok: true, client: updatedClient };
-  } catch (err) {
+  } catch {
     return {
       ok: false,
-      reason: err instanceof Error ? err.message : "顧客の更新に失敗しました",
+      reason: "顧客の更新に失敗しました",
     };
   }
 }

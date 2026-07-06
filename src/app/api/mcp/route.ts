@@ -57,6 +57,16 @@ export async function POST(request: Request): Promise<Response> {
 }
 
 export async function GET(request: Request): Promise<Response> {
+  // POST と同じ Bearer 認証（SDK バージョンアップ時の認証バイパスリスクを防ぐ）
+  const authHeader = request.headers.get("Authorization");
+  const resolved = await resolveBearer(authHeader);
+  if (!resolved) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   // stateless モードでは GET は 405 を返す（SDK が処理する）
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
