@@ -1,22 +1,18 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import type { ApiToken } from "@/domain/models/apiToken";
 import { createApiTokenAction, revokeApiTokenAction } from "@/app/actions/apiTokens";
 import type { CreateApiTokenState, RevokeApiTokenState } from "@/app/actions/apiTokens";
-import { FormField, Input, SubmitButton } from "@/app/components";
+import { FormField, Input, SubmitButton, ConfirmDialog } from "@/app/components";
+import { formatDateJP } from "@/lib/dateUtils";
 
 type Props = {
   initialTokens: ApiToken[];
 };
 
-function formatDate(date: Date | null): string {
-  if (!date) return "未使用";
-  return new Intl.DateTimeFormat("ja-JP", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(date);
+function formatUsedAt(date: Date | null): string {
+  return date ? formatDateJP(date) : "未使用";
 }
 
 function PlainTokenModal({
@@ -27,35 +23,23 @@ function PlainTokenModal({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4 shadow-xl">
-        <h3 className="text-sm font-bold text-text mb-3">APIトークンを発行しました</h3>
-        <p className="text-xs text-danger font-medium mb-3">
-          この画面を閉じると二度と表示できません。今すぐコピーしてください。
-        </p>
-        <div className="bg-gray-100 rounded p-3 mb-4 break-all font-mono text-xs select-all">
-          {plainToken}
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              void navigator.clipboard.writeText(plainToken);
-            }}
-            className="flex-1 py-2 px-4 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            コピー
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 py-2 px-4 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-          >
-            閉じる
-          </button>
-        </div>
+    <ConfirmDialog
+      open
+      title="APIトークンを発行しました"
+      confirmLabel="コピー"
+      cancelLabel="閉じる"
+      onConfirm={() => {
+        void navigator.clipboard.writeText(plainToken);
+      }}
+      onCancel={onClose}
+    >
+      <p className="text-xs text-danger font-medium mb-2">
+        この画面を閉じると二度と表示できません。今すぐコピーしてください。
+      </p>
+      <div className="bg-bg-surface-alt border border-border rounded p-3 break-all font-mono text-xs select-all">
+        {plainToken}
       </div>
-    </div>
+    </ConfirmDialog>
   );
 }
 
@@ -88,7 +72,11 @@ export function ApiTokenSection({ initialTokens }: Props) {
     null
   );
 
-  const showModal = state?.success === true;
+  // 発行直後に一度だけ平文を表示する。閉じたトークンを記録し、再表示しない。
+  // 一覧は Server Action の revalidatePath("/account") で更新されるためリロード不要。
+  const [dismissedToken, setDismissedToken] = useState<string | null>(null);
+  const newPlainToken = state?.success === true ? state.plainToken : null;
+  const showModal = newPlainToken !== null && newPlainToken !== dismissedToken;
 
   return (
     <div>
@@ -100,13 +88,10 @@ export function ApiTokenSection({ initialTokens }: Props) {
         </div>
       )}
 
-      {showModal && (
+      {showModal && newPlainToken && (
         <PlainTokenModal
-          plainToken={state.plainToken}
-          onClose={() => {
-            // フォームリセットのためページをリロード
-            window.location.reload();
-          }}
+          plainToken={newPlainToken}
+          onClose={() => setDismissedToken(newPlainToken)}
         />
       )}
 
@@ -129,17 +114,17 @@ export function ApiTokenSection({ initialTokens }: Props) {
 
       {/* トークン一覧 */}
       {initialTokens.length === 0 ? (
-        <p className="text-xs text-gray-500">APIトークンはまだありません。</p>
+        <p className="text-xs text-text-muted">APIトークンはまだありません。</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b">
-                <th className="text-left py-2 pr-4 font-medium text-gray-600">名前</th>
-                <th className="text-left py-2 pr-4 font-medium text-gray-600">トークン</th>
-                <th className="text-left py-2 pr-4 font-medium text-gray-600">最終使用</th>
-                <th className="text-left py-2 pr-4 font-medium text-gray-600">作成日</th>
-                <th className="text-left py-2 font-medium text-gray-600">操作</th>
+              <tr className="border-b border-border">
+                <th className="text-left py-2 pr-4 font-medium text-text-muted">名前</th>
+                <th className="text-left py-2 pr-4 font-medium text-text-muted">トークン</th>
+                <th className="text-left py-2 pr-4 font-medium text-text-muted">最終使用</th>
+                <th className="text-left py-2 pr-4 font-medium text-text-muted">作成日</th>
+                <th className="text-left py-2 font-medium text-text-muted">操作</th>
               </tr>
             </thead>
             <tbody>
@@ -148,24 +133,24 @@ export function ApiTokenSection({ initialTokens }: Props) {
                 return (
                   <tr
                     key={token.id}
-                    className={`border-b ${isRevoked ? "opacity-50" : ""}`}
+                    className={`border-b border-border ${isRevoked ? "opacity-50" : ""}`}
                   >
-                    <td className={`py-2 pr-4 ${isRevoked ? "line-through text-gray-400" : ""}`}>
+                    <td className={`py-2 pr-4 ${isRevoked ? "line-through text-text-muted" : "text-text"}`}>
                       {token.name}
                     </td>
-                    <td className="py-2 pr-4 font-mono">
+                    <td className="py-2 pr-4 font-mono text-text">
                       {token.tokenPrefix}...
                     </td>
-                    <td className="py-2 pr-4 text-gray-500">
-                      {formatDate(token.lastUsedAt)}
+                    <td className="py-2 pr-4 text-text-muted">
+                      {formatUsedAt(token.lastUsedAt)}
                     </td>
-                    <td className="py-2 pr-4 text-gray-500">
-                      {formatDate(token.createdAt)}
+                    <td className="py-2 pr-4 text-text-muted">
+                      {formatUsedAt(token.createdAt)}
                     </td>
                     <td className="py-2">
                       {!isRevoked && <RevokeForm token={token} />}
                       {isRevoked && (
-                        <span className="text-xs text-gray-400">失効済み</span>
+                        <span className="text-xs text-text-muted">失効済み</span>
                       )}
                     </td>
                   </tr>

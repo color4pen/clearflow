@@ -1,8 +1,24 @@
-import { eq, and, isNull, desc } from "drizzle-orm";
+import { eq, and, isNull, desc, or, lt } from "drizzle-orm";
 import { db } from "../db";
 import type { Transaction } from "../db";
 import { apiTokens } from "../schema";
 import type { ApiToken } from "@/domain/models/apiToken";
+
+/** ApiToken ドメイン型に射影する共通の列マップ（平文ハッシュを含めない）。 */
+const apiTokenColumns = {
+  id: apiTokens.id,
+  organizationId: apiTokens.organizationId,
+  userId: apiTokens.userId,
+  name: apiTokens.name,
+  tokenPrefix: apiTokens.tokenPrefix,
+  lastUsedAt: apiTokens.lastUsedAt,
+  expiresAt: apiTokens.expiresAt,
+  revokedAt: apiTokens.revokedAt,
+  createdAt: apiTokens.createdAt,
+} as const;
+
+/** lastUsedAt を再書き込みしない間隔。表示は分粒度で十分なため書き込みを間引く。 */
+const LAST_USED_THROTTLE_MS = 60_000;
 
 export async function create(
   data: {
@@ -26,17 +42,7 @@ export async function create(
       tokenPrefix: data.tokenPrefix,
       expiresAt: data.expiresAt ?? null,
     })
-    .returning({
-      id: apiTokens.id,
-      organizationId: apiTokens.organizationId,
-      userId: apiTokens.userId,
-      name: apiTokens.name,
-      tokenPrefix: apiTokens.tokenPrefix,
-      lastUsedAt: apiTokens.lastUsedAt,
-      expiresAt: apiTokens.expiresAt,
-      revokedAt: apiTokens.revokedAt,
-      createdAt: apiTokens.createdAt,
-    });
+    .returning(apiTokenColumns);
   const row = result[0]!;
   return row;
 }
@@ -69,17 +75,7 @@ export async function findByUserAndOrganization(
   organizationId: string
 ): Promise<ApiToken[]> {
   const result = await db
-    .select({
-      id: apiTokens.id,
-      organizationId: apiTokens.organizationId,
-      userId: apiTokens.userId,
-      name: apiTokens.name,
-      tokenPrefix: apiTokens.tokenPrefix,
-      lastUsedAt: apiTokens.lastUsedAt,
-      expiresAt: apiTokens.expiresAt,
-      revokedAt: apiTokens.revokedAt,
-      createdAt: apiTokens.createdAt,
-    })
+    .select(apiTokenColumns)
     .from(apiTokens)
     .where(
       and(
@@ -109,26 +105,32 @@ export async function revokeById(
         isNull(apiTokens.revokedAt)
       )
     )
-    .returning({
-      id: apiTokens.id,
-      organizationId: apiTokens.organizationId,
-      userId: apiTokens.userId,
-      name: apiTokens.name,
-      tokenPrefix: apiTokens.tokenPrefix,
-      lastUsedAt: apiTokens.lastUsedAt,
-      expiresAt: apiTokens.expiresAt,
-      revokedAt: apiTokens.revokedAt,
-      createdAt: apiTokens.createdAt,
-    });
+    .returning(apiTokenColumns);
   return result[0] ?? null;
 }
 
+/**
+ * lastUsedAt を更新する。organizationId でテナントスコープし、
+ * 直近 {@link LAST_USED_THROTTLE_MS} 以内に更新済みの行は DB 側で no-op にして
+ * 認証ホットパスの書き込みを間引く。
+ */
 export async function updateLastUsedAt(
   id: string,
+  organizationId: string,
   timestamp: Date
 ): Promise<void> {
+  const staleBefore = new Date(timestamp.getTime() - LAST_USED_THROTTLE_MS);
   await db
     .update(apiTokens)
     .set({ lastUsedAt: timestamp })
-    .where(eq(apiTokens.id, id));
+    .where(
+      and(
+        eq(apiTokens.id, id),
+        eq(apiTokens.organizationId, organizationId),
+        or(
+          isNull(apiTokens.lastUsedAt),
+          lt(apiTokens.lastUsedAt, staleBefore)
+        )
+      )
+    );
 }
