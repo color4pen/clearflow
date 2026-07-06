@@ -17,6 +17,8 @@
  *
  * TC-020: organizationId がツール引数に含まれていても authInfo.extra の値が usecase に渡る（スキーマ外フィールドの排除）。
  *
+ * TC-004: record_invoice_adjustment が createInvoiceAdjustment usecase に到達し成功する。
+ *
  * TC-023: member ロールで record_invoice_adjustment を呼ぶと認可拒否され usecase に到達しない。
  *
  * TC-024: usecase が DB 例外をスローしたとき、クライアントには固定文言が返り内部詳細は漏れない。
@@ -41,6 +43,10 @@ type CreateContractAdjustmentResult =
   | { ok: true; interaction: Interaction }
   | { ok: false; reason: string };
 
+type CreateInvoiceAdjustmentResult =
+  | { ok: true; interaction: Interaction }
+  | { ok: false; reason: string };
+
 const state = {
   createMeetingCalls: [] as unknown[],
   createMeetingReturns: null as CreateMeetingResult | null,
@@ -50,6 +56,7 @@ const state = {
   createContractAdjustmentCalls: [] as unknown[],
   createContractAdjustmentReturns: null as CreateContractAdjustmentResult | null,
   createInvoiceAdjustmentCalls: [] as unknown[],
+  createInvoiceAdjustmentReturns: null as CreateInvoiceAdjustmentResult | null,
 };
 
 // 実装を捕捉してから mock.module を呼ぶ。afterAll で復元する。
@@ -99,11 +106,11 @@ mock.module("@/application/usecases/createContractAdjustment", () => ({
   },
 }));
 
-// createInvoiceAdjustment は TC-023 の「呼ばれないこと」の検証に使う
+// createInvoiceAdjustment は TC-004（正常系）と TC-023（認可拒否）の両方で使う
 mock.module("@/application/usecases/createInvoiceAdjustment", () => ({
   createInvoiceAdjustment: async (input: unknown) => {
     state.createInvoiceAdjustmentCalls.push(input);
-    return { ok: false as const, reason: "should not be reached in authorization test" };
+    return state.createInvoiceAdjustmentReturns ?? { ok: false as const, reason: "mock not set" };
   },
 }));
 
@@ -183,6 +190,7 @@ beforeEach(() => {
   state.createContractAdjustmentCalls = [];
   state.createContractAdjustmentReturns = null;
   state.createInvoiceAdjustmentCalls = [];
+  state.createInvoiceAdjustmentReturns = null;
 });
 
 const mockMeeting: Interaction = {
@@ -221,6 +229,28 @@ const mockInteraction: Interaction = {
   location: null,
   attendees: [],
   summary: "テスト調整",
+  actionItems: [],
+  details: null,
+  createdById: "user-A",
+  createdAt: new Date("2026-01-01"),
+  updatedAt: new Date("2026-01-01"),
+  version: 1,
+};
+
+const mockInvoiceInteraction: Interaction = {
+  id: "interaction-2",
+  organizationId: "org-1",
+  kind: "invoice_adjustment",
+  dealId: null,
+  inquiryId: null,
+  contractId: null,
+  invoiceId: INVOICE_UUID,
+  clientId: null,
+  meetingType: null,
+  date: new Date("2026-01-01"),
+  location: null,
+  attendees: [],
+  summary: "テスト請求調整",
   actionItems: [],
   details: null,
   createdById: "user-A",
@@ -296,6 +326,26 @@ describe("MCP interactions ツール", () => {
       expect(callArgs.organizationId).toBe("org-1");
       expect(callArgs.actorId).toBe("user-A");
       expect(callArgs.summary).toBe("テスト契約調整");
+    });
+  });
+
+  describe("TC-004: 請求調整の記録（record_invoice_adjustment 正常系）", () => {
+    it("record_invoice_adjustment は createInvoiceAdjustment usecase に invoiceId / organizationId / actorId / summary を渡す", async () => {
+      state.createInvoiceAdjustmentReturns = { ok: true, interaction: mockInvoiceInteraction };
+
+      const result = await callInteractions({
+        operation: "record_invoice_adjustment",
+        invoiceId: INVOICE_UUID,
+        summary: "テスト請求調整",
+      });
+
+      expect(result.isError).toBeUndefined();
+      expect(state.createInvoiceAdjustmentCalls).toHaveLength(1);
+      const callArgs = state.createInvoiceAdjustmentCalls[0] as Record<string, unknown>;
+      expect(callArgs.invoiceId).toBe(INVOICE_UUID);
+      expect(callArgs.organizationId).toBe("org-1");
+      expect(callArgs.actorId).toBe("user-A");
+      expect(callArgs.summary).toBe("テスト請求調整");
     });
   });
 
