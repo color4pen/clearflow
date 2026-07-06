@@ -115,3 +115,10 @@
 {"type":"transition","ts":"2026-07-06T16:52:53.690Z","step":"step-transition","status":"ok","message":"code-fixer → regression-gate"}
 {"type":"transition","ts":"2026-07-06T16:52:53.691Z","step":"regression-gate","status":"started","message":"regression-gate iteration 2 started"}
 {"type":"transition","ts":"2026-07-06T16:52:53.693Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
+{"type":"transition","ts":"2026-07-06T16:56:10.967Z","step":"regression-gate-verdict","status":"ok","message":"regression-gate verdict: approved"}
+{"type":"step-attempt","step":"regression-gate","sessionId":"c21a4d61-a903-4b7f-84cf-55c116675b8c","outcome":{"verdict":"approved","findingsPath":"specrunner/changes/mcp-server-core/regression-gate-result-002.md","error":null,"toolResult":{"ok":true,"approved":true,"findings":[],"observations":[{"severity":"low","file":"src/app/api/mcp/route.ts","title":"McpServer シングルトンへの毎リクエスト connect(transport) — リスナー蓄積リスク（BY DESIGN / fix=no）","rationale":"POST/GET ハンドラが毎リクエスト mcpServer.connect(transport) をシングルトンに対して呼ぶ。review-feedback-002.md で fix=no と明示的に判定済み（設計 D8 の意図的な選択）。本番投入前にスモークテストでリスナー数増加確認を推奨する旨が記録されている。","line":53}]},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-07-06T16:52:53.702Z","endedAt":"2026-07-06T16:56:09.678Z"}
+{"type":"lineage","step":"regression-gate","ts":"2026-07-06T16:56:09.678Z","outputs":[{"path":"specrunner/changes/mcp-server-core/regression-gate-result-003.md","hash":null}],"inputs":[{"path":".","hash":null}]}
+{"type":"transition","ts":"2026-07-06T16:56:10.974Z","step":"regression-gate","status":"ok","message":"regression-gate iteration 2 completed with verdict: approved"}
+{"type":"transition","ts":"2026-07-06T16:56:10.974Z","step":"step-transition","status":"ok","message":"regression-gate → conformance"}
+{"type":"transition","ts":"2026-07-06T16:56:10.976Z","step":"conformance","status":"started","message":"conformance iteration 1 started"}
+{"type":"transition","ts":"2026-07-06T16:56:10.978Z","step":"conformance-started","status":"started","message":"Starting conformance step"}
