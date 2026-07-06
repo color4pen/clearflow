@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 14.1s | 0 |
-| 2 | typecheck | passed | 1.0s | 0 |
+| 1 | build | passed | 15.6s | 0 |
+| 2 | typecheck | passed | 1.1s | 0 |
 | 3 | test | passed | 0.7s | 0 |
-| 4 | lint | passed | 5.9s | 0 |
+| 4 | lint | passed | 5.3s | 0 |
 
 ## Phase: build
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 8.0s
+✓ Compiled successfully in 9.4s
   Running TypeScript ...
-  Finished TypeScript in 4.5s ...
+  Finished TypeScript in 4.6s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/41) ...
   Generating static pages using 7 workers (10/41) 
   Generating static pages using 7 workers (20/41) 
   Generating static pages using 7 workers (30/41) 
-✓ Generating static pages using 7 workers (41/41) in 160ms
+✓ Generating static pages using 7 workers (41/41) in 152ms
   Finalizing page optimization ...
 
 Route (app)
@@ -142,23 +142,16 @@ src/__tests__/usecases/approvalPolicyFlow.test.ts:
 [evaluatePolicies] Policy policy-1 has conditionField set but null conditionOperator or conditionValue — skipping
 [handleApprovalCompleted] originTriggerEntityId is null for requestId: req-1
 
- 1742 pass
+ 1757 pass
  0 fail
- 3640 expect() calls
-Ran 1742 tests across 107 files. [651.00ms]
+ 3678 expect() calls
+Ran 1757 tests across 109 files. [694.00ms]
 
 ```
 
 ## Phase: lint
 
 ```
-
-src/app/api/oauth/authorize/route.ts
-  2:10  warning  'redirect' is defined but never used  @typescript-eslint/no-unused-vars
-
-✖ 1 problem (0 errors, 1 warning)
-
-
 $ eslint
 
 ```
