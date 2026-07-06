@@ -10,6 +10,14 @@
  *
  * T-10 (invoices): version 不一致の更新が衝突エラーになることをテストで固定する。
  *       updateInvoice が version 不一致 reason を返すとき、ツール結果が isError: true になる。
+ *
+ * TC-016: 将来日付 paidAt の拒否を実行検証で固定する。
+ *         paidAt: '2099-12-31' で update_status を呼んだとき、MCP レイヤーが isError: true を返し
+ *         updateInvoiceStatus usecase が呼ばれないことを検証する。
+ *
+ * TC-039: invoices update の null vs undefined 区別を実行検証で固定する。
+ *         notes: null と issueDate 省略で update を呼んだとき、
+ *         usecase 引数の notes === null かつ issueDate === undefined であることを検証する。
  */
 
 import { describe, it, expect, mock, beforeEach, afterAll } from "bun:test";
@@ -202,6 +210,40 @@ describe("MCP invoices ツール", () => {
       expect(result.text).toContain("この請求は他のユーザーによって更新されました");
       // updateInvoice usecase に到達した
       expect(state.updateInvoiceCalls).toHaveLength(1);
+    });
+  });
+
+  describe("TC-016: 将来日付 paidAt の拒否", () => {
+    it("paidAt が将来日付（2099-12-31）のとき、ツール結果が isError:true になり updateInvoiceStatus が呼ばれない", async () => {
+      const result = await callInvoices({
+        operation: "update_status",
+        invoiceId: INVOICE_UUID,
+        newStatus: "paid",
+        paidAt: "2099-12-31",
+      });
+
+      expect(result.isError).toBe(true);
+      // MCP レイヤーで拒否されるため updateInvoiceStatus usecase に到達しない
+      expect(state.updateInvoiceStatusCalls).toHaveLength(0);
+    });
+  });
+
+  describe("TC-039: invoices update の null vs undefined 区別", () => {
+    it("notes: null と issueDate 省略で update を呼ぶと、usecase 引数の notes === null かつ issueDate === undefined になる", async () => {
+      state.updateInvoiceReturns = { ok: false as const, reason: "mock" };
+
+      await callInvoices({
+        operation: "update",
+        invoiceId: INVOICE_UUID,
+        notes: null,
+        // issueDate は省略（変更なし）
+      });
+
+      expect(state.updateInvoiceCalls).toHaveLength(1);
+      const callArgs = state.updateInvoiceCalls[0] as Record<string, unknown>;
+      // null（クリア）と undefined（変更なし）が正しく区別される
+      expect(callArgs.notes).toBeNull();
+      expect(callArgs.issueDate).toBeUndefined();
     });
   });
 });

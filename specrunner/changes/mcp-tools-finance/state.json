@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "64eb3227-de0c-42ec-b52b-e56de4db289b",
   "createdAt": "2026-07-06T22:16:19.953Z",
-  "updatedAt": "2026-07-06T23:24:59.097Z",
+  "updatedAt": "2026-07-06T23:37:04.214Z",
   "request": {
     "title": "MCP ツール: 経理系（契約・請求・売上）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-review",
+  "step": "code-fixer",
   "status": "running",
   "branch": "feat/mcp-tools-finance-64eb3227",
   "error": null,
@@ -35,7 +35,7 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 46,
+    "historyCount": 50,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -43,7 +43,8 @@
       "spec-fixer": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 1,
+      "code-review": 1
     }
   }
 }

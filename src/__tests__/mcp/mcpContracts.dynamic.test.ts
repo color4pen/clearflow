@@ -11,6 +11,10 @@
  * T-13: エラー変換で内部詳細を漏らさないことをテストで固定する。
  *       usecase catch ブロックが固定文言 { ok: false, reason: "契約の作成に失敗しました" } を
  *       返すとき、ツール結果が isError: true で DB エラー詳細が含まれないことを検証する。
+ *
+ * TC-038: contracts update の null vs undefined 区別を実行検証で固定する。
+ *         endDate: null と contractType 省略で update を呼んだとき、
+ *         usecase 引数の endDate === null かつ contractType === undefined であることを検証する。
  */
 
 import { describe, it, expect, mock, beforeEach, afterAll } from "bun:test";
@@ -191,6 +195,25 @@ describe("MCP contracts ツール", () => {
       // 固定文言がそのまま返る（toToolError(result.reason) の動作）
       expect(result.text).toBe("契約の作成に失敗しました");
       expect(state.createContractCalls).toHaveLength(1);
+    });
+  });
+
+  describe("TC-038: contracts update の null vs undefined 区別", () => {
+    it("endDate: null と contractType 省略で update を呼ぶと、usecase 引数の endDate === null かつ contractType === undefined になる", async () => {
+      state.updateContractReturns = { ok: false as const, reason: "mock" };
+
+      await callContracts({
+        operation: "update",
+        contractId: CONTRACT_UUID,
+        endDate: null,
+        // contractType は省略（変更なし）
+      });
+
+      expect(state.updateContractCalls).toHaveLength(1);
+      const callArgs = state.updateContractCalls[0] as Record<string, unknown>;
+      // null（クリア）と undefined（変更なし）が正しく区別される
+      expect(callArgs.endDate).toBeNull();
+      expect(callArgs.contractType).toBeUndefined();
     });
   });
 });
