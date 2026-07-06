@@ -20,6 +20,16 @@ function createMcpServer(): McpServer {
   return server;
 }
 
+function getProtectedResourceMetadataUrl(request: Request): string {
+  const authUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL;
+  if (authUrl) {
+    return `${authUrl.replace(/\/$/, "")}/.well-known/oauth-protected-resource`;
+  }
+  const host = request.headers.get("host") ?? "localhost";
+  const proto = request.headers.get("x-forwarded-proto") ?? "http";
+  return `${proto}://${host}/.well-known/oauth-protected-resource`;
+}
+
 /** Bearer 認証を検証し、authInfo を構築する。失敗時は 401 Response を返す。 */
 async function authenticate(
   request: Request
@@ -27,10 +37,14 @@ async function authenticate(
   const authHeader = request.headers.get("Authorization");
   const resolved = await resolveBearer(authHeader);
   if (!resolved) {
+    const resourceMetadataUrl = getProtectedResourceMetadataUrl(request);
     return {
       response: new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "WWW-Authenticate": `Bearer resource_metadata="${resourceMetadataUrl}"`,
+        },
       }),
     };
   }

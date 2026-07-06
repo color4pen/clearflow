@@ -21,3 +21,5 @@ export * as revenueTargetRepository from "./revenueTargetRepository";
 export * as actionItemRepository from "./actionItemRepository";
 export * as watchRepository from "./watchRepository";
 export * as apiTokenRepository from "./apiTokenRepository";
+export * as oauthClientRepository from "./oauthClientRepository";
+export * as oauthTokenRepository from "./oauthTokenRepository";

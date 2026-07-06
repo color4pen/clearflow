@@ -25,7 +25,8 @@
       "src/app/actions/"
     ],
     "mod-api": [
-      "src/app/api/"
+      "src/app/api/",
+      "src/app/.well-known/"
     ],
     "mod-appservice": [
       "src/application/services/"
@@ -129,11 +130,23 @@
     ],
     [
       "mod-api",
+      "mod-db"
+    ],
+    [
+      "mod-api",
+      "mod-model"
+    ],
+    [
+      "mod-api",
       "mod-repo"
     ],
     [
       "mod-api",
       "mod-usecase"
+    ],
+    [
+      "mod-api",
+      "mod-webhook"
     ],
     [
       "mod-appservice",

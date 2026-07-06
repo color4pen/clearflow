@@ -11,8 +11,8 @@
 実装: src/app/(dashboard)/, src/app/(platform)/, src/app/(auth)/, src/app/components/, src/app/layout.tsx, src/app/page.tsx
 
 ## API ルート {#mod-api}
-責務: 認証付き HTTP エンドポイント（Cron バッチ・監査ログ/売上のエクスポート・認証コールバック）の受付とユースケース委譲。
-実装: src/app/api/
+責務: 認証付き HTTP エンドポイント（Cron バッチ・監査ログ/売上のエクスポート・認証コールバック・OAuth 2.1 認可サーバー・Well-Known メタデータ）の受付とユースケース委譲。
+実装: src/app/api/, src/app/.well-known/
 
 ## リクエストプロキシ {#mod-proxy}
 責務: 全リクエストの認証ガード。未認証アクセスをログインへ、認証済みの認証ページアクセスをダッシュボードへリダイレクトする。
@@ -51,7 +51,7 @@
 実装: src/infrastructure/schema.ts, src/infrastructure/db.ts
 
 ## 認証 {#mod-auth}
-責務: Auth.js v5 によるセッション管理と資格情報検証。Bearer トークン（PAT）解決を含む。認可（権限判定）とは別関心事。
+責務: Auth.js v5 によるセッション管理と資格情報検証。Bearer トークン（PAT）解決を含む。OAuth 2.1 認可サーバー（認可コードフロー + PKCE）のエンドポイント群。認可（権限判定）とは別関心事。
 実装: src/infrastructure/auth.ts, src/infrastructure/apiTokenResolver.ts
 
 ## イベントハンドラ {#mod-handler}

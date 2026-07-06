@@ -653,6 +653,55 @@ export const watches = pgTable(
   ]
 );
 
+// OAuth clients table (platform-level, no organizationId — D3 exception to inv-all-tenant-scoped)
+export const oauthClients = pgTable("oauth_clients", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  clientId: text("client_id").notNull().unique(),
+  clientName: text("client_name").notNull(),
+  redirectUris: jsonb("redirect_uris").notNull().$type<string[]>(),
+  tokenEndpointAuthMethod: text("token_endpoint_auth_method").notNull().default("none"),
+  grantTypes: jsonb("grant_types").notNull().$type<string[]>(),
+  responseTypes: jsonb("response_types").notNull().$type<string[]>(),
+  clientIdIssuedAt: timestamp("client_id_issued_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// OAuth tokens table (authorization_code / access_token / refresh_token)
+export const oauthTokens = pgTable(
+  "oauth_tokens",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    type: text("type").notNull(), // "authorization_code" | "access_token" | "refresh_token"
+    clientId: text("client_id")
+      .notNull()
+      .references(() => oauthClients.clientId),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.id),
+    tokenHash: text("token_hash").notNull(),
+    tokenPrefix: text("token_prefix").notNull(),
+    familyId: uuid("family_id").notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    revokedAt: timestamp("revoked_at"),
+    lastUsedAt: timestamp("last_used_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    // Authorization code specific fields
+    codeChallenge: text("code_challenge"),
+    codeChallengeMethod: text("code_challenge_method"),
+    redirectUri: text("redirect_uri"),
+    state: text("state"),
+  },
+  (table) => [
+    unique("oauth_tokens_token_hash_unique").on(table.tokenHash),
+    index("oauth_tokens_user_client_type_idx").on(table.userId, table.clientId, table.type),
+    index("oauth_tokens_family_id_idx").on(table.familyId),
+    index("oauth_tokens_org_user_idx").on(table.organizationId, table.userId),
+  ]
+);
+
 // Relations
 export const organizationsRelations = relations(organizations, ({ many }) => ({
   users: many(users),
@@ -675,6 +724,7 @@ export const organizationsRelations = relations(organizations, ({ many }) => ({
   actionItems: many(actionItems),
   watches: many(watches),
   apiTokens: many(apiTokens),
+  oauthTokens: many(oauthTokens),
 }));
 
 export const revenueTargetsRelations = relations(revenueTargets, ({ one }) => ({
@@ -712,6 +762,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   actionItemsAsCreator: many(actionItems, { relationName: "actionItemsAsCreator" }),
   watches: many(watches),
   apiTokens: many(apiTokens),
+  oauthTokens: many(oauthTokens),
 }));
 
 export const approvalPoliciesRelations = relations(approvalPolicies, ({ one }) => ({
@@ -1028,6 +1079,25 @@ export const apiTokensRelations = relations(apiTokens, ({ one }) => ({
   }),
   organization: one(organizations, {
     fields: [apiTokens.organizationId],
+    references: [organizations.id],
+  }),
+}));
+
+export const oauthClientsRelations = relations(oauthClients, ({ many }) => ({
+  oauthTokens: many(oauthTokens),
+}));
+
+export const oauthTokensRelations = relations(oauthTokens, ({ one }) => ({
+  client: one(oauthClients, {
+    fields: [oauthTokens.clientId],
+    references: [oauthClients.clientId],
+  }),
+  user: one(users, {
+    fields: [oauthTokens.userId],
+    references: [users.id],
+  }),
+  organization: one(organizations, {
+    fields: [oauthTokens.organizationId],
     references: [organizations.id],
   }),
 }));

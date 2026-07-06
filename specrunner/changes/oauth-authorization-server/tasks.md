@@ -2,18 +2,18 @@
 
 ## T-01: DB スキーマ — oauth_clients / oauth_tokens テーブル追加
 
-- [ ] `src/infrastructure/schema.ts` に `oauthClients` テーブルを追加する
+- [x] `src/infrastructure/schema.ts` に `oauthClients` テーブルを追加する
   - `id` (uuid PK), `clientId` (text, unique — 動的登録で生成した UUID 文字列), `clientName` (text), `redirectUris` (jsonb — string[]), `tokenEndpointAuthMethod` (text, default "none"), `grantTypes` (jsonb — string[]), `responseTypes` (jsonb — string[]), `clientIdIssuedAt` (timestamp), `createdAt` (timestamp)
   - 注: `organizationId` なし（D3: プラットフォームレベル）
-- [ ] `src/infrastructure/schema.ts` に `oauthTokens` テーブルを追加する
+- [x] `src/infrastructure/schema.ts` に `oauthTokens` テーブルを追加する
   - `id` (uuid PK), `type` (text — "authorization_code" | "access_token" | "refresh_token"), `clientId` (text, FK → oauthClients.clientId), `userId` (uuid, FK → users.id), `organizationId` (uuid, FK → organizations.id), `tokenHash` (text, unique), `tokenPrefix` (text — 一覧表示用), `familyId` (uuid — トークン系列 ID), `expiresAt` (timestamp), `revokedAt` (timestamp), `lastUsedAt` (timestamp), `createdAt` (timestamp)
   - 認可コード固有: `codeChallenge` (text, nullable), `codeChallengeMethod` (text, nullable), `redirectUri` (text, nullable), `state` (text, nullable)
   - インデックス: `tokenHash` (unique), `(userId, clientId, type)` (接続一覧用), `(familyId)` (系列失効用), `(organizationId, userId)` (テナントスコープ一覧)
-- [ ] `oauthClientsRelations` と `oauthTokensRelations` を追加する
-- [ ] `organizationsRelations` に `oauthTokens: many(oauthTokens)` を追加する
-- [ ] `usersRelations` に `oauthTokens: many(oauthTokens)` を追加する
-- [ ] `bun run db:generate` でマイグレーションを生成する
-- [ ] `bun run db:migrate` でマイグレーションを適用する
+- [x] `oauthClientsRelations` と `oauthTokensRelations` を追加する
+- [x] `organizationsRelations` に `oauthTokens: many(oauthTokens)` を追加する
+- [x] `usersRelations` に `oauthTokens: many(oauthTokens)` を追加する
+- [x] `bun run db:generate` でマイグレーションを生成する
+- [x] `bun run db:migrate` でマイグレーションを適用する
 
 **Acceptance Criteria**:
 - マイグレーションが正常に適用され、`oauth_clients` と `oauth_tokens` テーブルが作成される
@@ -22,9 +22,9 @@
 
 ## T-02: ドメインモデル — OAuth クライアント / OAuth トークン
 
-- [ ] `src/domain/models/oauthClient.ts` を作成する
+- [x] `src/domain/models/oauthClient.ts` を作成する
   - `OAuthClient` 型を定義（id, clientId, clientName, redirectUris, tokenEndpointAuthMethod, grantTypes, responseTypes, clientIdIssuedAt, createdAt）
-- [ ] `src/domain/models/oauthToken.ts` を作成する
+- [x] `src/domain/models/oauthToken.ts` を作成する
   - `OAuthTokenType = "authorization_code" | "access_token" | "refresh_token"` を定義
   - `OAuthToken` 型を定義（id, type, clientId, userId, organizationId, tokenPrefix, familyId, expiresAt, revokedAt, lastUsedAt, createdAt, codeChallenge, codeChallengeMethod, redirectUri）
   - トークンプレフィクス定数: `OAUTH_ACCESS_TOKEN_PREFIX = "oat_"`, `OAUTH_REFRESH_TOKEN_PREFIX = "ort_"`
@@ -32,8 +32,8 @@
   - ハッシュ関数: `hashOAuthToken(plainToken: string): string`（SHA-256、PAT と同じパターン）
   - プレフィクス判定関数: `hasOAuthAccessTokenPrefix(token: string): boolean`, `hasOAuthRefreshTokenPrefix(token: string): boolean`
   - 有効期限定数: `ACCESS_TOKEN_LIFETIME_MS = 3600_000`, `REFRESH_TOKEN_LIFETIME_MS = 30 * 24 * 3600_000`, `AUTHORIZATION_CODE_LIFETIME_MS = 600_000`
-- [ ] `src/domain/models/auditLog.ts` の `AuditAction` に `"oauth_connection.create" | "oauth_connection.revoke"` を追加する
-- [ ] `src/domain/models/auditLog.ts` の `AuditTargetType` に `"oauth_connection"` を追加する
+- [x] `src/domain/models/auditLog.ts` の `AuditAction` に `"oauth_connection.create" | "oauth_connection.revoke"` を追加する
+- [x] `src/domain/models/auditLog.ts` の `AuditTargetType` に `"oauth_connection"` を追加する
 
 **Acceptance Criteria**:
 - 型定義・定数・ユーティリティ関数が export され、`bun run typecheck` が green
@@ -42,17 +42,17 @@
 
 ## T-03: リポジトリ — OAuth クライアント / OAuth トークン
 
-- [ ] `src/infrastructure/repositories/oauthClientRepository.ts` を作成する
+- [x] `src/infrastructure/repositories/oauthClientRepository.ts` を作成する
   - `create(data, tx?)`: クライアント登録
   - `findByClientId(clientId)`: clientId で検索
-- [ ] `src/infrastructure/repositories/oauthTokenRepository.ts` を作成する
+- [x] `src/infrastructure/repositories/oauthTokenRepository.ts` を作成する
   - `create(data, tx?)`: トークン/認可コード作成
   - `findByTokenHash(tokenHash)`: tokenHash で検索（認可コード交換・トークン検証用）
   - `revokeByFamilyId(familyId, tx?)`: 系列一括失効
   - `revokeByUserAndClientId(userId, clientId, organizationId, tx?)`: 接続解除（ユーザー × クライアントの全トークン失効）
   - `findActiveConnectionsByUser(userId, organizationId)`: ユーザーの接続一覧（クライアント名・最終使用日時・許可日時）— type が access_token または refresh_token で revokedAt IS NULL かつ expiresAt > now のものをクライアント単位でグルーピング
   - `updateLastUsedAt(id, organizationId, timestamp)`: lastUsedAt 更新（スロットリング付き、PAT と同パターン）
-- [ ] `src/infrastructure/repositories/index.ts` に `oauthClientRepository` と `oauthTokenRepository` を追加する
+- [x] `src/infrastructure/repositories/index.ts` に `oauthClientRepository` と `oauthTokenRepository` を追加する
 
 **Acceptance Criteria**:
 - リポジトリ関数が正しい SQL を生成し、`bun run typecheck` が green
@@ -61,13 +61,13 @@
 
 ## T-04: ユースケース — 動的クライアント登録
 
-- [ ] `src/application/usecases/registerOAuthClient.ts` を作成する
+- [x] `src/application/usecases/registerOAuthClient.ts` を作成する
   - 入力: `{ clientName, redirectUris, grantTypes?, responseTypes?, tokenEndpointAuthMethod? }`
   - バリデーション: clientName 必須、redirectUris 必須（1 つ以上の有効な URL）、tokenEndpointAuthMethod は "none" のみ許可
   - clientId を UUID で生成
   - oauthClientRepository.create でクライアントを保存
   - 出力: `{ ok: true, client }` | `{ ok: false, reason }`
-- [ ] レート制限ロジック: 既存の `rateLimitRecords` テーブルを使い、key `oauth_register:<ip>` で 10 件/時間の制限を適用する。レート制限チェックは route handler で行い、ユースケースには含めない
+- [x] レート制限ロジック: 既存の `rateLimitRecords` テーブルを使い、key `oauth_register:<ip>` で 10 件/時間の制限を適用する。レート制限チェックは route handler で行い、ユースケースには含めない
 
 **Acceptance Criteria**:
 - 正常系: クライアント登録が成功し、clientId が返る
@@ -76,7 +76,7 @@
 
 ## T-05: ユースケース — 認可（同意 → 認可コード発行）
 
-- [ ] `src/application/usecases/authorizeOAuthClient.ts` を作成する
+- [x] `src/application/usecases/authorizeOAuthClient.ts` を作成する
   - 入力: `{ clientId, redirectUri, codeChallenge, codeChallengeMethod, state, userId, organizationId }`
   - バリデーション: clientId が存在する、redirectUri がクライアントの登録済み redirectUris に含まれる、codeChallengeMethod が "S256"
   - 認可コードを生成し、ハッシュで DB に保存（type: "authorization_code"、familyId を新規 UUID で生成）
@@ -90,7 +90,7 @@
 
 ## T-06: ユースケース — トークン交換（認可コード → アクセストークン + リフレッシュトークン）
 
-- [ ] `src/application/usecases/exchangeOAuthToken.ts` を作成する
+- [x] `src/application/usecases/exchangeOAuthToken.ts` を作成する
   - grant_type=authorization_code のパス:
     - 入力: `{ grantType: "authorization_code", code, redirectUri, clientId, codeVerifier }`
     - tokenHash で認可コードを DB から取得
@@ -121,11 +121,11 @@
 
 ## T-07: ユースケース — 接続管理（一覧・解除）
 
-- [ ] `src/application/usecases/listOAuthConnections.ts` を作成する
+- [x] `src/application/usecases/listOAuthConnections.ts` を作成する
   - 入力: `{ userId, organizationId }`
   - oauthTokenRepository.findActiveConnectionsByUser で取得
   - 出力: 接続一覧（clientName, clientId, lastUsedAt, connectedAt）
-- [ ] `src/application/usecases/revokeOAuthConnection.ts` を作成する
+- [x] `src/application/usecases/revokeOAuthConnection.ts` を作成する
   - 入力: `{ userId, organizationId, clientId }`
   - oauthTokenRepository.revokeByUserAndClientId でトークン系列を全失効
   - 同一トランザクション内で監査ログを記録（`oauth_connection.revoke`）
@@ -139,7 +139,7 @@
 
 ## T-08: Bearer 検証の拡張 — resolveBearer に OAuth トークン解決を追加
 
-- [ ] `src/infrastructure/apiTokenResolver.ts` の `resolveBearer` を修正する
+- [x] `src/infrastructure/apiTokenResolver.ts` の `resolveBearer` を修正する
   - 既存ロジック: `hasApiTokenPrefix(plainToken)` が true → PAT 解決パス（現行コードそのまま）
   - 新規分岐: `hasOAuthAccessTokenPrefix(plainToken)` が true → OAuth トークン解決パス
     - tokenHash を算出し oauthTokenRepository.findByTokenHash で取得
@@ -148,7 +148,7 @@
     - lastUsedAt を更新（ベストエフォート）
     - `{ userId, organizationId, role }` を返す
   - どちらのプレフィクスにも一致しない → null を返す（現行動作と同じ）
-- [ ] `hasApiTokenPrefix` の呼び出しはそのまま残す（既存テスト `mcpAuth.test.ts` の文字列照合を維持するため）
+- [x] `hasApiTokenPrefix` の呼び出しはそのまま残す（既存テスト `mcpAuth.test.ts` の文字列照合を維持するため）
 
 **Acceptance Criteria**:
 - PAT（`cfp_` プレフィクス）は従来通り解決される
@@ -160,10 +160,10 @@
 
 ## T-09: API ルート — メタデータエンドポイント
 
-- [ ] `src/app/.well-known/oauth-protected-resource/route.ts` を作成する
+- [x] `src/app/.well-known/oauth-protected-resource/route.ts` を作成する
   - GET: `{ resource: "<MCP endpoint canonical URI>", authorization_servers: ["<authorization server URL>"], bearer_methods_supported: ["header"] }` を返す
   - URL はリクエストの Host ヘッダまたは環境変数（`NEXTAUTH_URL` / `AUTH_URL`）から構築する
-- [ ] `src/app/.well-known/oauth-authorization-server/route.ts` を作成する
+- [x] `src/app/.well-known/oauth-authorization-server/route.ts` を作成する
   - GET: RFC 8414 準拠のメタデータを返す
     - `issuer`, `authorization_endpoint`, `token_endpoint`, `registration_endpoint`, `response_types_supported: ["code"]`, `grant_types_supported: ["authorization_code", "refresh_token"]`, `token_endpoint_auth_methods_supported: ["none"]`, `code_challenge_methods_supported: ["S256"]`
 
@@ -174,7 +174,7 @@
 
 ## T-10: API ルート — 動的クライアント登録エンドポイント
 
-- [ ] `src/app/api/oauth/register/route.ts` を作成する
+- [x] `src/app/api/oauth/register/route.ts` を作成する
   - POST: リクエストボディを検証し、レート制限チェック（per-IP, 10 件/時間）を行い、registerOAuthClient ユースケースを呼び出す
   - 成功: 201 + クライアントメタデータ
   - レート制限超過: 429
@@ -191,7 +191,7 @@
 
 ## T-11: API ルート — 認可エンドポイント + 同意画面
 
-- [ ] `src/app/api/oauth/authorize/route.ts` を作成する
+- [x] `src/app/api/oauth/authorize/route.ts` を作成する
   - GET: クエリパラメータ（response_type, client_id, redirect_uri, code_challenge, code_challenge_method, state, resource）を検証
     - パラメータ不足・不正: redirect_uri にエラーリダイレクト（`error=invalid_request`）。redirect_uri 自体が不正または未登録の場合は 400 エラーページ（redirect_uri へリダイレクトしない）
     - Auth.js セッションなし: `/login?callbackUrl=<現在の authorize URL>` へリダイレクト
@@ -201,11 +201,11 @@
     - パラメータはサーバーサイドセッションから復元しバリデーションする（URL パラメータの改ざんリスク回避）
     - 許可: authorizeOAuthClient ユースケースを呼び出し、redirect_uri に `code` と `state` を付与してリダイレクト
     - 拒否: redirect_uri に `error=access_denied&state=...` を付与してリダイレクト
-- [ ] `src/app/(auth)/oauth/consent/page.tsx` を作成する（同意画面）
+- [x] `src/app/(auth)/oauth/consent/page.tsx` を作成する（同意画面）
   - Auth.js セッションでユーザー認証（未ログインなら `/login` へリダイレクト）
   - クライアント名・アクセス内容（「clearflow の MCP ツールへのアクセスを許可」）・ユーザー名・組織名を表示
   - 「許可」「拒否」ボタン → POST /api/oauth/authorize へ送信
-- [ ] パラメータ一式はサーバーサイドセッション（Auth.js セッションまたは一時的なサーバーサイドストア）に保存する。同意画面には参照用表示データのみを渡し、POST 時はセッションからパラメータを復元してバリデーションする（URL パラメータ渡しは改ざんリスクがあるため禁止）
+- [x] パラメータ一式はサーバーサイドセッション（Auth.js セッションまたは一時的なサーバーサイドストア）に保存する。同意画面には参照用表示データのみを渡し、POST 時はセッションからパラメータを復元してバリデーションする（URL パラメータ渡しは改ざんリスクがあるため禁止）
 
 **Acceptance Criteria**:
 - 未ログインユーザーがログインへ誘導され、ログイン後に認可フローへ戻る
@@ -217,7 +217,7 @@
 
 ## T-12: API ルート — トークンエンドポイント
 
-- [ ] `src/app/api/oauth/token/route.ts` を作成する
+- [x] `src/app/api/oauth/token/route.ts` を作成する
   - POST: `application/x-www-form-urlencoded` でリクエストを受け付ける
   - grant_type に応じて exchangeOAuthToken ユースケースを呼び出す
   - 成功: 200 + `{ access_token, token_type, expires_in, refresh_token }`
@@ -236,7 +236,7 @@
 
 ## T-13: MCP エンドポイントの 401 に WWW-Authenticate ヘッダを追加
 
-- [ ] `src/app/api/mcp/route.ts` の `authenticate` 関数を修正する
+- [x] `src/app/api/mcp/route.ts` の `authenticate` 関数を修正する
   - 401 レスポンスに `WWW-Authenticate: Bearer resource_metadata="<Protected Resource Metadata URL>"` ヘッダを追加する
   - URL はリクエストの Host ヘッダまたは環境変数から構築する
 
@@ -247,7 +247,7 @@
 
 ## T-14: proxy.ts の除外パス追加
 
-- [ ] `src/proxy.ts` の除外ロジックに `pathname.startsWith("/.well-known/")` を追加する
+- [x] `src/proxy.ts` の除外ロジックに `pathname.startsWith("/.well-known/")` を追加する
   - 注意: `/api/` 配下は既存の matcher 設定 `/((?!api|_next/static|_next/image|favicon.ico).*)` によりすでに middleware の対象外となっているため、`/api/oauth/` の明示的な除外は不要。追加が必要なのは `/.well-known/` のみ
   - `pathname.startsWith("/.well-known/")` の場合は `NextResponse.next()` を返す
 
@@ -259,7 +259,7 @@
 
 ## T-15: Server Actions — 接続管理
 
-- [ ] `src/app/actions/oauthConnections.ts` を作成する
+- [x] `src/app/actions/oauthConnections.ts` を作成する
   - `listOAuthConnectionsAction()`: セッションから userId / organizationId を取得し、listOAuthConnections ユースケースを呼び出す
   - `revokeOAuthConnectionAction(clientId)`: セッションから userId / organizationId を取得し、revokeOAuthConnection ユースケースを呼び出す
 
@@ -270,12 +270,12 @@
 
 ## T-16: UI — 接続済みアプリケーションセクション
 
-- [ ] `src/app/(dashboard)/account/OAuthConnectionSection.tsx` を作成する（Client Component）
+- [x] `src/app/(dashboard)/account/OAuthConnectionSection.tsx` を作成する（Client Component）
   - 接続一覧を表示（クライアント名・最終使用日時・許可日時）
   - 各接続に「接続解除」ボタン
   - 接続解除の確認ダイアログ
   - 接続が 0 件の場合は「接続済みアプリケーションはありません」を表示
-- [ ] `src/app/(dashboard)/account/page.tsx` を修正する
+- [x] `src/app/(dashboard)/account/page.tsx` を修正する
   - `listOAuthConnectionsAction` を呼び出して初期データを取得
   - `OAuthConnectionSection` を `ApiTokenSection` の後に追加する
 
@@ -287,13 +287,13 @@
 
 ## T-17: 設計ドキュメント delta — model.md / invariants.md 更新
 
-- [ ] `design/domain/model.md` に以下を追加する:
+- [x] `design/domain/model.md` に以下を追加する:
   - `## OAuth クライアント {#ent-oauth-client}`: 動的クライアント登録で作成される MCP クライアントの識別情報。clientId（一意識別子）・クライアント名・リダイレクト URI・認証方式を保持する。組織に属さないプラットフォームレベルの記録であり、`inv-all-tenant-scoped` の意図的な例外。
   - `## OAuth トークン {#ent-oauth-token}`: OAuth 2.1 認可フローで発行される認可コード・アクセストークン・リフレッシュトークンの統合記録。type で種別を区別する。[[ent-oauth-client]] と発行先ユーザー・組織を参照する。familyId で系列を管理し、リフレッシュトークンローテーションと再利用検知による系列一括失効を実現する。平文は SHA-256 ハッシュとして保存され、発行時のみ返却される。
-- [ ] `design/domain/invariants.md` に以下を追加する:
+- [x] `design/domain/invariants.md` に以下を追加する:
   - `## OAuth クライアントはプラットフォームスコープ {#inv-oauth-client-platform-scoped}`: [[ent-oauth-client]] は [[inv-all-tenant-scoped]] の意図的な例外であり、organizationId を持たない。テナント分離は [[ent-oauth-token]]（同意レコード）が userId + organizationId で担保する。
-- [ ] `design/static/modules.md` の `## 認証 {#mod-auth}` の責務に「OAuth 2.1 認可サーバー（認可コードフロー + PKCE）のエンドポイント群」を追加する
-- [ ] `design/static/dependencies.md` に新規依存を追加する:
+- [x] `design/static/modules.md` の `## 認証 {#mod-auth}` の責務に「OAuth 2.1 認可サーバー（認可コードフロー + PKCE）のエンドポイント群」を追加する
+- [x] `design/static/dependencies.md` に新規依存を追加する:
   - `[[mod-api]] -> [[mod-model]]`（OAuth route → ドメインモデル参照）
   - `[[mod-api]] -> [[mod-db]]`（OAuth route → レート制限テーブル参照）
   - `[[mod-auth]] -> [[mod-appservice]]`（apiTokenResolver → auditRecorder は不要 — resolverは監査しない）
@@ -305,7 +305,7 @@
 
 ## T-18: テスト — OAuth フロー統合テスト
 
-- [ ] `src/__tests__/oauth/oauthFlow.test.ts` を作成する（統合テスト）
+- [x] `src/__tests__/oauth/oauthFlow.test.ts` を作成する（統合テスト）
   - メタデータ発見 → 動的登録 → 認可コード + PKCE → トークン取得 → MCP ツール実行の一連のフロー
   - PKCE 不正（verifier 不一致）の拒否
   - PKCE code_challenge_method が S256 以外の拒否
@@ -314,11 +314,11 @@
   - リフレッシュトークンローテーション
   - リフレッシュトークン再利用検知 + 系列失効
   - 失効後のアクセストークン・リフレッシュトークンが 401
-- [ ] `src/__tests__/oauth/oauthConnections.test.ts` を作成する
+- [x] `src/__tests__/oauth/oauthConnections.test.ts` を作成する
   - 接続一覧: 自分の接続のみ表示
   - 接続解除: トークン系列の全失効
   - 他ユーザーの接続を一覧・解除できないこと
-- [ ] `src/__tests__/oauth/oauthMetadata.test.ts` を作成する（静的検証）
+- [x] `src/__tests__/oauth/oauthMetadata.test.ts` を作成する（静的検証）
   - Protected Resource Metadata のレスポンス形式
   - Authorization Server Metadata のレスポンス形式
   - WWW-Authenticate ヘッダの存在
@@ -330,7 +330,7 @@
 
 ## T-19: claude.ai 接続の手動確認手順ドキュメント
 
-- [ ] `docs/manual-testing/oauth-claude-ai.md` を作成する
+- [x] `docs/manual-testing/oauth-claude-ai.md` を作成する
   - claude.ai custom connector からの接続手順:
     1. clearflow を HTTPS で公開する（ngrok 等）
     2. claude.ai で custom connector を追加（MCP URL を指定）
