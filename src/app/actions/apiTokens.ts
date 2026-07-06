@@ -9,7 +9,7 @@ import type { ApiToken } from "@/domain/models/apiToken";
 // --- createApiTokenAction ---
 
 const createApiTokenSchema = z.object({
-  name: z.string().min(1, "トークン名は必須です").max(100, "トークン名は100文字以内で入力してください"),
+  name: z.string().trim().min(1, "トークン名は必須です").max(100, "トークン名は100文字以内で入力してください"),
 });
 
 export type CreateApiTokenState =
@@ -98,12 +98,18 @@ export async function revokeApiTokenAction(
 
 // --- listApiTokensAction ---
 
-export async function listApiTokensAction(): Promise<ApiToken[]> {
-  const session = await auth();
-  if (!session?.user?.id) return [];
+export type ListApiTokensResult =
+  | { success: false; message: string }
+  | { success: true; tokens: ApiToken[] };
 
-  return listApiTokens({
+export async function listApiTokensAction(): Promise<ListApiTokensResult> {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, message: "認証が必要です" };
+
+  const tokens = await listApiTokens({
     userId: session.user.id,
     organizationId: session.user.organizationId,
   });
+
+  return { success: true, tokens };
 }

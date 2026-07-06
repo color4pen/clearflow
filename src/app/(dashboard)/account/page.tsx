@@ -12,7 +12,8 @@ export default async function AccountPage() {
     redirect("/login");
   }
 
-  const tokens = await listApiTokensAction();
+  const tokenResult = await listApiTokensAction();
+  const tokens = tokenResult.success ? tokenResult.tokens : [];
 
   return (
     <div>
