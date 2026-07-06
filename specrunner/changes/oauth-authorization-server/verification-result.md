@@ -1,15 +1,15 @@
 # Verification Result — oauth-authorization-server — iter 1
 
-## Verdict: failed
+## Verdict: passed
 
 ## Phase Results
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 17.8s | 0 |
-| 2 | typecheck | passed | 4.0s | 0 |
-| 3 | test | failed | 0.7s | 1 |
-| 4 | lint | skipped | — | — |
+| 1 | build | passed | 14.1s | 0 |
+| 2 | typecheck | passed | 1.0s | 0 |
+| 3 | test | passed | 0.7s | 0 |
+| 4 | lint | passed | 5.9s | 0 |
 
 ## Phase: build
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 10.0s
+✓ Compiled successfully in 8.0s
   Running TypeScript ...
-  Finished TypeScript in 4.2s ...
+  Finished TypeScript in 4.5s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/41) ...
   Generating static pages using 7 workers (10/41) 
   Generating static pages using 7 workers (20/41) 
   Generating static pages using 7 workers (30/41) 
-✓ Generating static pages using 7 workers (41/41) in 151ms
+✓ Generating static pages using 7 workers (41/41) in 160ms
   Finalizing page optimization ...
 
 Route (app)
@@ -102,30 +102,10 @@ $ tsc --noEmit
 
 ## Phase: test
 
-Step 'test' failed
-
 ```
 bun test v1.3.12 (700fc117)
 
 $ bun test
-
-src/__tests__/actions/interactions.dynamic.test.ts:
-
-# Unhandled error between tests
--------------------------------
-30 |         return PostgresDrizzleAdapter(db, schema);
-31 |     }
-32 |     else if (is(db, BaseSQLiteDatabase)) {
-33 |         return SQLiteDrizzleAdapter(db, schema);
-34 |     }
-35 |     throw new Error(`Unsupported database type (${typeof db}) in Auth.js Drizzle adapter.`);
-                   ^
-error: Unsupported database type (object) in Auth.js Drizzle adapter.
-      at DrizzleAdapter (node_modules/@auth/drizzle-adapter/index.js:35:15)
-      at src/infrastructure/auth.ts:11:12
-      at loadAndEvaluateModule (2:1)
--------------------------------
-
 
 src/__tests__/domain/domainEvents.test.ts:
 [EventDispatcher] Async handler for "inquiry.converted" threw an error: 158 |     await new Promise((r) => setTimeout(r, 20));
@@ -162,15 +142,23 @@ src/__tests__/usecases/approvalPolicyFlow.test.ts:
 [evaluatePolicies] Policy policy-1 has conditionField set but null conditionOperator or conditionValue — skipping
 [handleApprovalCompleted] originTriggerEntityId is null for requestId: req-1
 
- 1730 pass
- 1 fail
- 1 error
- 3619 expect() calls
-Ran 1731 tests across 107 files. [650.00ms]
-error: script "test" exited with code 1
+ 1742 pass
+ 0 fail
+ 3640 expect() calls
+Ran 1742 tests across 107 files. [651.00ms]
 
 ```
 
 ## Phase: lint
 
-_(skipped — previous command failed)_
+```
+
+src/app/api/oauth/authorize/route.ts
+  2:10  warning  'redirect' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 1 problem (0 errors, 1 warning)
+
+
+$ eslint
+
+```
