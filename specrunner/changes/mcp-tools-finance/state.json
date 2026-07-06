@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "64eb3227-de0c-42ec-b52b-e56de4db289b",
   "createdAt": "2026-07-06T22:16:19.953Z",
-  "updatedAt": "2026-07-06T22:16:21.565Z",
+  "updatedAt": "2026-07-06T22:23:10.833Z",
   "request": {
     "title": "MCP ツール: 経理系（契約・請求・売上）",
     "type": "new-feature",
@@ -33,8 +33,11 @@
       ]
     }
   ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 6,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
