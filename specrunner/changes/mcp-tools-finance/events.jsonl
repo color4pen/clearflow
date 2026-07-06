@@ -84,3 +84,9 @@
 {"type":"transition","ts":"2026-07-06T23:46:37.149Z","step":"code-review","status":"ok","message":"code-review iteration 2 completed with verdict: approved"}
 {"type":"transition","ts":"2026-07-06T23:46:37.150Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-07-06T23:46:37.152Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-07-06T23:50:38.958Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"02e3e754-ad63-4be1-bcef-c2eee4b53e66","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-07-06T23:46:37.164Z","endedAt":"2026-07-06T23:50:37.563Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-07-06T23:50:37.563Z","outputs":[{"path":"specrunner/changes/mcp-tools-finance","hash":null}],"inputs":[{"path":"specrunner/changes/mcp-tools-finance/review-feedback-002.md","hash":"sha256:45b5ff76a8b7e0a320afcb01b118811372556ed4e66f5d9eb833204ad34fc254"}]}
+{"type":"transition","ts":"2026-07-06T23:50:38.963Z","step":"step-transition","status":"ok","message":"code-fixer → custom-reviewers"}
+{"type":"transition","ts":"2026-07-06T23:50:38.964Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 1 started"}
+{"type":"transition","ts":"2026-07-06T23:50:38.974Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
