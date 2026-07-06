@@ -3,9 +3,10 @@
  *
  * T-11: 書き込みが監査ログに記録され、他テナントに触れられないことを固定する。
  *
- * 1. 監査記録の実行検証:
- *    tasks create → createActionItem usecase が organizationId と actorId を受け取る
- *    （usecase 内で recordAudit が呼ばれる = 監査記録される）
+ * 1. 監査記録の実行検証（TC-019）:
+ *    tasks create → createActionItem usecase の実装を実際に実行し、
+ *    recordAudit が action_item.create アクションで呼ばれることを直接 assert する。
+ *    （createActionItem を全体モックせず recordAudit のみをモックし呼び出しを検証する）
  *
  * 2. テナント分離の実行検証:
  *    2 つの異なる organizationId で同一操作を呼び、usecase に渡される organizationId が
@@ -25,7 +26,10 @@ import type { Interaction } from "@/domain/models/interaction";
 import type { Watch } from "@/domain/models/watch";
 
 const state = {
-  createActionItemCalls: [] as unknown[],
+  // tasks の監査・テナント分離検証用（createActionItem の実際の実行から得る）
+  actionItemCreateArgs: [] as Record<string, unknown>[],
+  auditCalls: [] as Record<string, unknown>[],
+  // interactions / watches / notifications のテナント分離検証用（usecase モック）
   createMeetingCalls: [] as unknown[],
   watchDealCalls: [] as unknown[],
   markAsReadCalls: [] as unknown[],
@@ -33,7 +37,9 @@ const state = {
 
 // 実装を捕捉してから mock.module を呼ぶ。afterAll で復元する。
 import * as rateLimitModule from "@/infrastructure/rateLimit";
-import * as createActionItemModule from "@/application/usecases/createActionItem";
+import * as dbModule from "@/infrastructure/db";
+import * as actionItemRepositoryModule from "@/infrastructure/repositories/actionItemRepository";
+import * as auditRecorderModule from "@/application/services/auditRecorder";
 import * as createMeetingModule from "@/application/usecases/createMeeting";
 import * as watchDealModule from "@/application/usecases/watchDeal";
 import * as markNotificationsAsReadModule from "@/application/usecases/markNotificationsAsRead";
@@ -42,7 +48,9 @@ const realRateLimit = {
   checkRateLimit: rateLimitModule.checkRateLimit,
   RATE_LIMITS: rateLimitModule.RATE_LIMITS,
 };
-const realCreateActionItem = createActionItemModule.createActionItem;
+const realDb = { db: dbModule.db };
+const realActionItemRepository = { ...actionItemRepositoryModule };
+const realAuditRecorder = { ...auditRecorderModule };
 const realCreateMeeting = createMeetingModule.createMeeting;
 const realWatchDeal = watchDealModule.watchDeal;
 const realMarkNotificationsAsRead = markNotificationsAsReadModule.markNotificationsAsRead;
@@ -56,10 +64,48 @@ mock.module("@/infrastructure/rateLimit", () => ({
   },
 }));
 
-mock.module("@/application/usecases/createActionItem", () => ({
-  createActionItem: async (input: unknown) => {
-    state.createActionItemCalls.push(input);
-    return { ok: true as const, actionItem: mockActionItem };
+// db.transaction をフェイク実装に差し替える（DB 接続不要）
+mock.module("@/infrastructure/db", () => ({
+  db: {
+    transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn({}),
+  },
+}));
+
+// actionItemRepository.create が呼ばれたことを捕捉する（createActionItem の実実装を通す）
+mock.module("@/infrastructure/repositories/actionItemRepository", () => ({
+  create: async (data: Record<string, unknown>) => {
+    state.actionItemCreateArgs.push(data);
+    return {
+      id: "item-1",
+      organizationId: data.organizationId,
+      description: data.description,
+      assigneeId: data.assigneeId ?? null,
+      dueDate: data.dueDate ?? null,
+      done: false,
+      status: "todo",
+      interactionId: data.interactionId ?? null,
+      dealId: data.dealId ?? null,
+      inquiryId: data.inquiryId ?? null,
+      createdById: data.createdById,
+      createdAt: new Date("2026-01-01"),
+      updatedAt: new Date("2026-01-01"),
+      version: 1,
+    };
+  },
+  findById: async () => null,
+  findByOrganization: async () => [],
+  update: async () => null,
+  deleteById: async () => {},
+  findByDeal: async () => [],
+  findByInteraction: async () => [],
+  mapRow: (row: unknown) => row,
+}));
+
+// recordAudit を捕捉する — createActionItem の実実装が呼んだことを直接 assert できる
+mock.module("@/application/services/auditRecorder", () => ({
+  recordAudit: async (data: Record<string, unknown>) => {
+    state.auditCalls.push(data);
+    return { id: "audit-1", ...data };
   },
 }));
 
@@ -101,9 +147,9 @@ mock.module("@/infrastructure/repositories/userRepository", () => ({
 
 afterAll(() => {
   mock.module("@/infrastructure/rateLimit", () => realRateLimit);
-  mock.module("@/application/usecases/createActionItem", () => ({
-    createActionItem: realCreateActionItem,
-  }));
+  mock.module("@/infrastructure/db", () => realDb);
+  mock.module("@/infrastructure/repositories/actionItemRepository", () => realActionItemRepository);
+  mock.module("@/application/services/auditRecorder", () => realAuditRecorder);
   mock.module("@/application/usecases/createMeeting", () => ({
     createMeeting: realCreateMeeting,
   }));
@@ -123,23 +169,6 @@ const { registerWatchesTools } = await import("../../app/api/mcp/tools/watches")
 const { registerNotificationsTools } = await import("../../app/api/mcp/tools/notifications");
 
 const DEAL_UUID = "123e4567-e89b-12d3-a456-426614174001";
-
-const mockActionItem: ActionItem = {
-  id: "item-1",
-  organizationId: "org-1",
-  description: "テストタスク",
-  assigneeId: null,
-  dueDate: null,
-  done: false,
-  status: "todo",
-  interactionId: null,
-  dealId: null,
-  inquiryId: null,
-  createdById: "user-A",
-  createdAt: new Date("2026-01-01"),
-  updatedAt: new Date("2026-01-01"),
-  version: 1,
-};
 
 const mockMeeting: Interaction = {
   id: "meeting-1",
@@ -217,16 +246,17 @@ async function callTool(
 }
 
 beforeEach(() => {
-  state.createActionItemCalls = [];
+  state.actionItemCreateArgs = [];
+  state.auditCalls = [];
   state.createMeetingCalls = [];
   state.watchDealCalls = [];
   state.markAsReadCalls = [];
 });
 
 describe("MCP 活動系ツール — 監査記録・テナント分離（T-11）", () => {
-  describe("監査記録の実行検証", () => {
-    it("tasks create は createActionItem usecase に organizationId と actorId を渡す", async () => {
-      await callTool(
+  describe("TC-019: 監査記録の実行検証", () => {
+    it("tasks create は createActionItem usecase を通じて recordAudit を action_item.create アクションで呼ぶ", async () => {
+      const result = await callTool(
         "tasks",
         registerTasksTools,
         { operation: "create", description: "テストタスク" },
@@ -234,11 +264,19 @@ describe("MCP 活動系ツール — 監査記録・テナント分離（T-11）
         "org-1"
       );
 
-      expect(state.createActionItemCalls).toHaveLength(1);
-      const callArgs = state.createActionItemCalls[0] as Record<string, unknown>;
-      // usecase 内で recordAudit が呼ばれる = 監査記録される
-      expect(callArgs.organizationId).toBe("org-1");
-      expect(callArgs.actorId).toBe("user-A");
+      // ツール成功
+      expect(result.isError).toBeUndefined();
+
+      // actionItemRepository.create が呼ばれた（実際の DB 処理パスを通った）
+      expect(state.actionItemCreateArgs).toHaveLength(1);
+      expect(state.actionItemCreateArgs[0].organizationId).toBe("org-1");
+      expect(state.actionItemCreateArgs[0].createdById).toBe("user-A");
+
+      // recordAudit が action_item.create アクションで呼ばれた（監査記録される）
+      expect(state.auditCalls).toHaveLength(1);
+      expect(state.auditCalls[0].action).toBe("action_item.create");
+      expect(state.auditCalls[0].organizationId).toBe("org-1");
+      expect(state.auditCalls[0].actorId).toBe("user-A");
     });
   });
 
@@ -259,13 +297,13 @@ describe("MCP 活動系ツール — 監査記録・テナント分離（T-11）
         "org-2"
       );
 
-      expect(state.createActionItemCalls).toHaveLength(2);
-      const args1 = state.createActionItemCalls[0] as Record<string, unknown>;
-      const args2 = state.createActionItemCalls[1] as Record<string, unknown>;
-      expect(args1.organizationId).toBe("org-1");
-      expect(args2.organizationId).toBe("org-2");
+      expect(state.actionItemCreateArgs).toHaveLength(2);
+      expect(state.actionItemCreateArgs[0].organizationId).toBe("org-1");
+      expect(state.actionItemCreateArgs[1].organizationId).toBe("org-2");
       // 混在していない
-      expect(args1.organizationId).not.toBe(args2.organizationId);
+      expect(state.actionItemCreateArgs[0].organizationId).not.toBe(
+        state.actionItemCreateArgs[1].organizationId
+      );
     });
   });
 
