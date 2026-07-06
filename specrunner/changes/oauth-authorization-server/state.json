@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "806821c9-cb0e-44ab-90e9-c18695a20cda",
   "createdAt": "2026-07-06T17:53:51.221Z",
-  "updatedAt": "2026-07-06T19:37:09.170Z",
+  "updatedAt": "2026-07-06T19:42:22.818Z",
   "request": {
     "title": "MCP クライアント向け OAuth 2.1 認可サーバー",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-review",
+  "step": "code-fixer",
   "status": "running",
   "branch": "feat/oauth-authorization-server-806821c9",
   "error": null,
@@ -35,7 +35,7 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 66,
+    "historyCount": 70,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -45,7 +45,7 @@
       "implementer": 1,
       "verification": 2,
       "build-fixer": 1,
-      "code-review": 1,
+      "code-review": 2,
       "code-fixer": 1
     }
   }

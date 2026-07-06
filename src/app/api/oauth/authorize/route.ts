@@ -1,5 +1,4 @@
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { auth } from "@/infrastructure/auth";
 import { oauthClientRepository } from "@/infrastructure/repositories";
 import { authorizeOAuthClient } from "@/application/usecases/authorizeOAuthClient";
