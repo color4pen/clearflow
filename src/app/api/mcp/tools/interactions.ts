@@ -157,7 +157,7 @@ export function registerInteractionsTools(server: McpServer): void {
             });
 
             if (!result.ok) {
-              return toToolError(result.reason);
+              return toToolError("商談の記録に失敗しました");
             }
             return toToolSuccess(result.meeting);
           }
@@ -225,7 +225,7 @@ export function registerInteractionsTools(server: McpServer): void {
             });
 
             if (!result.ok) {
-              return toToolError(result.reason);
+              return toToolError("商談の更新に失敗しました");
             }
             return toToolSuccess(result.meeting);
           }
@@ -253,7 +253,7 @@ export function registerInteractionsTools(server: McpServer): void {
             });
 
             if (!result.ok) {
-              return toToolError(result.reason);
+              return toToolError("契約調整の記録に失敗しました");
             }
             return toToolSuccess(result.interaction);
           }
@@ -281,7 +281,7 @@ export function registerInteractionsTools(server: McpServer): void {
             });
 
             if (!result.ok) {
-              return toToolError(result.reason);
+              return toToolError("請求調整の記録に失敗しました");
             }
             return toToolSuccess(result.interaction);
           }

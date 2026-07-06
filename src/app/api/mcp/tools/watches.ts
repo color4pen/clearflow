@@ -54,7 +54,7 @@ export function registerWatchesTools(server: McpServer): void {
             });
 
             if (!result.ok) {
-              return toToolError(result.reason);
+              return toToolError("ウォッチの登録に失敗しました");
             }
             return toToolSuccess(result.watch);
           }
@@ -67,7 +67,7 @@ export function registerWatchesTools(server: McpServer): void {
             });
 
             if (!result.ok) {
-              return toToolError(result.reason);
+              return toToolError("ウォッチの解除に失敗しました");
             }
             return toToolSuccess({ unwatched: true, dealId: args.dealId });
           }

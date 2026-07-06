@@ -65,7 +65,7 @@ export function registerNotificationsTools(server: McpServer): void {
             });
 
             if (!result.ok) {
-              return toToolError(result.reason);
+              return toToolError("既読化に失敗しました");
             }
             return toToolSuccess({ marked: true });
           }

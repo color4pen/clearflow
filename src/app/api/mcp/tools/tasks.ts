@@ -136,7 +136,7 @@ export function registerTasksTools(server: McpServer): void {
             });
 
             if (!result.ok) {
-              return toToolError(result.reason);
+              return toToolError("タスクの作成に失敗しました");
             }
             return toToolSuccess(result.actionItem);
           }
@@ -175,7 +175,7 @@ export function registerTasksTools(server: McpServer): void {
             });
 
             if (!result.ok) {
-              return toToolError(result.reason);
+              return toToolError("タスクの更新に失敗しました");
             }
             return toToolSuccess(result.actionItem);
           }
@@ -201,7 +201,7 @@ export function registerTasksTools(server: McpServer): void {
             });
 
             if (!result.ok) {
-              return toToolError(result.reason);
+              return toToolError("タスクのステータス更新に失敗しました");
             }
             return toToolSuccess(result.actionItem);
           }
@@ -218,7 +218,7 @@ export function registerTasksTools(server: McpServer): void {
             });
 
             if (!result.ok) {
-              return toToolError(result.reason);
+              return toToolError("タスクのトグルに失敗しました");
             }
             return toToolSuccess(result.actionItem);
           }
@@ -243,7 +243,7 @@ export function registerTasksTools(server: McpServer): void {
             });
 
             if (!result.ok) {
-              return toToolError(result.reason);
+              return toToolError("タスクの削除に失敗しました");
             }
             return toToolSuccess({ deleted: true, id: args.id });
           }

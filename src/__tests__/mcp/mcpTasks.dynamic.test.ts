@@ -7,6 +7,8 @@
  *  - canPerform(member, actionItem, create) = true → member は create が usecase に到達する
  *  - updateActionItemStatus usecase が status 遷移で到達することを確認
  *
+ * TC-012: tasks update で dueDate: null を指定したとき updateActionItem usecase に null が渡る（null クリア）。
+ *
  * 受け入れ基準:「タスクの CRUD・ステータス遷移が Server Action と同一の認可判定になること
  * をテストで固定する」を満たす。
  */
@@ -21,6 +23,7 @@ const state = {
   deleteActionItemCalls: [] as unknown[],
   createActionItemCalls: [] as unknown[],
   updateActionItemStatusCalls: [] as unknown[],
+  updateActionItemCalls: [] as unknown[],
 };
 
 // 実装を捕捉してから mock.module を呼ぶ。afterAll で復元する。
@@ -28,6 +31,7 @@ import * as rateLimitModule from "@/infrastructure/rateLimit";
 import * as deleteActionItemModule from "@/application/usecases/deleteActionItem";
 import * as createActionItemModule from "@/application/usecases/createActionItem";
 import * as updateActionItemStatusModule from "@/application/usecases/updateActionItemStatus";
+import * as updateActionItemModule from "@/application/usecases/updateActionItem";
 const realRateLimit = {
   checkRateLimit: rateLimitModule.checkRateLimit,
   RATE_LIMITS: rateLimitModule.RATE_LIMITS,
@@ -35,6 +39,7 @@ const realRateLimit = {
 const realDeleteActionItem = deleteActionItemModule.deleteActionItem;
 const realCreateActionItem = createActionItemModule.createActionItem;
 const realUpdateActionItemStatus = updateActionItemStatusModule.updateActionItemStatus;
+const realUpdateActionItem = updateActionItemModule.updateActionItem;
 
 mock.module("@/infrastructure/rateLimit", () => ({
   checkRateLimit: async () => ({ allowed: true }),
@@ -65,6 +70,13 @@ mock.module("@/application/usecases/updateActionItemStatus", () => ({
   },
 }));
 
+mock.module("@/application/usecases/updateActionItem", () => ({
+  updateActionItem: async (input: unknown) => {
+    state.updateActionItemCalls.push(input);
+    return { ok: true as const, actionItem: mockActionItem };
+  },
+}));
+
 afterAll(() => {
   mock.module("@/infrastructure/rateLimit", () => realRateLimit);
   mock.module("@/application/usecases/deleteActionItem", () => ({
@@ -75,6 +87,9 @@ afterAll(() => {
   }));
   mock.module("@/application/usecases/updateActionItemStatus", () => ({
     updateActionItemStatus: realUpdateActionItemStatus,
+  }));
+  mock.module("@/application/usecases/updateActionItem", () => ({
+    updateActionItem: realUpdateActionItem,
   }));
 });
 
@@ -147,6 +162,7 @@ beforeEach(() => {
   state.deleteActionItemCalls = [];
   state.createActionItemCalls = [];
   state.updateActionItemStatusCalls = [];
+  state.updateActionItemCalls = [];
 });
 
 describe("MCP tasks ツール — 認可判定（T-08）", () => {
@@ -201,5 +217,36 @@ describe("MCP tasks ツール — 認可判定（T-08）", () => {
     expect(callArgs.id).toBe(ITEM_UUID);
     expect(callArgs.status).toBe("in_progress");
     expect(callArgs.organizationId).toBe("org-1");
+  });
+});
+
+describe("TC-012: tasks update で null 指定によりフィールドがクリアされる", () => {
+  it("dueDate: null を指定したとき updateActionItem usecase に dueDate: null が渡る（undefined による変更なしと区別される）", async () => {
+    const result = await callTasks(
+      { operation: "update", id: ITEM_UUID, dueDate: null },
+      "admin"
+    );
+
+    expect(result.isError).toBeUndefined();
+    expect(state.updateActionItemCalls).toHaveLength(1);
+    const callArgs = state.updateActionItemCalls[0] as Record<string, unknown>;
+    expect(callArgs.id).toBe(ITEM_UUID);
+    expect(callArgs.organizationId).toBe("org-1");
+    // null（クリア）が正しく伝わる
+    expect(callArgs.dueDate).toBeNull();
+  });
+
+  it("dueDate を省略したとき updateActionItem usecase に dueDate: undefined が渡る（変更なし）", async () => {
+    const result = await callTasks(
+      { operation: "update", id: ITEM_UUID, description: "更新後" },
+      "admin"
+    );
+
+    expect(result.isError).toBeUndefined();
+    expect(state.updateActionItemCalls).toHaveLength(1);
+    const callArgs = state.updateActionItemCalls[0] as Record<string, unknown>;
+    // undefined（変更なし）が正しく伝わる
+    expect(callArgs.dueDate).toBeUndefined();
+    expect(callArgs.description).toBe("更新後");
   });
 });
