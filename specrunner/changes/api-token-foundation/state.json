@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "1ec52947-2102-4a97-93dc-f4c41a781ddd",
   "createdAt": "2026-07-06T13:36:42.555Z",
-  "updatedAt": "2026-07-06T14:15:12.847Z",
+  "updatedAt": "2026-07-06T14:18:23.655Z",
   "request": {
     "title": "MCP 連携の土台 — API トークンの発行・失効と Bearer 認証",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/api-token-foundation-1ec52947",
   "error": null,
@@ -33,8 +33,22 @@
       ]
     }
   ],
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "7063dc096feb2a69b5f961ab03dd6ec91741cd40",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 33,
+    "historyCount": 38,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -43,7 +57,9 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 1,
-      "code-fixer": 1
+      "code-fixer": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
