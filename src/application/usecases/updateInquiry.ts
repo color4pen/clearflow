@@ -74,9 +74,8 @@ export async function updateInquiry(data: {
     }
     return { ok: true, inquiry: updatedInquiry };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "引き合いの更新に失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("updateInquiry failed", err);
+    return { ok: false, reason: "引き合いの更新に失敗しました" };
   }
 }

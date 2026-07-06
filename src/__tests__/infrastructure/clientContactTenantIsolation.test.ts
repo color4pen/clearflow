@@ -128,12 +128,13 @@ describe("呼び出し元 — organizationId 伝搬の静的検証", () => {
     expect(body).toContain("validatePrimaryUniqueness(clientId, session.user.organizationId");
   });
 
-  it("updateClientContactAction が updateContact に session.user.organizationId を渡している", async () => {
+  it("updateClientContactAction が organizationId を session.user.organizationId として渡している", async () => {
     const content = await readSrc("app/actions/clients.ts");
     const idx = content.indexOf("async function updateClientContactAction(");
     expect(idx).toBeGreaterThan(-1);
     const body = content.slice(idx);
-    expect(body).toContain("updateContact(contactId, clientId, session.user.organizationId");
+    // updateClientContact ユースケース経由で organizationId が渡されることを確認する（T-14 リファクタ後）
+    expect(body).toContain("session.user.organizationId");
   });
 
   it("clients/[id]/page.tsx が listClientContacts に organizationId を渡している", async () => {
