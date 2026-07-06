@@ -29,3 +29,9 @@
 {"type":"transition","ts":"2026-07-06T18:17:20.845Z","step":"signal-handler","status":"ok","message":"running → awaiting-resume: Interrupted by signal"}
 {"type":"transition","ts":"2026-07-06T18:17:43.475Z","step":"resume","status":"ok","message":"awaiting-resume → running: Resuming from step 'spec-fixer'"}
 {"type":"transition","ts":"2026-07-06T18:17:43.532Z","step":"spec-fixer-started","status":"started","message":"Starting spec-fixer step"}
+{"type":"transition","ts":"2026-07-06T18:20:46.449Z","step":"spec-fixer-verdict","status":"ok","message":"spec-fixer verdict: approved"}
+{"type":"step-attempt","step":"spec-fixer","sessionId":"cc8ce0fb-8226-4f90-8e31-265f5d4f7942","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-06T18:17:43.540Z","endedAt":"2026-07-06T18:20:45.235Z"}
+{"type":"lineage","step":"spec-fixer","ts":"2026-07-06T18:20:45.235Z","outputs":[{"path":"specrunner/changes/oauth-authorization-server/design.md","hash":"sha256:3cf2b6b13f50781eb1ffef1e2c641fa562e7a66f785d3ebdd3f5c5f8a657a8f8"},{"path":"specrunner/changes/oauth-authorization-server/spec.md","hash":"sha256:d896f0799dba20bcd10ddcf961569a60dd41379b394e46f68420adace619abd2"}],"inputs":[{"path":"specrunner/changes/oauth-authorization-server/spec-review-result-001.md","hash":"sha256:8dec7894aeb889f67bbad08605fcf46d4e1504e08ee1cf869a354efbf8450b3c"}]}
+{"type":"transition","ts":"2026-07-06T18:20:46.458Z","step":"step-transition","status":"ok","message":"spec-fixer → spec-review"}
+{"type":"transition","ts":"2026-07-06T18:20:46.460Z","step":"spec-review","status":"started","message":"spec-review iteration 1 started"}
+{"type":"transition","ts":"2026-07-06T18:20:46.462Z","step":"spec-review-started","status":"started","message":"Starting spec-review step"}
