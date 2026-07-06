@@ -82,3 +82,9 @@
 {"type":"transition","ts":"2026-07-06T16:31:16.355Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-07-06T16:31:16.355Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-07-06T16:31:16.358Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-07-06T16:40:58.142Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"8a5ff84e-c732-4ca9-8142-d3b4c41e5008","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-06T16:31:16.369Z","endedAt":"2026-07-06T16:40:56.743Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-07-06T16:40:56.743Z","outputs":[{"path":"specrunner/changes/mcp-server-core","hash":null}],"inputs":[{"path":"specrunner/changes/mcp-server-core/review-feedback-002.md","hash":"sha256:0d400e97f38381bd688dfea50fa2e2d77a78ab3635bbe364f0a66cbec8ed4c16"}]}
+{"type":"transition","ts":"2026-07-06T16:40:58.148Z","step":"step-transition","status":"ok","message":"code-fixer → custom-reviewers"}
+{"type":"transition","ts":"2026-07-06T16:40:58.150Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 1 started"}
+{"type":"transition","ts":"2026-07-06T16:40:58.160Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
