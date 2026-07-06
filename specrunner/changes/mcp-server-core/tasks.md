@@ -134,13 +134,15 @@
   - remove_deal_contact: `canPerform(role, "deal", "manageContacts")`
 - [ ] `get` 操作で `getClient` + `listClientContacts` を呼び出し、担当者一覧を含めて返す
 - [ ] `update_contact` で `validatePrimaryUniqueness` を呼び出す（Server Action と同様）
-- [ ] `update` で直接 `clientRepository.update` を呼び出す（Server Action と同様、usecase が存在しないため）
+- [ ] `update` で `updateClient` ユースケースを呼び出す（T-14 で新設するユースケース。事前に T-14 を完了すること）
 - [ ] 書き込み操作に `checkRateLimit` を適用する
 - [ ] route.ts で `registerClientsTools(server)` を呼び出す
 
 **Acceptance Criteria**:
 - `tools/list` に `clients` ツールが含まれる
 - get 操作で顧客 + 担当者一覧が返る
+- `update` 操作が `updateClient` ユースケース経由で動作し、監査ログ（`client.update`）が記録される
+- `update_contact` 操作が `updateClientContact` ユースケース経由で動作し、監査ログ（`client_contact.update`）が記録される
 - add_contact / update_contact / delete_contact が正しく動作する
 - add_deal_contact / remove_deal_contact が正しく動作する
 - delete_contact で member ロールの場合 isError: true が返る（client.deleteContact は admin/manager のみ）
@@ -198,10 +200,13 @@
 - [ ] テストケース: member による client.deleteContact → isError
 - [ ] テストケース: admin による inquiry.delete → 成功
 - [ ] テストケース: manager による deal.create → 成功
+- [ ] テストケース: member による inquiry.update_status → declined → isError（`canPerform(role, "inquiry", "decline")` により拒否）
+- [ ] テストケース: admin による inquiry.update_status → declined → 成功（decline 権限あり）
 
 **Acceptance Criteria**:
 - 権限マトリクスに基づく拒否がテストで固定される
 - Server Action と同一の認可判定が行われることが検証される
+- update_status の declined パスで decline 権限チェックが機能することが検証される
 
 ## T-10: テナント分離テスト
 
@@ -220,9 +225,11 @@
 - [ ] テストケース: 承認ポリシー該当時に inquiries の update_status → converted でツール結果に承認待ち情報が含まれる
 - [ ] テストケース: 承認ポリシー非該当時に inquiries の update_status → converted で案件が生成される
 - [ ] `updateInquiryStatus` usecase のモックを使用して、pendingApproval の有無による結果分岐をテストする
+- [ ] テストケース: inquiries の update_status → declined で引合のステータスが declined に変わる（`updateInquiryStatus` が `declined` 値で呼ばれることをモック検証）
 
 **Acceptance Criteria**:
 - 承認ポリシー該当時の pending 状態がツール結果に明示されることがテストで固定される
+- declined ステータス変更が正常に処理されることがテストで固定される
 
 ## T-12: 監査ログ記録テスト
 
@@ -230,10 +237,14 @@
 - [ ] テストケース: MCP 経由の inquiries create → 監査ログ（inquiry.create）が記録される
 - [ ] テストケース: MCP 経由の deals update_phase → 監査ログ（deal.updatePhase）が記録される
 - [ ] テストケース: MCP 経由の clients add_contact → 監査ログ（client_contact.create）が記録される
+- [ ] テストケース: MCP 経由の clients update → 監査ログ（client.update）が記録される（`updateClient` usecase 呼び出しのモック検証）
+- [ ] テストケース: MCP 経由の clients update_contact → 監査ログ（client_contact.update）が記録される（`updateClientContact` usecase 呼び出しのモック検証）
+- [ ] テストケース: 既存 Server Action（`updateClientAction`）経由の clients update → 監査ログ（client.update）が記録される（T-14 のリファクタ後に同一 usecase を通ることを確認）
 - [ ] usecase 呼び出しが行われることのモック検証で、監査記録が usecase 内で行われることを確認する
 
 **Acceptance Criteria**:
 - 書き込みツールの操作が監査ログに記録されることがテストで固定される
+- `clients update` / `clients update_contact` の MCP 経路・Server Action 経路の両方で監査ログ記録がテストで固定される
 
 ## T-13: 全体の品質ゲート確認
 
@@ -247,3 +258,28 @@
 - `aozu check` exit 0
 - architecture test green（mod-mcp 宣言込み）
 - 既存テストが変更されていない
+
+## T-14: `updateClient` / `updateClientContact` ユースケースの新設と Server Action リファクタ
+
+> **前提タスク**: T-05 の `clients update` / `update_contact` 操作で呼び出すユースケースを提供する。T-05 実装の前に完了すること。
+
+- [ ] `src/application/usecases/updateClient.ts` を作成する。`updateClient` 関数を export する
+  - 引数: `{ organizationId, clientId, data: UpdateClientInput, userId }` 相当
+  - `clientRepository.update` を呼び出して顧客レコードを更新する
+  - 監査ログ（アクション: `client.update`、対象エンティティ: client、entityId: clientId）を記録する
+  - 他ユースケース（`updateDeal` 等）のパターンに倣って実装する
+  - Result 型（`{ ok: true, client }` / `{ ok: false, reason }`）を返す
+- [ ] `src/application/usecases/updateClientContact.ts` を作成する。`updateClientContact` 関数を export する
+  - 引数: `{ organizationId, clientId, contactId, data: UpdateClientContactInput, userId }` 相当
+  - `clientRepository.updateContact` を呼び出して担当者レコードを更新する
+  - 監査ログ（アクション: `client_contact.update`、対象エンティティ: client_contact、entityId: contactId）を記録する
+  - Result 型を返す
+- [ ] `src/app/actions/clients.ts` の `updateClientAction` を `updateClient` ユースケース経由に変更する（既存の `clientRepository.update` 直接呼び出しを置き換える）
+- [ ] `src/app/actions/clients.ts` の `updateClientContactAction` を `updateClientContact` ユースケース経由に変更する（既存の `clientRepository.updateContact` 直接呼び出しを置き換える）
+
+**Acceptance Criteria**:
+- `src/application/usecases/updateClient.ts` が存在し、監査ログ記録ロジックを含む
+- `src/application/usecases/updateClientContact.ts` が存在し、監査ログ記録ロジックを含む
+- `updateClientAction` が `updateClient` ユースケースを呼び出す（直接 `clientRepository.update` を呼ばない）
+- `updateClientContactAction` が `updateClientContact` ユースケースを呼び出す（直接 `clientRepository.updateContact` を呼ばない）
+- 既存テストが変更なしで green を維持する
