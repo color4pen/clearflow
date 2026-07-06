@@ -4,7 +4,9 @@ import { PageToolbar, SectionCard } from "@/app/components";
 import { ProfileForm } from "./ProfileForm";
 import { PasswordForm } from "./PasswordForm";
 import { ApiTokenSection } from "./ApiTokenSection";
+import { OAuthConnectionSection } from "./OAuthConnectionSection";
 import { listApiTokensAction } from "@/app/actions/apiTokens";
+import { listOAuthConnectionsAction } from "@/app/actions/oauthConnections";
 
 export default async function AccountPage() {
   const session = await auth();
@@ -14,6 +16,9 @@ export default async function AccountPage() {
 
   const tokenResult = await listApiTokensAction();
   const tokens = tokenResult.success ? tokenResult.tokens : [];
+
+  const connectionsResult = await listOAuthConnectionsAction();
+  const connections = connectionsResult.success ? connectionsResult.connections : [];
 
   return (
     <div>
@@ -30,6 +35,10 @@ export default async function AccountPage() {
 
         <SectionCard className="p-5">
           <ApiTokenSection initialTokens={tokens} />
+        </SectionCard>
+
+        <SectionCard className="p-5">
+          <OAuthConnectionSection initialConnections={connections} />
         </SectionCard>
       </div>
     </div>

@@ -10,7 +10,8 @@ export async function proxy(request: NextRequest) {
   // Allow auth-related paths through
   if (
     pathname.startsWith("/login") ||
-    pathname.startsWith("/api/auth")
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/.well-known/")
   ) {
     return NextResponse.next();
   }

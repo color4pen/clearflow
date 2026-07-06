@@ -24,6 +24,7 @@
 - [[mod-api]] -> [[mod-repo]]
 - [[mod-api]] -> [[mod-authz]]
 - [[mod-api]] -> [[mod-auth]]
+- [[mod-api]] -> [[mod-webhook]]
 - [[mod-mcp]] -> [[mod-usecase]]
 - [[mod-mcp]] -> [[mod-auth]]
 - [[mod-mcp]] -> [[mod-authz]]
