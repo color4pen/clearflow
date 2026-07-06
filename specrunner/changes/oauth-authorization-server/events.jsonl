@@ -102,3 +102,9 @@
 {"type":"transition","ts":"2026-07-06T19:42:22.815Z","step":"code-review","status":"ok","message":"code-review iteration 2 completed with verdict: approved"}
 {"type":"transition","ts":"2026-07-06T19:42:22.816Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-07-06T19:42:22.818Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-07-06T19:42:45.135Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"00c4fb29-4185-4824-bd8b-199f01a5f0be","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":0,"transientRetryAttempts":0},"startedAt":"2026-07-06T19:42:22.830Z","endedAt":"2026-07-06T19:42:43.831Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-07-06T19:42:43.831Z","outputs":[{"path":"specrunner/changes/oauth-authorization-server","hash":null}],"inputs":[{"path":"specrunner/changes/oauth-authorization-server/review-feedback-002.md","hash":"sha256:ac791bbea9db7ec995fd401ce40a9cc5b54a0bf74b6d9757a20af07e9aee2ee7"}]}
+{"type":"transition","ts":"2026-07-06T19:42:45.140Z","step":"step-transition","status":"ok","message":"code-fixer → custom-reviewers"}
+{"type":"transition","ts":"2026-07-06T19:42:45.142Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 1 started"}
+{"type":"transition","ts":"2026-07-06T19:42:45.151Z","step":"domain-invariants-started","status":"started","message":"Starting domain-invariants step"}
