@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
-import { createClient, listClients, createClientContact, deleteClientContact } from "@/application/usecases";
+import { createClient, listClients, createClientContact, deleteClientContact, updateClient, updateClientContact } from "@/application/usecases";
 import { validatePrimaryUniqueness } from "@/application/services/clientContactService";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import { canPerform } from "@/domain/authorization";
@@ -150,21 +150,21 @@ export async function updateClientAction(
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
-  const { clientRepository } = await import("@/infrastructure/repositories");
-  const updated = await clientRepository.update(
+  const result = await updateClient({
     clientId,
-    session.user.organizationId,
-    {
+    organizationId: session.user.organizationId,
+    data: {
       name: parsed.data.name,
       industry: parsed.data.industry ?? null,
       size: parsed.data.size ?? null,
       address: parsed.data.address ?? null,
       notes: parsed.data.notes ?? null,
-    }
-  );
+    },
+    userId: session.user.id,
+  });
 
-  if (!updated) {
-    return { message: "顧客が見つかりません" };
+  if (!result.ok) {
+    return { message: result.reason };
   }
 
   revalidatePath("/clients");
@@ -267,13 +267,6 @@ export async function updateClientContactAction(
     return { success: false, message: "この操作を実行する権限がありません" };
   }
 
-  const { clientRepository } = await import("@/infrastructure/repositories");
-
-  const client = await clientRepository.findById(clientId, session.user.organizationId);
-  if (!client) {
-    return { success: false, message: "顧客が見つかりません" };
-  }
-
   const parsed = updateContactSchema.safeParse({
     name: formData.get("name"),
     department: formData.get("department") || undefined,
@@ -294,17 +287,23 @@ export async function updateClientContactAction(
     return { success: false, message: primaryValidation.reason };
   }
 
-  const updated = await clientRepository.updateContact(contactId, clientId, session.user.organizationId, {
-    name: parsed.data.name,
-    department: parsed.data.department ?? null,
-    position: parsed.data.position ?? null,
-    email: parsed.data.email ?? null,
-    phone: parsed.data.phone ?? null,
-    isPrimary,
+  const result = await updateClientContact({
+    clientId,
+    contactId,
+    organizationId: session.user.organizationId,
+    data: {
+      name: parsed.data.name,
+      department: parsed.data.department ?? null,
+      position: parsed.data.position ?? null,
+      email: parsed.data.email ?? null,
+      phone: parsed.data.phone ?? null,
+      isPrimary,
+    },
+    userId: session.user.id,
   });
 
-  if (!updated) {
-    return { success: false, message: "担当者が見つかりません" };
+  if (!result.ok) {
+    return { success: false, message: result.reason };
   }
 
   revalidatePath(`/clients/${clientId}`);

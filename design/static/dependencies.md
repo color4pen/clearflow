@@ -24,6 +24,14 @@
 - [[mod-api]] -> [[mod-repo]]
 - [[mod-api]] -> [[mod-authz]]
 - [[mod-api]] -> [[mod-auth]]
+- [[mod-mcp]] -> [[mod-usecase]]
+- [[mod-mcp]] -> [[mod-auth]]
+- [[mod-mcp]] -> [[mod-authz]]
+- [[mod-mcp]] -> [[mod-model]]
+- [[mod-mcp]] -> [[mod-webhook]]
+- [[mod-mcp]] -> [[mod-repo]]
+- [[mod-mcp]] -> [[mod-appservice]]
+- [[mod-mcp]] -> [[mod-lib]]
 - [[mod-proxy]] -> [[mod-auth]]
 
 ## アプリケーション層

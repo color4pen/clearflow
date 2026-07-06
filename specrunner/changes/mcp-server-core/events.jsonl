@@ -35,3 +35,8 @@
 {"type":"transition","ts":"2026-07-06T15:33:19.104Z","step":"spec-review","status":"ok","message":"spec-review iteration 2 completed with verdict: approved"}
 {"type":"transition","ts":"2026-07-06T15:33:19.104Z","step":"step-transition","status":"ok","message":"spec-review → test-case-gen"}
 {"type":"transition","ts":"2026-07-06T15:33:19.107Z","step":"test-case-gen-started","status":"started","message":"Starting test-case-gen step"}
+{"type":"transition","ts":"2026-07-06T15:38:02.914Z","step":"test-case-gen-verdict","status":"ok","message":"test-case-gen verdict: success"}
+{"type":"step-attempt","step":"test-case-gen","sessionId":"7d3b42c9-24b0-4bed-a05f-96d60db19d36","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-06T15:33:19.120Z","endedAt":"2026-07-06T15:38:01.570Z"}
+{"type":"lineage","step":"test-case-gen","ts":"2026-07-06T15:38:01.570Z","outputs":[{"path":"specrunner/changes/mcp-server-core/test-cases.md","hash":"sha256:19074872fc35e1f9d88a038c207b7e45f95a4ff490a77de22910c13174ade233"}],"inputs":[{"path":"specrunner/changes/mcp-server-core/design.md","hash":"sha256:174e6491a27f459d65cc415cb40a2ce87da98478e5e3a65781f8a6bb4daad7d6"},{"path":"specrunner/changes/mcp-server-core/tasks.md","hash":"sha256:64855af0e9d959ab2154d068d5288bd7e7c45063e9c07216f9f4e3650f1c08ae"}]}
+{"type":"transition","ts":"2026-07-06T15:38:02.921Z","step":"step-transition","status":"ok","message":"spec-review complete → implementer (iter 2)"}
+{"type":"transition","ts":"2026-07-06T15:38:02.923Z","step":"implementer-started","status":"started","message":"Starting implementer step"}

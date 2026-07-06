@@ -122,3 +122,7 @@ export { listInteractionsByInvoice } from "./listInteractionsByInvoice";
 export { createApiToken } from "./createApiToken";
 export { revokeApiToken } from "./revokeApiToken";
 export { listApiTokens } from "./listApiTokens";
+export { updateClient } from "./updateClient";
+export type { UpdateClientResult, UpdateClientInput } from "./updateClient";
+export { updateClientContact } from "./updateClientContact";
+export type { UpdateClientContactResult, UpdateClientContactInput } from "./updateClientContact";

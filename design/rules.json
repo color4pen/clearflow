@@ -12,6 +12,7 @@
     "mod-event",
     "mod-handler",
     "mod-lib",
+    "mod-mcp",
     "mod-model",
     "mod-proxy",
     "mod-repo",
@@ -56,6 +57,9 @@
     ],
     "mod-lib": [
       "src/lib/"
+    ],
+    "mod-mcp": [
+      "src/app/api/mcp/"
     ],
     "mod-model": [
       "src/domain/models/"
@@ -202,6 +206,38 @@
     [
       "mod-lib",
       "mod-model"
+    ],
+    [
+      "mod-mcp",
+      "mod-appservice"
+    ],
+    [
+      "mod-mcp",
+      "mod-auth"
+    ],
+    [
+      "mod-mcp",
+      "mod-authz"
+    ],
+    [
+      "mod-mcp",
+      "mod-lib"
+    ],
+    [
+      "mod-mcp",
+      "mod-model"
+    ],
+    [
+      "mod-mcp",
+      "mod-repo"
+    ],
+    [
+      "mod-mcp",
+      "mod-usecase"
+    ],
+    [
+      "mod-mcp",
+      "mod-webhook"
     ],
     [
       "mod-proxy",

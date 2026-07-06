@@ -69,4 +69,8 @@
 ## 開発スクリプト {#mod-devscript}
 責務: 開発環境専用の初期データ投入と DB リセット。アプリケーション本体から参照されない。
 実装: src/infrastructure/seed.ts, src/infrastructure/reset.ts
+
+## MCP {#mod-mcp}
+責務: MCP プロトコルの受付・ツール登録・Bearer 認証解決・認可チェック・ユースケース委譲。ビジネスロジックを持たない。
+実装: src/app/api/mcp/
 </content>
