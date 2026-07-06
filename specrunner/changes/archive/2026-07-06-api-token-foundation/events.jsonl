@@ -100,3 +100,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/api-token-foundation/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-06T14:31:25.602Z","endedAt":"2026-07-06T14:31:27.945Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-07-06T14:31:27.945Z","outputs":[{"path":"specrunner/changes/api-token-foundation/pr-create-result.md","hash":"sha256:a81cc8068c116c10fec69e4ddab5061e5a6f7ccbcfbb208706fd953878f39207"}],"inputs":[{"path":"feat/api-token-foundation-1ec52947","hash":null}]}
 {"type":"transition","ts":"2026-07-06T14:31:27.955Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-07-06T14:52:22.009Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
