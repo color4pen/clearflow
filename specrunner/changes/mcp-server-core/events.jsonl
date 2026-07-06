@@ -23,3 +23,9 @@
 {"type":"transition","ts":"2026-07-06T15:23:11.571Z","step":"spec-review","status":"warning","message":"spec-review iteration 1 completed with verdict: needs-fix"}
 {"type":"transition","ts":"2026-07-06T15:23:11.571Z","step":"step-transition","status":"ok","message":"spec-review → spec-fixer"}
 {"type":"transition","ts":"2026-07-06T15:23:11.574Z","step":"spec-fixer-started","status":"started","message":"Starting spec-fixer step"}
+{"type":"transition","ts":"2026-07-06T15:27:13.024Z","step":"spec-fixer-verdict","status":"ok","message":"spec-fixer verdict: approved"}
+{"type":"step-attempt","step":"spec-fixer","sessionId":"52455458-ca69-4dc3-afd6-cebaf38bf573","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-06T15:23:11.586Z","endedAt":"2026-07-06T15:27:11.702Z"}
+{"type":"lineage","step":"spec-fixer","ts":"2026-07-06T15:27:11.702Z","outputs":[{"path":"specrunner/changes/mcp-server-core/design.md","hash":"sha256:174e6491a27f459d65cc415cb40a2ce87da98478e5e3a65781f8a6bb4daad7d6"},{"path":"specrunner/changes/mcp-server-core/spec.md","hash":"sha256:af276ae2703a475e18d98aa9f72e01f470fa293afed115978538020e79cb2d6b"}],"inputs":[{"path":"specrunner/changes/mcp-server-core/spec-review-result-001.md","hash":"sha256:db6460e1aab0d4ea7f077544ce164bc55bd8ed8fd130201b59c80664e2587c51"}]}
+{"type":"transition","ts":"2026-07-06T15:27:13.032Z","step":"step-transition","status":"ok","message":"spec-review complete → spec-review (iter 2)"}
+{"type":"transition","ts":"2026-07-06T15:27:13.033Z","step":"spec-review","status":"started","message":"spec-review iteration 2 started"}
+{"type":"transition","ts":"2026-07-06T15:27:13.035Z","step":"spec-review-started","status":"started","message":"Starting spec-review step"}
