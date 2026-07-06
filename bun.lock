@@ -19,6 +19,7 @@
         "zod": "^4.4.3",
       },
       "devDependencies": {
+        "@color4pen/aozu": "^0.1.2",
         "@color4pen/specrunner": "0.3.5",
         "@tailwindcss/postcss": "^4",
         "@types/bcryptjs": "^3.0.0",
@@ -97,6 +98,8 @@
     "@babel/traverse": ["@babel/traverse@7.29.7", "", { "dependencies": { "@babel/code-frame": "^7.29.7", "@babel/generator": "^7.29.7", "@babel/helper-globals": "^7.29.7", "@babel/parser": "^7.29.7", "@babel/template": "^7.29.7", "@babel/types": "^7.29.7", "debug": "^4.3.1" } }, "sha512-EhlfNQtZ+NK22w5BM61ciuiq1m58ed33Wr1Xan//ZRTy6hgjnwyCffRYwzsGXdASJSUJ1guZILsErh1eQcl+zw=="],
 
     "@babel/types": ["@babel/types@7.29.7", "", { "dependencies": { "@babel/helper-string-parser": "^7.29.7", "@babel/helper-validator-identifier": "^7.29.7" } }, "sha512-4zBIxpPzowiZpusoFkyGVwakdRJUyuH5PxQ/PrqghfdFWWasvnCdPfQXHrenDai+gyLARulZjZowCOj6fjT4pA=="],
+
+    "@color4pen/aozu": ["@color4pen/aozu@0.1.2", "", { "bin": { "aozu": "src/cli/main.ts" } }, "sha512-7FZFqP7qxJg9YD7+IcJHPtN+LcUfNfpCWaO60rx+VhP4s5Y9ElTuO+B/+a9oqaUSmal8fr21a7zXRAmTLuuHZA=="],
 
     "@color4pen/specrunner": ["@color4pen/specrunner@0.3.5", "", { "dependencies": { "@anthropic-ai/sdk": "^0.91.0" }, "optionalDependencies": { "@anthropic-ai/claude-agent-sdk": "^0.2.128", "@openai/codex-sdk": "^0.130.0" }, "bin": { "specrunner": "dist/specrunner.js" } }, "sha512-W2P+rzraFyY9B95/vpulF3mGTBussAFHUCHs5bKxo1emMOpu92bevDxda3+VK2+9ABHtJ6M8HzXiMO7eaTpLXQ=="],
 
