@@ -6,10 +6,10 @@
 
 | # | Phase | Status | Duration | Exit Code |
 |---|-------|--------|----------|-----------|
-| 1 | build | passed | 16.4s | 0 |
-| 2 | typecheck | passed | 4.0s | 0 |
+| 1 | build | passed | 15.2s | 0 |
+| 2 | typecheck | passed | 1.1s | 0 |
 | 3 | test | passed | 0.7s | 0 |
-| 4 | lint | passed | 5.9s | 0 |
+| 4 | lint | passed | 5.3s | 0 |
 
 ## Phase: build
 
@@ -17,15 +17,15 @@
 ▲ Next.js 16.2.9 (Turbopack)
 
   Creating an optimized production build ...
-✓ Compiled successfully in 8.7s
+✓ Compiled successfully in 9.1s
   Running TypeScript ...
-  Finished TypeScript in 4.2s ...
+  Finished TypeScript in 4.5s ...
   Collecting page data using 7 workers ...
   Generating static pages using 7 workers (0/41) ...
   Generating static pages using 7 workers (10/41) 
   Generating static pages using 7 workers (20/41) 
   Generating static pages using 7 workers (30/41) 
-✓ Generating static pages using 7 workers (41/41) in 172ms
+✓ Generating static pages using 7 workers (41/41) in 152ms
   Finalizing page optimization ...
 
 Route (app)
@@ -142,10 +142,10 @@ src/__tests__/usecases/approvalPolicyFlow.test.ts:
 [evaluatePolicies] Policy policy-1 has conditionField set but null conditionOperator or conditionValue — skipping
 [handleApprovalCompleted] originTriggerEntityId is null for requestId: req-1
 
- 1775 pass
+ 1787 pass
  0 fail
- 3740 expect() calls
-Ran 1775 tests across 114 files. [682.00ms]
+ 3805 expect() calls
+Ran 1787 tests across 115 files. [674.00ms]
 
 ```
 
