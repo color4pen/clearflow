@@ -1904,3 +1904,26 @@ describe("監査ログ action/targetType 型カタログ", () => {
     expect(content).toContain("done: boolean");
   });
 });
+
+// ---------------------------------------------------------------------------
+// API トークン基盤 — ファイル存在確認
+// ---------------------------------------------------------------------------
+
+describe("API トークン基盤 — 静的ファイル構造検証", () => {
+  it("apiTokenRepository.ts が src/infrastructure/repositories/ に存在する", async () => {
+    const exists = await fileExists(
+      "src/infrastructure/repositories/apiTokenRepository.ts"
+    );
+    expect(exists).toBe(true);
+  });
+
+  it("infrastructure/repositories/index.ts に apiTokenRepository の re-export がある", async () => {
+    const content = await readSrc("infrastructure/repositories/index.ts");
+    expect(content).toContain("apiTokenRepository");
+  });
+
+  it("apiTokenResolver.ts が src/infrastructure/ に存在する", async () => {
+    const exists = await fileExists("src/infrastructure/apiTokenResolver.ts");
+    expect(exists).toBe(true);
+  });
+});

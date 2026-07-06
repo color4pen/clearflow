@@ -3,12 +3,16 @@ import { auth } from "@/infrastructure/auth";
 import { PageToolbar, SectionCard } from "@/app/components";
 import { ProfileForm } from "./ProfileForm";
 import { PasswordForm } from "./PasswordForm";
+import { ApiTokenSection } from "./ApiTokenSection";
+import { listApiTokensAction } from "@/app/actions/apiTokens";
 
 export default async function AccountPage() {
   const session = await auth();
   if (!session?.user) {
     redirect("/login");
   }
+
+  const tokens = await listApiTokensAction();
 
   return (
     <div>
@@ -21,6 +25,10 @@ export default async function AccountPage() {
 
         <SectionCard className="p-5">
           <PasswordForm />
+        </SectionCard>
+
+        <SectionCard className="p-5">
+          <ApiTokenSection initialTokens={tokens} />
         </SectionCard>
       </div>
     </div>

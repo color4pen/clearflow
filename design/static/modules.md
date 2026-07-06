@@ -51,8 +51,8 @@
 実装: src/infrastructure/schema.ts, src/infrastructure/db.ts
 
 ## 認証 {#mod-auth}
-責務: Auth.js v5 によるセッション管理と資格情報検証。認可（権限判定）とは別関心事。
-実装: src/infrastructure/auth.ts
+責務: Auth.js v5 によるセッション管理と資格情報検証。Bearer トークン（PAT）解決を含む。認可（権限判定）とは別関心事。
+実装: src/infrastructure/auth.ts, src/infrastructure/apiTokenResolver.ts
 
 ## イベントハンドラ {#mod-handler}
 責務: ドメインイベントへの波及反応（Webhook 配信・承認完了後アクション・監査ログ）の登録と実行。同期/非同期の別を管理する。起動時登録のエントリポイント（instrumentation）を含む。

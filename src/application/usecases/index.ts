@@ -119,3 +119,7 @@ export { createInvoiceAdjustment } from "./createInvoiceAdjustment";
 export type { CreateInvoiceAdjustmentResult } from "./createInvoiceAdjustment";
 export { listInteractionsByContract } from "./listInteractionsByContract";
 export { listInteractionsByInvoice } from "./listInteractionsByInvoice";
+export { createApiToken } from "./createApiToken";
+export type { } from "./createApiToken";
+export { revokeApiToken } from "./revokeApiToken";
+export { listApiTokens } from "./listApiTokens";
