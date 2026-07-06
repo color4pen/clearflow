@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "7dcc7c1c-703a-4e68-b751-4d2d62c95328",
   "createdAt": "2026-07-06T20:29:06.658Z",
-  "updatedAt": "2026-07-06T22:05:28.693Z",
+  "updatedAt": "2026-07-06T22:15:19.317Z",
   "request": {
     "title": "MCP ツール: 活動系（顧客接点・タスク・ウォッチ・通知）",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/mcp-tools-activity-7dcc7c1c",
   "error": null,
   "pipelineId": "standard",
@@ -33,7 +33,11 @@
       ]
     }
   ],
-  "resumePoint": null,
+  "resumePoint": {
+    "step": "pr-create",
+    "reason": "signal",
+    "iterationsExhausted": 0
+  },
   "reviewerStatuses": [
     {
       "name": "domain-invariants",
@@ -54,7 +58,7 @@
     "createdAt": "2026-07-06T22:05:28.686Z"
   },
   "_journal": {
-    "historyCount": 84,
+    "historyCount": 85,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
