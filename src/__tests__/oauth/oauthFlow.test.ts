@@ -14,6 +14,7 @@
 
 import { describe, it, expect, beforeEach, mock } from "bun:test";
 import { randomUUID, createHash } from "crypto";
+import { PgDatabase } from "drizzle-orm/pg-core";
 import type { OAuthClient } from "@/domain/models/oauthClient";
 import type { OAuthToken, OAuthTokenType } from "@/domain/models/oauthToken";
 import {
@@ -179,11 +180,13 @@ mock.module("@/application/services/auditRecorder", () => ({
   }),
 }));
 
-mock.module("@/infrastructure/db", () => ({
-  db: {
-    transaction: async (fn: (tx: unknown) => Promise<unknown>) => fn({}),
-  },
-}));
+mock.module("@/infrastructure/db", () => {
+  const mockDb = Object.create(PgDatabase.prototype) as {
+    transaction: (fn: (tx: unknown) => Promise<unknown>) => Promise<unknown>;
+  };
+  mockDb.transaction = async (fn: (tx: unknown) => Promise<unknown>) => fn({});
+  return { db: mockDb };
+});
 
 const { registerOAuthClient } = await import("@/application/usecases/registerOAuthClient");
 const { authorizeOAuthClient } = await import("@/application/usecases/authorizeOAuthClient");
