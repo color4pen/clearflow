@@ -20,14 +20,24 @@ function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotificatio
   return authExtra ?? null;
 }
 
+/** パース可能な日時文字列（不正な日付を new Date() 前に明確なエラーで弾く）。 */
+const dateString = z
+  .string()
+  .refine((v) => !Number.isNaN(Date.parse(v)), "日時の形式が不正です");
+
+/** YYYY-MM-DD 形式の日付（Server Action と同じ制約。todayJST との辞書順比較を安全にする）。 */
+const ymdDateString = z
+  .string()
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "日付は YYYY-MM-DD 形式で指定してください");
+
 const listSchema = z.object({
   operation: z.literal("list"),
   contractId: z.string().uuid().optional(),
   status: z.enum(["scheduled", "invoiced", "paid", "overdue"]).optional(),
-  paidAtFrom: z.string().optional(),
-  paidAtTo: z.string().optional(),
-  issueDateFrom: z.string().optional(),
-  issueDateTo: z.string().optional(),
+  paidAtFrom: dateString.optional(),
+  paidAtTo: dateString.optional(),
+  issueDateFrom: dateString.optional(),
+  issueDateTo: dateString.optional(),
 });
 
 const createSchema = z.object({
@@ -35,8 +45,8 @@ const createSchema = z.object({
   contractId: z.string().uuid("契約IDが不正です"),
   title: z.string().min(1, "タイトルは必須です"),
   amount: z.number().int().positive("金額は正の整数を指定してください"),
-  dueDate: z.string(),
-  issueDate: z.string().nullable().optional(),
+  dueDate: dateString,
+  issueDate: dateString.nullable().optional(),
   notes: z.string().optional(),
 });
 
@@ -45,8 +55,8 @@ const updateSchema = z.object({
   invoiceId: z.string().uuid("請求IDが不正です"),
   title: z.string().min(1).optional(),
   amount: z.number().int().positive().optional(),
-  issueDate: z.string().nullable().optional(),
-  dueDate: z.string().optional(),
+  issueDate: dateString.nullable().optional(),
+  dueDate: dateString.optional(),
   notes: z.string().nullable().optional(),
 });
 
@@ -54,7 +64,7 @@ const updateStatusSchema = z.object({
   operation: z.literal("update_status"),
   invoiceId: z.string().uuid("請求IDが不正です"),
   newStatus: z.enum(["scheduled", "invoiced", "paid", "overdue"]),
-  paidAt: z.string().optional(),
+  paidAt: ymdDateString.optional(),
 });
 
 const invoicesInputSchema = z.discriminatedUnion("operation", [

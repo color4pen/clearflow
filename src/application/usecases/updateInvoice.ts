@@ -99,9 +99,8 @@ export async function updateInvoice(data: {
 
     return { ok: true, invoice: updated };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "請求の更新に失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("updateInvoice failed", err);
+    return { ok: false, reason: "請求の更新に失敗しました" };
   }
 }

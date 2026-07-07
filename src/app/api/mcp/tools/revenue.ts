@@ -17,21 +17,34 @@ function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotificatio
   return authExtra ?? null;
 }
 
+/** パース可能な日時文字列（不正な日付を new Date() 前に明確なエラーで弾く）。 */
+const dateString = z
+  .string()
+  .refine((v) => !Number.isNaN(Date.parse(v)), "日時の形式が不正です");
+
+/**
+ * 終端日を当日末（23:59:59.999Z）に補正する。人間の売上画面と同じ inclusive 集計にするため
+ * （リポジトリのフィルタは `lte(paidAt, endDate)`。日付のみ指定では当日中の入金が除外されてしまう）。
+ */
+function toEndOfDay(s: string): Date {
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(`${s}T23:59:59.999Z`) : new Date(s);
+}
+
 const dashboardSchema = z.object({
   operation: z.literal("dashboard"),
 });
 
 const detailsSchema = z.object({
   operation: z.literal("details"),
-  startDate: z.string(),
-  endDate: z.string(),
+  startDate: dateString,
+  endDate: dateString,
   axis: z.enum(["monthly", "customer", "deal"]),
 });
 
 const forecastSchema = z.object({
   operation: z.literal("forecast"),
-  periodStart: z.string(),
-  periodEnd: z.string(),
+  periodStart: dateString,
+  periodEnd: dateString,
 });
 
 const revenueInputSchema = z.discriminatedUnion("operation", [
@@ -72,7 +85,7 @@ export function registerRevenueTools(server: McpServer): void {
             const details = await getRevenueDetails({
               organizationId,
               startDate: new Date(args.startDate),
-              endDate: new Date(args.endDate),
+              endDate: toEndOfDay(args.endDate),
               axis: args.axis as RevenueAxis,
             });
             return toToolSuccess(details);
@@ -85,7 +98,7 @@ export function registerRevenueTools(server: McpServer): void {
             const forecast = await getRevenueForecast({
               organizationId,
               periodStart: new Date(args.periodStart),
-              periodEnd: new Date(args.periodEnd),
+              periodEnd: toEndOfDay(args.periodEnd),
             });
             return toToolSuccess(forecast);
           }

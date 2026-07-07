@@ -21,6 +21,11 @@ function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotificatio
   return authExtra ?? null;
 }
 
+/** パース可能な日時文字列（不正な日付を new Date() 前に明確なエラーで弾く）。 */
+const dateString = z
+  .string()
+  .refine((v) => !Number.isNaN(Date.parse(v)), "日時の形式が不正です");
+
 const listSchema = z.object({
   operation: z.literal("list"),
 });
@@ -34,10 +39,10 @@ const createSchema = z.object({
   operation: z.literal("create"),
   dealId: z.string().uuid("案件IDが不正です"),
   amount: z.number().int().positive("金額は正の整数を指定してください"),
-  startDate: z.string(),
+  startDate: dateString,
   title: z.string().optional(),
   contractType: z.enum(["quasi_delegation", "fixed_price", "ses"]).optional(),
-  endDate: z.string().optional(),
+  endDate: dateString.optional(),
   paymentTerms: z.string().optional(),
   renewalType: z.enum(["one_time", "recurring"]).optional(),
   renewalCycle: z.string().optional(),
@@ -49,8 +54,8 @@ const updateSchema = z.object({
   title: z.string().min(1).optional(),
   contractType: z.enum(["quasi_delegation", "fixed_price", "ses"]).nullable().optional(),
   amount: z.number().int().positive().optional(),
-  startDate: z.string().optional(),
-  endDate: z.string().nullable().optional(),
+  startDate: dateString.optional(),
+  endDate: dateString.nullable().optional(),
   paymentTerms: z.string().nullable().optional(),
   renewalType: z.enum(["one_time", "recurring"]).optional(),
   renewalCycle: z.string().nullable().optional(),
