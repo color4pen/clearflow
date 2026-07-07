@@ -25,7 +25,7 @@
   - 結果が null の場合は toToolError("承認リクエストが見つかりません")
   - 結果に Request の全フィールド（originType, originTriggerAction, originTriggerEntityId 含む）+ approvalSteps 配列を含める
 - [ ] **create** operation:
-  - canPerform(role, "approval", "listRequests") での認可判定（Server Action では認証のみ。全ロールが作成可能）
+  - canPerform(role, "approval", "listRequests") での認可判定（Server Action では認証のみ。全ロールが作成可能）。注: `authorization.ts` に `approval.create` エントリが存在しないため `listRequests`（ALL_ROLES）を代替利用する。`listRequests` の許可ロールが変更された場合は create の認可挙動も変わるため、同時に確認が必要。将来 `approval.create` エントリを追加してこの代替を解消することを推奨する
   - checkRateLimit でレート制限（key: `mcp:createRequest:${userId}`, createRequest リミット使用）
   - テンプレートを `approvalTemplateRepository.findById` で取得（`@/infrastructure/repositories` から個別 import）
   - テンプレートが見つからない場合は toToolError("テンプレートが見つかりません")
@@ -41,12 +41,14 @@
   - checkRateLimit でレート制限（key: `mcp:submitRequest:${userId}`, approveReject リミット使用）
   - `submitRequest` usecase を呼び出す（`@/application/usecases/submitRequest` から個別 import）
   - requestId（UUID）は必須引数
+  - `result.ok === false` の場合、`result.reason` をサニタイズしてから `toToolError()` に渡す（approve/reject と同様）
 - [ ] **approve** operation:
   - canPerform(role, "approval", "approve") で認可判定
   - checkRateLimit でレート制限（key: `mcp:approveRequest:${userId}`, approveReject リミット使用）
   - `approveRequest` usecase を呼び出す（`@/application/usecases/approveRequest` から個別 import）
   - requestId（UUID）は必須引数
   - actorRole は authInfo.extra.role から取得して usecase に渡す
+  - `result.ok === false` の場合、`result.reason` を `toToolError()` に渡す前に既知の業務エラーメッセージ（楽観的ロック衝突・期限切れ等）かどうかサニタイズする。未知のメッセージ（DB 固有エラー等）は `"操作を完了できませんでした"` に差し替える（usecase 内 catch が `err.message` をそのまま reason に設定するため、DB 例外が混入する経路への対策）
 - [ ] **reject** operation:
   - canPerform(role, "approval", "reject") で認可判定
   - checkRateLimit でレート制限（key: `mcp:rejectRequest:${userId}`, approveReject リミット使用）
@@ -54,6 +56,7 @@
   - requestId（UUID）は必須引数
   - targetStatus 引数（optional, enum: "rejected" / "revision"。デフォルト "rejected"）
   - comment 引数（optional, 文字列）
+  - `result.ok === false` の場合、approve と同様に `result.reason` をサニタイズしてから `toToolError()` に渡す
 - [ ] **bulk_approve** operation:
   - canPerform(role, "approval", "approve") で認可判定
   - requestIds 配列（UUID の配列, min 1, max 20）は必須引数
@@ -65,6 +68,7 @@
   - checkRateLimit でレート制限（key: `mcp:resubmitRequest:${userId}`, approveReject リミット使用）
   - `resubmitRequest` usecase を呼び出す（`@/application/usecases/resubmitRequest` から個別 import）
   - requestId（UUID）は必須引数
+  - `result.ok === false` の場合、`result.reason` をサニタイズしてから `toToolError()` に渡す（approve/reject と同様）
 - [ ] 全 operation の catch で `handleToolError(error)` を使用する
 - [ ] usecase の Result が `{ ok: false }` の場合は `toToolError(result.reason)` を返す
 
@@ -96,6 +100,7 @@
 - [ ] **deactivate** operation:
   - canPerform(role, "approvalSettings", "deactivateDelegation") で認可判定
   - admin 以外は自身の委任のみ無効化可能: `approvalDelegationRepository.findByOrganization` で全委任を取得し、delegationId に該当する委任の fromUserId が自分自身でなければ拒否する（Server Action と同一ロジック）
+  - 注: `findByOrganization` で組織内全件を取得してから線形探索する実装は Server Action と同一だが、委任数が多い組織ではコストが増大する。`findById(delegationId, organizationId)` で直接取得すれば効率的だが、既存 repository のインターフェース変更を要するためスコープ外とする。将来の最適化候補として記録する
   - `deactivateDelegation` usecase を呼び出す（`@/application/usecases/deactivateDelegation` から個別 import）
   - delegationId（UUID）は必須引数
 - [ ] 全 operation の catch で `handleToolError(error)` を使用する
@@ -193,9 +198,11 @@
 - [ ] `import { registerApprovalTemplatesTools } from "./tools/approvalTemplates"` を追加
 - [ ] `import { registerApprovalPoliciesTools } from "./tools/approvalPolicies"` を追加
 - [ ] `createMcpServer()` 内で 4 つの register 関数を呼び出す
+- [ ] **TC-025 の更新**: `src/__tests__/mcp/mcpToolsRegistration.test.ts` の「登録ツール数」アサーションを 15 に更新する（現在の期待値 7 はすでに実態と乖離しているため、本タスクで合わせて修正する）
 
 **Acceptance Criteria**:
 - `createMcpServer()` が 15 ツール（既存 11 + 新規 4）を登録する
+- TC-025 が 15 ツールを期待するよう更新され、pass する
 - typecheck が通る
 
 ## T-06: 承認者資格フィルタの実行検証テスト
@@ -327,9 +334,10 @@
 ## T-14: typecheck・test green の確認
 
 - [ ] `bun run typecheck` が green であることを確認する
-- [ ] `bun test` が green であることを確認する（既存テスト無変更で green）
+- [ ] `bun test` が green であることを確認する（TC-025 は T-05 で更新済みのため除き、それ以外の既存テストは無変更で green）
 - [ ] 新規テストファイルが全て pass することを確認する
 - [ ] `aozu check` が exit 0 であることを確認する
 
 **Acceptance Criteria**:
 - 受け入れ基準「`typecheck && test` green・`aozu check` exit 0」を満たす
+- 「既存テスト無変更」の範囲には TC-025 を含まない（TC-025 は T-05 で意図的に更新する）

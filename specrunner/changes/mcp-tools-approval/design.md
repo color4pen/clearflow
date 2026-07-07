@@ -59,6 +59,7 @@ mcp-server-core（#158）で MCP サーバー基盤とコア CRM ツール群が
 - 承認期限のリマインド通知 — 既存バッチのまま
 - 新しい usecase や domain ロジックの追加 — 既存の usecase・repository をそのまま呼ぶ
 - 委任を考慮した「自分が承認すべき」リストの完全な再現 — UI もロール一致のみでフィルタしており、委任の反映は UI/MCP 共通の将来課題
+- **MCP ツールへの idempotencyKey 実装** — Server Action の submit / resubmit / approve / reject には `idempotencyKey` による重複実行防止機構があるが、MCP ツールでは実装しない。エージェントのリトライや一時的なネットワーク障害時に submit/resubmit が二重実行される可能性は楽観的ロック（approve の二重承認防止）では完全に防げないが、初期実装のスコープ外とする。将来課題: MCP ツールのリクエストに idempotencyKey 引数を追加し、usecase へ伝播させる
 
 ## Decisions
 
@@ -85,7 +86,10 @@ mcp-server-core（#158）で MCP サーバー基盤とコア CRM ツール群が
 - `filter: "action_required"` — status=pending かつ現在ユーザーのロールに該当する pending ステップがあるもの（UI の action-required タブと同一ロジック）
 - `filter: "my_requests"` — creatorId=自分のもの
 - `filter: "all"` — 全件（admin/manager のみ。権限なしの場合は空配列を返す）
+- filter 未指定 — 全件を返す（`canPerform` による authorization チェックのみ実施）
 - `statusFilter` — optional。特定ステータスで追加絞り込み
+
+> **非対称挙動の注記**: `filter` 未指定と `filter: "all"` 明示では同一ユーザーに対して返り値が変わる。`filter: "all"` 明示は「全件ビューを意図的に要求した」ケースであり admin/manager 以外には不適切とみなして空配列を返す。未指定は「フィルタを意識せず呼んだ」ケースとして canPerform が通れば全件返す設計。エージェントが混乱しないよう、ツールの description にこの挙動差異を明記すること（T-01 実装時）。
 
 **Alternatives considered**:
 - filter をクライアント（エージェント）に委ねる → 全件を返すと不要なデータ量が増え、エージェントの判断負荷が高い

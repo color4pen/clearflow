@@ -14,9 +14,9 @@ approval_requests ツールの `list` operation は `filter: "action_required"` 
 
 #### Scenario: member ロールの action_required フィルタ
 
-**Given** organizationId=org-1 に pending リクエストが 1 件あり、manager ステップが pending である
+**Given** organizationId=org-1 に pending リクエストが 2 件あり、1 件は manager ステップが pending、もう 1 件は承認ステップなしの legacy リクエスト（approvalSteps=[]）である
 **When** member ロールのユーザーが approval_requests ツールの list を filter="action_required" で呼ぶ
-**Then** 空配列が返される（member のステップがないため）
+**Then** ステップなし legacy リクエストのみが返される（ステップなし legacy リクエストは action_required に含まれる。manager ステップが pending のリクエストは member ロールには該当ステップがないため除外される）
 
 ### Requirement: 順序外のステップ承認は拒否される
 
