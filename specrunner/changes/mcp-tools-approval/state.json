@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "b232bc0c-5a28-4997-be1a-ac3d2bd1541a",
   "createdAt": "2026-07-07T00:22:23.733Z",
-  "updatedAt": "2026-07-07T01:29:37.863Z",
+  "updatedAt": "2026-07-07T01:35:52.967Z",
   "request": {
     "title": "MCP ツール: 承認系（申請・承認・委任・テンプレート・ポリシー）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-fixer",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/mcp-tools-approval-b232bc0c",
   "error": null,
@@ -34,8 +34,22 @@
     }
   ],
   "resumePoint": null,
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "skipped",
+      "approvedAtCommit": null,
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 42,
+    "historyCount": 51,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -44,7 +58,10 @@
       "test-case-gen": 1,
       "implementer": 1,
       "verification": 1,
-      "code-review": 1
+      "code-review": 1,
+      "code-fixer": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
