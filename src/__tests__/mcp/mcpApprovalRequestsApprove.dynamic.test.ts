@@ -19,7 +19,7 @@ const state = {
   approveRequestCalls: [] as unknown[],
   bulkApproveCalls: [] as unknown[],
   // モックが返す結果を制御するフラグ
-  approveMode: "completed" as "completed" | "already_completed" | "system",
+  approveMode: "completed" as "completed" | "already_completed" | "system" | "unknown_error",
   bulkApproveMode: "mixed" as "success" | "mixed",
 };
 
@@ -91,6 +91,9 @@ mock.module("@/application/usecases/approveRequest", () => ({
     state.approveRequestCalls.push(input);
     if (state.approveMode === "already_completed") {
       return { ok: false as const, reason: "All approval steps are already completed." };
+    }
+    if (state.approveMode === "unknown_error") {
+      return { ok: false as const, reason: "ERROR: connection to server lost during query execution, lost connection to mysql server at 'handshake'" };
     }
     if (state.approveMode === "system") {
       return { ok: true as const, request: mockSystemRequest };
@@ -331,5 +334,42 @@ describe("T-10: bulk_approve — 個別承認と同一判定・記録", () => {
 
     expect(result.isError).toBe(true);
     expect(state.bulkApproveCalls).toHaveLength(0);
+  });
+});
+
+// ============================================================
+// TC-017: approve — 未知エラーが固定文言にサニタイズされる
+// ============================================================
+describe("TC-017: approve — 未知エラーが固定文言にサニタイズされる", () => {
+  it("approveRequest が KNOWN_APPROVAL_REASONS 以外のエラー理由を返すとき '操作を完了できませんでした' が返される", async () => {
+    state.approveMode = "unknown_error";
+
+    const result = await callTool(
+      { operation: "approve", requestId: REQUEST_UUID },
+      "user-admin-1",
+      "admin"
+    );
+
+    expect(result.isError).toBe(true);
+    // 内部エラー詳細がクライアントに漏れていないこと
+    expect(result.text).not.toContain("connection");
+    expect(result.text).not.toContain("mysql");
+    // 固定文言が返されること
+    expect(result.text).toContain("操作を完了できませんでした");
+  });
+
+  it("approveRequest が呼ばれ、usecase への入力には organizationId が含まれる", async () => {
+    state.approveMode = "unknown_error";
+
+    await callTool(
+      { operation: "approve", requestId: REQUEST_UUID },
+      "user-admin-1",
+      "admin"
+    );
+
+    expect(state.approveRequestCalls).toHaveLength(1);
+    const callArgs = state.approveRequestCalls[0] as Record<string, unknown>;
+    expect(callArgs.requestId).toBe(REQUEST_UUID);
+    expect(callArgs.organizationId).toBe(ORG_ID);
   });
 });

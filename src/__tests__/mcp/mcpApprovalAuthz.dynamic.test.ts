@@ -20,6 +20,8 @@ const state = {
   rejectRequestCalls: [] as unknown[],
   bulkApproveCalls: [] as unknown[],
   createDelegationCalls: [] as unknown[],
+  listDelegationsResult: [] as ApprovalDelegation[],
+  findByOrganizationResult: [] as ApprovalDelegation[],
 };
 
 // ---- 定数 ----
@@ -29,6 +31,8 @@ const USER_MGR = "550e8400-e29b-41d4-a716-446655440010"; // 有効な UUID
 const USER_ADMIN = "550e8400-e29b-41d4-a716-446655440011"; // 有効な UUID
 const USER_OTHER = "550e8400-e29b-41d4-a716-446655440099"; // 有効な UUID（自分以外）
 const TO_USER_UUID = "550e8400-e29b-41d4-a716-446655440098";
+const DELEGATION_MGR_ID = "550e8400-e29b-41d4-a716-446655440050";
+const DELEGATION_OTHER_ID = "550e8400-e29b-41d4-a716-446655440051";
 
 // ---- モックデータ ----
 const mockRequest: ApprovalRequest = {
@@ -60,12 +64,37 @@ const mockDelegation: ApprovalDelegation = {
   createdAt: new Date("2026-07-01"),
 };
 
+const delegationOwnedByMgr: ApprovalDelegation = {
+  id: DELEGATION_MGR_ID,
+  fromUserId: USER_MGR,
+  toUserId: TO_USER_UUID,
+  fromUserRole: "manager",
+  organizationId: ORG_ID,
+  startDate: new Date("2026-07-01"),
+  endDate: new Date("2026-08-01"),
+  isActive: true,
+  createdAt: new Date("2026-07-01"),
+};
+
+const delegationOwnedByOther: ApprovalDelegation = {
+  id: DELEGATION_OTHER_ID,
+  fromUserId: USER_OTHER,
+  toUserId: TO_USER_UUID,
+  fromUserRole: "manager",
+  organizationId: ORG_ID,
+  startDate: new Date("2026-07-01"),
+  endDate: new Date("2026-08-01"),
+  isActive: true,
+  createdAt: new Date("2026-07-01"),
+};
+
 // ---- 実装を捕捉してからモック ----
 import * as rateLimitModule from "@/infrastructure/rateLimit";
 import * as approveRequestModule from "@/application/usecases/approveRequest";
 import * as rejectRequestModule from "@/application/usecases/rejectRequest";
 import * as bulkApproveModule from "@/application/usecases/bulkApprove";
 import * as createDelegationModule from "@/application/usecases/createDelegation";
+import * as listDelegationsModule from "@/application/usecases/listDelegations";
 import * as approvalDelegationRepositoryModule from "@/infrastructure/repositories/approvalDelegationRepository";
 
 const realRateLimit = {
@@ -76,6 +105,7 @@ const realApproveRequest = approveRequestModule.approveRequest;
 const realRejectRequest = rejectRequestModule.rejectRequest;
 const realBulkApprove = bulkApproveModule.bulkApprove;
 const realCreateDelegation = createDelegationModule.createDelegation;
+const realListDelegations = listDelegationsModule.listDelegations;
 const realApprovalDelegationRepository = { ...approvalDelegationRepositoryModule };
 
 mock.module("@/infrastructure/rateLimit", () => ({
@@ -115,10 +145,14 @@ mock.module("@/application/usecases/createDelegation", () => ({
   },
 }));
 
-// approvalDelegationRepository は delegations ツールの deactivate で使われるが、
-// このテストでは create のみテストするため簡易モックで十分
+mock.module("@/application/usecases/listDelegations", () => ({
+  listDelegations: async () => state.listDelegationsResult,
+}));
+
+// approvalDelegationRepository は delegations ツールの deactivate で使われる。
+// findByOrganization は TC-033 で状態制御するため state 参照にする。
 mock.module("@/infrastructure/repositories/approvalDelegationRepository", () => ({
-  findByOrganization: async () => [],
+  findByOrganization: async () => state.findByOrganizationResult,
   findActiveByToUserId: async () => [],
   create: async () => mockDelegation,
   deactivate: async () => null,
@@ -138,6 +172,9 @@ afterAll(() => {
   }));
   mock.module("@/application/usecases/createDelegation", () => ({
     createDelegation: realCreateDelegation,
+  }));
+  mock.module("@/application/usecases/listDelegations", () => ({
+    listDelegations: realListDelegations,
   }));
   mock.module("@/infrastructure/repositories/approvalDelegationRepository", () =>
     realApprovalDelegationRepository
@@ -221,6 +258,8 @@ beforeEach(() => {
   state.rejectRequestCalls = [];
   state.bulkApproveCalls = [];
   state.createDelegationCalls = [];
+  state.listDelegationsResult = [];
+  state.findByOrganizationResult = [];
 });
 
 // ============================================================
@@ -367,5 +406,65 @@ describe("T-12: delegations.create — admin 以外の fromUserId 制限", () =>
 
     expect(result.isError).toBeUndefined();
     expect(state.createDelegationCalls).toHaveLength(1);
+  });
+});
+
+// ============================================================
+// TC-032: delegations.list — admin/非admin フィルタリング
+// ============================================================
+describe("TC-032: delegations.list — admin 以外は自身の委任のみ返される", () => {
+  it("manager ロールで list を呼ぶと自身の委任のみ返され、他ユーザーの委任は含まれない", async () => {
+    state.listDelegationsResult = [delegationOwnedByMgr, delegationOwnedByOther];
+
+    const result = await callDelegationsTool({ operation: "list" }, USER_MGR, "manager");
+
+    expect(result.isError).toBeUndefined();
+    const data = JSON.parse(result.text) as ApprovalDelegation[];
+    expect(data).toHaveLength(1);
+    expect(data[0].id).toBe(DELEGATION_MGR_ID);
+    expect(data[0].fromUserId).toBe(USER_MGR);
+  });
+
+  it("admin ロールで list を呼ぶと全委任が返される", async () => {
+    state.listDelegationsResult = [delegationOwnedByMgr, delegationOwnedByOther];
+
+    const result = await callDelegationsTool({ operation: "list" }, USER_ADMIN, "admin");
+
+    expect(result.isError).toBeUndefined();
+    const data = JSON.parse(result.text) as ApprovalDelegation[];
+    expect(data).toHaveLength(2);
+  });
+});
+
+// ============================================================
+// TC-033: delegations.deactivate — ownership check
+// ============================================================
+describe("TC-033: delegations.deactivate — admin 以外の他人委任無効化が拒否される", () => {
+  it("manager ロールで他ユーザーの委任を deactivate しようとすると isError=true で拒否される", async () => {
+    // findByOrganization が他ユーザーの委任を返すよう設定
+    state.findByOrganizationResult = [delegationOwnedByOther];
+
+    const result = await callDelegationsTool(
+      { operation: "deactivate", delegationId: DELEGATION_OTHER_ID },
+      USER_MGR,
+      "manager"
+    );
+
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("権限");
+  });
+
+  it("manager ロールで存在しない委任 ID を deactivate しようとすると isError=true になる", async () => {
+    // findByOrganization は空（その委任は組織内に存在しない）
+    state.findByOrganizationResult = [];
+
+    const result = await callDelegationsTool(
+      { operation: "deactivate", delegationId: DELEGATION_OTHER_ID },
+      USER_MGR,
+      "manager"
+    );
+
+    expect(result.isError).toBe(true);
+    expect(result.text).toContain("委任が見つかりません");
   });
 });
