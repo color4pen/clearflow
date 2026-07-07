@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "b232bc0c-5a28-4997-be1a-ac3d2bd1541a",
   "createdAt": "2026-07-07T00:22:23.733Z",
-  "updatedAt": "2026-07-07T01:45:09.423Z",
+  "updatedAt": "2026-07-07T01:45:33.104Z",
   "request": {
     "title": "MCP ツール: 承認系（申請・承認・委任・テンプレート・ポリシー）",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/mcp-tools-approval-b232bc0c",
   "error": null,
   "pipelineId": "standard",
@@ -48,8 +48,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/163",
+    "number": 163,
+    "createdAt": "2026-07-07T01:45:33.091Z"
+  },
   "_journal": {
-    "historyCount": 73,
+    "historyCount": 78,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -63,7 +68,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
