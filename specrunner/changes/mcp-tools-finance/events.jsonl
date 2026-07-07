@@ -130,3 +130,11 @@
 {"type":"transition","ts":"2026-07-07T00:11:57.004Z","step":"verification","status":"ok","message":"verification iteration 1 completed with verdict: passed"}
 {"type":"transition","ts":"2026-07-07T00:11:57.004Z","step":"step-transition","status":"ok","message":"verification → adr-gen"}
 {"type":"transition","ts":"2026-07-07T00:11:57.007Z","step":"adr-gen-started","status":"started","message":"Starting adr-gen step"}
+{"type":"transition","ts":"2026-07-07T00:12:18.531Z","step":"adr-gen-verdict","status":"ok","message":"adr-gen verdict: success"}
+{"type":"step-attempt","step":"adr-gen","sessionId":"8f7f95c7-a977-4fc7-a7de-442c067c68e4","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-07T00:11:57.019Z","endedAt":"2026-07-07T00:12:14.589Z"}
+{"type":"transition","ts":"2026-07-07T00:12:18.537Z","step":"step-transition","status":"ok","message":"adr-gen → pr-create"}
+{"type":"transition","ts":"2026-07-07T00:12:18.539Z","step":"step-transition","status":"ok","message":"Transitioning to pr-create step"}
+{"type":"transition","ts":"2026-07-07T00:12:20.344Z","step":"pr-create-verdict","status":"ok","message":"pr-create verdict: success"}
+{"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/mcp-tools-finance/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-07T00:12:18.541Z","endedAt":"2026-07-07T00:12:20.343Z"}
+{"type":"lineage","step":"pr-create","ts":"2026-07-07T00:12:20.343Z","outputs":[{"path":"specrunner/changes/mcp-tools-finance/pr-create-result.md","hash":"sha256:4c89a4d4af4d7287534b67b11e3be4bc75f708d16b315cd9c7c78695b51f726d"}],"inputs":[{"path":"feat/mcp-tools-finance-64eb3227","hash":null}]}
+{"type":"transition","ts":"2026-07-07T00:12:20.361Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
