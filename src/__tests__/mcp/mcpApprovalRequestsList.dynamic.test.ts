@@ -397,3 +397,114 @@ describe("T-13: approval_requests.get — システム連動情報の返却", ()
     expect(result.text).toContain("承認リクエストが見つかりません");
   });
 });
+
+// ============================================================
+// TC-005: filter=all の非admin/manager 空配列返却
+// ============================================================
+describe("TC-005: approval_requests.list — filter=all の非対称挙動", () => {
+  it("member ロールで filter=all を呼ぶと空配列が返される", async () => {
+    const result = await callTool(
+      { operation: "list", filter: "all" },
+      "user-member-1",
+      "member"
+    );
+
+    expect(result.isError).toBeUndefined();
+    const items = result.data as unknown[];
+    expect(Array.isArray(items)).toBe(true);
+    expect(items).toHaveLength(0);
+  });
+
+  it("admin ロールで filter=all を呼ぶと全件が返される（管理者は制限なし）", async () => {
+    const result = await callTool(
+      { operation: "list", filter: "all" },
+      "user-admin-1",
+      "admin"
+    );
+
+    expect(result.isError).toBeUndefined();
+    const items = result.data as Array<{ id: string }>;
+    expect(items).toHaveLength(mockRequests.length);
+  });
+
+  it("manager ロールで filter=all を呼ぶと全件が返される（manager は制限なし）", async () => {
+    const result = await callTool(
+      { operation: "list", filter: "all" },
+      USER_MGR,
+      "manager"
+    );
+
+    expect(result.isError).toBeUndefined();
+    const items = result.data as Array<{ id: string }>;
+    expect(items).toHaveLength(mockRequests.length);
+  });
+});
+
+// ============================================================
+// TC-006: statusFilter による追加絞り込み
+// ============================================================
+describe("TC-006: approval_requests.list — statusFilter による絞り込み", () => {
+  it("statusFilter=approved を指定すると status=approved のリクエストのみ返される", async () => {
+    // モックデータには req-3 のみ status=approved
+    const result = await callTool(
+      { operation: "list", statusFilter: "approved" },
+      "user-admin-1",
+      "admin"
+    );
+
+    expect(result.isError).toBeUndefined();
+    const items = result.data as Array<{ id: string; status: string }>;
+    expect(items.every((r) => r.status === "approved")).toBe(true);
+    const ids = items.map((r) => r.id);
+    expect(ids).toContain("req-3");
+    expect(ids).not.toContain("req-1");
+    expect(ids).not.toContain("req-2");
+    expect(ids).not.toContain("req-4");
+  });
+
+  it("statusFilter=pending を指定すると status=pending のリクエストのみ返される", async () => {
+    // モックデータには req-1, req-2, req-4 が status=pending
+    const result = await callTool(
+      { operation: "list", statusFilter: "pending" },
+      "user-admin-1",
+      "admin"
+    );
+
+    expect(result.isError).toBeUndefined();
+    const items = result.data as Array<{ id: string; status: string }>;
+    expect(items.every((r) => r.status === "pending")).toBe(true);
+    const ids = items.map((r) => r.id);
+    expect(ids).toContain("req-1");
+    expect(ids).toContain("req-2");
+    expect(ids).toContain("req-4");
+    expect(ids).not.toContain("req-3");
+  });
+
+  it("filter=all（admin）と statusFilter=approved を組み合わせると status=approved のみ返される", async () => {
+    const result = await callTool(
+      { operation: "list", filter: "all", statusFilter: "approved" },
+      "user-admin-1",
+      "admin"
+    );
+
+    expect(result.isError).toBeUndefined();
+    const items = result.data as Array<{ id: string; status: string }>;
+    expect(items).toHaveLength(1);
+    expect(items[0].id).toBe("req-3");
+    expect(items[0].status).toBe("approved");
+  });
+
+  it("filter=all（member）と statusFilter=pending を組み合わせると空配列が返される（TC-005 と TC-006 の合成）", async () => {
+    // filter=all で member は全件を空にし、その後 statusFilter は適用される
+    const result = await callTool(
+      { operation: "list", filter: "all", statusFilter: "pending" },
+      "user-member-1",
+      "member"
+    );
+
+    expect(result.isError).toBeUndefined();
+    const items = result.data as unknown[];
+    expect(Array.isArray(items)).toBe(true);
+    expect(items).toHaveLength(0);
+  });
+});
