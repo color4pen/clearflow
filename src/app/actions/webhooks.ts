@@ -2,7 +2,6 @@
 
 import { randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { auth } from "@/infrastructure/auth";
 import {
   webhookEndpointRepository,
@@ -12,46 +11,7 @@ import { WEBHOOK_EVENT_TYPES } from "@/domain/models/webhookEvent";
 import { deliverSingleAttempt } from "@/infrastructure/webhookDelivery";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import { canPerform } from "@/domain/authorization";
-
-const PRIVATE_IP_PATTERNS = [
-  /^localhost$/i,
-  /^127\./,
-  /^::1$/,
-  /^169\.254\./,
-  /^10\./,
-  /^172\.(1[6-9]|2\d|3[01])\./,
-  /^192\.168\./,
-];
-
-function isPrivateHost(hostname: string): boolean {
-  return PRIVATE_IP_PATTERNS.some((pattern) => pattern.test(hostname));
-}
-
-function validateWebhookUrl(
-  url: string
-): { ok: true } | { ok: false; message: string } {
-  const urlResult = z.string().url().safeParse(url);
-  if (!urlResult.success) {
-    return { ok: false, message: "有効な URL を入力してください" };
-  }
-
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    return { ok: false, message: "有効な URL を入力してください" };
-  }
-
-  if (parsed.protocol !== "https:") {
-    return { ok: false, message: "内部ネットワークの URL は登録できません" };
-  }
-
-  if (isPrivateHost(parsed.hostname)) {
-    return { ok: false, message: "内部ネットワークの URL は登録できません" };
-  }
-
-  return { ok: true };
-}
+import { validateWebhookUrl } from "@/domain/services/webhookUrlValidator";
 
 export async function listWebhookEndpointsAction() {
   const session = await auth();

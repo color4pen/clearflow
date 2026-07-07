@@ -17,6 +17,10 @@ import { registerApprovalRequestsTools } from "./tools/approvalRequests";
 import { registerDelegationsTools } from "./tools/delegations";
 import { registerApprovalTemplatesTools } from "./tools/approvalTemplates";
 import { registerApprovalPoliciesTools } from "./tools/approvalPolicies";
+import { registerOrganizationTools } from "./tools/organization";
+import { registerUsersTools } from "./tools/users";
+import { registerWebhooksTools } from "./tools/webhooks";
+import { registerAuditLogsTools } from "./tools/auditLogs";
 
 /**
  * リクエストごとに新しい McpServer + transport を生成する（stateless）。
@@ -41,6 +45,10 @@ function createMcpServer(): McpServer {
   registerDelegationsTools(server);
   registerApprovalTemplatesTools(server);
   registerApprovalPoliciesTools(server);
+  registerOrganizationTools(server);
+  registerUsersTools(server);
+  registerWebhooksTools(server);
+  registerAuditLogsTools(server);
   return server;
 }
 

@@ -226,6 +226,10 @@
     ],
     [
       "mod-mcp",
+      "mod-domainservice"
+    ],
+    [
+      "mod-mcp",
       "mod-model"
     ],
     [

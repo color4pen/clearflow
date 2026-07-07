@@ -32,6 +32,7 @@
 - [[mod-mcp]] -> [[mod-webhook]]
 - [[mod-mcp]] -> [[mod-appservice]]
 - [[mod-mcp]] -> [[mod-repo]]
+- [[mod-mcp]] -> [[mod-domainservice]]
 - [[mod-proxy]] -> [[mod-auth]]
 
 ## アプリケーション層

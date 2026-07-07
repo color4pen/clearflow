@@ -88,6 +88,44 @@ bun run db:migrate  # マイグレーション適用
 bun run db:seed     # 初期データ投入（既存データを削除して再投入）
 ```
 
+## MCP サーバー
+
+Clearflow の MCP サーバー（`/api/mcp`）は PAT（API トークン）で認証し、AI エージェントから業務操作を行える 19 ツールを提供する。
+
+### MCP ツール一覧
+
+| ツール名 | 操作 | 説明 |
+|---|---|---|
+| `inquiries` | list, get, create, update, convert, decline, delete | 引合の管理 |
+| `deals` | list, get, create, update, change_phase, close, delete | 案件の管理 |
+| `clients` | list, get, create, update, add_contact, update_contact, delete_contact, add_deal_contact, remove_deal_contact | 顧客・顧客担当者の管理 |
+| `interactions` | record_contract, record_invoice | 顧客接点記録 |
+| `tasks` | list, get, create, update, toggle, delete | アクションアイテムの管理 |
+| `watches` | get, toggle | ウォッチ（フォロー）の管理 |
+| `notifications` | list, mark_read | 通知の確認・既読管理 |
+| `contracts` | list, get, create, update, change_status, delete | 契約の管理 |
+| `invoices` | list, get, create, update, change_status, delete | 請求の管理 |
+| `revenue` | get_dashboard, get_details, get_forecast | 売上ダッシュボード・明細・予測の参照 |
+| `revenue_targets` | get, set, delete | 売上目標の管理 |
+| `approval_requests` | list, get, submit, approve, reject, bulk_approve, resubmit | 承認申請の管理・承認・却下 |
+| `delegations` | list, get, create, deactivate | 承認委任の管理 |
+| `approval_templates` | list, get, create, update, delete | 承認テンプレートの管理 |
+| `approval_policies` | list, get, create, update | 承認ポリシーの管理 |
+| `organization` | get, update | 組織情報の取得・更新（update は admin 限定） |
+| `users` | list, create, update_role, deactivate, reactivate | ユーザーの管理（list は admin/manager、それ以外は admin 限定） |
+| `webhooks` | list, create, delete, toggle, list_deliveries, retry_delivery | Webhook エンドポイントと配信履歴の管理（admin 限定） |
+| `audit_logs` | search | 監査ログの検索（読み取り専用・admin 限定） |
+
+### 除外操作
+
+以下の 3 操作は MCP ツールとして提供しない。
+
+| 操作 | 除外理由 |
+|---|---|
+| login（セッション認証） | PAT は UI ログインとは独立した認証手段であり、MCP 経由でのセッション発行は対象外 |
+| パスワード変更 | 資格情報管理は UI 専用。AI エージェントへのパスワード操作権限は付与しない |
+| super-admin プロビジョニング（platform.ts） | 組織スコープ外の操作であり、PAT も組織ユーザーに紐づくため対象外 |
+
 ## ドキュメント
 
 - `docs/design/` — ドメイン設計・データモデル・承認/認可設計・UX ジャーニー・ユビキタス言語辞書・画面仕様（`screens/`）

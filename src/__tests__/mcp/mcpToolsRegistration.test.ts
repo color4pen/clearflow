@@ -1,7 +1,7 @@
 /**
- * TC-025: createMcpServer が既存 11 + 新規 4 = 15 ツールを登録する。
+ * TC-025: createMcpServer が既存 15 + 新規 4 = 19 ツールを登録する。
  *
- * McpServer に 15 つの register 関数を呼び出し、tools/list で登録ツール一覧を取得して
+ * McpServer に 19 つの register 関数を呼び出し、tools/list で登録ツール一覧を取得して
  * 全ツールが存在することを実行検証する。
  */
 
@@ -45,6 +45,10 @@ const { registerApprovalRequestsTools } = await import("../../app/api/mcp/tools/
 const { registerDelegationsTools } = await import("../../app/api/mcp/tools/delegations");
 const { registerApprovalTemplatesTools } = await import("../../app/api/mcp/tools/approvalTemplates");
 const { registerApprovalPoliciesTools } = await import("../../app/api/mcp/tools/approvalPolicies");
+const { registerOrganizationTools } = await import("../../app/api/mcp/tools/organization");
+const { registerUsersTools } = await import("../../app/api/mcp/tools/users");
+const { registerWebhooksTools } = await import("../../app/api/mcp/tools/webhooks");
+const { registerAuditLogsTools } = await import("../../app/api/mcp/tools/auditLogs");
 
 const testAuthInfo: AuthInfo = {
   token: "cfp_test",
@@ -53,8 +57,8 @@ const testAuthInfo: AuthInfo = {
   extra: { userId: "user-test", organizationId: "org-test", role: "admin" },
 };
 
-describe("TC-025: 15 ツールが登録される", () => {
-  it("全 15 ツールが登録されている", async () => {
+describe("TC-025: 19 ツールが登録される", () => {
+  it("全 19 ツールが登録されている", async () => {
     const server = new McpServer({ name: "clearflow", version: "1.0.0" });
     registerInquiriesTools(server);
     registerDealsTools(server);
@@ -71,6 +75,10 @@ describe("TC-025: 15 ツールが登録される", () => {
     registerDelegationsTools(server);
     registerApprovalTemplatesTools(server);
     registerApprovalPoliciesTools(server);
+    registerOrganizationTools(server);
+    registerUsersTools(server);
+    registerWebhooksTools(server);
+    registerAuditLogsTools(server);
 
     const transport = new WebStandardStreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
@@ -101,8 +109,8 @@ describe("TC-025: 15 ツールが登録される", () => {
     const tools = body.result?.tools ?? [];
     const toolNames = tools.map((t) => t.name);
 
-    // 15 ツールが登録されている
-    expect(toolNames).toHaveLength(15);
+    // 15 + 4 = 19 ツールが登録されている
+    expect(toolNames).toHaveLength(19);
     expect(toolNames).toContain("inquiries");
     expect(toolNames).toContain("deals");
     expect(toolNames).toContain("clients");
@@ -118,5 +126,9 @@ describe("TC-025: 15 ツールが登録される", () => {
     expect(toolNames).toContain("delegations");
     expect(toolNames).toContain("approval_templates");
     expect(toolNames).toContain("approval_policies");
+    expect(toolNames).toContain("organization");
+    expect(toolNames).toContain("users");
+    expect(toolNames).toContain("webhooks");
+    expect(toolNames).toContain("audit_logs");
   });
 });
