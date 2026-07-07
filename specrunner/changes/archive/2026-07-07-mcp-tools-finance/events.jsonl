@@ -138,3 +138,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/mcp-tools-finance/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-07T00:12:18.541Z","endedAt":"2026-07-07T00:12:20.343Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-07-07T00:12:20.343Z","outputs":[{"path":"specrunner/changes/mcp-tools-finance/pr-create-result.md","hash":"sha256:4c89a4d4af4d7287534b67b11e3be4bc75f708d16b315cd9c7c78695b51f726d"}],"inputs":[{"path":"feat/mcp-tools-finance-64eb3227","hash":null}]}
 {"type":"transition","ts":"2026-07-07T00:12:20.361Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-07-07T00:21:29.522Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
