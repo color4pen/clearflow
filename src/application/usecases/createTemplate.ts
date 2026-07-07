@@ -46,9 +46,8 @@ export async function createTemplate(data: {
 
     return { ok: true, template };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "テンプレートの作成に失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("createTemplate failed", err);
+    return { ok: false, reason: "テンプレートの作成に失敗しました" };
   }
 }

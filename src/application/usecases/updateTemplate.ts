@@ -52,9 +52,8 @@ export async function updateTemplate(data: {
 
     return { ok: true, template };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "テンプレートの更新に失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("updateTemplate failed", err);
+    return { ok: false, reason: "テンプレートの更新に失敗しました" };
   }
 }

@@ -18,6 +18,11 @@ function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotificatio
   return authExtra ?? null;
 }
 
+/** パース可能な日時文字列（不正な日付を new Date() 前に明確なエラーで弾く）。 */
+const dateString = z
+  .string()
+  .refine((v) => !Number.isNaN(Date.parse(v)), "日時の形式が不正です");
+
 const listSchema = z.object({
   operation: z.literal("list"),
 });
@@ -26,8 +31,8 @@ const createSchema = z.object({
   operation: z.literal("create"),
   fromUserId: z.string().uuid(),
   toUserId: z.string().uuid(),
-  startDate: z.string(),
-  endDate: z.string(),
+  startDate: dateString,
+  endDate: dateString,
 });
 
 const deactivateSchema = z.object({
@@ -110,6 +115,14 @@ export function registerDelegationsTools(server: McpServer): void {
           case "deactivate": {
             if (!canPerform(role, "approvalSettings", "deactivateDelegation")) {
               return toToolError("権限がありません");
+            }
+            const rateCheck = await checkRateLimit({
+              key: `mcp:deactivateDelegation:${userId}`,
+              limit: RATE_LIMITS.createRequest.limit,
+              windowMs: RATE_LIMITS.createRequest.windowMs,
+            });
+            if (!rateCheck.allowed) {
+              return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
             // admin 以外は自身の委任のみ無効化可能（Server Action と同一ロジック）

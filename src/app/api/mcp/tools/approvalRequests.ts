@@ -106,7 +106,7 @@ export function registerApprovalRequestsTools(server: McpServer): void {
     {
       description:
         "承認リクエストの一覧取得・詳細取得・作成・提出・承認・却下・一括承認・再提出を行います。operation 引数で操作を切り替えます。" +
-        "【filter 引数の注意】filter 未指定は全件返します。filter=all を明示指定した場合は admin/manager のみ全件返し、それ以外は空配列を返します。",
+        "【filter 引数の注意】admin/manager は全件、それ以外のロールは自分の申請のみ返します（filter 未指定時）。filter=all を明示指定した場合は admin/manager のみ全件返し、それ以外は空配列を返します。",
       inputSchema: approvalRequestsInputSchema,
     },
     async (args, extra) => {
@@ -143,8 +143,13 @@ export function registerApprovalRequestsTools(server: McpServer): void {
               if (role !== "admin" && role !== "manager") {
                 filtered = [];
               }
+            } else {
+              // filter 未指定: admin/manager は全件。それ以外は自分の申請のみに制限し、
+              // 組織全件の越権閲覧を防ぐ（filter=all の制限と同じ意図）。
+              if (role !== "admin" && role !== "manager") {
+                filtered = filtered.filter((req) => req.creatorId === userId);
+              }
             }
-            // filter 未指定の場合は全件（追加フィルタなし）
 
             if (args.statusFilter) {
               const statusFilter = args.statusFilter;
@@ -342,7 +347,15 @@ export function registerApprovalRequestsTools(server: McpServer): void {
               organizationId,
             });
 
-            return toToolSuccess(result);
+            // per-item reason も単発 approve と同様に sanitize する（DB エラー文の漏洩防止）
+            const sanitized = {
+              results: result.results.map((r) =>
+                r.reason === undefined
+                  ? r
+                  : { ...r, reason: sanitizeApprovalReason(r.reason) }
+              ),
+            };
+            return toToolSuccess(sanitized);
           }
 
           case "resubmit": {
