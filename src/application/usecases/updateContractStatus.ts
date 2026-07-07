@@ -87,10 +87,10 @@ export async function updateContractStatus(data: {
 
       dispatcher.flushAsync();
       return { ok: true, contract: updated };
-    } catch (err) {
+    } catch {
       return {
         ok: false,
-        reason: err instanceof Error ? err.message : "ステータスの更新に失敗しました",
+        reason: "ステータスの更新に失敗しました",
       };
     }
   });

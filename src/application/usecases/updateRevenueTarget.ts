@@ -93,10 +93,10 @@ export async function updateRevenueTarget(data: {
     }
 
     return { ok: true, target: updated };
-  } catch (err) {
+  } catch {
     return {
       ok: false,
-      reason: err instanceof Error ? err.message : "売上目標の更新に失敗しました",
+      reason: "売上目標の更新に失敗しました",
     };
   }
 }

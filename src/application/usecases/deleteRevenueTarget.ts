@@ -39,10 +39,10 @@ export async function deleteRevenueTarget(data: {
     });
 
     return { ok: true };
-  } catch (err) {
+  } catch {
     return {
       ok: false,
-      reason: err instanceof Error ? err.message : "売上目標の削除に失敗しました",
+      reason: "売上目標の削除に失敗しました",
     };
   }
 }

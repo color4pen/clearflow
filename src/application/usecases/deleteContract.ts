@@ -35,10 +35,10 @@ export async function deleteContract(data: {
     });
 
     return { ok: true };
-  } catch (err) {
+  } catch {
     return {
       ok: false,
-      reason: err instanceof Error ? err.message : "契約の削除に失敗しました",
+      reason: "契約の削除に失敗しました",
     };
   }
 }

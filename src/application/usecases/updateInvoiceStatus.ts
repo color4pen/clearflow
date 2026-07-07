@@ -102,10 +102,10 @@ export async function updateInvoiceStatus(data: {
 
       dispatcher.flushAsync();
       return { ok: true, invoice: updated };
-    } catch (err) {
+    } catch {
       return {
         ok: false,
-        reason: err instanceof Error ? err.message : "ステータスの更新に失敗しました",
+        reason: "ステータスの更新に失敗しました",
       };
     }
   });

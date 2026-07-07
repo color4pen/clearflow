@@ -80,9 +80,8 @@ export async function createInvoice(data: {
 
     return { ok: true, invoice };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "請求の作成に失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("createInvoice failed", err);
+    return { ok: false, reason: "請求の作成に失敗しました" };
   }
 }

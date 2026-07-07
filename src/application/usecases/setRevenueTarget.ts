@@ -62,10 +62,10 @@ export async function setRevenueTarget(data: {
     });
 
     return { ok: true, target };
-  } catch (err) {
+  } catch {
     return {
       ok: false,
-      reason: err instanceof Error ? err.message : "売上目標の作成に失敗しました",
+      reason: "売上目標の作成に失敗しました",
     };
   }
 }
