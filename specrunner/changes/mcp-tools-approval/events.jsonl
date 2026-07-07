@@ -17,3 +17,16 @@
 {"type":"transition","ts":"2026-07-07T00:42:12.565Z","step":"spec-review","status":"warning","message":"spec-review iteration 1 completed with verdict: needs-fix"}
 {"type":"transition","ts":"2026-07-07T00:42:12.565Z","step":"step-transition","status":"ok","message":"spec-review → spec-fixer"}
 {"type":"transition","ts":"2026-07-07T00:42:12.567Z","step":"spec-fixer-started","status":"started","message":"Starting spec-fixer step"}
+{"type":"transition","ts":"2026-07-07T00:45:12.135Z","step":"spec-fixer-verdict","status":"ok","message":"spec-fixer verdict: approved"}
+{"type":"step-attempt","step":"spec-fixer","sessionId":"b15d7fcd-0376-4047-ba61-14065a7192dd","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-07T00:42:12.579Z","endedAt":"2026-07-07T00:45:10.967Z"}
+{"type":"lineage","step":"spec-fixer","ts":"2026-07-07T00:45:10.967Z","outputs":[{"path":"specrunner/changes/mcp-tools-approval/design.md","hash":"sha256:51f9ee97bbc123bf05aaa4857a3b7354800b2cc4f88556795baffb79453e11d4"},{"path":"specrunner/changes/mcp-tools-approval/spec.md","hash":"sha256:12665802132ddba102738aeb28208be60901c20c2309cda791e7b858a9ef250b"}],"inputs":[{"path":"specrunner/changes/mcp-tools-approval/spec-review-result-001.md","hash":"sha256:48bbd89c2a9fcb234efaa32181cbd5317aa758d7ff9cabb74e86573e31a8cdd1"}]}
+{"type":"transition","ts":"2026-07-07T00:45:12.144Z","step":"step-transition","status":"ok","message":"spec-review complete → spec-review (iter 2)"}
+{"type":"transition","ts":"2026-07-07T00:45:12.146Z","step":"spec-review","status":"started","message":"spec-review iteration 2 started"}
+{"type":"transition","ts":"2026-07-07T00:45:12.148Z","step":"spec-review-started","status":"started","message":"Starting spec-review step"}
+{"type":"interruption","reason":"signal","ts":"2026-07-07T00:50:55.377Z"}
+{"type":"interruption","reason":"signal","ts":"2026-07-07T00:50:55.377Z"}
+{"type":"transition","ts":"2026-07-07T00:50:55.378Z","step":"signal-handler","status":"ok","message":"running → awaiting-resume: Interrupted by signal"}
+{"type":"transition","ts":"2026-07-07T00:50:55.378Z","step":"signal-handler","status":"ok","message":"running → awaiting-resume: Interrupted by signal"}
+{"type":"transition","ts":"2026-07-07T00:51:12.860Z","step":"resume","status":"ok","message":"awaiting-resume → running: Resuming from step 'spec-review'"}
+{"type":"transition","ts":"2026-07-07T00:51:12.921Z","step":"spec-review","status":"started","message":"spec-review iteration 1 started"}
+{"type":"transition","ts":"2026-07-07T00:51:12.922Z","step":"spec-review-started","status":"started","message":"Starting spec-review step"}
