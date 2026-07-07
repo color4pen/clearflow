@@ -13,6 +13,10 @@ import { registerContractsTools } from "./tools/contracts";
 import { registerInvoicesTools } from "./tools/invoices";
 import { registerRevenueTools } from "./tools/revenue";
 import { registerRevenueTargetsTools } from "./tools/revenueTargets";
+import { registerApprovalRequestsTools } from "./tools/approvalRequests";
+import { registerDelegationsTools } from "./tools/delegations";
+import { registerApprovalTemplatesTools } from "./tools/approvalTemplates";
+import { registerApprovalPoliciesTools } from "./tools/approvalPolicies";
 
 /**
  * リクエストごとに新しい McpServer + transport を生成する（stateless）。
@@ -33,6 +37,10 @@ function createMcpServer(): McpServer {
   registerInvoicesTools(server);
   registerRevenueTools(server);
   registerRevenueTargetsTools(server);
+  registerApprovalRequestsTools(server);
+  registerDelegationsTools(server);
+  registerApprovalTemplatesTools(server);
+  registerApprovalPoliciesTools(server);
   return server;
 }
 

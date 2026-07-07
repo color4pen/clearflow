@@ -64,9 +64,8 @@ export async function createPolicy(data: {
 
     return { ok: true, policy };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "ポリシーの作成に失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("createPolicy failed", err);
+    return { ok: false, reason: "ポリシーの作成に失敗しました" };
   }
 }

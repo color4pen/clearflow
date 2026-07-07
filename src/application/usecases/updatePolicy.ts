@@ -72,9 +72,8 @@ export async function updatePolicy(data: {
 
     return { ok: true, policy };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "ポリシーの更新に失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("updatePolicy failed", err);
+    return { ok: false, reason: "ポリシーの更新に失敗しました" };
   }
 }

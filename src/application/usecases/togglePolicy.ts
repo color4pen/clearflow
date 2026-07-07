@@ -57,9 +57,8 @@ export async function togglePolicy(data: {
 
     return { ok: true, policy };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "ポリシーの切り替えに失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("togglePolicy failed", err);
+    return { ok: false, reason: "ポリシーの切り替えに失敗しました" };
   }
 }

@@ -98,10 +98,9 @@ export async function createRequest(data: {
       dispatcher.flushAsync();
       return { ok: true, request: result };
     } catch (err) {
-      return {
-        ok: false,
-        reason: err instanceof Error ? err.message : "Failed to create request.",
-      };
+      // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+      console.error("createRequest failed", err);
+      return { ok: false, reason: "Failed to create request." };
     }
   });
 }
