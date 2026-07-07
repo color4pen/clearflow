@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f092803b-aa6f-4f3b-bc5c-78a751ae093d",
   "createdAt": "2026-07-07T02:03:07.527Z",
-  "updatedAt": "2026-07-07T02:03:09.130Z",
+  "updatedAt": "2026-07-07T02:07:07.614Z",
   "request": {
     "title": "MCP ツール: 管理系（組織・ユーザー・Webhook・監査ログ）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "request-review",
+  "step": "design",
   "status": "running",
   "branch": "feat/mcp-tools-admin-f092803b",
   "error": null,
@@ -34,7 +34,9 @@
     }
   ],
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 5,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
