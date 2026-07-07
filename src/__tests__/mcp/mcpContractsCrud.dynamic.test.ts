@@ -17,6 +17,10 @@
  *         deleteContract usecase が ok:true を返すとき、
  *         ツール結果が isError なしで deleted:true を含むことを検証する。
  *
+ * TC-007: contracts 部分更新（title のみ）成功シナリオ。
+ *         title のみ指定して update を呼んだとき updateContract が ok:true を返し、
+ *         ツール結果が isError なしで contract データを含むことを検証する。
+ *
  * TC-027: organizationId がスキーマに含まれない。
  *         organizationId は authInfo からのみ取得され、usecase に正しく伝播する。
  *         ツール引数に organizationId が含まれていなくても正常に動作することを検証する。
@@ -28,6 +32,7 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import type { Contract, ContractWithClient } from "@/domain/models/contract";
 
+type UpdateContractResult = { ok: true; contract: Contract } | { ok: false; reason: string };
 type UpdateContractStatusResult = { ok: true; contract: Contract } | { ok: false; reason: string };
 type DeleteContractResult = { ok: true } | { ok: false; reason: string };
 
@@ -36,6 +41,8 @@ const state = {
   listContractsReturns: null as ContractWithClient[] | null,
   getContractCalls: [] as unknown[],
   getContractReturns: null as Contract | null | undefined,
+  updateContractCalls: [] as unknown[],
+  updateContractReturns: null as UpdateContractResult | null,
   updateContractStatusCalls: [] as unknown[],
   updateContractStatusReturns: null as UpdateContractStatusResult | null,
   deleteContractCalls: [] as unknown[],
@@ -46,6 +53,7 @@ const state = {
 import * as rateLimitModule from "@/infrastructure/rateLimit";
 import * as listContractsModule from "@/application/usecases/listContracts";
 import * as getContractModule from "@/application/usecases/getContract";
+import * as updateContractModule from "@/application/usecases/updateContract";
 import * as updateContractStatusModule from "@/application/usecases/updateContractStatus";
 import * as deleteContractModule from "@/application/usecases/deleteContract";
 const realRateLimit = {
@@ -54,6 +62,7 @@ const realRateLimit = {
 };
 const realListContracts = listContractsModule.listContracts;
 const realGetContract = getContractModule.getContract;
+const realUpdateContract = updateContractModule.updateContract;
 const realUpdateContractStatus = updateContractStatusModule.updateContractStatus;
 const realDeleteContract = deleteContractModule.deleteContract;
 
@@ -76,6 +85,13 @@ mock.module("@/application/usecases/getContract", () => ({
   getContract: async (input: unknown) => {
     state.getContractCalls.push(input);
     return state.getContractReturns ?? null;
+  },
+}));
+
+mock.module("@/application/usecases/updateContract", () => ({
+  updateContract: async (input: unknown) => {
+    state.updateContractCalls.push(input);
+    return state.updateContractReturns ?? { ok: false as const, reason: "mock not set" };
   },
 }));
 
@@ -102,6 +118,9 @@ afterAll(() => {
   }));
   mock.module("@/application/usecases/getContract", () => ({
     getContract: realGetContract,
+  }));
+  mock.module("@/application/usecases/updateContract", () => ({
+    updateContract: realUpdateContract,
   }));
   mock.module("@/application/usecases/updateContractStatus", () => ({
     updateContractStatus: realUpdateContractStatus,
@@ -190,6 +209,8 @@ beforeEach(() => {
   state.listContractsReturns = null;
   state.getContractCalls = [];
   state.getContractReturns = undefined;
+  state.updateContractCalls = [];
+  state.updateContractReturns = null;
   state.updateContractStatusCalls = [];
   state.updateContractStatusReturns = null;
   state.deleteContractCalls = [];
@@ -269,6 +290,29 @@ describe("MCP contracts ツール 基本 CRUD 成功シナリオ", () => {
       const parsed = JSON.parse(result.text) as Record<string, unknown>;
       expect(parsed.deleted).toBe(true);
       expect(parsed.contractId).toBe(CONTRACT_UUID);
+    });
+  });
+
+  describe("TC-007: contracts 部分更新（title のみ）成功", () => {
+    it("title のみ指定して update を呼んで updateContract が ok:true を返すとき、ツール結果が isError なしで contract データを含む", async () => {
+      state.updateContractReturns = { ok: true, contract: mockContract };
+
+      const result = await callContracts({
+        operation: "update",
+        contractId: CONTRACT_UUID,
+        title: "新しいタイトル",
+        // 他のフィールドはすべて省略（部分更新）
+      });
+
+      expect(result.isError).toBeUndefined();
+      // updateContract usecase に到達した
+      expect(state.updateContractCalls).toHaveLength(1);
+      const callArgs = state.updateContractCalls[0] as Record<string, unknown>;
+      expect(callArgs.contractId).toBe(CONTRACT_UUID);
+      expect(callArgs.title).toBe("新しいタイトル");
+      // 省略フィールドは undefined（変更なし）として渡される
+      expect(callArgs.endDate).toBeUndefined();
+      expect(callArgs.amount).toBeUndefined();
     });
   });
 

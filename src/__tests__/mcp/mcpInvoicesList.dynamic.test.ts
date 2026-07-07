@@ -10,6 +10,10 @@
  *         contractId 指定なし → listInvoicesByOrganization usecase が呼ばれ、
  *         organizationId が authInfo から伝播すること、
  *         ツール結果が isError なしで invoices データを含むことを検証する。
+ *
+ * TC-017: invoices 部分更新（amount のみ）成功シナリオ。
+ *         amount のみ指定して update を呼んだとき updateInvoice が ok:true を返し、
+ *         ツール結果が isError なしで invoice データを含むことを検証する。
  */
 
 import { describe, it, expect, mock, beforeEach, afterAll } from "bun:test";
@@ -18,17 +22,22 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import type { AuthInfo } from "@modelcontextprotocol/sdk/server/auth/types.js";
 import type { Invoice } from "@/domain/models/invoice";
 
+type UpdateInvoiceResult = { ok: true; invoice: Invoice } | { ok: false; reason: string };
+
 const state = {
   listInvoicesByContractCalls: [] as unknown[],
   listInvoicesByContractReturns: null as Invoice[] | null,
   listInvoicesByOrganizationCalls: [] as unknown[],
   listInvoicesByOrganizationReturns: null as Invoice[] | null,
+  updateInvoiceCalls: [] as unknown[],
+  updateInvoiceReturns: null as UpdateInvoiceResult | null,
 };
 
 // 実装を捕捉してから mock.module を呼ぶ。afterAll で復元する。
 import * as rateLimitModule from "@/infrastructure/rateLimit";
 import * as listInvoicesByContractModule from "@/application/usecases/listInvoicesByContract";
 import * as listInvoicesByOrganizationModule from "@/application/usecases/listInvoicesByOrganization";
+import * as updateInvoiceModule from "@/application/usecases/updateInvoice";
 const realRateLimit = {
   checkRateLimit: rateLimitModule.checkRateLimit,
   RATE_LIMITS: rateLimitModule.RATE_LIMITS,
@@ -36,6 +45,7 @@ const realRateLimit = {
 const realListInvoicesByContract = listInvoicesByContractModule.listInvoicesByContract;
 const realListInvoicesByOrganization =
   listInvoicesByOrganizationModule.listInvoicesByOrganization;
+const realUpdateInvoice = updateInvoiceModule.updateInvoice;
 
 mock.module("@/infrastructure/rateLimit", () => ({
   checkRateLimit: async () => ({ allowed: true }),
@@ -59,6 +69,13 @@ mock.module("@/application/usecases/listInvoicesByOrganization", () => ({
   },
 }));
 
+mock.module("@/application/usecases/updateInvoice", () => ({
+  updateInvoice: async (input: unknown) => {
+    state.updateInvoiceCalls.push(input);
+    return state.updateInvoiceReturns ?? { ok: false as const, reason: "mock not set" };
+  },
+}));
+
 afterAll(() => {
   mock.module("@/infrastructure/rateLimit", () => realRateLimit);
   mock.module("@/application/usecases/listInvoicesByContract", () => ({
@@ -66,6 +83,9 @@ afterAll(() => {
   }));
   mock.module("@/application/usecases/listInvoicesByOrganization", () => ({
     listInvoicesByOrganization: realListInvoicesByOrganization,
+  }));
+  mock.module("@/application/usecases/updateInvoice", () => ({
+    updateInvoice: realUpdateInvoice,
   }));
 });
 
@@ -140,6 +160,8 @@ beforeEach(() => {
   state.listInvoicesByContractReturns = null;
   state.listInvoicesByOrganizationCalls = [];
   state.listInvoicesByOrganizationReturns = null;
+  state.updateInvoiceCalls = [];
+  state.updateInvoiceReturns = null;
 });
 
 describe("MCP invoices ツール 一覧取得成功シナリオ", () => {
@@ -182,6 +204,29 @@ describe("MCP invoices ツール 一覧取得成功シナリオ", () => {
       // レスポンスに請求データが含まれる
       const parsed = JSON.parse(result.text) as unknown[];
       expect(parsed).toHaveLength(1);
+    });
+  });
+
+  describe("TC-017: invoices 部分更新（amount のみ）成功", () => {
+    it("amount のみ指定して update を呼んで updateInvoice が ok:true を返すとき、ツール結果が isError なしで invoice データを含む", async () => {
+      state.updateInvoiceReturns = { ok: true, invoice: mockInvoice };
+
+      const result = await callInvoices({
+        operation: "update",
+        invoiceId: INVOICE_UUID,
+        amount: 600_000,
+        // 他のフィールドはすべて省略（部分更新）
+      });
+
+      expect(result.isError).toBeUndefined();
+      // updateInvoice usecase に到達した
+      expect(state.updateInvoiceCalls).toHaveLength(1);
+      const callArgs = state.updateInvoiceCalls[0] as Record<string, unknown>;
+      expect(callArgs.invoiceId).toBe(INVOICE_UUID);
+      expect(callArgs.amount).toBe(600_000);
+      // 省略フィールドは undefined（変更なし）として渡される
+      expect(callArgs.title).toBeUndefined();
+      expect(callArgs.issueDate).toBeUndefined();
     });
   });
 });
