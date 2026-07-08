@@ -51,9 +51,8 @@ export async function reactivateUser(data: {
 
     return { ok: true };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "ユーザーの再有効化に失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("reactivateUser failed", err);
+    return { ok: false, reason: "ユーザーの再有効化に失敗しました" };
   }
 }

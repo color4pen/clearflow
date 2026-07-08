@@ -39,9 +39,8 @@ export async function updateOrganization(data: {
 
     return { ok: true };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "組織の更新に失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("updateOrganization failed", err);
+    return { ok: false, reason: "組織の更新に失敗しました" };
   }
 }
