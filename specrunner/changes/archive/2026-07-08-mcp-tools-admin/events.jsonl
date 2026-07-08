@@ -91,3 +91,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/mcp-tools-admin/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-08T11:23:55.217Z","endedAt":"2026-07-08T11:23:56.960Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-07-08T11:23:56.960Z","outputs":[{"path":"specrunner/changes/mcp-tools-admin/pr-create-result.md","hash":"sha256:71882f26c56129b45069d54df8fff3f75c51f1e135e8405b926daa0e8281b919"}],"inputs":[{"path":"feat/mcp-tools-admin-f092803b","hash":null}]}
 {"type":"transition","ts":"2026-07-08T11:23:56.969Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-07-08T11:35:34.422Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}

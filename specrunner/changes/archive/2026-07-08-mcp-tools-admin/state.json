@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f092803b-aa6f-4f3b-bc5c-78a751ae093d",
   "createdAt": "2026-07-07T02:03:07.527Z",
-  "updatedAt": "2026-07-08T11:23:56.969Z",
+  "updatedAt": "2026-07-08T11:35:34.422Z",
   "request": {
     "title": "MCP ツール: 管理系（組織・ユーザー・Webhook・監査ログ）",
     "type": "new-feature",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "feat/mcp-tools-admin-f092803b",
   "error": null,
   "pipelineId": "standard",
@@ -54,7 +54,7 @@
     "createdAt": "2026-07-08T11:23:56.959Z"
   },
   "_journal": {
-    "historyCount": 63,
+    "historyCount": 64,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
