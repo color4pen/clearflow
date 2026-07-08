@@ -4,11 +4,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { phaseLabels, contractTypeLabels } from "@/app/(dashboard)/labels";
 
 const allPhases = [
+  "hearing",
   "proposal_prep",
   "proposed",
   "negotiation",
   "won",
   "lost",
+  "passed",
 ] as const;
 
 type Props = {

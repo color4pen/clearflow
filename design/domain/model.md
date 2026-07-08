@@ -6,7 +6,7 @@
 受託案件の起点となる顧客からの問い合わせ。案件化の判断に至るまでの情報を保持する。status は new / converted / declined を取り、source（web / phone / email / referral / agent_service / exhibition / other）で流入経路を表す。agent_service は [[term-agent-service]]。[[ent-client]] を参照する（受付時点では未特定でありうる）。案件化により [[ent-deal]] を 1 つ生成する。楽観的ロック（[[term-optimistic-lock]]）を持つ。
 
 ## 案件 {#ent-deal}
-受注を目指して営業活動を行う対象。[[ent-inquiry]] から転換されるか直接作成される。phase は proposal_prep / proposed / negotiation / won / lost を取る。contractType（quasi_delegation / fixed_price / ses）・想定金額・想定期間・営業担当・技術リードを保持する。[[ent-client]] を必須参照する。won 到達後に [[ent-contract]] を作成できる。
+受注を目指して営業活動を行う対象。[[ent-inquiry]] から転換されるか直接作成される。phase は hearing（初期フェーズ）/ proposal_prep / proposed / negotiation / won / lost / passed の 7 値を取る。新規作成・引合転換の両経路とも phase 未指定で hearing が初期値となる。won / lost / passed は終端（[[inv-deal-terminal-irreversible]]）。contractType（quasi_delegation / fixed_price / ses）・想定金額・想定期間・営業担当・技術リードを保持する。[[ent-client]] を必須参照する。won 到達後に [[ent-contract]] を作成できる。
 
 ## 案件担当者 {#ent-deal-contact}
 案件における顧客側担当者の役割付与。[[ent-deal]] と [[ent-client-contact]] を参照し、role（key_person / decision_maker / technical / other）をこの案件について定める。同一担当者が案件ごとに異なる役割を持ちうる。
@@ -60,7 +60,7 @@
 全状態変更の追記専用記録。action（`<対象>.<操作>` 形式）・対象種別・対象 ID・操作者・メタデータを持つ。recordAudit を通じてユースケースのトランザクション内に同期記録され、[[term-timeline]] と通知の導出に読み取られる。ドメインイベント（[[ent-domain-event]]）とは別系統。
 
 ## ドメインイベント {#ent-domain-event}
-ドメインで発生した業務上意味のある事実（受注・入金・承認完了など）の表現。ユースケースで発行され、Webhook 配信・通知・承認ポリシー評価などの波及反応を駆動する。全操作を網羅記録する [[ent-audit-log]] とは語彙・関心事が異なり、混同しない。
+ドメインで発生した業務上意味のある事実（受注・失注・見送り・入金・承認完了など）の表現。ユースケースで発行され、Webhook 配信・通知・承認ポリシー評価などの波及反応を駆動する。案件フェーズの終端遷移イベントとして deal.won / deal.lost / deal.passed（見送り）が対等に定義される。全操作を網羅記録する [[ent-audit-log]] とは語彙・関心事が異なり、混同しない。
 </content>
 
 ## API トークン {#ent-api-token}

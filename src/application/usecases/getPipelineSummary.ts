@@ -3,11 +3,13 @@ import type { DealPhase, DealWithDetails } from "@/domain/models/deal";
 import type { PipelineSummaryItem } from "@/domain/models/dashboard";
 
 const ALL_PHASES: DealPhase[] = [
+  "hearing",
   "proposal_prep",
   "proposed",
   "negotiation",
   "won",
   "lost",
+  "passed",
 ];
 
 export async function getPipelineSummary(

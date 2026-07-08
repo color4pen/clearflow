@@ -12,7 +12,7 @@
 converted は [[ent-inquiry]] の [[term-terminal-state]]。一度案件化した引合は引合に戻せない。declined からは new に戻せる。
 
 ## 案件の終端フェーズは不可逆 {#inv-deal-terminal-irreversible}
-[[ent-deal]] の won / lost は [[term-terminal-state]]。到達後は他フェーズへ遷移できない。won / lost 以外のフェーズ間は順序制約なく自由に遷移できる。
+[[ent-deal]] の won / lost / passed は [[term-terminal-state]]。到達後は他フェーズへ遷移できない。won / lost / passed 以外のフェーズ間は順序制約なく自由に遷移できる。passed（見送り）は当社都合でヒアリング後に追わないと判断した終端であり、競合・先方都合の lost とは区別する。
 
 ## 案件には顧客が必須 {#inv-deal-requires-client}
 [[ent-deal]] の clientId は必須。顧客が特定されていない案件は存在しない。

@@ -76,6 +76,17 @@ export async function updateDealPhase(data: {
               fromPhase: deal.phase,
             },
           });
+        } else if (data.newPhase === "passed") {
+          await dispatcher.dispatch({
+            type: "deal.passed",
+            organizationId: data.organizationId,
+            actorId: data.actorId,
+            occurredAt: new Date(),
+            payload: {
+              dealId: data.dealId,
+              fromPhase: deal.phase,
+            },
+          });
         } else {
           await dispatcher.dispatch({
             type: "deal.phase_changed",

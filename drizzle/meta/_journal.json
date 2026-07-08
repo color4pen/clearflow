@@ -148,6 +148,13 @@
       "when": 1783362832041,
       "tag": "0020_glossy_layla_miller",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1783552375551,
+      "tag": "0021_silky_shinko_yamashiro",
+      "breakpoints": true
     }
   ]
 }

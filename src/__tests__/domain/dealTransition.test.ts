@@ -3,6 +3,60 @@ import { canTransition } from "@/domain/services/dealTransition";
 import type { DealPhase } from "@/domain/models/deal";
 
 describe("canTransition — 案件フェーズ遷移ルール", () => {
+  // hearing フェーズへの遷移
+  it("T-00a: hearing → proposal_prep が許可される", () => {
+    const result = canTransition("hearing", "proposal_prep");
+    expect(result).toBe(true);
+  });
+
+  it("T-00b: hearing → passed が許可される（見送りは hearing から直接遷移可）", () => {
+    const result = canTransition("hearing", "passed");
+    expect(result).toBe(true);
+  });
+
+  it("T-00c: hearing → won が許可される（スキップ可）", () => {
+    const result = canTransition("hearing", "won");
+    expect(result).toBe(true);
+  });
+
+  it("T-00d: hearing → lost が許可される", () => {
+    const result = canTransition("hearing", "lost");
+    expect(result).toBe(true);
+  });
+
+  it("T-00e: hearing → hearing が拒否される（同一フェーズ遷移）", () => {
+    const result = canTransition("hearing", "hearing");
+    expect(result).toBe(false);
+  });
+
+  // passed フェーズは終端
+  it("T-00f: passed → hearing が拒否される（終端状態）", () => {
+    const result = canTransition("passed", "hearing");
+    expect(result).toBe(false);
+  });
+
+  it("T-00g: passed → proposal_prep が拒否される（終端状態）", () => {
+    const result = canTransition("passed", "proposal_prep");
+    expect(result).toBe(false);
+  });
+
+  it("T-00h: passed → won が拒否される（終端状態）", () => {
+    const result = canTransition("passed", "won");
+    expect(result).toBe(false);
+  });
+
+  it("T-00i: passed → lost が拒否される（終端状態）", () => {
+    const result = canTransition("passed", "lost");
+    expect(result).toBe(false);
+  });
+
+  it("T-00j: 全非終端フェーズから passed への遷移が許可される", () => {
+    expect(canTransition("hearing", "passed")).toBe(true);
+    expect(canTransition("proposal_prep", "passed")).toBe(true);
+    expect(canTransition("proposed", "passed")).toBe(true);
+    expect(canTransition("negotiation", "passed")).toBe(true);
+  });
+
   // 許可される遷移
   it("T-01: proposal_prep → proposed が許可される", () => {
     // 準備 - なし（純粋関数）

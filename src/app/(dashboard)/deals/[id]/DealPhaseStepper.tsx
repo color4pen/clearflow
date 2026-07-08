@@ -8,9 +8,9 @@ import { phaseLabels } from "@/app/(dashboard)/labels";
 import { ConfirmDialog, useToast } from "@/app/components";
 import type { DealPhase } from "@/domain/models/deal";
 
-// 提案準備 → 提案済 → 交渉中 →（受注 / 失注）の一本のパイプライン。
-// 非終端3フェーズは相互に自由遷移（後戻り・スキップ可）、受注/失注は終端。
-const PIPELINE: DealPhase[] = ["proposal_prep", "proposed", "negotiation"];
+// ヒアリング → 提案準備 → 提案済 → 交渉中 →（受注 / 失注 / 見送り）の一本のパイプライン。
+// 非終端4フェーズは相互に自由遷移（後戻り・スキップ可）、受注/失注/見送りは終端。
+const PIPELINE: DealPhase[] = ["hearing", "proposal_prep", "proposed", "negotiation"];
 
 type Props = {
   dealId: string;
@@ -23,9 +23,9 @@ export function DealPhaseStepper({ dealId, phase, canChangePhase, inquiryId }: P
   const router = useRouter();
   const { showToast } = useToast();
   const [submitting, setSubmitting] = useState(false);
-  const [pendingTerminal, setPendingTerminal] = useState<"won" | "lost" | null>(null);
+  const [pendingTerminal, setPendingTerminal] = useState<"won" | "lost" | "passed" | null>(null);
 
-  const isTerminal = phase === "won" || phase === "lost";
+  const isTerminal = phase === "won" || phase === "lost" || phase === "passed";
   // 進捗インデックス: 非終端は自身の位置、終端は全ステップ完了扱い
   const currentIndex = isTerminal ? PIPELINE.length : PIPELINE.indexOf(phase);
 
@@ -122,14 +122,16 @@ export function DealPhaseStepper({ dealId, phase, canChangePhase, inquiryId }: P
 
       {bar(isTerminal)}
 
-      {/* 終端: 受注/失注 */}
+      {/* 終端: 受注/失注/見送り */}
       {isTerminal ? (
         <span
           className={[
             "text-xs font-bold rounded-full px-3.5 py-1.5 border",
             phase === "won"
               ? "bg-green-50 text-green-700 border-green-300"
-              : "bg-red-50 text-danger border-red-300",
+              : phase === "lost"
+              ? "bg-red-50 text-danger border-red-300"
+              : "bg-gray-50 text-gray-700 border-gray-300",
           ].join(" ")}
         >
           {phaseLabels[phase] ?? phase}（確定）
@@ -152,16 +154,36 @@ export function DealPhaseStepper({ dealId, phase, canChangePhase, inquiryId }: P
           >
             失注にする
           </button>
+          <button
+            type="button"
+            disabled={submitting}
+            onClick={() => setPendingTerminal("passed")}
+            className="text-xs font-bold rounded-full px-3.5 py-1.5 border border-gray-500 text-gray-600 hover:bg-gray-50 cursor-pointer disabled:opacity-50"
+          >
+            見送りにする
+          </button>
         </div>
       ) : (
-        <span className="text-xs text-text-muted">受注 / 失注</span>
+        <span className="text-xs text-text-muted">受注 / 失注 / 見送り</span>
       )}
 
       <ConfirmDialog
         open={pendingTerminal !== null}
-        variant={pendingTerminal === "won" ? "primary" : "danger"}
-        title={`フェーズ変更: ${pendingTerminal === "won" ? "受注" : "失注"}`}
-        message={`フェーズを「${pendingTerminal === "won" ? "受注" : "失注"}」に変更しますか？確定後はフェーズを戻せません。`}
+        variant={pendingTerminal === "won" ? "primary" : pendingTerminal === "lost" ? "danger" : "primary"}
+        title={
+          pendingTerminal === "won"
+            ? "フェーズ変更: 受注"
+            : pendingTerminal === "lost"
+            ? "フェーズ変更: 失注"
+            : "フェーズ変更: 見送り"
+        }
+        message={
+          pendingTerminal === "won"
+            ? "フェーズを「受注」に変更しますか？確定後はフェーズを戻せません。"
+            : pendingTerminal === "lost"
+            ? "フェーズを「失注」に変更しますか？確定後はフェーズを戻せません。"
+            : "フェーズを「見送り」に変更しますか？確定後はフェーズを戻せません。"
+        }
         loading={submitting}
         onConfirm={confirmTerminal}
         onCancel={() => setPendingTerminal(null)}

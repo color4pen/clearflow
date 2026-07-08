@@ -26,13 +26,15 @@ describe("停滞案件フィルタ 境界条件 静的検証", () => {
     expect(content).toContain("updatedAt <= fourteenDaysAgo");
   });
 
-  it("TC-053: won/lost フェーズの案件は停滞案件に含まれない — フェーズ除外条件が存在する", async () => {
+  it("TC-053: won/lost/passed フェーズの案件は停滞案件に含まれない — フェーズ除外条件が存在する", async () => {
     const content = await readSrc("app/(dashboard)/dashboard/page.tsx");
     // won フェーズを除外する条件
     expect(content).toContain('phase !== "won"');
     // lost フェーズを除外する条件
     expect(content).toContain('phase !== "lost"');
-    // 両条件が AND で結合されている
+    // passed フェーズを除外する条件
+    expect(content).toContain('phase !== "passed"');
+    // 条件が AND で結合されている
     const wonIdx = content.indexOf('phase !== "won"');
     const lostIdx = content.indexOf('phase !== "lost"');
     const between = content.slice(wonIdx, lostIdx);

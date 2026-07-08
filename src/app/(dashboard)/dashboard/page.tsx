@@ -83,6 +83,7 @@ export default async function DashboardPage() {
           (deal) =>
             deal.phase !== "won" &&
             deal.phase !== "lost" &&
+            deal.phase !== "passed" &&
             deal.updatedAt <= fourteenDaysAgo
         )
       : null;

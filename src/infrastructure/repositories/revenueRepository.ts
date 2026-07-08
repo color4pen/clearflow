@@ -146,12 +146,12 @@ export async function getDealRevenue(
 
 /**
  * パイプライン集計: 非終端フェーズの案件をフェーズごとに集計する
- * 対象フェーズ: proposal_prep, proposed, negotiation (won, lost を除外)
+ * 対象フェーズ: hearing, proposal_prep, proposed, negotiation (won, lost, passed を除外)
  */
 export async function getPipelineSummary(
   organizationId: string
 ): Promise<PipelineSummary[]> {
-  const activePhases = ["proposal_prep", "proposed", "negotiation"] as const;
+  const activePhases = ["hearing", "proposal_prep", "proposed", "negotiation"] as const;
 
   const rows = await db
     .select({

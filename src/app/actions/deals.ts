@@ -175,7 +175,7 @@ export async function updateDealPhaseAction(
     return { success: false, message: "フェーズが指定されていません" };
   }
 
-  const isTerminalPhase = newPhase === "won" || newPhase === "lost";
+  const isTerminalPhase = newPhase === "won" || newPhase === "lost" || newPhase === "passed";
   const requiredOperation = isTerminalPhase ? "closePhase" : "changePhase";
   if (!canPerform(session.user.role, "deal", requiredOperation)) {
     return { success: false, message: "この操作を実行する権限がありません" };
@@ -256,7 +256,7 @@ export async function updateDealAction(
 
   const phaseRaw = formData.get("phase");
   if (typeof phaseRaw === "string" && phaseRaw !== "") {
-    const isTerminal = phaseRaw === "won" || phaseRaw === "lost";
+    const isTerminal = phaseRaw === "won" || phaseRaw === "lost" || phaseRaw === "passed";
     const phaseOperation = isTerminal ? "closePhase" : "changePhase";
     if (!canPerform(session.user.role, "deal", phaseOperation)) {
       return { success: false, message: "この操作を実行する権限がありません" };

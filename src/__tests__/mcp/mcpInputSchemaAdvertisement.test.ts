@@ -555,6 +555,25 @@ describe("TC-018: 不明な operation を渡した場合にエラーが返る", 
   });
 });
 
+// ─── TC-019-deals: deals の newPhase enum に hearing と passed が含まれる ───
+
+describe("TC-019-deals: deals の update_phase newPhase enum に hearing と passed が含まれる", () => {
+  it("inputSchema.properties.newPhase.enum に hearing と passed が含まれる", async () => {
+    const schemas = await listToolSchemas();
+    const newPhaseProp = schemas["deals"]?.properties?.newPhase;
+    expect(newPhaseProp).toBeDefined();
+    const enumValues = resolveEnum(newPhaseProp);
+    expect(enumValues).toContain("hearing");
+    expect(enumValues).toContain("proposal_prep");
+    expect(enumValues).toContain("proposed");
+    expect(enumValues).toContain("negotiation");
+    expect(enumValues).toContain("won");
+    expect(enumValues).toContain("lost");
+    expect(enumValues).toContain("passed");
+    expect(enumValues).toHaveLength(7);
+  });
+});
+
 // ─── TC-019: 全ツールの operation enum 値がスキーマと一致する ───
 
 describe("TC-019: 全ツールの operation enum 値がスキーマと一致する", () => {

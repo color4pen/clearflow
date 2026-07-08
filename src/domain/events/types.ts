@@ -41,6 +41,11 @@ export type DealLost = BaseDomainEvent & {
   payload: { dealId: string; fromPhase: DealPhase };
 };
 
+export type DealPassed = BaseDomainEvent & {
+  type: "deal.passed";
+  payload: { dealId: string; fromPhase: DealPhase };
+};
+
 // ---------------------------------------------------------------------------
 // Contract events
 // ---------------------------------------------------------------------------
@@ -152,6 +157,7 @@ export type DomainEvent =
   | DealPhaseChanged
   | DealWon
   | DealLost
+  | DealPassed
   | ContractCreated
   | ContractCompleted
   | ContractCancelled
