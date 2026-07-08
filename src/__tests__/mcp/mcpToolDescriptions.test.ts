@@ -62,6 +62,22 @@ const testAuthInfo: AuthInfo = {
   extra: { userId: "user-test", organizationId: "org-test", role: "admin" },
 };
 
+type PropertySchema = {
+  type?: string;
+  description?: string;
+  [key: string]: unknown;
+};
+
+type ToolInfo = {
+  name: string;
+  description: string;
+  inputSchema: {
+    type?: string;
+    properties?: Record<string, PropertySchema>;
+    [key: string]: unknown;
+  };
+};
+
 /** 全 19 ツールを登録した McpServer を作成する */
 function createFullServer() {
   const server = new McpServer({ name: "clearflow", version: "1.0.0" });
@@ -87,8 +103,8 @@ function createFullServer() {
   return server;
 }
 
-/** tools/list を呼び出して { name → description } マップを返す */
-async function listToolDescriptions(): Promise<Record<string, string>> {
+/** tools/list を呼び出して { name → ToolInfo } マップを返す */
+async function listTools(): Promise<Record<string, ToolInfo>> {
   const server = createFullServer();
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
@@ -112,14 +128,24 @@ async function listToolDescriptions(): Promise<Record<string, string>> {
 
   const response = await transport.handleRequest(request, { authInfo: testAuthInfo });
   const body = (await response.json()) as {
-    result?: { tools?: Array<{ name: string; description: string }> };
+    result?: { tools?: Array<ToolInfo> };
   };
   await transport.close();
 
   const tools = body.result?.tools ?? [];
-  const descMap: Record<string, string> = {};
+  const toolMap: Record<string, ToolInfo> = {};
   for (const tool of tools) {
-    descMap[tool.name] = tool.description ?? "";
+    toolMap[tool.name] = tool;
+  }
+  return toolMap;
+}
+
+/** tools/list を呼び出して { name → description } マップを返す */
+async function listToolDescriptions(): Promise<Record<string, string>> {
+  const toolMap = await listTools();
+  const descMap: Record<string, string> = {};
+  for (const [name, tool] of Object.entries(toolMap)) {
+    descMap[name] = tool.description ?? "";
   }
   return descMap;
 }
@@ -188,5 +214,33 @@ describe("non-empty: 全 19 ツールの description が空でない", () => {
     for (const [toolName, description] of Object.entries(descMap)) {
       expect(description, `${toolName} の description が空`).toBeTruthy();
     }
+  });
+});
+
+// ─── TC-028: inquiries inputSchema フィールド describe 固定 ───
+
+describe("TC-028: inquiries ツールの inputSchema フィールド description が正しい", () => {
+  it("source プロパティの description に「問い合わせ元」が含まれる", async () => {
+    const toolMap = await listTools();
+    const inquiriesTool = toolMap["inquiries"];
+    expect(inquiriesTool, "inquiries が tools/list に存在しない").toBeDefined();
+    const sourceDesc = inquiriesTool.inputSchema.properties?.["source"]?.description;
+    expect(
+      sourceDesc,
+      `source.description が未設定または空（properties: ${JSON.stringify(inquiriesTool.inputSchema.properties?.["source"])}）`
+    ).toBeDefined();
+    expect(sourceDesc).toContain("問い合わせ元");
+  });
+
+  it("budget プロパティの description に「予算（整数）」が含まれる", async () => {
+    const toolMap = await listTools();
+    const inquiriesTool = toolMap["inquiries"];
+    expect(inquiriesTool, "inquiries が tools/list に存在しない").toBeDefined();
+    const budgetDesc = inquiriesTool.inputSchema.properties?.["budget"]?.description;
+    expect(
+      budgetDesc,
+      `budget.description が未設定または空（properties: ${JSON.stringify(inquiriesTool.inputSchema.properties?.["budget"])}）`
+    ).toBeDefined();
+    expect(budgetDesc).toContain("予算（整数）");
   });
 });
