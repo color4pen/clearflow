@@ -18,13 +18,13 @@ function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotificatio
 
 const searchSchema = z.object({
   operation: z.literal("search"),
-  startDate: z.string().datetime().optional(),
-  endDate: z.string().datetime().optional(),
-  action: z.string().optional(),
-  actorId: z.string().uuid().optional(),
-  targetType: z.string().optional(),
-  limit: z.number().int().min(1).max(1000).optional().default(100),
-  offset: z.number().int().min(0).optional(),
+  startDate: z.string().datetime().optional().describe("検索開始日時（ISO 8601）"),
+  endDate: z.string().datetime().optional().describe("検索終了日時（ISO 8601）"),
+  action: z.string().optional().describe("操作種別"),
+  actorId: z.string().uuid().optional().describe("操作者ID（UUID）"),
+  targetType: z.string().optional().describe("操作対象の種別"),
+  limit: z.number().int().min(1).max(1000).optional().default(100).describe("取得件数上限（1〜1000、デフォルト100）"),
+  offset: z.number().int().min(0).optional().describe("取得開始位置"),
 });
 
 const auditLogsInputSchema = z.discriminatedUnion("operation", [searchSchema]);
@@ -36,7 +36,7 @@ export function registerAuditLogsTools(server: McpServer): void {
     "audit_logs",
     {
       description:
-        "監査ログの検索を行います（読み取り専用）。operation 引数で操作を切り替えます。",
+        "監査ログ検索。監査ログ（AuditLog）・操作履歴・証跡（audit trail）の検索（読み取り専用）。日時範囲・アクション・操作者・対象タイプでの絞り込みに対応。operation: search",
       inputSchema: auditLogsAdvertisementSchema,
     },
     async (args, extra) => {

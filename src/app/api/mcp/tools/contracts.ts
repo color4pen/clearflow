@@ -33,44 +33,51 @@ const listSchema = z.object({
 
 const getSchema = z.object({
   operation: z.literal("get"),
-  contractId: z.string().uuid("契約IDが不正です"),
+  contractId: z.string().uuid("契約IDが不正です").describe("契約ID（UUID）"),
 });
 
 const createSchema = z.object({
   operation: z.literal("create"),
-  dealId: z.string().uuid("案件IDが不正です"),
-  amount: z.number().int().positive("金額は正の整数を指定してください"),
-  startDate: dateString,
+  dealId: z.string().uuid("案件IDが不正です").describe("案件ID（UUID）"),
+  amount: z.number().int().positive("金額は正の整数を指定してください").describe("契約金額（正の整数、円）"),
+  startDate: dateString.describe("契約開始日"),
   title: z.string().optional(),
-  contractType: z.enum(["quasi_delegation", "fixed_price", "ses"]).optional(),
-  endDate: dateString.optional(),
-  paymentTerms: z.string().optional(),
-  renewalType: z.enum(["one_time", "recurring"]).optional(),
-  renewalCycle: z.string().optional(),
+  contractType: z
+    .enum(["quasi_delegation", "fixed_price", "ses"])
+    .optional()
+    .describe("quasi_delegation=準委任, fixed_price=請負, ses=SES"),
+  endDate: dateString.optional().describe("契約終了日"),
+  paymentTerms: z.string().optional().describe("支払条件"),
+  renewalType: z.enum(["one_time", "recurring"]).optional().describe("one_time=一回限り, recurring=自動更新"),
+  renewalCycle: z.string().optional().describe("更新サイクル"),
 });
 
 const updateSchema = z.object({
   operation: z.literal("update"),
-  contractId: z.string().uuid("契約IDが不正です"),
+  contractId: z.string().uuid("契約IDが不正です").describe("契約ID（UUID）"),
   title: z.string().min(1).optional(),
-  contractType: z.enum(["quasi_delegation", "fixed_price", "ses"]).nullable().optional(),
-  amount: z.number().int().positive().optional(),
-  startDate: dateString.optional(),
-  endDate: dateString.nullable().optional(),
-  paymentTerms: z.string().nullable().optional(),
-  renewalType: z.enum(["one_time", "recurring"]).optional(),
-  renewalCycle: z.string().nullable().optional(),
+  contractType: z
+    .enum(["quasi_delegation", "fixed_price", "ses"])
+    .nullable()
+    .optional()
+    .describe("quasi_delegation=準委任, fixed_price=請負, ses=SES"),
+  amount: z.number().int().positive().optional().describe("契約金額（正の整数、円）"),
+  startDate: dateString.optional().describe("契約開始日"),
+  endDate: dateString.nullable().optional().describe("契約終了日"),
+  paymentTerms: z.string().nullable().optional().describe("支払条件"),
+  renewalType: z.enum(["one_time", "recurring"]).optional().describe("one_time=一回限り, recurring=自動更新"),
+  renewalCycle: z.string().nullable().optional().describe("更新サイクル"),
 });
 
 const updateStatusSchema = z.object({
   operation: z.literal("update_status"),
-  contractId: z.string().uuid("契約IDが不正です"),
-  newStatus: z.enum(["active", "completed", "cancelled"]),
+  contractId: z.string().uuid("契約IDが不正です").describe("契約ID（UUID）"),
+  newStatus: z.enum(["active", "completed", "cancelled"]).describe("active=有効, completed=完了, cancelled=解約"),
 });
 
 const deleteSchema = z.object({
   operation: z.literal("delete"),
-  contractId: z.string().uuid("契約IDが不正です"),
+  contractId: z.string().uuid("契約IDが不正です").describe("契約ID（UUID）"),
 });
 
 const contractsInputSchema = z.discriminatedUnion("operation", [
@@ -96,7 +103,7 @@ export function registerContractsTools(server: McpServer): void {
     "contracts",
     {
       description:
-        "契約（Contract）の一覧取得・詳細取得・作成・更新・ステータス更新・削除を行います。operation 引数で操作を切り替えます。",
+        "契約管理。受注後の契約（Contract）・契約書・受注の一覧・詳細・作成・更新・ステータス変更・削除。契約種別（準委任/請負/SES）・金額・期間・更新条件を扱う。operation: list/get/create/update/update_status/delete",
       inputSchema: contractsAdvertisementSchema,
     },
     async (args, extra) => {

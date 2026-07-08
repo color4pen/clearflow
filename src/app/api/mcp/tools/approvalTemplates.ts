@@ -45,22 +45,22 @@ const listSchema = z.object({
 
 const createSchema = z.object({
   operation: z.literal("create"),
-  name: z.string().min(1, "テンプレート名は必須です"),
-  steps: z.array(templateStepSchema).min(1),
-  fields: z.array(templateFieldSchema).optional(),
+  name: z.string().min(1, "テンプレート名は必須です").describe("テンプレート名"),
+  steps: z.array(templateStepSchema).min(1).describe("承認ステップ配列"),
+  fields: z.array(templateFieldSchema).optional().describe("フォーム定義配列"),
 });
 
 const updateSchema = z.object({
   operation: z.literal("update"),
-  templateId: z.string().uuid(),
-  name: z.string().min(1).optional(),
-  steps: z.array(templateStepSchema).optional(),
-  fields: z.array(templateFieldSchema).optional(),
+  templateId: z.string().uuid().describe("テンプレートID（UUID）"),
+  name: z.string().min(1).optional().describe("テンプレート名"),
+  steps: z.array(templateStepSchema).optional().describe("承認ステップ配列"),
+  fields: z.array(templateFieldSchema).optional().describe("フォーム定義配列"),
 });
 
 const deleteSchema = z.object({
   operation: z.literal("delete"),
-  templateId: z.string().uuid(),
+  templateId: z.string().uuid().describe("テンプレートID（UUID）"),
 });
 
 const approvalTemplatesInputSchema = z.discriminatedUnion("operation", [
@@ -82,7 +82,7 @@ export function registerApprovalTemplatesTools(server: McpServer): void {
     "approval_templates",
     {
       description:
-        "承認テンプレートの一覧取得・作成・更新・削除を行います。operation 引数で操作を切り替えます。",
+        "承認テンプレート管理。承認テンプレート（ApprovalTemplate）・承認フロー定義・ワークフローテンプレートの一覧・作成・更新・削除。承認ステップとフォーム定義を管理する。operation: list/create/update/delete",
       inputSchema: approvalTemplatesAdvertisementSchema,
     },
     async (args, extra) => {

@@ -43,45 +43,50 @@ const legacyActionItemSchema = z.object({
 
 const createMeetingSchema = z.object({
   operation: z.literal("create_meeting"),
-  dealId: z.string().uuid().optional(),
-  inquiryId: z.string().uuid().optional(),
-  type: z.enum(["hearing", "proposal", "negotiation", "closing", "followup"]),
-  date: dateString,
-  location: z.string().optional(),
+  dealId: z.string().uuid().optional().describe("案件ID（UUID）"),
+  inquiryId: z.string().uuid().optional().describe("引合ID（UUID）"),
+  type: z
+    .enum(["hearing", "proposal", "negotiation", "closing", "followup"])
+    .describe("hearing=ヒアリング, proposal=提案, negotiation=交渉, closing=クロージング, followup=フォローアップ"),
+  date: dateString.describe("実施日時"),
+  location: z.string().optional().describe("場所"),
   internalAttendees: z.array(z.string()).optional().default([]),
   externalAttendees: z.array(z.string()).optional().default([]),
-  summary: z.string().optional(),
+  summary: z.string().optional().describe("要約"),
   actionItems: z.array(legacyActionItemSchema).optional().default([]),
   hearingData: hearingDataSchema.optional(),
 });
 
 const updateMeetingSchema = z.object({
   operation: z.literal("update_meeting"),
-  meetingId: z.string().uuid(),
-  type: z.enum(["hearing", "proposal", "negotiation", "closing", "followup"]).optional(),
-  date: dateString.optional(),
-  location: z.string().nullable().optional(),
+  meetingId: z.string().uuid().describe("商談ID（UUID）"),
+  type: z
+    .enum(["hearing", "proposal", "negotiation", "closing", "followup"])
+    .optional()
+    .describe("hearing=ヒアリング, proposal=提案, negotiation=交渉, closing=クロージング, followup=フォローアップ"),
+  date: dateString.optional().describe("実施日時"),
+  location: z.string().nullable().optional().describe("場所"),
   internalAttendees: z.array(z.string()).nullable().optional(),
   externalAttendees: z.array(z.string()).nullable().optional(),
-  summary: z.string().nullable().optional(),
+  summary: z.string().nullable().optional().describe("要約"),
   actionItems: z.array(legacyActionItemSchema).optional(),
   hearingData: hearingDataSchema.nullable().optional(),
 });
 
 const recordContractAdjustmentSchema = z.object({
   operation: z.literal("record_contract_adjustment"),
-  contractId: z.string().uuid("契約IDが不正です"),
-  summary: z.string().min(1, "要約は必須です"),
-  date: dateString.optional(),
-  details: z.string().optional(),
+  contractId: z.string().uuid("契約IDが不正です").describe("契約ID（UUID）"),
+  summary: z.string().min(1, "要約は必須です").describe("要約"),
+  date: dateString.optional().describe("実施日時"),
+  details: z.string().optional().describe("詳細"),
 });
 
 const recordInvoiceAdjustmentSchema = z.object({
   operation: z.literal("record_invoice_adjustment"),
-  invoiceId: z.string().uuid("請求IDが不正です"),
-  summary: z.string().min(1, "要約は必須です"),
-  date: dateString.optional(),
-  details: z.string().optional(),
+  invoiceId: z.string().uuid("請求IDが不正です").describe("請求ID（UUID）"),
+  summary: z.string().min(1, "要約は必須です").describe("要約"),
+  date: dateString.optional().describe("実施日時"),
+  details: z.string().optional().describe("詳細"),
 });
 
 const interactionsInputSchema = z.discriminatedUnion("operation", [
@@ -103,7 +108,7 @@ export function registerInteractionsTools(server: McpServer): void {
     "interactions",
     {
       description:
-        "顧客接点（Interaction）の記録・編集を行います。商談の記録・編集、契約調整・請求調整の記録に対応します。operation 引数で操作を切り替えます。",
+        "顧客接点管理。商談（Interaction）・打ち合わせ・ミーティング（meeting）の記録・編集、契約調整・請求調整の記録。案件や引合に紐付く接触履歴を扱う。operation: create_meeting/update_meeting/record_contract_adjustment/record_invoice_adjustment",
       inputSchema: interactionsAdvertisementSchema,
     },
     async (args, extra) => {

@@ -20,22 +20,22 @@ function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotificatio
 
 const setSchema = z.object({
   operation: z.literal("set"),
-  periodStart: z.string(),
-  periodEnd: z.string(),
-  targetAmount: z.number().int().positive("目標金額は正の整数を指定してください"),
+  periodStart: z.string().describe("対象期間開始日"),
+  periodEnd: z.string().describe("対象期間終了日"),
+  targetAmount: z.number().int().positive("目標金額は正の整数を指定してください").describe("目標金額（正の整数、円）"),
 });
 
 const updateSchema = z.object({
   operation: z.literal("update"),
-  id: z.string().uuid("売上目標IDが不正です"),
-  periodStart: z.string().optional(),
-  periodEnd: z.string().optional(),
-  targetAmount: z.number().int().positive().optional(),
+  id: z.string().uuid("売上目標IDが不正です").describe("売上目標ID（UUID）"),
+  periodStart: z.string().optional().describe("対象期間開始日"),
+  periodEnd: z.string().optional().describe("対象期間終了日"),
+  targetAmount: z.number().int().positive().optional().describe("目標金額（正の整数、円）"),
 });
 
 const deleteSchema = z.object({
   operation: z.literal("delete"),
-  id: z.string().uuid("売上目標IDが不正です"),
+  id: z.string().uuid("売上目標IDが不正です").describe("売上目標ID（UUID）"),
 });
 
 const revenueTargetsInputSchema = z.discriminatedUnion("operation", [
@@ -55,7 +55,7 @@ export function registerRevenueTargetsTools(server: McpServer): void {
     "revenue_targets",
     {
       description:
-        "売上目標（RevenueTarget）の設定・更新・削除を行います。operation 引数で操作を切り替えます。",
+        "売上目標管理。売上目標（RevenueTarget）・売上予算（target/KPI）の設定・更新・削除。期間・目標金額を管理する。operation: set/update/delete",
       inputSchema: revenueTargetsAdvertisementSchema,
     },
     async (args, extra) => {

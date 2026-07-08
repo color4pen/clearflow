@@ -45,49 +45,53 @@ function sanitizeApprovalReason(reason: string): string {
 
 const listSchema = z.object({
   operation: z.literal("list"),
-  filter: z.enum(["action_required", "my_requests", "all"]).optional(),
+  filter: z
+    .enum(["action_required", "my_requests", "all"])
+    .optional()
+    .describe("action_required=対応待ち, my_requests=自分の申請, all=全件"),
   statusFilter: z
     .enum(["draft", "pending", "approved", "rejected", "revision", "expired"])
-    .optional(),
+    .optional()
+    .describe("draft=下書き, pending=承認待ち, approved=承認済, rejected=却下, revision=差戻し, expired=期限切れ"),
 });
 
 const getSchema = z.object({
   operation: z.literal("get"),
-  requestId: z.string().uuid(),
+  requestId: z.string().uuid().describe("承認リクエストID（UUID）"),
 });
 
 const createSchema = z.object({
   operation: z.literal("create"),
-  title: z.string().min(1, "タイトルは必須です"),
-  templateId: z.string().uuid(),
-  formData: z.record(z.string(), z.unknown()).optional(),
+  title: z.string().min(1, "タイトルは必須です").describe("申請タイトル"),
+  templateId: z.string().uuid().describe("承認テンプレートID（UUID）"),
+  formData: z.record(z.string(), z.unknown()).optional().describe("申請フォームデータ"),
 });
 
 const submitSchema = z.object({
   operation: z.literal("submit"),
-  requestId: z.string().uuid(),
+  requestId: z.string().uuid().describe("承認リクエストID（UUID）"),
 });
 
 const approveSchema = z.object({
   operation: z.literal("approve"),
-  requestId: z.string().uuid(),
+  requestId: z.string().uuid().describe("承認リクエストID（UUID）"),
 });
 
 const rejectSchema = z.object({
   operation: z.literal("reject"),
-  requestId: z.string().uuid(),
-  targetStatus: z.enum(["rejected", "revision"]).optional(),
-  comment: z.string().optional(),
+  requestId: z.string().uuid().describe("承認リクエストID（UUID）"),
+  targetStatus: z.enum(["rejected", "revision"]).optional().describe("rejected=却下, revision=差戻し"),
+  comment: z.string().optional().describe("却下コメント"),
 });
 
 const bulkApproveSchema = z.object({
   operation: z.literal("bulk_approve"),
-  requestIds: z.array(z.string().uuid()).min(1).max(20),
+  requestIds: z.array(z.string().uuid()).min(1).max(20).describe("一括承認対象ID群（最大20件）"),
 });
 
 const resubmitSchema = z.object({
   operation: z.literal("resubmit"),
-  requestId: z.string().uuid(),
+  requestId: z.string().uuid().describe("承認リクエストID（UUID）"),
 });
 
 const approvalRequestsInputSchema = z.discriminatedUnion("operation", [
@@ -117,8 +121,7 @@ export function registerApprovalRequestsTools(server: McpServer): void {
     "approval_requests",
     {
       description:
-        "承認リクエストの一覧取得・詳細取得・作成・提出・承認・却下・一括承認・再提出を行います。operation 引数で操作を切り替えます。" +
-        "【filter 引数の注意】admin/manager は全件、それ以外のロールは自分の申請のみ返します（filter 未指定時）。filter=all を明示指定した場合は admin/manager のみ全件返し、それ以外は空配列を返します。",
+        "承認リクエスト管理。申請・稟議・ワークフロー（approval）の一覧・詳細・作成・提出・承認・却下・一括承認・再提出。ステータス（draft/pending/approved/rejected）を管理する。【filter 引数の注意】admin/manager は全件、それ以外のロールは自分の申請のみ返します（filter 未指定時）。filter=all を明示指定した場合は admin/manager のみ全件返し、それ以外は空配列を返します。operation: list/get/create/submit/approve/reject/bulk_approve/resubmit",
       inputSchema: approvalRequestsAdvertisementSchema,
     },
     async (args, extra) => {

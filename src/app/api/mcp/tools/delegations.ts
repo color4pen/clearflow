@@ -30,15 +30,15 @@ const listSchema = z.object({
 
 const createSchema = z.object({
   operation: z.literal("create"),
-  fromUserId: z.string().uuid(),
-  toUserId: z.string().uuid(),
-  startDate: dateString,
-  endDate: dateString,
+  fromUserId: z.string().uuid().describe("委任元ユーザーID（UUID）"),
+  toUserId: z.string().uuid().describe("委任先ユーザーID（UUID）"),
+  startDate: dateString.describe("委任開始日"),
+  endDate: dateString.describe("委任終了日"),
 });
 
 const deactivateSchema = z.object({
   operation: z.literal("deactivate"),
-  delegationId: z.string().uuid(),
+  delegationId: z.string().uuid().describe("委任ID（UUID）"),
 });
 
 const delegationsInputSchema = z.discriminatedUnion("operation", [
@@ -58,7 +58,7 @@ export function registerDelegationsTools(server: McpServer): void {
     "delegations",
     {
       description:
-        "承認委任の一覧取得・作成・無効化を行います。operation 引数で操作を切り替えます。",
+        "承認委任管理。承認委任（Delegation）・代理承認・代行の一覧・作成・無効化。期間指定と委任元/委任先のユーザーを管理する。operation: list/create/deactivate",
       inputSchema: delegationsAdvertisementSchema,
     },
     async (args, extra) => {

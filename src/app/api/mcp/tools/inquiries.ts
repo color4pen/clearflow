@@ -31,43 +31,43 @@ const listSchema = z.object({
 
 const createSchema = z.object({
   operation: z.literal("create"),
-  clientId: z.string().uuid().optional(),
-  newClientName: z.string().min(1).optional(),
-  title: z.string().min(1, "件名は必須です"),
+  clientId: z.string().uuid().optional().describe("顧客ID（UUID）"),
+  newClientName: z.string().min(1).optional().describe("新規顧客名 — 顧客を同時作成する場合に指定"),
+  title: z.string().min(1, "件名は必須です").describe("件名"),
   description: z.string().optional(),
-  contactNote: z.string().optional(),
+  contactNote: z.string().optional().describe("連絡メモ"),
   source: z
     .enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"])
     .describe("問い合わせ元"),
-  assigneeId: z.string().uuid().optional(),
+  assigneeId: z.string().uuid().optional().describe("担当者ID（UUID）"),
   budget: z.number().int().optional().describe("予算（整数）"),
-  timeline: z.string().optional(),
+  timeline: z.string().optional().describe("希望時期"),
 });
 
 const updateSchema = z.object({
   operation: z.literal("update"),
-  inquiryId: z.string().uuid(),
-  title: z.string().min(1).optional(),
+  inquiryId: z.string().uuid().describe("引合ID（UUID）"),
+  title: z.string().min(1).optional().describe("件名"),
   description: z.string().optional(),
-  contactNote: z.string().optional(),
+  contactNote: z.string().optional().describe("連絡メモ"),
   source: z
     .enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"])
     .optional(),
-  clientId: z.string().uuid().optional(),
-  assigneeId: z.string().uuid().optional(),
+  clientId: z.string().uuid().optional().describe("顧客ID（UUID）"),
+  assigneeId: z.string().uuid().optional().describe("担当者ID（UUID）"),
   budget: z.number().int().optional(),
-  timeline: z.string().optional(),
+  timeline: z.string().optional().describe("希望時期"),
 });
 
 const updateStatusSchema = z.object({
   operation: z.literal("update_status"),
-  inquiryId: z.string().uuid(),
-  newStatus: z.enum(["new", "converted", "declined"]),
+  inquiryId: z.string().uuid().describe("引合ID（UUID）"),
+  newStatus: z.enum(["new", "converted", "declined"]).describe("new=新規, converted=案件化, declined=辞退"),
 });
 
 const deleteSchema = z.object({
   operation: z.literal("delete"),
-  inquiryId: z.string().uuid(),
+  inquiryId: z.string().uuid().describe("引合ID（UUID）"),
 });
 
 const inquiriesInputSchema = z.discriminatedUnion("operation", [
@@ -91,7 +91,7 @@ export function registerInquiriesTools(server: McpServer): void {
     "inquiries",
     {
       description:
-        "引合（Inquiry）の一覧取得・作成・更新・ステータス更新・削除を行います。operation 引数で操作を切り替えます。",
+        "引合管理。引合（Inquiry）・問い合わせ・見込み・リード（lead）の一覧・作成・更新・ステータス変更・削除。予算・ソース・ステータス（new/converted/declined）を管理する。operation: list/create/update/update_status/delete",
       inputSchema: inquiriesAdvertisementSchema,
     },
     async (args, extra) => {
