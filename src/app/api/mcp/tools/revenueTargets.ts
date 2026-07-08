@@ -8,6 +8,7 @@ import { setRevenueTarget } from "@/application/usecases/setRevenueTarget";
 import { updateRevenueTarget } from "@/application/usecases/updateRevenueTarget";
 import { deleteRevenueTarget } from "@/application/usecases/deleteRevenueTarget";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 
 function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
@@ -43,13 +44,19 @@ const revenueTargetsInputSchema = z.discriminatedUnion("operation", [
   deleteSchema,
 ]);
 
+const revenueTargetsAdvertisementSchema = buildAdvertisementSchema([
+  setSchema,
+  updateSchema,
+  deleteSchema,
+]);
+
 export function registerRevenueTargetsTools(server: McpServer): void {
   server.registerTool(
     "revenue_targets",
     {
       description:
         "売上目標（RevenueTarget）の設定・更新・削除を行います。operation 引数で操作を切り替えます。",
-      inputSchema: revenueTargetsInputSchema,
+      inputSchema: revenueTargetsAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -59,7 +66,11 @@ export function registerRevenueTargetsTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(revenueTargetsInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof revenueTargetsInputSchema>;
+
+        switch (typedArgs.operation) {
           case "set": {
             if (!canPerform(role, "revenue", "setTarget")) {
               return toToolError("権限がありません");
@@ -76,9 +87,9 @@ export function registerRevenueTargetsTools(server: McpServer): void {
             const result = await setRevenueTarget({
               organizationId,
               actorId: userId,
-              periodStart: new Date(args.periodStart),
-              periodEnd: new Date(args.periodEnd),
-              targetAmount: args.targetAmount,
+              periodStart: new Date(typedArgs.periodStart),
+              periodEnd: new Date(typedArgs.periodEnd),
+              targetAmount: typedArgs.targetAmount,
             });
 
             if (!result.ok) {
@@ -101,14 +112,14 @@ export function registerRevenueTargetsTools(server: McpServer): void {
             }
 
             const result = await updateRevenueTarget({
-              id: args.id,
+              id: typedArgs.id,
               organizationId,
               actorId: userId,
               periodStart:
-                args.periodStart !== undefined ? new Date(args.periodStart) : undefined,
+                typedArgs.periodStart !== undefined ? new Date(typedArgs.periodStart) : undefined,
               periodEnd:
-                args.periodEnd !== undefined ? new Date(args.periodEnd) : undefined,
-              targetAmount: args.targetAmount,
+                typedArgs.periodEnd !== undefined ? new Date(typedArgs.periodEnd) : undefined,
+              targetAmount: typedArgs.targetAmount,
             });
 
             if (!result.ok) {
@@ -131,7 +142,7 @@ export function registerRevenueTargetsTools(server: McpServer): void {
             }
 
             const result = await deleteRevenueTarget({
-              id: args.id,
+              id: typedArgs.id,
               organizationId,
               actorId: userId,
             });
@@ -139,7 +150,7 @@ export function registerRevenueTargetsTools(server: McpServer): void {
             if (!result.ok) {
               return toToolError(result.reason);
             }
-            return toToolSuccess({ deleted: true, id: args.id });
+            return toToolSuccess({ deleted: true, id: typedArgs.id });
           }
 
           default: {

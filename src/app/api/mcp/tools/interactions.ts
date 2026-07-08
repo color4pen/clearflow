@@ -9,6 +9,7 @@ import { updateMeeting } from "@/application/usecases/updateMeeting";
 import { createContractAdjustment } from "@/application/usecases/createContractAdjustment";
 import { createInvoiceAdjustment } from "@/application/usecases/createInvoiceAdjustment";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 import type { MeetingAttendee } from "@/domain/models/interaction";
 
@@ -90,13 +91,20 @@ const interactionsInputSchema = z.discriminatedUnion("operation", [
   recordInvoiceAdjustmentSchema,
 ]);
 
+const interactionsAdvertisementSchema = buildAdvertisementSchema([
+  createMeetingSchema,
+  updateMeetingSchema,
+  recordContractAdjustmentSchema,
+  recordInvoiceAdjustmentSchema,
+]);
+
 export function registerInteractionsTools(server: McpServer): void {
   server.registerTool(
     "interactions",
     {
       description:
         "顧客接点（Interaction）の記録・編集を行います。商談の記録・編集、契約調整・請求調整の記録に対応します。operation 引数で操作を切り替えます。",
-      inputSchema: interactionsInputSchema,
+      inputSchema: interactionsAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -106,7 +114,11 @@ export function registerInteractionsTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(interactionsInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof interactionsInputSchema>;
+
+        switch (typedArgs.operation) {
           case "create_meeting": {
             if (!canPerform(role, "meeting", "create")) {
               return toToolError("権限がありません");
@@ -121,13 +133,13 @@ export function registerInteractionsTools(server: McpServer): void {
             }
 
             const attendees: MeetingAttendee[] = [
-              ...(args.internalAttendees ?? []).map((name) => ({
+              ...(typedArgs.internalAttendees ?? []).map((name) => ({
                 userId: null as string | null,
                 contactId: null as string | null,
                 name,
                 isExternal: false,
               })),
-              ...(args.externalAttendees ?? []).map((name) => ({
+              ...(typedArgs.externalAttendees ?? []).map((name) => ({
                 userId: null as string | null,
                 contactId: null as string | null,
                 name,
@@ -135,14 +147,14 @@ export function registerInteractionsTools(server: McpServer): void {
               })),
             ];
 
-            const hearingData = args.hearingData
+            const hearingData = typedArgs.hearingData
               ? {
-                  challenge: args.hearingData.challenge ?? null,
-                  budget: args.hearingData.budget ?? null,
-                  decisionMaker: args.hearingData.decisionMaker ?? null,
-                  timeline: args.hearingData.timeline ?? null,
-                  competitors: args.hearingData.competitors ?? null,
-                  notes: args.hearingData.notes ?? null,
+                  challenge: typedArgs.hearingData.challenge ?? null,
+                  budget: typedArgs.hearingData.budget ?? null,
+                  decisionMaker: typedArgs.hearingData.decisionMaker ?? null,
+                  timeline: typedArgs.hearingData.timeline ?? null,
+                  competitors: typedArgs.hearingData.competitors ?? null,
+                  notes: typedArgs.hearingData.notes ?? null,
                 }
               : undefined;
 
@@ -150,14 +162,14 @@ export function registerInteractionsTools(server: McpServer): void {
               organizationId,
               actorId: userId,
               kind: "meeting",
-              dealId: args.dealId ?? null,
-              inquiryId: args.inquiryId ?? null,
-              meetingType: args.type,
-              date: new Date(args.date),
-              location: args.location ?? null,
+              dealId: typedArgs.dealId ?? null,
+              inquiryId: typedArgs.inquiryId ?? null,
+              meetingType: typedArgs.type,
+              date: new Date(typedArgs.date),
+              location: typedArgs.location ?? null,
               attendees,
-              summary: args.summary ?? null,
-              actionItems: args.actionItems ?? [],
+              summary: typedArgs.summary ?? null,
+              actionItems: typedArgs.actionItems ?? [],
               details: hearingData ?? null,
             });
 
@@ -182,15 +194,15 @@ export function registerInteractionsTools(server: McpServer): void {
 
             // attendees: internalAttendees / externalAttendees のいずれかが指定された場合のみ変換する
             let attendees: MeetingAttendee[] | undefined;
-            if (args.internalAttendees !== undefined || args.externalAttendees !== undefined) {
+            if (typedArgs.internalAttendees !== undefined || typedArgs.externalAttendees !== undefined) {
               attendees = [
-                ...(args.internalAttendees ?? []).map((name) => ({
+                ...(typedArgs.internalAttendees ?? []).map((name) => ({
                   userId: null as string | null,
                   contactId: null as string | null,
                   name,
                   isExternal: false,
                 })),
-                ...(args.externalAttendees ?? []).map((name) => ({
+                ...(typedArgs.externalAttendees ?? []).map((name) => ({
                   userId: null as string | null,
                   contactId: null as string | null,
                   name,
@@ -201,31 +213,31 @@ export function registerInteractionsTools(server: McpServer): void {
 
             // hearingData: undefined（変更なし）と null（クリア）を区別する
             let details: { challenge: string | null; budget: string | null; decisionMaker: string | null; timeline: string | null; competitors: string | null; notes: string | null } | null | undefined;
-            if (args.hearingData === undefined) {
+            if (typedArgs.hearingData === undefined) {
               details = undefined;
-            } else if (args.hearingData === null) {
+            } else if (typedArgs.hearingData === null) {
               details = null;
             } else {
               details = {
-                challenge: args.hearingData.challenge ?? null,
-                budget: args.hearingData.budget ?? null,
-                decisionMaker: args.hearingData.decisionMaker ?? null,
-                timeline: args.hearingData.timeline ?? null,
-                competitors: args.hearingData.competitors ?? null,
-                notes: args.hearingData.notes ?? null,
+                challenge: typedArgs.hearingData.challenge ?? null,
+                budget: typedArgs.hearingData.budget ?? null,
+                decisionMaker: typedArgs.hearingData.decisionMaker ?? null,
+                timeline: typedArgs.hearingData.timeline ?? null,
+                competitors: typedArgs.hearingData.competitors ?? null,
+                notes: typedArgs.hearingData.notes ?? null,
               };
             }
 
             const result = await updateMeeting({
-              meetingId: args.meetingId,
+              meetingId: typedArgs.meetingId,
               organizationId,
               actorId: userId,
-              meetingType: args.type,
-              date: args.date ? new Date(args.date) : undefined,
-              location: args.location,
+              meetingType: typedArgs.type,
+              date: typedArgs.date ? new Date(typedArgs.date) : undefined,
+              location: typedArgs.location,
               attendees,
-              summary: args.summary,
-              actionItems: args.actionItems,
+              summary: typedArgs.summary,
+              actionItems: typedArgs.actionItems,
               details,
             });
 
@@ -249,12 +261,12 @@ export function registerInteractionsTools(server: McpServer): void {
             }
 
             const result = await createContractAdjustment({
-              contractId: args.contractId,
+              contractId: typedArgs.contractId,
               organizationId,
               actorId: userId,
-              summary: args.summary,
-              date: args.date ? new Date(args.date) : undefined,
-              details: args.details ?? null,
+              summary: typedArgs.summary,
+              date: typedArgs.date ? new Date(typedArgs.date) : undefined,
+              details: typedArgs.details ?? null,
             });
 
             if (!result.ok) {
@@ -277,12 +289,12 @@ export function registerInteractionsTools(server: McpServer): void {
             }
 
             const result = await createInvoiceAdjustment({
-              invoiceId: args.invoiceId,
+              invoiceId: typedArgs.invoiceId,
               organizationId,
               actorId: userId,
-              summary: args.summary,
-              date: args.date ? new Date(args.date) : undefined,
-              details: args.details ?? null,
+              summary: typedArgs.summary,
+              date: typedArgs.date ? new Date(typedArgs.date) : undefined,
+              details: typedArgs.details ?? null,
             });
 
             if (!result.ok) {

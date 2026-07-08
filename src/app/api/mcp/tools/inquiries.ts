@@ -13,6 +13,7 @@ import {
   createClient,
 } from "@/application/usecases";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 
 function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
@@ -35,9 +36,11 @@ const createSchema = z.object({
   title: z.string().min(1, "件名は必須です"),
   description: z.string().optional(),
   contactNote: z.string().optional(),
-  source: z.enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"]),
+  source: z
+    .enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"])
+    .describe("問い合わせ元"),
   assigneeId: z.string().uuid().optional(),
-  budget: z.number().int().optional(),
+  budget: z.number().int().optional().describe("予算（整数）"),
   timeline: z.string().optional(),
 });
 
@@ -75,13 +78,21 @@ const inquiriesInputSchema = z.discriminatedUnion("operation", [
   deleteSchema,
 ]);
 
+const inquiriesAdvertisementSchema = buildAdvertisementSchema([
+  createSchema,
+  listSchema,
+  updateSchema,
+  updateStatusSchema,
+  deleteSchema,
+]);
+
 export function registerInquiriesTools(server: McpServer): void {
   server.registerTool(
     "inquiries",
     {
       description:
         "引合（Inquiry）の一覧取得・作成・更新・ステータス更新・削除を行います。operation 引数で操作を切り替えます。",
-      inputSchema: inquiriesInputSchema,
+      inputSchema: inquiriesAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -91,7 +102,11 @@ export function registerInquiriesTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(inquiriesInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof inquiriesInputSchema>;
+
+        switch (typedArgs.operation) {
           case "list": {
             if (!canPerform(role, "inquiry", "list")) {
               return toToolError("権限がありません");
@@ -114,10 +129,10 @@ export function registerInquiriesTools(server: McpServer): void {
             }
 
             // 新規顧客名が指定されており clientId が未指定の場合、顧客を先に作成する
-            let resolvedClientId: string | null = args.clientId ?? null;
-            if (args.newClientName && !args.clientId) {
+            let resolvedClientId: string | null = typedArgs.clientId ?? null;
+            if (typedArgs.newClientName && !typedArgs.clientId) {
               const clientResult = await createClient({
-                name: args.newClientName,
+                name: typedArgs.newClientName,
                 organizationId,
                 actorId: userId,
               });
@@ -131,13 +146,13 @@ export function registerInquiriesTools(server: McpServer): void {
               organizationId,
               actorId: userId,
               clientId: resolvedClientId,
-              title: args.title,
-              description: args.description ?? null,
-              contactNote: args.contactNote ?? null,
-              source: args.source,
-              assigneeId: args.assigneeId ?? null,
-              budget: args.budget ?? null,
-              timeline: args.timeline ?? null,
+              title: typedArgs.title,
+              description: typedArgs.description ?? null,
+              contactNote: typedArgs.contactNote ?? null,
+              source: typedArgs.source,
+              assigneeId: typedArgs.assigneeId ?? null,
+              budget: typedArgs.budget ?? null,
+              timeline: typedArgs.timeline ?? null,
             });
 
             if (!result.ok) {
@@ -160,17 +175,17 @@ export function registerInquiriesTools(server: McpServer): void {
             }
 
             const result = await updateInquiry({
-              inquiryId: args.inquiryId,
+              inquiryId: typedArgs.inquiryId,
               organizationId,
               actorId: userId,
-              title: args.title,
-              description: args.description,
-              contactNote: args.contactNote,
-              source: args.source,
-              clientId: args.clientId,
-              assigneeId: args.assigneeId,
-              budget: args.budget,
-              timeline: args.timeline,
+              title: typedArgs.title,
+              description: typedArgs.description,
+              contactNote: typedArgs.contactNote,
+              source: typedArgs.source,
+              clientId: typedArgs.clientId,
+              assigneeId: typedArgs.assigneeId,
+              budget: typedArgs.budget,
+              timeline: typedArgs.timeline,
             });
 
             if (!result.ok) {
@@ -180,7 +195,7 @@ export function registerInquiriesTools(server: McpServer): void {
           }
 
           case "update_status": {
-            const { newStatus } = args;
+            const { newStatus } = typedArgs;
             if (newStatus === "converted") {
               if (!canPerform(role, "inquiry", "convert")) {
                 return toToolError("権限がありません");
@@ -201,7 +216,7 @@ export function registerInquiriesTools(server: McpServer): void {
             }
 
             const result = await updateInquiryStatus({
-              inquiryId: args.inquiryId,
+              inquiryId: typedArgs.inquiryId,
               organizationId,
               actorId: userId,
               newStatus,
@@ -237,7 +252,7 @@ export function registerInquiriesTools(server: McpServer): void {
             }
 
             const result = await deleteInquiry({
-              id: args.inquiryId,
+              id: typedArgs.inquiryId,
               organizationId,
               actorId: userId,
             });
@@ -245,7 +260,7 @@ export function registerInquiriesTools(server: McpServer): void {
             if (!result.ok) {
               return toToolError(result.reason);
             }
-            return toToolSuccess({ deleted: true, inquiryId: args.inquiryId });
+            return toToolSuccess({ deleted: true, inquiryId: typedArgs.inquiryId });
           }
 
           default: {

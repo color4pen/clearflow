@@ -15,6 +15,7 @@ import {
   getDealActivity,
 } from "@/application/usecases";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 import type { ContractType, DealPhase } from "@/domain/models/deal";
 
@@ -85,21 +86,34 @@ const dealsInputSchema = z.discriminatedUnion("operation", [
   deleteSchema,
 ]);
 
+const dealsAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  getSchema,
+  createSchema,
+  updateSchema,
+  updatePhaseSchema,
+  deleteSchema,
+]);
+
 export function registerDealsTools(server: McpServer): void {
   server.registerTool(
     "deals",
     {
       description:
         "案件（Deal）の一覧取得・詳細取得・作成・更新・フェーズ更新・削除を行います。operation 引数で操作を切り替えます。",
-      inputSchema: dealsInputSchema,
+      inputSchema: dealsAdvertisementSchema,
     },
-    async (args, extra) => {
+    async (_rawArgs, extra) => {
       try {
         const auth = getAuthInfo(extra);
         if (!auth) {
           return toToolError("認証情報が取得できません");
         }
         const { userId, organizationId, role } = auth;
+
+        const parseResult = validateAndParse(dealsInputSchema, _rawArgs);
+        if (parseResult) return parseResult;
+        const args = _rawArgs as z.infer<typeof dealsInputSchema>;
 
         switch (args.operation) {
           case "list": {

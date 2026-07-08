@@ -18,6 +18,7 @@ import {
 } from "@/application/usecases";
 import { validatePrimaryUniqueness } from "@/application/services/clientContactService";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 import type { DealContactRole } from "@/domain/models/deal";
 
@@ -122,21 +123,37 @@ const clientsInputSchema = z.discriminatedUnion("operation", [
   removeDealContactSchema,
 ]);
 
+const clientsAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  getSchema,
+  createSchema,
+  updateSchema,
+  addContactSchema,
+  updateContactSchema,
+  deleteContactSchema,
+  addDealContactSchema,
+  removeDealContactSchema,
+]);
+
 export function registerClientsTools(server: McpServer): void {
   server.registerTool(
     "clients",
     {
       description:
         "顧客（Client）・顧客担当者（ClientContact）・案件担当者（DealContact）の操作を行います。operation 引数で操作を切り替えます。",
-      inputSchema: clientsInputSchema,
+      inputSchema: clientsAdvertisementSchema,
     },
-    async (args, extra) => {
+    async (_rawArgs, extra) => {
       try {
         const auth = getAuthInfo(extra);
         if (!auth) {
           return toToolError("認証情報が取得できません");
         }
         const { userId, organizationId, role } = auth;
+
+        const parseResult = validateAndParse(clientsInputSchema, _rawArgs);
+        if (parseResult) return parseResult;
+        const args = _rawArgs as z.infer<typeof clientsInputSchema>;
 
         switch (args.operation) {
           case "list": {

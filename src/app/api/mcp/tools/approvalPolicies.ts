@@ -9,6 +9,7 @@ import { updatePolicy } from "@/application/usecases/updatePolicy";
 import { togglePolicy } from "@/application/usecases/togglePolicy";
 import * as approvalPolicyRepository from "@/infrastructure/repositories/approvalPolicyRepository";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 import type { ConditionOperator } from "@/domain/models/approvalPolicy";
 
@@ -100,13 +101,20 @@ const approvalPoliciesInputSchema = z.discriminatedUnion("operation", [
   toggleSchema,
 ]);
 
+const approvalPoliciesAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  createSchema as unknown as z.ZodObject<z.ZodRawShape>,
+  updateSchema as unknown as z.ZodObject<z.ZodRawShape>,
+  toggleSchema,
+]);
+
 export function registerApprovalPoliciesTools(server: McpServer): void {
   server.registerTool(
     "approval_policies",
     {
       description:
         "承認ポリシーの一覧取得・作成・更新・有効/無効切替を行います。operation 引数で操作を切り替えます。",
-      inputSchema: approvalPoliciesInputSchema,
+      inputSchema: approvalPoliciesAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -116,7 +124,11 @@ export function registerApprovalPoliciesTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(approvalPoliciesInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof approvalPoliciesInputSchema>;
+
+        switch (typedArgs.operation) {
           case "list": {
             if (!canPerform(role, "approvalSettings", "listPolicies")) {
               return toToolError("権限がありません");
@@ -138,20 +150,20 @@ export function registerApprovalPoliciesTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            const hasCondition = args.conditionField && args.conditionField.trim() !== "";
+            const hasCondition = typedArgs.conditionField && typedArgs.conditionField.trim() !== "";
 
             const result = await createPolicy({
               organizationId,
               actorId: userId,
-              name: args.name,
-              description: args.description ?? null,
-              triggerAction: args.triggerAction,
-              conditionField: hasCondition ? (args.conditionField ?? null) : null,
+              name: typedArgs.name,
+              description: typedArgs.description ?? null,
+              triggerAction: typedArgs.triggerAction,
+              conditionField: hasCondition ? (typedArgs.conditionField ?? null) : null,
               conditionOperator: hasCondition
-                ? ((args.conditionOperator as ConditionOperator) ?? null)
+                ? ((typedArgs.conditionOperator as ConditionOperator) ?? null)
                 : null,
-              conditionValue: hasCondition ? (args.conditionValue ?? null) : null,
-              templateId: args.templateId,
+              conditionValue: hasCondition ? (typedArgs.conditionValue ?? null) : null,
+              templateId: typedArgs.templateId,
             });
 
             if (!result.ok) {
@@ -173,21 +185,21 @@ export function registerApprovalPoliciesTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            const hasCondition = args.conditionField && args.conditionField.trim() !== "";
+            const hasCondition = typedArgs.conditionField && typedArgs.conditionField.trim() !== "";
 
             const result = await updatePolicy({
-              id: args.policyId,
+              id: typedArgs.policyId,
               organizationId,
               actorId: userId,
-              name: args.name,
-              description: args.description ?? null,
-              triggerAction: args.triggerAction,
-              conditionField: hasCondition ? (args.conditionField ?? null) : null,
+              name: typedArgs.name,
+              description: typedArgs.description ?? null,
+              triggerAction: typedArgs.triggerAction,
+              conditionField: hasCondition ? (typedArgs.conditionField ?? null) : null,
               conditionOperator: hasCondition
-                ? ((args.conditionOperator as ConditionOperator) ?? null)
+                ? ((typedArgs.conditionOperator as ConditionOperator) ?? null)
                 : null,
-              conditionValue: hasCondition ? (args.conditionValue ?? null) : null,
-              templateId: args.templateId,
+              conditionValue: hasCondition ? (typedArgs.conditionValue ?? null) : null,
+              templateId: typedArgs.templateId,
             });
 
             if (!result.ok) {
@@ -210,7 +222,7 @@ export function registerApprovalPoliciesTools(server: McpServer): void {
             }
 
             const result = await togglePolicy({
-              id: args.policyId,
+              id: typedArgs.policyId,
               organizationId,
               actorId: userId,
             });

@@ -13,6 +13,7 @@ import { WEBHOOK_EVENT_TYPES } from "@/domain/models/webhookEvent";
 import { deliverSingleAttempt } from "@/infrastructure/webhookDelivery";
 import { validateWebhookUrl } from "@/domain/services/webhookUrlValidator";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 
 function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
@@ -62,13 +63,22 @@ const webhooksInputSchema = z.discriminatedUnion("operation", [
   retryDeliverySchema,
 ]);
 
+const webhooksAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  createSchema,
+  deleteSchema,
+  toggleSchema,
+  listDeliveriesSchema,
+  retryDeliverySchema,
+]);
+
 export function registerWebhooksTools(server: McpServer): void {
   server.registerTool(
     "webhooks",
     {
       description:
         "Webhook エンドポイントの一覧・作成・削除・有効化/無効化、配信履歴の確認、失敗配信のリトライを行います。operation 引数で操作を切り替えます。",
-      inputSchema: webhooksInputSchema,
+      inputSchema: webhooksAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -78,11 +88,15 @@ export function registerWebhooksTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
+        const parseResult = validateAndParse(webhooksInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof webhooksInputSchema>;
+
         if (!canPerform(role, "organization", "manageWebhooks")) {
           return toToolError("権限がありません");
         }
 
-        switch (args.operation) {
+        switch (typedArgs.operation) {
           case "list": {
             const endpoints =
               await webhookEndpointRepository.findByOrganization(organizationId);
@@ -103,12 +117,12 @@ export function registerWebhooksTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            const urlValidation = validateWebhookUrl(args.url);
+            const urlValidation = validateWebhookUrl(typedArgs.url);
             if (!urlValidation.ok) {
               return toToolError(urlValidation.message);
             }
 
-            const validEvents = args.events.filter((e) =>
+            const validEvents = typedArgs.events.filter((e) =>
               (WEBHOOK_EVENT_TYPES as readonly string[]).includes(e)
             );
             if (validEvents.length === 0) {
@@ -119,7 +133,7 @@ export function registerWebhooksTools(server: McpServer): void {
 
             const endpoint = await webhookEndpointRepository.create({
               organizationId,
-              url: args.url,
+              url: typedArgs.url,
               secret,
               events: validEvents,
             });
@@ -138,7 +152,7 @@ export function registerWebhooksTools(server: McpServer): void {
             }
 
             await webhookEndpointRepository.deleteById(
-              args.endpointId,
+              typedArgs.endpointId,
               organizationId
             );
             return toToolSuccess({ deleted: true });
@@ -155,16 +169,16 @@ export function registerWebhooksTools(server: McpServer): void {
             }
 
             await webhookEndpointRepository.updateIsActive(
-              args.endpointId,
+              typedArgs.endpointId,
               organizationId,
-              args.isActive
+              typedArgs.isActive
             );
             return toToolSuccess({ updated: true });
           }
 
           case "list_deliveries": {
             const deliveries = await webhookDeliveryRepository.findByEndpointId(
-              args.endpointId,
+              typedArgs.endpointId,
               organizationId,
               { limit: 50 }
             );
@@ -182,7 +196,7 @@ export function registerWebhooksTools(server: McpServer): void {
             }
 
             const delivery = await webhookDeliveryRepository.findById(
-              args.deliveryId,
+              typedArgs.deliveryId,
               organizationId
             );
             if (!delivery) {
@@ -201,8 +215,8 @@ export function registerWebhooksTools(server: McpServer): void {
               return toToolError("failed 状態の配信のみリトライできます");
             }
 
-            await webhookDeliveryRepository.resetForRetry(args.deliveryId);
-            void deliverSingleAttempt(endpoint, delivery.payload, args.deliveryId);
+            await webhookDeliveryRepository.resetForRetry(typedArgs.deliveryId);
+            void deliverSingleAttempt(endpoint, delivery.payload, typedArgs.deliveryId);
 
             return toToolSuccess({ retried: true });
           }

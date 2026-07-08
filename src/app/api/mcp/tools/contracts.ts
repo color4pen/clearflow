@@ -11,6 +11,7 @@ import { updateContract } from "@/application/usecases/updateContract";
 import { updateContractStatus } from "@/application/usecases/updateContractStatus";
 import { deleteContract } from "@/application/usecases/deleteContract";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 import type { ContractStatus } from "@/domain/models/contract";
 
@@ -81,13 +82,22 @@ const contractsInputSchema = z.discriminatedUnion("operation", [
   deleteSchema,
 ]);
 
+const contractsAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  getSchema,
+  createSchema,
+  updateSchema,
+  updateStatusSchema,
+  deleteSchema,
+]);
+
 export function registerContractsTools(server: McpServer): void {
   server.registerTool(
     "contracts",
     {
       description:
         "契約（Contract）の一覧取得・詳細取得・作成・更新・ステータス更新・削除を行います。operation 引数で操作を切り替えます。",
-      inputSchema: contractsInputSchema,
+      inputSchema: contractsAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -97,7 +107,11 @@ export function registerContractsTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(contractsInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof contractsInputSchema>;
+
+        switch (typedArgs.operation) {
           case "list": {
             if (!canPerform(role, "contract", "list")) {
               return toToolError("権限がありません");
@@ -111,7 +125,7 @@ export function registerContractsTools(server: McpServer): void {
               return toToolError("権限がありません");
             }
             const contract = await getContract({
-              contractId: args.contractId,
+              contractId: typedArgs.contractId,
               organizationId,
             });
             if (!contract) {
@@ -134,17 +148,17 @@ export function registerContractsTools(server: McpServer): void {
             }
 
             const result = await createContract({
-              dealId: args.dealId,
+              dealId: typedArgs.dealId,
               organizationId,
               actorId: userId,
-              title: args.title,
-              contractType: args.contractType,
-              amount: args.amount,
-              startDate: new Date(args.startDate),
-              endDate: args.endDate !== undefined ? new Date(args.endDate) : undefined,
-              paymentTerms: args.paymentTerms,
-              renewalType: args.renewalType,
-              renewalCycle: args.renewalCycle,
+              title: typedArgs.title,
+              contractType: typedArgs.contractType,
+              amount: typedArgs.amount,
+              startDate: new Date(typedArgs.startDate),
+              endDate: typedArgs.endDate !== undefined ? new Date(typedArgs.endDate) : undefined,
+              paymentTerms: typedArgs.paymentTerms,
+              renewalType: typedArgs.renewalType,
+              renewalCycle: typedArgs.renewalCycle,
             });
 
             if (!result.ok) {
@@ -168,28 +182,28 @@ export function registerContractsTools(server: McpServer): void {
 
             // startDate: undefined（変更なし）、文字列（Date に変換）を区別する
             const startDate =
-              args.startDate === undefined ? undefined : new Date(args.startDate);
+              typedArgs.startDate === undefined ? undefined : new Date(typedArgs.startDate);
 
             // endDate: undefined（変更なし）、null（クリア）、文字列（Date に変換）を区別する
             const endDate =
-              args.endDate === undefined
+              typedArgs.endDate === undefined
                 ? undefined
-                : args.endDate === null
+                : typedArgs.endDate === null
                   ? null
-                  : new Date(args.endDate);
+                  : new Date(typedArgs.endDate);
 
             const result = await updateContract({
-              contractId: args.contractId,
+              contractId: typedArgs.contractId,
               organizationId,
               actorId: userId,
-              title: args.title,
-              contractType: args.contractType,
-              amount: args.amount,
+              title: typedArgs.title,
+              contractType: typedArgs.contractType,
+              amount: typedArgs.amount,
               startDate,
               endDate,
-              paymentTerms: args.paymentTerms,
-              renewalType: args.renewalType,
-              renewalCycle: args.renewalCycle,
+              paymentTerms: typedArgs.paymentTerms,
+              renewalType: typedArgs.renewalType,
+              renewalCycle: typedArgs.renewalCycle,
             });
 
             if (!result.ok) {
@@ -212,10 +226,10 @@ export function registerContractsTools(server: McpServer): void {
             }
 
             const result = await updateContractStatus({
-              contractId: args.contractId,
+              contractId: typedArgs.contractId,
               organizationId,
               actorId: userId,
-              newStatus: args.newStatus as ContractStatus,
+              newStatus: typedArgs.newStatus as ContractStatus,
             });
 
             if (!result.ok) {
@@ -238,7 +252,7 @@ export function registerContractsTools(server: McpServer): void {
             }
 
             const result = await deleteContract({
-              id: args.contractId,
+              id: typedArgs.contractId,
               organizationId,
               actorId: userId,
             });
@@ -246,7 +260,7 @@ export function registerContractsTools(server: McpServer): void {
             if (!result.ok) {
               return toToolError(result.reason);
             }
-            return toToolSuccess({ deleted: true, contractId: args.contractId });
+            return toToolSuccess({ deleted: true, contractId: typedArgs.contractId });
           }
 
           default: {

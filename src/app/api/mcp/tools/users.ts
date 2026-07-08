@@ -10,6 +10,7 @@ import { updateUserRole } from "@/application/usecases/updateUserRole";
 import { deactivateUser } from "@/application/usecases/deactivateUser";
 import { reactivateUser } from "@/application/usecases/reactivateUser";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 
 function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
@@ -55,13 +56,21 @@ const usersInputSchema = z.discriminatedUnion("operation", [
   reactivateSchema,
 ]);
 
+const usersAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  createSchema,
+  updateRoleSchema,
+  deactivateSchema,
+  reactivateSchema,
+]);
+
 export function registerUsersTools(server: McpServer): void {
   server.registerTool(
     "users",
     {
       description:
         "ユーザーの一覧・作成・ロール変更・無効化・再有効化を行います。operation 引数で操作を切り替えます。",
-      inputSchema: usersInputSchema,
+      inputSchema: usersAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -71,7 +80,11 @@ export function registerUsersTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(usersInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof usersInputSchema>;
+
+        switch (typedArgs.operation) {
           case "list": {
             if (!canPerform(role, "organization", "listUsers")) {
               return toToolError("権限がありません");
@@ -96,10 +109,10 @@ export function registerUsersTools(server: McpServer): void {
             const result = await createUser({
               organizationId,
               actorId: userId,
-              email: args.email,
-              name: args.name,
-              role: args.role,
-              password: args.password,
+              email: typedArgs.email,
+              name: typedArgs.name,
+              role: typedArgs.role,
+              password: typedArgs.password,
             });
 
             if (!result.ok) {
@@ -122,10 +135,10 @@ export function registerUsersTools(server: McpServer): void {
             }
 
             const result = await updateUserRole({
-              targetUserId: args.userId,
+              targetUserId: typedArgs.userId,
               organizationId,
               actorId: userId,
-              newRole: args.role,
+              newRole: typedArgs.role,
             });
 
             if (!result.ok) {
@@ -149,7 +162,7 @@ export function registerUsersTools(server: McpServer): void {
 
             const result = await deactivateUser({
               actorId: userId,
-              targetUserId: args.userId,
+              targetUserId: typedArgs.userId,
               organizationId,
             });
 
@@ -174,7 +187,7 @@ export function registerUsersTools(server: McpServer): void {
 
             const result = await reactivateUser({
               actorId: userId,
-              targetUserId: args.userId,
+              targetUserId: typedArgs.userId,
               organizationId,
             });
 

@@ -7,6 +7,7 @@ import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import { organizationRepository } from "@/infrastructure/repositories";
 import { updateOrganization } from "@/application/usecases/updateOrganization";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 
 function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
@@ -30,13 +31,18 @@ const organizationInputSchema = z.discriminatedUnion("operation", [
   updateSchema,
 ]);
 
+const organizationAdvertisementSchema = buildAdvertisementSchema([
+  getSchema,
+  updateSchema,
+]);
+
 export function registerOrganizationTools(server: McpServer): void {
   server.registerTool(
     "organization",
     {
       description:
         "組織情報の取得・更新を行います。operation 引数で操作を切り替えます。",
-      inputSchema: organizationInputSchema,
+      inputSchema: organizationAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -46,7 +52,11 @@ export function registerOrganizationTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(organizationInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof organizationInputSchema>;
+
+        switch (typedArgs.operation) {
           case "get": {
             const organization = await organizationRepository.findById(
               organizationId,
@@ -74,7 +84,7 @@ export function registerOrganizationTools(server: McpServer): void {
             const result = await updateOrganization({
               organizationId,
               actorId: userId,
-              name: args.name,
+              name: typedArgs.name,
             });
 
             if (!result.ok) {

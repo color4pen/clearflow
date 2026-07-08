@@ -15,6 +15,7 @@ import { bulkApprove } from "@/application/usecases/bulkApprove";
 import { resubmitRequest } from "@/application/usecases/resubmitRequest";
 import * as approvalTemplateRepository from "@/infrastructure/repositories/approvalTemplateRepository";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 
 function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
@@ -100,6 +101,17 @@ const approvalRequestsInputSchema = z.discriminatedUnion("operation", [
   resubmitSchema,
 ]);
 
+const approvalRequestsAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  getSchema,
+  createSchema,
+  submitSchema,
+  approveSchema,
+  rejectSchema,
+  bulkApproveSchema,
+  resubmitSchema,
+]);
+
 export function registerApprovalRequestsTools(server: McpServer): void {
   server.registerTool(
     "approval_requests",
@@ -107,7 +119,7 @@ export function registerApprovalRequestsTools(server: McpServer): void {
       description:
         "承認リクエストの一覧取得・詳細取得・作成・提出・承認・却下・一括承認・再提出を行います。operation 引数で操作を切り替えます。" +
         "【filter 引数の注意】admin/manager は全件、それ以外のロールは自分の申請のみ返します（filter 未指定時）。filter=all を明示指定した場合は admin/manager のみ全件返し、それ以外は空配列を返します。",
-      inputSchema: approvalRequestsInputSchema,
+      inputSchema: approvalRequestsAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -117,7 +129,11 @@ export function registerApprovalRequestsTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(approvalRequestsInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof approvalRequestsInputSchema>;
+
+        switch (typedArgs.operation) {
           case "list": {
             if (!canPerform(role, "approval", "listRequests")) {
               return toToolError("権限がありません");
@@ -126,7 +142,7 @@ export function registerApprovalRequestsTools(server: McpServer): void {
 
             let filtered = allRequests;
 
-            if (args.filter === "action_required") {
+            if (typedArgs.filter === "action_required") {
               filtered = filtered.filter((req) => {
                 if (req.status !== "pending") return false;
                 // Legacy: ステップなしの場合は action_required に含める
@@ -136,9 +152,9 @@ export function registerApprovalRequestsTools(server: McpServer): void {
                   (step) => step.approverRole === role && step.status === "pending"
                 );
               });
-            } else if (args.filter === "my_requests") {
+            } else if (typedArgs.filter === "my_requests") {
               filtered = filtered.filter((req) => req.creatorId === userId);
-            } else if (args.filter === "all") {
+            } else if (typedArgs.filter === "all") {
               // admin/manager 以外は空配列
               if (role !== "admin" && role !== "manager") {
                 filtered = [];
@@ -151,8 +167,8 @@ export function registerApprovalRequestsTools(server: McpServer): void {
               }
             }
 
-            if (args.statusFilter) {
-              const statusFilter = args.statusFilter;
+            if (typedArgs.statusFilter) {
+              const statusFilter = typedArgs.statusFilter;
               filtered = filtered.filter((req) => req.status === statusFilter);
             }
 
@@ -163,12 +179,12 @@ export function registerApprovalRequestsTools(server: McpServer): void {
             if (!canPerform(role, "approval", "viewRequest")) {
               return toToolError("権限がありません");
             }
-            const request = await getRequest(args.requestId, organizationId);
+            const request = await getRequest(typedArgs.requestId, organizationId);
             if (!request) {
               return toToolError("承認リクエストが見つかりません");
             }
             const steps = await getApprovalSteps({
-              requestId: args.requestId,
+              requestId: typedArgs.requestId,
               organizationId,
             });
             return toToolSuccess({ ...request, approvalSteps: steps });
@@ -188,7 +204,7 @@ export function registerApprovalRequestsTools(server: McpServer): void {
             }
 
             const template = await approvalTemplateRepository.findById(
-              args.templateId,
+              typedArgs.templateId,
               organizationId
             );
             if (!template) {
@@ -196,7 +212,7 @@ export function registerApprovalRequestsTools(server: McpServer): void {
             }
 
             // テンプレートフィールド定義に基づいて formData を検証・変換する
-            const inputFormData = args.formData ?? {};
+            const inputFormData = typedArgs.formData ?? {};
             const builtFormData: Record<string, { value: unknown; label: string }> = {};
             const formErrors: string[] = [];
 
@@ -236,8 +252,8 @@ export function registerApprovalRequestsTools(server: McpServer): void {
             }
 
             const result = await createRequest({
-              title: args.title,
-              templateId: args.templateId,
+              title: typedArgs.title,
+              templateId: typedArgs.templateId,
               formData: builtFormData,
               organizationId,
               creatorId: userId,
@@ -263,7 +279,7 @@ export function registerApprovalRequestsTools(server: McpServer): void {
             }
 
             const result = await submitRequest({
-              requestId: args.requestId,
+              requestId: typedArgs.requestId,
               organizationId,
               actorId: userId,
             });
@@ -288,7 +304,7 @@ export function registerApprovalRequestsTools(server: McpServer): void {
             }
 
             const result = await approveRequest({
-              requestId: args.requestId,
+              requestId: typedArgs.requestId,
               organizationId,
               actorId: userId,
               actorRole: role,
@@ -314,11 +330,11 @@ export function registerApprovalRequestsTools(server: McpServer): void {
             }
 
             const result = await rejectRequest({
-              requestId: args.requestId,
+              requestId: typedArgs.requestId,
               organizationId,
               actorId: userId,
-              targetStatus: args.targetStatus ?? "rejected",
-              comment: args.comment,
+              targetStatus: typedArgs.targetStatus ?? "rejected",
+              comment: typedArgs.comment,
             });
 
             if (!result.ok) {
@@ -341,7 +357,7 @@ export function registerApprovalRequestsTools(server: McpServer): void {
             }
 
             const result = await bulkApprove({
-              requestIds: args.requestIds,
+              requestIds: typedArgs.requestIds,
               actorId: userId,
               actorRole: role,
               organizationId,
@@ -372,7 +388,7 @@ export function registerApprovalRequestsTools(server: McpServer): void {
             }
 
             const result = await resubmitRequest({
-              requestId: args.requestId,
+              requestId: typedArgs.requestId,
               organizationId,
               actorId: userId,
             });
