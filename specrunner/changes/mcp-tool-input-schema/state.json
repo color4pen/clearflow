@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "dd16ace9-7ea5-4d51-9f33-35613f5b4520",
   "createdAt": "2026-07-08T16:04:52.805Z",
-  "updatedAt": "2026-07-08T16:04:55.186Z",
+  "updatedAt": "2026-07-08T16:09:44.193Z",
   "request": {
     "title": "MCP ツールの inputSchema をクライアントに正しく広告する",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "request-review",
+  "step": "design",
   "status": "running",
   "branch": "change/mcp-tool-input-schema-dd16ace9",
   "error": null,
@@ -34,7 +34,9 @@
     }
   ],
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 5,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
