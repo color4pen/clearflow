@@ -12,6 +12,7 @@ export const WEBHOOK_EVENT_TYPES = [
   "deal.phase_changed",
   "deal.won",
   "deal.lost",
+  "deal.passed",
   "contract.created",
   "contract.completed",
   "contract.cancelled",
@@ -62,6 +63,12 @@ export type DealLostWebhookData = {
   fromPhase: string;
 };
 
+export type DealPassedWebhookData = {
+  event: "deal.passed";
+  dealId: string;
+  fromPhase: string;
+};
+
 export type ContractCreatedWebhookData = {
   event: "contract.created";
   contractId: string;
@@ -98,6 +105,7 @@ export type DomainEventWebhookData =
   | DealPhaseChangedWebhookData
   | DealWonWebhookData
   | DealLostWebhookData
+  | DealPassedWebhookData
   | ContractCreatedWebhookData
   | ContractCompletedWebhookData
   | ContractCancelledWebhookData

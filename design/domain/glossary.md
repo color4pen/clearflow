@@ -6,7 +6,7 @@
 関連先 relatedTo が案件または引合である [[ent-interaction]]（営業文脈）。営業の打ち合わせを指す。チャネルは会議が主だが電話・メールもありうる。UI/日本語表記は「商談」で統一する。独立したテーブルは持たず interactions で表す。
 
 ## 終端状態 {#term-terminal-state}
-不可逆な最終状態。到達後は他状態へ遷移できない。案件の won/lost、契約の completed/cancelled、請求の paid、承認リクエストの approved/rejected/expired、引合の converted が該当する。
+不可逆な最終状態。到達後は他状態へ遷移できない。案件の won/lost/passed（見送り）、契約の completed/cancelled、請求の paid、承認リクエストの approved/rejected/expired、引合の converted が該当する。案件の passed は当社都合でヒアリング後に追わないと判断した終端であり、競合・先方都合で負ける lost とは区別する。
 
 ## 仲介サービス {#term-agent-service}
 マッチング費用が発生する案件紹介サービス（レディクルなど）。[[ent-inquiry]] の source が agent_service のとき、案件化時の承認要否判定に影響する。

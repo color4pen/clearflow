@@ -14,14 +14,16 @@ async function readSrc(relPath: string): Promise<string> {
 }
 
 describe("getPipelineSummary usecase 静的検証", () => {
-  it("TC-105: 全 5 フェーズの集計結果が返される — ALL_PHASES 定義に全フェーズがある", async () => {
+  it("TC-105: 全 7 フェーズの集計結果が返される — ALL_PHASES 定義に全フェーズがある", async () => {
     const content = await readSrc("application/usecases/getPipelineSummary.ts");
-    // 全 5 フェーズが定義されている
+    // 全 7 フェーズが定義されている
+    expect(content).toContain("hearing");
     expect(content).toContain("proposal_prep");
     expect(content).toContain("proposed");
     expect(content).toContain("negotiation");
     expect(content).toContain("won");
     expect(content).toContain("lost");
+    expect(content).toContain("passed");
   });
 
   it("TC-105: 案件 0 件のフェーズも含まれる — 初期化ロジックがある", async () => {

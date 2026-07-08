@@ -53,11 +53,13 @@ export const interactionKindEnum = pgEnum("interaction_kind", [
   "note",
 ]);
 export const dealPhaseEnum = pgEnum("deal_phase", [
+  "hearing",
   "proposal_prep",
   "proposed",
   "negotiation",
   "won",
   "lost",
+  "passed",
 ]);
 export const contractStatusEnum = pgEnum("contract_status", [
   "active",
@@ -424,7 +426,7 @@ export const deals = pgTable("deals", {
     .references(() => clients.id),
   title: text("title").notNull(),
   description: text("description"),
-  phase: dealPhaseEnum("phase").notNull().default("proposal_prep"),
+  phase: dealPhaseEnum("phase").notNull().default("hearing"),
   estimatedAmount: integer("estimated_amount"),
   estimatedStartDate: timestamp("estimated_start_date"),
   estimatedEndDate: timestamp("estimated_end_date"),

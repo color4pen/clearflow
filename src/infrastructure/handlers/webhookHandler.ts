@@ -38,7 +38,7 @@ async function deliverDomainEventToEndpoints(
 }
 
 // ---------------------------------------------------------------------------
-// Async handler function for all 18 domain event types
+// Async handler function for all 19 domain event types
 // ---------------------------------------------------------------------------
 
 export async function handleDomainEventWebhook(event: DomainEvent): Promise<void> {
@@ -192,6 +192,14 @@ export async function handleDomainEventWebhook(event: DomainEvent): Promise<void
     case "deal.lost":
       await deliverDomainEventToEndpoints(organizationId, "deal.lost", {
         event: "deal.lost",
+        dealId: event.payload.dealId,
+        fromPhase: event.payload.fromPhase,
+      });
+      break;
+
+    case "deal.passed":
+      await deliverDomainEventToEndpoints(organizationId, "deal.passed", {
+        event: "deal.passed",
         dealId: event.payload.dealId,
         fromPhase: event.payload.fromPhase,
       });

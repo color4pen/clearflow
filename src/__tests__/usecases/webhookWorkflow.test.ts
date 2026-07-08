@@ -24,7 +24,7 @@ async function readSrc(relPath: string): Promise<string> {
 // ---------------------------------------------------------------------------
 
 describe("Webhook domain model", () => {
-  it("webhookEvent.ts has WEBHOOK_EVENT_TYPES with 18 elements", async () => {
+  it("webhookEvent.ts has WEBHOOK_EVENT_TYPES with 19 elements", async () => {
     const src = await readSrc("domain/models/webhookEvent.ts");
     expect(src).toContain("WEBHOOK_EVENT_TYPES");
 
@@ -34,7 +34,7 @@ describe("Webhook domain model", () => {
       .split(",")
       .map((s) => s.trim())
       .filter((s) => s.length > 0);
-    expect(elements.length).toBe(18);
+    expect(elements.length).toBe(19);
   });
 
   it("webhookEvent.ts exports WebhookEventType", async () => {
@@ -60,7 +60,7 @@ describe("Webhook domain model", () => {
     }
   });
 
-  it("webhookEvent.ts contains all 10 new domain event types", async () => {
+  it("webhookEvent.ts contains all 11 new domain event types", async () => {
     const src = await readSrc("domain/models/webhookEvent.ts");
     const newEvents = [
       "inquiry.converted",
@@ -68,6 +68,7 @@ describe("Webhook domain model", () => {
       "deal.phase_changed",
       "deal.won",
       "deal.lost",
+      "deal.passed",
       "contract.created",
       "contract.completed",
       "contract.cancelled",
@@ -244,6 +245,11 @@ describe("New domain event usecases", () => {
     expect(src).toContain('"deal.lost"');
   });
 
+  it('updateDealPhase dispatches "deal.passed" on passed transition', async () => {
+    const src = await readSrc("application/usecases/updateDealPhase.ts");
+    expect(src).toContain('"deal.passed"');
+  });
+
   it('updateDealPhase dispatches "deal.phase_changed" for other transitions', async () => {
     const src = await readSrc("application/usecases/updateDealPhase.ts");
     expect(src).toContain('"deal.phase_changed"');
@@ -334,6 +340,7 @@ describe("TC-027: new domain events route through deliverToEndpoint", () => {
     "deal.phase_changed",
     "deal.won",
     "deal.lost",
+    "deal.passed",
     "contract.created",
     "contract.completed",
     "contract.cancelled",

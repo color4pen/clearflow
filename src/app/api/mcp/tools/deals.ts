@@ -77,8 +77,8 @@ const updatePhaseSchema = z.object({
   operation: z.literal("update_phase"),
   dealId: z.string().uuid().describe("案件ID（UUID）"),
   newPhase: z
-    .enum(["proposal_prep", "proposed", "negotiation", "won", "lost"])
-    .describe("proposal_prep=提案準備, proposed=提案済, negotiation=交渉中, won=受注, lost=失注"),
+    .enum(["hearing", "proposal_prep", "proposed", "negotiation", "won", "lost", "passed"])
+    .describe("hearing=ヒアリング, proposal_prep=提案準備, proposed=提案済, negotiation=交渉中, won=受注, lost=失注, passed=見送り"),
 });
 
 const deleteSchema = z.object({
@@ -109,7 +109,7 @@ export function registerDealsTools(server: McpServer): void {
     "deals",
     {
       description:
-        "案件管理。案件（Deal）・商談・opportunity の一覧・詳細・作成・更新・フェーズ更新・削除。フェーズ（proposal_prep〜won/lost）・見積金額・契約種別（準委任/請負/SES）を管理する。operation: list/get/create/update/update_phase/delete",
+        "案件管理。案件（Deal）・商談・opportunity の一覧・詳細・作成・更新・フェーズ更新・削除。フェーズ（hearing〜won/lost/passed）・見積金額・契約種別（準委任/請負/SES）を管理する。operation: list/get/create/update/update_phase/delete",
       inputSchema: dealsAdvertisementSchema,
     },
     async (_rawArgs, extra) => {
@@ -245,7 +245,7 @@ export function registerDealsTools(server: McpServer): void {
 
           case "update_phase": {
             const { newPhase } = args;
-            const isTerminalPhase = newPhase === "won" || newPhase === "lost";
+            const isTerminalPhase = newPhase === "won" || newPhase === "lost" || newPhase === "passed";
             const requiredOperation = isTerminalPhase ? "closePhase" : "changePhase";
             if (!canPerform(role, "deal", requiredOperation)) {
               return toToolError("権限がありません");

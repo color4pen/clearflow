@@ -725,7 +725,28 @@ async function seed() {
     estimatedAmount: 3000000,
     notes: "既存顧客からの口頭依頼。引き合いなしで直接案件化",
   });
-  console.log("✅ Created deals (6 total: proposal_prep×2, won×3, lost)");
+
+  // ヒアリングフェーズ案件（初期フェーズのサンプル）
+  await db.insert(deals).values({
+    organizationId: org.id,
+    clientId: yamato.id,
+    title: "大和建設 新規DX相談",
+    phase: "hearing",
+    estimatedAmount: 8000000,
+    assigneeId: memberUser.id,
+    notes: "初回ヒアリング実施済み。要件整理中",
+  });
+
+  // 見送りフェーズ案件（終端・当社都合で見送り）
+  await db.insert(deals).values({
+    organizationId: org.id,
+    clientId: nihonFinance.id,
+    title: "日本ファイナンス 小規模改善案件",
+    phase: "passed",
+    estimatedAmount: 1500000,
+    notes: "ヒアリング後、採算が合わないと判断し見送り",
+  });
+  console.log("✅ Created deals (8 total: hearing×1, proposal_prep×2, won×3, lost×1, passed×1)");
 
   // Create deal meetings (案件直紐づきの商談)
   await db.insert(interactions).values({

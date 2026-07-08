@@ -32,6 +32,7 @@ export function registerHandlers(): void {
     "deal.phase_changed",
     "deal.won",
     "deal.lost",
+    "deal.passed",
     "contract.created",
     "contract.completed",
     "contract.cancelled",

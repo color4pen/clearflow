@@ -1,9 +1,11 @@
 export type DealPhase =
+  | "hearing"
   | "proposal_prep"
   | "proposed"
   | "negotiation"
   | "won"
-  | "lost";
+  | "lost"
+  | "passed";
 
 export type ContractType = "quasi_delegation" | "fixed_price" | "ses";
 

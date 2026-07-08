@@ -52,7 +52,7 @@ export default async function DealsPage({
 
       {/* パイプラインサマリ */}
       <SectionCard className="p-4 mb-2">
-        <div className="grid grid-cols-6">
+        <div className="grid grid-cols-8">
           {summary.map((item) => (
             <Link
               key={item.phase}

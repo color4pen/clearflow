@@ -125,7 +125,7 @@ export function SalesDashboard({
           <h2 className="text-sm font-semibold text-text-muted mb-2">
             パイプラインサマリ
           </h2>
-          <div className="grid grid-cols-6">
+          <div className="grid grid-cols-8">
             {pipelineSummary.map((item) => (
               <Link
                 key={item.phase}
