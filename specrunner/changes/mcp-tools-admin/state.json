@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f092803b-aa6f-4f3b-bc5c-78a751ae093d",
   "createdAt": "2026-07-07T02:03:07.527Z",
-  "updatedAt": "2026-07-07T02:48:09.536Z",
+  "updatedAt": "2026-07-08T11:05:16.401Z",
   "request": {
     "title": "MCP ツール: 管理系（組織・ユーザー・Webhook・監査ログ）",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-fixer",
+  "step": "domain-invariants",
   "status": "running",
   "branch": "feat/mcp-tools-admin-f092803b",
   "error": null,
@@ -33,8 +33,23 @@
       ]
     }
   ],
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "pending",
+      "approvedAtCommit": null,
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 29,
+    "historyCount": 39,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -42,7 +57,10 @@
       "test-case-gen": 1,
       "implementer": 1,
       "verification": 1,
-      "code-review": 1
+      "code-review": 1,
+      "code-fixer": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
