@@ -133,3 +133,41 @@ describe("MCP ツールハンドラの権限チェック（静的検証）", () 
     expect(content).toContain('"client", "deleteContact"');
   });
 });
+
+describe("TC-015: MCP deals.ts isTerminalPhase に passed が含まれる（静的検証）", () => {
+  it("deals.ts の isTerminalPhase 判定に passed が含まれる", async () => {
+    const content = await readSrc("app/api/mcp/tools/deals.ts");
+    // isTerminalPhase の判定ロジックに passed が含まれる
+    const isTerminalMatch = content.match(/isTerminalPhase\s*=\s*.+/);
+    expect(isTerminalMatch).not.toBeNull();
+    expect(isTerminalMatch![0]).toContain("passed");
+  });
+
+  it("deals.ts の updatePhaseSchema に passed が含まれる", async () => {
+    const content = await readSrc("app/api/mcp/tools/deals.ts");
+    // updatePhaseSchema 定義ブロック内に passed が含まれる（MCP が passed を受理できる）
+    const updatePhaseSection = content.match(/const updatePhaseSchema[\s\S]*?\}\);/);
+    expect(updatePhaseSection).not.toBeNull();
+    expect(updatePhaseSection![0]).toContain('"passed"');
+  });
+
+  it("deals.ts の updatePhaseSchema に hearing が含まれる", async () => {
+    const content = await readSrc("app/api/mcp/tools/deals.ts");
+    // updatePhaseSchema 定義ブロック内に hearing が含まれる（MCP が hearing を受理できる）
+    const updatePhaseSection = content.match(/const updatePhaseSchema[\s\S]*?\}\);/);
+    expect(updatePhaseSection).not.toBeNull();
+    expect(updatePhaseSection![0]).toContain('"hearing"');
+  });
+
+  it("passed は closePhase 権限経路に到達する（isTerminalPhase=true → closePhase）", async () => {
+    const content = await readSrc("app/api/mcp/tools/deals.ts");
+    // isTerminalPhase が true のとき requiredOperation が closePhase になるパターンが存在する
+    expect(content).toContain("closePhase");
+    // passed を含む isTerminalPhase 判定と closePhase が同一 case ブロック内に存在する
+    const updatePhaseCase = content.match(/case "update_phase"[\s\S]*?(?=case "|default)/);
+    expect(updatePhaseCase).not.toBeNull();
+    const block = updatePhaseCase![0];
+    expect(block).toContain("passed");
+    expect(block).toContain("closePhase");
+  });
+});

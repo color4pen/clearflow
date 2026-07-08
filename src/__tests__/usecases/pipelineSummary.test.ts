@@ -66,3 +66,47 @@ describe("getPipelineSummary usecase 静的検証", () => {
     expect(content).toContain("getPipelineSummary");
   });
 });
+
+describe("TC-011: revenueRepository activePhases 静的検証", () => {
+  it("activePhases に hearing が含まれる", async () => {
+    const content = await readSrc("infrastructure/repositories/revenueRepository.ts");
+    // hearing は早期パイプラインとして集計対象
+    expect(content).toContain('"hearing"');
+  });
+
+  it("activePhases から passed が除外されている", async () => {
+    const content = await readSrc("infrastructure/repositories/revenueRepository.ts");
+    // activePhases の定義部分を抽出して passed が含まれないことを確認
+    const activePhasesMatch = content.match(/activePhases\s*=\s*\[([^\]]+)\]/);
+    expect(activePhasesMatch).not.toBeNull();
+    const activePhasesLiteral = activePhasesMatch![1];
+    expect(activePhasesLiteral).not.toContain("passed");
+  });
+
+  it("activePhases から won が除外されている", async () => {
+    const content = await readSrc("infrastructure/repositories/revenueRepository.ts");
+    const activePhasesMatch = content.match(/activePhases\s*=\s*\[([^\]]+)\]/);
+    expect(activePhasesMatch).not.toBeNull();
+    const activePhasesLiteral = activePhasesMatch![1];
+    expect(activePhasesLiteral).not.toContain("won");
+  });
+
+  it("activePhases から lost が除外されている", async () => {
+    const content = await readSrc("infrastructure/repositories/revenueRepository.ts");
+    const activePhasesMatch = content.match(/activePhases\s*=\s*\[([^\]]+)\]/);
+    expect(activePhasesMatch).not.toBeNull();
+    const activePhasesLiteral = activePhasesMatch![1];
+    expect(activePhasesLiteral).not.toContain("lost");
+  });
+
+  it("activePhases の全 4 フェーズが含まれる（hearing, proposal_prep, proposed, negotiation）", async () => {
+    const content = await readSrc("infrastructure/repositories/revenueRepository.ts");
+    const activePhasesMatch = content.match(/activePhases\s*=\s*\[([^\]]+)\]/);
+    expect(activePhasesMatch).not.toBeNull();
+    const activePhasesLiteral = activePhasesMatch![1];
+    expect(activePhasesLiteral).toContain("hearing");
+    expect(activePhasesLiteral).toContain("proposal_prep");
+    expect(activePhasesLiteral).toContain("proposed");
+    expect(activePhasesLiteral).toContain("negotiation");
+  });
+});
