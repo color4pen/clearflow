@@ -29,13 +29,18 @@ const listSchema = z.object({
 const createSchema = z
   .object({
     operation: z.literal("create"),
-    name: z.string().min(1, "ポリシー名は必須です"),
-    triggerAction: z.enum(["inquiry.convert", "contract.create", "contract.cancel"]),
-    templateId: z.string().uuid(),
+    name: z.string().min(1, "ポリシー名は必須です").describe("ポリシー名"),
+    triggerAction: z
+      .enum(["inquiry.convert", "contract.create", "contract.cancel"])
+      .describe("inquiry.convert=引合の案件化, contract.create=契約作成, contract.cancel=契約解約"),
+    templateId: z.string().uuid().describe("適用する承認テンプレートID（UUID）"),
     description: z.string().optional(),
-    conditionField: z.string().optional(),
-    conditionOperator: z.enum(CONDITION_OPERATORS).optional(),
-    conditionValue: z.string().optional(),
+    conditionField: z.string().optional().describe("条件対象フィールド名"),
+    conditionOperator: z
+      .enum(CONDITION_OPERATORS)
+      .optional()
+      .describe("gt=より大きい, gte=以上, lt=未満, lte=以下, eq=等しい, neq=等しくない, in=含む"),
+    conditionValue: z.string().optional().describe("条件値"),
   })
   .superRefine((data, ctx) => {
     const hasField = data.conditionField && data.conditionField.trim() !== "";
@@ -60,14 +65,19 @@ const createSchema = z
 const updateSchema = z
   .object({
     operation: z.literal("update"),
-    policyId: z.string().uuid(),
-    name: z.string().min(1, "ポリシー名は必須です"),
-    triggerAction: z.enum(["inquiry.convert", "contract.create", "contract.cancel"]),
-    templateId: z.string().uuid(),
+    policyId: z.string().uuid().describe("ポリシーID（UUID）"),
+    name: z.string().min(1, "ポリシー名は必須です").describe("ポリシー名"),
+    triggerAction: z
+      .enum(["inquiry.convert", "contract.create", "contract.cancel"])
+      .describe("inquiry.convert=引合の案件化, contract.create=契約作成, contract.cancel=契約解約"),
+    templateId: z.string().uuid().describe("適用する承認テンプレートID（UUID）"),
     description: z.string().optional(),
-    conditionField: z.string().optional(),
-    conditionOperator: z.enum(CONDITION_OPERATORS).optional(),
-    conditionValue: z.string().optional(),
+    conditionField: z.string().optional().describe("条件対象フィールド名"),
+    conditionOperator: z
+      .enum(CONDITION_OPERATORS)
+      .optional()
+      .describe("gt=より大きい, gte=以上, lt=未満, lte=以下, eq=等しい, neq=等しくない, in=含む"),
+    conditionValue: z.string().optional().describe("条件値"),
   })
   .superRefine((data, ctx) => {
     const hasField = data.conditionField && data.conditionField.trim() !== "";
@@ -91,7 +101,7 @@ const updateSchema = z
 
 const toggleSchema = z.object({
   operation: z.literal("toggle"),
-  policyId: z.string().uuid(),
+  policyId: z.string().uuid().describe("ポリシーID（UUID）"),
 });
 
 const approvalPoliciesInputSchema = z.discriminatedUnion("operation", [
@@ -113,7 +123,7 @@ export function registerApprovalPoliciesTools(server: McpServer): void {
     "approval_policies",
     {
       description:
-        "承認ポリシーの一覧取得・作成・更新・有効/無効切替を行います。operation 引数で操作を切り替えます。",
+        "承認ポリシー管理。承認ポリシー（ApprovalPolicy）・自動承認ルール・トリガーの一覧・作成・更新・有効/無効切替。トリガーアクション（inquiry.convert/contract.create/contract.cancel）と条件を管理する。operation: list/create/update/toggle",
       inputSchema: approvalPoliciesAdvertisementSchema,
     },
     async (args, extra) => {

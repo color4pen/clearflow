@@ -23,7 +23,7 @@ const getSchema = z.object({
 
 const updateSchema = z.object({
   operation: z.literal("update"),
-  name: z.string().min(1, "組織名は必須です"),
+  name: z.string().min(1, "組織名は必須です").describe("組織名"),
 });
 
 const organizationInputSchema = z.discriminatedUnion("operation", [
@@ -41,7 +41,7 @@ export function registerOrganizationTools(server: McpServer): void {
     "organization",
     {
       description:
-        "組織情報の取得・更新を行います。operation 引数で操作を切り替えます。",
+        "組織管理。組織（Organization）・テナント・会社（company）情報の取得・更新。組織名の取得と変更を行う。operation: get/update",
       inputSchema: organizationAdvertisementSchema,
     },
     async (args, extra) => {

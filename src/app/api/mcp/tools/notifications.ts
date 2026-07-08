@@ -40,7 +40,7 @@ export function registerNotificationsTools(server: McpServer): void {
     "notifications",
     {
       description:
-        "通知の一覧取得と既読化を行います。operation 引数で操作を切り替えます。",
+        "通知管理。通知（Notification）・お知らせ・アラート（alert）の一覧取得と既読管理（mark_as_read）。operation: list/mark_as_read",
       inputSchema: notificationsAdvertisementSchema,
     },
     async (args, extra) => {

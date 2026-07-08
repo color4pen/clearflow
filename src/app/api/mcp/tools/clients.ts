@@ -35,14 +35,14 @@ const listSchema = z.object({
 
 const getSchema = z.object({
   operation: z.literal("get"),
-  clientId: z.string().uuid(),
+  clientId: z.string().uuid().describe("顧客ID（UUID）"),
 });
 
 const createSchema = z.object({
   operation: z.literal("create"),
-  name: z.string().min(1, "顧客名は必須です"),
-  industry: z.string().optional(),
-  size: z.string().optional(),
+  name: z.string().min(1, "顧客名は必須です").describe("顧客名"),
+  industry: z.string().optional().describe("業種"),
+  size: z.string().optional().describe("企業規模"),
   address: z.string().optional(),
   notes: z.string().optional(),
   contacts: z
@@ -53,7 +53,7 @@ const createSchema = z.object({
         position: z.string().optional(),
         email: z.string().optional(),
         phone: z.string().optional(),
-        isPrimary: z.boolean().optional(),
+        isPrimary: z.boolean().optional().describe("主担当フラグ"),
       })
     )
     .optional(),
@@ -61,54 +61,56 @@ const createSchema = z.object({
 
 const updateSchema = z.object({
   operation: z.literal("update"),
-  clientId: z.string().uuid(),
-  name: z.string().min(1).optional(),
-  industry: z.string().nullable().optional(),
-  size: z.string().nullable().optional(),
+  clientId: z.string().uuid().describe("顧客ID（UUID）"),
+  name: z.string().min(1).optional().describe("顧客名"),
+  industry: z.string().nullable().optional().describe("業種"),
+  size: z.string().nullable().optional().describe("企業規模"),
   address: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
 });
 
 const addContactSchema = z.object({
   operation: z.literal("add_contact"),
-  clientId: z.string().uuid(),
+  clientId: z.string().uuid().describe("顧客ID（UUID）"),
   name: z.string().min(1, "担当者名は必須です"),
   department: z.string().optional(),
   position: z.string().optional(),
   email: z.string().optional(),
   phone: z.string().optional(),
-  isPrimary: z.boolean().optional(),
+  isPrimary: z.boolean().optional().describe("主担当フラグ"),
 });
 
 const updateContactSchema = z.object({
   operation: z.literal("update_contact"),
-  clientId: z.string().uuid(),
-  contactId: z.string().uuid(),
+  clientId: z.string().uuid().describe("顧客ID（UUID）"),
+  contactId: z.string().uuid().describe("担当者ID（UUID）"),
   name: z.string().min(1).optional(),
   department: z.string().nullable().optional(),
   position: z.string().nullable().optional(),
   email: z.string().nullable().optional(),
   phone: z.string().nullable().optional(),
-  isPrimary: z.boolean().optional(),
+  isPrimary: z.boolean().optional().describe("主担当フラグ"),
 });
 
 const deleteContactSchema = z.object({
   operation: z.literal("delete_contact"),
-  clientId: z.string().uuid(),
-  contactId: z.string().uuid(),
+  clientId: z.string().uuid().describe("顧客ID（UUID）"),
+  contactId: z.string().uuid().describe("担当者ID（UUID）"),
 });
 
 const addDealContactSchema = z.object({
   operation: z.literal("add_deal_contact"),
-  dealId: z.string().uuid(),
-  contactId: z.string().uuid(),
-  role: z.enum(["key_person", "decision_maker", "technical", "other"]),
+  dealId: z.string().uuid().describe("案件ID（UUID）"),
+  contactId: z.string().uuid().describe("担当者ID（UUID）"),
+  role: z
+    .enum(["key_person", "decision_maker", "technical", "other"])
+    .describe("担当者役割: key_person=キーパーソン, decision_maker=意思決定者, technical=技術担当, other=その他"),
 });
 
 const removeDealContactSchema = z.object({
   operation: z.literal("remove_deal_contact"),
-  dealId: z.string().uuid(),
-  contactId: z.string().uuid(),
+  dealId: z.string().uuid().describe("案件ID（UUID）"),
+  contactId: z.string().uuid().describe("担当者ID（UUID）"),
 });
 
 const clientsInputSchema = z.discriminatedUnion("operation", [
@@ -140,7 +142,7 @@ export function registerClientsTools(server: McpServer): void {
     "clients",
     {
       description:
-        "顧客（Client）・顧客担当者（ClientContact）・案件担当者（DealContact）の操作を行います。operation 引数で操作を切り替えます。",
+        "顧客管理。顧客（Client）・取引先・クライアント（customer）の一覧・詳細・作成・更新、担当者（ClientContact）の追加・更新・削除、案件担当者（DealContact）の追加・削除。operation: list/get/create/update/add_contact/update_contact/delete_contact/add_deal_contact/remove_deal_contact",
       inputSchema: clientsAdvertisementSchema,
     },
     async (_rawArgs, extra) => {

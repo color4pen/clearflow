@@ -18,12 +18,12 @@ function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotificatio
 
 const watchSchema = z.object({
   operation: z.literal("watch"),
-  dealId: z.string().uuid("案件IDが不正です"),
+  dealId: z.string().uuid("案件IDが不正です").describe("案件ID（UUID）"),
 });
 
 const unwatchSchema = z.object({
   operation: z.literal("unwatch"),
-  dealId: z.string().uuid("案件IDが不正です"),
+  dealId: z.string().uuid("案件IDが不正です").describe("案件ID（UUID）"),
 });
 
 const watchesInputSchema = z.discriminatedUnion("operation", [
@@ -41,7 +41,7 @@ export function registerWatchesTools(server: McpServer): void {
     "watches",
     {
       description:
-        "案件（Deal）のウォッチ登録・解除を行います。operation 引数で操作を切り替えます。",
+        "ウォッチ管理。案件（Deal）のウォッチ（Watch）・フォロー・お気に入り（bookmark）の登録・解除。案件の変更通知を購読する。operation: watch/unwatch",
       inputSchema: watchesAdvertisementSchema,
     },
     async (args, extra) => {

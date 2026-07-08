@@ -29,29 +29,29 @@ const listSchema = z.object({
 
 const createSchema = z.object({
   operation: z.literal("create"),
-  url: z.string().url(),
-  events: z.array(z.string()).min(1),
+  url: z.string().url().describe("配信先URL"),
+  events: z.array(z.string()).min(1).describe("購読イベント種別の配列"),
 });
 
 const deleteSchema = z.object({
   operation: z.literal("delete"),
-  endpointId: z.string().uuid(),
+  endpointId: z.string().uuid().describe("WebhookエンドポイントID（UUID）"),
 });
 
 const toggleSchema = z.object({
   operation: z.literal("toggle"),
-  endpointId: z.string().uuid(),
-  isActive: z.boolean(),
+  endpointId: z.string().uuid().describe("WebhookエンドポイントID（UUID）"),
+  isActive: z.boolean().describe("有効フラグ"),
 });
 
 const listDeliveriesSchema = z.object({
   operation: z.literal("list_deliveries"),
-  endpointId: z.string().uuid(),
+  endpointId: z.string().uuid().describe("WebhookエンドポイントID（UUID）"),
 });
 
 const retryDeliverySchema = z.object({
   operation: z.literal("retry_delivery"),
-  deliveryId: z.string().uuid(),
+  deliveryId: z.string().uuid().describe("配信ID（UUID）"),
 });
 
 const webhooksInputSchema = z.discriminatedUnion("operation", [
@@ -77,7 +77,7 @@ export function registerWebhooksTools(server: McpServer): void {
     "webhooks",
     {
       description:
-        "Webhook エンドポイントの一覧・作成・削除・有効化/無効化、配信履歴の確認、失敗配信のリトライを行います。operation 引数で操作を切り替えます。",
+        "Webhook管理。Webhook（Webフック）・通知連携・HTTP コールバックのエンドポイント管理・配信履歴確認・失敗配信リトライ。operation: list/create/delete/toggle/list_deliveries/retry_delivery",
       inputSchema: webhooksAdvertisementSchema,
     },
     async (args, extra) => {

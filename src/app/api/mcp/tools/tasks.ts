@@ -31,51 +31,51 @@ const dateString = z
 
 const listSchema = z.object({
   operation: z.literal("list"),
-  done: z.boolean().optional(),
-  assigneeId: z.string().uuid().optional(),
+  done: z.boolean().optional().describe("完了フラグ"),
+  assigneeId: z.string().uuid().optional().describe("担当者ID（UUID）"),
 });
 
 const createSchema = z.object({
   operation: z.literal("create"),
-  description: z.string().min(1, "説明は必須です"),
-  assigneeId: z.string().uuid().optional(),
-  dueDate: dateString.optional(),
-  interactionId: z.string().uuid().optional(),
-  dealId: z.string().uuid().optional(),
-  inquiryId: z.string().uuid().optional(),
+  description: z.string().min(1, "説明は必須です").describe("タスク内容"),
+  assigneeId: z.string().uuid().optional().describe("担当者ID（UUID）"),
+  dueDate: dateString.optional().describe("期日"),
+  interactionId: z.string().uuid().optional().describe("関連商談ID（UUID）"),
+  dealId: z.string().uuid().optional().describe("関連案件ID（UUID）"),
+  inquiryId: z.string().uuid().optional().describe("関連引合ID（UUID）"),
 });
 
 const updateSchema = z.object({
   operation: z.literal("update"),
-  id: z.string().uuid("アクションアイテムIDが不正です"),
-  description: z.string().min(1).optional(),
-  assigneeId: z.string().uuid().nullable().optional(),
-  dueDate: dateString.nullable().optional(),
-  interactionId: z.string().uuid().nullable().optional(),
-  dealId: z.string().uuid().nullable().optional(),
-  inquiryId: z.string().uuid().nullable().optional(),
+  id: z.string().uuid("アクションアイテムIDが不正です").describe("タスクID（UUID）"),
+  description: z.string().min(1).optional().describe("タスク内容"),
+  assigneeId: z.string().uuid().nullable().optional().describe("担当者ID（UUID）"),
+  dueDate: dateString.nullable().optional().describe("期日"),
+  interactionId: z.string().uuid().nullable().optional().describe("関連商談ID（UUID）"),
+  dealId: z.string().uuid().nullable().optional().describe("関連案件ID（UUID）"),
+  inquiryId: z.string().uuid().nullable().optional().describe("関連引合ID（UUID）"),
 });
 
 const updateStatusSchema = z.object({
   operation: z.literal("update_status"),
-  id: z.string().uuid("アクションアイテムIDが不正です"),
-  status: z.enum(["todo", "in_progress", "done"]),
+  id: z.string().uuid("アクションアイテムIDが不正です").describe("タスクID（UUID）"),
+  status: z.enum(["todo", "in_progress", "done"]).describe("todo=未着手, in_progress=進行中, done=完了"),
 });
 
 const toggleSchema = z.object({
   operation: z.literal("toggle"),
-  id: z.string().uuid("アクションアイテムIDが不正です"),
+  id: z.string().uuid("アクションアイテムIDが不正です").describe("タスクID（UUID）"),
 });
 
 const deleteSchema = z.object({
   operation: z.literal("delete"),
-  id: z.string().uuid("アクションアイテムIDが不正です"),
+  id: z.string().uuid("アクションアイテムIDが不正です").describe("タスクID（UUID）"),
 });
 
 const searchLinkTargetsSchema = z.object({
   operation: z.literal("search_link_targets"),
-  type: z.enum(["deal", "inquiry", "meeting"]),
-  query: z.string(),
+  type: z.enum(["deal", "inquiry", "meeting"]).describe("deal=案件, inquiry=引合, meeting=商談"),
+  query: z.string().describe("検索キーワード"),
 });
 
 const tasksInputSchema = z.discriminatedUnion("operation", [
@@ -103,7 +103,7 @@ export function registerTasksTools(server: McpServer): void {
     "tasks",
     {
       description:
-        "アクションアイテム（タスク）の一覧取得・作成・更新・ステータス更新・トグル・削除・リンク先候補検索を行います。operation 引数で操作を切り替えます。",
+        "タスク・アクションアイテム管理。タスク（Task）・TODO・やること・action item の一覧・作成・更新・ステータス更新・トグル・削除・リンク先検索。案件/引合/商談とリンクでき、期日・担当者を管理する。operation: list/create/update/update_status/toggle/delete/search_link_targets",
       inputSchema: tasksAdvertisementSchema,
     },
     async (args, extra) => {

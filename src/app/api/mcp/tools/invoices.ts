@@ -33,39 +33,44 @@ const ymdDateString = z
 
 const listSchema = z.object({
   operation: z.literal("list"),
-  contractId: z.string().uuid().optional(),
-  status: z.enum(["scheduled", "invoiced", "paid", "overdue"]).optional(),
-  paidAtFrom: dateString.optional(),
-  paidAtTo: dateString.optional(),
-  issueDateFrom: dateString.optional(),
-  issueDateTo: dateString.optional(),
+  contractId: z.string().uuid().optional().describe("契約ID（UUID）"),
+  status: z
+    .enum(["scheduled", "invoiced", "paid", "overdue"])
+    .optional()
+    .describe("scheduled=予定, invoiced=請求済, paid=入金済, overdue=延滞"),
+  paidAtFrom: dateString.optional().describe("入金日範囲（from）"),
+  paidAtTo: dateString.optional().describe("入金日範囲（to）"),
+  issueDateFrom: dateString.optional().describe("発行日範囲（from）"),
+  issueDateTo: dateString.optional().describe("発行日範囲（to）"),
 });
 
 const createSchema = z.object({
   operation: z.literal("create"),
-  contractId: z.string().uuid("契約IDが不正です"),
-  title: z.string().min(1, "タイトルは必須です"),
-  amount: z.number().int().positive("金額は正の整数を指定してください"),
-  dueDate: dateString,
-  issueDate: dateString.nullable().optional(),
+  contractId: z.string().uuid("契約IDが不正です").describe("契約ID（UUID）"),
+  title: z.string().min(1, "タイトルは必須です").describe("請求タイトル"),
+  amount: z.number().int().positive("金額は正の整数を指定してください").describe("請求金額（正の整数、円）"),
+  dueDate: dateString.describe("支払期日"),
+  issueDate: dateString.nullable().optional().describe("発行日"),
   notes: z.string().optional(),
 });
 
 const updateSchema = z.object({
   operation: z.literal("update"),
-  invoiceId: z.string().uuid("請求IDが不正です"),
-  title: z.string().min(1).optional(),
-  amount: z.number().int().positive().optional(),
-  issueDate: dateString.nullable().optional(),
-  dueDate: dateString.optional(),
+  invoiceId: z.string().uuid("請求IDが不正です").describe("請求ID（UUID）"),
+  title: z.string().min(1).optional().describe("請求タイトル"),
+  amount: z.number().int().positive().optional().describe("請求金額（正の整数、円）"),
+  issueDate: dateString.nullable().optional().describe("発行日"),
+  dueDate: dateString.optional().describe("支払期日"),
   notes: z.string().nullable().optional(),
 });
 
 const updateStatusSchema = z.object({
   operation: z.literal("update_status"),
-  invoiceId: z.string().uuid("請求IDが不正です"),
-  newStatus: z.enum(["scheduled", "invoiced", "paid", "overdue"]),
-  paidAt: ymdDateString.optional(),
+  invoiceId: z.string().uuid("請求IDが不正です").describe("請求ID（UUID）"),
+  newStatus: z
+    .enum(["scheduled", "invoiced", "paid", "overdue"])
+    .describe("scheduled=予定, invoiced=請求済, paid=入金済, overdue=延滞"),
+  paidAt: ymdDateString.optional().describe("入金日（YYYY-MM-DD）"),
 });
 
 const invoicesInputSchema = z.discriminatedUnion("operation", [
@@ -87,7 +92,7 @@ export function registerInvoicesTools(server: McpServer): void {
     "invoices",
     {
       description:
-        "請求（Invoice）の一覧取得・作成・更新・ステータス更新を行います。operation 引数で操作を切り替えます。",
+        "請求管理。請求（Invoice）・請求書・インボイス（billing）の一覧・作成・更新・ステータス更新。金額・発行日・支払期日・ステータス（scheduled/invoiced/paid/overdue）を管理する。operation: list/create/update/update_status",
       inputSchema: invoicesAdvertisementSchema,
     },
     async (args, extra) => {

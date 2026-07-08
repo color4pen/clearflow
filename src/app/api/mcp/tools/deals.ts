@@ -29,52 +29,61 @@ function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotificatio
 const listSchema = z.object({
   operation: z.literal("list"),
   phase: z.string().optional(),
-  clientId: z.string().uuid().optional(),
+  clientId: z.string().uuid().optional().describe("顧客ID（UUID）"),
 });
 
 const getSchema = z.object({
   operation: z.literal("get"),
-  dealId: z.string().uuid(),
+  dealId: z.string().uuid().describe("案件ID（UUID）"),
 });
 
 const createSchema = z.object({
   operation: z.literal("create"),
-  inquiryId: z.string().uuid().optional(),
-  clientId: z.string().uuid().optional(),
-  title: z.string().min(1, "案件名は必須です"),
+  inquiryId: z.string().uuid().optional().describe("引合ID（UUID）"),
+  clientId: z.string().uuid().optional().describe("顧客ID（UUID）"),
+  title: z.string().min(1, "案件名は必須です").describe("案件名"),
   description: z.string().optional(),
-  estimatedAmount: z.number().int().optional(),
-  estimatedStartDate: z.string().optional(),
-  estimatedEndDate: z.string().optional(),
-  contractType: z.enum(["quasi_delegation", "fixed_price", "ses"]).optional(),
-  assigneeId: z.string().uuid().optional(),
-  technicalLeadId: z.string().uuid().optional(),
+  estimatedAmount: z.number().int().optional().describe("見積金額（整数、円）"),
+  estimatedStartDate: z.string().optional().describe("見積開始日"),
+  estimatedEndDate: z.string().optional().describe("見積終了日"),
+  contractType: z
+    .enum(["quasi_delegation", "fixed_price", "ses"])
+    .optional()
+    .describe("quasi_delegation=準委任, fixed_price=請負, ses=SES"),
+  assigneeId: z.string().uuid().optional().describe("営業担当ID（UUID）"),
+  technicalLeadId: z.string().uuid().optional().describe("技術担当ID（UUID）"),
   notes: z.string().optional(),
 });
 
 const updateSchema = z.object({
   operation: z.literal("update"),
-  dealId: z.string().uuid(),
-  title: z.string().min(1).optional(),
+  dealId: z.string().uuid().describe("案件ID（UUID）"),
+  title: z.string().min(1).optional().describe("案件名"),
   description: z.string().nullable().optional(),
-  estimatedAmount: z.number().int().nullable().optional(),
-  estimatedStartDate: z.string().nullable().optional(),
-  estimatedEndDate: z.string().nullable().optional(),
-  contractType: z.enum(["quasi_delegation", "fixed_price", "ses"]).nullable().optional(),
-  assigneeId: z.string().uuid().nullable().optional(),
-  technicalLeadId: z.string().uuid().nullable().optional(),
+  estimatedAmount: z.number().int().nullable().optional().describe("見積金額（整数、円）"),
+  estimatedStartDate: z.string().nullable().optional().describe("見積開始日"),
+  estimatedEndDate: z.string().nullable().optional().describe("見積終了日"),
+  contractType: z
+    .enum(["quasi_delegation", "fixed_price", "ses"])
+    .nullable()
+    .optional()
+    .describe("quasi_delegation=準委任, fixed_price=請負, ses=SES"),
+  assigneeId: z.string().uuid().nullable().optional().describe("営業担当ID（UUID）"),
+  technicalLeadId: z.string().uuid().nullable().optional().describe("技術担当ID（UUID）"),
   notes: z.string().nullable().optional(),
 });
 
 const updatePhaseSchema = z.object({
   operation: z.literal("update_phase"),
-  dealId: z.string().uuid(),
-  newPhase: z.enum(["proposal_prep", "proposed", "negotiation", "won", "lost"]),
+  dealId: z.string().uuid().describe("案件ID（UUID）"),
+  newPhase: z
+    .enum(["proposal_prep", "proposed", "negotiation", "won", "lost"])
+    .describe("proposal_prep=提案準備, proposed=提案済, negotiation=交渉中, won=受注, lost=失注"),
 });
 
 const deleteSchema = z.object({
   operation: z.literal("delete"),
-  dealId: z.string().uuid(),
+  dealId: z.string().uuid().describe("案件ID（UUID）"),
 });
 
 const dealsInputSchema = z.discriminatedUnion("operation", [
@@ -100,7 +109,7 @@ export function registerDealsTools(server: McpServer): void {
     "deals",
     {
       description:
-        "案件（Deal）の一覧取得・詳細取得・作成・更新・フェーズ更新・削除を行います。operation 引数で操作を切り替えます。",
+        "案件管理。案件（Deal）・商談・opportunity の一覧・詳細・作成・更新・フェーズ更新・削除。フェーズ（proposal_prep〜won/lost）・見積金額・契約種別（準委任/請負/SES）を管理する。operation: list/get/create/update/update_phase/delete",
       inputSchema: dealsAdvertisementSchema,
     },
     async (_rawArgs, extra) => {

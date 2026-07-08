@@ -26,26 +26,30 @@ const listSchema = z.object({
 
 const createSchema = z.object({
   operation: z.literal("create"),
-  email: z.string().email(),
-  name: z.string().min(1),
-  role: z.enum(["admin", "member", "manager", "finance"]),
-  password: z.string().min(8),
+  email: z.string().email().describe("メールアドレス"),
+  name: z.string().min(1).describe("ユーザー名"),
+  role: z
+    .enum(["admin", "member", "manager", "finance"])
+    .describe("admin=管理者, member=一般メンバー, manager=マネージャー, finance=経理"),
+  password: z.string().min(8).describe("初期パスワード（8文字以上）"),
 });
 
 const updateRoleSchema = z.object({
   operation: z.literal("update_role"),
-  userId: z.string().uuid(),
-  role: z.enum(["admin", "member", "manager", "finance"]),
+  userId: z.string().uuid().describe("ユーザーID（UUID）"),
+  role: z
+    .enum(["admin", "member", "manager", "finance"])
+    .describe("admin=管理者, member=一般メンバー, manager=マネージャー, finance=経理"),
 });
 
 const deactivateSchema = z.object({
   operation: z.literal("deactivate"),
-  userId: z.string().uuid(),
+  userId: z.string().uuid().describe("ユーザーID（UUID）"),
 });
 
 const reactivateSchema = z.object({
   operation: z.literal("reactivate"),
-  userId: z.string().uuid(),
+  userId: z.string().uuid().describe("ユーザーID（UUID）"),
 });
 
 const usersInputSchema = z.discriminatedUnion("operation", [
@@ -69,7 +73,7 @@ export function registerUsersTools(server: McpServer): void {
     "users",
     {
       description:
-        "ユーザーの一覧・作成・ロール変更・無効化・再有効化を行います。operation 引数で操作を切り替えます。",
+        "ユーザー管理。ユーザー（User）・メンバー・アカウント（member）の一覧・作成・ロール変更・有効化/無効化。ロール（admin/member/manager/finance）を管理する。operation: list/create/update_role/deactivate/reactivate",
       inputSchema: usersAdvertisementSchema,
     },
     async (args, extra) => {

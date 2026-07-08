@@ -37,15 +37,15 @@ const dashboardSchema = z.object({
 
 const detailsSchema = z.object({
   operation: z.literal("details"),
-  startDate: dateString,
-  endDate: dateString,
-  axis: z.enum(["monthly", "customer", "deal"]),
+  startDate: dateString.describe("集計開始日"),
+  endDate: dateString.describe("集計終了日"),
+  axis: z.enum(["monthly", "customer", "deal"]).describe("monthly=月次, customer=顧客別, deal=案件別"),
 });
 
 const forecastSchema = z.object({
   operation: z.literal("forecast"),
-  periodStart: dateString,
-  periodEnd: dateString,
+  periodStart: dateString.describe("予実開始日"),
+  periodEnd: dateString.describe("予実終了日"),
 });
 
 const revenueInputSchema = z.discriminatedUnion("operation", [
@@ -65,7 +65,7 @@ export function registerRevenueTools(server: McpServer): void {
     "revenue",
     {
       description:
-        "売上（Revenue）のダッシュボード・明細・予実取得を行います（読み取り専用）。operation 引数で操作を切り替えます。",
+        "売上情報。売上（Revenue）・売上実績（sales）のダッシュボード・期間別明細・予実（forecast）を取得する（読み取り専用）。operation: dashboard/details/forecast",
       inputSchema: revenueAdvertisementSchema,
     },
     async (args, extra) => {
