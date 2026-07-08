@@ -91,7 +91,7 @@ describe("TC-013 / TC-049 / TC-050: テナント分離（静的検証）", () =>
 
     it("getDeal に organizationId を渡している", async () => {
       const content = await readSrc("app/api/mcp/tools/deals.ts");
-      expect(content).toContain("getDeal(args.dealId, organizationId)");
+      expect(content).toContain("getDeal(typedArgs.dealId, organizationId)");
     });
 
     it("createDeal に organizationId を渡している", async () => {
@@ -114,7 +114,7 @@ describe("TC-013 / TC-049 / TC-050: テナント分離（静的検証）", () =>
 
     it("getClient に organizationId を渡している", async () => {
       const content = await readSrc("app/api/mcp/tools/clients.ts");
-      expect(content).toContain("getClient(args.clientId, organizationId)");
+      expect(content).toContain("getClient(typedArgs.clientId, organizationId)");
     });
   });
 

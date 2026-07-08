@@ -9,6 +9,7 @@ import { updateTemplate } from "@/application/usecases/updateTemplate";
 import { deleteTemplate } from "@/application/usecases/deleteTemplate";
 import * as approvalTemplateRepository from "@/infrastructure/repositories/approvalTemplateRepository";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 
 function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
@@ -69,13 +70,20 @@ const approvalTemplatesInputSchema = z.discriminatedUnion("operation", [
   deleteSchema,
 ]);
 
+const approvalTemplatesAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  createSchema,
+  updateSchema,
+  deleteSchema,
+]);
+
 export function registerApprovalTemplatesTools(server: McpServer): void {
   server.registerTool(
     "approval_templates",
     {
       description:
         "承認テンプレートの一覧取得・作成・更新・削除を行います。operation 引数で操作を切り替えます。",
-      inputSchema: approvalTemplatesInputSchema,
+      inputSchema: approvalTemplatesAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -85,7 +93,11 @@ export function registerApprovalTemplatesTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(approvalTemplatesInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof approvalTemplatesInputSchema>;
+
+        switch (typedArgs.operation) {
           case "list": {
             if (!canPerform(role, "approvalSettings", "listTemplates")) {
               return toToolError("権限がありません");
@@ -107,7 +119,7 @@ export function registerApprovalTemplatesTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            const stepsWithOrder = args.steps.map((step, index) => ({
+            const stepsWithOrder = typedArgs.steps.map((step, index) => ({
               stepOrder: index + 1,
               approverRole: step.approverRole,
               deadlineHours: step.deadlineHours,
@@ -115,9 +127,9 @@ export function registerApprovalTemplatesTools(server: McpServer): void {
             }));
 
             const result = await createTemplate({
-              name: args.name,
+              name: typedArgs.name,
               steps: stepsWithOrder,
-              fields: args.fields,
+              fields: typedArgs.fields,
               organizationId,
               actorId: userId,
             });
@@ -141,8 +153,8 @@ export function registerApprovalTemplatesTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            const stepsWithOrder = args.steps
-              ? args.steps.map((step, index) => ({
+            const stepsWithOrder = typedArgs.steps
+              ? typedArgs.steps.map((step, index) => ({
                   stepOrder: index + 1,
                   approverRole: step.approverRole,
                   deadlineHours: step.deadlineHours,
@@ -151,10 +163,10 @@ export function registerApprovalTemplatesTools(server: McpServer): void {
               : undefined;
 
             const result = await updateTemplate({
-              id: args.templateId,
-              name: args.name,
+              id: typedArgs.templateId,
+              name: typedArgs.name,
               steps: stepsWithOrder,
-              fields: args.fields,
+              fields: typedArgs.fields,
               organizationId,
               actorId: userId,
             });
@@ -179,7 +191,7 @@ export function registerApprovalTemplatesTools(server: McpServer): void {
             }
 
             const result = await deleteTemplate({
-              id: args.templateId,
+              id: typedArgs.templateId,
               organizationId,
               actorId: userId,
             });
@@ -187,7 +199,7 @@ export function registerApprovalTemplatesTools(server: McpServer): void {
             if (!result.ok) {
               return toToolError(result.reason);
             }
-            return toToolSuccess({ deleted: true, templateId: args.templateId });
+            return toToolSuccess({ deleted: true, templateId: typedArgs.templateId });
           }
 
           default: {

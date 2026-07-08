@@ -10,6 +10,7 @@ import { createInvoice } from "@/application/usecases/createInvoice";
 import { updateInvoice } from "@/application/usecases/updateInvoice";
 import { updateInvoiceStatus } from "@/application/usecases/updateInvoiceStatus";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 import type { InvoiceStatus } from "@/domain/models/invoice";
 
@@ -74,13 +75,20 @@ const invoicesInputSchema = z.discriminatedUnion("operation", [
   updateStatusSchema,
 ]);
 
+const invoicesAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  createSchema,
+  updateSchema,
+  updateStatusSchema,
+]);
+
 export function registerInvoicesTools(server: McpServer): void {
   server.registerTool(
     "invoices",
     {
       description:
         "請求（Invoice）の一覧取得・作成・更新・ステータス更新を行います。operation 引数で操作を切り替えます。",
-      inputSchema: invoicesInputSchema,
+      inputSchema: invoicesAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -90,16 +98,20 @@ export function registerInvoicesTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(invoicesInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof invoicesInputSchema>;
+
+        switch (typedArgs.operation) {
           case "list": {
             if (!canPerform(role, "invoice", "list")) {
               return toToolError("権限がありません");
             }
 
-            if (args.contractId !== undefined) {
+            if (typedArgs.contractId !== undefined) {
               // contractId あり → 契約別一覧
               const invoices = await listInvoicesByContract({
-                contractId: args.contractId,
+                contractId: typedArgs.contractId,
                 organizationId,
               });
               return toToolSuccess(invoices);
@@ -107,13 +119,13 @@ export function registerInvoicesTools(server: McpServer): void {
               // contractId なし → 組織全体の一覧（フィルタあり）
               const invoices = await listInvoicesByOrganization({
                 organizationId,
-                status: args.status as InvoiceStatus | undefined,
-                paidAtFrom: args.paidAtFrom !== undefined ? new Date(args.paidAtFrom) : undefined,
-                paidAtTo: args.paidAtTo !== undefined ? new Date(args.paidAtTo) : undefined,
+                status: typedArgs.status as InvoiceStatus | undefined,
+                paidAtFrom: typedArgs.paidAtFrom !== undefined ? new Date(typedArgs.paidAtFrom) : undefined,
+                paidAtTo: typedArgs.paidAtTo !== undefined ? new Date(typedArgs.paidAtTo) : undefined,
                 issueDateFrom:
-                  args.issueDateFrom !== undefined ? new Date(args.issueDateFrom) : undefined,
+                  typedArgs.issueDateFrom !== undefined ? new Date(typedArgs.issueDateFrom) : undefined,
                 issueDateTo:
-                  args.issueDateTo !== undefined ? new Date(args.issueDateTo) : undefined,
+                  typedArgs.issueDateTo !== undefined ? new Date(typedArgs.issueDateTo) : undefined,
               });
               return toToolSuccess(invoices);
             }
@@ -134,21 +146,21 @@ export function registerInvoicesTools(server: McpServer): void {
 
             // issueDate: undefined（未指定）、null（null として渡す）、文字列（Date に変換）を区別する
             const issueDate =
-              args.issueDate === undefined
+              typedArgs.issueDate === undefined
                 ? undefined
-                : args.issueDate === null
+                : typedArgs.issueDate === null
                   ? null
-                  : new Date(args.issueDate);
+                  : new Date(typedArgs.issueDate);
 
             const result = await createInvoice({
-              contractId: args.contractId,
+              contractId: typedArgs.contractId,
               organizationId,
               actorId: userId,
-              title: args.title,
-              amount: args.amount,
-              dueDate: new Date(args.dueDate),
+              title: typedArgs.title,
+              amount: typedArgs.amount,
+              dueDate: new Date(typedArgs.dueDate),
               issueDate,
-              notes: args.notes,
+              notes: typedArgs.notes,
             });
 
             if (!result.ok) {
@@ -172,25 +184,25 @@ export function registerInvoicesTools(server: McpServer): void {
 
             // issueDate: undefined（変更なし）、null（クリア）、文字列（Date に変換）を区別する
             const issueDate =
-              args.issueDate === undefined
+              typedArgs.issueDate === undefined
                 ? undefined
-                : args.issueDate === null
+                : typedArgs.issueDate === null
                   ? null
-                  : new Date(args.issueDate);
+                  : new Date(typedArgs.issueDate);
 
             // dueDate: undefined（変更なし）、文字列（Date に変換）を区別する
             const dueDate =
-              args.dueDate === undefined ? undefined : new Date(args.dueDate);
+              typedArgs.dueDate === undefined ? undefined : new Date(typedArgs.dueDate);
 
             const result = await updateInvoice({
-              invoiceId: args.invoiceId,
+              invoiceId: typedArgs.invoiceId,
               organizationId,
               actorId: userId,
-              title: args.title,
-              amount: args.amount,
+              title: typedArgs.title,
+              amount: typedArgs.amount,
               issueDate,
               dueDate,
-              notes: args.notes,
+              notes: typedArgs.notes,
             });
 
             if (!result.ok) {
@@ -213,24 +225,24 @@ export function registerInvoicesTools(server: McpServer): void {
             }
 
             // paidAt が指定された場合、本日以前（JST）であることを検証する
-            if (args.paidAt !== undefined) {
+            if (typedArgs.paidAt !== undefined) {
               const todayJST = new Intl.DateTimeFormat("sv", {
                 timeZone: "Asia/Tokyo",
               }).format(new Date());
-              if (args.paidAt > todayJST) {
+              if (typedArgs.paidAt > todayJST) {
                 return toToolError("入金日は本日以前の日付を指定してください");
               }
             }
 
             // paidAt: 省略時は undefined（usecase のデフォルトに委ねる）、指定時は Date に変換
             const paidAt =
-              args.paidAt !== undefined ? new Date(args.paidAt) : undefined;
+              typedArgs.paidAt !== undefined ? new Date(typedArgs.paidAt) : undefined;
 
             const result = await updateInvoiceStatus({
-              invoiceId: args.invoiceId,
+              invoiceId: typedArgs.invoiceId,
               organizationId,
               actorId: userId,
-              newStatus: args.newStatus as InvoiceStatus,
+              newStatus: typedArgs.newStatus as InvoiceStatus,
               paidAt,
             });
 

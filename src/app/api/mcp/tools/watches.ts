@@ -6,6 +6,7 @@ import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import { watchDeal } from "@/application/usecases/watchDeal";
 import { unwatchDeal } from "@/application/usecases/unwatchDeal";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 
 function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
@@ -30,13 +31,18 @@ const watchesInputSchema = z.discriminatedUnion("operation", [
   unwatchSchema,
 ]);
 
+const watchesAdvertisementSchema = buildAdvertisementSchema([
+  watchSchema,
+  unwatchSchema,
+]);
+
 export function registerWatchesTools(server: McpServer): void {
   server.registerTool(
     "watches",
     {
       description:
         "案件（Deal）のウォッチ登録・解除を行います。operation 引数で操作を切り替えます。",
-      inputSchema: watchesInputSchema,
+      inputSchema: watchesAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -45,6 +51,10 @@ export function registerWatchesTools(server: McpServer): void {
           return toToolError("認証情報が取得できません");
         }
         const { userId, organizationId } = auth;
+
+        const parseResult = validateAndParse(watchesInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof watchesInputSchema>;
 
         const rateCheck = await checkRateLimit({
           key: `mcp:watches:${userId}`,
@@ -55,11 +65,11 @@ export function registerWatchesTools(server: McpServer): void {
           return toToolError("レート制限超過。しばらく待ってから再試行してください");
         }
 
-        switch (args.operation) {
+        switch (typedArgs.operation) {
           case "watch": {
             const result = await watchDeal({
               userId,
-              dealId: args.dealId,
+              dealId: typedArgs.dealId,
               organizationId,
             });
 
@@ -72,14 +82,14 @@ export function registerWatchesTools(server: McpServer): void {
           case "unwatch": {
             const result = await unwatchDeal({
               userId,
-              dealId: args.dealId,
+              dealId: typedArgs.dealId,
               organizationId,
             });
 
             if (!result.ok) {
               return toToolError("ウォッチの解除に失敗しました");
             }
-            return toToolSuccess({ unwatched: true, dealId: args.dealId });
+            return toToolSuccess({ unwatched: true, dealId: typedArgs.dealId });
           }
 
           default: {

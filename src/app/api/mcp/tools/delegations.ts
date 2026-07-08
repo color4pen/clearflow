@@ -9,6 +9,7 @@ import { createDelegation } from "@/application/usecases/createDelegation";
 import { deactivateDelegation } from "@/application/usecases/deactivateDelegation";
 import * as approvalDelegationRepository from "@/infrastructure/repositories/approvalDelegationRepository";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 
 function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
@@ -46,13 +47,19 @@ const delegationsInputSchema = z.discriminatedUnion("operation", [
   deactivateSchema,
 ]);
 
+const delegationsAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  createSchema,
+  deactivateSchema,
+]);
+
 export function registerDelegationsTools(server: McpServer): void {
   server.registerTool(
     "delegations",
     {
       description:
         "承認委任の一覧取得・作成・無効化を行います。operation 引数で操作を切り替えます。",
-      inputSchema: delegationsInputSchema,
+      inputSchema: delegationsAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -62,7 +69,11 @@ export function registerDelegationsTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(delegationsInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof delegationsInputSchema>;
+
+        switch (typedArgs.operation) {
           case "list": {
             if (!canPerform(role, "approvalSettings", "listDelegations")) {
               return toToolError("権限がありません");
@@ -84,7 +95,7 @@ export function registerDelegationsTools(server: McpServer): void {
             }
 
             // admin 以外は自分自身からの委任のみ作成可能
-            if (role !== "admin" && args.fromUserId !== userId) {
+            if (role !== "admin" && typedArgs.fromUserId !== userId) {
               return toToolError("この操作を実行する権限がありません");
             }
 
@@ -98,11 +109,11 @@ export function registerDelegationsTools(server: McpServer): void {
             }
 
             const result = await createDelegation({
-              fromUserId: args.fromUserId,
-              toUserId: args.toUserId,
+              fromUserId: typedArgs.fromUserId,
+              toUserId: typedArgs.toUserId,
               organizationId,
-              startDate: new Date(args.startDate),
-              endDate: new Date(args.endDate),
+              startDate: new Date(typedArgs.startDate),
+              endDate: new Date(typedArgs.endDate),
               actorId: userId,
             });
 
@@ -130,7 +141,7 @@ export function registerDelegationsTools(server: McpServer): void {
               const allDelegations = await approvalDelegationRepository.findByOrganization(
                 organizationId
               );
-              const delegation = allDelegations.find((d) => d.id === args.delegationId);
+              const delegation = allDelegations.find((d) => d.id === typedArgs.delegationId);
               if (!delegation) {
                 return toToolError("委任が見つかりません");
               }
@@ -140,7 +151,7 @@ export function registerDelegationsTools(server: McpServer): void {
             }
 
             const result = await deactivateDelegation({
-              delegationId: args.delegationId,
+              delegationId: typedArgs.delegationId,
               organizationId,
               actorId: userId,
             });
@@ -148,7 +159,7 @@ export function registerDelegationsTools(server: McpServer): void {
             if (!result.ok) {
               return toToolError(result.reason);
             }
-            return toToolSuccess({ deactivated: true, delegationId: args.delegationId });
+            return toToolSuccess({ deactivated: true, delegationId: typedArgs.delegationId });
           }
 
           default: {

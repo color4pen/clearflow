@@ -14,6 +14,7 @@ import { searchDeals } from "@/application/usecases/searchDeals";
 import { searchInquiries } from "@/application/usecases/searchInquiries";
 import { searchMeetings } from "@/application/usecases/searchMeetings";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 
 function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
@@ -87,13 +88,23 @@ const tasksInputSchema = z.discriminatedUnion("operation", [
   searchLinkTargetsSchema,
 ]);
 
+const tasksAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  createSchema,
+  updateSchema,
+  updateStatusSchema,
+  toggleSchema,
+  deleteSchema,
+  searchLinkTargetsSchema,
+]);
+
 export function registerTasksTools(server: McpServer): void {
   server.registerTool(
     "tasks",
     {
       description:
         "アクションアイテム（タスク）の一覧取得・作成・更新・ステータス更新・トグル・削除・リンク先候補検索を行います。operation 引数で操作を切り替えます。",
-      inputSchema: tasksInputSchema,
+      inputSchema: tasksAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -103,15 +114,19 @@ export function registerTasksTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(tasksInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof tasksInputSchema>;
+
+        switch (typedArgs.operation) {
           case "list": {
             if (!canPerform(role, "actionItem", "list")) {
               return toToolError("権限がありません");
             }
             const items = await listActionItems({
               organizationId,
-              done: args.done,
-              assigneeId: args.assigneeId,
+              done: typedArgs.done,
+              assigneeId: typedArgs.assigneeId,
             });
             return toToolSuccess(items);
           }
@@ -132,12 +147,12 @@ export function registerTasksTools(server: McpServer): void {
             const result = await createActionItem({
               organizationId,
               actorId: userId,
-              description: args.description,
-              assigneeId: args.assigneeId ?? null,
-              dueDate: args.dueDate ? new Date(args.dueDate) : null,
-              interactionId: args.interactionId ?? null,
-              dealId: args.dealId ?? null,
-              inquiryId: args.inquiryId ?? null,
+              description: typedArgs.description,
+              assigneeId: typedArgs.assigneeId ?? null,
+              dueDate: typedArgs.dueDate ? new Date(typedArgs.dueDate) : null,
+              interactionId: typedArgs.interactionId ?? null,
+              dealId: typedArgs.dealId ?? null,
+              inquiryId: typedArgs.inquiryId ?? null,
             });
 
             if (!result.ok) {
@@ -161,22 +176,22 @@ export function registerTasksTools(server: McpServer): void {
 
             // dueDate: undefined（変更なし）と null（クリア）を区別する
             const dueDate =
-              args.dueDate === undefined
+              typedArgs.dueDate === undefined
                 ? undefined
-                : args.dueDate === null
+                : typedArgs.dueDate === null
                   ? null
-                  : new Date(args.dueDate);
+                  : new Date(typedArgs.dueDate);
 
             const result = await updateActionItem({
-              id: args.id,
+              id: typedArgs.id,
               organizationId,
               actorId: userId,
-              description: args.description,
-              assigneeId: args.assigneeId,
+              description: typedArgs.description,
+              assigneeId: typedArgs.assigneeId,
               dueDate,
-              interactionId: args.interactionId,
-              dealId: args.dealId,
-              inquiryId: args.inquiryId,
+              interactionId: typedArgs.interactionId,
+              dealId: typedArgs.dealId,
+              inquiryId: typedArgs.inquiryId,
             });
 
             if (!result.ok) {
@@ -199,10 +214,10 @@ export function registerTasksTools(server: McpServer): void {
             }
 
             const result = await updateActionItemStatus({
-              id: args.id,
+              id: typedArgs.id,
               organizationId,
               actorId: userId,
-              status: args.status,
+              status: typedArgs.status,
             });
 
             if (!result.ok) {
@@ -225,7 +240,7 @@ export function registerTasksTools(server: McpServer): void {
             }
 
             const result = await toggleActionItemDone({
-              id: args.id,
+              id: typedArgs.id,
               organizationId,
               actorId: userId,
             });
@@ -250,7 +265,7 @@ export function registerTasksTools(server: McpServer): void {
             }
 
             const result = await deleteActionItem({
-              id: args.id,
+              id: typedArgs.id,
               organizationId,
               actorId: userId,
             });
@@ -258,7 +273,7 @@ export function registerTasksTools(server: McpServer): void {
             if (!result.ok) {
               return toToolError("タスクの削除に失敗しました");
             }
-            return toToolSuccess({ deleted: true, id: args.id });
+            return toToolSuccess({ deleted: true, id: typedArgs.id });
           }
 
           case "search_link_targets": {
@@ -275,12 +290,12 @@ export function registerTasksTools(server: McpServer): void {
             }
 
             let results;
-            if (args.type === "deal") {
-              results = await searchDeals(organizationId, args.query);
-            } else if (args.type === "inquiry") {
-              results = await searchInquiries(organizationId, args.query);
+            if (typedArgs.type === "deal") {
+              results = await searchDeals(organizationId, typedArgs.query);
+            } else if (typedArgs.type === "inquiry") {
+              results = await searchInquiries(organizationId, typedArgs.query);
             } else {
-              results = await searchMeetings(organizationId, args.query);
+              results = await searchMeetings(organizationId, typedArgs.query);
             }
 
             return toToolSuccess(results);

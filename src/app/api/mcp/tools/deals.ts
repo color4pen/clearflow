@@ -15,6 +15,7 @@ import {
   getDealActivity,
 } from "@/application/usecases";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 import type { ContractType, DealPhase } from "@/domain/models/deal";
 
@@ -85,13 +86,22 @@ const dealsInputSchema = z.discriminatedUnion("operation", [
   deleteSchema,
 ]);
 
+const dealsAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  getSchema,
+  createSchema,
+  updateSchema,
+  updatePhaseSchema,
+  deleteSchema,
+]);
+
 export function registerDealsTools(server: McpServer): void {
   server.registerTool(
     "deals",
     {
       description:
         "案件（Deal）の一覧取得・詳細取得・作成・更新・フェーズ更新・削除を行います。operation 引数で操作を切り替えます。",
-      inputSchema: dealsInputSchema,
+      inputSchema: dealsAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -101,7 +111,11 @@ export function registerDealsTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(dealsInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof dealsInputSchema>;
+
+        switch (typedArgs.operation) {
           case "list": {
             if (!canPerform(role, "deal", "list")) {
               return toToolError("権限がありません");
@@ -114,14 +128,14 @@ export function registerDealsTools(server: McpServer): void {
             if (!canPerform(role, "deal", "view")) {
               return toToolError("権限がありません");
             }
-            const deal = await getDeal(args.dealId, organizationId);
+            const deal = await getDeal(typedArgs.dealId, organizationId);
             if (!deal) {
               return toToolError("案件が見つかりません");
             }
             const [contacts, activity] = await Promise.all([
-              listDealContacts(args.dealId, organizationId),
+              listDealContacts(typedArgs.dealId, organizationId),
               getDealActivity({
-                dealId: args.dealId,
+                dealId: typedArgs.dealId,
                 organizationId,
                 dealTitle: deal.title,
               }),
@@ -138,7 +152,7 @@ export function registerDealsTools(server: McpServer): void {
               return toToolError("権限がありません");
             }
             // inquiryId も clientId もない場合はエラー
-            if (!args.inquiryId && !args.clientId) {
+            if (!typedArgs.inquiryId && !typedArgs.clientId) {
               return toToolError("顧客または引き合いの指定が必要です");
             }
             const rateCheck = await checkRateLimit({
@@ -153,21 +167,21 @@ export function registerDealsTools(server: McpServer): void {
             const result = await createDeal({
               organizationId,
               actorId: userId,
-              inquiryId: args.inquiryId,
-              clientId: args.clientId,
-              title: args.title,
-              description: args.description ?? null,
-              estimatedAmount: args.estimatedAmount ?? null,
-              estimatedStartDate: args.estimatedStartDate
-                ? new Date(args.estimatedStartDate)
+              inquiryId: typedArgs.inquiryId,
+              clientId: typedArgs.clientId,
+              title: typedArgs.title,
+              description: typedArgs.description ?? null,
+              estimatedAmount: typedArgs.estimatedAmount ?? null,
+              estimatedStartDate: typedArgs.estimatedStartDate
+                ? new Date(typedArgs.estimatedStartDate)
                 : null,
-              estimatedEndDate: args.estimatedEndDate
-                ? new Date(args.estimatedEndDate)
+              estimatedEndDate: typedArgs.estimatedEndDate
+                ? new Date(typedArgs.estimatedEndDate)
                 : null,
-              contractType: (args.contractType as ContractType) ?? null,
-              assigneeId: args.assigneeId ?? null,
-              technicalLeadId: args.technicalLeadId ?? null,
-              notes: args.notes ?? null,
+              contractType: (typedArgs.contractType as ContractType) ?? null,
+              assigneeId: typedArgs.assigneeId ?? null,
+              technicalLeadId: typedArgs.technicalLeadId ?? null,
+              notes: typedArgs.notes ?? null,
             });
 
             if (!result.ok) {
@@ -190,28 +204,28 @@ export function registerDealsTools(server: McpServer): void {
             }
 
             const result = await updateDeal({
-              dealId: args.dealId,
+              dealId: typedArgs.dealId,
               organizationId,
               actorId: userId,
-              title: args.title,
-              description: args.description,
-              estimatedAmount: args.estimatedAmount,
+              title: typedArgs.title,
+              description: typedArgs.description,
+              estimatedAmount: typedArgs.estimatedAmount,
               estimatedStartDate:
-                args.estimatedStartDate === undefined
+                typedArgs.estimatedStartDate === undefined
                   ? undefined
-                  : args.estimatedStartDate === null
+                  : typedArgs.estimatedStartDate === null
                     ? null
-                    : new Date(args.estimatedStartDate),
+                    : new Date(typedArgs.estimatedStartDate),
               estimatedEndDate:
-                args.estimatedEndDate === undefined
+                typedArgs.estimatedEndDate === undefined
                   ? undefined
-                  : args.estimatedEndDate === null
+                  : typedArgs.estimatedEndDate === null
                     ? null
-                    : new Date(args.estimatedEndDate),
-              contractType: args.contractType,
-              assigneeId: args.assigneeId,
-              technicalLeadId: args.technicalLeadId,
-              notes: args.notes,
+                    : new Date(typedArgs.estimatedEndDate),
+              contractType: typedArgs.contractType,
+              assigneeId: typedArgs.assigneeId,
+              technicalLeadId: typedArgs.technicalLeadId,
+              notes: typedArgs.notes,
             });
 
             if (!result.ok) {
@@ -221,7 +235,7 @@ export function registerDealsTools(server: McpServer): void {
           }
 
           case "update_phase": {
-            const { newPhase } = args;
+            const { newPhase } = typedArgs;
             const isTerminalPhase = newPhase === "won" || newPhase === "lost";
             const requiredOperation = isTerminalPhase ? "closePhase" : "changePhase";
             if (!canPerform(role, "deal", requiredOperation)) {
@@ -237,7 +251,7 @@ export function registerDealsTools(server: McpServer): void {
             }
 
             const result = await updateDealPhase({
-              dealId: args.dealId,
+              dealId: typedArgs.dealId,
               organizationId,
               actorId: userId,
               newPhase: newPhase as DealPhase,
@@ -263,7 +277,7 @@ export function registerDealsTools(server: McpServer): void {
             }
 
             const result = await deleteDeal({
-              id: args.dealId,
+              id: typedArgs.dealId,
               organizationId,
               actorId: userId,
             });
@@ -271,7 +285,7 @@ export function registerDealsTools(server: McpServer): void {
             if (!result.ok) {
               return toToolError(result.reason);
             }
-            return toToolSuccess({ deleted: true, dealId: args.dealId });
+            return toToolSuccess({ deleted: true, dealId: typedArgs.dealId });
           }
 
           default: {

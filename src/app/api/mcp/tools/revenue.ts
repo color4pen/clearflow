@@ -7,6 +7,7 @@ import { getRevenueDashboard } from "@/application/usecases/getRevenueDashboard"
 import { getRevenueDetails } from "@/application/usecases/getRevenueDetails";
 import { getRevenueForecast } from "@/application/usecases/getRevenueForecast";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 import type { RevenueAxis } from "@/application/usecases/getRevenueDetails";
 
@@ -53,13 +54,19 @@ const revenueInputSchema = z.discriminatedUnion("operation", [
   forecastSchema,
 ]);
 
+const revenueAdvertisementSchema = buildAdvertisementSchema([
+  dashboardSchema,
+  detailsSchema,
+  forecastSchema,
+]);
+
 export function registerRevenueTools(server: McpServer): void {
   server.registerTool(
     "revenue",
     {
       description:
         "売上（Revenue）のダッシュボード・明細・予実取得を行います（読み取り専用）。operation 引数で操作を切り替えます。",
-      inputSchema: revenueInputSchema,
+      inputSchema: revenueAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -69,7 +76,11 @@ export function registerRevenueTools(server: McpServer): void {
         }
         const { organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(revenueInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof revenueInputSchema>;
+
+        switch (typedArgs.operation) {
           case "dashboard": {
             if (!canPerform(role, "revenue", "view")) {
               return toToolError("権限がありません");
@@ -84,9 +95,9 @@ export function registerRevenueTools(server: McpServer): void {
             }
             const details = await getRevenueDetails({
               organizationId,
-              startDate: new Date(args.startDate),
-              endDate: toEndOfDay(args.endDate),
-              axis: args.axis as RevenueAxis,
+              startDate: new Date(typedArgs.startDate),
+              endDate: toEndOfDay(typedArgs.endDate),
+              axis: typedArgs.axis as RevenueAxis,
             });
             return toToolSuccess(details);
           }
@@ -97,8 +108,8 @@ export function registerRevenueTools(server: McpServer): void {
             }
             const forecast = await getRevenueForecast({
               organizationId,
-              periodStart: new Date(args.periodStart),
-              periodEnd: toEndOfDay(args.periodEnd),
+              periodStart: new Date(typedArgs.periodStart),
+              periodEnd: toEndOfDay(typedArgs.periodEnd),
             });
             return toToolSuccess(forecast);
           }

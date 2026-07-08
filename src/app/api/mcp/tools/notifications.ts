@@ -7,6 +7,7 @@ import { getNotifications } from "@/application/usecases/getNotifications";
 import { markNotificationsAsRead } from "@/application/usecases/markNotificationsAsRead";
 import * as userRepository from "@/infrastructure/repositories/userRepository";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 
 function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
@@ -29,13 +30,18 @@ const notificationsInputSchema = z.discriminatedUnion("operation", [
   markAsReadSchema,
 ]);
 
+const notificationsAdvertisementSchema = buildAdvertisementSchema([
+  listSchema,
+  markAsReadSchema,
+]);
+
 export function registerNotificationsTools(server: McpServer): void {
   server.registerTool(
     "notifications",
     {
       description:
         "通知の一覧取得と既読化を行います。operation 引数で操作を切り替えます。",
-      inputSchema: notificationsInputSchema,
+      inputSchema: notificationsAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -45,7 +51,11 @@ export function registerNotificationsTools(server: McpServer): void {
         }
         const { userId, organizationId } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(notificationsInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof notificationsInputSchema>;
+
+        switch (typedArgs.operation) {
           case "list": {
             const user = await userRepository.findById(userId, organizationId);
             const notificationsLastSeenAt = user?.notificationsLastSeenAt ?? null;

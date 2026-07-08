@@ -6,6 +6,7 @@ import { canPerform } from "@/domain/authorization";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import { listAuditLogs } from "@/application/usecases/listAuditLogs";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
+import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
 
 function getAuthInfo(extra: RequestHandlerExtra<ServerRequest, ServerNotification>) {
@@ -28,13 +29,15 @@ const searchSchema = z.object({
 
 const auditLogsInputSchema = z.discriminatedUnion("operation", [searchSchema]);
 
+const auditLogsAdvertisementSchema = buildAdvertisementSchema([searchSchema]);
+
 export function registerAuditLogsTools(server: McpServer): void {
   server.registerTool(
     "audit_logs",
     {
       description:
         "監査ログの検索を行います（読み取り専用）。operation 引数で操作を切り替えます。",
-      inputSchema: auditLogsInputSchema,
+      inputSchema: auditLogsAdvertisementSchema,
     },
     async (args, extra) => {
       try {
@@ -44,7 +47,11 @@ export function registerAuditLogsTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        switch (args.operation) {
+        const parseResult = validateAndParse(auditLogsInputSchema, args);
+        if (parseResult) return parseResult;
+        const typedArgs = args as z.infer<typeof auditLogsInputSchema>;
+
+        switch (typedArgs.operation) {
           case "search": {
             if (!canPerform(role, "organization", "exportAuditLog")) {
               return toToolError("権限がありません");
@@ -58,8 +65,8 @@ export function registerAuditLogsTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            const startDate = args.startDate ? new Date(args.startDate) : undefined;
-            const endDate = args.endDate ? new Date(args.endDate) : undefined;
+            const startDate = typedArgs.startDate ? new Date(typedArgs.startDate) : undefined;
+            const endDate = typedArgs.endDate ? new Date(typedArgs.endDate) : undefined;
 
             if (startDate && endDate && startDate > endDate) {
               return toToolError("startDate は endDate 以前を指定してください");
@@ -70,11 +77,11 @@ export function registerAuditLogsTools(server: McpServer): void {
               filters: {
                 startDate,
                 endDate,
-                action: args.action,
-                actorId: args.actorId,
-                targetType: args.targetType,
-                limit: args.limit,
-                offset: args.offset,
+                action: typedArgs.action,
+                actorId: typedArgs.actorId,
+                targetType: typedArgs.targetType,
+                limit: typedArgs.limit,
+                offset: typedArgs.offset,
               },
             });
 
