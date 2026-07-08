@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "4f3e45dc-0bc8-4479-bc00-a6b98c9ca03d",
   "createdAt": "2026-07-08T22:40:23.688Z",
-  "updatedAt": "2026-07-08T22:45:13.188Z",
+  "updatedAt": "2026-07-08T22:50:57.515Z",
   "request": {
     "title": "案件フェーズ: ヒアリング（初期）と見送り（終端）の追加",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "design",
+  "step": "spec-review",
   "status": "running",
   "branch": "feat/deal-phase-hearing-passed-4f3e45dc",
   "error": null,
@@ -34,9 +34,10 @@
     }
   ],
   "_journal": {
-    "historyCount": 5,
+    "historyCount": 9,
     "stepCounts": {
-      "request-review": 1
+      "request-review": 1,
+      "design": 1
     }
   }
 }
