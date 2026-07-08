@@ -87,3 +87,11 @@
 {"type":"transition","ts":"2026-07-08T23:50:32.742Z","step":"verification","status":"ok","message":"verification iteration 1 completed with verdict: passed"}
 {"type":"transition","ts":"2026-07-08T23:50:32.742Z","step":"step-transition","status":"ok","message":"verification → adr-gen"}
 {"type":"transition","ts":"2026-07-08T23:50:32.745Z","step":"adr-gen-started","status":"started","message":"Starting adr-gen step"}
+{"type":"transition","ts":"2026-07-08T23:50:55.801Z","step":"adr-gen-verdict","status":"ok","message":"adr-gen verdict: success"}
+{"type":"step-attempt","step":"adr-gen","sessionId":"9b1abc21-97a8-4afe-97f9-ffdcdbd3a1af","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-08T23:50:32.758Z","endedAt":"2026-07-08T23:50:54.584Z"}
+{"type":"transition","ts":"2026-07-08T23:50:55.807Z","step":"step-transition","status":"ok","message":"adr-gen → pr-create"}
+{"type":"transition","ts":"2026-07-08T23:50:55.811Z","step":"step-transition","status":"ok","message":"Transitioning to pr-create step"}
+{"type":"transition","ts":"2026-07-08T23:50:57.419Z","step":"pr-create-verdict","status":"ok","message":"pr-create verdict: success"}
+{"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/deal-phase-hearing-passed/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-08T23:50:55.812Z","endedAt":"2026-07-08T23:50:57.418Z"}
+{"type":"lineage","step":"pr-create","ts":"2026-07-08T23:50:57.418Z","outputs":[{"path":"specrunner/changes/deal-phase-hearing-passed/pr-create-result.md","hash":"sha256:7e5854da56681f806dfce3dec599577d78059462625f7c50627d02f71fb978b6"}],"inputs":[{"path":"feat/deal-phase-hearing-passed-4f3e45dc","hash":null}]}
+{"type":"transition","ts":"2026-07-08T23:50:57.428Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}

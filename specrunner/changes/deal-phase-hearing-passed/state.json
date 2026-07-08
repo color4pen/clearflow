@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "4f3e45dc-0bc8-4479-bc00-a6b98c9ca03d",
   "createdAt": "2026-07-08T22:40:23.688Z",
-  "updatedAt": "2026-07-08T23:50:32.745Z",
+  "updatedAt": "2026-07-08T23:50:57.428Z",
   "request": {
     "title": "案件フェーズ: ヒアリング（初期）と見送り（終端）の追加",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/deal-phase-hearing-passed-4f3e45dc",
   "error": null,
   "pipelineId": "standard",
@@ -47,8 +47,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/169",
+    "number": 169,
+    "createdAt": "2026-07-08T23:50:57.417Z"
+  },
   "_journal": {
-    "historyCount": 60,
+    "historyCount": 65,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -61,7 +66,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
