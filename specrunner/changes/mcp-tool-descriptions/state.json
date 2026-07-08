@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "bb303b25-7306-4cbb-98c7-20f2c7429b7e",
   "createdAt": "2026-07-08T21:52:10.357Z",
-  "updatedAt": "2026-07-08T21:55:53.016Z",
+  "updatedAt": "2026-07-08T22:01:56.405Z",
   "request": {
     "title": "MCP ツールの発見性向上（description / フィールド説明の充実）",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "design",
+  "step": "spec-review",
   "status": "running",
   "branch": "change/mcp-tool-descriptions-bb303b25",
   "error": null,
@@ -34,9 +34,10 @@
     }
   ],
   "_journal": {
-    "historyCount": 5,
+    "historyCount": 9,
     "stepCounts": {
-      "request-review": 1
+      "request-review": 1,
+      "design": 1
     }
   }
 }
