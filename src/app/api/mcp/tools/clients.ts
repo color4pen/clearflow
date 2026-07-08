@@ -143,7 +143,7 @@ export function registerClientsTools(server: McpServer): void {
         "顧客（Client）・顧客担当者（ClientContact）・案件担当者（DealContact）の操作を行います。operation 引数で操作を切り替えます。",
       inputSchema: clientsAdvertisementSchema,
     },
-    async (args, extra) => {
+    async (_rawArgs, extra) => {
       try {
         const auth = getAuthInfo(extra);
         if (!auth) {
@@ -151,11 +151,11 @@ export function registerClientsTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        const parseResult = validateAndParse(clientsInputSchema, args);
+        const parseResult = validateAndParse(clientsInputSchema, _rawArgs);
         if (parseResult) return parseResult;
-        const typedArgs = args as z.infer<typeof clientsInputSchema>;
+        const args = _rawArgs as z.infer<typeof clientsInputSchema>;
 
-        switch (typedArgs.operation) {
+        switch (args.operation) {
           case "list": {
             if (!canPerform(role, "client", "list")) {
               return toToolError("権限がありません");
@@ -168,11 +168,11 @@ export function registerClientsTools(server: McpServer): void {
             if (!canPerform(role, "client", "view")) {
               return toToolError("権限がありません");
             }
-            const client = await getClient(typedArgs.clientId, organizationId);
+            const client = await getClient(args.clientId, organizationId);
             if (!client) {
               return toToolError("顧客が見つかりません");
             }
-            const contacts = await listClientContacts(typedArgs.clientId, organizationId);
+            const contacts = await listClientContacts(args.clientId, organizationId);
             return toToolSuccess({ client, contacts });
           }
 
@@ -190,14 +190,14 @@ export function registerClientsTools(server: McpServer): void {
             }
 
             const result = await createClient({
-              name: typedArgs.name,
+              name: args.name,
               organizationId,
               actorId: userId,
-              industry: typedArgs.industry ?? null,
-              size: typedArgs.size ?? null,
-              address: typedArgs.address ?? null,
-              notes: typedArgs.notes ?? null,
-              contacts: typedArgs.contacts,
+              industry: args.industry ?? null,
+              size: args.size ?? null,
+              address: args.address ?? null,
+              notes: args.notes ?? null,
+              contacts: args.contacts,
             });
 
             if (!result.ok) {
@@ -220,14 +220,14 @@ export function registerClientsTools(server: McpServer): void {
             }
 
             const result = await updateClient({
-              clientId: typedArgs.clientId,
+              clientId: args.clientId,
               organizationId,
               data: {
-                name: typedArgs.name,
-                industry: typedArgs.industry,
-                size: typedArgs.size,
-                address: typedArgs.address,
-                notes: typedArgs.notes,
+                name: args.name,
+                industry: args.industry,
+                size: args.size,
+                address: args.address,
+                notes: args.notes,
               },
               userId,
             });
@@ -252,15 +252,15 @@ export function registerClientsTools(server: McpServer): void {
             }
 
             const result = await createClientContact({
-              clientId: typedArgs.clientId,
-              name: typedArgs.name,
+              clientId: args.clientId,
+              name: args.name,
               organizationId,
               actorId: userId,
-              department: typedArgs.department ?? null,
-              position: typedArgs.position ?? null,
-              email: typedArgs.email ?? null,
-              phone: typedArgs.phone ?? null,
-              isPrimary: typedArgs.isPrimary ?? false,
+              department: args.department ?? null,
+              position: args.position ?? null,
+              email: args.email ?? null,
+              phone: args.phone ?? null,
+              isPrimary: args.isPrimary ?? false,
             });
 
             if (!result.ok) {
@@ -285,12 +285,12 @@ export function registerClientsTools(server: McpServer): void {
             // isPrimary を明示的に true に設定するときのみ一意性を検証する。
             // 省略時（undefined）は変更なしとして扱い、既存の主担当フラグを保持する
             // （フォーム経由の Server Action と異なり、フィールド省略は「未指定」であって
-            //  「オフ」ではないため、typedArgs.isPrimary ?? false による降格を避ける）。
-            if (typedArgs.isPrimary === true) {
+            //  「オフ」ではないため、args.isPrimary ?? false による降格を避ける）。
+            if (args.isPrimary === true) {
               const primaryValidation = await validatePrimaryUniqueness(
-                typedArgs.clientId,
+                args.clientId,
                 organizationId,
-                typedArgs.contactId,
+                args.contactId,
                 true
               );
               if (!primaryValidation.ok) {
@@ -299,16 +299,16 @@ export function registerClientsTools(server: McpServer): void {
             }
 
             const result = await updateClientContact({
-              clientId: typedArgs.clientId,
-              contactId: typedArgs.contactId,
+              clientId: args.clientId,
+              contactId: args.contactId,
               organizationId,
               data: {
-                name: typedArgs.name,
-                department: typedArgs.department,
-                position: typedArgs.position,
-                email: typedArgs.email,
-                phone: typedArgs.phone,
-                isPrimary: typedArgs.isPrimary,
+                name: args.name,
+                department: args.department,
+                position: args.position,
+                email: args.email,
+                phone: args.phone,
+                isPrimary: args.isPrimary,
               },
               userId,
             });
@@ -333,8 +333,8 @@ export function registerClientsTools(server: McpServer): void {
             }
 
             const result = await deleteClientContact({
-              contactId: typedArgs.contactId,
-              clientId: typedArgs.clientId,
+              contactId: args.contactId,
+              clientId: args.clientId,
               organizationId,
               actorId: userId,
             });
@@ -342,7 +342,7 @@ export function registerClientsTools(server: McpServer): void {
             if (!result.ok) {
               return toToolError(result.reason);
             }
-            return toToolSuccess({ deleted: true, contactId: typedArgs.contactId });
+            return toToolSuccess({ deleted: true, contactId: args.contactId });
           }
 
           case "add_deal_contact": {
@@ -359,9 +359,9 @@ export function registerClientsTools(server: McpServer): void {
             }
 
             const result = await addDealContact({
-              dealId: typedArgs.dealId,
-              contactId: typedArgs.contactId,
-              role: typedArgs.role as DealContactRole,
+              dealId: args.dealId,
+              contactId: args.contactId,
+              role: args.role as DealContactRole,
               organizationId,
               actorId: userId,
             });
@@ -386,8 +386,8 @@ export function registerClientsTools(server: McpServer): void {
             }
 
             const result = await removeDealContact({
-              dealId: typedArgs.dealId,
-              contactId: typedArgs.contactId,
+              dealId: args.dealId,
+              contactId: args.contactId,
               organizationId,
               actorId: userId,
             });
@@ -395,7 +395,7 @@ export function registerClientsTools(server: McpServer): void {
             if (!result.ok) {
               return toToolError(result.reason);
             }
-            return toToolSuccess({ deleted: true, dealId: typedArgs.dealId, contactId: typedArgs.contactId });
+            return toToolSuccess({ deleted: true, dealId: args.dealId, contactId: args.contactId });
           }
 
           default: {

@@ -103,7 +103,7 @@ export function registerDealsTools(server: McpServer): void {
         "案件（Deal）の一覧取得・詳細取得・作成・更新・フェーズ更新・削除を行います。operation 引数で操作を切り替えます。",
       inputSchema: dealsAdvertisementSchema,
     },
-    async (args, extra) => {
+    async (_rawArgs, extra) => {
       try {
         const auth = getAuthInfo(extra);
         if (!auth) {
@@ -111,11 +111,11 @@ export function registerDealsTools(server: McpServer): void {
         }
         const { userId, organizationId, role } = auth;
 
-        const parseResult = validateAndParse(dealsInputSchema, args);
+        const parseResult = validateAndParse(dealsInputSchema, _rawArgs);
         if (parseResult) return parseResult;
-        const typedArgs = args as z.infer<typeof dealsInputSchema>;
+        const args = _rawArgs as z.infer<typeof dealsInputSchema>;
 
-        switch (typedArgs.operation) {
+        switch (args.operation) {
           case "list": {
             if (!canPerform(role, "deal", "list")) {
               return toToolError("権限がありません");
@@ -128,14 +128,14 @@ export function registerDealsTools(server: McpServer): void {
             if (!canPerform(role, "deal", "view")) {
               return toToolError("権限がありません");
             }
-            const deal = await getDeal(typedArgs.dealId, organizationId);
+            const deal = await getDeal(args.dealId, organizationId);
             if (!deal) {
               return toToolError("案件が見つかりません");
             }
             const [contacts, activity] = await Promise.all([
-              listDealContacts(typedArgs.dealId, organizationId),
+              listDealContacts(args.dealId, organizationId),
               getDealActivity({
-                dealId: typedArgs.dealId,
+                dealId: args.dealId,
                 organizationId,
                 dealTitle: deal.title,
               }),
@@ -152,7 +152,7 @@ export function registerDealsTools(server: McpServer): void {
               return toToolError("権限がありません");
             }
             // inquiryId も clientId もない場合はエラー
-            if (!typedArgs.inquiryId && !typedArgs.clientId) {
+            if (!args.inquiryId && !args.clientId) {
               return toToolError("顧客または引き合いの指定が必要です");
             }
             const rateCheck = await checkRateLimit({
@@ -167,21 +167,21 @@ export function registerDealsTools(server: McpServer): void {
             const result = await createDeal({
               organizationId,
               actorId: userId,
-              inquiryId: typedArgs.inquiryId,
-              clientId: typedArgs.clientId,
-              title: typedArgs.title,
-              description: typedArgs.description ?? null,
-              estimatedAmount: typedArgs.estimatedAmount ?? null,
-              estimatedStartDate: typedArgs.estimatedStartDate
-                ? new Date(typedArgs.estimatedStartDate)
+              inquiryId: args.inquiryId,
+              clientId: args.clientId,
+              title: args.title,
+              description: args.description ?? null,
+              estimatedAmount: args.estimatedAmount ?? null,
+              estimatedStartDate: args.estimatedStartDate
+                ? new Date(args.estimatedStartDate)
                 : null,
-              estimatedEndDate: typedArgs.estimatedEndDate
-                ? new Date(typedArgs.estimatedEndDate)
+              estimatedEndDate: args.estimatedEndDate
+                ? new Date(args.estimatedEndDate)
                 : null,
-              contractType: (typedArgs.contractType as ContractType) ?? null,
-              assigneeId: typedArgs.assigneeId ?? null,
-              technicalLeadId: typedArgs.technicalLeadId ?? null,
-              notes: typedArgs.notes ?? null,
+              contractType: (args.contractType as ContractType) ?? null,
+              assigneeId: args.assigneeId ?? null,
+              technicalLeadId: args.technicalLeadId ?? null,
+              notes: args.notes ?? null,
             });
 
             if (!result.ok) {
@@ -204,28 +204,28 @@ export function registerDealsTools(server: McpServer): void {
             }
 
             const result = await updateDeal({
-              dealId: typedArgs.dealId,
+              dealId: args.dealId,
               organizationId,
               actorId: userId,
-              title: typedArgs.title,
-              description: typedArgs.description,
-              estimatedAmount: typedArgs.estimatedAmount,
+              title: args.title,
+              description: args.description,
+              estimatedAmount: args.estimatedAmount,
               estimatedStartDate:
-                typedArgs.estimatedStartDate === undefined
+                args.estimatedStartDate === undefined
                   ? undefined
-                  : typedArgs.estimatedStartDate === null
+                  : args.estimatedStartDate === null
                     ? null
-                    : new Date(typedArgs.estimatedStartDate),
+                    : new Date(args.estimatedStartDate),
               estimatedEndDate:
-                typedArgs.estimatedEndDate === undefined
+                args.estimatedEndDate === undefined
                   ? undefined
-                  : typedArgs.estimatedEndDate === null
+                  : args.estimatedEndDate === null
                     ? null
-                    : new Date(typedArgs.estimatedEndDate),
-              contractType: typedArgs.contractType,
-              assigneeId: typedArgs.assigneeId,
-              technicalLeadId: typedArgs.technicalLeadId,
-              notes: typedArgs.notes,
+                    : new Date(args.estimatedEndDate),
+              contractType: args.contractType,
+              assigneeId: args.assigneeId,
+              technicalLeadId: args.technicalLeadId,
+              notes: args.notes,
             });
 
             if (!result.ok) {
@@ -235,7 +235,7 @@ export function registerDealsTools(server: McpServer): void {
           }
 
           case "update_phase": {
-            const { newPhase } = typedArgs;
+            const { newPhase } = args;
             const isTerminalPhase = newPhase === "won" || newPhase === "lost";
             const requiredOperation = isTerminalPhase ? "closePhase" : "changePhase";
             if (!canPerform(role, "deal", requiredOperation)) {
@@ -251,7 +251,7 @@ export function registerDealsTools(server: McpServer): void {
             }
 
             const result = await updateDealPhase({
-              dealId: typedArgs.dealId,
+              dealId: args.dealId,
               organizationId,
               actorId: userId,
               newPhase: newPhase as DealPhase,
@@ -277,7 +277,7 @@ export function registerDealsTools(server: McpServer): void {
             }
 
             const result = await deleteDeal({
-              id: typedArgs.dealId,
+              id: args.dealId,
               organizationId,
               actorId: userId,
             });
@@ -285,7 +285,7 @@ export function registerDealsTools(server: McpServer): void {
             if (!result.ok) {
               return toToolError(result.reason);
             }
-            return toToolSuccess({ deleted: true, dealId: typedArgs.dealId });
+            return toToolSuccess({ deleted: true, dealId: args.dealId });
           }
 
           default: {
