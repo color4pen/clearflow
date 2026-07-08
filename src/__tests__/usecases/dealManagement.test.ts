@@ -213,6 +213,47 @@ describe("Deal domain model description 静的検証", () => {
   });
 });
 
+describe("TC-003/TC-004: hearing デフォルト起点 静的検証", () => {
+  it("TC-003: schema.ts の deals.phase カラムに .default('hearing') が存在する", async () => {
+    const content = await readSrc("infrastructure/schema.ts");
+    // deals テーブルの phase カラム定義行を抽出して default("hearing") を確認
+    const phaseDefaultMatch = content.match(/phase[^;]*\.default\("hearing"\)/);
+    expect(phaseDefaultMatch).not.toBeNull();
+  });
+
+  it("TC-004: dealRepository.create の .values() 呼び出しに phase が含まれない（DB default に委ねる）", async () => {
+    const content = await readSrc("infrastructure/repositories/dealRepository.ts");
+    // create 関数の .values({ ... }) ブロックを抽出する
+    const createFnIdx = content.indexOf("export async function create(");
+    expect(createFnIdx).toBeGreaterThan(-1);
+    // .values({ から最初の }) までを取得
+    const afterCreate = content.slice(createFnIdx);
+    const valuesIdx = afterCreate.indexOf(".values({");
+    expect(valuesIdx).toBeGreaterThan(-1);
+    const valuesStart = valuesIdx + ".values({".length;
+    // 対応する }) を探す（ネスト考慮不要: .values() の中身はフラット）
+    const valuesEnd = afterCreate.indexOf("})", valuesStart);
+    const valuesBlock = afterCreate.slice(valuesStart, valuesEnd);
+    // phase が .values() に含まれていないこと（DB default = "hearing" に委ねる）
+    expect(valuesBlock).not.toContain("phase");
+  });
+
+  it("TC-003: dealPhaseEnum の先頭値が hearing である（enum 並び順の固定）", async () => {
+    const content = await readSrc("infrastructure/schema.ts");
+    // pgEnum("deal_phase", [ の後の配列リテラルを抽出し、最初の値を確認
+    const enumIdx = content.indexOf('pgEnum("deal_phase"');
+    expect(enumIdx).toBeGreaterThan(-1);
+    const enumBlock = content.slice(enumIdx, enumIdx + 300);
+    // 配列 [ の後の最初の文字列リテラルを取得（"deal_phase" の次）
+    const arrayStart = enumBlock.indexOf("[");
+    expect(arrayStart).toBeGreaterThan(-1);
+    const arrayContent = enumBlock.slice(arrayStart);
+    const firstValueMatch = arrayContent.match(/"([^"]+)"/);
+    expect(firstValueMatch).not.toBeNull();
+    expect(firstValueMatch![1]).toBe("hearing");
+  });
+});
+
 describe("deals Server Action ロールチェック静的検証", () => {
   it("createDealAction に canPerform ロールチェックが含まれる", async () => {
     // 準備 - ソースファイルを読み込む
