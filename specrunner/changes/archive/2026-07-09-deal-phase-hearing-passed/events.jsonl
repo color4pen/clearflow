@@ -95,3 +95,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/deal-phase-hearing-passed/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-08T23:50:55.812Z","endedAt":"2026-07-08T23:50:57.418Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-07-08T23:50:57.418Z","outputs":[{"path":"specrunner/changes/deal-phase-hearing-passed/pr-create-result.md","hash":"sha256:7e5854da56681f806dfce3dec599577d78059462625f7c50627d02f71fb978b6"}],"inputs":[{"path":"feat/deal-phase-hearing-passed-4f3e45dc","hash":null}]}
 {"type":"transition","ts":"2026-07-08T23:50:57.428Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-07-08T23:55:35.043Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
