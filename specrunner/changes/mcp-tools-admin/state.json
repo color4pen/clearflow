@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "f092803b-aa6f-4f3b-bc5c-78a751ae093d",
   "createdAt": "2026-07-07T02:03:07.527Z",
-  "updatedAt": "2026-07-08T11:23:39.321Z",
+  "updatedAt": "2026-07-08T11:23:56.969Z",
   "request": {
     "title": "MCP ツール: 管理系（組織・ユーザー・Webhook・監査ログ）",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/mcp-tools-admin-f092803b",
   "error": null,
   "pipelineId": "standard",
@@ -48,8 +48,13 @@
     }
   ],
   "resumePoint": null,
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/164",
+    "number": 164,
+    "createdAt": "2026-07-08T11:23:56.959Z"
+  },
   "_journal": {
-    "historyCount": 58,
+    "historyCount": 63,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -62,7 +67,9 @@
       "domain-invariants": 2,
       "custom-reviewers": 2,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
