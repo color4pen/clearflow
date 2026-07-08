@@ -271,6 +271,27 @@ describe("webhooks ツール — 認可テスト", () => {
     expect(result.isError).toBeUndefined();
     expect(state.findByOrganizationCalls).toHaveLength(1);
   });
+
+  it("内部ネットワーク宛の URL は create で拒否され usecase に到達しない（SSRF 防御）", async () => {
+    for (const url of [
+      "https://127.0.0.1/webhook",
+      "https://10.0.0.1/webhook",
+      "https://192.168.1.1/webhook",
+      "https://0.0.0.0/webhook",
+      "https://[::1]/webhook",
+      "http://example.com/webhook", // https 必須
+    ]) {
+      state.createCalls = [];
+      const result = await callWebhooksTool(
+        { operation: "create", url, events: ["request.created"] },
+        USER_ADMIN,
+        ORG_1,
+        "admin"
+      );
+      expect(result.isError, `${url} は拒否されるべき`).toBe(true);
+      expect(state.createCalls, `${url} は usecase に到達しないべき`).toHaveLength(0);
+    }
+  });
 });
 
 // ============================================================

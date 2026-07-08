@@ -62,9 +62,8 @@ export async function deactivateUser(data: {
 
     return { ok: true };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "ユーザーの無効化に失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("deactivateUser failed", err);
+    return { ok: false, reason: "ユーザーの無効化に失敗しました" };
   }
 }

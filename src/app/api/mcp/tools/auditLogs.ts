@@ -61,6 +61,10 @@ export function registerAuditLogsTools(server: McpServer): void {
             const startDate = args.startDate ? new Date(args.startDate) : undefined;
             const endDate = args.endDate ? new Date(args.endDate) : undefined;
 
+            if (startDate && endDate && startDate > endDate) {
+              return toToolError("startDate は endDate 以前を指定してください");
+            }
+
             const logs = await listAuditLogs({
               organizationId,
               filters: {

@@ -71,9 +71,8 @@ export async function updateUserRole(data: {
 
     return { ok: true };
   } catch (err) {
-    return {
-      ok: false,
-      reason: err instanceof Error ? err.message : "ロールの変更に失敗しました",
-    };
+    // 例外詳細（DB エラー文等）はクライアントに返さず、サーバー側にのみ記録する
+    console.error("updateUserRole failed", err);
+    return { ok: false, reason: "ロールの変更に失敗しました" };
   }
 }
