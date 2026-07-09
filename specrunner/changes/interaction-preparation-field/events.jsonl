@@ -48,3 +48,9 @@
 {"type":"transition","ts":"2026-07-09T04:48:52.043Z","step":"code-review","status":"ok","message":"code-review iteration 1 completed with verdict: approved"}
 {"type":"transition","ts":"2026-07-09T04:48:52.043Z","step":"step-transition","status":"ok","message":"code-review → code-fixer"}
 {"type":"transition","ts":"2026-07-09T04:48:52.045Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-07-09T04:49:28.168Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"06a1e42c-c180-460f-986c-f54c744ed1fc","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-09T04:48:52.057Z","endedAt":"2026-07-09T04:49:26.978Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-07-09T04:49:26.978Z","outputs":[{"path":"specrunner/changes/interaction-preparation-field","hash":null}],"inputs":[{"path":"specrunner/changes/interaction-preparation-field/review-feedback-001.md","hash":"sha256:828683ae26982503fa7b17cb4f8b2c33924e78fa90739cd322019e1fdc374f70"}]}
+{"type":"transition","ts":"2026-07-09T04:49:28.173Z","step":"step-transition","status":"ok","message":"code-fixer → custom-reviewers"}
+{"type":"transition","ts":"2026-07-09T04:49:28.174Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 1 started"}
+{"type":"transition","ts":"2026-07-09T04:49:28.174Z","step":"custom-reviewers","status":"started","message":"custom-reviewers iteration 1 started"}
