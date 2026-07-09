@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "3f8ab86c-a8d5-4167-a75f-ffbf9aa86465",
   "createdAt": "2026-07-09T02:39:42.536Z",
-  "updatedAt": "2026-07-09T03:08:30.365Z",
+  "updatedAt": "2026-07-09T03:13:54.714Z",
   "request": {
     "title": "MCP フィールドの用途・形式を describe に明記（Markdown/改行・用途）",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "change/mcp-field-contract-3f8ab86c",
   "error": null,
@@ -44,8 +44,32 @@
       ]
     }
   ],
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "skipped",
+      "approvedAtCommit": null,
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    },
+    {
+      "name": "mcp-conformance",
+      "status": "approved",
+      "approvedAtCommit": "367588191869250b7183a6f0d3343b78007979de",
+      "activationPaths": [
+        "src/app/api/mcp/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
+  "resumePoint": null,
   "_journal": {
-    "historyCount": 31,
+    "historyCount": 42,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -54,7 +78,9 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 1,
-      "domain-invariants": 1
+      "domain-invariants": 1,
+      "mcp-conformance": 1,
+      "custom-reviewers": 1
     }
   }
 }
