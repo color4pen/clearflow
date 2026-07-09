@@ -3,6 +3,22 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { toToolError } from "./errors";
 
 /**
+ * Zod v4 型から description を取り出す。
+ * Zod v4 では .describe() はラッパー型オブジェクトの直属 .description プロパティに設定される。
+ * .nullable().optional() 等でラップされた後でも元の description を保持するために使う。
+ */
+function extractDescription(type: z.ZodTypeAny): string | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const desc = (type as any).description;
+  if (typeof desc === "string") return desc;
+  // フォールバック: inner type を再帰確認（古い Zod v4 バージョン等への安全策）
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const innerType = (type as any)._zod?.def?.innerType as z.ZodTypeAny | undefined;
+  if (innerType) return extractDescription(innerType);
+  return undefined;
+}
+
+/**
  * Zod v4 フィールドが null を許容するか再帰的にチェックする。
  * ZodNullable、または ZodOptional の内側が ZodNullable の場合に true を返す。
  */
@@ -46,19 +62,37 @@ export function buildAdvertisementSchema(
     }
   }
 
-  // operation 以外の全フィールドをマージする（同名は先勝ち）
-  // nullable なフィールドは .nullable().optional()、それ以外は .optional() を付与する
-  const mergedFields: Record<string, z.ZodTypeAny> = {};
+  // operation 以外の全フィールドをマージする。
+  // type/shape は先勝ち（first-win）、description は全スキーマを通じて最初に見つかった
+  // 非 undefined 値を採用する（先行スキーマに describe がなく後続スキーマにある場合に対応）。
+  // nullable なフィールドは .nullable().optional()、それ以外は .optional() を付与する。
+  const mergedFieldTypes: Record<string, z.ZodTypeAny> = {};
+  const mergedDescriptions: Record<string, string> = {};
   for (const schema of operationSchemas) {
     for (const [key, value] of Object.entries(schema.shape)) {
       if (key === "operation") continue;
-      if (!(key in mergedFields)) {
-        const fieldType = value as z.ZodTypeAny;
-        mergedFields[key] = nullableFieldNames.has(key)
-          ? fieldType.nullable().optional()
-          : fieldType.optional();
+      const fieldType = value as z.ZodTypeAny;
+      if (!(key in mergedFieldTypes)) {
+        mergedFieldTypes[key] = fieldType;
+      }
+      if (!(key in mergedDescriptions)) {
+        const description = extractDescription(fieldType);
+        if (description !== undefined) {
+          mergedDescriptions[key] = description;
+        }
       }
     }
+  }
+
+  const mergedFields: Record<string, z.ZodTypeAny> = {};
+  for (const [key, fieldType] of Object.entries(mergedFieldTypes)) {
+    const description = mergedDescriptions[key];
+    const wrapped = nullableFieldNames.has(key)
+      ? fieldType.nullable().optional()
+      : fieldType.optional();
+    // .nullable() wrapping can bury an existing description inside anyOf;
+    // re-apply it at the top level so MCP agents can discover it.
+    mergedFields[key] = description ? wrapped.describe(description) : wrapped;
   }
 
   return z.object({

@@ -50,8 +50,8 @@ const createMeetingSchema = z.object({
     .describe("hearing=ヒアリング, proposal=提案, negotiation=交渉, closing=クロージング, followup=フォローアップ"),
   date: dateString.describe("実施日時"),
   location: z.string().optional().describe("場所"),
-  internalAttendees: z.array(z.string()).optional().default([]),
-  externalAttendees: z.array(z.string()).optional().default([]),
+  internalAttendees: z.array(z.string()).optional(),
+  externalAttendees: z.array(z.string()).optional(),
   summary: z.string().optional().describe("要約"),
   actionItems: z.array(legacyActionItemSchema).optional().default([]),
   hearingData: hearingDataSchema.optional(),
@@ -66,8 +66,20 @@ const updateMeetingSchema = z.object({
     .describe("hearing=ヒアリング, proposal=提案, negotiation=交渉, closing=クロージング, followup=フォローアップ"),
   date: dateString.optional().describe("実施日時"),
   location: z.string().nullable().optional().describe("場所"),
-  internalAttendees: z.array(z.string()).nullable().optional(),
-  externalAttendees: z.array(z.string()).nullable().optional(),
+  internalAttendees: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .describe(
+      "社内参加者の名前リスト。指定した場合のみ内部参加者を差し替える。省略時は既存の内部参加者を保持する（externalAttendees とは独立して部分更新される）。null を指定すると内部参加者をクリアする。"
+    ),
+  externalAttendees: z
+    .array(z.string())
+    .nullable()
+    .optional()
+    .describe(
+      "社外参加者の名前リスト。指定した場合のみ外部参加者を差し替える。省略時は既存の外部参加者を保持する（internalAttendees とは独立して部分更新される）。null を指定すると外部参加者をクリアする。"
+    ),
   summary: z.string().nullable().optional().describe("要約"),
   actionItems: z.array(legacyActionItemSchema).optional(),
   hearingData: hearingDataSchema.nullable().optional(),
@@ -197,24 +209,29 @@ export function registerInteractionsTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            // attendees: internalAttendees / externalAttendees のいずれかが指定された場合のみ変換する
-            let attendees: MeetingAttendee[] | undefined;
-            if (typedArgs.internalAttendees !== undefined || typedArgs.externalAttendees !== undefined) {
-              attendees = [
-                ...(typedArgs.internalAttendees ?? []).map((name) => ({
-                  userId: null as string | null,
-                  contactId: null as string | null,
-                  name,
-                  isExternal: false,
-                })),
-                ...(typedArgs.externalAttendees ?? []).map((name) => ({
-                  userId: null as string | null,
-                  contactId: null as string | null,
-                  name,
-                  isExternal: true,
-                })),
-              ];
-            }
+            // internalAttendees / externalAttendees は独立した部分更新フィールドとして usecase に渡す。
+            // undefined（省略）→ usecase でその側の既存参加者を保持
+            // null（明示クリア）→ 空配列として変換（その側をクリア）
+            // string[]（指定）→ MeetingAttendee[] に変換してその側を差し替え
+            const internalAttendees: MeetingAttendee[] | undefined =
+              typedArgs.internalAttendees === undefined
+                ? undefined
+                : (typedArgs.internalAttendees ?? []).map((name) => ({
+                    userId: null as string | null,
+                    contactId: null as string | null,
+                    name,
+                    isExternal: false,
+                  }));
+
+            const externalAttendees: MeetingAttendee[] | undefined =
+              typedArgs.externalAttendees === undefined
+                ? undefined
+                : (typedArgs.externalAttendees ?? []).map((name) => ({
+                    userId: null as string | null,
+                    contactId: null as string | null,
+                    name,
+                    isExternal: true,
+                  }));
 
             // hearingData: undefined（変更なし）と null（クリア）を区別する
             let details: { challenge: string | null; budget: string | null; decisionMaker: string | null; timeline: string | null; competitors: string | null; notes: string | null } | null | undefined;
@@ -240,7 +257,8 @@ export function registerInteractionsTools(server: McpServer): void {
               meetingType: typedArgs.type,
               date: typedArgs.date ? new Date(typedArgs.date) : undefined,
               location: typedArgs.location,
-              attendees,
+              internalAttendees,
+              externalAttendees,
               summary: typedArgs.summary,
               actionItems: typedArgs.actionItems,
               details,
