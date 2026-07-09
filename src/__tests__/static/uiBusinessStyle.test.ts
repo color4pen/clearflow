@@ -4,6 +4,7 @@
  * TC-003: styles.ts に BTN_DANGER が定義されている
  * TC-004: styles.ts に BTN_SUBMIT が定義されている
  * TC-008: DataTable の行 hover が hover:bg-bg-surface-alt に統一されている
+ * TC-012: styles.ts に廃止定数（BTN_PRIMARY_DISABLED / BTN_SUCCESS / BTN_WARNING / BTN_SUBMIT）が存在しない
  * TC-017: DataTable の th が text-text-secondary を使用している
  * TC-018: DataTable に hover:bg-primary/10 が存在しない
  * TC-019: BulkApprovalPanel の結果アラートがデザイントークン参照である
@@ -163,6 +164,44 @@ describe("styles.ts constants — TC-003 and TC-004", () => {
     expect(content).toContain("text-white");
     expect(content).toContain("rounded");
     expect(content).not.toContain("rounded-none");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TC-012: 廃止定数が styles.ts に存在しない
+// ---------------------------------------------------------------------------
+
+describe("styles.ts deprecated constants — TC-012", () => {
+  /**
+   * TC-012: BTN_PRIMARY_DISABLED は BTN_PRIMARY に統合済みのため styles.ts に存在しない
+   */
+  it("TC-012: styles.ts に BTN_PRIMARY_DISABLED が含まれない", async () => {
+    const content = await readSrc("app/(dashboard)/styles.ts");
+    expect(content).not.toContain("BTN_PRIMARY_DISABLED");
+  });
+
+  /**
+   * TC-012: BTN_SUCCESS は BTN_PRIMARY に統合済みのため styles.ts に存在しない
+   */
+  it("TC-012: styles.ts に BTN_SUCCESS が含まれない", async () => {
+    const content = await readSrc("app/(dashboard)/styles.ts");
+    expect(content).not.toContain("BTN_SUCCESS");
+  });
+
+  /**
+   * TC-012: BTN_WARNING は BTN_SECONDARY / BTN_DANGER に統合済みのため styles.ts に存在しない
+   */
+  it("TC-012: styles.ts に BTN_WARNING が含まれない", async () => {
+    const content = await readSrc("app/(dashboard)/styles.ts");
+    expect(content).not.toContain("BTN_WARNING");
+  });
+
+  /**
+   * TC-012: BTN_SUBMIT は BTN_PRIMARY に統合済みのため styles.ts に存在しない
+   */
+  it("TC-012: styles.ts に BTN_SUBMIT が含まれない", async () => {
+    const content = await readSrc("app/(dashboard)/styles.ts");
+    expect(content).not.toContain("BTN_SUBMIT");
   });
 });
 
