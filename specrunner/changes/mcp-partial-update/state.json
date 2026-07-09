@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d78f394a-3814-4758-8414-1fc93485ca8f",
   "createdAt": "2026-07-09T00:00:32.102Z",
-  "updatedAt": "2026-07-09T01:09:39.872Z",
+  "updatedAt": "2026-07-09T01:12:13.566Z",
   "request": {
     "title": "MCP update 系ツールの部分更新を是正（未指定フィールドの保持）",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "change/mcp-partial-update-d78f394a",
   "error": null,
@@ -45,8 +45,31 @@
     }
   ],
   "resumePoint": null,
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "2ae1dd5b9508ec28753389f091fc1f3c2cdbcb59",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    },
+    {
+      "name": "mcp-conformance",
+      "status": "approved",
+      "approvedAtCommit": "2ae1dd5b9508ec28753389f091fc1f3c2cdbcb59",
+      "activationPaths": [
+        "src/app/api/mcp/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 38,
+    "historyCount": 44,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -55,7 +78,9 @@
       "implementer": 1,
       "verification": 1,
       "code-review": 1,
-      "domain-invariants": 1
+      "domain-invariants": 1,
+      "mcp-conformance": 1,
+      "custom-reviewers": 1
     }
   }
 }
