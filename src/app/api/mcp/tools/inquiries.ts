@@ -62,7 +62,20 @@ const updateSchema = z.object({
 const updateStatusSchema = z.object({
   operation: z.literal("update_status"),
   inquiryId: z.string().uuid().describe("引合ID（UUID）"),
-  newStatus: z.enum(["new", "converted", "declined"]).describe("new=新規, converted=案件化, declined=辞退"),
+  newStatus: z
+    .enum(["new", "converted", "declined"])
+    .describe(
+      "new=新規, converted=案件化（後方互換。案件化には convert オペレーションの使用を推奨）, declined=辞退"
+    ),
+});
+
+const convertSchema = z.object({
+  operation: z
+    .literal("convert")
+    .describe(
+      "引合を案件化し Deal を生成する。承認ポリシー該当時は承認後に Deal が生成される（pendingApproval を返す）。案件化専用オペレーション（推奨）"
+    ),
+  inquiryId: z.string().uuid().describe("引合ID（UUID）"),
 });
 
 const deleteSchema = z.object({
@@ -75,6 +88,7 @@ const inquiriesInputSchema = z.discriminatedUnion("operation", [
   createSchema,
   updateSchema,
   updateStatusSchema,
+  convertSchema,
   deleteSchema,
 ]);
 
@@ -83,6 +97,7 @@ const inquiriesAdvertisementSchema = buildAdvertisementSchema([
   listSchema,
   updateSchema,
   updateStatusSchema,
+  convertSchema,
   deleteSchema,
 ]);
 
@@ -91,7 +106,7 @@ export function registerInquiriesTools(server: McpServer): void {
     "inquiries",
     {
       description:
-        "引合管理。引合（Inquiry）・問い合わせ・見込み・リード（lead）の一覧・作成・更新・ステータス変更・削除。予算・ソース・ステータス（new/converted/declined）を管理する。operation: list/create/update/update_status/delete",
+        "引合管理。引合（Inquiry）・問い合わせ・見込み・リード（lead）の一覧・作成・更新・ステータス変更・案件化・削除。予算・ソース・ステータス（new/converted/declined）を管理する。operation: list/create/update/update_status/convert/delete",
       inputSchema: inquiriesAdvertisementSchema,
     },
     async (args, extra) => {
@@ -235,7 +250,51 @@ export function registerInquiriesTools(server: McpServer): void {
               });
             }
 
+            if (result.deal) {
+              return toToolSuccess({ inquiry: result.inquiry, deal: result.deal });
+            }
+
             return toToolSuccess(result.inquiry);
+          }
+
+          case "convert": {
+            if (!canPerform(role, "inquiry", "convert")) {
+              return toToolError("権限がありません");
+            }
+
+            const rateCheck = await checkRateLimit({
+              key: `mcp:updateInquiryStatus:${userId}`,
+              limit: RATE_LIMITS.createRequest.limit,
+              windowMs: RATE_LIMITS.createRequest.windowMs,
+            });
+            if (!rateCheck.allowed) {
+              return toToolError("レート制限超過。しばらく待ってから再試行してください");
+            }
+
+            const result = await updateInquiryStatus({
+              inquiryId: typedArgs.inquiryId,
+              organizationId,
+              actorId: userId,
+              newStatus: "converted",
+            });
+
+            if (!result.ok) {
+              return toToolError(result.reason);
+            }
+
+            if (result.pendingApproval) {
+              return toToolSuccess({
+                inquiry: result.inquiry,
+                pendingApproval: result.pendingApproval,
+                message: "承認リクエストを作成しました。承認後に案件が自動生成されます。",
+              });
+            }
+
+            return toToolSuccess({
+              inquiry: result.inquiry,
+              deal: result.deal,
+              message: `案件を生成しました（dealId: ${result.deal?.id ?? ""}）`,
+            });
           }
 
           case "delete": {

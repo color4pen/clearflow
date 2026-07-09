@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "c405cb55-3e0c-45f8-b085-ee38bd537255",
   "createdAt": "2026-07-09T01:37:15.177Z",
-  "updatedAt": "2026-07-09T01:53:34.095Z",
+  "updatedAt": "2026-07-09T01:57:19.529Z",
   "request": {
     "title": "MCP: 引合の「案件化」専用オペレーション",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "test-case-gen",
+  "step": "implementer",
   "status": "running",
   "branch": "feat/mcp-inquiry-convert-c405cb55",
   "error": null,
@@ -45,11 +45,12 @@
     }
   ],
   "_journal": {
-    "historyCount": 13,
+    "historyCount": 16,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
-      "spec-review": 1
+      "spec-review": 1,
+      "test-case-gen": 1
     }
   }
 }

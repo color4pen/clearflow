@@ -12,9 +12,10 @@ import { canTransition } from "@/domain/services";
 import { dispatcher } from "@/domain/events";
 import { evaluatePolicies } from "./evaluatePolicies";
 import type { Inquiry, InquiryStatus } from "@/domain/models/inquiry";
+import type { Deal } from "@/domain/models/deal";
 
 export type UpdateInquiryStatusResult =
-  | { ok: true; inquiry: Inquiry; pendingApproval?: { requestId: string } }
+  | { ok: true; inquiry: Inquiry; deal?: Deal; pendingApproval?: { requestId: string } }
   | { ok: false; reason: string };
 
 export async function updateInquiryStatus(
@@ -183,7 +184,7 @@ export async function updateInquiryStatus(
 
       // 従来フロー（ポリシー非合致、skipPolicyCheck=true、またはテンプレートなしのフォールバック）
       try {
-        const updatedInquiry = await db.transaction(async (tx) => {
+        const txResult = await db.transaction(async (tx) => {
           const deal = await dealRepository.create(
             {
               organizationId: data.organizationId,
@@ -230,15 +231,15 @@ export async function updateInquiryStatus(
             },
           });
 
-          return updated;
+          return { inquiry: updated, deal };
         });
 
-        if (!updatedInquiry) {
+        if (!txResult.inquiry) {
           return { ok: false, reason: "この引き合いは他のユーザーによって更新されました" };
         }
 
         dispatcher.flushAsync();
-        return { ok: true, inquiry: updatedInquiry };
+        return { ok: true, inquiry: txResult.inquiry, deal: txResult.deal };
       } catch (err) {
         return {
           ok: false,
