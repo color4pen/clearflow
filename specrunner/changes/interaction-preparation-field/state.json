@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "2b87610d-f12a-4482-8141-13315d061a36",
   "createdAt": "2026-07-09T04:06:07.822Z",
-  "updatedAt": "2026-07-09T04:53:14.569Z",
+  "updatedAt": "2026-07-09T04:53:46.788Z",
   "request": {
     "title": "商談（interaction）に汎用「事前準備」フィールドを追加",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "feat/interaction-preparation-field-2b87610d",
   "error": null,
@@ -45,8 +45,31 @@
     }
   ],
   "resumePoint": null,
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "1e0f60c0fcd6e21e4967f5d38e2948469b13692b",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    },
+    {
+      "name": "mcp-conformance",
+      "status": "approved",
+      "approvedAtCommit": "1e0f60c0fcd6e21e4967f5d38e2948469b13692b",
+      "activationPaths": [
+        "src/app/api/mcp/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 39,
+    "historyCount": 45,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -56,7 +79,9 @@
       "verification": 1,
       "code-review": 1,
       "code-fixer": 1,
-      "domain-invariants": 1
+      "domain-invariants": 1,
+      "mcp-conformance": 1,
+      "custom-reviewers": 1
     }
   }
 }
