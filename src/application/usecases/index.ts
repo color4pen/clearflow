@@ -20,6 +20,7 @@ export { bulkApprove } from "./bulkApprove";
 export { createClient } from "./createClient";
 export { createInquiry } from "./createInquiry";
 export { updateInquiryStatus } from "./updateInquiryStatus";
+export type { UpdateInquiryStatusResult } from "./updateInquiryStatus";
 export { evaluatePolicies } from "./evaluatePolicies";
 export { updateInquiry } from "./updateInquiry";
 export { listClients } from "./listClients";

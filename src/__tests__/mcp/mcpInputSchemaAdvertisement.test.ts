@@ -578,7 +578,7 @@ describe("TC-019-deals: deals の update_phase newPhase enum に hearing と pas
 
 describe("TC-019: 全ツールの operation enum 値がスキーマと一致する", () => {
   const expectedOperations: Record<string, string[]> = {
-    inquiries: ["list", "create", "update", "update_status", "delete"],
+    inquiries: ["list", "create", "update", "update_status", "convert", "delete"],
     deals: ["list", "get", "create", "update", "update_phase", "delete"],
     clients: [
       "list", "get", "create", "update",
