@@ -11,13 +11,7 @@ type Props = {
 export function InquiryStatusBanner({ status, dealId, dealTitle, hasPendingApproval }: Props) {
   if (status === "new" && hasPendingApproval) {
     return (
-      <div
-        className="text-sm px-4 py-3 mb-3"
-        style={{
-          backgroundColor: "#eef5fb",
-          borderLeft: "3px solid #2980b9",
-        }}
-      >
+      <div className="text-sm px-4 py-3 mb-3 bg-bg-info border-l-4 border-primary">
         案件化の承認待ちです
       </div>
     );
@@ -25,13 +19,7 @@ export function InquiryStatusBanner({ status, dealId, dealTitle, hasPendingAppro
 
   if (status === "converted" && dealId) {
     return (
-      <div
-        className="text-sm px-4 py-3 mb-3 flex items-center gap-2"
-        style={{
-          backgroundColor: "#eef7f1",
-          borderLeft: "3px solid #cde6d8",
-        }}
-      >
+      <div className="text-sm px-4 py-3 mb-3 flex items-center gap-2 bg-bg-success-light border-l-4 border-success">
         <span>案件化済み</span>
         {dealTitle && (
           <Link href={`/deals/${dealId}`} className="text-primary underline font-bold">

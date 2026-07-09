@@ -10,6 +10,14 @@ import { DeleteContractButton } from "./DeleteContractButton";
 import { ContractInfoSection } from "./ContractInfoSection";
 import { ContractInteractionSection } from "./ContractInteractionSection";
 import { contractStatusLabels } from "@/app/(dashboard)/labels";
+import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
+import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
+
+const CONTRACT_STATUS_VARIANT: Record<string, StatusBadgeVariant> = {
+  active: "green",
+  completed: "navy",
+  cancelled: "red",
+};
 
 export default async function ContractDetailPage({
   params,
@@ -66,7 +74,11 @@ export default async function ContractDetailPage({
             <dl className="text-xs space-y-1 mt-1">
               <div className="flex gap-2">
                 <dt className="text-text-muted w-24 shrink-0">ステータス</dt>
-                <dd className="text-text px-2 py-1">{contractStatusLabels[contract.status] ?? contract.status}</dd>
+                <dd className="text-text px-2 py-1">
+                  <StatusBadge variant={CONTRACT_STATUS_VARIANT[contract.status] ?? "gray"}>
+                    {contractStatusLabels[contract.status] ?? contract.status}
+                  </StatusBadge>
+                </dd>
               </div>
             </dl>
 

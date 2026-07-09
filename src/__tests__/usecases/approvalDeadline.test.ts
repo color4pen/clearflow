@@ -608,12 +608,12 @@ describe("UI — deadline display in ApprovalStepsSection", () => {
     expect(src).toContain('expired: "期限切れ"');
   });
 
-  it("has expired CSS class in statusClass", async () => {
-    // statusClass moved to statusUtils.ts (T-02 refactoring)
+  it("has expired variant in statusVariant", async () => {
+    // statusVariant replaced statusClass in statusUtils.ts (design-foundation refactoring)
     const src = await readSrc("app/(dashboard)/requests/statusUtils.ts");
     expect(src).toContain("expired:");
-    // New style: business system hex color for expired
-    expect(src).toContain("text-[#999999]");
+    // New style: semantic variant for expired
+    expect(src).toContain('"gray"');
   });
 
   it("shows remaining time for future deadlines", async () => {

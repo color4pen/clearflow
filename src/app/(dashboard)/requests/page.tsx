@@ -4,7 +4,7 @@ import { listRequests, listOrganizationUsers } from "@/application/usecases";
 import { bulkApproveAction } from "@/app/actions/requests";
 import { BulkApprovalPanel } from "./BulkApprovalPanel";
 import { RequestTabs } from "./RequestTabs";
-import { statusLabel, statusClass } from "./statusUtils";
+import { statusLabel, statusVariant } from "./statusUtils";
 
 type Tab = "action-required" | "my-requests" | "all";
 
@@ -104,7 +104,7 @@ export default async function RequestsPage({
             title: r.title,
             status: r.status,
             statusText: statusLabel(r.status),
-            statusClass: statusClass(r.status),
+            statusVariant: statusVariant(r.status),
             creatorId: r.creatorId,
             creatorName: userNameMap.get(r.creatorId) ?? r.creatorId.slice(0, 8),
             createdAt: r.createdAt,

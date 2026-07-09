@@ -5,7 +5,15 @@ import { getInquiry, getClient, getDealByInquiry, listClients, listMeetingsByInq
 import { SectionCard } from "@/app/components";
 import { InquiryActions } from "./InquiryActions";
 import { DeleteInquiryButton } from "./DeleteInquiryButton";
-import { InquiryStatusBadge } from "../InquiryStatusBadge";
+import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
+import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
+import { statusLabels } from "@/app/(dashboard)/labels";
+
+const INQUIRY_STATUS_VARIANT: Record<string, StatusBadgeVariant> = {
+  new: "gray",
+  converted: "green",
+  declined: "gray",
+};
 import { InquiryStatusBanner } from "./InquiryStatusBanner";
 import { InquiryInfoDisplay } from "./InquiryInfoDisplay";
 import { InquiryCustomerSection } from "./InquiryCustomerSection";
@@ -52,7 +60,9 @@ export default async function InquiryDetailPage({
           {" / "}
           <span className="text-text">{inquiry.title}</span>
         </span>
-        <InquiryStatusBadge status={inquiry.status} />
+        <StatusBadge variant={INQUIRY_STATUS_VARIANT[inquiry.status] ?? "gray"}>
+          {statusLabels[inquiry.status] ?? inquiry.status}
+        </StatusBadge>
       </div>
 
       {/* Status banner */}

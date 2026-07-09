@@ -11,16 +11,16 @@ const OPTIONS: { value: ActionItemStatus; label: string }[] = [
 
 // チップ本体の配色（状態ごと）
 const CHIP: Record<ActionItemStatus, string> = {
-  todo: "bg-bg-surface-alt text-text-muted border-border",
-  in_progress: "bg-blue-50 text-blue-700 border-blue-200",
-  done: "bg-green-50 text-green-700 border-green-200",
+  todo: "bg-status-gray-bg text-status-gray-text border-status-gray-bg",
+  in_progress: "bg-status-blue-bg text-status-blue-text border-status-blue-bg",
+  done: "bg-status-green-bg text-status-green-text border-status-green-bg",
 };
 
 // 先頭ドットの色
 const DOT: Record<ActionItemStatus, string> = {
-  todo: "bg-gray-400",
-  in_progress: "bg-blue-500",
-  done: "bg-green-500",
+  todo: "bg-status-gray-text",
+  in_progress: "bg-status-blue-text",
+  done: "bg-status-green-text",
 };
 
 type Props = {

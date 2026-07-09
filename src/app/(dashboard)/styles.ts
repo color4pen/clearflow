@@ -22,7 +22,7 @@ export const BTN_SUBMIT =
 
 export const TOOLBAR = "bg-bg-toolbar border border-border px-2 py-1";
 
-export const SECTION_CARD = "bg-bg-surface border border-border rounded shadow-sm";
+export const SECTION_CARD = "bg-bg-surface border border-border rounded-lg shadow-sm";
 
 export const FOOTER_BAR =
   "bg-bg-toolbar border border-border border-t-0 px-2 py-0.5 text-xs text-text-muted";

@@ -2,7 +2,7 @@
 
 ## T-01: globals.css — デザイントークン値の刷新
 
-- [ ] `:root` ブロックの以下の変数値を更新する:
+- [x] `:root` ブロックの以下の変数値を更新する:
   - `--bg-page: #f1f5f9`
   - `--bg-surface: #ffffff`
   - `--bg-surface-alt: #f8fafc`
@@ -36,7 +36,7 @@
   - `--theme-revision: #ea580c`
   - `--theme-draft: #1a56db`
   - `--theme-expired: #94a3b8`
-- [ ] `[data-theme="dark"]` ブロックの以下の変数値を更新する:
+- [x] `[data-theme="dark"]` ブロックの以下の変数値を更新する:
   - `--bg-page: #0f172a`
   - `--bg-surface: #1e293b`
   - `--bg-surface-alt: #334155`
@@ -81,7 +81,7 @@
 
 ## T-02: globals.css — ステータス系統トークンの新設
 
-- [ ] `:root` ブロックに以下のステータス系統トークンを追加する（既存トークンの後）:
+- [x] `:root` ブロックに以下のステータス系統トークンを追加する（既存トークンの後）:
   ```css
   /* ステータス系統トークン */
   --status-gray-text: #6b7280;
@@ -97,7 +97,7 @@
   --status-navy-text: #1e3a5f;
   --status-navy-bg: #dbeafe;
   ```
-- [ ] `[data-theme="dark"]` ブロックに以下のダーク値を追加する:
+- [x] `[data-theme="dark"]` ブロックに以下のダーク値を追加する:
   ```css
   /* ステータス系統トークン（ダーク） */
   --status-gray-text: #d1d5db;
@@ -113,7 +113,7 @@
   --status-navy-text: #bfdbfe;
   --status-navy-bg: #1e3a5f;
   ```
-- [ ] `@theme inline` ブロックに以下を追加する:
+- [x] `@theme inline` ブロックに以下を追加する:
   ```css
   /* ステータス系統 */
   --color-status-gray-text: var(--status-gray-text);
@@ -140,8 +140,8 @@
 
 ## T-03: StatusBadge.tsx — 共有コンポーネント新設
 
-- [ ] `src/app/(dashboard)/components/StatusBadge.tsx` を新規作成する
-- [ ] Props 型を定義する:
+- [x] `src/app/(dashboard)/components/StatusBadge.tsx` を新規作成する
+- [x] Props 型を定義する:
   ```typescript
   export type StatusBadgeVariant = "gray" | "blue" | "green" | "yellow" | "red" | "navy";
   type Props = {
@@ -150,7 +150,7 @@
     className?: string;
   };
   ```
-- [ ] variant ごとのクラスマップを定義する（例）:
+- [x] variant ごとのクラスマップを定義する（例）:
   ```typescript
   const VARIANT_CLASS: Record<StatusBadgeVariant, string> = {
     gray: "bg-status-gray-bg text-status-gray-text",
@@ -161,9 +161,9 @@
     navy: "bg-status-navy-bg text-status-navy-text",
   };
   ```
-- [ ] コンポーネント本体を実装する。`<span>` を使い `rounded-full px-2 py-0.5 text-2xs font-semibold whitespace-nowrap inline-block` のクラスを適用する
-- [ ] インタラクション（クリックハンドラ・フォーカス）は一切持たないこと
-- [ ] `"use client"` ディレクティブは付けない（Server Component として動作可能にする）
+- [x] コンポーネント本体を実装する。`<span>` を使い `rounded-full px-2 py-0.5 text-2xs font-semibold whitespace-nowrap inline-block` のクラスを適用する
+- [x] インタラクション（クリックハンドラ・フォーカス）は一切持たないこと
+- [x] `"use client"` ディレクティブは付けない（Server Component として動作可能にする）
 
 **Acceptance Criteria**:
 - `src/app/(dashboard)/components/StatusBadge.tsx` が存在する
@@ -177,23 +177,23 @@
 
 ## T-04: statusUtils.ts — variant 返却関数に置き換え
 
-- [ ] `statusClass` 関数を `statusVariant` 関数に置き換える（戻り値: `StatusBadgeVariant`）:
+- [x] `statusClass` 関数を `statusVariant` 関数に置き換える（戻り値: `StatusBadgeVariant`）:
   - draft → `"gray"`
   - pending → `"yellow"`
   - approved → `"green"`
   - rejected → `"red"`
   - revision → `"yellow"`
   - expired → `"gray"`
-- [ ] `stepStatusClass` 関数を `stepStatusVariant` 関数に置き換える（戻り値: `StatusBadgeVariant`）:
+- [x] `stepStatusClass` 関数を `stepStatusVariant` 関数に置き換える（戻り値: `StatusBadgeVariant`）:
   - pending → `"yellow"`
   - approved → `"green"`
   - rejected → `"yellow"`
-- [ ] `statusRowClass` 関数を更新する（Tailwind パレット直参照を廃止）:
+- [x] `statusRowClass` 関数を更新する（Tailwind パレット直参照を廃止）:
   - pending → `"bg-bg-row-pending"`
   - revision → `"bg-bg-row-revision"`
   - その他 → `""`
-- [ ] `StatusBadgeVariant` 型を `StatusBadge.tsx` からインポートする
-- [ ] ファイル内に `text-[#` 形式の文字列が残っていないことを確認する
+- [x] `StatusBadgeVariant` 型を `StatusBadge.tsx` からインポートする
+- [x] ファイル内に `text-[#` 形式の文字列が残っていないことを確認する
 
 **Acceptance Criteria**:
 - `statusVariant` 関数がエクスポートされ、全 6 ステータスに対して正しい variant を返す
@@ -208,7 +208,7 @@
 
 ### deals/page.tsx
 
-- [ ] `phaseVariant` ヘルパー関数を定義する（ファイル内または `labels.ts` の近傍に配置）:
+- [x] `phaseVariant` ヘルパー関数を定義する（ファイル内または `labels.ts` の近傍に配置）:
   ```typescript
   const PHASE_VARIANT: Record<string, StatusBadgeVariant> = {
     hearing: "gray",
@@ -223,7 +223,7 @@
     return PHASE_VARIANT[phase] ?? "gray";
   }
   ```
-- [ ] DataTable の `phase` 列の render を以下に変更する:
+- [x] DataTable の `phase` 列の render を以下に変更する:
   ```tsx
   render: (row) => (
     <StatusBadge variant={phaseVariant(row.phase)}>
@@ -231,11 +231,11 @@
     </StatusBadge>
   )
   ```
-- [ ] `StatusBadge` をインポートする
+- [x] `StatusBadge` をインポートする
 
 ### deals/[id]/page.tsx — 契約テーブルのステータス列
 
-- [ ] 案件詳細ページ内の `dealContracts` テーブルの `status` 列 render を `<StatusBadge>` に変更する（contractStatusVariant を使用。T-07 の関数を参照/先行定義する）
+- [x] 案件詳細ページ内の `dealContracts` テーブルの `status` 列 render を `<StatusBadge>` に変更する（contractStatusVariant を使用。T-07 の関数を参照/先行定義する）
 
 **Acceptance Criteria**:
 - `deals/page.tsx` のフェーズ列で `StatusBadge` が使用されている
@@ -249,13 +249,13 @@
 
 ### inquiries/InquiryStatusBadge.tsx
 
-- [ ] ファイルを削除する（StatusBadge に統合するため）
+- [x] ファイルを削除する（StatusBadge に統合するため）
 
 ### inquiries/InquiryListView.tsx
 
-- [ ] `InquiryStatusBadge` のインポートを削除する
-- [ ] `StatusBadge` をインポートする
-- [ ] `inquiryStatusVariant` ヘルパー関数を定義する:
+- [x] `InquiryStatusBadge` のインポートを削除する
+- [x] `StatusBadge` をインポートする
+- [x] `inquiryStatusVariant` ヘルパー関数を定義する:
   ```typescript
   const INQUIRY_STATUS_VARIANT: Record<string, StatusBadgeVariant> = {
     new: "gray",
@@ -263,7 +263,7 @@
     declined: "gray",
   };
   ```
-- [ ] `<InquiryStatusBadge status={row.status} />` を以下に置換する:
+- [x] `<InquiryStatusBadge status={row.status} />` を以下に置換する:
   ```tsx
   <StatusBadge variant={INQUIRY_STATUS_VARIANT[row.status] ?? "gray"}>
     {statusLabels[row.status] ?? row.status}
@@ -272,8 +272,8 @@
 
 ### inquiries/[id]/InquiryStatusBanner.tsx
 
-- [ ] インラインスタイルの `style={{ backgroundColor: "#eef5fb", borderLeft: "3px solid #2980b9" }}` を Tailwind クラス `bg-bg-info border-l-4 border-primary` に置換する
-- [ ] インラインスタイルの `style={{ backgroundColor: "#eef7f1", borderLeft: "3px solid #cde6d8" }}` を `bg-bg-success-light border-l-4 border-success` に置換する
+- [x] インラインスタイルの `style={{ backgroundColor: "#eef5fb", borderLeft: "3px solid #2980b9" }}` を Tailwind クラス `bg-bg-info border-l-4 border-primary` に置換する
+- [x] インラインスタイルの `style={{ backgroundColor: "#eef7f1", borderLeft: "3px solid #cde6d8" }}` を `bg-bg-success-light border-l-4 border-success` に置換する
 
 **Acceptance Criteria**:
 - `InquiryStatusBadge.tsx` が削除されている
@@ -285,7 +285,7 @@
 
 ## T-07: contracts — ステータス表示を StatusBadge に置換
 
-- [ ] `contractStatusVariant` ヘルパー関数を定義する（`labels.ts` の近傍または `contracts/page.tsx` 内）:
+- [x] `contractStatusVariant` ヘルパー関数を定義する（`labels.ts` の近傍または `contracts/page.tsx` 内）:
   ```typescript
   const CONTRACT_STATUS_VARIANT: Record<string, StatusBadgeVariant> = {
     active: "green",
@@ -293,8 +293,8 @@
     cancelled: "red",
   };
   ```
-- [ ] `contracts/page.tsx` の DataTable `status` 列 render を `<StatusBadge>` に変更する
-- [ ] `contracts/[id]/page.tsx` の `contractStatusLabels[contract.status]` 表示を `<StatusBadge>` に変更する
+- [x] `contracts/page.tsx` の DataTable `status` 列 render を `<StatusBadge>` に変更する
+- [x] `contracts/[id]/page.tsx` の `contractStatusLabels[contract.status]` 表示を `<StatusBadge>` に変更する
 
 **Acceptance Criteria**:
 - `contracts/page.tsx` と `contracts/[id]/page.tsx` の契約ステータス表示が `StatusBadge` を使用している
@@ -306,7 +306,7 @@
 
 ## T-08: invoices — 請求ステータスを StatusBadge に置換
 
-- [ ] `invoiceStatusVariant` ヘルパー関数を定義する（`InvoiceSection.tsx` 内または `labels.ts` 近傍）:
+- [x] `invoiceStatusVariant` ヘルパー関数を定義する（`InvoiceSection.tsx` 内または `labels.ts` 近傍）:
   ```typescript
   const INVOICE_STATUS_VARIANT: Record<string, StatusBadgeVariant> = {
     scheduled: "gray",
@@ -318,15 +318,15 @@
 
 ### contracts/[id]/InvoiceSection.tsx
 
-- [ ] DataTable `status` 列の render を変更する:
+- [x] DataTable `status` 列の render を変更する:
   - 現行: `<span className={colorClass}>{invoiceStatusLabels[row.status] ?? row.status}</span>`
   - 変更後: `<StatusBadge variant={INVOICE_STATUS_VARIANT[row.status] ?? "gray"}>{invoiceStatusLabels[row.status] ?? row.status}</StatusBadge>`
-- [ ] `colorClass` の条件分岐（`text-primary` / `text-success` / `text-danger`）を削除する
-- [ ] `StatusBadge` をインポートする
+- [x] `colorClass` の条件分岐（`text-primary` / `text-success` / `text-danger`）を削除する
+- [x] `StatusBadge` をインポートする
 
 ### contracts/[id]/invoices/[invoiceId]/page.tsx
 
-- [ ] `invoice.status` 表示部分（`<span className={...}>` の条件分岐）を `<StatusBadge>` に置換する:
+- [x] `invoice.status` 表示部分（`<span className={...}>` の条件分岐）を `<StatusBadge>` に置換する:
   ```tsx
   <StatusBadge variant={INVOICE_STATUS_VARIANT[invoice.status] ?? "gray"}>
     {invoiceStatusLabels[invoice.status] ?? invoice.status}
@@ -345,14 +345,14 @@
 
 ### requests/page.tsx
 
-- [ ] `statusClass` のインポートを削除し `statusVariant` をインポートする
-- [ ] `requests.map(...)` で渡す `statusClass: statusClass(r.status)` を `statusVariant: statusVariant(r.status)` に変更する
+- [x] `statusClass` のインポートを削除し `statusVariant` をインポートする
+- [x] `requests.map(...)` で渡す `statusClass: statusClass(r.status)` を `statusVariant: statusVariant(r.status)` に変更する
 
 ### requests/BulkApprovalPanel.tsx
 
-- [ ] `RequestItem` 型の `statusClass: string` フィールドを `statusVariant: StatusBadgeVariant` に変更する
-- [ ] `StatusBadge`・`StatusBadgeVariant` をインポートする
-- [ ] ステータス列の描画を変更する:
+- [x] `RequestItem` 型の `statusClass: string` フィールドを `statusVariant: StatusBadgeVariant` に変更する
+- [x] `StatusBadge`・`StatusBadgeVariant` をインポートする
+- [x] ステータス列の描画を変更する:
   ```tsx
   // 変更前
   <span className={`text-xs ${request.statusClass}`}>{request.statusText}</span>
@@ -372,10 +372,10 @@
 
 ### requests/[id]/page.tsx
 
-- [ ] ファイル末尾のローカル関数 `statusBadgeClass()` を削除する
-- [ ] `statusVariant` をインポートする（`statusUtils.ts` から）
-- [ ] `StatusBadge` をインポートする
-- [ ] ヘッダーのステータス表示を変更する:
+- [x] ファイル末尾のローカル関数 `statusBadgeClass()` を削除する
+- [x] `statusVariant` をインポートする（`statusUtils.ts` から）
+- [x] `StatusBadge` をインポートする
+- [x] ヘッダーのステータス表示を変更する:
   ```tsx
   // 変更前
   <span className={`rounded-full px-2 py-0.5 text-xs border flex-shrink-0 ${statusBadgeClass(request.status)}`}>
@@ -399,9 +399,9 @@
 
 ### requests/[id]/ApprovalStepper.tsx
 
-- [ ] `stepStatusVariant` を `statusUtils.ts` からインポートする
-- [ ] `StatusBadge` をインポートする
-- [ ] step のステータスラベルチップを `StatusBadge` に変更する:
+- [x] `stepStatusVariant` を `statusUtils.ts` からインポートする
+- [x] `StatusBadge` をインポートする
+- [x] step のステータスラベルチップを `StatusBadge` に変更する:
   ```tsx
   // 変更前（条件分岐の inline クラス）
   <span className={[
@@ -418,10 +418,10 @@
     {stepStatusLabel(step.status)}
   </StatusBadge>
   ```
-- [ ] `StepIcon` の `bg-emerald-500`（承認済み丸）を `bg-status-green-text` に変更する
-- [ ] `StepIcon` の `bg-red-500`（却下丸）を `bg-status-red-text` に変更する
-- [ ] `ConnectorLine` の `bg-emerald-400`（完了ライン）を `bg-status-green-text/70` に変更する
-- [ ] 現在ステップ行のハイライト `bg-blue-50 border border-blue-200` を `bg-status-blue-bg border border-status-blue-bg` に変更する
+- [x] `StepIcon` の `bg-emerald-500`（承認済み丸）を `bg-status-green-text` に変更する
+- [x] `StepIcon` の `bg-red-500`（却下丸）を `bg-status-red-text` に変更する
+- [x] `ConnectorLine` の `bg-emerald-400`（完了ライン）を `bg-status-green-text/70` に変更する
+- [x] 現在ステップ行のハイライト `bg-blue-50 border border-blue-200` を `bg-status-blue-bg border border-status-blue-bg` に変更する
 
 **Acceptance Criteria**:
 - ステップステータスチップが `StatusBadge` を使用している
@@ -435,7 +435,7 @@
 
 ### src/app/(dashboard)/components/StatusChipSelect.tsx
 
-- [ ] `CHIP` マップのクラスを系統トークン参照に変更する:
+- [x] `CHIP` マップのクラスを系統トークン参照に変更する:
   ```typescript
   const CHIP: Record<ActionItemStatus, string> = {
     todo: "bg-status-gray-bg text-status-gray-text border-status-gray-bg",
@@ -443,7 +443,7 @@
     done: "bg-status-green-bg text-status-green-text border-status-green-bg",
   };
   ```
-- [ ] `DOT` マップのクラスを系統トークン参照に変更する:
+- [x] `DOT` マップのクラスを系統トークン参照に変更する:
   ```typescript
   const DOT: Record<ActionItemStatus, string> = {
     todo: "bg-status-gray-text",
@@ -451,8 +451,8 @@
     done: "bg-status-green-text",
   };
   ```
-- [ ] `bg-blue-50`・`text-blue-700`・`bg-green-50`・`text-green-700` 等の Tailwind パレット直参照が残っていないことを確認する
-- [ ] ドロップダウンの開閉・onChange の挙動は一切変更しない
+- [x] `bg-blue-50`・`text-blue-700`・`bg-green-50`・`text-green-700` 等の Tailwind パレット直参照が残っていないことを確認する
+- [x] ドロップダウンの開閉・onChange の挙動は一切変更しない
 
 **Acceptance Criteria**:
 - `CHIP` マップに `bg-blue-50`・`text-blue-700` 等の直参照が存在しない
@@ -466,13 +466,13 @@
 
 ### src/app/(dashboard)/deals/[id]/DealPhaseStepper.tsx
 
-- [ ] 終端フェーズ表示 `<span>` のクラス条件分岐を更新する:
+- [x] 終端フェーズ表示 `<span>` のクラス条件分岐を更新する:
   - won: `"bg-status-green-bg text-status-green-text border-status-green-text/30"`
   - lost: `"bg-status-red-bg text-status-red-text border-status-red-text/30"`
   - その他（passed）: `"bg-status-gray-bg text-status-gray-text border-status-gray-text/30"`
-- [ ] `bg-green-50 text-green-700 border-green-300`・`bg-red-50 text-danger border-red-300`・`bg-gray-50 text-gray-700 border-gray-300` のハードコードが残っていないことを確認する
-- [ ] 既存の pill 形状・パディング（`rounded-full px-3.5 py-1.5 border`）は変更しない
-- [ ] ボタン類（受注にする・失注にする・見送りにする）のスタイルはスコープ外のため変更しない
+- [x] `bg-green-50 text-green-700 border-green-300`・`bg-red-50 text-danger border-red-300`・`bg-gray-50 text-gray-700 border-gray-300` のハードコードが残っていないことを確認する
+- [x] 既存の pill 形状・パディング（`rounded-full px-3.5 py-1.5 border`）は変更しない
+- [x] ボタン類（受注にする・失注にする・見送りにする）のスタイルはスコープ外のため変更しない
 
 **Acceptance Criteria**:
 - 終端フェーズ span のクラスにシステムトークン参照が使用されている
@@ -486,7 +486,7 @@
 
 ### src/app/(dashboard)/styles.ts
 
-- [ ] `SECTION_CARD` の定義を以下に変更する:
+- [x] `SECTION_CARD` の定義を以下に変更する:
   ```typescript
   export const SECTION_CARD = "bg-bg-surface border border-border rounded-lg shadow-sm";
   ```
@@ -503,20 +503,20 @@
 
 ### src/__tests__/domain/statusUtils.test.ts
 
-- [ ] TC-008 の関数名を `statusClass` → `statusVariant` に更新する
-- [ ] TC-008 のインポートを `statusClass` → `statusVariant` に変更する
-- [ ] TC-008 の各ステータスの期待値を variant 文字列に更新する:
+- [x] TC-008 の関数名を `statusClass` → `statusVariant` に更新する
+- [x] TC-008 のインポートを `statusClass` → `statusVariant` に変更する
+- [x] TC-008 の各ステータスの期待値を variant 文字列に更新する:
   - `statusVariant("draft")` → `"gray"`
   - `statusVariant("pending")` → `"yellow"`
   - `statusVariant("approved")` → `"green"`
   - `statusVariant("rejected")` → `"red"`
   - `statusVariant("revision")` → `"yellow"`
   - `statusVariant("expired")` → `"gray"`
-- [ ] TC-011 の `statusRowClass` 期待値を更新する:
+- [x] TC-011 の `statusRowClass` 期待値を更新する:
   - pending → `"bg-bg-row-pending"`
   - revision → `"bg-bg-row-revision"`
   - approved/draft/rejected → `""`
-- [ ] TC-012 の関数名を `stepStatusClass` → `stepStatusVariant` に更新し、期待値を更新する:
+- [x] TC-012 の関数名を `stepStatusClass` → `stepStatusVariant` に更新し、期待値を更新する:
   - pending → `"yellow"`
   - approved → `"green"`
   - rejected → `"yellow"`
@@ -530,8 +530,8 @@
 
 ## T-16: StatusBadge 単体テスト新設
 
-- [ ] `src/__tests__/components/StatusBadge.test.ts` を新規作成する
-- [ ] ファイル読み込みによる静的解析テストを実装する（既存テストパターンに倣う）:
+- [x] `src/__tests__/components/StatusBadge.test.ts` を新規作成する
+- [x] ファイル読み込みによる静的解析テストを実装する（既存テストパターンに倣う）:
   - `StatusBadge.tsx` が存在することを確認する
   - `StatusBadgeVariant` がエクスポートされていることを確認する
   - 各 variant のクラス文字列（`bg-status-green-bg text-status-green-text` 等）が全 6 系統ソースに存在することを確認する
@@ -546,8 +546,8 @@
 
 ## T-17: 代表画面の表示テスト新設
 
-- [ ] `src/__tests__/components/statusBadgeIntegration.test.ts` を新規作成する
-- [ ] 静的解析テストを実装する（ファイル読み込みパターン）:
+- [x] `src/__tests__/components/statusBadgeIntegration.test.ts` を新規作成する
+- [x] 静的解析テストを実装する（ファイル読み込みパターン）:
   - `deals/page.tsx` が `StatusBadge` をインポートしていること
   - `deals/page.tsx` に `phaseVariant` または `PHASE_VARIANT` が定義されていること
   - `deals/page.tsx` に `won.*green`（won フェーズ → green）相当のマッピングが存在すること
@@ -568,14 +568,14 @@
 
 ## T-18: 最終検証
 
-- [ ] `bun run typecheck` がエラーなしで通ること
-- [ ] `bun run lint` がエラーなしで通ること
-- [ ] `bun run build` がエラーなしで通ること
-- [ ] `bun test` で既存テストが全件 pass することを確認する（新テスト含む）
-- [ ] `bunx aozu check` が exit 0 であること
-- [ ] `src/__tests__/static/architecture.test.ts` が pass することを確認する（StatusBadge が mod-ui にマップされること）
-- [ ] `requests/statusUtils.ts` に `text-[#` が残っていないことを最終確認する
-- [ ] `StatusBadge.tsx` に `"use client"` が付いていないことを確認する
+- [x] `bun run typecheck` がエラーなしで通ること
+- [x] `bun run lint` がエラーなしで通ること
+- [x] `bun run build` がエラーなしで通ること
+- [x] `bun test` で既存テストが全件 pass することを確認する（新テスト含む）
+- [x] `bunx aozu check` が exit 0 であること
+- [x] `src/__tests__/static/architecture.test.ts` が pass することを確認する（StatusBadge が mod-ui にマップされること）
+- [x] `requests/statusUtils.ts` に `text-[#` が残っていないことを最終確認する
+- [x] `StatusBadge.tsx` に `"use client"` が付いていないことを確認する
 
 **Acceptance Criteria**:
 - typecheck / lint / build / test / aozu check / architecture test が全件グリーン

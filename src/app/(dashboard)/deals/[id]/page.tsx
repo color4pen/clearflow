@@ -16,6 +16,14 @@ import {
   meetingTypeLabels,
   contractStatusLabels,
 } from "@/app/(dashboard)/labels";
+import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
+import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
+
+const CONTRACT_STATUS_VARIANT: Record<string, StatusBadgeVariant> = {
+  active: "green",
+  completed: "navy",
+  cancelled: "red",
+};
 import { isActivityFeedEnabled } from "@/lib/activityConfig";
 import type { Interaction } from "@/domain/models/interaction";
 
@@ -256,7 +264,11 @@ export default async function DealDetailPage({
                   {
                     key: "status",
                     header: "ステータス",
-                    render: (row) => contractStatusLabels[row.status] ?? row.status,
+                    render: (row) => (
+                      <StatusBadge variant={CONTRACT_STATUS_VARIANT[row.status] ?? "gray"}>
+                        {contractStatusLabels[row.status] ?? row.status}
+                      </StatusBadge>
+                    ),
                   },
                 ]}
                 rows={dealContracts}

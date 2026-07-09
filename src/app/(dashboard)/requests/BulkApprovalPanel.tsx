@@ -2,6 +2,8 @@
 
 import { useState, useTransition, useEffect } from "react";
 import Link from "next/link";
+import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
+import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
 import type { BulkApproveActionResult } from "@/app/actions/requests";
 
 type ApprovalStepItem = {
@@ -15,7 +17,7 @@ type RequestItem = {
   title: string;
   status: string;
   statusText: string;
-  statusClass: string;
+  statusVariant: StatusBadgeVariant;
   creatorId: string;
   creatorName: string;
   createdAt: Date;
@@ -252,9 +254,7 @@ export function BulkApprovalPanel({
                     {request.creatorName}
                   </td>
                   <td className="px-2 py-1.5 text-center">
-                    <span className={`text-xs ${request.statusClass}`}>
-                      {request.statusText}
-                    </span>
+                    <StatusBadge variant={request.statusVariant}>{request.statusText}</StatusBadge>
                   </td>
                   <td className="px-2 py-1.5 text-center">
                     <OriginTypeLabel originType={request.originType} />

@@ -2,8 +2,17 @@ import Link from "next/link";
 import { SectionCard } from "@/app/components";
 import { DataTable } from "@/app/components/DataTable";
 import { invoiceStatusLabels } from "@/app/(dashboard)/labels";
+import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
+import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
 import type { Invoice } from "@/domain/models/invoice";
 import type { RenewalType } from "@/domain/models/contract";
+
+const INVOICE_STATUS_VARIANT: Record<string, StatusBadgeVariant> = {
+  scheduled: "gray",
+  invoiced: "blue",
+  paid: "green",
+  overdue: "red",
+};
 
 type Props = {
   contractId: string;
@@ -113,21 +122,11 @@ export function InvoiceSection({ contractId, invoices, contractStatus, canManage
     {
       key: "status",
       header: "ステータス",
-      render: (row: Invoice) => {
-        const colorClass =
-          row.status === "invoiced"
-            ? "text-primary"
-            : row.status === "paid"
-              ? "text-success"
-              : row.status === "overdue"
-                ? "text-danger"
-                : "";
-        return (
-          <span className={colorClass}>
-            {invoiceStatusLabels[row.status] ?? row.status}
-          </span>
-        );
-      },
+      render: (row: Invoice) => (
+        <StatusBadge variant={INVOICE_STATUS_VARIANT[row.status] ?? "gray"}>
+          {invoiceStatusLabels[row.status] ?? row.status}
+        </StatusBadge>
+      ),
     },
   ];
 

@@ -128,10 +128,10 @@ export function DealPhaseStepper({ dealId, phase, canChangePhase, inquiryId }: P
           className={[
             "text-xs font-bold rounded-full px-3.5 py-1.5 border",
             phase === "won"
-              ? "bg-green-50 text-green-700 border-green-300"
+              ? "bg-status-green-bg text-status-green-text border-status-green-text/30"
               : phase === "lost"
-              ? "bg-red-50 text-danger border-red-300"
-              : "bg-gray-50 text-gray-700 border-gray-300",
+              ? "bg-status-red-bg text-status-red-text border-status-red-text/30"
+              : "bg-status-gray-bg text-status-gray-text border-status-gray-text/30",
           ].join(" ")}
         >
           {phaseLabels[phase] ?? phase}（確定）
