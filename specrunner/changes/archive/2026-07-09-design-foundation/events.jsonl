@@ -73,3 +73,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/design-foundation/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-09T11:54:19.675Z","endedAt":"2026-07-09T11:54:21.263Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-07-09T11:54:21.263Z","outputs":[{"path":"specrunner/changes/design-foundation/pr-create-result.md","hash":"sha256:5347bbbf2c6561262a811ff4d4347877ceb6b68359df12b3cc1f8766efb00470"}],"inputs":[{"path":"refactor/design-foundation-d4b46393","hash":null}]}
 {"type":"transition","ts":"2026-07-09T11:54:21.278Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-07-09T12:47:54.805Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}

@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d4b46393-257f-412c-9381-1a9a87a12dfe",
   "createdAt": "2026-07-09T11:03:07.765Z",
-  "updatedAt": "2026-07-09T11:54:21.279Z",
+  "updatedAt": "2026-07-09T12:47:54.805Z",
   "request": {
     "title": "UI デザイン基盤の刷新（デザイントークン＋ステータスバッジ体系）",
     "type": "refactoring",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "refactor/design-foundation-d4b46393",
   "error": null,
   "pipelineId": "standard",
@@ -73,7 +73,7 @@
     "createdAt": "2026-07-09T11:54:21.262Z"
   },
   "_journal": {
-    "historyCount": 51,
+    "historyCount": 52,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
