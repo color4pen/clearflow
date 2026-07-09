@@ -87,7 +87,7 @@ export default async function ContractsPage() {
             rowKey={(row) => row.id}
             rowHref={(row) => `/contracts/${row.id}`}
             rowClass={(row) =>
-              isExpiringWithin30Days(row) ? "bg-amber-50" : undefined
+              isExpiringWithin30Days(row) ? "bg-bg-row-pending" : undefined
             }
           />
         )}

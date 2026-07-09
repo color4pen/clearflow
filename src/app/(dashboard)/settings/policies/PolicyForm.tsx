@@ -82,7 +82,7 @@ export function PolicyForm(props: Props) {
   return (
     <div>
       {state?.success === false && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200">
+        <div className="mb-4 p-4 bg-status-red-bg border border-status-red-text/30">
           <p className="text-xs text-danger">{state.message}</p>
         </div>
       )}
@@ -100,7 +100,7 @@ export function PolicyForm(props: Props) {
         <FormField
           label={
             <>
-              ポリシー名 <span className="text-red-500">*</span>
+              ポリシー名 <span className="text-danger">*</span>
             </>
           }
           htmlFor="name"
@@ -132,7 +132,7 @@ export function PolicyForm(props: Props) {
         <FormField
           label={
             <>
-              トリガーアクション <span className="text-red-500">*</span>
+              トリガーアクション <span className="text-danger">*</span>
             </>
           }
           htmlFor="triggerAction"
@@ -157,7 +157,7 @@ export function PolicyForm(props: Props) {
         <FormField
           label={
             <>
-              テンプレート <span className="text-red-500">*</span>
+              テンプレート <span className="text-danger">*</span>
             </>
           }
           htmlFor="templateId"
@@ -195,7 +195,7 @@ export function PolicyForm(props: Props) {
         <FormField
           label={
             <>
-              条件演算子{hasCondition && <span className="text-red-500"> *</span>}
+              条件演算子{hasCondition && <span className="text-danger"> *</span>}
             </>
           }
           htmlFor="conditionOperator"
@@ -221,7 +221,7 @@ export function PolicyForm(props: Props) {
         <FormField
           label={
             <>
-              条件値{hasCondition && <span className="text-red-500"> *</span>}
+              条件値{hasCondition && <span className="text-danger"> *</span>}
             </>
           }
           htmlFor="conditionValue"

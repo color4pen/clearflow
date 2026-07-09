@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateInquiryStatusAction } from "@/app/actions/inquiries";
 import { ConfirmDialog, useToast } from "@/app/components";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 import type { InquiryStatus } from "@/domain/models/inquiry";
 
 type Props = {
@@ -51,7 +52,7 @@ export function InquiryActions({ inquiry, canChangeStatus }: Props) {
             type="button"
             disabled={isSubmitting}
             onClick={() => setShowConvertConfirm(true)}
-            className="bg-green-600 text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
+            className={BTN_PRIMARY}
           >
             案件化
           </button>

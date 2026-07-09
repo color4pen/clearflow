@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createContractAction } from "@/app/actions/contracts";
-import { SectionCard, FormField, Input, Select, preventEnterSubmit, MoneyInput } from "@/app/components";
+import { SectionCard, FormField, Input, Select, preventEnterSubmit, MoneyInput, SubmitButton } from "@/app/components";
+import { BTN_SECONDARY } from "@/app/(dashboard)/styles";
 
 type DealInfo = {
   id: string;
@@ -109,17 +110,11 @@ export function NewContractForm({ deal }: Props) {
         )}
 
         <div className="flex gap-2 mt-3">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-primary text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
-          >
-            {isSubmitting ? "作成中..." : "契約を作成"}
-          </button>
+          <SubmitButton pending={isSubmitting}>契約を作成</SubmitButton>
           <button
             type="button"
             onClick={() => router.back()}
-            className="border border-border text-text text-xs px-3 py-1.5 cursor-pointer"
+            className={BTN_SECONDARY}
           >
             キャンセル
           </button>

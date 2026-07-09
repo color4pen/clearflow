@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { updateInvoiceStatusAction } from "@/app/actions/invoices";
 import { ConfirmDialog, useToast } from "@/app/components";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 import type { InvoiceStatus } from "@/domain/models/invoice";
 
 type Props = {
@@ -52,7 +53,7 @@ export function InvoiceActions({ invoiceId, contractId, status }: Props) {
             type="button"
             disabled={isSubmitting}
             onClick={() => handleTransition("invoiced")}
-            className="text-xs px-3 py-1.5 bg-primary text-white cursor-pointer disabled:opacity-50"
+            className={BTN_PRIMARY}
           >
             発行する
           </button>
@@ -63,7 +64,7 @@ export function InvoiceActions({ invoiceId, contractId, status }: Props) {
             type="button"
             disabled={isSubmitting}
             onClick={() => { setPaidAt(todayString()); setShowPaidDialog(true); }}
-            className="text-xs px-3 py-1.5 bg-green-600 text-white cursor-pointer disabled:opacity-50"
+            className={BTN_PRIMARY}
           >
             入金確認
           </button>

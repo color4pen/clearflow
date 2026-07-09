@@ -61,7 +61,7 @@ export default function NewRequestPage() {
     const label = (
       <>
         {field.label}
-        {field.required && <span className="text-red-500 ml-1">*</span>}
+        {field.required && <span className="text-danger ml-1">*</span>}
       </>
     );
 
@@ -144,14 +144,14 @@ export default function NewRequestPage() {
 
       <SectionCard className="p-4">
         {state.message && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-danger text-xs">
+          <div className="mb-4 p-3 bg-status-red-bg border border-status-red-text/30 text-status-red-text text-xs">
             {state.message}
           </div>
         )}
 
         <form action={formAction} onKeyDown={preventEnterSubmit} className="space-y-4">
           <FormField
-            label={<>タイトル <span className="text-red-500">*</span></>}
+            label={<>タイトル <span className="text-danger">*</span></>}
             htmlFor="title"
             error={state.errors?.title?.[0]}
           >
@@ -165,7 +165,7 @@ export default function NewRequestPage() {
           </FormField>
 
           <FormField
-            label={<>申請種別 <span className="text-red-500">*</span></>}
+            label={<>申請種別 <span className="text-danger">*</span></>}
             htmlFor="templateId"
             error={state.errors?.templateId?.[0]}
           >

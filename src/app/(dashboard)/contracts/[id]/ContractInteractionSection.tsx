@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { SectionCard } from "@/app/components";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 import { recordContractAdjustmentAction } from "@/app/actions/interactions";
 import type { RecordContractAdjustmentState } from "@/app/actions/interactions";
 import type { Interaction } from "@/domain/models/interaction";
@@ -89,7 +90,7 @@ export function ContractInteractionSection({ contractId, interactions, canRecord
             <button
               type="submit"
               disabled={isPending}
-              className="text-xs px-3 py-1 bg-primary text-white disabled:opacity-50"
+              className={BTN_PRIMARY}
             >
               {isPending ? "記録中..." : "契約調整を記録"}
             </button>

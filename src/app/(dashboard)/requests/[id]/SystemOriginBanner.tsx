@@ -77,9 +77,9 @@ export async function SystemOriginBanner({
 
 function Banner({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mb-4 flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3">
-      <span className="text-blue-500 text-sm mt-0.5 flex-shrink-0">ℹ</span>
-      <p className="text-xs text-blue-800">{children}</p>
+    <div className="mb-4 flex items-start gap-2 rounded-lg border border-status-blue-text/30 bg-bg-info px-4 py-3">
+      <span className="text-status-blue-text text-sm mt-0.5 flex-shrink-0">ℹ</span>
+      <p className="text-xs text-status-blue-text">{children}</p>
     </div>
   );
 }

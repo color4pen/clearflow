@@ -119,7 +119,7 @@ export function InquiryCustomerSection({
               type="button"
               onClick={handleSave}
               disabled={isSubmitting}
-              className="text-xs font-bold px-3 py-1 bg-green-600 text-white cursor-pointer disabled:opacity-50 mt-1"
+              className="text-xs font-bold px-3 py-1 bg-primary text-white cursor-pointer disabled:opacity-50 hover:opacity-90 mt-1"
             >
               {isSubmitting ? "保存中..." : "保存"}
             </button>

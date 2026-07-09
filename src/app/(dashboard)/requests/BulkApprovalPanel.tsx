@@ -147,10 +147,10 @@ export function BulkApprovalPanel({
         <div
           className={`mb-4 p-4 border ${
             resultType === "success"
-              ? "bg-green-50 border-green-300 text-green-800"
+              ? "bg-bg-success-light border-border-success-light text-success"
               : resultType === "error"
-                ? "bg-red-50 border-red-300 text-red-800"
-                : "bg-yellow-50 border-yellow-300 text-yellow-800"
+                ? "bg-status-red-bg border-status-red-text/30 text-status-red-text"
+                : "bg-bg-row-pending border-border-row-pending text-warning"
           }`}
         >
           <div className="flex items-start justify-between">

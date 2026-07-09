@@ -120,7 +120,7 @@ export function ActionButtons({
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="text-xs border border-danger text-danger bg-white rounded px-3 py-1.5 hover:bg-red-50 disabled:opacity-50 transition-colors"
+                    className="text-xs border border-danger text-danger bg-bg-surface rounded px-3 py-1.5 hover:bg-status-red-bg disabled:opacity-50 transition-colors"
                   >
                     {isPending ? "処理中..." : "却下する"}
                   </button>

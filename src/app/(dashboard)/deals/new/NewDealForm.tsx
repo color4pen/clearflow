@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createDealAction } from "@/app/actions/deals";
-import { FormField, Input, Select, Textarea, SectionCard, preventEnterSubmit, MoneyInput } from "@/app/components";
+import { FormField, Input, Select, Textarea, SectionCard, preventEnterSubmit, MoneyInput, SubmitButton } from "@/app/components";
 import Link from "next/link";
 import type { CreateDealState } from "@/app/actions/deals";
 import type { Client } from "@/domain/models/client";
@@ -119,13 +119,7 @@ export function NewDealForm({ inquiryId, clients, users }: Props) {
         </FormField>
 
         <div className="flex gap-2 mt-4">
-          <button
-            type="submit"
-            disabled={isPending}
-            className="bg-primary text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
-          >
-            {isPending ? "作成中..." : "案件を作成"}
-          </button>
+          <SubmitButton pending={isPending}>案件を作成</SubmitButton>
           <Link
             href={inquiryId ? `/inquiries/${inquiryId}` : "/deals"}
             className="text-xs text-text-muted underline"

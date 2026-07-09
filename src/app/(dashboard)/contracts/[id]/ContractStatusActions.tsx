@@ -25,7 +25,7 @@ const STATUS_VARIANTS: Record<ContractStatus, "primary" | "success" | "danger"> 
 
 const variantStyles = {
   primary: "bg-primary text-white",
-  success: "bg-green-600 text-white",
+  success: "bg-primary text-white",
   danger: "border border-danger text-danger hover:bg-danger hover:text-white",
 };
 

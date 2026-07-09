@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createActionItemAction } from "@/app/actions/actionItems";
 import { Input, useToast } from "@/app/components";
+import { BTN_PRIMARY, BTN_SECONDARY, SELECT_BASE } from "@/app/(dashboard)/styles";
 import { ActionItemRow } from "@/app/(dashboard)/components/ActionItemRow";
 import { LinkTargetPicker, type LinkTarget } from "@/app/(dashboard)/components/LinkTargetPicker";
 import type { ActionItemWithSource } from "@/application/usecases/listActionItems";
@@ -85,7 +86,7 @@ export function TaskList({ items, orgUsers, currentUserId, canDelete }: Props) {
               </div>
               <div>
                 <label className="text-xs text-text-muted block mb-0.5">担当者</label>
-                <select value={assigneeId} onChange={(e) => setAssigneeId(e.target.value)} disabled={isPending} className="w-full text-xs border border-border rounded px-2 py-1.5 bg-bg-surface text-text">
+                <select value={assigneeId} onChange={(e) => setAssigneeId(e.target.value)} disabled={isPending} className={SELECT_BASE}>
                   <option value="">未設定</option>
                   {orgUsers.map((u) => (<option key={u.id} value={u.id}>{u.name}</option>))}
                 </select>
@@ -114,8 +115,8 @@ export function TaskList({ items, orgUsers, currentUserId, canDelete }: Props) {
               </div>
             </div>
             <div className="flex gap-2 justify-end mt-4">
-              <button type="button" onClick={() => setShowAddModal(false)} disabled={isPending} className="border border-border text-text text-xs px-3 py-1.5 cursor-pointer disabled:opacity-50">キャンセル</button>
-              <button type="button" onClick={handleAdd} disabled={isPending} className="bg-primary text-white text-xs px-3 py-1.5 cursor-pointer disabled:opacity-50">{isPending ? "作成中..." : "作成"}</button>
+              <button type="button" onClick={() => setShowAddModal(false)} disabled={isPending} className={BTN_SECONDARY}>キャンセル</button>
+              <button type="button" onClick={handleAdd} disabled={isPending} className={BTN_PRIMARY}>{isPending ? "作成中..." : "作成"}</button>
             </div>
           </div>
         </div>
@@ -133,7 +134,7 @@ export function TaskList({ items, orgUsers, currentUserId, canDelete }: Props) {
 
       <div className="flex items-center justify-between px-3.5 py-2">
         <span className="text-xs text-text-muted">{items.length} 件</span>
-        <button type="button" onClick={handleOpenAdd} className="text-xs font-medium px-3 py-1.5 bg-primary text-white rounded cursor-pointer">
+        <button type="button" onClick={handleOpenAdd} className={BTN_PRIMARY}>
           新規作成
         </button>
       </div>

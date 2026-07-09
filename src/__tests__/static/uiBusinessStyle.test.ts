@@ -138,23 +138,23 @@ describe("findAllWithStepsByOrganization grouping logic — TC-022", () => {
 
 describe("styles.ts constants — TC-003 and TC-004", () => {
   /**
-   * TC-003: BTN_DANGER が定義されており
-   *         text-danger と underline を含む
+   * TC-003: BTN_DANGER が定義されており bg-danger と text-white を含む
+   * （旧: text-danger + underline → 新: bg-danger text-white の塗りボタン形式）
    */
-  it("TC-003: styles.ts exports BTN_DANGER containing text-danger and underline", async () => {
+  it("TC-003: styles.ts exports BTN_DANGER containing bg-danger and text-white", async () => {
     const content = await readSrc("app/(dashboard)/styles.ts");
     expect(content).toContain("BTN_DANGER");
-    expect(content).toContain("text-danger");
-    expect(content).toContain("underline");
+    expect(content).toContain("bg-danger");
+    expect(content).toContain("text-white");
   });
 
   /**
-   * TC-004: BTN_SUBMIT が定義されており
-   *         bg-primary・text-white・rounded を含む
+   * TC-004: BTN_SUBMIT は BTN_PRIMARY に統合済み。
+   *         BTN_PRIMARY が bg-primary・text-white・rounded を含む
    */
-  it("TC-004: styles.ts exports BTN_SUBMIT containing bg-primary, text-white, and rounded", async () => {
+  it("TC-004: styles.ts exports BTN_PRIMARY (BTN_SUBMIT unified) containing bg-primary, text-white, and rounded", async () => {
     const content = await readSrc("app/(dashboard)/styles.ts");
-    expect(content).toContain("BTN_SUBMIT");
+    expect(content).toContain("BTN_PRIMARY");
     expect(content).toContain("bg-primary");
     expect(content).toContain("text-white");
     expect(content).toContain("rounded");
@@ -168,12 +168,12 @@ describe("styles.ts constants — TC-003 and TC-004", () => {
 
 describe("styles.ts constants — TC-032 and TC-033", () => {
   /**
-   * TC-032: BTN_PRIMARY_DISABLED が定義されており
-   *         disabled:cursor-not-allowed を含む
+   * TC-032: BTN_PRIMARY が disabled:cursor-not-allowed を含む
+   * （BTN_PRIMARY_DISABLED は BTN_PRIMARY に統合済み）
    */
-  it("TC-032: styles.ts exports BTN_PRIMARY_DISABLED containing disabled:cursor-not-allowed", async () => {
+  it("TC-032: styles.ts exports BTN_PRIMARY containing disabled:cursor-not-allowed", async () => {
     const content = await readSrc("app/(dashboard)/styles.ts");
-    expect(content).toContain("BTN_PRIMARY_DISABLED");
+    expect(content).toContain("BTN_PRIMARY");
     expect(content).toContain("disabled:cursor-not-allowed");
   });
 
