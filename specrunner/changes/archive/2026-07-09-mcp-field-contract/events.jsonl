@@ -81,3 +81,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/mcp-field-contract/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-09T03:17:55.048Z","endedAt":"2026-07-09T03:17:56.465Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-07-09T03:17:56.465Z","outputs":[{"path":"specrunner/changes/mcp-field-contract/pr-create-result.md","hash":"sha256:3e498baad407672f76d7fabf92574a7fc1bc4d60317e7c7634c3f8d94fdd197c"}],"inputs":[{"path":"change/mcp-field-contract-3f8ab86c","hash":null}]}
 {"type":"transition","ts":"2026-07-09T03:17:56.472Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-07-09T03:31:25.696Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}

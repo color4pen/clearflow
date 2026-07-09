@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "3f8ab86c-a8d5-4167-a75f-ffbf9aa86465",
   "createdAt": "2026-07-09T02:39:42.536Z",
-  "updatedAt": "2026-07-09T03:17:56.472Z",
+  "updatedAt": "2026-07-09T03:31:25.696Z",
   "request": {
     "title": "MCP フィールドの用途・形式を describe に明記（Markdown/改行・用途）",
     "type": "spec-change",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "change/mcp-field-contract-3f8ab86c",
   "error": null,
   "pipelineId": "standard",
@@ -67,14 +67,18 @@
       "invalidatedByCommit": null
     }
   ],
-  "resumePoint": null,
+  "resumePoint": {
+    "step": "pr-create",
+    "reason": "signal",
+    "iterationsExhausted": 0
+  },
   "pullRequest": {
     "url": "https://github.com/color4pen/clearflow/pull/172",
     "number": 172,
     "createdAt": "2026-07-09T03:17:56.464Z"
   },
   "_journal": {
-    "historyCount": 56,
+    "historyCount": 57,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
