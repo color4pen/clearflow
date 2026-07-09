@@ -87,6 +87,7 @@ function makeInteraction(overrides: Partial<Interaction> = {}): Interaction {
     location: null,
     attendees: [],
     summary: null,
+    preparation: null,
     actionItems: [],
     details: null,
     createdById: ACTOR_ID,

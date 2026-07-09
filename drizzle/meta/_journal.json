@@ -155,6 +155,13 @@
       "when": 1783552375551,
       "tag": "0021_silky_shinko_yamashiro",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1783571556211,
+      "tag": "0022_conscious_speedball",
+      "breakpoints": true
     }
   ]
 }

@@ -28,6 +28,7 @@ function mapRow(row: typeof interactions.$inferSelect): Interaction {
     location: row.location ?? null,
     attendees: row.attendees as MeetingAttendee[],
     summary: row.summary ?? null,
+    preparation: row.preparation ?? null,
     actionItems: row.actionItems as LegacyMeetingActionItem[],
     details: row.details as HearingData | null,
     createdById: row.createdById,
@@ -51,6 +52,7 @@ export async function create(
     location?: string | null;
     attendees: MeetingAttendee[];
     summary?: string | null;
+    preparation?: string | null;
     actionItems: LegacyMeetingActionItem[];
     details?: HearingData | null;
     createdById: string;
@@ -73,6 +75,7 @@ export async function create(
       location: data.location ?? null,
       attendees: data.attendees,
       summary: data.summary ?? null,
+      preparation: data.preparation ?? null,
       actionItems: data.actionItems,
       details: data.details ?? null,
       createdById: data.createdById,
@@ -131,6 +134,7 @@ export async function update(
     location: string | null;
     attendees: MeetingAttendee[];
     summary: string | null;
+    preparation: string | null;
     actionItems: LegacyMeetingActionItem[];
     details: HearingData | null;
     contractId: string | null;

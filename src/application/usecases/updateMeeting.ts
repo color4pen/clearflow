@@ -28,6 +28,7 @@ export async function updateMeeting(data: {
   /** 社外参加者のみ差し替える場合に使う。省略時は既存の社外参加者を保持する。null を指定すると社外参加者をクリアする。 */
   externalAttendees?: MeetingAttendee[];
   summary?: string | null;
+  preparation?: string | null;
   actionItems?: LegacyMeetingActionItem[];
   details?: HearingData | null;
 }): Promise<UpdateMeetingResult> {
@@ -71,6 +72,7 @@ export async function updateMeeting(data: {
           ...(data.location !== undefined && { location: data.location }),
           ...(resolvedAttendees !== undefined && { attendees: resolvedAttendees }),
           ...(data.summary !== undefined && { summary: data.summary }),
+          ...(data.preparation !== undefined && { preparation: data.preparation }),
           ...(data.actionItems !== undefined && { actionItems: data.actionItems }),
           details,
         },

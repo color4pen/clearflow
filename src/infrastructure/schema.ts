@@ -387,6 +387,7 @@ export const interactions = pgTable(
     // Array<{ userId: string | null, contactId: string | null, name: string, isExternal: boolean }>
     attendees: jsonb("attendees").notNull().default([]),
     summary: text("summary"),
+    preparation: text("preparation"),
     // Array<{ description: string, assignee: string, dueDate: string | null, done: boolean }>
     actionItems: jsonb("action_items").notNull().default([]),
     // kind 固有データ（kind=meeting のときは HearingData）

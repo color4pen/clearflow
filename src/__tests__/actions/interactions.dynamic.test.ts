@@ -181,6 +181,7 @@ function makeInteraction(relatedTo: "contract" | "invoice"): Interaction {
     location: null,
     attendees: [],
     summary: "テスト要約",
+    preparation: null,
     actionItems: [],
     details: null,
     createdById: "user-admin",

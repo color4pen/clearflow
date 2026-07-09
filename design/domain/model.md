@@ -12,7 +12,7 @@
 案件における顧客側担当者の役割付与。[[ent-deal]] と [[ent-client-contact]] を参照し、role（key_person / decision_maker / technical / other）をこの案件について定める。同一担当者が案件ごとに異なる役割を持ちうる。
 
 ## 顧客接点 {#ent-interaction}
-顧客との接点の記録。kind（チャネル: meeting / call / email / note）で接触手段を、関連先 relatedTo で文脈を表す。関連先が案件/引合なら [[term-shodan]]（営業文脈、営業ステージ meetingType とヒアリング情報 HearingData を持つ）、契約なら契約調整、請求なら請求調整。[[ent-deal]] / [[ent-inquiry]] / [[ent-contract]] / [[ent-invoice]] / [[ent-client]] のいずれかを関連先として参照する。参加者（社内ユーザーまたは社外）を保持する。
+顧客との接点の記録。kind（チャネル: meeting / call / email / note）で接触手段を、関連先 relatedTo で文脈を表す。関連先が案件/引合なら [[term-shodan]]（営業文脈、営業ステージ meetingType とヒアリング情報 HearingData を持つ）、契約なら契約調整、請求なら請求調整。[[ent-deal]] / [[ent-inquiry]] / [[ent-contract]] / [[ent-invoice]] / [[ent-client]] のいずれかを関連先として参照する。参加者（社内ユーザーまたは社外）を保持する。事前準備（preparation: フリーテキスト、Markdown 対応）を全種別共通で保持する。
 
 ## 顧客 {#ent-client}
 取引先企業。[[ent-inquiry]] と [[ent-deal]] を通じて共有される。企業名・業種・規模・所在地を保持する。

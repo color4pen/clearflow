@@ -121,6 +121,7 @@ function makeMeeting(attendees: MeetingAttendee[]): Interaction {
     location: null,
     attendees,
     summary: "テスト商談",
+    preparation: null,
     actionItems: [],
     details: null,
     createdById: ACTOR_ID,

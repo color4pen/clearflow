@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createMeetingAction } from "@/app/actions/meetings";
-import { FormField, Input, Select, Textarea, SubmitButton, preventEnterSubmit } from "@/app/components";
+import { FormField, Input, Select, Textarea, MarkdownTextarea, SubmitButton, preventEnterSubmit } from "@/app/components";
 import type { LegacyMeetingActionItem, HearingData } from "@/domain/models/interaction";
 
 type ExternalAttendee = {
@@ -40,6 +40,7 @@ const emptyHearingData: HearingData = {
 export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers = [] }: Props) {
   const router = useRouter();
   const [selectedType, setSelectedType] = useState("");
+  const [preparation, setPreparation] = useState("");
   const [internalAttendees, setInternalAttendees] = useState<string[]>([""]);
   const [externalAttendees, setExternalAttendees] = useState<ExternalAttendee[]>([
     { name: "", registerAsContact: false },
@@ -49,6 +50,9 @@ export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers =
 
   const [state, formAction, isPending] = useActionState(
     async (prev: Parameters<typeof createMeetingAction>[0], formData: FormData) => {
+      if (preparation.trim()) {
+        formData.set("preparation", preparation);
+      }
       formData.set("internalAttendees", JSON.stringify(internalAttendees.filter((a) => a.trim())));
       formData.set(
         "externalAttendees",
@@ -301,6 +305,17 @@ export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers =
             + 追加
           </button>
         </div>
+      </div>
+
+      <div className="mt-3">
+        <FormField label="事前準備">
+          <MarkdownTextarea
+            value={preparation}
+            onChange={(e) => setPreparation(e.target.value)}
+            rows={4}
+            placeholder="商談に向けた事前準備メモ（Markdown 記法可）"
+          />
+        </FormField>
       </div>
 
       <div className="mt-3">

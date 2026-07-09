@@ -26,6 +26,7 @@ export async function createMeeting(data: {
   location?: string | null;
   attendees: MeetingAttendee[];
   summary?: string | null;
+  preparation?: string | null;
   actionItems: LegacyMeetingActionItem[];
   details?: HearingData | null;
 }): Promise<CreateMeetingResult> {
@@ -66,6 +67,7 @@ export async function createMeeting(data: {
           location: data.location,
           attendees: data.attendees,
           summary: data.summary,
+          preparation: data.preparation,
           actionItems: data.actionItems,
           details,
           createdById: data.actorId,

@@ -8,6 +8,7 @@ import { MeetingInfoSection } from "./MeetingInfoSection";
 import { MeetingAttendeesSection } from "./MeetingAttendeesSection";
 import { MeetingHearingSection } from "./MeetingHearingSection";
 import { MeetingSummarySection } from "./MeetingSummarySection";
+import { MeetingPreparationSection } from "./MeetingPreparationSection";
 import { MeetingActionItemsSection } from "./MeetingActionItemsSection";
 
 export default async function DealMeetingDetailPage({
@@ -73,8 +74,17 @@ export default async function DealMeetingDetailPage({
         className="grid"
         style={{ gridTemplateColumns: "1.6fr 1fr", gap: "24px" }}
       >
-        {/* 左カラム: 議事録 + ヒアリング情報 */}
+        {/* 左カラム: 事前準備 + 議事録 + ヒアリング情報 */}
         <div className="space-y-6">
+          <SectionCard className="p-3">
+            <MeetingPreparationSection
+              meetingId={meetingId}
+              dealId={id}
+              preparation={meeting.preparation}
+              editable={editable}
+            />
+          </SectionCard>
+
           <SectionCard className="p-3">
             <MeetingSummarySection
               meetingId={meetingId}
