@@ -121,51 +121,49 @@ export function SalesDashboard({
 
       <div className="mt-2 space-y-2">
         {/* Pipeline summary */}
-        <SectionCard className="p-4">
-          <h2 className="text-sm font-semibold text-text-muted mb-2">
-            パイプラインサマリ
-          </h2>
-          <div className="grid grid-cols-8">
-            {pipelineSummary.map((item) => (
+        <div className="grid gap-3 [grid-template-columns:repeat(auto-fill,minmax(150px,1fr))]">
+          {pipelineSummary.map((item) => (
+            <SectionCard key={item.phase} className="p-3">
               <Link
-                key={item.phase}
                 href={`/deals?phase=${item.phase}`}
-                className="block p-3 hover:bg-bg-page text-center border-r border-border"
+                className="block hover:bg-bg-page text-center"
               >
-                <div className="text-xs text-text-muted mb-1">
+                <div className="text-xs text-text-secondary mb-1">
                   {phaseLabels[item.phase] ?? item.phase}
                 </div>
-                <div className="text-xl font-bold text-text">
+                <div className="text-2xl font-bold text-text">
                   {item.count}
-                  <span className="text-sm font-normal ml-0.5">件</span>
+                  <span className="text-xs font-normal ml-0.5">件</span>
                 </div>
-                <div className="text-xs text-text-secondary font-mono">
+                <div className="text-2xs text-text-muted font-mono">
                   ¥{item.totalAmount.toLocaleString("ja-JP")}
                 </div>
               </Link>
-            ))}
-            {/* Total column */}
+            </SectionCard>
+          ))}
+          {/* Total column */}
+          <SectionCard className="p-3">
             <Link
               href="/deals"
-              className="block p-3 hover:bg-bg-page text-center"
+              className="block hover:bg-bg-page text-center"
             >
-              <div className="text-xs text-text-muted mb-1">合計</div>
-              <div className="text-xl font-bold text-text">
+              <div className="text-xs text-text-secondary mb-1">合計</div>
+              <div className="text-2xl font-bold text-text">
                 {totalCount}
-                <span className="text-sm font-normal ml-0.5">件</span>
+                <span className="text-xs font-normal ml-0.5">件</span>
               </div>
-              <div className="text-xs text-text-secondary font-mono">
+              <div className="text-2xs text-text-muted font-mono">
                 ¥{totalAmount.toLocaleString("ja-JP")}
               </div>
             </Link>
-          </div>
-        </SectionCard>
+          </SectionCard>
+        </div>
 
         {/* Main 2-column content */}
         <div className="grid grid-cols-[1.55fr_1fr] gap-6">
           {/* Left: Action items */}
           <SectionCard className="p-4">
-            <h2 className="text-sm font-semibold text-text-muted mb-2 flex items-center gap-1">
+            <h2 className="text-sm font-semibold text-text mb-2 flex items-center gap-1">
               アクション待ちリスト
               <span className="text-xs text-text-secondary font-normal ml-1">
                 {actions.length}件
@@ -286,7 +284,7 @@ export function SalesDashboard({
             {/* Stale deals (manager/admin only) */}
             {staleDeals !== null && (
               <SectionCard className="p-4">
-                <h2 className="text-sm font-semibold text-text-muted mb-2">
+                <h2 className="text-sm font-semibold text-text mb-2">
                   停滞案件リスト
                 </h2>
                 {staleDeals.length === 0 ? (
@@ -335,7 +333,7 @@ export function SalesDashboard({
 
             {/* Recent activities */}
             <SectionCard className="p-4">
-              <h2 className="text-sm font-semibold text-text-muted mb-2">
+              <h2 className="text-sm font-semibold text-text mb-2">
                 直近の活動
               </h2>
               {recentActivities.length === 0 ? (

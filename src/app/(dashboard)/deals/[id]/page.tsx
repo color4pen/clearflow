@@ -15,17 +15,33 @@ import {
   contractTypeLabels,
   meetingTypeLabels,
   contractStatusLabels,
+  phaseLabels,
 } from "@/app/(dashboard)/labels";
 import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
 import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
+import { isActivityFeedEnabled } from "@/lib/activityConfig";
+import type { Interaction } from "@/domain/models/interaction";
 
 const CONTRACT_STATUS_VARIANT: Record<string, StatusBadgeVariant> = {
   active: "green",
   completed: "navy",
   cancelled: "red",
 };
-import { isActivityFeedEnabled } from "@/lib/activityConfig";
-import type { Interaction } from "@/domain/models/interaction";
+
+// deals/page.tsx の PHASE_VARIANT と同期が必要
+const PHASE_VARIANT: Record<string, StatusBadgeVariant> = {
+  hearing: "gray",
+  proposal_prep: "blue",
+  proposed: "blue",
+  negotiation: "blue",
+  won: "green",
+  lost: "red",
+  passed: "gray",
+};
+
+function phaseVariant(phase: string): StatusBadgeVariant {
+  return PHASE_VARIANT[phase] ?? "gray";
+}
 
 export default async function DealDetailPage({
   params,
@@ -66,7 +82,7 @@ export default async function DealDetailPage({
 
   return (
     <div>
-      {/* ヘッダー: パンくず + タイトル */}
+      {/* ヘッダー: パンくず + ヒーロー行 */}
       <div className="mb-3">
         <div className="text-xs text-text-muted mb-0.5">
           <Link href="/deals" className="text-primary underline">
@@ -75,30 +91,31 @@ export default async function DealDetailPage({
           {" > "}
           {deal.title}
         </div>
-        <div className="text-lg font-bold text-text">{deal.title}</div>
-        {deal.estimateRequestId && (
-          <div className="text-xs mt-0.5">
-            <Link
-              href={`/requests/${deal.estimateRequestId}`}
-              className="text-primary underline"
-            >
-              見積承認を表示
-            </Link>
+        <div className="flex items-center gap-2 flex-wrap">
+          <h1 className="text-lg font-bold text-text">{deal.title}</h1>
+          <StatusBadge variant={phaseVariant(deal.phase)}>{phaseLabels[deal.phase] ?? deal.phase}</StatusBadge>
+          <div className="ml-auto flex items-center gap-3">
+            <WatchToggle dealId={deal.id} isWatching={watchStatus.isWatching} />
+            {deal.estimateRequestId && (
+              <Link
+                href={`/requests/${deal.estimateRequestId}`}
+                className="text-primary underline"
+              >
+                見積承認を表示
+              </Link>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {/* フェーズ進捗: 提案準備 → 提案済 → 交渉中 →（受注/失注）を一本化したステッパー */}
       <SectionCard className="px-4 py-3 mb-3">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <DealPhaseStepper
-            dealId={deal.id}
-            phase={deal.phase}
-            canChangePhase={canChangePhase}
-            inquiryId={deal.inquiryId}
-          />
-          <WatchToggle dealId={deal.id} isWatching={watchStatus.isWatching} />
-        </div>
+        <DealPhaseStepper
+          dealId={deal.id}
+          phase={deal.phase}
+          canChangePhase={canChangePhase}
+          inquiryId={deal.inquiryId}
+        />
       </SectionCard>
 
       {/* 2カラムグリッド: 1.5fr : 1fr */}
