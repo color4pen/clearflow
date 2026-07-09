@@ -62,23 +62,37 @@ export function buildAdvertisementSchema(
     }
   }
 
-  // operation 以外の全フィールドをマージする（同名は先勝ち）
-  // nullable なフィールドは .nullable().optional()、それ以外は .optional() を付与する
-  const mergedFields: Record<string, z.ZodTypeAny> = {};
+  // operation 以外の全フィールドをマージする。
+  // type/shape は先勝ち（first-win）、description は全スキーマを通じて最初に見つかった
+  // 非 undefined 値を採用する（先行スキーマに describe がなく後続スキーマにある場合に対応）。
+  // nullable なフィールドは .nullable().optional()、それ以外は .optional() を付与する。
+  const mergedFieldTypes: Record<string, z.ZodTypeAny> = {};
+  const mergedDescriptions: Record<string, string> = {};
   for (const schema of operationSchemas) {
     for (const [key, value] of Object.entries(schema.shape)) {
       if (key === "operation") continue;
-      if (!(key in mergedFields)) {
-        const fieldType = value as z.ZodTypeAny;
+      const fieldType = value as z.ZodTypeAny;
+      if (!(key in mergedFieldTypes)) {
+        mergedFieldTypes[key] = fieldType;
+      }
+      if (!(key in mergedDescriptions)) {
         const description = extractDescription(fieldType);
-        const wrapped = nullableFieldNames.has(key)
-          ? fieldType.nullable().optional()
-          : fieldType.optional();
-        // .nullable() wrapping can bury an existing description inside anyOf;
-        // re-apply it at the top level so MCP agents can discover it.
-        mergedFields[key] = description ? wrapped.describe(description) : wrapped;
+        if (description !== undefined) {
+          mergedDescriptions[key] = description;
+        }
       }
     }
+  }
+
+  const mergedFields: Record<string, z.ZodTypeAny> = {};
+  for (const [key, fieldType] of Object.entries(mergedFieldTypes)) {
+    const description = mergedDescriptions[key];
+    const wrapped = nullableFieldNames.has(key)
+      ? fieldType.nullable().optional()
+      : fieldType.optional();
+    // .nullable() wrapping can bury an existing description inside anyOf;
+    // re-apply it at the top level so MCP agents can discover it.
+    mergedFields[key] = description ? wrapped.describe(description) : wrapped;
   }
 
   return z.object({

@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d78f394a-3814-4758-8414-1fc93485ca8f",
   "createdAt": "2026-07-09T00:00:32.102Z",
-  "updatedAt": "2026-07-09T01:12:13.566Z",
+  "updatedAt": "2026-07-09T01:16:49.294Z",
   "request": {
     "title": "MCP update 系ツールの部分更新を是正（未指定フィールドの保持）",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "regression-gate",
+  "step": "code-fixer",
   "status": "running",
   "branch": "change/mcp-partial-update-d78f394a",
   "error": null,
@@ -69,7 +69,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 44,
+    "historyCount": 48,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -80,7 +80,8 @@
       "code-review": 1,
       "domain-invariants": 1,
       "mcp-conformance": 1,
-      "custom-reviewers": 1
+      "custom-reviewers": 1,
+      "regression-gate": 1
     }
   }
 }
