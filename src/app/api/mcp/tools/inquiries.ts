@@ -34,8 +34,8 @@ const createSchema = z.object({
   clientId: z.string().uuid().optional().describe("顧客ID（UUID）"),
   newClientName: z.string().min(1).optional().describe("新規顧客名 — 顧客を同時作成する場合に指定"),
   title: z.string().min(1, "件名は必須です").describe("件名"),
-  description: z.string().optional(),
-  contactNote: z.string().optional().describe("連絡メモ"),
+  description: z.string().optional().describe("引合の概要説明。Markdown 記法・改行が反映される"),
+  contactNote: z.string().optional().describe("問い合わせ内容・連絡メモ。Markdown 記法・改行が反映される"),
   source: z
     .enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"])
     .describe("問い合わせ元"),
@@ -48,8 +48,8 @@ const updateSchema = z.object({
   operation: z.literal("update"),
   inquiryId: z.string().uuid().describe("引合ID（UUID）"),
   title: z.string().min(1).optional().describe("件名"),
-  description: z.string().nullable().optional(),
-  contactNote: z.string().nullable().optional().describe("連絡メモ"),
+  description: z.string().nullable().optional().describe("引合の概要説明。Markdown 記法・改行が反映される"),
+  contactNote: z.string().nullable().optional().describe("問い合わせ内容・連絡メモ。Markdown 記法・改行が反映される"),
   source: z
     .enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"])
     .optional(),

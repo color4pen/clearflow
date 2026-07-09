@@ -31,7 +31,7 @@ const hearingDataSchema = z.object({
   decisionMaker: z.string().nullable().optional(),
   timeline: z.string().nullable().optional(),
   competitors: z.string().nullable().optional(),
-  notes: z.string().nullable().optional(),
+  notes: z.string().nullable().optional().describe("ヒアリングのメモ・補足事項"),
 });
 
 const legacyActionItemSchema = z.object({
@@ -52,7 +52,7 @@ const createMeetingSchema = z.object({
   location: z.string().optional().describe("場所"),
   internalAttendees: z.array(z.string()).optional(),
   externalAttendees: z.array(z.string()).optional(),
-  summary: z.string().optional().describe("要約"),
+  summary: z.string().optional().describe("議事録・商談要約の本文。Markdown 記法・改行が反映される"),
   actionItems: z.array(legacyActionItemSchema).optional().default([]),
   hearingData: hearingDataSchema.optional(),
 });
@@ -80,7 +80,7 @@ const updateMeetingSchema = z.object({
     .describe(
       "社外参加者の名前リスト。指定した場合のみ外部参加者を差し替える。省略時は既存の外部参加者を保持する（internalAttendees とは独立して部分更新される）。null を指定すると外部参加者をクリアする。"
     ),
-  summary: z.string().nullable().optional().describe("要約"),
+  summary: z.string().nullable().optional().describe("議事録・商談要約の本文。Markdown 記法・改行が反映される"),
   actionItems: z.array(legacyActionItemSchema).optional(),
   hearingData: hearingDataSchema.nullable().optional(),
 });
@@ -88,17 +88,17 @@ const updateMeetingSchema = z.object({
 const recordContractAdjustmentSchema = z.object({
   operation: z.literal("record_contract_adjustment"),
   contractId: z.string().uuid("契約IDが不正です").describe("契約ID（UUID）"),
-  summary: z.string().min(1, "要約は必須です").describe("要約"),
+  summary: z.string().min(1, "要約は必須です").describe("契約調整の要約（必須）"),
   date: dateString.optional().describe("実施日時"),
-  details: z.string().optional().describe("詳細"),
+  details: z.string().optional().describe("補足・詳細情報"),
 });
 
 const recordInvoiceAdjustmentSchema = z.object({
   operation: z.literal("record_invoice_adjustment"),
   invoiceId: z.string().uuid("請求IDが不正です").describe("請求ID（UUID）"),
-  summary: z.string().min(1, "要約は必須です").describe("要約"),
+  summary: z.string().min(1, "要約は必須です").describe("請求調整の要約（必須）"),
   date: dateString.optional().describe("実施日時"),
-  details: z.string().optional().describe("詳細"),
+  details: z.string().optional().describe("補足・詳細情報"),
 });
 
 const interactionsInputSchema = z.discriminatedUnion("operation", [
