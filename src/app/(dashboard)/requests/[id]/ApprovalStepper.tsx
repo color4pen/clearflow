@@ -1,4 +1,6 @@
 import type { ApprovalStep } from "@/domain/models/approvalStep";
+import { stepStatusVariant } from "@/app/(dashboard)/requests/statusUtils";
+import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
 
 type Props = {
   steps: ApprovalStep[];
@@ -40,14 +42,14 @@ function StepIcon({
 }) {
   if (status === "approved") {
     return (
-      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center">
+      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-status-green-text flex items-center justify-center">
         <span className="text-white text-xs font-bold">✓</span>
       </div>
     );
   }
   if (status === "rejected") {
     return (
-      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-red-500 flex items-center justify-center">
+      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-status-red-text flex items-center justify-center">
         <span className="text-white text-xs font-bold">✕</span>
       </div>
     );
@@ -70,7 +72,7 @@ function ConnectorLine({ isCompleted }: { isCompleted: boolean }) {
   return (
     <div className="flex justify-center w-7 flex-shrink-0">
       <div
-        className={`w-0.5 h-6 ${isCompleted ? "bg-emerald-400" : "bg-border"}`}
+        className={`w-0.5 h-6 ${isCompleted ? "bg-status-green-text/70" : "bg-border"}`}
       />
     </div>
   );
@@ -112,7 +114,7 @@ export function ApprovalStepper({ steps, currentStepId }: Props) {
               <div
                 className={[
                   "flex items-start gap-3 rounded-lg p-2",
-                  isCurrent ? "bg-blue-50 border border-blue-200" : "",
+                  isCurrent ? "bg-status-blue-bg border border-status-blue-bg" : "",
                 ].join(" ")}
               >
                 <StepIcon status={step.status} isCurrent={isCurrent} />
@@ -121,20 +123,9 @@ export function ApprovalStepper({ steps, currentStepId }: Props) {
                     <span className="text-xs font-semibold text-text">
                       {step.name ?? step.approverRole}
                     </span>
-                    <span
-                      className={[
-                        "text-[10px] rounded px-1.5 py-0.5",
-                        step.status === "approved"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : step.status === "rejected"
-                            ? "bg-red-100 text-red-700"
-                            : isCurrent
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-bg-toolbar text-text-muted",
-                      ].join(" ")}
-                    >
+                    <StatusBadge variant={stepStatusVariant(step.status)}>
                       {stepStatusLabel(step.status)}
-                    </span>
+                    </StatusBadge>
                   </div>
                   {step.approvedByName && (
                     <p className="text-xs text-text-secondary mt-0.5">

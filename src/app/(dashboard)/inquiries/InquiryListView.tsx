@@ -2,9 +2,17 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { InquiryStatusBadge } from "./InquiryStatusBadge";
+import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
+import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
+import { statusLabels } from "@/app/(dashboard)/labels";
 import { filterInquiries } from "./filterInquiries";
 import type { InquiryRow, TabValue } from "./filterInquiries";
+
+const INQUIRY_STATUS_VARIANT: Record<string, StatusBadgeVariant> = {
+  new: "gray",
+  converted: "green",
+  declined: "gray",
+};
 
 type Props = {
   inquiries: InquiryRow[];
@@ -101,7 +109,7 @@ export function InquiryListView({ inquiries, sources }: Props) {
             <div
               key={row.id}
               className={`grid text-xs border border-border border-t-0 hover:bg-bg-toolbar ${
-                index % 2 === 0 ? "bg-bg-surface" : "bg-[#fafafa]"
+                index % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt"
               }`}
               style={{ gridTemplateColumns: gridCols }}
             >
@@ -127,7 +135,9 @@ export function InquiryListView({ inquiries, sources }: Props) {
 
               {/* ステータス */}
               <div className="px-[14px] py-[10px] flex items-center gap-2">
-                <InquiryStatusBadge status={row.status} />
+                <StatusBadge variant={INQUIRY_STATUS_VARIANT[row.status] ?? "gray"}>
+                  {statusLabels[row.status] ?? row.status}
+                </StatusBadge>
                 {row.status === "converted" && row.dealId && (
                   <Link
                     href={`/deals/${row.dealId}`}

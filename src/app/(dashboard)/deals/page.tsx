@@ -3,8 +3,24 @@ import { auth } from "@/infrastructure/auth";
 import { getPipelineSummary } from "@/application/usecases";
 import { PageToolbar, ToolbarActions, DataTable, SectionCard } from "@/app/components";
 import { phaseLabels, contractTypeLabels } from "@/app/(dashboard)/labels";
+import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
+import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
 import { DealsFilter } from "./DealsFilter";
 import type { DealWithDetails } from "@/domain/models/deal";
+
+const PHASE_VARIANT: Record<string, StatusBadgeVariant> = {
+  hearing: "gray",
+  proposal_prep: "blue",
+  proposed: "blue",
+  negotiation: "blue",
+  won: "green",
+  lost: "red",
+  passed: "gray",
+};
+
+function phaseVariant(phase: string): StatusBadgeVariant {
+  return PHASE_VARIANT[phase] ?? "gray";
+}
 
 export default async function DealsPage({
   searchParams,
@@ -122,7 +138,11 @@ export default async function DealsPage({
               {
                 key: "phase",
                 header: "フェーズ",
-                render: (row) => phaseLabels[row.phase] ?? row.phase,
+                render: (row) => (
+                  <StatusBadge variant={phaseVariant(row.phase)}>
+                    {phaseLabels[row.phase] ?? row.phase}
+                  </StatusBadge>
+                ),
               },
               {
                 key: "contractType",

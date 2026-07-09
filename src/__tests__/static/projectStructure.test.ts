@@ -461,15 +461,15 @@ describe("Multi-stage approval UI", () => {
    * The requests list page must include a "revision" status in its status map,
    * displaying it as "差し戻し" with the orange badge class.
    */
-  it("TC-055: requests list page displays revision status as '差し戻し' with orange badge", async () => {
-    // statusLabel/statusClass moved to statusUtils.ts (T-02 refactoring)
+  it("TC-055: requests list page displays revision status as '差し戻し' with yellow badge", async () => {
+    // statusLabel/statusVariant moved to statusUtils.ts (design-foundation refactoring)
     const content = await readSrc("app/(dashboard)/requests/statusUtils.ts");
     // Must include "revision" in the status label map
     expect(content).toContain("revision");
     // "差し戻し" must be the display label
     expect(content).toContain("差し戻し");
-    // Must apply orange styling for revision status
-    expect(content).toContain("orange");
+    // Must apply yellow styling for revision status (semantic: 注意/保留)
+    expect(content).toContain("yellow");
   });
 });
 

@@ -16,7 +16,8 @@ import {
 import { ActionButtons } from "./ActionButtons";
 import { ApprovalStepper } from "./ApprovalStepper";
 import { SystemOriginBanner } from "./SystemOriginBanner";
-import { statusLabel } from "../statusUtils";
+import { statusLabel, statusVariant } from "../statusUtils";
+import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
 import { SectionCard } from "@/app/components";
 import { getCurrentStep, canApproveWithDelegation } from "@/domain/services/approvalStepService";
 
@@ -84,11 +85,9 @@ export default async function RequestDetailPage({
             <h1 className="text-base font-bold text-text flex-1 min-w-0">
               {request.title}
             </h1>
-            <span
-              className={`rounded-full px-2 py-0.5 text-xs border flex-shrink-0 ${statusBadgeClass(request.status)}`}
-            >
+            <StatusBadge variant={statusVariant(request.status)} className="flex-shrink-0">
               {statusLabel(request.status)}
-            </span>
+            </StatusBadge>
           </div>
           <div className="mt-1.5 flex items-center gap-3 text-xs text-text-muted flex-wrap">
             <span>申請者: {creatorName}</span>
@@ -146,21 +145,3 @@ export default async function RequestDetailPage({
   );
 }
 
-function statusBadgeClass(status: string): string {
-  switch (status) {
-    case "pending":
-      return "bg-amber-50 border-amber-300 text-amber-700";
-    case "approved":
-      return "bg-emerald-50 border-emerald-300 text-emerald-700";
-    case "rejected":
-      return "bg-red-50 border-red-300 text-red-700";
-    case "revision":
-      return "bg-orange-50 border-orange-300 text-orange-700";
-    case "draft":
-      return "bg-blue-50 border-blue-300 text-blue-700";
-    case "expired":
-      return "bg-gray-50 border-gray-300 text-gray-500";
-    default:
-      return "bg-bg-toolbar border-border text-text-muted";
-  }
-}

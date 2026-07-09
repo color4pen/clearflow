@@ -3,77 +3,108 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 :root {
-  --bg-page: #e8e8e8;
+  --bg-page: #f1f5f9;
   --bg-surface: #ffffff;
-  --bg-surface-alt: #f9f9f9;
-  --bg-toolbar: #f5f5f5;
-  --bg-header: #2c3e50;
-  --bg-table-head: #dcdde1;
-  --bg-row-pending: #fdf6e3;
-  --bg-row-revision: #fef0e5;
-  --bg-info: #eef5fb;
-  --bg-success-light: #eef7f1;
+  --bg-surface-alt: #f8fafc;
+  --bg-toolbar: #f8fafc;
+  --bg-header: #0f172a;
+  --bg-table-head: #f8fafc;
+  --bg-row-pending: #fffbeb;
+  --bg-row-revision: #fff7ed;
+  --bg-info: #e8effd;
+  --bg-success-light: #f0fdf4;
 
-  --border: #cccccc;
-  --border-light: #e0e0e0;
-  --border-table-head: #bdc3c7;
-  --border-row-pending: #e8d5a3;
-  --border-row-revision: #f0d0b0;
-  --border-success-light: #cde6d8;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --border-table-head: #e2e8f0;
+  --border-row-pending: #fde68a;
+  --border-row-revision: #fed7aa;
+  --border-success-light: #bbf7d0;
 
-  --text: #2c3e50;
-  --text-secondary: #555555;
-  --text-muted: #7f8c8d;
-  --text-disabled: #95a5a6;
-  --text-placeholder: #aab2b8;
-  --text-on-dark: #ecf0f1;
-  --text-on-dark-secondary: #bdc3c7;
-  --text-on-dark-muted: #7f8c8d;
-  --text-on-dark-disabled: #95a5a6;
-  --text-sidebar-muted: #7f95a8;
+  --text: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  --text-disabled: #cbd5e1;
+  --text-placeholder: #94a3b8;
+  --text-on-dark: #f8fafc;
+  --text-on-dark-secondary: #cbd5e1;
+  --text-on-dark-muted: #94a3b8;
+  --text-on-dark-disabled: #64748b;
+  --text-sidebar-muted: #64748b;
 
-  --theme-primary: #2980b9;
-  --theme-success: #1a8a4a;
-  --theme-warning: #d4880f;
-  --theme-danger: #c0392b;
-  --theme-revision: #d35400;
-  --theme-draft: #2980b9;
-  --theme-expired: #999999;
+  --theme-primary: #1a56db;
+  --theme-success: #16a34a;
+  --theme-warning: #d97706;
+  --theme-danger: #dc2626;
+  --theme-revision: #ea580c;
+  --theme-draft: #1a56db;
+  --theme-expired: #94a3b8;
+
+  /* ステータス系統トークン */
+  --status-gray-text: #6b7280;
+  --status-gray-bg: #f3f4f6;
+  --status-blue-text: #2563eb;
+  --status-blue-bg: #dbeafe;
+  --status-green-text: #16a34a;
+  --status-green-bg: #dcfce7;
+  --status-yellow-text: #d97706;
+  --status-yellow-bg: #fef3c7;
+  --status-red-text: #dc2626;
+  --status-red-bg: #fee2e2;
+  --status-navy-text: #1e3a5f;
+  --status-navy-bg: #dbeafe;
 }
 
 [data-theme="dark"] {
-  --bg-page: #1a1a2e;
-  --bg-surface: #2c2c3e;
-  --bg-surface-alt: #333346;
-  --bg-toolbar: #252538;
-  --bg-header: #16162a;
-  --bg-table-head: #3a3a50;
+  --bg-page: #0f172a;
+  --bg-surface: #1e293b;
+  --bg-surface-alt: #334155;
+  --bg-toolbar: #334155;
+  --bg-header: #020617;
+  --bg-table-head: #334155;
   --bg-row-pending: #3d3520;
   --bg-row-revision: #3d2e20;
+  --bg-info: #172554;
+  --bg-success-light: #14532d;
 
-  --border: #4a4a5e;
-  --border-light: #3a3a50;
-  --border-table-head: #4a4a5e;
+  --border: #334155;
+  --border-light: #293548;
+  --border-table-head: #475569;
   --border-row-pending: #5a4a20;
   --border-row-revision: #5a3a20;
+  --border-success-light: #166534;
 
-  --text: #e0e0e8;
-  --text-secondary: #b0b0c0;
-  --text-muted: #8888a0;
-  --text-disabled: #606078;
-  --text-placeholder: #555570;
-  --text-on-dark: #e0e0e8;
-  --text-on-dark-secondary: #b0b0c0;
-  --text-on-dark-muted: #8888a0;
-  --text-on-dark-disabled: #606078;
+  --text: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-disabled: #475569;
+  --text-placeholder: #475569;
+  --text-on-dark: #f8fafc;
+  --text-on-dark-secondary: #cbd5e1;
+  --text-on-dark-muted: #94a3b8;
+  --text-on-dark-disabled: #64748b;
 
-  --theme-primary: #5ba3d9;
-  --theme-success: #3cb371;
-  --theme-warning: #e6a530;
-  --theme-danger: #e74c3c;
-  --theme-revision: #e67e22;
-  --theme-draft: #5ba3d9;
-  --theme-expired: #707088;
+  --theme-primary: #60a5fa;
+  --theme-success: #4ade80;
+  --theme-warning: #fbbf24;
+  --theme-danger: #f87171;
+  --theme-revision: #fb923c;
+  --theme-draft: #60a5fa;
+  --theme-expired: #64748b;
+
+  /* ステータス系統トークン（ダーク） */
+  --status-gray-text: #d1d5db;
+  --status-gray-bg: #374151;
+  --status-blue-text: #93c5fd;
+  --status-blue-bg: #1e3a8a;
+  --status-green-text: #86efac;
+  --status-green-bg: #14532d;
+  --status-yellow-text: #fcd34d;
+  --status-yellow-bg: #78350f;
+  --status-red-text: #fca5a5;
+  --status-red-bg: #7f1d1d;
+  --status-navy-text: #bfdbfe;
+  --status-navy-bg: #1e3a5f;
 }
 
 @theme inline {
@@ -113,6 +144,20 @@
   --color-revision: var(--theme-revision);
   --color-draft: var(--theme-draft);
   --color-expired: var(--theme-expired);
+
+  /* ステータス系統 */
+  --color-status-gray-text: var(--status-gray-text);
+  --color-status-gray-bg: var(--status-gray-bg);
+  --color-status-blue-text: var(--status-blue-text);
+  --color-status-blue-bg: var(--status-blue-bg);
+  --color-status-green-text: var(--status-green-text);
+  --color-status-green-bg: var(--status-green-bg);
+  --color-status-yellow-text: var(--status-yellow-text);
+  --color-status-yellow-bg: var(--status-yellow-bg);
+  --color-status-red-text: var(--status-red-text);
+  --color-status-red-bg: var(--status-red-bg);
+  --color-status-navy-text: var(--status-navy-text);
+  --color-status-navy-bg: var(--status-navy-bg);
 
   --font-sans: var(--font-noto-sans-jp);
   --font-mono: var(--font-ibm-plex-mono);

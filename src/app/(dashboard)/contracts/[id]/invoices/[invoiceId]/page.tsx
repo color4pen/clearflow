@@ -5,6 +5,15 @@ import { getInvoice, listInteractionsByInvoice } from "@/application/usecases";
 import { canPerform } from "@/domain/authorization";
 import { SectionCard } from "@/app/components";
 import { invoiceStatusLabels } from "@/app/(dashboard)/labels";
+import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
+import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
+
+const INVOICE_STATUS_VARIANT: Record<string, StatusBadgeVariant> = {
+  scheduled: "gray",
+  invoiced: "blue",
+  paid: "green",
+  overdue: "red",
+};
 import { InvoiceActions } from "./InvoiceActions";
 import { InvoiceInteractionSection } from "./InvoiceInteractionSection";
 
@@ -69,13 +78,9 @@ export default async function InvoiceDetailPage({
 
             <dt className="text-text-muted">ステータス</dt>
             <dd className="text-text">
-              <span className={
-                invoice.status === "invoiced" ? "text-primary" :
-                invoice.status === "paid" ? "text-success" :
-                invoice.status === "overdue" ? "text-danger" : ""
-              }>
+              <StatusBadge variant={INVOICE_STATUS_VARIANT[invoice.status] ?? "gray"}>
                 {invoiceStatusLabels[invoice.status] ?? invoice.status}
-              </span>
+              </StatusBadge>
             </dd>
 
             {invoice.notes && (

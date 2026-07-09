@@ -1,49 +1,49 @@
 /**
  * statusUtils unit tests
  *
- * TC-008: statusClass 関数の各ステータスに対する戻り値を検証する
+ * TC-008: statusVariant 関数の各ステータスに対する戻り値を検証する
  * TC-011: statusRowClass 関数の各ステータスに対する戻り値を検証する
- * TC-012: stepStatusLabel / stepStatusClass がエクスポートされており正しく動作する
+ * TC-012: stepStatusLabel / stepStatusVariant がエクスポートされており正しく動作する
  */
 
 import { describe, it, expect } from "bun:test";
 import {
-  statusClass,
+  statusVariant,
   statusRowClass,
   stepStatusLabel,
-  stepStatusClass,
+  stepStatusVariant,
 } from "@/app/(dashboard)/requests/statusUtils";
 
 // ---------------------------------------------------------------------------
-// TC-008: statusClass — 各ステータスの色クラスが正しくマッピングされている
+// TC-008: statusVariant — 各ステータスの variant が正しくマッピングされている
 // ---------------------------------------------------------------------------
 
-describe("statusUtils — statusClass", () => {
+describe("statusUtils — statusVariant", () => {
   /**
-   * TC-008: 各ステータスの色クラスが正しくマッピングされている
+   * TC-008: 各ステータスの variant が正しくマッピングされている
    */
-  it("TC-008: draft returns text-[#2980b9]", () => {
-    expect(statusClass("draft")).toBe("text-[#2980b9]");
+  it("TC-008: draft returns gray", () => {
+    expect(statusVariant("draft")).toBe("gray");
   });
 
-  it("TC-008: pending returns text-[#d4880f] font-bold", () => {
-    expect(statusClass("pending")).toBe("text-[#d4880f] font-bold");
+  it("TC-008: pending returns yellow", () => {
+    expect(statusVariant("pending")).toBe("yellow");
   });
 
-  it("TC-008: approved returns text-[#1a8a4a]", () => {
-    expect(statusClass("approved")).toBe("text-[#1a8a4a]");
+  it("TC-008: approved returns green", () => {
+    expect(statusVariant("approved")).toBe("green");
   });
 
-  it("TC-008: rejected returns text-[#c0392b]", () => {
-    expect(statusClass("rejected")).toBe("text-[#c0392b]");
+  it("TC-008: rejected returns red", () => {
+    expect(statusVariant("rejected")).toBe("red");
   });
 
-  it("TC-008: revision returns text-[#d35400] font-bold", () => {
-    expect(statusClass("revision")).toBe("text-[#d35400] font-bold");
+  it("TC-008: revision returns yellow", () => {
+    expect(statusVariant("revision")).toBe("yellow");
   });
 
-  it("TC-008: expired returns text-[#999999]", () => {
-    expect(statusClass("expired")).toBe("text-[#999999]");
+  it("TC-008: expired returns gray", () => {
+    expect(statusVariant("expired")).toBe("gray");
   });
 });
 
@@ -55,12 +55,12 @@ describe("statusUtils — statusRowClass", () => {
   /**
    * TC-011: statusRowClass が正しいクラスを返す
    */
-  it("TC-011: pending returns bg-amber-50", () => {
-    expect(statusRowClass("pending")).toBe("bg-amber-50");
+  it("TC-011: pending returns bg-bg-row-pending", () => {
+    expect(statusRowClass("pending")).toBe("bg-bg-row-pending");
   });
 
-  it("TC-011: revision returns bg-orange-50", () => {
-    expect(statusRowClass("revision")).toBe("bg-orange-50");
+  it("TC-011: revision returns bg-bg-row-revision", () => {
+    expect(statusRowClass("revision")).toBe("bg-bg-row-revision");
   });
 
   it("TC-011: approved returns empty string", () => {
@@ -77,12 +77,12 @@ describe("statusUtils — statusRowClass", () => {
 });
 
 // ---------------------------------------------------------------------------
-// TC-012: stepStatusLabel / stepStatusClass がエクスポートされている
+// TC-012: stepStatusLabel / stepStatusVariant がエクスポートされている
 // ---------------------------------------------------------------------------
 
-describe("statusUtils — stepStatusLabel and stepStatusClass", () => {
+describe("statusUtils — stepStatusLabel and stepStatusVariant", () => {
   /**
-   * TC-012: stepStatusLabel / stepStatusClass がエクスポートされており
+   * TC-012: stepStatusLabel / stepStatusVariant がエクスポートされており
    *         ApprovalStepStatus を引数として受け付ける
    */
   it("TC-012: stepStatusLabel is exported and returns correct Japanese labels", () => {
@@ -92,10 +92,10 @@ describe("statusUtils — stepStatusLabel and stepStatusClass", () => {
     expect(stepStatusLabel("rejected")).toBe("差し戻し");
   });
 
-  it("TC-012: stepStatusClass is exported and returns correct CSS classes", () => {
-    expect(typeof stepStatusClass).toBe("function");
-    expect(stepStatusClass("pending")).toBe("text-amber-700 font-medium");
-    expect(stepStatusClass("approved")).toBe("text-emerald-700 font-medium");
-    expect(stepStatusClass("rejected")).toBe("text-orange-600 font-medium");
+  it("TC-012: stepStatusVariant is exported and returns correct variant values", () => {
+    expect(typeof stepStatusVariant).toBe("function");
+    expect(stepStatusVariant("pending")).toBe("yellow");
+    expect(stepStatusVariant("approved")).toBe("green");
+    expect(stepStatusVariant("rejected")).toBe("yellow");
   });
 });

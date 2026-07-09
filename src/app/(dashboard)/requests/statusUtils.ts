@@ -1,5 +1,6 @@
 import type { RequestStatus } from "@/domain/models/request";
 import type { ApprovalStepStatus } from "@/domain/models/approvalStep";
+import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
 
 export function statusLabel(status: RequestStatus): string {
   const labels: Record<RequestStatus, string> = {
@@ -13,16 +14,16 @@ export function statusLabel(status: RequestStatus): string {
   return labels[status];
 }
 
-export function statusClass(status: RequestStatus): string {
-  const classes: Record<RequestStatus, string> = {
-    draft: "text-[#2980b9]",
-    pending: "text-[#d4880f] font-bold",
-    approved: "text-[#1a8a4a]",
-    rejected: "text-[#c0392b]",
-    revision: "text-[#d35400] font-bold",
-    expired: "text-[#999999]",
+export function statusVariant(status: RequestStatus): StatusBadgeVariant {
+  const variants: Record<RequestStatus, StatusBadgeVariant> = {
+    draft: "gray",
+    pending: "yellow",
+    approved: "green",
+    rejected: "red",
+    revision: "yellow",
+    expired: "gray",
   };
-  return classes[status];
+  return variants[status];
 }
 
 export function stepStatusLabel(status: ApprovalStepStatus): string {
@@ -34,17 +35,17 @@ export function stepStatusLabel(status: ApprovalStepStatus): string {
   return labels[status];
 }
 
-export function stepStatusClass(status: ApprovalStepStatus): string {
-  const classes: Record<ApprovalStepStatus, string> = {
-    pending: "text-amber-700 font-medium",
-    approved: "text-emerald-700 font-medium",
-    rejected: "text-orange-600 font-medium",
+export function stepStatusVariant(status: ApprovalStepStatus): StatusBadgeVariant {
+  const variants: Record<ApprovalStepStatus, StatusBadgeVariant> = {
+    pending: "yellow",
+    approved: "green",
+    rejected: "yellow",
   };
-  return classes[status];
+  return variants[status];
 }
 
 export function statusRowClass(status: RequestStatus): string {
-  if (status === "pending") return "bg-amber-50";
-  if (status === "revision") return "bg-orange-50";
+  if (status === "pending") return "bg-bg-row-pending";
+  if (status === "revision") return "bg-bg-row-revision";
   return "";
 }

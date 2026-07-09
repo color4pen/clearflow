@@ -4,7 +4,7 @@ import { listRequests, listOrganizationUsers } from "@/application/usecases";
 import { bulkApproveAction } from "@/app/actions/requests";
 import { BulkApprovalPanel } from "./BulkApprovalPanel";
 import { RequestTabs } from "./RequestTabs";
-import { statusLabel, statusClass } from "./statusUtils";
+import { statusLabel, statusVariant } from "./statusUtils";
 
 type Tab = "action-required" | "my-requests" | "all";
 
@@ -77,7 +77,7 @@ export default async function RequestsPage({
   return (
     <div>
       <div className="flex items-center justify-between bg-bg-toolbar border border-border px-2 py-1 mb-0">
-        <span className="text-sm font-bold text-[#333333]">申請管理</span>
+        <span className="text-sm font-bold text-text">申請管理</span>
         <div className="flex items-center gap-2">
           <Link href="/requests/new" className="text-xs text-primary underline">[新規作成]</Link>
         </div>
@@ -104,7 +104,7 @@ export default async function RequestsPage({
             title: r.title,
             status: r.status,
             statusText: statusLabel(r.status),
-            statusClass: statusClass(r.status),
+            statusVariant: statusVariant(r.status),
             creatorId: r.creatorId,
             creatorName: userNameMap.get(r.creatorId) ?? r.creatorId.slice(0, 8),
             createdAt: r.createdAt,
