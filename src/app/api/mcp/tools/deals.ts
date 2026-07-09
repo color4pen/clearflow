@@ -42,7 +42,7 @@ const createSchema = z.object({
   inquiryId: z.string().uuid().optional().describe("引合ID（UUID）"),
   clientId: z.string().uuid().optional().describe("顧客ID（UUID）"),
   title: z.string().min(1, "案件名は必須です").describe("案件名"),
-  description: z.string().optional(),
+  description: z.string().optional().describe("案件の概要説明"),
   estimatedAmount: z.number().int().optional().describe("見積金額（整数、円）"),
   estimatedStartDate: z.string().optional().describe("見積開始日"),
   estimatedEndDate: z.string().optional().describe("見積終了日"),
@@ -52,14 +52,14 @@ const createSchema = z.object({
     .describe("quasi_delegation=準委任, fixed_price=請負, ses=SES"),
   assigneeId: z.string().uuid().optional().describe("営業担当ID（UUID）"),
   technicalLeadId: z.string().uuid().optional().describe("技術担当ID（UUID）"),
-  notes: z.string().optional(),
+  notes: z.string().optional().describe("案件の備考・共有メモ。Markdown 記法・改行が反映される"),
 });
 
 const updateSchema = z.object({
   operation: z.literal("update"),
   dealId: z.string().uuid().describe("案件ID（UUID）"),
   title: z.string().min(1).optional().describe("案件名"),
-  description: z.string().nullable().optional(),
+  description: z.string().nullable().optional().describe("案件の概要説明"),
   estimatedAmount: z.number().int().nullable().optional().describe("見積金額（整数、円）"),
   estimatedStartDate: z.string().nullable().optional().describe("見積開始日"),
   estimatedEndDate: z.string().nullable().optional().describe("見積終了日"),
@@ -70,7 +70,7 @@ const updateSchema = z.object({
     .describe("quasi_delegation=準委任, fixed_price=請負, ses=SES"),
   assigneeId: z.string().uuid().nullable().optional().describe("営業担当ID（UUID）"),
   technicalLeadId: z.string().uuid().nullable().optional().describe("技術担当ID（UUID）"),
-  notes: z.string().nullable().optional(),
+  notes: z.string().nullable().optional().describe("案件の備考・共有メモ。Markdown 記法・改行が反映される"),
 });
 
 const updatePhaseSchema = z.object({
