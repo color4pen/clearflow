@@ -99,3 +99,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/mcp-inquiry-convert/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-09T02:33:11.707Z","endedAt":"2026-07-09T02:33:13.228Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-07-09T02:33:13.228Z","outputs":[{"path":"specrunner/changes/mcp-inquiry-convert/pr-create-result.md","hash":"sha256:9f1f4e97f3aabc71b90fff0d6eb2f3d367b8c721efd33266da9cf7db2df69cca"}],"inputs":[{"path":"feat/mcp-inquiry-convert-c405cb55","hash":null}]}
 {"type":"transition","ts":"2026-07-09T02:33:13.239Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-07-09T02:35:29.079Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}
