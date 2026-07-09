@@ -53,6 +53,7 @@ const createMeetingSchema = z.object({
   internalAttendees: z.array(z.string()).optional(),
   externalAttendees: z.array(z.string()).optional(),
   summary: z.string().optional().describe("議事録・商談要約の本文。Markdown 記法・改行が反映される"),
+  preparation: z.string().optional().describe("商談の事前準備メモ。Markdown 記法・改行が反映される"),
   actionItems: z.array(legacyActionItemSchema).optional().default([]),
   hearingData: hearingDataSchema.optional(),
 });
@@ -81,6 +82,7 @@ const updateMeetingSchema = z.object({
       "社外参加者の名前リスト。指定した場合のみ外部参加者を差し替える。省略時は既存の外部参加者を保持する（internalAttendees とは独立して部分更新される）。null を指定すると外部参加者をクリアする。"
     ),
   summary: z.string().nullable().optional().describe("議事録・商談要約の本文。Markdown 記法・改行が反映される"),
+  preparation: z.string().nullable().optional().describe("商談の事前準備メモ。Markdown 記法・改行が反映される"),
   actionItems: z.array(legacyActionItemSchema).optional(),
   hearingData: hearingDataSchema.nullable().optional(),
 });
@@ -186,6 +188,7 @@ export function registerInteractionsTools(server: McpServer): void {
               location: typedArgs.location ?? null,
               attendees,
               summary: typedArgs.summary ?? null,
+              preparation: typedArgs.preparation ?? null,
               actionItems: typedArgs.actionItems ?? [],
               details: hearingData ?? null,
             });
@@ -260,6 +263,7 @@ export function registerInteractionsTools(server: McpServer): void {
               internalAttendees,
               externalAttendees,
               summary: typedArgs.summary,
+              preparation: typedArgs.preparation,
               actionItems: typedArgs.actionItems,
               details,
             });

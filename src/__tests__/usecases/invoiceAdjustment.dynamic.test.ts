@@ -100,6 +100,7 @@ function makeInteraction(overrides: Partial<Interaction> = {}): Interaction {
     location: null,
     attendees: [],
     summary: "請求金額の調整",
+    preparation: null,
     actionItems: [],
     details: null,
     createdById: ACTOR_ID,

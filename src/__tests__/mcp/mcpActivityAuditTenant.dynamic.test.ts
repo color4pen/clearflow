@@ -184,6 +184,7 @@ const mockMeeting: Interaction = {
   location: null,
   attendees: [],
   summary: null,
+  preparation: null,
   actionItems: [],
   details: null,
   createdById: "user-A",

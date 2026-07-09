@@ -52,6 +52,8 @@ export type Interaction = {
   location: string | null;
   attendees: MeetingAttendee[];
   summary: string | null;
+  /** 商談の事前準備メモ。Markdown 対応。全商談種別で共通。 */
+  preparation: string | null;
   /** レガシー JSONB フィールド。action_items テーブルに移行済み。 */
   actionItems: LegacyMeetingActionItem[];
   /** kind 固有データ。現時点では kind=meeting のみ対象（HearingData）。 */

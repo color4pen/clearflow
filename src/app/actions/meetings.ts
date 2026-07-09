@@ -38,6 +38,7 @@ const createMeetingSchema = z.object({
   internalAttendees: z.array(z.string()).optional().default([]),
   externalAttendees: z.array(z.string()).optional().default([]),
   summary: z.string().optional(),
+  preparation: z.string().optional(),
   actionItems: z.array(actionItemSchema).optional().default([]),
   hearingData: hearingDataSchema.optional(),
   contactRegistrations: z.array(contactRegistrationSchema).optional().default([]),
@@ -149,6 +150,7 @@ export async function createMeetingAction(
     internalAttendees,
     externalAttendees,
     summary: formData.get("summary") || undefined,
+    preparation: formData.get("preparation") || undefined,
     actionItems,
     hearingData,
     contactRegistrations,
@@ -190,6 +192,7 @@ export async function createMeetingAction(
     location: parsed.data.location ?? null,
     attendees,
     summary: parsed.data.summary ?? null,
+    preparation: parsed.data.preparation ?? null,
     actionItems: parsed.data.actionItems,
     details: parsed.data.hearingData ?? null,
   });
@@ -229,6 +232,7 @@ const updateMeetingSchema = z.object({
   internalAttendees: z.array(z.string()).optional(),
   externalAttendees: z.array(z.string()).optional(),
   summary: z.string().nullable().optional(),
+  preparation: z.string().nullable().optional(),
   actionItems: z.array(actionItemSchema).optional(),
   hearingData: hearingDataSchema.nullable().optional(),
 });
@@ -311,6 +315,7 @@ export async function updateMeetingAction(
     }
   }
 
+  const preparationRaw = formData.get("preparation");
   const parsed = updateMeetingSchema.safeParse({
     meetingId: formData.get("meetingId"),
     type: formData.get("type") || undefined,
@@ -319,6 +324,7 @@ export async function updateMeetingAction(
     internalAttendees,
     externalAttendees,
     summary: formData.get("summary") ?? undefined,
+    preparation: preparationRaw !== null ? preparationRaw : undefined,
     actionItems,
     hearingData,
   });
@@ -354,6 +360,7 @@ export async function updateMeetingAction(
     location: parsed.data.location,
     attendees,
     summary: parsed.data.summary,
+    preparation: parsed.data.preparation,
     actionItems: parsed.data.actionItems,
     details: parsed.data.hearingData,
   });

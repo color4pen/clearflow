@@ -61,6 +61,7 @@ function makeInteraction(id: string, overrides: Partial<Interaction> = {}): Inte
     location: null,
     attendees: [],
     summary: `やり取り ${id}`,
+    preparation: null,
     actionItems: [],
     details: null,
     createdById: "actor-001",

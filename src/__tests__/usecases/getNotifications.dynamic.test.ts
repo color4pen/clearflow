@@ -436,6 +436,7 @@ describe("デュアルターゲットテスト: interaction と meeting の両 t
         location: null,
         attendees: [],
         summary: null,
+        preparation: null,
         actionItems: [],
         details: null,
         createdById: OTHER_USER_ID,
