@@ -7,6 +7,7 @@
 - [ ] `PHASE_VARIANT` 定数（hearing=gray / proposal_prep=blue / proposed=blue / negotiation=blue / won=green / lost=red / passed=gray）を `deals/[id]/page.tsx` のモジュールスコープに追加する
 - [ ] `phaseVariant(phase: string): StatusBadgeVariant` ヘルパー関数を追加する（`PHASE_VARIANT[phase] ?? "gray"`）
 - [ ] `StatusBadgeVariant` 型のインポートを `StatusBadge` から追加する（既存の `StatusBadge` インポートを拡張）
+- [ ] `phaseLabels` を `labels.ts` からのインポートに追加する（既存の `contractTypeLabels / meetingTypeLabels / contractStatusLabels` インポートを拡張）
 - [ ] 「deals/page.tsx の PHASE_VARIANT と同期が必要」である旨のコードコメントを定数に添える
 
 **Acceptance Criteria**:
