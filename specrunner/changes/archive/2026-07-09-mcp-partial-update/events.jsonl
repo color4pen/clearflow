@@ -110,3 +110,4 @@
 {"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/mcp-partial-update/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-09T01:29:39.276Z","endedAt":"2026-07-09T01:29:40.976Z"}
 {"type":"lineage","step":"pr-create","ts":"2026-07-09T01:29:40.976Z","outputs":[{"path":"specrunner/changes/mcp-partial-update/pr-create-result.md","hash":"sha256:ab95c1cb10c93b75091792eda331b63dde61e55493c43bd72ec21d720f024d73"}],"inputs":[{"path":"change/mcp-partial-update-d78f394a","hash":null}]}
 {"type":"transition","ts":"2026-07-09T01:29:40.983Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}
+{"type":"transition","ts":"2026-07-09T01:32:41.660Z","step":"archive","status":"ok","message":"awaiting-archive → archived: change archived"}

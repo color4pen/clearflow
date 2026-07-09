@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d78f394a-3814-4758-8414-1fc93485ca8f",
   "createdAt": "2026-07-09T00:00:32.102Z",
-  "updatedAt": "2026-07-09T01:29:40.983Z",
+  "updatedAt": "2026-07-09T01:32:41.660Z",
   "request": {
     "title": "MCP update 系ツールの部分更新を是正（未指定フィールドの保持）",
     "type": "spec-change",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "change/mcp-partial-update-d78f394a",
   "error": null,
   "pipelineId": "standard",
@@ -44,7 +44,11 @@
       ]
     }
   ],
-  "resumePoint": null,
+  "resumePoint": {
+    "step": "pr-create",
+    "reason": "signal",
+    "iterationsExhausted": 0
+  },
   "reviewerStatuses": [
     {
       "name": "domain-invariants",
@@ -74,7 +78,7 @@
     "createdAt": "2026-07-09T01:29:40.975Z"
   },
   "_journal": {
-    "historyCount": 77,
+    "historyCount": 78,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
