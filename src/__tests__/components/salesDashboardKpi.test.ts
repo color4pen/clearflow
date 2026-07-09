@@ -40,11 +40,38 @@ describe("SalesDashboard.tsx — h2 色統一", () => {
     const content = await readSrc("app/(dashboard)/dashboard/SalesDashboard.tsx");
     expect(content).not.toContain("text-sm font-semibold text-text-muted");
   });
+
+  // TC-017: h2 文言の不変性
+  it("h2 文言「アクション待ちリスト」が存在する", async () => {
+    const content = await readSrc("app/(dashboard)/dashboard/SalesDashboard.tsx");
+    expect(content).toContain("アクション待ちリスト");
+  });
+
+  it("h2 文言「停滞案件リスト」が存在する", async () => {
+    const content = await readSrc("app/(dashboard)/dashboard/SalesDashboard.tsx");
+    expect(content).toContain("停滞案件リスト");
+  });
+
+  it("h2 文言「直近の活動」が存在する", async () => {
+    const content = await readSrc("app/(dashboard)/dashboard/SalesDashboard.tsx");
+    expect(content).toContain("直近の活動");
+  });
 });
 
 describe("SalesDashboard.tsx — ハードコード排除", () => {
+  // TC-018: ハードコード hex クラスが全パターンで存在しない
   it("text-[# 形式のハードコード hex クラスが存在しない", async () => {
     const content = await readSrc("app/(dashboard)/dashboard/SalesDashboard.tsx");
     expect(content).not.toContain("text-[#");
+  });
+
+  it("bg-[# 形式のハードコード hex クラスが存在しない", async () => {
+    const content = await readSrc("app/(dashboard)/dashboard/SalesDashboard.tsx");
+    expect(content).not.toContain("bg-[#");
+  });
+
+  it("border-[# 形式のハードコード hex クラスが存在しない", async () => {
+    const content = await readSrc("app/(dashboard)/dashboard/SalesDashboard.tsx");
+    expect(content).not.toContain("border-[#");
   });
 });
