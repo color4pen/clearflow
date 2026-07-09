@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "2b87610d-f12a-4482-8141-13315d061a36",
   "createdAt": "2026-07-09T04:06:07.822Z",
-  "updatedAt": "2026-07-09T04:43:03.502Z",
+  "updatedAt": "2026-07-09T04:48:52.045Z",
   "request": {
     "title": "商談（interaction）に汎用「事前準備」フィールドを追加",
     "type": "new-feature",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-review",
+  "step": "code-fixer",
   "status": "running",
   "branch": "feat/interaction-preparation-field-2b87610d",
   "error": null,
@@ -46,14 +46,15 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 30,
+    "historyCount": 34,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
       "spec-review": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 1,
+      "code-review": 1
     }
   }
 }
