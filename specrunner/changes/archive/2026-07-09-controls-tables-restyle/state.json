@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "298d49db-a016-4bac-90da-b9b6f264f0a4",
   "createdAt": "2026-07-09T12:49:32.541Z",
-  "updatedAt": "2026-07-09T14:03:05.327Z",
+  "updatedAt": "2026-07-09T14:09:19.150Z",
   "request": {
     "title": "操作系とテーブルの再スタイル（ボタン階層・入力欄・期限表示の統一）",
     "type": "refactoring",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "refactor/controls-tables-restyle-298d49db",
   "error": null,
   "pipelineId": "standard",
@@ -44,7 +44,11 @@
       ]
     }
   ],
-  "resumePoint": null,
+  "resumePoint": {
+    "step": "pr-create",
+    "reason": "signal",
+    "iterationsExhausted": 0
+  },
   "reviewerStatuses": [
     {
       "name": "domain-invariants",
@@ -74,7 +78,7 @@
     "createdAt": "2026-07-09T14:03:05.316Z"
   },
   "_journal": {
-    "historyCount": 71,
+    "historyCount": 72,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
