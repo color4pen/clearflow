@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "298d49db-a016-4bac-90da-b9b6f264f0a4",
   "createdAt": "2026-07-09T12:49:32.541Z",
-  "updatedAt": "2026-07-09T14:02:38.219Z",
+  "updatedAt": "2026-07-09T14:03:05.327Z",
   "request": {
     "title": "操作系とテーブルの再スタイル（ボタン階層・入力欄・期限表示の統一）",
     "type": "refactoring",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "refactor/controls-tables-restyle-298d49db",
   "error": null,
   "pipelineId": "standard",
@@ -68,8 +68,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/175",
+    "number": 175,
+    "createdAt": "2026-07-09T14:03:05.316Z"
+  },
   "_journal": {
-    "historyCount": 66,
+    "historyCount": 71,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -83,7 +88,9 @@
       "mcp-conformance": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
