@@ -15,21 +15,23 @@ export async function updatePolicy(data: {
   id: string;
   organizationId: string;
   actorId: string;
-  name: string;
+  name?: string;
   description?: string | null;
-  triggerAction: string;
+  triggerAction?: string;
   conditionField?: string | null;
   conditionOperator?: ConditionOperator | null;
   conditionValue?: string | null;
-  templateId: string;
+  templateId?: string;
 }): Promise<UpdatePolicyResult> {
-  // Validate that the template belongs to this organization (cross-tenant guard)
-  const template = await approvalTemplateRepository.findById(
-    data.templateId,
-    data.organizationId
-  );
-  if (!template) {
-    return { ok: false, reason: "指定されたテンプレートが見つかりません" };
+  // templateId が指定された場合のみ、テンプレートの組織帰属を検証する（クロステナントガード）
+  if (data.templateId !== undefined) {
+    const template = await approvalTemplateRepository.findById(
+      data.templateId,
+      data.organizationId
+    );
+    if (!template) {
+      return { ok: false, reason: "指定されたテンプレートが見つかりません" };
+    }
   }
 
   try {
@@ -38,13 +40,13 @@ export async function updatePolicy(data: {
         data.id,
         data.organizationId,
         {
-          name: data.name,
-          description: data.description ?? null,
-          triggerAction: data.triggerAction,
-          conditionField: data.conditionField ?? null,
-          conditionOperator: data.conditionOperator ?? null,
-          conditionValue: data.conditionValue ?? null,
-          templateId: data.templateId,
+          ...(data.name !== undefined && { name: data.name }),
+          ...(data.description !== undefined && { description: data.description }),
+          ...(data.triggerAction !== undefined && { triggerAction: data.triggerAction }),
+          ...(data.conditionField !== undefined && { conditionField: data.conditionField }),
+          ...(data.conditionOperator !== undefined && { conditionOperator: data.conditionOperator }),
+          ...(data.conditionValue !== undefined && { conditionValue: data.conditionValue }),
+          ...(data.templateId !== undefined && { templateId: data.templateId }),
         },
         tx
       );
@@ -58,7 +60,10 @@ export async function updatePolicy(data: {
           targetId: data.id,
           actorId: data.actorId,
           organizationId: data.organizationId,
-          metadata: { name: data.name, triggerAction: data.triggerAction },
+          metadata: {
+            ...(data.name !== undefined && { name: data.name }),
+            ...(data.triggerAction !== undefined && { triggerAction: data.triggerAction }),
+          },
         },
         tx
       );

@@ -3,6 +3,22 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { toToolError } from "./errors";
 
 /**
+ * Zod v4 型から description を取り出す。
+ * Zod v4 では .describe() はラッパー型オブジェクトの直属 .description プロパティに設定される。
+ * .nullable().optional() 等でラップされた後でも元の description を保持するために使う。
+ */
+function extractDescription(type: z.ZodTypeAny): string | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const desc = (type as any).description;
+  if (typeof desc === "string") return desc;
+  // フォールバック: inner type を再帰確認（古い Zod v4 バージョン等への安全策）
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const innerType = (type as any)._zod?.def?.innerType as z.ZodTypeAny | undefined;
+  if (innerType) return extractDescription(innerType);
+  return undefined;
+}
+
+/**
  * Zod v4 フィールドが null を許容するか再帰的にチェックする。
  * ZodNullable、または ZodOptional の内側が ZodNullable の場合に true を返す。
  */
@@ -54,9 +70,13 @@ export function buildAdvertisementSchema(
       if (key === "operation") continue;
       if (!(key in mergedFields)) {
         const fieldType = value as z.ZodTypeAny;
-        mergedFields[key] = nullableFieldNames.has(key)
+        const description = extractDescription(fieldType);
+        const wrapped = nullableFieldNames.has(key)
           ? fieldType.nullable().optional()
           : fieldType.optional();
+        // .nullable() wrapping can bury an existing description inside anyOf;
+        // re-apply it at the top level so MCP agents can discover it.
+        mergedFields[key] = description ? wrapped.describe(description) : wrapped;
       }
     }
   }

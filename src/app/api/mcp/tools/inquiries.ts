@@ -48,15 +48,15 @@ const updateSchema = z.object({
   operation: z.literal("update"),
   inquiryId: z.string().uuid().describe("引合ID（UUID）"),
   title: z.string().min(1).optional().describe("件名"),
-  description: z.string().optional(),
-  contactNote: z.string().optional().describe("連絡メモ"),
+  description: z.string().nullable().optional(),
+  contactNote: z.string().nullable().optional().describe("連絡メモ"),
   source: z
     .enum(["web", "phone", "email", "referral", "agent_service", "exhibition", "other"])
     .optional(),
-  clientId: z.string().uuid().optional().describe("顧客ID（UUID）"),
-  assigneeId: z.string().uuid().optional().describe("担当者ID（UUID）"),
-  budget: z.number().int().optional(),
-  timeline: z.string().optional().describe("希望時期"),
+  clientId: z.string().uuid().nullable().optional().describe("顧客ID（UUID）"),
+  assigneeId: z.string().uuid().nullable().optional().describe("担当者ID（UUID）"),
+  budget: z.number().int().nullable().optional(),
+  timeline: z.string().nullable().optional().describe("希望時期"),
 });
 
 const updateStatusSchema = z.object({

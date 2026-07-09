@@ -21,7 +21,12 @@ export async function updateMeeting(data: {
   meetingType?: MeetingType;
   date?: Date;
   location?: string | null;
+  /** 後方互換用: Server Action から attendees を全置換する場合に使う。internalAttendees / externalAttendees と同時指定時は後者を優先する。 */
   attendees?: MeetingAttendee[];
+  /** 社内参加者のみ差し替える場合に使う。省略時は既存の社内参加者を保持する。null を指定すると社内参加者をクリアする。 */
+  internalAttendees?: MeetingAttendee[];
+  /** 社外参加者のみ差し替える場合に使う。省略時は既存の社外参加者を保持する。null を指定すると社外参加者をクリアする。 */
+  externalAttendees?: MeetingAttendee[];
   summary?: string | null;
   actionItems?: LegacyMeetingActionItem[];
   details?: HearingData | null;
@@ -30,6 +35,20 @@ export async function updateMeeting(data: {
   const existing = await interactionRepository.findById(data.meetingId, data.organizationId);
   if (!existing) {
     return { ok: false, reason: "商談が見つかりません" };
+  }
+
+  // attendees の解決: internalAttendees / externalAttendees が優先される（MCP 部分更新）
+  // どちらか一方でも指定された場合、指定側を差し替え、未指定側は既存を保持する
+  // 両方とも未指定の場合は attendees（後方互換 / Server Action）を使う
+  let resolvedAttendees: MeetingAttendee[] | undefined;
+  if (data.internalAttendees !== undefined || data.externalAttendees !== undefined) {
+    const existingInternal = existing.attendees.filter((a) => !a.isExternal);
+    const existingExternal = existing.attendees.filter((a) => a.isExternal);
+    const newInternal = data.internalAttendees !== undefined ? data.internalAttendees : existingInternal;
+    const newExternal = data.externalAttendees !== undefined ? data.externalAttendees : existingExternal;
+    resolvedAttendees = [...newInternal, ...newExternal];
+  } else {
+    resolvedAttendees = data.attendees;
   }
 
   // 更新後の meetingType（指定がなければ既存の meetingType）が hearing でない場合は details を null に強制する
@@ -50,7 +69,7 @@ export async function updateMeeting(data: {
           ...(data.meetingType !== undefined && { meetingType: data.meetingType }),
           ...(data.date !== undefined && { date: data.date }),
           ...(data.location !== undefined && { location: data.location }),
-          ...(data.attendees !== undefined && { attendees: data.attendees }),
+          ...(resolvedAttendees !== undefined && { attendees: resolvedAttendees }),
           ...(data.summary !== undefined && { summary: data.summary }),
           ...(data.actionItems !== undefined && { actionItems: data.actionItems }),
           details,

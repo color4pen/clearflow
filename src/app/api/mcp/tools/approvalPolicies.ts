@@ -66,21 +66,27 @@ const updateSchema = z
   .object({
     operation: z.literal("update"),
     policyId: z.string().uuid().describe("ポリシーID（UUID）"),
-    name: z.string().min(1, "ポリシー名は必須です").describe("ポリシー名"),
+    name: z.string().min(1, "ポリシー名は必須です").optional().describe("ポリシー名"),
     triggerAction: z
       .enum(["inquiry.convert", "contract.create", "contract.cancel"])
+      .optional()
       .describe("inquiry.convert=引合の案件化, contract.create=契約作成, contract.cancel=契約解約"),
-    templateId: z.string().uuid().describe("適用する承認テンプレートID（UUID）"),
-    description: z.string().optional(),
-    conditionField: z.string().optional().describe("条件対象フィールド名"),
+    templateId: z.string().uuid().optional().describe("適用する承認テンプレートID（UUID）"),
+    description: z.string().nullable().optional(),
+    conditionField: z.string().nullable().optional().describe("条件対象フィールド名"),
     conditionOperator: z
       .enum(CONDITION_OPERATORS)
+      .nullable()
       .optional()
       .describe("gt=より大きい, gte=以上, lt=未満, lte=以下, eq=等しい, neq=等しくない, in=含む"),
-    conditionValue: z.string().optional().describe("条件値"),
+    conditionValue: z.string().nullable().optional().describe("条件値"),
   })
   .superRefine((data, ctx) => {
-    const hasField = data.conditionField && data.conditionField.trim() !== "";
+    // conditionField が明示的に指定されかつ非 null / 非空のときのみ conditionOperator / conditionValue を要求する
+    const hasField =
+      data.conditionField !== undefined &&
+      data.conditionField !== null &&
+      data.conditionField.trim() !== "";
     if (hasField) {
       if (!data.conditionOperator) {
         ctx.addIssue({
@@ -195,20 +201,31 @@ export function registerApprovalPoliciesTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            const hasCondition = typedArgs.conditionField && typedArgs.conditionField.trim() !== "";
+            // conditionField: undefined（省略 = 変更なし）/ null や空文字（クリア）/ 非空文字列（更新）
+            // conditionField が明示指定された場合のみ condition 系フィールドを更新する
+            let conditionField: string | null | undefined;
+            let conditionOperator: ConditionOperator | null | undefined;
+            let conditionValue: string | null | undefined;
+            if (typedArgs.conditionField !== undefined) {
+              const hasField =
+                typedArgs.conditionField !== null && typedArgs.conditionField.trim() !== "";
+              conditionField = hasField ? typedArgs.conditionField : null;
+              conditionOperator = hasField
+                ? ((typedArgs.conditionOperator as ConditionOperator) ?? null)
+                : null;
+              conditionValue = hasField ? (typedArgs.conditionValue ?? null) : null;
+            }
 
             const result = await updatePolicy({
               id: typedArgs.policyId,
               organizationId,
               actorId: userId,
               name: typedArgs.name,
-              description: typedArgs.description ?? null,
+              description: typedArgs.description,
               triggerAction: typedArgs.triggerAction,
-              conditionField: hasCondition ? (typedArgs.conditionField ?? null) : null,
-              conditionOperator: hasCondition
-                ? ((typedArgs.conditionOperator as ConditionOperator) ?? null)
-                : null,
-              conditionValue: hasCondition ? (typedArgs.conditionValue ?? null) : null,
+              conditionField,
+              conditionOperator,
+              conditionValue,
               templateId: typedArgs.templateId,
             });
 

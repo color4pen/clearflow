@@ -21,3 +21,8 @@
 {"type":"transition","ts":"2026-07-09T00:25:23.804Z","step":"signal-handler","status":"ok","message":"running → awaiting-resume: Interrupted by signal"}
 {"type":"transition","ts":"2026-07-09T00:26:04.737Z","step":"resume","status":"ok","message":"awaiting-resume → running: Resuming from step 'test-case-gen'"}
 {"type":"transition","ts":"2026-07-09T00:26:04.795Z","step":"test-case-gen-started","status":"started","message":"Starting test-case-gen step"}
+{"type":"transition","ts":"2026-07-09T00:29:22.685Z","step":"test-case-gen-verdict","status":"ok","message":"test-case-gen verdict: success"}
+{"type":"step-attempt","step":"test-case-gen","sessionId":"695ee355-0ed8-4276-8465-9396966884e0","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-09T00:26:04.802Z","endedAt":"2026-07-09T00:29:20.719Z"}
+{"type":"lineage","step":"test-case-gen","ts":"2026-07-09T00:29:20.719Z","outputs":[{"path":"specrunner/changes/mcp-partial-update/test-cases.md","hash":"sha256:cf24fe8f80cdab293bdbd13a491921df4ce259b188b65a39a4b41db7791252ad"}],"inputs":[{"path":"specrunner/changes/mcp-partial-update/design.md","hash":"sha256:240de502838040445364ddc748ba89c23758bcd3722c17e174f96fe82bf527f6"},{"path":"specrunner/changes/mcp-partial-update/tasks.md","hash":"sha256:7c2d111199088085a6c14892c7736b010d4799d1bb5dd7564fc9867120f9febf"}]}
+{"type":"transition","ts":"2026-07-09T00:29:22.712Z","step":"step-transition","status":"ok","message":"test-case-gen → implementer"}
+{"type":"transition","ts":"2026-07-09T00:29:22.718Z","step":"implementer-started","status":"started","message":"Starting implementer step"}
