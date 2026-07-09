@@ -220,7 +220,7 @@ export function BulkApprovalPanel({
                 <tr
                   key={request.id}
                   data-href={`/requests/${request.id}`}
-                  className={`${rowBg} border-b border-border-light hover:bg-[#eef2f7] cursor-pointer`}
+                  className={`${rowBg} border-b border-border-light hover:bg-bg-surface-alt cursor-pointer`}
                 >
                   {showBulkApproval && (
                     <td className="px-1 py-1.5 text-center">

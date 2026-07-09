@@ -109,7 +109,7 @@ export function InquiryListView({ inquiries, sources }: Props) {
             <div
               key={row.id}
               className={`grid text-xs border border-border border-t-0 hover:bg-bg-toolbar ${
-                index % 2 === 0 ? "bg-bg-surface" : "bg-[#fafafa]"
+                index % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt"
               }`}
               style={{ gridTemplateColumns: gridCols }}
             >

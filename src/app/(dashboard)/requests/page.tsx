@@ -77,7 +77,7 @@ export default async function RequestsPage({
   return (
     <div>
       <div className="flex items-center justify-between bg-bg-toolbar border border-border px-2 py-1 mb-0">
-        <span className="text-sm font-bold text-[#333333]">申請管理</span>
+        <span className="text-sm font-bold text-text">申請管理</span>
         <div className="flex items-center gap-2">
           <Link href="/requests/new" className="text-xs text-primary underline">[新規作成]</Link>
         </div>
