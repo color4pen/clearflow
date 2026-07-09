@@ -108,7 +108,7 @@ export function MeetingInfoSection({ meetingId, dealId, meeting, editable }: Pro
                   type="button"
                   disabled={isSubmitting}
                   onClick={handleSave}
-                  className="text-xs font-bold px-3 py-1 bg-green-600 text-white cursor-pointer disabled:opacity-50"
+                  className="text-xs font-bold px-3 py-1 bg-primary text-white cursor-pointer disabled:opacity-50 hover:opacity-90"
                 >
                   {isSubmitting ? "保存中..." : "保存"}
                 </button>

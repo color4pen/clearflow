@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createInvoiceAction } from "@/app/actions/invoices";
-import { FormField, Input, SectionCard, preventEnterSubmit } from "@/app/components";
+import { FormField, Input, SectionCard, preventEnterSubmit, SubmitButton } from "@/app/components";
+import { BTN_SECONDARY } from "@/app/(dashboard)/styles";
 import { MoneyInput } from "@/app/components/MoneyInput";
 
 type Props = {
@@ -114,17 +115,11 @@ export function NewInvoiceForm({ contractId, remainingAmount }: Props) {
         </FormField>
 
         <div className="flex gap-2 mt-3">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="bg-primary text-white text-xs font-bold px-4 py-1.5 cursor-pointer disabled:opacity-50"
-          >
-            {isSubmitting ? "作成中..." : "請求を作成"}
-          </button>
+          <SubmitButton pending={isSubmitting}>請求を作成</SubmitButton>
           <button
             type="button"
             onClick={() => router.push(`/contracts/${contractId}`)}
-            className="border border-border text-text text-xs px-3 py-1.5 cursor-pointer"
+            className={BTN_SECONDARY}
           >
             キャンセル
           </button>

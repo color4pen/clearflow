@@ -1,6 +1,7 @@
 "use client";
 
 import { FormField, Select, Input } from "@/app/components";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 
 type User = { id: string; name: string };
 
@@ -90,7 +91,7 @@ export function AuditLogFilter({
       <div className="flex justify-end mt-1 mb-1">
         <button
           type="submit"
-          className="bg-primary text-white text-xs px-3 py-1.5 rounded font-medium"
+          className={BTN_PRIMARY}
         >
           絞り込み
         </button>

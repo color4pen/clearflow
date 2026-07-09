@@ -3,6 +3,11 @@
  *
  * TC-003: styles.ts に BTN_DANGER が定義されている
  * TC-004: styles.ts に BTN_SUBMIT が定義されている
+ * TC-008: DataTable の行 hover が hover:bg-bg-surface-alt に統一されている
+ * TC-012: styles.ts に廃止定数（BTN_PRIMARY_DISABLED / BTN_SUCCESS / BTN_WARNING / BTN_SUBMIT）が存在しない
+ * TC-017: DataTable の th が text-text-secondary を使用している
+ * TC-018: DataTable に hover:bg-primary/10 が存在しない
+ * TC-019: BulkApprovalPanel の結果アラートがデザイントークン参照である
  * TC-021: RequestWithSteps 型に承認ステップ情報（ApprovalStepSummary[]）が含まれる
  * TC-022: findAllWithStepsByOrganization が Map ベースグルーピングで N+1 を回避する
  * TC-032: styles.ts に BTN_PRIMARY_DISABLED が定義されている
@@ -138,27 +143,65 @@ describe("findAllWithStepsByOrganization grouping logic — TC-022", () => {
 
 describe("styles.ts constants — TC-003 and TC-004", () => {
   /**
-   * TC-003: BTN_DANGER が定義されており
-   *         text-danger と underline を含む
+   * TC-003: BTN_DANGER が定義されており bg-danger と text-white を含む
+   * （旧: text-danger + underline → 新: bg-danger text-white の塗りボタン形式）
    */
-  it("TC-003: styles.ts exports BTN_DANGER containing text-danger and underline", async () => {
+  it("TC-003: styles.ts exports BTN_DANGER containing bg-danger and text-white", async () => {
     const content = await readSrc("app/(dashboard)/styles.ts");
     expect(content).toContain("BTN_DANGER");
-    expect(content).toContain("text-danger");
-    expect(content).toContain("underline");
+    expect(content).toContain("bg-danger");
+    expect(content).toContain("text-white");
   });
 
   /**
-   * TC-004: BTN_SUBMIT が定義されており
-   *         bg-primary・text-white・rounded を含む
+   * TC-004: BTN_SUBMIT は BTN_PRIMARY に統合済み。
+   *         BTN_PRIMARY が bg-primary・text-white・rounded を含む
    */
-  it("TC-004: styles.ts exports BTN_SUBMIT containing bg-primary, text-white, and rounded", async () => {
+  it("TC-004: styles.ts exports BTN_PRIMARY (BTN_SUBMIT unified) containing bg-primary, text-white, and rounded", async () => {
     const content = await readSrc("app/(dashboard)/styles.ts");
-    expect(content).toContain("BTN_SUBMIT");
+    expect(content).toContain("BTN_PRIMARY");
     expect(content).toContain("bg-primary");
     expect(content).toContain("text-white");
     expect(content).toContain("rounded");
     expect(content).not.toContain("rounded-none");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TC-012: 廃止定数が styles.ts に存在しない
+// ---------------------------------------------------------------------------
+
+describe("styles.ts deprecated constants — TC-012", () => {
+  /**
+   * TC-012: BTN_PRIMARY_DISABLED は BTN_PRIMARY に統合済みのため styles.ts に存在しない
+   */
+  it("TC-012: styles.ts に BTN_PRIMARY_DISABLED が含まれない", async () => {
+    const content = await readSrc("app/(dashboard)/styles.ts");
+    expect(content).not.toContain("BTN_PRIMARY_DISABLED");
+  });
+
+  /**
+   * TC-012: BTN_SUCCESS は BTN_PRIMARY に統合済みのため styles.ts に存在しない
+   */
+  it("TC-012: styles.ts に BTN_SUCCESS が含まれない", async () => {
+    const content = await readSrc("app/(dashboard)/styles.ts");
+    expect(content).not.toContain("BTN_SUCCESS");
+  });
+
+  /**
+   * TC-012: BTN_WARNING は BTN_SECONDARY / BTN_DANGER に統合済みのため styles.ts に存在しない
+   */
+  it("TC-012: styles.ts に BTN_WARNING が含まれない", async () => {
+    const content = await readSrc("app/(dashboard)/styles.ts");
+    expect(content).not.toContain("BTN_WARNING");
+  });
+
+  /**
+   * TC-012: BTN_SUBMIT は BTN_PRIMARY に統合済みのため styles.ts に存在しない
+   */
+  it("TC-012: styles.ts に BTN_SUBMIT が含まれない", async () => {
+    const content = await readSrc("app/(dashboard)/styles.ts");
+    expect(content).not.toContain("BTN_SUBMIT");
   });
 });
 
@@ -168,12 +211,12 @@ describe("styles.ts constants — TC-003 and TC-004", () => {
 
 describe("styles.ts constants — TC-032 and TC-033", () => {
   /**
-   * TC-032: BTN_PRIMARY_DISABLED が定義されており
-   *         disabled:cursor-not-allowed を含む
+   * TC-032: BTN_PRIMARY が disabled:cursor-not-allowed を含む
+   * （BTN_PRIMARY_DISABLED は BTN_PRIMARY に統合済み）
    */
-  it("TC-032: styles.ts exports BTN_PRIMARY_DISABLED containing disabled:cursor-not-allowed", async () => {
+  it("TC-032: styles.ts exports BTN_PRIMARY containing disabled:cursor-not-allowed", async () => {
     const content = await readSrc("app/(dashboard)/styles.ts");
-    expect(content).toContain("BTN_PRIMARY_DISABLED");
+    expect(content).toContain("BTN_PRIMARY");
     expect(content).toContain("disabled:cursor-not-allowed");
   });
 
@@ -188,6 +231,99 @@ describe("styles.ts constants — TC-032 and TC-033", () => {
     expect(content).toContain("border border-border");
     expect(content).toContain("rounded");
     expect(content).not.toContain("rounded-none");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TC-008 / TC-017 / TC-018: DataTable 行 hover・th スタイル統一
+// ---------------------------------------------------------------------------
+
+describe("DataTable styles — TC-008, TC-017, TC-018", () => {
+  /**
+   * TC-017: DataTable の th が text-text-secondary を使用している
+   */
+  it("TC-017: DataTable.tsx の th className に text-text-secondary が含まれる", async () => {
+    const content = await readSrc("app/components/DataTable.tsx");
+    expect(content).toContain("text-text-secondary");
+  });
+
+  /**
+   * TC-008: DataTable の行 hover が hover:bg-bg-surface-alt に統一されている
+   */
+  it("TC-008: DataTable.tsx の行 className に hover:bg-bg-surface-alt が含まれる", async () => {
+    const content = await readSrc("app/components/DataTable.tsx");
+    expect(content).toContain("hover:bg-bg-surface-alt");
+  });
+
+  /**
+   * TC-018: DataTable に hover:bg-primary/10 が存在しない（廃止済み）
+   */
+  it("TC-018: DataTable.tsx に hover:bg-primary/10 が含まれない", async () => {
+    const content = await readSrc("app/components/DataTable.tsx");
+    expect(content).not.toContain("hover:bg-primary/10");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TC-019: BulkApprovalPanel 結果アラートのデザイントークン参照
+// ---------------------------------------------------------------------------
+
+describe("BulkApprovalPanel result alert tokens — TC-019", () => {
+  /**
+   * TC-019: 成功アラートが bg-bg-success-light / border-border-success-light / text-success を使用する
+   */
+  it("TC-019: BulkApprovalPanel.tsx の成功アラートが bg-bg-success-light を使用する", async () => {
+    const content = await readSrc("app/(dashboard)/requests/BulkApprovalPanel.tsx");
+    expect(content).toContain("bg-bg-success-light");
+  });
+
+  it("TC-019: BulkApprovalPanel.tsx の成功アラートが text-success を使用する", async () => {
+    const content = await readSrc("app/(dashboard)/requests/BulkApprovalPanel.tsx");
+    expect(content).toContain("text-success");
+  });
+
+  /**
+   * TC-019: 失敗アラートが bg-status-red-bg / text-status-red-text を使用する
+   */
+  it("TC-019: BulkApprovalPanel.tsx の失敗アラートが bg-status-red-bg を使用する", async () => {
+    const content = await readSrc("app/(dashboard)/requests/BulkApprovalPanel.tsx");
+    expect(content).toContain("bg-status-red-bg");
+  });
+
+  it("TC-019: BulkApprovalPanel.tsx の失敗アラートが text-status-red-text を使用する", async () => {
+    const content = await readSrc("app/(dashboard)/requests/BulkApprovalPanel.tsx");
+    expect(content).toContain("text-status-red-text");
+  });
+
+  /**
+   * TC-019: 部分成功アラートが bg-bg-row-pending / text-warning を使用する
+   */
+  it("TC-019: BulkApprovalPanel.tsx の部分成功アラートが bg-bg-row-pending を使用する", async () => {
+    const content = await readSrc("app/(dashboard)/requests/BulkApprovalPanel.tsx");
+    expect(content).toContain("bg-bg-row-pending");
+  });
+
+  it("TC-019: BulkApprovalPanel.tsx の部分成功アラートが text-warning を使用する", async () => {
+    const content = await readSrc("app/(dashboard)/requests/BulkApprovalPanel.tsx");
+    expect(content).toContain("text-warning");
+  });
+
+  /**
+   * TC-019: 生パレットクラス（bg-green-*, bg-red-*, bg-yellow-*）が存在しない
+   */
+  it("TC-019: BulkApprovalPanel.tsx に bg-green-* の生パレットクラスが含まれない", async () => {
+    const content = await readSrc("app/(dashboard)/requests/BulkApprovalPanel.tsx");
+    expect(content).not.toMatch(/bg-green-\d+/);
+  });
+
+  it("TC-019: BulkApprovalPanel.tsx に bg-red-* の生パレットクラスが含まれない", async () => {
+    const content = await readSrc("app/(dashboard)/requests/BulkApprovalPanel.tsx");
+    expect(content).not.toMatch(/bg-red-\d+/);
+  });
+
+  it("TC-019: BulkApprovalPanel.tsx に bg-yellow-* の生パレットクラスが含まれない", async () => {
+    const content = await readSrc("app/(dashboard)/requests/BulkApprovalPanel.tsx");
+    expect(content).not.toMatch(/bg-yellow-\d+/);
   });
 });
 

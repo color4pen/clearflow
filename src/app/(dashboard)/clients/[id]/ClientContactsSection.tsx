@@ -4,6 +4,7 @@ import { Fragment, useState } from "react";
 import { useRouter } from "next/navigation";
 import { addClientContactAction, deleteClientContactAction, updateClientContactAction } from "@/app/actions/clients";
 import { ConfirmDialog, Input, preventEnterSubmit, useToast } from "@/app/components";
+import { BTN_PRIMARY, BTN_SECONDARY } from "@/app/(dashboard)/styles";
 import type { ClientContact } from "@/domain/models/client";
 
 type Props = {
@@ -190,7 +191,7 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
             <button
               type="submit"
               disabled={isAdding}
-              className="text-xs bg-primary text-white px-3 py-1 cursor-pointer disabled:opacity-50"
+              className={BTN_PRIMARY}
             >
               {isAdding ? "追加中..." : "追加"}
             </button>
@@ -242,14 +243,14 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
                 <button
                   type="button"
                   onClick={() => setEditingContact(null)}
-                  className="border border-border text-text text-xs px-3 py-1.5 cursor-pointer"
+                  className={BTN_SECONDARY}
                 >
                   キャンセル
                 </button>
                 <button
                   type="submit"
                   disabled={isEditing}
-                  className="text-xs bg-primary text-white px-3 py-1.5 cursor-pointer disabled:opacity-50"
+                  className={BTN_PRIMARY}
                 >
                   {isEditing ? "保存中..." : "保存"}
                 </button>

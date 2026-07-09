@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { SectionCard } from "@/app/components";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 import { DataTable } from "@/app/components/DataTable";
 import { invoiceStatusLabels } from "@/app/(dashboard)/labels";
 import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
@@ -60,27 +61,27 @@ function ProgressBarSummary({ contractAmount, paidTotal, invoicedTotal, schedule
 
   return (
     <div className="mb-3">
-      <div className="flex h-3 w-full overflow-hidden bg-gray-200 mb-1">
+      <div className="flex h-3 w-full overflow-hidden bg-border mb-1">
         <div
-          className="bg-green-500 h-full"
+          className="bg-success h-full"
           style={{ width: `${paidPct}%` }}
         />
         <div
-          className="bg-blue-500 h-full"
+          className="bg-primary h-full"
           style={{ width: `${invoicedPct}%` }}
         />
       </div>
       <div className="flex gap-3 text-xs text-text-muted">
         <span>
-          <span className="inline-block w-2 h-2 bg-green-500 mr-1" />
+          <span className="inline-block w-2 h-2 bg-success mr-1" />
           入金済 ¥{paidTotal.toLocaleString("ja-JP")}
         </span>
         <span>
-          <span className="inline-block w-2 h-2 bg-blue-500 mr-1" />
+          <span className="inline-block w-2 h-2 bg-primary mr-1" />
           請求済 ¥{invoicedTotal.toLocaleString("ja-JP")}
         </span>
         <span>
-          <span className="inline-block w-2 h-2 bg-gray-200 border border-gray-300 mr-1" />
+          <span className="inline-block w-2 h-2 bg-border border border-border mr-1" />
           残り ¥{remaining.toLocaleString("ja-JP")}
         </span>
       </div>
@@ -137,7 +138,7 @@ export function InvoiceSection({ contractId, invoices, contractStatus, canManage
         {canManage && isActiveContract && (
           <Link
             href={`/contracts/${contractId}/invoices/new`}
-            className="text-xs px-3 py-1 bg-primary text-white"
+            className={BTN_PRIMARY}
           >
             請求を追加
           </Link>

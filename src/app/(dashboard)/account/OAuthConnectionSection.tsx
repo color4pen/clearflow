@@ -57,7 +57,7 @@ function RevokeButton({
           onConfirm={handleRevoke}
           onCancel={() => setShowConfirm(false)}
         >
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-text-secondary">
             <strong>{connection.clientName}</strong> との接続を解除します。
             このアプリケーションは以後 clearflow にアクセスできなくなります。
           </p>

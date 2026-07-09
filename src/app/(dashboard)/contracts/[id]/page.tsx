@@ -61,7 +61,7 @@ export default async function ContractDetailPage({
       </div>
 
       {isPending && (
-        <div className="bg-amber-50 border border-amber-300 px-3 py-2 text-xs text-amber-800 mb-2">
+        <div className="bg-bg-row-pending border border-border-row-pending px-3 py-2 text-xs text-warning mb-2">
           この契約には承認待ちの申請があります
         </div>
       )}

@@ -45,11 +45,11 @@ export function WebhookCreateForm() {
   return (
     <div>
       {state?.success === true && state.endpoint && (
-        <div className="mb-4 p-4 bg-green-50 border border-green-200">
-          <p className="text-xs font-bold text-green-800">エンドポイントを作成しました。</p>
-          <p className="mt-1 text-xs text-green-700">
+        <div className="mb-4 p-4 bg-bg-success-light border border-border-success-light">
+          <p className="text-xs font-bold text-success">エンドポイントを作成しました。</p>
+          <p className="mt-1 text-xs text-success">
             Secret:{" "}
-            <code className="bg-green-100 px-1 py-0.5 text-xs">
+            <code className="bg-bg-success-light px-1 py-0.5 text-xs">
               {state.endpoint.secret}
             </code>
           </p>
@@ -59,14 +59,14 @@ export function WebhookCreateForm() {
         </div>
       )}
       {state?.success === false && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200">
+        <div className="mb-4 p-4 bg-status-red-bg border border-status-red-text/30">
           <p className="text-xs text-danger">{state.message}</p>
         </div>
       )}
 
       <form action={formAction} onKeyDown={preventEnterSubmit} className="space-y-4">
         <FormField
-          label={<>URL <span className="text-red-500">*</span></>}
+          label={<>URL <span className="text-danger">*</span></>}
           htmlFor="url"
         >
           <Input
@@ -80,7 +80,7 @@ export function WebhookCreateForm() {
         </FormField>
         <div>
           <p className="block text-xs font-bold text-text mb-2">
-            購読するイベント <span className="text-red-500">*</span>
+            購読するイベント <span className="text-danger">*</span>
           </p>
           <div className="grid grid-cols-2 gap-2">
             {WEBHOOK_EVENT_TYPES.map((eventType) => (

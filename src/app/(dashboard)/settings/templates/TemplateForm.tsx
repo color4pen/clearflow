@@ -174,7 +174,7 @@ export function TemplateForm(props: Props) {
   return (
     <div>
       {state?.success === false && (
-        <div className="mb-4 p-4 bg-red-50 border border-red-200">
+        <div className="mb-4 p-4 bg-status-red-bg border border-status-red-text/30">
           <p className="text-xs text-danger">{state.message}</p>
         </div>
       )}
@@ -194,7 +194,7 @@ export function TemplateForm(props: Props) {
 
         {/* Template name */}
         <FormField
-          label={<>テンプレート名 <span className="text-red-500">*</span></>}
+          label={<>テンプレート名 <span className="text-danger">*</span></>}
           htmlFor="name"
         >
           <Input
@@ -300,7 +300,7 @@ export function TemplateForm(props: Props) {
         <div>
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-xs font-bold text-text">
-              承認ステップ <span className="text-red-500">*</span>
+              承認ステップ <span className="text-danger">*</span>
             </h3>
             <LinkButton variant="primary" onClick={addStep} type="button">
               + ステップを追加
@@ -316,7 +316,7 @@ export function TemplateForm(props: Props) {
                 <div className="flex-1 space-y-2">
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <FormField
-                      label={<>承認者ロール <span className="text-red-500">*</span></>}
+                      label={<>承認者ロール <span className="text-danger">*</span></>}
                     >
                       <Select
                         value={step.approverRole}

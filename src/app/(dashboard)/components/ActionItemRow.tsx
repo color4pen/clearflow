@@ -14,6 +14,7 @@ import { ActionItemModal } from "./ActionItemModal";
 import type { LinkTarget } from "./LinkTargetPicker";
 import type { ActionItem } from "@/domain/models/actionItem";
 import { StatusChipSelect } from "./StatusChipSelect";
+import { dueDateClass } from "@/app/(dashboard)/lib/dueDateClass";
 
 type Props = {
   item: ActionItem;
@@ -23,6 +24,7 @@ type Props = {
   showSource?: boolean;
   sourceName?: string;
   sourceHref?: string | null;
+  _testNow?: Date;
 };
 
 export function ActionItemRow({
@@ -33,6 +35,7 @@ export function ActionItemRow({
   showSource = false,
   sourceName,
   sourceHref,
+  _testNow,
 }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
@@ -175,7 +178,7 @@ export function ActionItemRow({
         <span className="text-text-muted truncate">
           {resolveAssigneeName(item.assigneeId)}
         </span>
-        <span className="text-text-muted font-mono">
+        <span className={`font-mono whitespace-nowrap ${item.dueDate ? (dueDateClass(item.dueDate, _testNow) || "text-text-muted") : "text-text-muted"}`}>
           {item.dueDate ? formatDueDate(item.dueDate) : "—"}
         </span>
         <span className="text-text-muted truncate">
@@ -219,7 +222,7 @@ export function ActionItemRow({
           <div className="flex items-center gap-2 mt-0.5 text-xs text-text-muted">
             <span className="truncate">{resolveAssigneeName(item.assigneeId)}</span>
             <span>·</span>
-            <span className="font-mono whitespace-nowrap">
+            <span className={`font-mono whitespace-nowrap ${item.dueDate ? (dueDateClass(item.dueDate, _testNow) || "text-text-muted") : "text-text-muted"}`}>
               {item.dueDate ? formatDueDate(item.dueDate) : "—"}
             </span>
           </div>

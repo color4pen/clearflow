@@ -69,7 +69,7 @@ export function NotificationPanel({ notifications, unreadCount, actorNames }: Pr
         </svg>
         <span>通知</span>
         {displayUnreadCount > 0 && (
-          <span className="ml-auto flex items-center justify-center min-w-4 h-4 px-1 text-2xs font-bold bg-red-500 text-white rounded-full">
+          <span className="ml-auto flex items-center justify-center min-w-4 h-4 px-1 text-2xs font-bold bg-danger text-white rounded-full">
             {displayUnreadCount > 99 ? "99+" : displayUnreadCount}
           </span>
         )}

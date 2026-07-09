@@ -1,24 +1,17 @@
-export const BTN_PRIMARY = "text-primary underline text-xs";
+export const BTN_PRIMARY =
+  "bg-primary text-white text-xs font-medium rounded px-4 py-1.5 hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed";
 
-export const BTN_PRIMARY_DISABLED =
-  "text-primary underline text-xs disabled:text-text-on-dark-secondary disabled:no-underline disabled:cursor-not-allowed";
+export const BTN_SECONDARY =
+  "bg-bg-surface text-text text-xs font-medium rounded px-4 py-1.5 border border-border hover:bg-bg-surface-alt disabled:opacity-50";
 
-export const BTN_SECONDARY = "text-xs text-text-muted underline";
-
-export const BTN_DANGER = "text-danger underline text-xs";
-
-export const BTN_SUCCESS = "text-success underline text-xs";
-
-export const BTN_WARNING = "text-revision underline text-xs";
+export const BTN_DANGER =
+  "bg-danger text-white text-xs font-medium rounded px-4 py-1.5 hover:opacity-90 disabled:opacity-50";
 
 export const INPUT_BASE =
-  "w-full border border-border rounded px-2.5 py-1.5 text-xs focus:border-primary focus:outline-none";
+  "w-full border border-border rounded px-2.5 py-1.5 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder";
 
 export const SELECT_BASE =
-  "block w-full border border-border rounded px-2.5 py-1.5 text-xs focus:border-primary focus:outline-none";
-
-export const BTN_SUBMIT =
-  "bg-primary text-white text-xs px-3.5 py-1.5 rounded font-medium disabled:opacity-50 disabled:cursor-not-allowed";
+  "block w-full border border-border rounded px-2.5 py-1.5 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none";
 
 export const TOOLBAR = "bg-bg-toolbar border border-border px-2 py-1";
 

@@ -83,7 +83,7 @@ export function ApiTokenSection({ initialTokens }: Props) {
       <h2 className="text-sm font-bold text-text mb-3">APIトークン管理</h2>
 
       {state?.success === false && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded">
+        <div className="mb-4 p-3 bg-status-red-bg border border-status-red-text/30 rounded">
           <p className="text-xs text-danger">{state.message}</p>
         </div>
       )}

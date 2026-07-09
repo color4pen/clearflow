@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Input } from "@/app/components";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 import { LinkTargetPicker, type LinkTarget } from "./LinkTargetPicker";
 
 type Props = {
@@ -148,7 +149,7 @@ export function ActionItemModal({
               <button type="button" onClick={onCancel} disabled={loading} className="border border-border text-text text-xs px-3 py-1.5 cursor-pointer disabled:opacity-50">
                 キャンセル
               </button>
-              <button type="button" onClick={handleConfirm} disabled={loading} className="bg-primary text-white text-xs px-3 py-1.5 cursor-pointer disabled:opacity-50">
+              <button type="button" onClick={handleConfirm} disabled={loading} className={BTN_PRIMARY}>
                 保存
               </button>
             </div>

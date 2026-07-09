@@ -233,7 +233,7 @@ export default async function RevenueForecastPage({
                       >
                         <button
                           type="submit"
-                          className="text-xs text-red-500 hover:underline"
+                          className="text-xs text-danger hover:underline"
                         >
                           削除
                         </button>
@@ -282,7 +282,7 @@ export default async function RevenueForecastPage({
                   </div>
                   {item.target.targetAmount > 0 && (
                     <div className="mt-2">
-                      <div className="w-full bg-gray-200 rounded-full h-2 flex overflow-hidden">
+                      <div className="w-full bg-border rounded-full h-2 flex overflow-hidden">
                         <div
                           className="bg-primary h-2"
                           style={{ width: progressWidth }}

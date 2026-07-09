@@ -4,6 +4,7 @@ import { useState } from "react";
 import { addDealContactAction, removeDealContactAction } from "@/app/actions/dealContacts";
 import { dealContactRoleLabels } from "@/app/(dashboard)/labels";
 import { preventEnterSubmit } from "@/app/components";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 import type { DealContact } from "@/domain/models/deal";
 import type { ClientContact } from "@/domain/models/client";
 
@@ -119,7 +120,7 @@ export function DealContactsSection({
           </div>
           <button
             type="submit"
-            className="text-xs bg-primary text-white px-3 py-1 rounded"
+            className={BTN_PRIMARY}
           >
             追加
           </button>

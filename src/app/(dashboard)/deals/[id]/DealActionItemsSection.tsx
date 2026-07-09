@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createActionItemAction } from "@/app/actions/actionItems";
 import { useToast } from "@/app/components";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 import { ActionItemRow } from "@/app/(dashboard)/components/ActionItemRow";
 import { ActionItemModal } from "@/app/(dashboard)/components/ActionItemModal";
 import type { ActionItem } from "@/domain/models/actionItem";
@@ -55,7 +56,7 @@ export function DealActionItemsSection({ actionItems, dealId, orgUsers, editable
           <button
             type="button"
             onClick={() => setShowAddModal(true)}
-            className="text-xs font-medium px-3 py-1.5 bg-primary text-white rounded cursor-pointer"
+            className={BTN_PRIMARY}
           >
             追加
           </button>

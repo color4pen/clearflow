@@ -59,7 +59,7 @@ export function MeetingActionItemsSection({ interactionId, dealId, actionItems, 
           <button
             type="button"
             onClick={() => setShowAddForm(true)}
-            className="text-xs font-bold px-3 py-1 bg-green-600 text-white cursor-pointer"
+            className="text-xs font-bold px-3 py-1 bg-primary text-white cursor-pointer hover:opacity-90"
           >
             追加
           </button>
@@ -127,7 +127,7 @@ export function MeetingActionItemsSection({ interactionId, dealId, actionItems, 
               type="button"
               onClick={handleAdd}
               disabled={isPending}
-              className="text-xs font-bold px-3 py-1 bg-green-600 text-white cursor-pointer disabled:opacity-50"
+              className="text-xs font-bold px-3 py-1 bg-primary text-white cursor-pointer hover:opacity-90 disabled:opacity-50"
             >
               {isPending ? "追加中..." : "追加"}
             </button>

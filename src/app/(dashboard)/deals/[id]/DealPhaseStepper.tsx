@@ -142,7 +142,7 @@ export function DealPhaseStepper({ dealId, phase, canChangePhase, inquiryId }: P
             type="button"
             disabled={submitting}
             onClick={() => setPendingTerminal("won")}
-            className="text-xs font-bold rounded-full px-3.5 py-1.5 border border-green-600 text-green-700 hover:bg-green-50 cursor-pointer disabled:opacity-50"
+            className="text-xs font-bold rounded-full px-3.5 py-1.5 border border-status-green-text text-status-green-text hover:bg-status-green-bg cursor-pointer disabled:opacity-50"
           >
             受注にする
           </button>
@@ -150,7 +150,7 @@ export function DealPhaseStepper({ dealId, phase, canChangePhase, inquiryId }: P
             type="button"
             disabled={submitting}
             onClick={() => setPendingTerminal("lost")}
-            className="text-xs font-bold rounded-full px-3.5 py-1.5 border border-danger text-danger hover:bg-red-50 cursor-pointer disabled:opacity-50"
+            className="text-xs font-bold rounded-full px-3.5 py-1.5 border border-danger text-danger hover:bg-status-red-bg cursor-pointer disabled:opacity-50"
           >
             失注にする
           </button>
@@ -158,7 +158,7 @@ export function DealPhaseStepper({ dealId, phase, canChangePhase, inquiryId }: P
             type="button"
             disabled={submitting}
             onClick={() => setPendingTerminal("passed")}
-            className="text-xs font-bold rounded-full px-3.5 py-1.5 border border-gray-500 text-gray-600 hover:bg-gray-50 cursor-pointer disabled:opacity-50"
+            className="text-xs font-bold rounded-full px-3.5 py-1.5 border border-status-gray-text text-status-gray-text hover:bg-status-gray-bg cursor-pointer disabled:opacity-50"
           >
             見送りにする
           </button>

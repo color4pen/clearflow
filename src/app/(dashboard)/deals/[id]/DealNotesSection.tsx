@@ -46,7 +46,7 @@ export function DealNotesSection({ dealId, notes, editable }: Props) {
               onClick={handleSave}
               className={`text-xs font-bold px-3 py-1 ${
                 isDirty
-                  ? "bg-green-600 text-white cursor-pointer"
+                  ? "bg-primary text-white cursor-pointer hover:opacity-90"
                   : "bg-bg-toolbar border border-border text-text-muted cursor-not-allowed"
               } disabled:opacity-50`}
             >
