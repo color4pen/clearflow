@@ -69,3 +69,16 @@
 {"type":"transition","ts":"2026-07-09T01:16:49.291Z","step":"regression-gate","status":"warning","message":"regression-gate iteration 1 completed with verdict: needs-fix"}
 {"type":"transition","ts":"2026-07-09T01:16:49.291Z","step":"step-transition","status":"ok","message":"regression-gate → code-fixer"}
 {"type":"transition","ts":"2026-07-09T01:16:49.294Z","step":"code-fixer-started","status":"started","message":"Starting code-fixer step"}
+{"type":"transition","ts":"2026-07-09T01:19:08.286Z","step":"code-fixer-verdict","status":"ok","message":"code-fixer verdict: approved"}
+{"type":"step-attempt","step":"code-fixer","sessionId":"4fc96132-30c2-47cd-a455-4a70fb4d678e","outcome":{"verdict":"approved","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-09T01:16:49.306Z","endedAt":"2026-07-09T01:19:06.965Z"}
+{"type":"lineage","step":"code-fixer","ts":"2026-07-09T01:19:06.965Z","outputs":[{"path":"specrunner/changes/mcp-partial-update","hash":null}],"inputs":[{"path":"specrunner/changes/mcp-partial-update/regression-gate-result-001.md","hash":"sha256:c66402a82a0343d017024a9f076f89d2fd4fc0b9e11c06d61c73c0b8e07fdc77"}]}
+{"type":"transition","ts":"2026-07-09T01:19:08.292Z","step":"step-transition","status":"ok","message":"code-fixer → regression-gate"}
+{"type":"transition","ts":"2026-07-09T01:19:08.293Z","step":"regression-gate","status":"started","message":"regression-gate iteration 2 started"}
+{"type":"transition","ts":"2026-07-09T01:19:08.295Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
+{"type":"transition","ts":"2026-07-09T01:20:11.652Z","step":"store-fail","status":"ok","message":"running → failed: result file not found: specrunner/changes/mcp-partial-update/regression-gate-result-002.md"}
+{"type":"step-attempt","step":"regression-gate","sessionId":null,"outcome":{"verdict":null,"findingsPath":null,"error":{"code":"RESULT_FILE_NOT_FOUND","message":"result file not found: specrunner/changes/mcp-partial-update/regression-gate-result-002.md","hint":""},"transientRetryAttempts":0},"startedAt":"2026-07-09T01:19:08.304Z","endedAt":"2026-07-09T01:20:11.652Z"}
+{"type":"transition","ts":"2026-07-09T01:20:11.658Z","step":"regression-gate","status":"error","message":"regression-gate iteration 2 completed with verdict: error"}
+{"type":"transition","ts":"2026-07-09T01:20:11.658Z","step":"pipeline","status":"ok","message":"failed → awaiting-resume: result file not found: specrunner/changes/mcp-partial-update/regression-gate-result-002.md"}
+{"type":"transition","ts":"2026-07-09T01:21:05.639Z","step":"resume","status":"ok","message":"awaiting-resume → running: Resuming from step 'regression-gate'"}
+{"type":"transition","ts":"2026-07-09T01:21:05.708Z","step":"regression-gate","status":"started","message":"regression-gate iteration 1 started"}
+{"type":"transition","ts":"2026-07-09T01:21:05.710Z","step":"regression-gate-started","status":"started","message":"Starting regression-gate step"}
