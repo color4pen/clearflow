@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d4b46393-257f-412c-9381-1a9a87a12dfe",
   "createdAt": "2026-07-09T11:03:07.765Z",
-  "updatedAt": "2026-07-09T11:03:10.240Z",
+  "updatedAt": "2026-07-09T11:09:17.442Z",
   "request": {
     "title": "UI デザイン基盤の刷新（デザイントークン＋ステータスバッジ体系）",
     "type": "refactoring",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "request-review",
+  "step": "design",
   "status": "running",
   "branch": "refactor/design-foundation-d4b46393",
   "error": null,
@@ -45,7 +45,9 @@
     }
   ],
   "_journal": {
-    "historyCount": 2,
-    "stepCounts": {}
+    "historyCount": 5,
+    "stepCounts": {
+      "request-review": 1
+    }
   }
 }
