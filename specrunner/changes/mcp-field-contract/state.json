@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "3f8ab86c-a8d5-4167-a75f-ffbf9aa86465",
   "createdAt": "2026-07-09T02:39:42.536Z",
-  "updatedAt": "2026-07-09T03:13:54.714Z",
+  "updatedAt": "2026-07-09T03:14:27.515Z",
   "request": {
     "title": "MCP フィールドの用途・形式を describe に明記（Markdown/改行・用途）",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "regression-gate",
+  "step": "conformance",
   "status": "running",
   "branch": "change/mcp-field-contract-3f8ab86c",
   "error": null,
@@ -69,7 +69,7 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 42,
+    "historyCount": 47,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -80,7 +80,8 @@
       "code-review": 1,
       "domain-invariants": 1,
       "mcp-conformance": 1,
-      "custom-reviewers": 1
+      "custom-reviewers": 1,
+      "regression-gate": 1
     }
   }
 }
