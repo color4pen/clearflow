@@ -28,3 +28,16 @@
 {"type":"transition","ts":"2026-07-09T13:25:04.601Z","step":"signal-handler","status":"ok","message":"running → awaiting-resume: Interrupted by signal"}
 {"type":"transition","ts":"2026-07-09T13:25:46.088Z","step":"resume","status":"ok","message":"awaiting-resume → running: Resuming from step 'implementer'"}
 {"type":"transition","ts":"2026-07-09T13:25:46.168Z","step":"implementer-started","status":"started","message":"Starting implementer step"}
+{"type":"transition","ts":"2026-07-09T13:42:21.880Z","step":"implementer-verdict","status":"ok","message":"implementer verdict: success"}
+{"type":"step-attempt","step":"implementer","sessionId":"e5d31dd5-fb19-4b32-a07a-e4cdcfc11534","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-09T13:25:46.180Z","endedAt":"2026-07-09T13:42:20.404Z"}
+{"type":"lineage","step":"implementer","ts":"2026-07-09T13:42:20.404Z","outputs":[{"path":"specrunner/changes/controls-tables-restyle","hash":null},{"path":"specrunner/changes/controls-tables-restyle/tasks.md","hash":"sha256:b8dffef91e0760b415411aae5fa4606ee68f79dc02c8c1cd2e14f6ce47475fd3"}],"inputs":[{"path":"specrunner/changes/controls-tables-restyle/tasks.md","hash":"sha256:b8dffef91e0760b415411aae5fa4606ee68f79dc02c8c1cd2e14f6ce47475fd3"},{"path":"specrunner/changes/controls-tables-restyle/spec.md","hash":"sha256:a5c6fb7b261b3e739a0910d0e69a250eefa69629afdbc41b08216ea84571f4f3"}]}
+{"type":"transition","ts":"2026-07-09T13:42:21.890Z","step":"step-transition","status":"ok","message":"implementer → verification"}
+{"type":"transition","ts":"2026-07-09T13:42:21.892Z","step":"verification","status":"started","message":"verification iteration 1 started"}
+{"type":"transition","ts":"2026-07-09T13:42:21.893Z","step":"step-transition","status":"ok","message":"Transitioning to verification step"}
+{"type":"transition","ts":"2026-07-09T13:42:45.568Z","step":"verification-verdict","status":"ok","message":"verification verdict: passed"}
+{"type":"step-attempt","step":"verification","sessionId":null,"outcome":{"verdict":"passed","findingsPath":"specrunner/changes/controls-tables-restyle/verification-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-09T13:42:21.894Z","endedAt":"2026-07-09T13:42:45.566Z"}
+{"type":"lineage","step":"verification","ts":"2026-07-09T13:42:45.566Z","outputs":[{"path":"specrunner/changes/controls-tables-restyle/verification-result.md","hash":"sha256:c9c2263e3525847ea685dc6ab6de506a713d5d0b834f5913f0c84e5ddefca119"}],"inputs":[{"path":".","hash":null}]}
+{"type":"transition","ts":"2026-07-09T13:42:45.575Z","step":"verification","status":"ok","message":"verification iteration 1 completed with verdict: passed"}
+{"type":"transition","ts":"2026-07-09T13:42:45.575Z","step":"step-transition","status":"ok","message":"verification → code-review"}
+{"type":"transition","ts":"2026-07-09T13:42:45.577Z","step":"code-review","status":"started","message":"code-review iteration 1 started"}
+{"type":"transition","ts":"2026-07-09T13:42:45.579Z","step":"code-review-started","status":"started","message":"Starting code-review step"}
