@@ -37,11 +37,17 @@ const approvalMockState = {
 
 // Zod の uuid 検証 (RFC 4122 準拠) を通過する有効な UUID
 const INQUIRY_UUID = "550e8400-e29b-41d4-a716-446655440000";
+const DEAL_UUID = "660e8400-e29b-41d4-a716-446655440001";
 const mockInquiry = {
   id: INQUIRY_UUID,
   title: "テスト引合",
   status: "new",
   organizationId: "org-1",
+};
+const mockDeal = {
+  id: DEAL_UUID,
+  organizationId: "org-1",
+  inquiryId: INQUIRY_UUID,
 };
 
 // @/application/usecases をモック（updateInquiryStatus の挙動を mode で切り替え）
@@ -67,7 +73,7 @@ mock.module("@/application/usecases", () => ({
         pendingApproval: { requestId: "req-pending-1" },
       };
     }
-    return { ok: true as const, inquiry: mockInquiry };
+    return { ok: true as const, inquiry: mockInquiry, deal: mockDeal };
   },
   deleteInquiry: async () => ({ ok: false as const, reason: "stub" }),
   createClient: async () => ({ ok: false as const, reason: "stub" }),
@@ -217,7 +223,7 @@ describe("TC-011 / TC-012: 承認フロー pending 分岐 runtime テスト", ()
     expect(parsed.message).toContain("承認リクエストを作成しました");
   });
 
-  it("TC-012: usecase が pendingApproval を返さない場合、ツール結果は引合データのみ", async () => {
+  it("TC-012: usecase が deal を即時返す（direct変換）場合、ツール結果に inquiry と deal が含まれる", async () => {
     approvalMockState.mode = "direct";
 
     const server = new McpServer({ name: "clearflow-test", version: "1.0.0" });
@@ -231,15 +237,15 @@ describe("TC-011 / TC-012: 承認フロー pending 分岐 runtime テスト", ()
     };
     const text = body.result?.content?.[0]?.text ?? "";
     const parsed = JSON.parse(text) as {
-      id?: string;
+      inquiry?: { id: string };
+      deal?: { id: string };
       pendingApproval?: unknown;
-      message?: string;
     };
 
-    // pendingApproval や承認待ちメッセージが含まれないこと
-    expect(parsed.id).toBe(INQUIRY_UUID);
+    // 即時案件化: inquiry と deal が含まれ、pendingApproval は含まれないこと
+    expect(parsed.inquiry?.id).toBe(INQUIRY_UUID);
+    expect(parsed.deal?.id).toBe(DEAL_UUID);
     expect(parsed.pendingApproval).toBeUndefined();
-    expect(parsed.message).toBeUndefined();
   });
 
   it("TC-011/TC-012 共通: updateInquiryStatus が organizationId を受け取ること", async () => {
