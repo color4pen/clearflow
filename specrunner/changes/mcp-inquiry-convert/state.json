@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "c405cb55-3e0c-45f8-b085-ee38bd537255",
   "createdAt": "2026-07-09T01:37:15.177Z",
-  "updatedAt": "2026-07-09T02:32:47.098Z",
+  "updatedAt": "2026-07-09T02:33:13.239Z",
   "request": {
     "title": "MCP: 引合の「案件化」専用オペレーション",
     "type": "new-feature",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "feat/mcp-inquiry-convert-c405cb55",
   "error": null,
   "pipelineId": "standard",
@@ -67,8 +67,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/171",
+    "number": 171,
+    "createdAt": "2026-07-09T02:33:13.227Z"
+  },
   "_journal": {
-    "historyCount": 62,
+    "historyCount": 67,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -82,7 +87,9 @@
       "mcp-conformance": 1,
       "custom-reviewers": 1,
       "regression-gate": 2,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
