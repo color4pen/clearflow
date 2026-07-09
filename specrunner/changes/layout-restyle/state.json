@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "e5fb941d-b52f-4faf-bc6a-d8523896f9a0",
   "createdAt": "2026-07-09T14:16:52.114Z",
-  "updatedAt": "2026-07-09T14:47:35.415Z",
+  "updatedAt": "2026-07-09T14:54:32.501Z",
   "request": {
     "title": "レイアウト再配置（案件詳細ヒーローヘッダー＋ダッシュボード KPI カード化）",
     "type": "refactoring",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-review",
+  "step": "code-fixer",
   "status": "running",
   "branch": "refactor/layout-restyle-e5fb941d",
   "error": null,
@@ -45,7 +45,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 33,
+    "historyCount": 37,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -53,7 +53,8 @@
       "spec-fixer": 1,
       "test-case-gen": 1,
       "implementer": 1,
-      "verification": 1
+      "verification": 1,
+      "code-review": 1
     }
   }
 }

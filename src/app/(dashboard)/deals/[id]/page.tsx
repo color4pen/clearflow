@@ -19,6 +19,8 @@ import {
 } from "@/app/(dashboard)/labels";
 import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
 import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
+import { isActivityFeedEnabled } from "@/lib/activityConfig";
+import type { Interaction } from "@/domain/models/interaction";
 
 const CONTRACT_STATUS_VARIANT: Record<string, StatusBadgeVariant> = {
   active: "green",
@@ -40,8 +42,6 @@ const PHASE_VARIANT: Record<string, StatusBadgeVariant> = {
 function phaseVariant(phase: string): StatusBadgeVariant {
   return PHASE_VARIANT[phase] ?? "gray";
 }
-import { isActivityFeedEnabled } from "@/lib/activityConfig";
-import type { Interaction } from "@/domain/models/interaction";
 
 export default async function DealDetailPage({
   params,
