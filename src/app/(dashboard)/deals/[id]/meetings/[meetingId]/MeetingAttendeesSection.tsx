@@ -41,12 +41,20 @@ export function MeetingAttendeesSection({
     Array<{ contactId: string; name: string }>
   >(externalWithContact);
 
-  const [isDirty, setIsDirty] = useState(false);
+  // 社内 / 社外を独立して dirty 追跡し、変更した側だけを送信する。
+  // 未変更の側は FormData に含めない（= サーバ側で既存を保持する）。
+  const [internalDirty, setInternalDirty] = useState(false);
+  const [externalDirty, setExternalDirty] = useState(false);
+  const isDirty = internalDirty || externalDirty;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  function markDirty() {
-    setIsDirty(true);
+  function markInternalDirty() {
+    setInternalDirty(true);
+  }
+
+  function markExternalDirty() {
+    setExternalDirty(true);
   }
 
   async function handleSave() {
@@ -56,40 +64,49 @@ export function MeetingAttendeesSection({
     const formData = new FormData();
     formData.set("meetingId", meetingId);
     formData.set("dealId", dealId);
-    formData.set(
-      "internalAttendees",
-      JSON.stringify(internalAttendees.filter((a) => a.trim()))
-    );
-    formData.set(
-      "externalContactIds",
-      JSON.stringify(externalAttendees.map((a) => a.contactId))
-    );
+    if (internalDirty) {
+      formData.set(
+        "internalAttendees",
+        JSON.stringify(internalAttendees.filter((a) => a.trim()))
+      );
+    }
+    if (externalDirty) {
+      formData.set(
+        "externalContactIds",
+        JSON.stringify(externalAttendees.map((a) => a.contactId))
+      );
+    }
 
     const result = await updateMeetingAction({}, formData);
     const success = !result.message && !result.errors;
     setIsSubmitting(false);
 
     if (success) {
-      setIsDirty(false);
+      setInternalDirty(false);
+      setExternalDirty(false);
       router.refresh();
     } else {
-      setError(result.message ?? "保存に失敗しました");
+      const fieldError =
+        result.errors?.externalContactIds?.[0] ??
+        result.errors?.internalAttendees?.[0] ??
+        (result.errors ? Object.values(result.errors).flat()[0] : undefined);
+      setError(result.message ?? fieldError ?? "保存に失敗しました");
     }
   }
 
   function addInternalAttendee() {
     setInternalAttendees((prev) => [...prev, ""]);
-    markDirty();
+    markInternalDirty();
   }
 
   function removeInternalAttendee(idx: number) {
     setInternalAttendees((prev) => prev.filter((_, i) => i !== idx));
-    markDirty();
+    markInternalDirty();
   }
 
   function removeExternalAttendee(contactId: string) {
     setExternalAttendees((prev) => prev.filter((a) => a.contactId !== contactId));
-    markDirty();
+    markExternalDirty();
   }
 
   return (
@@ -130,7 +147,7 @@ export function MeetingAttendeesSection({
                         user.name,
                         "",
                       ]);
-                      markDirty();
+                      markInternalDirty();
                     }
                     e.target.value = "";
                   }}
@@ -152,7 +169,7 @@ export function MeetingAttendeesSection({
                     setInternalAttendees((prev) =>
                       prev.map((a, i) => (i === idx ? e.target.value : a))
                     );
-                    markDirty();
+                    markInternalDirty();
                   }}
                   placeholder="氏名"
                   disabled={!editable}
@@ -207,7 +224,7 @@ export function MeetingAttendeesSection({
                             ...prev,
                             { contactId: contact.id, name: contact.name },
                           ]);
-                          markDirty();
+                          markExternalDirty();
                         }
                         e.target.value = "";
                       }}
@@ -223,20 +240,30 @@ export function MeetingAttendeesSection({
                 )}
               </>
             )}
-            {externalAttendees.map((attendee) => (
-              <div key={attendee.contactId} className="flex gap-1 mb-1 items-center">
-                <span className="text-xs text-text flex-1">{attendee.name}</span>
-                {editable && (
-                  <button
-                    type="button"
-                    onClick={() => removeExternalAttendee(attendee.contactId)}
-                    className="text-xs text-danger underline whitespace-nowrap"
-                  >
-                    削除
-                  </button>
-                )}
-              </div>
-            ))}
+            {externalAttendees.map((attendee) => {
+              // 担当者マスタから削除された contactId は氏名スナップショットのまま
+              // 補足付きで表示する（行の削除はユーザーの明示操作でのみ可能）
+              const isDeleted = !existingContacts.some((c) => c.id === attendee.contactId);
+              return (
+                <div key={attendee.contactId} className="flex gap-1 mb-1 items-center">
+                  <span className="text-xs text-text flex-1">
+                    {attendee.name}
+                    {isDeleted && (
+                      <span className="text-text-muted ml-1">（削除済み担当者）</span>
+                    )}
+                  </span>
+                  {editable && (
+                    <button
+                      type="button"
+                      onClick={() => removeExternalAttendee(attendee.contactId)}
+                      className="text-xs text-danger underline whitespace-nowrap"
+                    >
+                      削除
+                    </button>
+                  )}
+                </div>
+              );
+            })}
             {/* contactId のない旧データは氏名のみ表示（読み取り専用） */}
             {attendees
               .filter((a) => a.isExternal && a.contactId === null)
