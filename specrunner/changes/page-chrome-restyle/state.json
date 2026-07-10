@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "8ec6b75f-ba5e-4396-a991-7da4e88bde96",
   "createdAt": "2026-07-10T00:44:58.063Z",
-  "updatedAt": "2026-07-10T01:20:14.755Z",
+  "updatedAt": "2026-07-10T01:26:31.957Z",
   "request": {
     "title": "画面骨格の格上げ（一覧ツールバー・空状態・タブ・詳細ヒーロー横展開・ログイン）",
     "type": "refactoring",
@@ -46,11 +46,11 @@
   ],
   "resumePoint": null,
   "_journal": {
-    "historyCount": 19,
+    "historyCount": 25,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
-      "spec-review": 1
+      "spec-review": 2
     }
   }
 }

@@ -398,11 +398,14 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 ### newCreateLinks.test.ts
 
-以下 7 ファイルそれぞれに対し:
+以下 6 ファイルそれぞれに対し:
 - [ ] `BTN_PRIMARY` またはその定数値（`bg-primary text-white`）を含む新規作成 Link が存在することを確認するテストを書く
 - [ ] ブラケット `[` が新規作成テキストに含まれないことを確認するテストを書く
 
-対象: `deals/page.tsx`・`inquiries/page.tsx`・`clients/page.tsx`・`requests/page.tsx`・`settings/policies/page.tsx`・`settings/templates/page.tsx`・`contracts/page.tsx`
+対象: `deals/page.tsx`・`inquiries/page.tsx`・`clients/page.tsx`・`requests/page.tsx`・`settings/policies/page.tsx`・`settings/templates/page.tsx`
+
+さらに contracts について（spec.md「存在しない」シナリオ対応）:
+- [ ] `contracts/page.tsx` に `/contracts/new` へのリンクが**存在しない**ことを確認するテストを書く
 
 ### 既存テストの調査と追随更新
 
@@ -415,7 +418,7 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 - `pageToolbar.test.ts` が存在し全テストが green
 - `emptyState.test.ts` が存在し全テストが green
 - `detailHeroPages.test.ts` が存在し全テストが green（4 ページ × 4 項目 = 16 テスト以上）
-- `newCreateLinks.test.ts` が存在し全テストが green（7 ファイル × 2 項目 = 14 テスト以上）
+- `newCreateLinks.test.ts` が存在し全テストが green（6 ファイル × 2 項目 = 12 テスト以上 ＋ contracts 非存在テスト 1 件以上）
 - `bun test` 全体が green
 
 ---

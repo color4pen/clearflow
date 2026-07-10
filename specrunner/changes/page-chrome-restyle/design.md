@@ -60,7 +60,7 @@ tasks の「新規作成」ボタンは `TaskList.tsx` からすべての作成 
 
 適用方針:
 - 一覧 0 件: `icon` を付与（clients 🏢 / deals 💼 / inquiries 📨 / contracts 📁 / tasks 📋 / requests 📝）
-- 詳細サブセクション 0 件: `icon` 省略、文言のみ（deals/[id]・clients/[id] 等の既存 `text-xs text-text-muted` 箇所）
+- 詳細サブセクション 0 件: `icon` 省略、文言のみ（**deals/[id] と clients/[id] の 2 ファイルのみ**。他の詳細画面には適用しない）
 
 **Rationale**: 4 系統の空状態を 1 コンポーネントに集約し、将来の変更コストを最小化する。optional な icon prop により一覧・サブセクションの 2 パターンを単一コンポーネントでカバーできる。
 
