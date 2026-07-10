@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "3034b36c-ce74-481f-9952-6fdaadb0ba9c",
   "createdAt": "2026-07-10T03:00:18.035Z",
-  "updatedAt": "2026-07-10T03:47:17.298Z",
+  "updatedAt": "2026-07-10T03:47:44.632Z",
   "request": {
     "title": "シェルと共有部品の刷新（サイドバー装飾・フォーム規律・トースト/ダイアログ）",
     "type": "refactoring",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "refactor/shell-forms-restyle-3034b36c",
   "error": null,
   "pipelineId": "standard",
@@ -67,8 +67,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/179",
+    "number": 179,
+    "createdAt": "2026-07-10T03:47:44.619Z"
+  },
   "_journal": {
-    "historyCount": 54,
+    "historyCount": 59,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -82,7 +87,9 @@
       "domain-invariants": 1,
       "custom-reviewers": 1,
       "regression-gate": 1,
-      "conformance": 1
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
