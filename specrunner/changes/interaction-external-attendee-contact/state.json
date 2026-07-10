@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d2145fe2-ba3d-4dfb-8bee-b9c96943a2ee",
   "createdAt": "2026-07-10T09:07:33.623Z",
-  "updatedAt": "2026-07-10T10:17:21.014Z",
+  "updatedAt": "2026-07-10T10:17:22.584Z",
   "request": {
     "title": "商談記録の社外参加者を顧客担当者参照に変更",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "domain-invariants",
+  "step": "regression-gate",
   "status": "running",
   "branch": "change/interaction-external-attendee-contact-d2145fe2",
   "error": null,
@@ -45,8 +45,31 @@
     }
   ],
   "resumePoint": null,
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "approved",
+      "approvedAtCommit": "f531c60a773c23ead3e31fc5e02d7a2666a02665",
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    },
+    {
+      "name": "mcp-conformance",
+      "status": "approved",
+      "approvedAtCommit": "f531c60a773c23ead3e31fc5e02d7a2666a02665",
+      "activationPaths": [
+        "src/app/api/mcp/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 37,
+    "historyCount": 43,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -56,7 +79,9 @@
       "verification": 1,
       "code-review": 1,
       "code-fixer": 1,
-      "domain-invariants": 1
+      "domain-invariants": 1,
+      "mcp-conformance": 1,
+      "custom-reviewers": 1
     }
   }
 }
