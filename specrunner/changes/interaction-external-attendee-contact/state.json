@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d2145fe2-ba3d-4dfb-8bee-b9c96943a2ee",
   "createdAt": "2026-07-10T09:07:33.623Z",
-  "updatedAt": "2026-07-10T09:31:59.068Z",
+  "updatedAt": "2026-07-10T09:53:06.807Z",
   "request": {
     "title": "商談記録の社外参加者を顧客担当者参照に変更",
     "type": "spec-change",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "implementer",
+  "step": "code-review",
   "status": "running",
   "branch": "change/interaction-external-attendee-contact-d2145fe2",
   "error": null,
@@ -45,12 +45,14 @@
     }
   ],
   "_journal": {
-    "historyCount": 16,
+    "historyCount": 25,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
       "spec-review": 1,
-      "test-case-gen": 1
+      "test-case-gen": 1,
+      "implementer": 1,
+      "verification": 1
     }
   }
 }
