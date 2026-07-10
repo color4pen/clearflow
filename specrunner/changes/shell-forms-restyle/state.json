@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "3034b36c-ce74-481f-9952-6fdaadb0ba9c",
   "createdAt": "2026-07-10T03:00:18.035Z",
-  "updatedAt": "2026-07-10T03:39:00.148Z",
+  "updatedAt": "2026-07-10T03:40:46.594Z",
   "request": {
     "title": "シェルと共有部品の刷新（サイドバー装飾・フォーム規律・トースト/ダイアログ）",
     "type": "refactoring",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "regression-gate",
+  "step": "conformance",
   "status": "running",
   "branch": "refactor/shell-forms-restyle-3034b36c",
   "error": null,
@@ -68,7 +68,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 40,
+    "historyCount": 45,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -80,7 +80,8 @@
       "code-fixer": 1,
       "mcp-conformance": 1,
       "domain-invariants": 1,
-      "custom-reviewers": 1
+      "custom-reviewers": 1,
+      "regression-gate": 1
     }
   }
 }

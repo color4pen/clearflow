@@ -139,6 +139,26 @@
       },
       "jobId": "3034b36c-ce74-481f-9952-6fdaadb0ba9c",
       "stepName": "code-fixer"
+    },
+    {
+      "command": "job",
+      "timestamp": "2026-07-10T03:40:45.239Z",
+      "modelUsage": {
+        "claude-haiku-4-5-20251001": {
+          "inputTokens": 7142,
+          "outputTokens": 16,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "claude-sonnet-4-6": {
+          "inputTokens": 14,
+          "outputTokens": 4879,
+          "cacheReadInputTokens": 210731,
+          "cacheCreationInputTokens": 26074
+        }
+      },
+      "jobId": "3034b36c-ce74-481f-9952-6fdaadb0ba9c",
+      "stepName": "regression-gate"
     }
   ]
 }
