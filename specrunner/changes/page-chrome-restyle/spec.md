@@ -44,9 +44,9 @@
 
 ---
 
-### Requirement: 新規作成導線 7 箇所が BTN_PRIMARY スタイルのリンクである
+### Requirement: 新規作成導線 6 箇所が BTN_PRIMARY スタイルのリンクである
 
-deals・inquiries・clients・requests・settings/policies・settings/templates の各一覧ページと contracts/page.tsx の新規作成リンクは、`BTN_PRIMARY` 定数（`bg-primary` および `text-white` を含む）のクラスを持つ SHALL。ブラケット文字 `[` `]` を含まない。`＋` プレフィックスを含む。
+deals・inquiries・clients・requests・settings/policies・settings/templates の各一覧ページの新規作成リンクは、`BTN_PRIMARY` 定数（`bg-primary` および `text-white` を含む）のクラスを持つ SHALL。ブラケット文字 `[` `]` を含まない。`＋` プレフィックスを含む。contracts/page.tsx には新規作成導線を追加しない SHALL NOT（`/contracts/new` は `?dealId=` 必須の案件起点フロー）。
 
 #### Scenario: deals/page.tsx の新規作成が BTN_PRIMARY を使用する
 
@@ -54,11 +54,11 @@ deals・inquiries・clients・requests・settings/policies・settings/templates 
 **When** 新規作成 Link のクラスと文言を確認する
 **Then** `BTN_PRIMARY` またはその文字列値（`bg-primary text-white` 等）が含まれ、`[新規作成]` というブラケット表記が存在しない
 
-#### Scenario: contracts/page.tsx に新規作成リンクが存在する
+#### Scenario: contracts/page.tsx に新規作成リンクが存在しない
 
 **Given** `contracts/page.tsx` のソースを確認する
-**When** PageToolbar の actions に含まれるリンクを確認する
-**Then** `/contracts/new` へのリンクが存在し、BTN_PRIMARY 相当のクラスを持つ
+**When** PageToolbar の actions を確認する
+**Then** `/contracts/new` へのリンクが存在しない
 
 ---
 

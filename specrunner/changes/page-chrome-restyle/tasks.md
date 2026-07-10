@@ -71,19 +71,12 @@ Tasks must be granular enough for the implementer to execute without additional 
 
 ---
 
-## T-04: contracts/page.tsx に新規作成 BTN_PRIMARY Link を追加
+## T-04: 欠番
 
-対象ファイル: `src/app/(dashboard)/contracts/page.tsx`
-
-- [ ] `BTN_PRIMARY` を `src/app/(dashboard)/styles.ts` からインポートする
-- [ ] `Link` を `next/link` からインポートする（既存）
-- [ ] `ToolbarActions` を `@/app/components` からインポートする
-- [ ] `<PageToolbar title="契約管理" />` を `<PageToolbar title="契約管理" actions={<ToolbarActions><Link href="/contracts/new" className={BTN_PRIMARY}>＋ 新規作成</Link></ToolbarActions>} />` に変更する
-
-**Note**: `/contracts/new` は `?dealId=` パラメータ必須であり、パラメータなしでアクセスすると notFound() を返す。これは既存の仕様であり、本タスクでは導線の追加のみを行う。
+contracts への新規作成導線は新設しない（request.md 要件 2: `/contracts/new` は `?dealId=` 必須の案件起点フローのため）。本タスクは削除された。
 
 **Acceptance Criteria**:
-- `contracts/page.tsx` の PageToolbar に `href="/contracts/new"` かつ BTN_PRIMARY 相当クラスを持つ Link が存在する
+- `contracts/page.tsx` に `/contracts/new` への新規リンクが追加されていない
 
 ---
 
@@ -168,9 +161,9 @@ Tasks must be granular enough for the implementer to execute without additional 
 - `src/app/(dashboard)/tasks/TaskList.tsx`
 - `src/app/(dashboard)/requests/page.tsx`
 
-対象ファイル（詳細サブセクション 0 件）:
+対象ファイル（詳細サブセクション 0 件・**この 2 ファイルのみ**）:
 - `src/app/(dashboard)/deals/[id]/page.tsx`（商談記録・契約 0 件メッセージ）
-- clients/[id] 等の既存 `text-xs text-text-muted` 簡易メッセージ箇所（各 SectionCard 内）
+- `src/app/(dashboard)/clients/[id]/page.tsx`（関連引合・関連案件・関連契約・担当者の 0 件メッセージ）
 
 ### 一覧 0 件への適用
 
@@ -186,7 +179,8 @@ Tasks must be granular enough for the implementer to execute without additional 
 
 - [ ] `deals/[id]/page.tsx` の商談記録 0 件（`<p className="text-xs text-text-muted">商談記録がありません</p>`）を `<EmptyState message="商談記録がありません" />` に置き換える
 - [ ] `deals/[id]/page.tsx` の契約 0 件メッセージを `<EmptyState message="..." />` に置き換える
-- [ ] その他の SectionCard 内の簡易 `text-xs text-text-muted` 0 件メッセージも同様に EmptyState に統一する（icon は省略）
+- [ ] `clients/[id]/page.tsx` の SectionCard 内 `text-xs text-text-muted` 0 件メッセージ（関連引合・関連案件・関連契約・担当者）を `<EmptyState message="..." />` に置き換える（icon は省略・文言不変）
+- [ ] 上記 2 ファイル以外の詳細画面には適用しない
 
 **Acceptance Criteria**:
 - 一覧 6 ページで 0 件表示が `EmptyState` コンポーネントを使用し、各絵文字が設定されている
@@ -349,7 +343,8 @@ Tasks must be granular enough for the implementer to execute without additional 
 ### login/page.tsx の変更
 
 - [ ] 最外 div のクラスから `bg-bg-page` を削除し、`style={{ background: 'var(--bg-login-gradient)' }}` を付与する（`min-h-screen flex items-center justify-center` は維持）
-- [ ] カードの `SectionCard` に `className="max-w-[380px] rounded-xl p-9 shadow-lg"` を付与する（`py-4 px-4` と `max-w-md` を置き換え）
+- [ ] 内側ラッパー div のクラスを `max-w-md w-full space-y-4 px-4` から `max-w-[380px] w-full space-y-4` に変更する（幅制約 380px はラッパー側で担う）
+- [ ] カードの `SectionCard` の `className` を `py-4 px-4` から `rounded-xl p-9 shadow-lg` に変更する（幅指定は付けない。ラッパーの 380px に従う）
 - [ ] ロゴ `h1` のクラスを `"text-sm font-bold text-center text-text"` から `"text-xl font-bold text-center text-primary"` に変更する
 - [ ] サブコピー `h2` の文言を「承認ワークフローシステム」から「案件管理システム」に変更する（クラスは `"mt-1 text-center text-xs text-text-muted"` のまま）
 - [ ] 「ログイン」の `h3` ラベル（`text-sm font-bold text-text mb-4`）を削除する

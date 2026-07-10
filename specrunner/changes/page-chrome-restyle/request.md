@@ -62,7 +62,7 @@
 ### 2. 新規作成の塗りボタン化
 
 - 上記 6 箇所のブラケットリンクを `BTN_PRIMARY` の Link（`＋ 新規作成` / `＋ 新規登録` / `＋ ポリシーを追加` / `＋ テンプレートを追加`）に置き換える。遷移先・配置（PageToolbar の `actions`）・表示ロール条件は不変。
-- `tasks`: TaskList 内の「新規作成」ボタンを `tasks/page.tsx` の PageToolbar `actions` へ移動する。ボタンとモーダル開閉はローカル state に結合した Client Component のため、**ボタン＋追加モーダルを独立 Client Component（例: `NewTaskButton`）に抽出して PageToolbar の `actions` に渡す**（開閉・作成の挙動は不変。位置と部品分割のみ）。
+- `tasks`: TaskList 内の「新規作成」ボタンを `tasks/page.tsx` の PageToolbar `actions` へ移動する。ボタンとモーダル開閉はローカル state に結合した Client Component のため、**ボタン＋追加モーダルを独立 Client Component `CreateTaskButton` に抽出して PageToolbar の `actions` に渡す**（開閉・作成の挙動は不変。位置と部品分割のみ）。
 - 空状態内の導線リンク（「最初の◯◯を登録する」等）はリンクのまま維持。
 - `contracts` 一覧への新規作成導線は**新設しない**（`/contracts/new` は `?dealId=` 必須の案件起点フローであり、一覧からの直接導線はドメインフローに反するため）。
 
@@ -73,7 +73,7 @@
 - Props: `icon?: string`（絵文字）, `message: string`, `children?`（導線リンク等）, `className?`
 - 形状: 中央寄せ・`py-10`・絵文字は `text-4xl`・メッセージ `text-xs text-text-muted`。
 - 適用先と絵文字: clients 🏢 / deals 💼 / inquiries 📨 / contracts 📁 / tasks 📋 / requests 📝。一覧 0 件時の表示を EmptyState に統一（既存の文言・導線リンクは children として維持）。
-- 詳細内サブセクション（deals/[id]・clients/[id] 等の 0 件表示）は絵文字なし（`icon` 省略）で文言のみ統一適用。文言不変。
+- 詳細内サブセクション 0 件表示は **`deals/[id]` と `clients/[id]` の 2 ファイルのみ**対象とし、絵文字なし（`icon` 省略）で統一適用。文言不変。他の詳細画面には適用しない。
 
 ### 4. タブの下線式統一
 
