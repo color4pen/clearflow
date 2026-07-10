@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "3034b36c-ce74-481f-9952-6fdaadb0ba9c",
   "createdAt": "2026-07-10T03:00:18.035Z",
-  "updatedAt": "2026-07-10T03:47:44.632Z",
+  "updatedAt": "2026-07-10T03:52:35.061Z",
   "request": {
     "title": "シェルと共有部品の刷新（サイドバー装飾・フォーム規律・トースト/ダイアログ）",
     "type": "refactoring",
@@ -13,7 +13,7 @@
     "name": "clearflow"
   },
   "step": "pr-create",
-  "status": "awaiting-archive",
+  "status": "archived",
   "branch": "refactor/shell-forms-restyle-3034b36c",
   "error": null,
   "pipelineId": "standard",
@@ -73,7 +73,7 @@
     "createdAt": "2026-07-10T03:47:44.619Z"
   },
   "_journal": {
-    "historyCount": 59,
+    "historyCount": 60,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
