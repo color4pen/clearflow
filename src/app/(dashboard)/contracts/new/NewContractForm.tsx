@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createContractAction } from "@/app/actions/contracts";
 import { SectionCard, FormField, Input, Select, preventEnterSubmit, MoneyInput, SubmitButton } from "@/app/components";
+import { useToast } from "@/app/components";
 import { BTN_SECONDARY } from "@/app/(dashboard)/styles";
 
 type DealInfo = {
@@ -21,6 +22,7 @@ type Props = {
 
 export function NewContractForm({ deal }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [renewalType, setRenewalType] = useState<string>("one_time");
@@ -37,8 +39,10 @@ export function NewContractForm({ deal }: Props) {
     if (!result.success) {
       setErrorMessage(result.message ?? "エラーが発生しました");
     } else if (result.contractId) {
+      showToast("契約を作成しました", "success");
       router.push(`/contracts/${result.contractId}`);
     } else {
+      showToast("契約を作成しました", "success");
       router.push(`/deals/${deal.id}`);
     }
   }
@@ -52,62 +56,64 @@ export function NewContractForm({ deal }: Props) {
           <p className="text-danger text-xs mb-2">{errorMessage}</p>
         )}
 
-        <FormField label="契約名">
-          <Input name="title" defaultValue={deal.title} />
-        </FormField>
-
-        <FormField label="契約種別">
-          <Select name="contractType" defaultValue={deal.contractType ?? ""}>
-            <option value="">未設定</option>
-            <option value="quasi_delegation">準委任</option>
-            <option value="fixed_price">請負</option>
-            <option value="ses">SES</option>
-          </Select>
-        </FormField>
-
-        <FormField label="金額（円）">
-          <MoneyInput
-            name="amount"
-            defaultValue={deal.estimatedAmount}
-          />
-        </FormField>
-
-        <FormField label="開始日">
-          <Input
-            name="startDate"
-            type="date"
-            defaultValue={deal.estimatedStartDate ?? ""}
-          />
-        </FormField>
-
-        <FormField label="終了日">
-          <Input
-            name="endDate"
-            type="date"
-            defaultValue={deal.estimatedEndDate ?? ""}
-          />
-        </FormField>
-
-        <FormField label="支払条件">
-          <Input name="paymentTerms" />
-        </FormField>
-
-        <FormField label="更新種別">
-          <Select
-            name="renewalType"
-            value={renewalType}
-            onChange={(e) => setRenewalType(e.target.value)}
-          >
-            <option value="one_time">スポット</option>
-            <option value="recurring">定期</option>
-          </Select>
-        </FormField>
-
-        {renewalType === "recurring" && (
-          <FormField label="更新サイクル">
-            <Input name="renewalCycle" placeholder="monthly / yearly" />
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+          <FormField label="契約名" required>
+            <Input name="title" defaultValue={deal.title} />
           </FormField>
-        )}
+
+          <FormField label="契約種別">
+            <Select name="contractType" defaultValue={deal.contractType ?? ""}>
+              <option value="">未設定</option>
+              <option value="quasi_delegation">準委任</option>
+              <option value="fixed_price">請負</option>
+              <option value="ses">SES</option>
+            </Select>
+          </FormField>
+
+          <FormField label="金額（円）">
+            <MoneyInput
+              name="amount"
+              defaultValue={deal.estimatedAmount}
+            />
+          </FormField>
+
+          <FormField label="開始日">
+            <Input
+              name="startDate"
+              type="date"
+              defaultValue={deal.estimatedStartDate ?? ""}
+            />
+          </FormField>
+
+          <FormField label="終了日">
+            <Input
+              name="endDate"
+              type="date"
+              defaultValue={deal.estimatedEndDate ?? ""}
+            />
+          </FormField>
+
+          <FormField label="支払条件">
+            <Input name="paymentTerms" />
+          </FormField>
+
+          <FormField label="更新種別">
+            <Select
+              name="renewalType"
+              value={renewalType}
+              onChange={(e) => setRenewalType(e.target.value)}
+            >
+              <option value="one_time">スポット</option>
+              <option value="recurring">定期</option>
+            </Select>
+          </FormField>
+
+          {renewalType === "recurring" && (
+            <FormField label="更新サイクル">
+              <Input name="renewalCycle" placeholder="monthly / yearly" />
+            </FormField>
+          )}
+        </div>
 
         <div className="flex gap-2 mt-3">
           <SubmitButton pending={isSubmitting}>契約を作成</SubmitButton>

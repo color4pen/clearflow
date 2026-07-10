@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createInquiryAction } from "@/app/actions/inquiries";
 import { FormField, Input, Select, Textarea, SubmitButton, preventEnterSubmit } from "@/app/components";
+import { useToast } from "@/app/components";
 import type { Client } from "@/domain/models/client";
 
 type Props = {
@@ -25,12 +26,14 @@ const sourceOptions = [
 
 export function InquiryForm({ clients, users }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
 
   const [state, formAction, isPending] = useActionState(
     async (prev: Parameters<typeof createInquiryAction>[0], formData: FormData) => {
       const result = await createInquiryAction(prev, formData);
       if (!result.errors && !result.message) {
+        showToast("引き合いを登録しました", "success");
         router.push("/inquiries");
       }
       return result;
@@ -52,7 +55,7 @@ export function InquiryForm({ clients, users }: Props) {
         <p className="text-danger text-xs mb-3">{state.message}</p>
       )}
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-x-6 gap-y-4">
         <FormField
           label="顧客"
           htmlFor="clientId"
@@ -90,7 +93,8 @@ export function InquiryForm({ clients, users }: Props) {
         )}
 
         <FormField
-          label={<>件名 <span className="text-danger">*</span></>}
+          label="件名"
+          required
           htmlFor="title"
           error={state.errors?.title?.[0]}
         >
@@ -98,7 +102,8 @@ export function InquiryForm({ clients, users }: Props) {
         </FormField>
 
         <FormField
-          label={<>流入経路 <span className="text-danger">*</span></>}
+          label="流入経路"
+          required
           htmlFor="source"
           error={state.errors?.source?.[0]}
         >

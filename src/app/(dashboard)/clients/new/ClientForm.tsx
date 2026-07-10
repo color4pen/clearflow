@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClientAction } from "@/app/actions/clients";
 import { FormField, Input, Textarea, SubmitButton, preventEnterSubmit } from "@/app/components";
+import { useToast } from "@/app/components";
 
 type Contact = {
   name: string;
@@ -26,6 +27,7 @@ const emptyContact = (): Contact => ({
 
 export function ClientForm() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [state, formAction, isPending] = useActionState(
     async (prev: Parameters<typeof createClientAction>[0], formData: FormData) => {
@@ -33,6 +35,7 @@ export function ClientForm() {
       formData.set("contacts", JSON.stringify(contacts));
       const result = await createClientAction(prev, formData);
       if (!result.errors && !result.message) {
+        showToast("顧客を登録しました", "success");
         router.push("/clients");
       }
       return result;
@@ -60,8 +63,8 @@ export function ClientForm() {
         <p className="text-danger text-xs mb-3">{state.message}</p>
       )}
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <FormField label={<>企業名 <span className="text-danger">*</span></>} htmlFor="name" error={state.errors?.name?.[0]}>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-4 mb-4">
+        <FormField label="企業名" htmlFor="name" required error={state.errors?.name?.[0]}>
           <Input id="name" name="name" required placeholder="株式会社○○" />
         </FormField>
 
@@ -110,8 +113,8 @@ export function ClientForm() {
                 削除
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <FormField label={<>氏名 <span className="text-danger">*</span></>} htmlFor={`contact_name_${i}`}>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
+              <FormField label="氏名" htmlFor={`contact_name_${i}`} required>
                 <Input
                   id={`contact_name_${i}`}
                   value={contact.name}

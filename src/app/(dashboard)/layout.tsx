@@ -4,6 +4,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { SidebarNav } from "./SidebarNav";
 import { DashboardProviders } from "./DashboardProviders";
 import { NotificationBell } from "./NotificationBell";
+import { listRequests } from "@/application/usecases";
 
 export default async function DashboardLayout({
   children,
@@ -17,25 +18,41 @@ export default async function DashboardLayout({
 
   const isAdmin = session.user.role === "admin";
 
+  const requests = await listRequests(session.user.organizationId);
+  const role = session.user.role;
+  const badgeCount = requests.filter(
+    (r) =>
+      r.status === "pending" &&
+      (r.approvalSteps.length === 0 ||
+        r.approvalSteps.some((s) => s.status === "pending" && s.approverRole === role))
+  ).length;
+
   return (
     <div className="flex min-h-screen">
-      <aside className="w-[210px] min-w-[210px] bg-bg-header flex flex-col h-screen sticky top-0">
-        <div className="px-4 py-4">
+      <aside className="w-[220px] min-w-[220px] bg-bg-header flex flex-col h-screen sticky top-0">
+        <div className="h-14 flex flex-col justify-center px-4 border-b border-white/10">
           <div className="text-[15px] font-bold text-white">Clearflow</div>
           <div className="text-2xs text-text-sidebar-muted">案件管理</div>
         </div>
 
-        <SidebarNav isAdmin={isAdmin} />
+        <SidebarNav isAdmin={isAdmin} badgeCount={badgeCount} />
 
         <div className="border-t border-white/10">
           <NotificationBell />
         </div>
 
-        <div className="border-t border-white/10 px-4 py-3 flex flex-col gap-2">
-          <div className="text-xs text-text-on-dark-disabled">
-            {session.user.name} / {session.user.role}
+        <div className="border-t border-white/10 px-4 py-3 flex items-center gap-3">
+          {/* 頭文字アバター */}
+          <div className="w-8 h-8 rounded-full bg-primary text-white font-bold text-sm flex items-center justify-center flex-shrink-0">
+            {session.user.name?.charAt(0) ?? "?"}
           </div>
-          <div className="flex items-center gap-2">
+          {/* 縦 2 段テキスト */}
+          <div className="flex-1 min-w-0">
+            <div className="text-xs text-text-on-dark-secondary truncate">{session.user.name}</div>
+            <div className="text-2xs text-text-on-dark-muted">{session.user.role}</div>
+          </div>
+          {/* ThemeToggle + ログアウト */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             <ThemeToggle />
             <form
               action={async () => {
@@ -45,7 +62,7 @@ export default async function DashboardLayout({
             >
               <button
                 type="submit"
-                className="text-text-on-dark-muted hover:text-text-on-dark-secondary text-xs"
+                className="text-status-red-text hover:opacity-80 text-xs"
               >
                 [ログアウト]
               </button>
