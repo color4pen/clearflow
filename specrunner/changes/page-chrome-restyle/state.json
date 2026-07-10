@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "8ec6b75f-ba5e-4396-a991-7da4e88bde96",
   "createdAt": "2026-07-10T00:44:58.063Z",
-  "updatedAt": "2026-07-10T01:59:48.582Z",
+  "updatedAt": "2026-07-10T02:04:26.732Z",
   "request": {
     "title": "画面骨格の格上げ（一覧ツールバー・空状態・タブ・詳細ヒーロー横展開・ログイン）",
     "type": "refactoring",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "conformance",
+  "step": "adr-gen",
   "status": "running",
   "branch": "refactor/page-chrome-restyle-8ec6b75f",
   "error": null,
@@ -69,7 +69,7 @@
     }
   ],
   "_journal": {
-    "historyCount": 58,
+    "historyCount": 62,
     "stepCounts": {
       "request-review": 2,
       "design": 1,
@@ -81,7 +81,8 @@
       "mcp-conformance": 1,
       "domain-invariants": 1,
       "custom-reviewers": 1,
-      "regression-gate": 1
+      "regression-gate": 1,
+      "conformance": 1
     }
   }
 }
