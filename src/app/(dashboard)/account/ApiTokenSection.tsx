@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import type { ApiToken } from "@/domain/models/apiToken";
 import { createApiTokenAction, revokeApiTokenAction } from "@/app/actions/apiTokens";
 import type { CreateApiTokenState, RevokeApiTokenState } from "@/app/actions/apiTokens";
-import { FormField, Input, SubmitButton, ConfirmDialog } from "@/app/components";
+import { FormField, Input, SubmitButton, ConfirmDialog, DataTable } from "@/app/components";
 import { formatDateJP } from "@/lib/dateUtils";
 
 type Props = {
@@ -116,49 +116,51 @@ export function ApiTokenSection({ initialTokens }: Props) {
       {initialTokens.length === 0 ? (
         <p className="text-xs text-text-muted">APIトークンはまだありません。</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2 pr-4 font-medium text-text-muted">名前</th>
-                <th className="text-left py-2 pr-4 font-medium text-text-muted">トークン</th>
-                <th className="text-left py-2 pr-4 font-medium text-text-muted">最終使用</th>
-                <th className="text-left py-2 pr-4 font-medium text-text-muted">作成日</th>
-                <th className="text-left py-2 font-medium text-text-muted">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {initialTokens.map((token) => {
-                const isRevoked = token.revokedAt !== null;
-                return (
-                  <tr
-                    key={token.id}
-                    className={`border-b border-border ${isRevoked ? "opacity-50" : ""}`}
-                  >
-                    <td className={`py-2 pr-4 ${isRevoked ? "line-through text-text-muted" : "text-text"}`}>
-                      {token.name}
-                    </td>
-                    <td className="py-2 pr-4 font-mono text-text">
-                      {token.tokenPrefix}...
-                    </td>
-                    <td className="py-2 pr-4 text-text-muted">
-                      {formatUsedAt(token.lastUsedAt)}
-                    </td>
-                    <td className="py-2 pr-4 text-text-muted">
-                      {formatUsedAt(token.createdAt)}
-                    </td>
-                    <td className="py-2">
-                      {!isRevoked && <RevokeForm token={token} />}
-                      {isRevoked && (
-                        <span className="text-xs text-text-muted">失効済み</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={[
+            {
+              key: "name",
+              header: "名前",
+              render: (token) => (
+                <span className={token.revokedAt !== null ? "line-through text-text-muted" : "text-text"}>
+                  {token.name}
+                </span>
+              ),
+            },
+            {
+              key: "token",
+              header: "トークン",
+              render: (token) => <span className="font-mono">{token.tokenPrefix}...</span>,
+            },
+            {
+              key: "lastUsedAt",
+              header: "最終使用",
+              render: (token) => <span className="text-text-muted">{formatUsedAt(token.lastUsedAt)}</span>,
+            },
+            {
+              key: "createdAt",
+              header: "作成日",
+              render: (token) => <span className="text-text-muted">{formatUsedAt(token.createdAt)}</span>,
+            },
+            {
+              key: "actions",
+              header: "操作",
+              render: (token) =>
+                token.revokedAt === null ? (
+                  <RevokeForm token={token} />
+                ) : (
+                  <span className="text-xs text-text-muted">失効済み</span>
+                ),
+            },
+          ]}
+          rows={initialTokens}
+          rowKey={(token) => token.id}
+          rowClass={(token, idx) =>
+            token.revokedAt !== null
+              ? `opacity-50 ${idx % 2 === 0 ? "bg-bg-surface" : "bg-bg-surface-alt"}`
+              : undefined
+          }
+        />
       )}
     </div>
   );

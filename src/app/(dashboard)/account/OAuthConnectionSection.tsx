@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import type { OAuthConnection } from "@/application/usecases/listOAuthConnections";
 import { revokeOAuthConnectionAction } from "@/app/actions/oauthConnections";
-import { ConfirmDialog } from "@/app/components";
+import { ConfirmDialog, DataTable } from "@/app/components";
 import { formatDateJP } from "@/lib/dateUtils";
 
 type Props = {
@@ -81,30 +81,32 @@ export function OAuthConnectionSection({ initialConnections }: Props) {
       {connections.length === 0 ? (
         <p className="text-xs text-text-muted">接続済みアプリケーションはありません。</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left py-2 pr-4 font-medium text-text-muted">アプリケーション名</th>
-                <th className="text-left py-2 pr-4 font-medium text-text-muted">最終使用</th>
-                <th className="text-left py-2 pr-4 font-medium text-text-muted">許可日時</th>
-                <th className="text-left py-2 font-medium text-text-muted">操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {connections.map((conn) => (
-                <tr key={conn.clientId} className="border-b border-border">
-                  <td className="py-2 pr-4 text-text">{conn.clientName}</td>
-                  <td className="py-2 pr-4 text-text-muted">{formatUsedAt(conn.lastUsedAt)}</td>
-                  <td className="py-2 pr-4 text-text-muted">{formatDateJP(conn.connectedAt)}</td>
-                  <td className="py-2">
-                    <RevokeButton connection={conn} onRevoked={handleRevoked} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          columns={[
+            {
+              key: "clientName",
+              header: "アプリケーション名",
+              render: (conn) => <span className="text-text">{conn.clientName}</span>,
+            },
+            {
+              key: "lastUsedAt",
+              header: "最終使用",
+              render: (conn) => <span className="text-text-muted">{formatUsedAt(conn.lastUsedAt)}</span>,
+            },
+            {
+              key: "connectedAt",
+              header: "許可日時",
+              render: (conn) => <span className="text-text-muted">{formatDateJP(conn.connectedAt)}</span>,
+            },
+            {
+              key: "actions",
+              header: "操作",
+              render: (conn) => <RevokeButton connection={conn} onRevoked={handleRevoked} />,
+            },
+          ]}
+          rows={connections}
+          rowKey={(conn) => conn.clientId}
+        />
       )}
     </div>
   );

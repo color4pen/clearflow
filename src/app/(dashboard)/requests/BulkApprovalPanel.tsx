@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition } from "react";
 import Link from "next/link";
+import { DataTable } from "@/app/components";
 import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
 import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
 import type { BulkApproveActionResult } from "@/app/actions/requests";
@@ -53,23 +54,15 @@ function OriginTypeLabel({ originType }: { originType: string }) {
   );
 }
 
-type BulkResult = BulkApproveActionResult["results"];
-
-function RowClickHandler() {
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      const target = e.target as HTMLElement;
-      if (target.closest("a,button,input")) return;
-      const row = target.closest("tr[data-href]");
-      if (row) {
-        window.location.href = (row as HTMLElement).dataset.href!;
-      }
-    }
-    document.addEventListener("click", handleClick);
-    return () => document.removeEventListener("click", handleClick);
-  }, []);
-  return null;
+function isActionable(request: RequestItem): boolean {
+  return (
+    request.status === "pending" ||
+    request.status === "revision" ||
+    request.status === "draft"
+  );
 }
+
+type BulkResult = BulkApproveActionResult["results"];
 
 export function BulkApprovalPanel({
   requests,
@@ -141,8 +134,6 @@ export function BulkApprovalPanel({
 
   return (
     <div>
-      <RowClickHandler />
-
       {resultMessage && (
         <div
           className={`mb-4 p-4 border ${
@@ -179,95 +170,95 @@ export function BulkApprovalPanel({
         </div>
       )}
 
-      <div className="overflow-hidden border border-border border-t-0">
-        <table className="w-full border-collapse table-fixed">
-          <colgroup>
-            {showBulkApproval && <col className="w-6" />}
-            <col />
-            <col style={{ width: "90px" }} />
-            <col style={{ width: "110px" }} />
-            <col style={{ width: "90px" }} />
-            <col style={{ width: "110px" }} />
-          </colgroup>
-          <thead>
-            <tr className="bg-bg-table-head border-b border-border-table-head">
-              {showBulkApproval && (
-                <th className="px-1 py-1.5 text-xs text-text font-bold text-center">☐</th>
-              )}
-              <th className="px-2 py-1.5 text-xs text-text font-bold text-left">件名</th>
-              <th className="px-2 py-1.5 text-xs text-text font-bold text-left">申請者</th>
-              <th className="px-2 py-1.5 text-xs text-text font-bold text-center">ステータス</th>
-              <th className="px-2 py-1.5 text-xs text-text font-bold text-center">種別</th>
-              <th className="px-2 py-1.5 text-xs text-text font-bold text-left">申請日</th>
-            </tr>
-          </thead>
-          <tbody>
-            {requests.map((request, idx) => {
-              const isActionable =
-                request.status === "pending" ||
-                request.status === "revision" ||
-                request.status === "draft";
-              const rowBg =
-                request.status === "pending"
-                  ? "bg-bg-row-pending"
-                  : request.status === "revision"
-                    ? "bg-bg-row-revision"
-                    : idx % 2 === 0
-                      ? "bg-bg-surface"
-                      : "bg-bg-surface-alt";
-
-              return (
-                <tr
-                  key={request.id}
-                  data-href={`/requests/${request.id}`}
-                  className={`${rowBg} border-b border-border-light hover:bg-bg-surface-alt cursor-pointer`}
+      <DataTable
+        fixed
+        columns={[
+          ...(showBulkApproval
+            ? [
+                {
+                  key: "checkbox",
+                  header: "☐",
+                  align: "center" as const,
+                  width: "w-10",
+                  render: (request: RequestItem) =>
+                    request.status === "pending" ? (
+                      <input
+                        type="checkbox"
+                        checked={selected.has(request.id)}
+                        onChange={() => toggleSelect(request.id)}
+                        disabled={isPending}
+                        className="h-3 w-3"
+                        aria-label={`${request.title}を選択`}
+                      />
+                    ) : (
+                      <span />
+                    ),
+                },
+              ]
+            : []),
+          {
+            key: "title",
+            header: "件名",
+            render: (request: RequestItem) => (
+              <div className="truncate">
+                <Link
+                  href={`/requests/${request.id}`}
+                  className={
+                    isActionable(request)
+                      ? "text-text underline hover:text-primary"
+                      : "text-text-disabled hover:text-text-muted"
+                  }
                 >
-                  {showBulkApproval && (
-                    <td className="px-1 py-1.5 text-center">
-                      {request.status === "pending" ? (
-                        <input
-                          type="checkbox"
-                          checked={selected.has(request.id)}
-                          onChange={() => toggleSelect(request.id)}
-                          disabled={isPending}
-                          className="h-3 w-3"
-                          aria-label={`${request.title}を選択`}
-                        />
-                      ) : (
-                        <span />
-                      )}
-                    </td>
-                  )}
-                  <td className="px-2 py-1.5 text-xs truncate">
-                    <Link
-                      href={`/requests/${request.id}`}
-                      className={
-                        isActionable
-                          ? "text-text underline hover:text-primary"
-                          : "text-text-disabled hover:text-text-muted"
-                      }
-                    >
-                      {request.title}
-                    </Link>
-                  </td>
-                  <td className="px-2 py-1.5 text-xs text-text-secondary truncate">
-                    {request.creatorName}
-                  </td>
-                  <td className="px-2 py-1.5 text-center">
-                    <StatusBadge variant={request.statusVariant}>{request.statusText}</StatusBadge>
-                  </td>
-                  <td className="px-2 py-1.5 text-center">
-                    <OriginTypeLabel originType={request.originType} />
-                  </td>
-                  <td className="px-2 py-1.5 text-xs text-text-muted font-sans">
-                    {formatDate(request.createdAt)}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                  {request.title}
+                </Link>
+              </div>
+            ),
+          },
+          {
+            key: "creatorName",
+            header: "申請者",
+            width: "w-[90px]",
+            render: (request: RequestItem) => (
+              <div className="truncate text-text-secondary">{request.creatorName}</div>
+            ),
+          },
+          {
+            key: "status",
+            header: "ステータス",
+            align: "center" as const,
+            width: "w-[110px]",
+            render: (request: RequestItem) => (
+              <StatusBadge variant={request.statusVariant}>{request.statusText}</StatusBadge>
+            ),
+          },
+          {
+            key: "originType",
+            header: "種別",
+            align: "center" as const,
+            width: "w-[90px]",
+            render: (request: RequestItem) => <OriginTypeLabel originType={request.originType} />,
+          },
+          {
+            key: "createdAt",
+            header: "申請日",
+            width: "w-[110px]",
+            render: (request: RequestItem) => (
+              <span className="text-text-muted font-sans">{formatDate(request.createdAt)}</span>
+            ),
+          },
+        ]}
+        rows={requests}
+        rowKey={(request) => request.id}
+        rowClass={(request) =>
+          request.status === "pending"
+            ? "bg-bg-row-pending"
+            : request.status === "revision"
+              ? "bg-bg-row-revision"
+              : undefined
+        }
+        rowHref={(request) => `/requests/${request.id}`}
+        footer={`全${total}件 (承認待:${pendingCount}　承認済:${approvedCount}　却下:${rejectedCount})`}
+      />
 
       {showBulkApproval && selectedCount > 0 && (
         <div className="bg-bg-toolbar border border-border border-t-0 px-2 py-1 flex justify-end">
@@ -280,12 +271,6 @@ export function BulkApprovalPanel({
           </button>
         </div>
       )}
-
-      <div className="bg-bg-toolbar border border-border border-t-0 px-2 py-1.5">
-        <span className="text-xs text-text-muted">
-          全{total}件 (承認待:{pendingCount}　承認済:{approvedCount}　却下:{rejectedCount})
-        </span>
-      </div>
     </div>
   );
 }

@@ -6,7 +6,7 @@ export function RowClickHandler() {
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       const target = e.target as HTMLElement;
-      if (target.closest("a,button")) return;
+      if (target.closest("a,button,input,label")) return;
       const row = target.closest("tr[data-href]");
       if (row) {
         window.location.href = (row as HTMLElement).dataset.href!;
