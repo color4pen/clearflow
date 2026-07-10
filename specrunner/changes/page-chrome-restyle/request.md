@@ -61,10 +61,10 @@
 
 ### 2. 新規作成の塗りボタン化
 
-- 上記 6 箇所のブラケットリンクを `BTN_PRIMARY` の Link（`＋ 新規作成` / `＋ 新規登録` / `＋ ポリシーを追加` / `＋ テンプレートを追加`）に置き換える。遷移先・配置（PageToolbar の `actions`）は不変。
-- `tasks`: TaskList 内の「新規作成」ボタンを `tasks/page.tsx` の PageToolbar `actions` へ移動（ボタン実装・挙動不変。位置のみ）。
-- `contracts/page.tsx`: PageToolbar `actions` に `＋ 新規作成` → `/contracts/new` の `BTN_PRIMARY` Link を追加（遷移先ページは既存。導線の新設のみ）。
+- 上記 6 箇所のブラケットリンクを `BTN_PRIMARY` の Link（`＋ 新規作成` / `＋ 新規登録` / `＋ ポリシーを追加` / `＋ テンプレートを追加`）に置き換える。遷移先・配置（PageToolbar の `actions`）・表示ロール条件は不変。
+- `tasks`: TaskList 内の「新規作成」ボタンを `tasks/page.tsx` の PageToolbar `actions` へ移動する。ボタンとモーダル開閉はローカル state に結合した Client Component のため、**ボタン＋追加モーダルを独立 Client Component（例: `NewTaskButton`）に抽出して PageToolbar の `actions` に渡す**（開閉・作成の挙動は不変。位置と部品分割のみ）。
 - 空状態内の導線リンク（「最初の◯◯を登録する」等）はリンクのまま維持。
+- `contracts` 一覧への新規作成導線は**新設しない**（`/contracts/new` は `?dealId=` 必須の案件起点フローであり、一覧からの直接導線はドメインフローに反するため）。
 
 ### 3. 共有 EmptyState コンポーネントの新設と適用
 
@@ -79,7 +79,7 @@
 
 - 基準スタイル: `requests/RequestTabs.tsx` の下線式（`border-b-2`、active = `border-primary text-primary font-bold`、非 active = `border-transparent text-text-secondary`）。
 - `inquiries/InquiryListView.tsx` のステータストグル（塗りボタン式）を下線式へ（選択状態・フィルタ挙動は不変）。
-- `tasks/page.tsx` のタブはスタイル差分のみ基準に追随。
+- `tasks/page.tsx` のタブ（未完了/完了）はスタイル差分のみ基準に追随。**「自分のタスク/全員」トグルはタブではなくフィルタ切替のため現行スタイルを維持（対象外）**。
 - `RequestTabs` の件数 pill（`rounded-full bg-primary text-white`）を「ラベル (n)」形式のテキスト（active 色に追随）へ変更。件数の取得元は不変。
 - 新たな件数取得（サーバー集計の追加）は行わない。
 
@@ -119,7 +119,7 @@ deals/[id] と同型（パンくず行 → ヒーロー行 `flex items-center ga
 - [ ] PageToolbar のタイトルが `h1` で描画されることをテストで固定。
 - [ ] EmptyState の単体テスト（icon あり/なし・children 描画）。
 - [ ] 4 詳細画面のヒーロー行（h1＋StatusBadge 同居、パンくず順）をコンポーネント/表示テストで固定。
-- [ ] 新規作成導線 7 箇所（6 置換＋contracts 新設）が `BTN_PRIMARY` 相当のクラスで `/xxx/new` へリンクすることを固定。
+- [ ] 新規作成導線 6 箇所（置換）＋tasks の移設ボタンが `BTN_PRIMARY` 相当のクラスで従来と同じ遷移先/挙動を持つことを固定。
 - [ ] `src/app` 配下に生パレットクラス・hex 直書きクラスを新たに持ち込んでいない（`(auth)` のエラー表示置換で既存分は減る）。
 - [ ] `aozu check` exit 0・architecture test green。
 - [ ] 参照資料が利用可能な場合、`mock-fidelity-check.md` が change folder に存在し、対象画面ごとの突き合わせ結果を含む。
