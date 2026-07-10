@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { listClients, listDeals } from "@/application/usecases";
-import { PageToolbar, ToolbarActions, DataTable } from "@/app/components";
+import { PageToolbar, ToolbarActions, DataTable, EmptyState } from "@/app/components";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 
 export default async function ClientsPage() {
   const session = await auth();
@@ -23,23 +24,22 @@ export default async function ClientsPage() {
         title="顧客管理"
         actions={
           <ToolbarActions>
-            <Link href="/clients/new" className="text-xs text-primary underline">
-              [新規登録]
+            <Link href="/clients/new" className={BTN_PRIMARY}>
+              ＋ 新規登録
             </Link>
           </ToolbarActions>
         }
       />
 
       {clients.length === 0 ? (
-        <div className="text-center py-8 text-text-disabled text-sm bg-bg-surface border border-border border-t-0">
-          <p>顧客が登録されていません</p>
+        <EmptyState icon="🏢" message="顧客が登録されていません">
           <Link
             href="/clients/new"
-            className="mt-2 inline-block text-primary underline text-xs"
+            className="inline-block text-primary underline text-xs"
           >
             最初の顧客を登録する
           </Link>
-        </div>
+        </EmptyState>
       ) : (
         <DataTable
           columns={[

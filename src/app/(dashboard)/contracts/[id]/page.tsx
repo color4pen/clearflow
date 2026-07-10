@@ -52,12 +52,27 @@ export default async function ContractDetailPage({
 
   return (
     <div>
-      <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2">
-        <span className="text-sm font-bold text-text">{contract.title}</span>
-        <span className="text-text-muted text-xs ml-2">
-          <Link href="/contracts" className="text-primary underline">契約一覧</Link>
-          {" > "}詳細
-        </span>
+      {/* Breadcrumb */}
+      <div className="text-xs text-text-muted mb-0.5">
+        <Link href="/contracts" className="text-primary underline">契約一覧</Link>
+        {" > "}
+        {contract.title}
+      </div>
+
+      {/* Hero row */}
+      <div className="flex items-center gap-2 flex-wrap mb-3">
+        <h1 className="text-lg font-bold text-text">{contract.title}</h1>
+        <StatusBadge variant={CONTRACT_STATUS_VARIANT[contract.status] ?? "gray"}>
+          {contractStatusLabels[contract.status] ?? contract.status}
+        </StatusBadge>
+        <div className="ml-auto flex items-center gap-3">
+          <Link href={`/deals/${contract.dealId}`} className="text-primary underline text-xs">
+            案件を表示
+          </Link>
+          <Link href={`/clients/${contract.clientId}`} className="text-primary underline text-xs">
+            顧客を表示
+          </Link>
+        </div>
       </div>
 
       {isPending && (
@@ -71,16 +86,6 @@ export default async function ContractDetailPage({
         <div className="flex flex-col gap-3">
           <SectionCard className="p-3">
             <ContractInfoSection contract={contract} editable={canManage} />
-            <dl className="text-xs space-y-1 mt-1">
-              <div className="flex gap-2">
-                <dt className="text-text-muted w-24 shrink-0">ステータス</dt>
-                <dd className="text-text px-2 py-1">
-                  <StatusBadge variant={CONTRACT_STATUS_VARIANT[contract.status] ?? "gray"}>
-                    {contractStatusLabels[contract.status] ?? contract.status}
-                  </StatusBadge>
-                </dd>
-              </div>
-            </dl>
 
             {!isTerminal && (
               <div className="mt-3">
@@ -91,28 +96,6 @@ export default async function ContractDetailPage({
                 />
               </div>
             )}
-
-            <div className="mt-3">
-              <h2 className="text-xs font-bold text-text mb-2">関連情報</h2>
-              <dl className="text-xs space-y-1">
-                <div className="flex gap-2">
-                  <dt className="text-text-muted w-24 shrink-0">関連案件</dt>
-                  <dd className="text-text px-2 py-1">
-                    <Link href={`/deals/${contract.dealId}`} className="text-primary underline text-xs">
-                      案件を表示
-                    </Link>
-                  </dd>
-                </div>
-                <div className="flex gap-2">
-                  <dt className="text-text-muted w-24 shrink-0">顧客</dt>
-                  <dd className="text-text px-2 py-1">
-                    <Link href={`/clients/${contract.clientId}`} className="text-primary underline text-xs">
-                      顧客を表示
-                    </Link>
-                  </dd>
-                </div>
-              </dl>
-            </div>
 
             {canManage && invoices.length === 0 && (
               <div className="mt-3">

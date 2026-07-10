@@ -72,29 +72,28 @@ export default async function RequestDetailPage({
 
   return (
     <div>
-      <div className="mb-2">
-        <Link href="/requests" className="text-xs text-primary underline">
-          ← 申請一覧に戻る
-        </Link>
+      {/* Breadcrumb */}
+      <div className="text-xs text-text-muted mb-0.5">
+        <Link href="/requests" className="text-primary underline">申請一覧</Link>
+        {" > "}
+        {request.title}
+      </div>
+
+      {/* Hero row */}
+      <div className="flex items-center gap-2 flex-wrap mb-1">
+        <h1 className="text-lg font-bold text-text">{request.title}</h1>
+        <StatusBadge variant={statusVariant(request.status)}>
+          {statusLabel(request.status)}
+        </StatusBadge>
+      </div>
+
+      {/* Meta row */}
+      <div className="mt-1.5 flex items-center gap-3 text-xs text-text-muted flex-wrap mb-3">
+        <span>申請者: {creatorName}</span>
+        <span>申請日時: {formatDateTime(request.createdAt)}</span>
       </div>
 
       <SectionCard>
-        {/* Header section */}
-        <div className="border-b border-border px-4 py-3">
-          <div className="flex items-start gap-3 flex-wrap">
-            <h1 className="text-base font-bold text-text flex-1 min-w-0">
-              {request.title}
-            </h1>
-            <StatusBadge variant={statusVariant(request.status)} className="flex-shrink-0">
-              {statusLabel(request.status)}
-            </StatusBadge>
-          </div>
-          <div className="mt-1.5 flex items-center gap-3 text-xs text-text-muted flex-wrap">
-            <span>申請者: {creatorName}</span>
-            <span>申請日時: {formatDateTime(request.createdAt)}</span>
-          </div>
-        </div>
-
         <div className="p-4">
           {/* System origin banner */}
           <SystemOriginBanner

@@ -47,14 +47,21 @@ export default async function InvoiceDetailPage({
 
   return (
     <div>
-      <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2">
-        <span className="text-sm font-bold text-text">{invoice.title}</span>
-        <span className="text-text-muted text-xs ml-2">
-          <Link href="/contracts" className="text-primary underline">契約一覧</Link>
-          {" > "}
-          <Link href={`/contracts/${contractId}`} className="text-primary underline">{contract.title}</Link>
-          {" > "}請求詳細
-        </span>
+      {/* Breadcrumb */}
+      <div className="text-xs text-text-muted mb-0.5">
+        <Link href="/contracts" className="text-primary underline">契約一覧</Link>
+        {" > "}
+        <Link href={`/contracts/${contractId}`} className="text-primary underline">{contract.title}</Link>
+        {" > "}
+        {invoice.title}
+      </div>
+
+      {/* Hero row */}
+      <div className="flex items-center gap-2 flex-wrap mb-3">
+        <h1 className="text-lg font-bold text-text">{invoice.title}</h1>
+        <StatusBadge variant={INVOICE_STATUS_VARIANT[invoice.status] ?? "gray"}>
+          {invoiceStatusLabels[invoice.status] ?? invoice.status}
+        </StatusBadge>
       </div>
 
       <div className="max-w-[560px] mx-auto">
@@ -75,13 +82,6 @@ export default async function InvoiceDetailPage({
 
             <dt className="text-text-muted">入金日</dt>
             <dd className="text-text">{formatDate(invoice.paidAt)}</dd>
-
-            <dt className="text-text-muted">ステータス</dt>
-            <dd className="text-text">
-              <StatusBadge variant={INVOICE_STATUS_VARIANT[invoice.status] ?? "gray"}>
-                {invoiceStatusLabels[invoice.status] ?? invoice.status}
-              </StatusBadge>
-            </dd>
 
             {invoice.notes && (
               <>

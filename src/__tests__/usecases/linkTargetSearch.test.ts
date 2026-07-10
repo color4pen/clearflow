@@ -164,8 +164,8 @@ describe("searchLinkTargetsAction", () => {
 // ---------------------------------------------------------------------------
 
 describe("単一紐づけ — 呼び出し元での FK マッピング", () => {
-  it("TaskList.tsx のコード内で linkTarget から dealId / interactionId をマッピングするコードが存在する", async () => {
-    const content = await readSrc("app/(dashboard)/tasks/TaskList.tsx");
+  it("CreateTaskButton.tsx のコード内で linkTarget から dealId / interactionId をマッピングするコードが存在する", async () => {
+    const content = await readSrc("app/(dashboard)/tasks/CreateTaskButton.tsx");
     expect(content).toContain("linkTarget");
     expect(content).toContain("dealId");
     expect(content).toContain("inquiryId");

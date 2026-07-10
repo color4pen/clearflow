@@ -1,5 +1,6 @@
 export { PageToolbar, ToolbarActions } from "./PageToolbar";
 export { DataTable } from "./DataTable";
+export { EmptyState } from "./EmptyState";
 export { FormField, Input, Select, Textarea, preventEnterSubmit } from "./FormField";
 export { LinkButton, SubmitButton } from "./LinkButton";
 export { SectionCard } from "./SectionCard";

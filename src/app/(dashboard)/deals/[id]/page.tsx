@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { getDeal, listMeetings, listDealContacts, listContractsByDeal, getClient, listClientContacts, listActionItemsByDeal, listOrganizationUsers, getDealActivity, getWatchStatus } from "@/application/usecases";
-import { SectionCard, DataTable } from "@/app/components";
+import { SectionCard, DataTable, EmptyState } from "@/app/components";
 import { DealContactsSection } from "./DealContactsSection";
 import { DealNotesSection } from "./DealNotesSection";
 import { DealInfoSection } from "./DealInfoSection";
@@ -147,7 +147,7 @@ export default async function DealDetailPage({
               </Link>
             </div>
             {dealMeetings.length === 0 ? (
-              <p className="text-xs text-text-muted">商談記録がありません</p>
+              <EmptyState message="商談記録がありません" />
             ) : (
               <DataTable<Interaction>
                 columns={[
@@ -241,11 +241,13 @@ export default async function DealDetailPage({
               )}
             </div>
             {dealContracts.length === 0 ? (
-              <p className="text-xs text-text-muted">
-                {deal.phase === "won"
-                  ? "契約がありません"
-                  : "契約がありません（受注後に作成できます）"}
-              </p>
+              <EmptyState
+                message={
+                  deal.phase === "won"
+                    ? "契約がありません"
+                    : "契約がありません（受注後に作成できます）"
+                }
+              />
             ) : (
               <DataTable
                 columns={[

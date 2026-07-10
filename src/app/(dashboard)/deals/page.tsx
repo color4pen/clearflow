@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { getPipelineSummary } from "@/application/usecases";
-import { PageToolbar, ToolbarActions, DataTable, SectionCard } from "@/app/components";
+import { PageToolbar, ToolbarActions, DataTable, SectionCard, EmptyState } from "@/app/components";
 import { phaseLabels, contractTypeLabels } from "@/app/(dashboard)/labels";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
 import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
 import { DealsFilter } from "./DealsFilter";
@@ -59,8 +60,8 @@ export default async function DealsPage({
         title="案件管理"
         actions={
           <ToolbarActions>
-            <Link href="/deals/new" className="text-xs text-primary underline">
-              [新規作成]
+            <Link href="/deals/new" className={BTN_PRIMARY}>
+              ＋ 新規作成
             </Link>
           </ToolbarActions>
         }
@@ -117,7 +118,7 @@ export default async function DealsPage({
 
       <SectionCard className="p-2">
         {filteredDeals.length === 0 ? (
-          <p className="text-xs text-text-muted py-4 text-center">案件はありません</p>
+          <EmptyState icon="💼" message="案件はありません" />
         ) : (
           <DataTable<DealWithDetails>
             columns={[

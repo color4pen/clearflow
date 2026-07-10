@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { getClient, listClientContacts, listInquiriesByClient, listDealsByClient, listContractsByClient } from "@/application/usecases";
-import { SectionCard, DataTable } from "@/app/components";
+import { SectionCard, DataTable, EmptyState } from "@/app/components";
 import { statusLabels, sourceLabels, phaseLabels, contractTypeLabels, contractStatusLabels } from "@/app/(dashboard)/labels";
 import { ClientInfoSection } from "./ClientInfoSection";
 import { ClientContactsSection } from "./ClientContactsSection";
@@ -76,7 +76,7 @@ export default async function ClientDetailPage({
           <SectionCard>
             <h2 className="text-xs font-bold text-text px-2 py-1 border-b border-border-light">関連引き合い</h2>
             {relatedInquiries.length === 0 ? (
-              <p className="text-xs text-text-muted px-2 py-3">関連する引き合いはありません</p>
+              <EmptyState message="関連する引き合いはありません" />
             ) : (
               <DataTable
                 columns={[
@@ -115,7 +115,7 @@ export default async function ClientDetailPage({
           <SectionCard>
             <h2 className="text-xs font-bold text-text px-2 py-1 border-b border-border-light">案件一覧</h2>
             {relatedDeals.length === 0 ? (
-              <p className="text-xs text-text-muted px-2 py-3">案件がありません</p>
+              <EmptyState message="案件がありません" />
             ) : (
               <DataTable
                 columns={[
@@ -153,7 +153,7 @@ export default async function ClientDetailPage({
           <SectionCard>
             <h2 className="text-xs font-bold text-text px-2 py-1 border-b border-border-light">契約一覧</h2>
             {relatedContracts.length === 0 ? (
-              <p className="text-xs text-text-muted px-2 py-3">契約がありません</p>
+              <EmptyState message="契約がありません" />
             ) : (
               <DataTable
                 columns={[

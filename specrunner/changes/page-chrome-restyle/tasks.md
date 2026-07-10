@@ -12,11 +12,11 @@ Tasks must be granular enough for the implementer to execute without additional 
 
 対象ファイル: `src/app/components/PageToolbar.tsx`
 
-- [ ] 外枠 div のクラスを `"flex items-center gap-2 flex-wrap mb-3"` に変更する（`bg-bg-toolbar border border-border px-2 py-1` を削除、`justify-between` も削除）
-- [ ] タイトルを `<span className="text-sm font-bold text-text">` から `<h1 className="text-lg font-bold text-text">` に変更する
-- [ ] `children` がある場合の `|` 区切り span（`<span className="text-border mx-1">|</span>`）を削除する
-- [ ] `actions` を `{actions && <div className="ml-auto flex items-center gap-3">{actions}</div>}` でラップする（右端固定）
-- [ ] `ToolbarActions` コンポーネントのクラスを `"flex items-center gap-3"` に更新する（`gap-2` → `gap-3`）
+- [x] 外枠 div のクラスを `"flex items-center gap-2 flex-wrap mb-3"` に変更する（`bg-bg-toolbar border border-border px-2 py-1` を削除、`justify-between` も削除）
+- [x] タイトルを `<span className="text-sm font-bold text-text">` から `<h1 className="text-lg font-bold text-text">` に変更する
+- [x] `children` がある場合の `|` 区切り span（`<span className="text-border mx-1">|</span>`）を削除する
+- [x] `actions` を `{actions && <div className="ml-auto flex items-center gap-3">{actions}</div>}` でラップする（右端固定）
+- [x] `ToolbarActions` コンポーネントのクラスを `"flex items-center gap-3"` に更新する（`gap-2` → `gap-3`）
 
 **Acceptance Criteria**:
 - `PageToolbar.tsx` の外枠 div に `bg-bg-toolbar` が含まれない
@@ -30,11 +30,11 @@ Tasks must be granular enough for the implementer to execute without additional 
 
 対象ファイル: `src/app/(dashboard)/requests/page.tsx`
 
-- [ ] `PageToolbar` と `ToolbarActions` を `@/app/components` からインポートする
-- [ ] lines 79-84 のインライン div（`flex items-center justify-between bg-bg-toolbar border border-border...`）を `<PageToolbar>` に置き換える
-- [ ] タイトル「申請管理」を `title` prop として渡す
-- [ ] 新規作成リンク（T-03 で BTN_PRIMARY 化する対象）を `actions` prop として渡す
-- [ ] `<div className="mb-0">` の外側ラッパーが不要になった場合は除去する
+- [x] `PageToolbar` と `ToolbarActions` を `@/app/components` からインポートする
+- [x] lines 79-84 のインライン div（`flex items-center justify-between bg-bg-toolbar border border-border...`）を `<PageToolbar>` に置き換える
+- [x] タイトル「申請管理」を `title` prop として渡す
+- [x] 新規作成リンク（T-03 で BTN_PRIMARY 化する対象）を `actions` prop として渡す
+- [x] `<div className="mb-0">` の外側ラッパーが不要になった場合は除去する
 
 **Acceptance Criteria**:
 - `requests/page.tsx` にインラインの `bg-bg-toolbar border border-border` div が存在しない
@@ -53,16 +53,16 @@ Tasks must be granular enough for the implementer to execute without additional 
 - `src/app/(dashboard)/settings/templates/page.tsx`
 
 各ファイルで以下を行う:
-- [ ] `BTN_PRIMARY` を `src/app/(dashboard)/styles.ts` からインポートする（既にインポート済みの場合はスキップ）
-- [ ] 旧リンク形式 `className="text-xs text-primary underline"` の新規作成 Link を `className={BTN_PRIMARY}` の Link に変更する
-- [ ] ラベル文言を以下の通りに変更する:
+- [x] `BTN_PRIMARY` を `src/app/(dashboard)/styles.ts` からインポートする（既にインポート済みの場合はスキップ）
+- [x] 旧リンク形式 `className="text-xs text-primary underline"` の新規作成 Link を `className={BTN_PRIMARY}` の Link に変更する
+- [x] ラベル文言を以下の通りに変更する:
   - deals: `[新規作成]` → `＋ 新規作成`
   - inquiries: `[新規登録]` → `＋ 新規登録`
   - clients: `[新規登録]` → `＋ 新規登録`
   - requests: `[新規作成]` → `＋ 新規作成`
   - policies: `[ポリシーを追加]` → `＋ ポリシーを追加`
   - templates: `[テンプレートを追加]` → `＋ テンプレートを追加`
-- [ ] 遷移先 href は変更しない
+- [x] 遷移先 href は変更しない
 
 **Acceptance Criteria**:
 - 上記 6 ファイルそれぞれで `[新規作成]` や `[新規登録]` 等のブラケット表記が存在しない
@@ -89,33 +89,33 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 ### CreateTaskButton.tsx の作成
 
-- [ ] `"use client"` ディレクティブを付与する
-- [ ] Props: `orgUsers: { id: string; name: string }[]`、`currentUserId: string`
-- [ ] `TaskList.tsx` の create 関連 state をそのままコピー移植する:
+- [x] `"use client"` ディレクティブを付与する
+- [x] Props: `orgUsers: { id: string; name: string }[]`、`currentUserId: string`
+- [x] `TaskList.tsx` の create 関連 state をそのままコピー移植する:
   - `showAddModal`・`showPicker`・`description`・`assigneeId`・`dueDate`・`linkTarget`・`error`
   - `isPending`・`startTransition`
   - `handleOpenAdd()`・`handleAdd()`
   - `router`（`useRouter`）・`showToast`（`useToast`）
-- [ ] モーダルダイアログ JSX（`showAddModal &&` ブロック、`fixed inset-0`）を丸ごとコピー移植する
-- [ ] `LinkTargetPicker` の使用（`showPicker` state 制御）を含める
-- [ ] 「新規作成」ボタン（`<button onClick={handleOpenAdd} className={BTN_PRIMARY}>`）を含める
-- [ ] コンポーネントの return は `<>ボタン + モーダル + Picker</>` のフラグメント形式とする
-- [ ] 必要な import を全て含める（`createActionItemAction`・`useRouter`・`useToast`・`Input`・`BTN_PRIMARY`・`BTN_SECONDARY`・`SELECT_BASE`・`LinkTargetPicker`）
+- [x] モーダルダイアログ JSX（`showAddModal &&` ブロック、`fixed inset-0`）を丸ごとコピー移植する
+- [x] `LinkTargetPicker` の使用（`showPicker` state 制御）を含める
+- [x] 「新規作成」ボタン（`<button onClick={handleOpenAdd} className={BTN_PRIMARY}>`）を含める
+- [x] コンポーネントの return は `<>ボタン + モーダル + Picker</>` のフラグメント形式とする
+- [x] 必要な import を全て含める（`createActionItemAction`・`useRouter`・`useToast`・`Input`・`BTN_PRIMARY`・`BTN_SECONDARY`・`SELECT_BASE`・`LinkTargetPicker`）
 
 ### TaskList.tsx の変更
 
-- [ ] create 関連 state・ハンドラ・import（`useRouter`・`useToast`・`createActionItemAction`・`useTransition` 等）のうち、リスト描画に不要なものを削除する
-- [ ] モーダルダイアログ JSX ブロック（lines 77-123 相当）を削除する
-- [ ] `LinkTargetPicker` のモーダル外 JSX（lines 125-133 相当）を削除する
-- [ ] `<div className="flex items-center justify-between px-3.5 py-2">` ブロックのボタン部分を削除し、件数表示（`{items.length} 件`）のみ残す
-- [ ] `import { createActionItemAction }` 等の不要 import を削除する
-- [ ] `"use client"` ディレクティブは維持する（`ActionItemRow` が Client Component のため）
+- [x] create 関連 state・ハンドラ・import（`useRouter`・`useToast`・`createActionItemAction`・`useTransition` 等）のうち、リスト描画に不要なものを削除する
+- [x] モーダルダイアログ JSX ブロック（lines 77-123 相当）を削除する
+- [x] `LinkTargetPicker` のモーダル外 JSX（lines 125-133 相当）を削除する
+- [x] `<div className="flex items-center justify-between px-3.5 py-2">` ブロックのボタン部分を削除し、件数表示（`{items.length} 件`）のみ残す
+- [x] `import { createActionItemAction }` 等の不要 import を削除する
+- [x] `"use client"` ディレクティブは維持する（`ActionItemRow` が Client Component のため）
 
 ### page.tsx の変更
 
-- [ ] `CreateTaskButton` を `"./CreateTaskButton"` からインポートする
-- [ ] `<PageToolbar title="タスク" />` を `<PageToolbar title="タスク" actions={<CreateTaskButton orgUsers={orgUsers} currentUserId={currentUserId} />} />` に変更する
-- [ ] `orgUsers` と `currentUserId` は既存の変数から渡す
+- [x] `CreateTaskButton` を `"./CreateTaskButton"` からインポートする
+- [x] `<PageToolbar title="タスク" />` を `<PageToolbar title="タスク" actions={<CreateTaskButton orgUsers={orgUsers} currentUserId={currentUserId} />} />` に変更する
+- [x] `orgUsers` と `currentUserId` は既存の変数から渡す
 
 **Acceptance Criteria**:
 - `CreateTaskButton.tsx` が存在し `"use client"` を持ち、ボタンとモーダルを含む
@@ -133,16 +133,16 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 ### EmptyState.tsx の作成
 
-- [ ] Props: `icon?: string`（絵文字）、`message: string`、`children?: ReactNode`、`className?: string`
-- [ ] 外枠: `<div className={`py-10 text-center ${className ?? ""}`}>`
-- [ ] `icon` が存在する場合: `<span className="text-4xl block mb-2">{icon}</span>`
-- [ ] メッセージ: `<p className="text-xs text-text-muted">{message}</p>`
-- [ ] `children` が存在する場合: `<div className="mt-2">{children}</div>`
-- [ ] `import type { ReactNode } from "react"` を追加する
+- [x] Props: `icon?: string`（絵文字）、`message: string`、`children?: ReactNode`、`className?: string`
+- [x] 外枠: `<div className={`py-10 text-center ${className ?? ""}`}>`
+- [x] `icon` が存在する場合: `<span className="text-4xl block mb-2">{icon}</span>`
+- [x] メッセージ: `<p className="text-xs text-text-muted">{message}</p>`
+- [x] `children` が存在する場合: `<div className="mt-2">{children}</div>`
+- [x] `import type { ReactNode } from "react"` を追加する
 
 ### index.ts への追加
 
-- [ ] `export { EmptyState } from "./EmptyState"` を追加する
+- [x] `export { EmptyState } from "./EmptyState"` を追加する
 
 **Acceptance Criteria**:
 - `EmptyState.tsx` が存在し Props に `icon?`・`message`・`children?`・`className?` を持つ
@@ -168,19 +168,19 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 ### 一覧 0 件への適用
 
 各ファイルで以下を行う:
-- [ ] `EmptyState` を `@/app/components` からインポートする
-- [ ] 既存の 0 件表示 div/p を `<EmptyState icon="絵文字" message="...">` に置き換える
-- [ ] 絵文字の割り当て: clients 🏢 / deals 💼 / inquiries 📨 / contracts 📁 / tasks 📋 / requests 📝
-- [ ] 既存の導線リンク（「最初の○○を登録する」等）は `children` として維持する
-- [ ] `inquiries/InquiryListView.tsx` の 0 件表示（`text-center py-8 text-text-disabled text-sm` 相当）を `<EmptyState icon="📨" message="該当する引合はありません" />` に置き換える
-- [ ] `tasks/TaskList.tsx` の 0 件表示（`text-xs text-text-muted px-3.5 py-4`）を `<EmptyState icon="📋" message="タスクはありません" className="px-3.5" />` に置き換える
+- [x] `EmptyState` を `@/app/components` からインポートする
+- [x] 既存の 0 件表示 div/p を `<EmptyState icon="絵文字" message="...">` に置き換える
+- [x] 絵文字の割り当て: clients 🏢 / deals 💼 / inquiries 📨 / contracts 📁 / tasks 📋 / requests 📝
+- [x] 既存の導線リンク（「最初の○○を登録する」等）は `children` として維持する
+- [x] `inquiries/InquiryListView.tsx` の 0 件表示（`text-center py-8 text-text-disabled text-sm` 相当）を `<EmptyState icon="📨" message="該当する引合はありません" />` に置き換える
+- [x] `tasks/TaskList.tsx` の 0 件表示（`text-xs text-text-muted px-3.5 py-4`）を `<EmptyState icon="📋" message="タスクはありません" className="px-3.5" />` に置き換える
 
 ### 詳細サブセクション 0 件への適用
 
-- [ ] `deals/[id]/page.tsx` の商談記録 0 件（`<p className="text-xs text-text-muted">商談記録がありません</p>`）を `<EmptyState message="商談記録がありません" />` に置き換える
-- [ ] `deals/[id]/page.tsx` の契約 0 件メッセージを `<EmptyState message="..." />` に置き換える
-- [ ] `clients/[id]/page.tsx` の SectionCard 内 `text-xs text-text-muted` 0 件メッセージ（関連引合・関連案件・関連契約・担当者）を `<EmptyState message="..." />` に置き換える（icon は省略・文言不変）
-- [ ] 上記 2 ファイル以外の詳細画面には適用しない
+- [x] `deals/[id]/page.tsx` の商談記録 0 件（`<p className="text-xs text-text-muted">商談記録がありません</p>`）を `<EmptyState message="商談記録がありません" />` に置き換える
+- [x] `deals/[id]/page.tsx` の契約 0 件メッセージを `<EmptyState message="..." />` に置き換える
+- [x] `clients/[id]/page.tsx` の SectionCard 内 `text-xs text-text-muted` 0 件メッセージ（関連引合・関連案件・関連契約）を `<EmptyState message="..." />` に置き換える（icon は省略・文言不変）
+- [x] 上記 2 ファイル以外の詳細画面には適用しない
 
 **Acceptance Criteria**:
 - 一覧 6 ページで 0 件表示が `EmptyState` コンポーネントを使用し、各絵文字が設定されている
@@ -193,23 +193,23 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 ### inquiries/InquiryListView.tsx の変更
 
-- [ ] ステータスタブの button 要素のクラスを塗りボタン式から下線式に変更する:
+- [x] ステータスタブの button 要素のクラスを塗りボタン式から下線式に変更する:
   - 旧 active: `"bg-primary text-white border-primary font-bold"`
   - 新 active: `"border-b-2 border-primary text-primary font-bold"`
   - 旧 非 active: `"bg-bg-surface text-text border-border hover:bg-bg-toolbar"`
   - 新 非 active: `"border-b-2 border-transparent text-text-secondary hover:text-text hover:border-border"`
-- [ ] ボタン外枠（タブコンテナ）を `"flex items-end gap-0 border-b border-border"` でラップする（`px-2 py-2 bg-bg-toolbar border border-border border-t-0` の filter bar から分離する必要がある場合はレイアウトを調整）
-- [ ] `active === tab.value` による選択状態の判定は不変
-- [ ] タブボタンに `px-4 py-2 text-xs font-medium transition-colors` のベースクラスを付与する
-- [ ] フィルタ（source dropdown・search input）は変更しない
+- [x] ボタン外枠（タブコンテナ）を `"flex items-end gap-0 border-b border-border"` でラップする（`px-2 py-2 bg-bg-toolbar border border-border border-t-0` の filter bar から分離する必要がある場合はレイアウトを調整）
+- [x] `active === tab.value` による選択状態の判定は不変
+- [x] タブボタンに `px-4 py-2 text-xs font-medium transition-colors` のベースクラスを付与する
+- [x] フィルタ（source dropdown・search input）は変更しない
 
 ### tasks/page.tsx の変更
 
-- [ ] 未完了・完了タブのクラスを RequestTabs 基準に揃える:
+- [x] 未完了・完了タブのクラスを RequestTabs 基準に揃える:
   - active: `"border-b-2 border-primary text-primary font-bold bg-bg-surface px-4 py-2 text-xs font-medium"`
   - 非 active: `"border-b-2 border-transparent text-text-secondary hover:text-text hover:border-border px-4 py-2 text-xs font-medium"`
-- [ ] タブコンテナ（`flex gap-0 border-b border-border`）は維持する
-- [ ] 「自分のタスク」「全員」のフィルタ Link は変更しない
+- [x] タブコンテナ（`flex gap-0 border-b border-border`）は維持する
+- [x] 「自分のタスク」「全員」のフィルタ Link は変更しない
 
 **Acceptance Criteria**:
 - `InquiryListView.tsx` のタブ button に `border-b-2` が存在し、`bg-primary text-white border-primary` の組み合わせが存在しない
@@ -222,10 +222,10 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 対象ファイル: `src/app/(dashboard)/requests/RequestTabs.tsx`
 
-- [ ] 件数 pill の span 要素（`className={...} "rounded-full px-1.5 py-0.5 text-[10px] ..."}`）を削除する
-- [ ] ラベルの描画を `<span>{tab.label}</span>` から `{tab.label} ({tab.count})` のインラインテキストに変更する（span を使わずに直接テキストとして展開、またはシンプルな span で包む）
-- [ ] active 時の件数テキストカラーは Link の `text-primary` を継承させる（追加クラス不要）
-- [ ] 非 active 時の件数テキストカラーは Link の `text-text-secondary` を継承させる
+- [x] 件数 pill の span 要素（`className={...} "rounded-full px-1.5 py-0.5 text-[10px] ..."}`）を削除する
+- [x] ラベルの描画を `<span>{tab.label}</span>` から `{tab.label} ({tab.count})` のインラインテキストに変更する（span を使わずに直接テキストとして展開、またはシンプルな span で包む）
+- [x] active 時の件数テキストカラーは Link の `text-primary` を継承させる（追加クラス不要）
+- [x] 非 active 時の件数テキストカラーは Link の `text-text-secondary` を継承させる
 
 **Acceptance Criteria**:
 - `RequestTabs.tsx` に `rounded-full bg-primary text-white` の pill クラスが存在しない
@@ -238,16 +238,16 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 対象ファイル: `src/app/(dashboard)/inquiries/[id]/page.tsx`
 
-- [ ] 先頭の `bg-bg-toolbar border border-border px-2 py-1` div（lines 57-66 相当）を削除する
-- [ ] パンくず行を新設する: `<div className="text-xs text-text-muted mb-0.5"><Link href="/inquiries" className="text-primary underline">引合一覧</Link>{" > "}{inquiry.title}</div>`
-- [ ] ヒーロー行を新設する: `<div className="flex items-center gap-2 flex-wrap">`
+- [x] 先頭の `bg-bg-toolbar border border-border px-2 py-1` div（lines 57-66 相当）を削除する
+- [x] パンくず行を新設する: `<div className="text-xs text-text-muted mb-0.5"><Link href="/inquiries" className="text-primary underline">引合一覧</Link>{" > "}{inquiry.title}</div>`
+- [x] ヒーロー行を新設する: `<div className="flex items-center gap-2 flex-wrap">`
   - `<h1 className="text-lg font-bold text-text">{inquiry.title}</h1>`
   - `<StatusBadge variant={INQUIRY_STATUS_VARIANT[inquiry.status] ?? "gray"}>{statusLabels[inquiry.status] ?? inquiry.status}</StatusBadge>`
   - `<div className="ml-auto flex items-center gap-3"><InquiryActions .../></div>`
-- [ ] `InquiryActions` コンポーネントを Actions SectionCard（lines 124-141 相当）から ml-auto エリアへ移動する
-- [ ] Actions SectionCard の `inquiry.status !== "converted"` 条件での `InquiryActions` 呼び出しを削除する
-- [ ] `DeleteInquiryButton` は Actions SectionCard 内に残す（ml-auto に移動しない）
-- [ ] `InquiryStatusBanner` は現位置（ヒーロー行の直下）に維持する
+- [x] `InquiryActions` コンポーネントを Actions SectionCard（lines 124-141 相当）から ml-auto エリアへ移動する
+- [x] Actions SectionCard の `inquiry.status !== "converted"` 条件での `InquiryActions` 呼び出しを削除する
+- [x] `DeleteInquiryButton` は Actions SectionCard 内に残す（ml-auto に移動しない）
+- [x] `InquiryStatusBanner` は現位置（ヒーロー行の直下）に維持する
 
 **Acceptance Criteria**:
 - `inquiries/[id]/page.tsx` に `<h1` と `StatusBadge` がヒーロー行の flex コンテナ内に存在する
@@ -262,17 +262,17 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 対象ファイル: `src/app/(dashboard)/contracts/[id]/page.tsx`
 
-- [ ] 先頭の `bg-bg-toolbar border border-border px-2 py-1` div（lines 55-61 相当）を削除する
-- [ ] パンくず行を新設する: `<div className="text-xs text-text-muted mb-0.5"><Link href="/contracts" className="text-primary underline">契約一覧</Link>{" > "}{contract.title}</div>`
-- [ ] ヒーロー行を新設する: `<div className="flex items-center gap-2 flex-wrap">`
+- [x] 先頭の `bg-bg-toolbar border border-border px-2 py-1` div（lines 55-61 相当）を削除する
+- [x] パンくず行を新設する: `<div className="text-xs text-text-muted mb-0.5"><Link href="/contracts" className="text-primary underline">契約一覧</Link>{" > "}{contract.title}</div>`
+- [x] ヒーロー行を新設する: `<div className="flex items-center gap-2 flex-wrap">`
   - `<h1 className="text-lg font-bold text-text">{contract.title}</h1>`
   - `<StatusBadge variant={CONTRACT_STATUS_VARIANT[contract.status] ?? "gray"}>{contractStatusLabels[contract.status] ?? contract.status}</StatusBadge>`
   - `<div className="ml-auto flex items-center gap-3">「案件を表示」「顧客を表示」リンク</div>`
-- [ ] 「案件を表示」リンク（`href={/deals/${contract.dealId}}`）を ml-auto エリアへ移動する
-- [ ] 「顧客を表示」リンク（`href={/clients/${contract.clientId}}`）を ml-auto エリアへ移動する
-- [ ] SectionCard 内の dl の `<div className="flex gap-2">` ステータス行（`<dt>ステータス</dt>`）を削除する（ヒーロー行に移動済み）
-- [ ] `ContractStatusActions`・`DeleteContractButton`・`isPending` バナーは現位置を維持する
-- [ ] 関連情報 dl の案件・顧客リンクは dl から削除する（ml-auto エリアに移動したため）
+- [x] 「案件を表示」リンク（`href={/deals/${contract.dealId}}`）を ml-auto エリアへ移動する
+- [x] 「顧客を表示」リンク（`href={/clients/${contract.clientId}}`）を ml-auto エリアへ移動する
+- [x] SectionCard 内の dl の `<div className="flex gap-2">` ステータス行（`<dt>ステータス</dt>`）を削除する（ヒーロー行に移動済み）
+- [x] `ContractStatusActions`・`DeleteContractButton`・`isPending` バナーは現位置を維持する
+- [x] 関連情報 dl の案件・顧客リンクは dl から削除する（ml-auto エリアに移動したため）
 
 **Acceptance Criteria**:
 - `contracts/[id]/page.tsx` に `<h1` と `StatusBadge` がヒーロー行の flex コンテナ内に存在する
@@ -287,15 +287,15 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 対象ファイル: `src/app/(dashboard)/contracts/[id]/invoices/[invoiceId]/page.tsx`
 
-- [ ] 先頭の `bg-bg-toolbar border border-border px-2 py-1` div（lines 50-58 相当）を削除する
-- [ ] パンくず行を新設する: `<div className="text-xs text-text-muted mb-0.5"><Link href="/contracts" className="text-primary underline">契約一覧</Link>{" > "}<Link href={/contracts/${contractId}} className="text-primary underline">{contract.title}</Link>{" > "}{invoice.title}</div>`
-- [ ] ヒーロー行を新設する: `<div className="flex items-center gap-2 flex-wrap">`
+- [x] 先頭の `bg-bg-toolbar border border-border px-2 py-1` div（lines 50-58 相当）を削除する
+- [x] パンくず行を新設する: `<div className="text-xs text-text-muted mb-0.5"><Link href="/contracts" className="text-primary underline">契約一覧</Link>{" > "}<Link href={/contracts/${contractId}} className="text-primary underline">{contract.title}</Link>{" > "}{invoice.title}</div>`
+- [x] ヒーロー行を新設する: `<div className="flex items-center gap-2 flex-wrap">`
   - `<h1 className="text-lg font-bold text-text">{invoice.title}</h1>`
   - `<StatusBadge variant={INVOICE_STATUS_VARIANT[invoice.status] ?? "gray"}>{invoiceStatusLabels[invoice.status] ?? invoice.status}</StatusBadge>`
   - ml-auto 要素なし（右端アクションなし）
-- [ ] `max-w-[560px] mx-auto` の中央寄せラッパーを維持する（ヒーロー行はその外か内かを判断: 仕様通り `max-w-[560px] mx-auto` 内に収める）
-- [ ] SectionCard 内の dl の `<dt>ステータス</dt>` 行を削除する（ヒーロー行に移動済み）
-- [ ] `InvoiceActions` は SectionCard 内の現位置を維持する
+- [x] `max-w-[560px] mx-auto` の中央寄せラッパーを維持する（ヒーロー行はその外か内かを判断: 仕様通り `max-w-[560px] mx-auto` 内に収める）
+- [x] SectionCard 内の dl の `<dt>ステータス</dt>` 行を削除する（ヒーロー行に移動済み）
+- [x] `InvoiceActions` は SectionCard 内の現位置を維持する
 
 **Acceptance Criteria**:
 - `invoices/[invoiceId]/page.tsx` に `<h1` と `StatusBadge` がヒーロー行の flex コンテナ内に存在する
@@ -309,16 +309,16 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 対象ファイル: `src/app/(dashboard)/requests/[id]/page.tsx`
 
-- [ ] 先頭の「← 申請一覧に戻る」リンク div（lines 75-78 相当）を削除する
-- [ ] パンくず行を新設する: `<div className="text-xs text-text-muted mb-0.5"><Link href="/requests" className="text-primary underline">申請一覧</Link>{" > "}{request.title}</div>`
-- [ ] ヒーロー行を新設する: `<div className="flex items-center gap-2 flex-wrap">`
+- [x] 先頭の「← 申請一覧に戻る」リンク div（lines 75-78 相当）を削除する
+- [x] パンくず行を新設する: `<div className="text-xs text-text-muted mb-0.5"><Link href="/requests" className="text-primary underline">申請一覧</Link>{" > "}{request.title}</div>`
+- [x] ヒーロー行を新設する: `<div className="flex items-center gap-2 flex-wrap">`
   - `<h1 className="text-lg font-bold text-text">{request.title}</h1>`
   - `<StatusBadge variant={statusVariant(request.status)}>{statusLabel(request.status)}</StatusBadge>`
   - ml-auto 要素なし
-- [ ] メタ行（申請者・申請日時）をヒーロー行の直下に配置する: `<div className="mt-1.5 flex items-center gap-3 text-xs text-text-muted flex-wrap">` （内容は不変）
-- [ ] SectionCard 内の `border-b border-border px-4 py-3` ヘッダーブロック（h1・StatusBadge・メタ行を含む部分）を削除する
-- [ ] SectionCard は `<div className="p-4">` の内容のみ残す（SystemOriginBanner・フォームデータ・更新日時・ApprovalStepper・ActionButtons）
-- [ ] `SectionCard` タグを `<SectionCard>` のまま維持し、内容の再配置のみを行う
+- [x] メタ行（申請者・申請日時）をヒーロー行の直下に配置する: `<div className="mt-1.5 flex items-center gap-3 text-xs text-text-muted flex-wrap">` （内容は不変）
+- [x] SectionCard 内の `border-b border-border px-4 py-3` ヘッダーブロック（h1・StatusBadge・メタ行を含む部分）を削除する
+- [x] SectionCard は `<div className="p-4">` の内容のみ残す（SystemOriginBanner・フォームデータ・更新日時・ApprovalStepper・ActionButtons）
+- [x] `SectionCard` タグを `<SectionCard>` のまま維持し、内容の再配置のみを行う
 
 **Acceptance Criteria**:
 - `requests/[id]/page.tsx` に `<h1` と `StatusBadge` が SectionCard 外のヒーロー行 flex コンテナ内に存在する
@@ -337,20 +337,20 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 ### globals.css の変更
 
-- [ ] `:root` ブロックに `--bg-login-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);` を追加する
-- [ ] `[data-theme="dark"]` ブロックにも同値で `--bg-login-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);` を追加する
+- [x] `:root` ブロックに `--bg-login-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);` を追加する
+- [x] `[data-theme="dark"]` ブロックにも同値で `--bg-login-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);` を追加する
 
 ### login/page.tsx の変更
 
-- [ ] 最外 div のクラスから `bg-bg-page` を削除し、`style={{ background: 'var(--bg-login-gradient)' }}` を付与する（`min-h-screen flex items-center justify-center` は維持）
-- [ ] 内側ラッパー div のクラスを `max-w-md w-full space-y-4 px-4` から `max-w-[380px] w-full space-y-4` に変更する（幅制約 380px はラッパー側で担う）
-- [ ] カードの `SectionCard` の `className` を `py-4 px-4` から `rounded-xl p-9 shadow-lg` に変更する（幅指定は付けない。ラッパーの 380px に従う）
-- [ ] ロゴ `h1` のクラスを `"text-sm font-bold text-center text-text"` から `"text-xl font-bold text-center text-primary"` に変更する
-- [ ] サブコピー `h2` の文言を「承認ワークフローシステム」から「案件管理システム」に変更する（クラスは `"mt-1 text-center text-xs text-text-muted"` のまま）
-- [ ] 「ログイン」の `h3` ラベル（`text-sm font-bold text-text mb-4`）を削除する
-- [ ] エラー表示の div のクラスを `"mb-4 p-3 bg-red-50 border border-red-200 text-danger text-xs"` から `"mb-4 p-3 bg-status-red-bg border border-status-red-text text-status-red-text text-xs"` に変更する
-- [ ] `space-y-4` の外側 div は維持する
-- [ ] フォーム（email・password・SubmitButton）は変更しない
+- [x] 最外 div のクラスから `bg-bg-page` を削除し、`style={{ background: 'var(--bg-login-gradient)' }}` を付与する（`min-h-screen flex items-center justify-center` は維持）
+- [x] 内側ラッパー div のクラスを `max-w-md w-full space-y-4 px-4` から `max-w-[380px] w-full space-y-4` に変更する（幅制約 380px はラッパー側で担う）
+- [x] カードの `SectionCard` の `className` を `py-4 px-4` から `rounded-xl p-9 shadow-lg` に変更する（幅指定は付けない。ラッパーの 380px に従う）
+- [x] ロゴ `h1` のクラスを `"text-sm font-bold text-center text-text"` から `"text-xl font-bold text-center text-primary"` に変更する
+- [x] サブコピー `h2` の文言を「承認ワークフローシステム」から「案件管理システム」に変更する（クラスは `"mt-1 text-center text-xs text-text-muted"` のまま）
+- [x] 「ログイン」の `h3` ラベル（`text-sm font-bold text-text mb-4`）を削除する
+- [x] エラー表示の div のクラスを `"mb-4 p-3 bg-red-50 border border-red-200 text-danger text-xs"` から `"mb-4 p-3 bg-status-red-bg border border-status-red-text text-status-red-text text-xs"` に変更する
+- [x] `space-y-4` の外側 div は維持する
+- [x] フォーム（email・password・SubmitButton）は変更しない
 
 **Acceptance Criteria**:
 - `globals.css` の `:root` ブロックに `--bg-login-gradient` が定義されている
@@ -373,46 +373,46 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 ### pageToolbar.test.ts
 
-- [ ] `PageToolbar.tsx` が `<h1` を含むことを確認するテストを書く
-- [ ] `PageToolbar.tsx` が `text-lg font-bold` クラスを含むことを確認するテストを書く
-- [ ] `PageToolbar.tsx` に `bg-bg-toolbar` が含まれないことを確認するテストを書く
-- [ ] テストは `readFile` + `expect(content).toContain()` 形式（既存パターンに準拠）
+- [x] `PageToolbar.tsx` が `<h1` を含むことを確認するテストを書く
+- [x] `PageToolbar.tsx` が `text-lg font-bold` クラスを含むことを確認するテストを書く
+- [x] `PageToolbar.tsx` に `bg-bg-toolbar` が含まれないことを確認するテストを書く
+- [x] テストは `readFile` + `expect(content).toContain()` 形式（既存パターンに準拠）
 
 ### emptyState.test.ts
 
-- [ ] `EmptyState.tsx` が `icon` prop に対する条件分岐を含むことを確認するテストを書く
-- [ ] `EmptyState.tsx` が `message` prop の描画コードを含むことを確認するテストを書く
-- [ ] `EmptyState.tsx` が `children` prop の描画コードを含むことを確認するテストを書く
-- [ ] `EmptyState.tsx` が `text-xs text-text-muted` を含むことを確認するテストを書く
-- [ ] `EmptyState.tsx` が `py-10 text-center` を含むことを確認するテストを書く
+- [x] `EmptyState.tsx` が `icon` prop に対する条件分岐を含むことを確認するテストを書く
+- [x] `EmptyState.tsx` が `message` prop の描画コードを含むことを確認するテストを書く
+- [x] `EmptyState.tsx` が `children` prop の描画コードを含むことを確認するテストを書く
+- [x] `EmptyState.tsx` が `text-xs text-text-muted` を含むことを確認するテストを書く
+- [x] `EmptyState.tsx` が `py-10 text-center` を含むことを確認するテストを書く
 
 ### detailHeroPages.test.ts
 
 以下 4 ファイルそれぞれに対し:
-- [ ] `<h1` が存在することを確認するテストを書く
-- [ ] `StatusBadge` が存在することを確認するテストを書く
-- [ ] 一覧リンク（`/inquiries`・`/contracts`・`/requests`）が存在することを確認するテストを書く
-- [ ] `bg-bg-toolbar border border-border` の旧バーが存在しないことを確認するテストを書く
+- [x] `<h1` が存在することを確認するテストを書く
+- [x] `StatusBadge` が存在することを確認するテストを書く
+- [x] 一覧リンク（`/inquiries`・`/contracts`・`/requests`）が存在することを確認するテストを書く
+- [x] `bg-bg-toolbar border border-border` の旧バーが存在しないことを確認するテストを書く
 
 対象: `inquiries/[id]/page.tsx`・`contracts/[id]/page.tsx`・`contracts/[id]/invoices/[invoiceId]/page.tsx`・`requests/[id]/page.tsx`
 
 ### newCreateLinks.test.ts
 
 以下 6 ファイルそれぞれに対し:
-- [ ] `BTN_PRIMARY` またはその定数値（`bg-primary text-white`）を含む新規作成 Link が存在することを確認するテストを書く
-- [ ] ブラケット `[` が新規作成テキストに含まれないことを確認するテストを書く
+- [x] `BTN_PRIMARY` またはその定数値（`bg-primary text-white`）を含む新規作成 Link が存在することを確認するテストを書く
+- [x] ブラケット `[` が新規作成テキストに含まれないことを確認するテストを書く
 
 対象: `deals/page.tsx`・`inquiries/page.tsx`・`clients/page.tsx`・`requests/page.tsx`・`settings/policies/page.tsx`・`settings/templates/page.tsx`
 
 さらに contracts について（spec.md「存在しない」シナリオ対応）:
-- [ ] `contracts/page.tsx` に `/contracts/new` へのリンクが**存在しない**ことを確認するテストを書く
+- [x] `contracts/page.tsx` に `/contracts/new` へのリンクが**存在しない**ことを確認するテストを書く
 
 ### 既存テストの調査と追随更新
 
-- [ ] `bun test` を実行し、クラス名・DOM 構造固定テストが新しい実装によって失敗していないか確認する
-- [ ] 失敗している場合、期待値の変更が「クラス名・DOM 構造の追随」であれば更新する（挙動アサーションは変更しない）
-- [ ] `src/__tests__/static/uiBusinessStyle.test.ts` の既存テストが引き続きパスすることを確認する
-- [ ] `src/__tests__/components/dealDetailHeroHeader.test.ts` の既存テストが変更なしでパスすることを確認する
+- [x] `bun test` を実行し、クラス名・DOM 構造固定テストが新しい実装によって失敗していないか確認する
+- [x] 失敗している場合、期待値の変更が「クラス名・DOM 構造の追随」であれば更新する（挙動アサーションは変更しない）
+- [x] `src/__tests__/static/uiBusinessStyle.test.ts` の既存テストが引き続きパスすることを確認する
+- [x] `src/__tests__/components/dealDetailHeroHeader.test.ts` の既存テストが変更なしでパスすることを確認する
 
 **Acceptance Criteria**:
 - `pageToolbar.test.ts` が存在し全テストが green
@@ -429,10 +429,10 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 参照資料: `/Users/seki/Documents/GitHub/clearflow/specrunner/reference/juchu-mock/mock.html`・`mock-styles.css`・`design-spec.md`
 
-- [ ] 参照資料（`mock.html`・`mock-styles.css`・`design-spec.md`）の該当箇所を読む
-- [ ] 対象画面ごとに「モックの該当箇所 / 適用した値 / 意図的な差異と理由」を記録するセクションを作成する
-- [ ] 対象画面: 一覧ツールバー（PageToolbar）/ 一覧フィルタバー / 空状態 / タブ / 詳細ヒーロー（4 画面）/ ログイン
-- [ ] 参照資料が存在しない環境では「参照資料なし」と明記し、本書の仕様値のみを正として記録する
+- [x] 参照資料（`mock.html`・`mock-styles.css`・`design-spec.md`）の該当箇所を読む
+- [x] 対象画面ごとに「モックの該当箇所 / 適用した値 / 意図的な差異と理由」を記録するセクションを作成する
+- [x] 対象画面: 一覧ツールバー（PageToolbar）/ 一覧フィルタバー / 空状態 / タブ / 詳細ヒーロー（4 画面）/ ログイン
+- [x] 参照資料が存在しない環境では「参照資料なし」と明記し、本書の仕様値のみを正として記録する
 
 **Acceptance Criteria**:
 - `specrunner/changes/page-chrome-restyle/mock-fidelity-check.md` が存在する
@@ -443,13 +443,13 @@ contracts への新規作成導線は新設しない（request.md 要件 2: `/co
 
 ## T-17: 品質ゲート確認
 
-- [ ] `bun run typecheck` が exit 0 で完了する
-- [ ] `bun run lint` が exit 0 で完了する
-- [ ] `bun run build` が exit 0 で完了する
-- [ ] `bun test` の全テストが green（既存 144 件 + 新規追加分）
-- [ ] `aozu check` が exit 0 で完了する
-- [ ] アーキテクチャテスト（`src/__tests__/static/architecture.test.ts`）が green
-- [ ] `src/app` 配下の変更ファイルに `bg-red-\d+`・`border-red-\d+`・`text-[#`・`bg-[#` が存在しないことを確認する
+- [x] `bun run typecheck` が exit 0 で完了する
+- [x] `bun run lint` が exit 0 で完了する
+- [x] `bun run build` が exit 0 で完了する
+- [x] `bun test` の全テストが green（既存 144 件 + 新規追加分）
+- [x] `aozu check` が exit 0 で完了する
+- [x] アーキテクチャテスト（`src/__tests__/static/architecture.test.ts`）が green
+- [x] `src/app` 配下の変更ファイルに `bg-red-\d+`・`border-red-\d+`・`text-[#`・`bg-[#` が存在しないことを確認する
 
 **Acceptance Criteria**:
 - 上記全コマンドが exit 0

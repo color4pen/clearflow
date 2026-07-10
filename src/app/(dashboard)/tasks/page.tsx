@@ -4,6 +4,7 @@ import { listActionItems, listOrganizationUsers } from "@/application/usecases";
 import { canPerform } from "@/domain/authorization";
 import { PageToolbar, SectionCard } from "@/app/components";
 import { TaskList } from "./TaskList";
+import { CreateTaskButton } from "./CreateTaskButton";
 
 export default async function TasksPage({
   searchParams,
@@ -32,26 +33,26 @@ export default async function TasksPage({
 
   return (
     <div>
-      <PageToolbar title="タスク" />
+      <PageToolbar title="タスク" actions={<CreateTaskButton orgUsers={orgUsers} currentUserId={currentUserId} />} />
 
       <div className="mt-3 mb-3 flex items-center justify-between">
         <div className="flex gap-0 border-b border-border">
           <Link
             href={`/tasks?status=todo${showAll ? "&assignee=all" : ""}`}
-            className={`text-xs px-4 py-2 border-b-2 ${
+            className={`border-b-2 px-4 py-2 text-xs font-medium ${
               !isDone
-                ? "border-primary text-primary font-bold"
-                : "border-transparent text-text-muted hover:text-text"
+                ? "border-primary text-primary font-bold bg-bg-surface"
+                : "border-transparent text-text-secondary hover:text-text hover:border-border"
             }`}
           >
             未完了
           </Link>
           <Link
             href={`/tasks?status=done${showAll ? "&assignee=all" : ""}`}
-            className={`text-xs px-4 py-2 border-b-2 ${
+            className={`border-b-2 px-4 py-2 text-xs font-medium ${
               isDone
-                ? "border-primary text-primary font-bold"
-                : "border-transparent text-text-muted hover:text-text"
+                ? "border-primary text-primary font-bold bg-bg-surface"
+                : "border-transparent text-text-secondary hover:text-text hover:border-border"
             }`}
           >
             完了
@@ -85,7 +86,6 @@ export default async function TasksPage({
         <TaskList
           items={items}
           orgUsers={orgUsers}
-          currentUserId={currentUserId}
           canDelete={canDelete}
         />
       </SectionCard>

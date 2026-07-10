@@ -2,9 +2,11 @@ import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { listRequests, listOrganizationUsers } from "@/application/usecases";
 import { bulkApproveAction } from "@/app/actions/requests";
+import { PageToolbar, ToolbarActions, EmptyState } from "@/app/components";
 import { BulkApprovalPanel } from "./BulkApprovalPanel";
 import { RequestTabs } from "./RequestTabs";
 import { statusLabel, statusVariant } from "./statusUtils";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 
 type Tab = "action-required" | "my-requests" | "all";
 
@@ -76,27 +78,30 @@ export default async function RequestsPage({
 
   return (
     <div>
-      <div className="flex items-center justify-between bg-bg-toolbar border border-border px-2 py-1 mb-0">
-        <span className="text-sm font-bold text-text">申請管理</span>
-        <div className="flex items-center gap-2">
-          <Link href="/requests/new" className="text-xs text-primary underline">[新規作成]</Link>
-        </div>
-      </div>
+      <PageToolbar
+        title="申請管理"
+        actions={
+          <ToolbarActions>
+            <Link href="/requests/new" className={BTN_PRIMARY}>
+              ＋ 新規作成
+            </Link>
+          </ToolbarActions>
+        }
+      />
 
       <RequestTabs currentTab={effectiveTab} tabs={tabs} />
 
       {filteredRequests.length === 0 ? (
-        <div className="text-center py-8 text-text-disabled text-sm bg-bg-surface border border-border border-t-0">
-          <p>申請がありません</p>
+        <EmptyState icon="📝" message="申請がありません">
           {effectiveTab === "my-requests" && (
             <Link
               href="/requests/new"
-              className="mt-2 inline-block text-primary underline text-xs"
+              className="inline-block text-primary underline text-xs"
             >
               最初の申請を作成する
             </Link>
           )}
-        </div>
+        </EmptyState>
       ) : (
         <BulkApprovalPanel
           requests={filteredRequests.map((r) => ({

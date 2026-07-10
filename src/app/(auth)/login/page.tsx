@@ -13,24 +13,23 @@ export default function LoginPage() {
   );
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-bg-page">
-      <div className="max-w-md w-full space-y-4 px-4">
+    <div
+      className="min-h-screen flex items-center justify-center"
+      style={{ background: "var(--bg-login-gradient)" }}
+    >
+      <div className="max-w-[380px] w-full space-y-4">
         <div>
-          <h1 className="text-sm font-bold text-center text-text">
+          <h1 className="text-xl font-bold text-center text-primary">
             Clearflow
           </h1>
           <h2 className="mt-1 text-center text-xs text-text-muted">
-            承認ワークフローシステム
+            案件管理システム
           </h2>
         </div>
 
-        <SectionCard className="py-4 px-4">
-          <h3 className="text-sm font-bold text-text mb-4">
-            ログイン
-          </h3>
-
+        <SectionCard className="rounded-xl p-9 shadow-lg">
           {state.message && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-danger text-xs">
+            <div className="mb-4 p-3 bg-status-red-bg border border-status-red-text text-status-red-text text-xs">
               {state.message}
             </div>
           )}

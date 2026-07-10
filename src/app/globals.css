@@ -40,6 +40,9 @@
   --theme-draft: #1a56db;
   --theme-expired: #94a3b8;
 
+  /* ログイン背景グラデーション */
+  --bg-login-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+
   /* ステータス系統トークン */
   --status-gray-text: #6b7280;
   --status-gray-bg: #f3f4f6;
@@ -91,6 +94,9 @@
   --theme-revision: #fb923c;
   --theme-draft: #60a5fa;
   --theme-expired: #64748b;
+
+  /* ログイン背景グラデーション */
+  --bg-login-gradient: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
 
   /* ステータス系統トークン（ダーク） */
   --status-gray-text: #d1d5db;
