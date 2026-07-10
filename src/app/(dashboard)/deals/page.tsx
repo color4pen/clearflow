@@ -116,7 +116,7 @@ export default async function DealsPage({
         />
       </div>
 
-      <SectionCard className="p-2">
+      <SectionCard className="overflow-hidden">
         {filteredDeals.length === 0 ? (
           <EmptyState icon="💼" message="案件はありません" />
         ) : (

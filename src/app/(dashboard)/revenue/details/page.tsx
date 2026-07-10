@@ -105,7 +105,7 @@ export default async function RevenueDetailsPage({
         </div>
       </SectionCard>
 
-      <SectionCard className="p-2 mt-2">
+      <SectionCard className="mt-2 overflow-hidden">
         {result.axis === "monthly" && (
           <DataTable<MonthlyRevenue>
             columns={[
