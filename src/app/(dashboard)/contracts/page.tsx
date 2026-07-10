@@ -24,7 +24,7 @@ export default async function ContractsPage() {
     <div>
       <PageToolbar title="契約管理" />
 
-      <SectionCard className="p-2 mt-2">
+      <SectionCard className="mt-2 overflow-hidden">
         {contracts.length === 0 ? (
           <EmptyState icon="📁" message="契約はありません" />
         ) : (
