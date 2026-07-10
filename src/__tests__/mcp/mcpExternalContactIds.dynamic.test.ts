@@ -34,6 +34,7 @@ const contactResolutionState = {
   interaction: null as Record<string, unknown> | null,
   deal: null as Record<string, unknown> | null,
   contacts: [] as Array<{ id: string; name: string }>,
+  listClientContactsCallCount: 0,
 };
 
 // ---------------------------------------------------------------------------
@@ -76,7 +77,10 @@ mock.module("@/application/usecases/updateMeeting", () => ({
 }));
 
 mock.module("@/application/usecases/listClientContacts", () => ({
-  listClientContacts: async () => contactResolutionState.contacts,
+  listClientContacts: async () => {
+    contactResolutionState.listClientContactsCallCount++;
+    return contactResolutionState.contacts;
+  },
 }));
 
 mock.module("@/infrastructure/repositories/interactionRepository", () => ({
@@ -214,6 +218,7 @@ beforeEach(() => {
   contactResolutionState.interaction = null;
   contactResolutionState.deal = null;
   contactResolutionState.contacts = [];
+  contactResolutionState.listClientContactsCallCount = 0;
 });
 
 // ---------------------------------------------------------------------------
@@ -472,5 +477,58 @@ describe("MCP tools/list — externalContactIds 広告スキーマ検証", () =>
     // 部分更新意味論（省略=保持、null=クリア）と登録済み担当者IDの制約が説明に含まれる
     expect(desc).toContain("省略時は既存の外部参加者を保持する");
     expect(desc).toContain("登録済みの担当者ID");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TC-020: 担当者削除後も既存商談記録の社外参加者氏名スナップショットが維持される
+//
+// 名前はスナップショットとして attendees JSONB に保存済みのため、
+// 担当者が削除されても read 経路で listClientContacts を呼ぶ必要はない。
+// update_meeting で externalContactIds を省略した場合に listClientContacts が
+// 呼ばれないことを regression として固定する。
+// ---------------------------------------------------------------------------
+
+describe("TC-020: 担当者削除後も社外参加者氏名スナップショットが維持される（listClientContacts 非呼び出し）", () => {
+  it("externalContactIds を省略した update_meeting では listClientContacts が呼ばれない", async () => {
+    state.updateMeetingReturns = { ok: true, meeting: mockMeeting };
+
+    await callInteractions({
+      operation: "update_meeting",
+      meetingId: MEETING_UUID,
+      summary: "サマリのみ更新",
+      // externalContactIds は省略 → 既存の社外参加者（氏名スナップショット）を保持
+    });
+
+    expect(contactResolutionState.listClientContactsCallCount).toBe(0);
+  });
+
+  it("externalContactIds: null（クリア）でも listClientContacts が呼ばれない", async () => {
+    state.updateMeetingReturns = { ok: true, meeting: mockMeeting };
+
+    await callInteractions({
+      operation: "update_meeting",
+      meetingId: MEETING_UUID,
+      externalContactIds: null,
+    });
+
+    expect(contactResolutionState.listClientContactsCallCount).toBe(0);
+  });
+
+  it("externalContactIds 省略 → updateMeeting に externalAttendees: undefined が渡り既存スナップショットが保持される", async () => {
+    state.updateMeetingReturns = { ok: true, meeting: mockMeeting };
+
+    await callInteractions({
+      operation: "update_meeting",
+      meetingId: MEETING_UUID,
+      internalAttendees: ["社内 参加者"],
+      // externalContactIds は省略 → 削除済み担当者の氏名スナップショットを保持
+    });
+
+    expect(state.updateMeetingCalls).toHaveLength(1);
+    const callArgs = state.updateMeetingCalls[0] as Record<string, unknown>;
+    // externalAttendees が undefined → usecase 層で既存 attendees の外部側を保持する
+    expect(callArgs.externalAttendees).toBeUndefined();
+    expect(contactResolutionState.listClientContactsCallCount).toBe(0);
   });
 });
