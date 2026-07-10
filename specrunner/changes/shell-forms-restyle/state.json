@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "3034b36c-ce74-481f-9952-6fdaadb0ba9c",
   "createdAt": "2026-07-10T03:00:18.035Z",
-  "updatedAt": "2026-07-10T03:38:24.463Z",
+  "updatedAt": "2026-07-10T03:39:00.148Z",
   "request": {
     "title": "シェルと共有部品の刷新（サイドバー装飾・フォーム規律・トースト/ダイアログ）",
     "type": "refactoring",
@@ -12,7 +12,7 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "code-fixer",
+  "step": "regression-gate",
   "status": "running",
   "branch": "refactor/shell-forms-restyle-3034b36c",
   "error": null,
@@ -44,8 +44,31 @@
       ]
     }
   ],
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "skipped",
+      "approvedAtCommit": null,
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    },
+    {
+      "name": "mcp-conformance",
+      "status": "skipped",
+      "approvedAtCommit": null,
+      "activationPaths": [
+        "src/app/api/mcp/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
   "_journal": {
-    "historyCount": 29,
+    "historyCount": 40,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -53,7 +76,11 @@
       "test-case-gen": 1,
       "implementer": 1,
       "verification": 1,
-      "code-review": 1
+      "code-review": 1,
+      "code-fixer": 1,
+      "mcp-conformance": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1
     }
   }
 }
