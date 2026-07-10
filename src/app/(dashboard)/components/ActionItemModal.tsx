@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Input } from "@/app/components";
-import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
+import { Input, Select } from "@/app/components";
+import { BTN_PRIMARY, BTN_SECONDARY, FORM_LABEL } from "@/app/(dashboard)/styles";
 import { LinkTargetPicker, type LinkTarget } from "./LinkTargetPicker";
 
 type Props = {
@@ -82,7 +82,7 @@ export function ActionItemModal({
           <div className="space-y-2">
             {error && <p className="text-danger text-xs">{error}</p>}
             <div>
-              <label className="text-xs text-text-muted block mb-0.5">内容</label>
+              <label className={`${FORM_LABEL} block mb-0.5`}>内容</label>
               <Input
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -91,12 +91,11 @@ export function ActionItemModal({
               />
             </div>
             <div>
-              <label className="text-xs text-text-muted block mb-0.5">担当者</label>
-              <select
+              <label className={`${FORM_LABEL} block mb-0.5`}>担当者</label>
+              <Select
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
                 disabled={loading}
-                className="w-full text-xs border border-border rounded px-2 py-1.5 bg-bg-surface text-text"
               >
                 <option value="">未設定</option>
                 {orgUsers.map((u) => (
@@ -104,10 +103,10 @@ export function ActionItemModal({
                     {u.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
             <div>
-              <label className="text-xs text-text-muted block mb-0.5">期日</label>
+              <label className={`${FORM_LABEL} block mb-0.5`}>期日</label>
               <Input
                 type="date"
                 value={dueDate}
@@ -117,7 +116,7 @@ export function ActionItemModal({
             </div>
             {showLinkTarget && (
               <div>
-                <label className="text-xs text-text-muted block mb-0.5">紐づけ先</label>
+                <label className={`${FORM_LABEL} block mb-0.5`}>紐づけ先</label>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-text flex-1 truncate">
                     {linkTarget ? linkTarget.label : "なし"}
@@ -146,7 +145,7 @@ export function ActionItemModal({
               </button>
             )}
             <div className="flex gap-2 ml-auto">
-              <button type="button" onClick={onCancel} disabled={loading} className="border border-border text-text text-xs px-3 py-1.5 cursor-pointer disabled:opacity-50">
+              <button type="button" onClick={onCancel} disabled={loading} className={BTN_SECONDARY}>
                 キャンセル
               </button>
               <button type="button" onClick={handleConfirm} disabled={loading} className={BTN_PRIMARY}>

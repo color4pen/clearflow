@@ -86,10 +86,10 @@ export function NotificationPanel({ notifications, unreadCount, actorNames }: Pr
 
       {/* clip 領域: 本文側に置き、パネルをサイドバー境界でクリップする
           （閉じる際にパネルがサイドバー上を横切らずに境界で消える） */}
-      <div className="fixed top-0 left-[210px] right-0 h-screen z-40 overflow-hidden pointer-events-none">
+      <div className="fixed top-0 left-[220px] right-0 h-screen z-40 overflow-hidden pointer-events-none">
         {/* flyout: clip 内を左→右にスライドして開閉する */}
         <div
-          className={`h-full w-80 bg-white dark:bg-bg-card border-r border-border shadow-xl flex flex-col pointer-events-auto transition-transform duration-200 ease-out ${
+          className={`h-full w-[340px] bg-white dark:bg-bg-surface border-r border-border shadow-xl flex flex-col pointer-events-auto transition-transform duration-200 ease-out ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
           role="dialog"

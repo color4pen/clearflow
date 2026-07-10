@@ -13,10 +13,10 @@
 
 ## T-01: globals.css にトーストトークンとキーフレームを追加する
 
-- [ ] `:root` ブロックの末尾に `--bg-toast: #1e293b;` を追加する
-- [ ] `[data-theme="dark"]` ブロックの末尾に `--bg-toast: #334155;` を追加する
-- [ ] `@theme inline` ブロックの末尾に `--color-bg-toast: var(--bg-toast);` を追加する
-- [ ] `globals.css` の末尾に以下の `@keyframes toast-slide-in` を追加する:
+- [x] `:root` ブロックの末尾に `--bg-toast: #1e293b;` を追加する
+- [x] `[data-theme="dark"]` ブロックの末尾に `--bg-toast: #334155;` を追加する
+- [x] `@theme inline` ブロックの末尾に `--color-bg-toast: var(--bg-toast);` を追加する
+- [x] `globals.css` の末尾に以下の `@keyframes toast-slide-in` を追加する:
   ```css
   @keyframes toast-slide-in {
     from {
@@ -40,7 +40,7 @@
 
 ## T-02: styles.ts の `FORM_LABEL` を更新する
 
-- [ ] `src/app/(dashboard)/styles.ts` の `FORM_LABEL` 定数を以下に変更する:
+- [x] `src/app/(dashboard)/styles.ts` の `FORM_LABEL` 定数を以下に変更する:
   ```ts
   export const FORM_LABEL = "text-xs font-semibold text-text-secondary";
   ```
@@ -55,16 +55,16 @@
 
 対象ファイル: `src/app/components/FormField.tsx`
 
-- [ ] `import { FORM_LABEL } from "@/app/(dashboard)/styles";` を追加する
-- [ ] `FormField` の `Props` 型に `required?: boolean` を追加する
-- [ ] `FormField` のラベル要素のクラスを `FORM_LABEL` 定数参照に変更する（`"block ... mb-0.5"` 部分は維持）:
+- [x] `import { FORM_LABEL } from "@/app/(dashboard)/styles";` を追加する
+- [x] `FormField` の `Props` 型に `required?: boolean` を追加する
+- [x] `FormField` のラベル要素のクラスを `FORM_LABEL` 定数参照に変更する（`"block ... mb-0.5"` 部分は維持）:
   ```tsx
   <label htmlFor={htmlFor} className={`block ${FORM_LABEL} mb-0.5`}>
     {label}
     {required && <span className="text-danger"> *</span>}
   </label>
   ```
-- [ ] `Input` の `Props` 型（`React.InputHTMLAttributes<HTMLInputElement>` に加えて）に `invalid?: boolean` を追加する。内部実装で `invalid` は HTML の `<input>` には渡さず（`rest` で展開しない）、クラスのみに使う:
+- [x] `Input` の `Props` 型（`React.InputHTMLAttributes<HTMLInputElement>` に加えて）に `invalid?: boolean` を追加する。内部実装で `invalid` は HTML の `<input>` には渡さず（`rest` で展開しない）、クラスのみに使う:
   ```tsx
   export function Input({ invalid, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { invalid?: boolean }) {
     return (
@@ -76,9 +76,9 @@
     );
   }
   ```
-- [ ] `Select` に同様の `invalid?: boolean` を追加し、`border-danger focus:border-danger` を適用する
-- [ ] `Textarea` に同様の `invalid?: boolean` を追加し、`border-danger focus:border-danger` を適用する
-- [ ] `Textarea` に `min-h-20` クラスを追加する（既存クラスとスペース区切りで追記）
+- [x] `Select` に同様の `invalid?: boolean` を追加し、`border-danger focus:border-danger` を適用する
+- [x] `Textarea` に同様の `invalid?: boolean` を追加し、`border-danger focus:border-danger` を適用する
+- [x] `Textarea` に `min-h-20` クラスを追加する（既存クラスとスペース区切りで追記）
 
 **Acceptance Criteria**:
 - `FormField` が `FORM_LABEL` をインポートしている
@@ -94,8 +94,8 @@
 
 対象ファイル: `src/app/components/MoneyInput.tsx`
 
-- [ ] `Props` 型に `invalid?: boolean` を追加する
-- [ ] 表示用 `<input>` の `className` 計算で、`invalid` が true のとき `border-danger focus:border-danger` に、false のとき `border-border focus:border-primary` に切り替える（既存の `baseClass` 文字列を分割して対応）
+- [x] `Props` 型に `invalid?: boolean` を追加する
+- [x] 表示用 `<input>` の `className` 計算で、`invalid` が true のとき `border-danger focus:border-danger` に、false のとき `border-border focus:border-primary` に切り替える（既存の `baseClass` 文字列を分割して対応）
 
 **Acceptance Criteria**:
 - `MoneyInput` に `invalid?: boolean` props が存在する
@@ -107,8 +107,8 @@
 
 対象ファイル: `src/app/(dashboard)/SidebarNav.tsx`
 
-- [ ] `NavItem` 型を拡張し `icon: string` フィールドを追加する
-- [ ] `navItems` のフラット配列を `navSections` 配列に置き換える。各セクションは `{ label: string; items: NavItem[] }` 型とする:
+- [x] `NavItem` 型を拡張し `icon: string` フィールドを追加する
+- [x] `navItems` のフラット配列を `navSections` 配列に置き換える。各セクションは `{ label: string; items: NavItem[] }` 型とする:
   ```ts
   const navSections = [
     {
@@ -142,11 +142,11 @@
     },
   ];
   ```
-- [ ] `Props` 型に `badgeCount?: number` を追加する
-- [ ] 描画ロジックを `navSections.map` に変更する。各セクションに見出しラベル（`text-2xs font-semibold uppercase tracking-wider text-text-sidebar-muted px-4 pt-4 pb-1`）を描画する
-- [ ] 各アイテムの描画: アイコンを `<span className="inline-block w-5">{item.icon}</span>` で先頭に配置、ラベルを続ける
-- [ ] active クラスを `bg-white/10 text-white border-l-[3px] border-primary` に変更する（`border-l-2 border-white` を削除）
-- [ ] `hasBadge` かつ `badgeCount` が 1 以上のとき、ラベル右端に `ml-auto` ピルを描画する:
+- [x] `Props` 型に `badgeCount?: number` を追加する
+- [x] 描画ロジックを `navSections.map` に変更する。各セクションに見出しラベル（`text-2xs font-semibold uppercase tracking-wider text-text-sidebar-muted px-4 pt-4 pb-1`）を描画する
+- [x] 各アイテムの描画: アイコンを `<span className="inline-block w-5">{item.icon}</span>` で先頭に配置、ラベルを続ける
+- [x] active クラスを `bg-white/10 text-white border-l-[3px] border-primary` に変更する（`border-l-2 border-white` を削除）
+- [x] `hasBadge` かつ `badgeCount` が 1 以上のとき、ラベル右端に `ml-auto` ピルを描画する:
   ```tsx
   {item.hasBadge && badgeCount != null && badgeCount > 0 && (
     <span className="ml-auto flex items-center justify-center bg-danger text-white text-2xs font-bold rounded-full min-w-4 h-4 px-1">
@@ -170,16 +170,16 @@
 
 対象ファイル: `src/app/(dashboard)/layout.tsx`
 
-- [ ] `listRequests` を `@/application/usecases` からインポートする
-- [ ] `layout.tsx` の `aside` の幅を `w-[210px] min-w-[210px]` → `w-[220px] min-w-[220px]` に変更する
-- [ ] ロゴ行を `h-14` 固定高さ・`border-b border-white/10` 付き・flex center レイアウトに変更する:
+- [x] `listRequests` を `@/application/usecases` からインポートする
+- [x] `layout.tsx` の `aside` の幅を `w-[210px] min-w-[210px]` → `w-[220px] min-w-[220px]` に変更する
+- [x] ロゴ行を `h-14` 固定高さ・`border-b border-white/10` 付き・flex center レイアウトに変更する:
   ```tsx
   <div className="h-14 flex flex-col justify-center px-4 border-b border-white/10">
     <div className="text-[15px] font-bold text-white">Clearflow</div>
     <div className="text-2xs text-text-sidebar-muted">案件管理</div>
   </div>
   ```
-- [ ] `badgeCount` を計算する:
+- [x] `badgeCount` を計算する:
   ```ts
   const requests = await listRequests(session.user.organizationId);
   const role = session.user.role;
@@ -190,8 +190,8 @@
         r.approvalSteps.some((s) => s.status === "pending" && s.approverRole === role))
   ).length;
   ```
-- [ ] `<SidebarNav isAdmin={isAdmin} />` に `badgeCount={badgeCount}` を追加する
-- [ ] ユーザー領域を以下に置き換える（アバター・縦 2 段・danger ログアウト）:
+- [x] `<SidebarNav isAdmin={isAdmin} />` に `badgeCount={badgeCount}` を追加する
+- [x] ユーザー領域を以下に置き換える（アバター・縦 2 段・danger ログアウト）:
   ```tsx
   <div className="border-t border-white/10 px-4 py-3 flex items-center gap-3">
     {/* 頭文字アバター */}
@@ -236,9 +236,9 @@
 
 対象ファイル: `src/app/(dashboard)/NotificationPanel.tsx`
 
-- [ ] `dark:bg-bg-card` を `bg-white dark:bg-bg-surface` に変更する（flyout div のクラス）
-- [ ] パネル幅を `w-80` → `w-[340px]` に変更する
-- [ ] clip 領域の左オフセットを `left-[210px]` → `left-[220px]` に変更する（サイドバー幅追随）
+- [x] `dark:bg-bg-card` を `bg-white dark:bg-bg-surface` に変更する（flyout div のクラス）
+- [x] パネル幅を `w-80` → `w-[340px]` に変更する
+- [x] clip 領域の左オフセットを `left-[210px]` → `left-[220px]` に変更する（サイドバー幅追随）
 
 **Acceptance Criteria**:
 - `NotificationPanel.tsx` に `bg-bg-card` の文字列が存在しない
@@ -253,9 +253,9 @@
 
 対象ファイル: `src/app/(dashboard)/deals/new/NewDealForm.tsx`
 
-- [ ] `<SectionCard className="p-4">` の直下（エラーメッセージ `p` の次）に `<div className="grid grid-cols-2 gap-x-6 gap-y-4">` を追加し、ボタン行より前の `</SectionCard>` との間を wrap する
-- [ ] 各 `FormField` は 1 カラム（デフォルト）とし、備考（`name="notes"`）の `Textarea` を持つ `FormField` のみ `<div className="col-span-2">` で包む
-- [ ] `FormField` に `required` props を追加する:
+- [x] `<SectionCard className="p-4">` の直下（エラーメッセージ `p` の次）に `<div className="grid grid-cols-2 gap-x-6 gap-y-4">` を追加し、ボタン行より前の `</SectionCard>` との間を wrap する
+- [x] 各 `FormField` は 1 カラム（デフォルト）とし、備考（`name="notes"`）の `Textarea` を持つ `FormField` のみ `<div className="col-span-2">` で包む
+- [x] `FormField` に `required` props を追加する:
   - 顧客（`clientId` 選択時、新規顧客名入力）: `required`
   - 案件名: `required`
   - 想定金額・日付・担当者: required なし（任意）
@@ -265,10 +265,10 @@
 
 対象ファイル: `src/app/(dashboard)/contracts/new/NewContractForm.tsx`
 
-- [ ] フォームフィールド全体を `<div className="grid grid-cols-2 gap-x-6 gap-y-4">` で wrap する
-- [ ] 契約名・契約種別・金額・開始日・終了日・支払条件・更新種別: 各 1 カラム（デフォルト）
-- [ ] `renewalType === "recurring"` 時に表示される更新サイクルフィールドは `col-span-2` か 1 カラムのどちらでも可
-- [ ] `FormField` に `required` props を追加する:
+- [x] フォームフィールド全体を `<div className="grid grid-cols-2 gap-x-6 gap-y-4">` で wrap する
+- [x] 契約名・契約種別・金額・開始日・終了日・支払条件・更新種別: 各 1 カラム（デフォルト）
+- [x] `renewalType === "recurring"` 時に表示される更新サイクルフィールドは `col-span-2` か 1 カラムのどちらでも可
+- [x] `FormField` に `required` props を追加する:
   - 契約名: `required`
   - 残りは任意
 
@@ -285,9 +285,9 @@
 
 対象ファイル: `src/app/(dashboard)/clients/new/ClientForm.tsx`
 
-- [ ] `grid grid-cols-2 gap-3` → `grid grid-cols-2 gap-x-6 gap-y-4` に変更する
-- [ ] 担当者セクション内のグリッドも `grid grid-cols-2 gap-2` → `grid grid-cols-2 gap-x-4 gap-y-3` に変更する（担当者ブロック内は比較的コンパクトでよい）
-- [ ] 手書きの `<span className="text-danger">*</span>` を `FormField required` prop に置き換える:
+- [x] `grid grid-cols-2 gap-3` → `grid grid-cols-2 gap-x-6 gap-y-4` に変更する
+- [x] 担当者セクション内のグリッドも `grid grid-cols-2 gap-2` → `grid grid-cols-2 gap-x-4 gap-y-3` に変更する（担当者ブロック内は比較的コンパクトでよい）
+- [x] 手書きの `<span className="text-danger">*</span>` を `FormField required` prop に置き換える:
   - 企業名（`name`）: `required`
   - 担当者の氏名（各 `contact_name_i`）: `required`
 
@@ -295,8 +295,8 @@
 
 対象ファイル: `src/app/(dashboard)/inquiries/new/InquiryForm.tsx`
 
-- [ ] `grid grid-cols-2 gap-3` → `grid grid-cols-2 gap-x-6 gap-y-4` に変更する
-- [ ] 手書きの `<span className="text-danger">*</span>` を `FormField required` prop に置き換える:
+- [x] `grid grid-cols-2 gap-3` → `grid grid-cols-2 gap-x-6 gap-y-4` に変更する
+- [x] 手書きの `<span className="text-danger">*</span>` を `FormField required` prop に置き換える:
   - 件名（`title`）: `required`
   - 流入経路（`source`）: `required`
 
@@ -312,14 +312,14 @@
 
 対象ファイル: `src/app/components/Toast.tsx`
 
-- [ ] 位置クラスを `fixed top-4 right-4` → `fixed bottom-4 right-4` に変更する
-- [ ] Toast 要素本体のクラスを以下に変更する:
+- [x] 位置クラスを `fixed top-4 right-4` → `fixed bottom-4 right-4` に変更する
+- [x] Toast 要素本体のクラスを以下に変更する:
   ```tsx
   className="fixed bottom-4 right-4 z-[60] bg-bg-toast px-4 py-3 min-w-[240px] max-w-[360px] rounded shadow-lg"
   style={{ animation: "toast-slide-in 0.25s ease" }}
   ```
-- [ ] 左カラーバー（`border-l-4 border-l-success` / `border-l-4 border-l-danger` の `variant` 分岐）を削除する
-- [ ] メッセージ表示を variant ごとのプレフィックス付きに変更する:
+- [x] 左カラーバー（`border-l-4 border-l-success` / `border-l-4 border-l-danger` の `variant` 分岐）を削除する
+- [x] メッセージ表示を variant ごとのプレフィックス付きに変更する:
   ```tsx
   <p className="text-xs text-text-on-dark flex items-center gap-1.5">
     {toast.variant === "success" ? (
@@ -330,7 +330,7 @@
     {toast.message}
   </p>
   ```
-- [ ] `key` を `toast.id` として React の再マウントでアニメーションを毎回発火させる（`<div key={toast.id} ...>`）
+- [x] `key` を `toast.id` として React の再マウントでアニメーションを毎回発火させる（`<div key={toast.id} ...>`）
 
 **Acceptance Criteria**:
 - `Toast.tsx` に `bottom-4 right-4` が含まれる
@@ -349,33 +349,33 @@
 
 対象ファイル: `src/app/(dashboard)/clients/new/ClientForm.tsx`
 
-- [ ] `useToast` を `@/app/components` からインポートする
-- [ ] コンポーネント内で `const { showToast } = useToast();` を呼ぶ
-- [ ] `router.push("/clients")` の直前に `showToast("顧客を登録しました", "success")` を追加する
+- [x] `useToast` を `@/app/components` からインポートする
+- [x] コンポーネント内で `const { showToast } = useToast();` を呼ぶ
+- [x] `router.push("/clients")` の直前に `showToast("顧客を登録しました", "success")` を追加する
 
 ### T-11b: InquiryForm.tsx
 
 対象ファイル: `src/app/(dashboard)/inquiries/new/InquiryForm.tsx`
 
-- [ ] `useToast` を `@/app/components` からインポートする
-- [ ] コンポーネント内で `const { showToast } = useToast();` を呼ぶ
-- [ ] `router.push("/inquiries")` の直前に `showToast("引き合いを登録しました", "success")` を追加する
+- [x] `useToast` を `@/app/components` からインポートする
+- [x] コンポーネント内で `const { showToast } = useToast();` を呼ぶ
+- [x] `router.push("/inquiries")` の直前に `showToast("引き合いを登録しました", "success")` を追加する
 
 ### T-11c: NewDealForm.tsx
 
 対象ファイル: `src/app/(dashboard)/deals/new/NewDealForm.tsx`
 
-- [ ] `useToast` を `@/app/components` からインポートする
-- [ ] コンポーネント内で `const { showToast } = useToast();` を呼ぶ
-- [ ] `useEffect` 内の `router.push(...)` の直前に `showToast("案件を作成しました", "success")` を追加する
+- [x] `useToast` を `@/app/components` からインポートする
+- [x] コンポーネント内で `const { showToast } = useToast();` を呼ぶ
+- [x] `useEffect` 内の `router.push(...)` の直前に `showToast("案件を作成しました", "success")` を追加する
 
 ### T-11d: NewContractForm.tsx
 
 対象ファイル: `src/app/(dashboard)/contracts/new/NewContractForm.tsx`
 
-- [ ] `useToast` を `@/app/components` からインポートする
-- [ ] コンポーネント内で `const { showToast } = useToast();` を呼ぶ
-- [ ] `router.push(...)` の直前（成功分岐 `result.contractId` および `deal.id` フォールバック両方）に `showToast("契約を作成しました", "success")` を追加する
+- [x] `useToast` を `@/app/components` からインポートする
+- [x] コンポーネント内で `const { showToast } = useToast();` を呼ぶ
+- [x] `router.push(...)` の直前（成功分岐 `result.contractId` および `deal.id` フォールバック両方）に `showToast("契約を作成しました", "success")` を追加する
 
 **Acceptance Criteria**:
 - `ClientForm.tsx` が `useToast` をインポートしており `showToast("顧客を登録しました", "success")` の呼び出しが存在する
@@ -389,11 +389,11 @@
 
 対象ファイル: `src/app/components/ConfirmDialog.tsx`
 
-- [ ] `BTN_PRIMARY`, `BTN_SECONDARY`, `BTN_DANGER` を `@/app/(dashboard)/styles` からインポートする
-- [ ] overlay のクラスを `bg-black/40` → `bg-black/45` に変更する
-- [ ] 本体 `maxWidth` を `420` → `480` に変更する
-- [ ] 本体の `rounded` → `rounded-lg` に変更する
-- [ ] 本体内の構造を 3 分割に変更する:
+- [x] `BTN_PRIMARY`, `BTN_SECONDARY`, `BTN_DANGER` を `@/app/(dashboard)/styles` からインポートする
+- [x] overlay のクラスを `bg-black/40` → `bg-black/45` に変更する
+- [x] 本体 `maxWidth` を `420` → `480` に変更する
+- [x] 本体の `rounded` → `rounded-lg` に変更する
+- [x] 本体内の構造を 3 分割に変更する:
   ```tsx
   {/* header */}
   <div className="px-4 py-3 border-b border-border">
@@ -414,7 +414,7 @@
     </button>
   </div>
   ```
-- [ ] 既存のインラインクラスによるボタン（角丸なし）を上記に置き換える
+- [x] 既存のインラインクラスによるボタン（角丸なし）を上記に置き換える
 
 **Acceptance Criteria**:
 - `ConfirmDialog.tsx` が `BTN_PRIMARY`, `BTN_SECONDARY`, `BTN_DANGER` をインポートしている
@@ -431,9 +431,9 @@
 
 対象ファイル: `src/app/(dashboard)/components/ActionItemModal.tsx`
 
-- [ ] `Select` を `@/app/components` からインポートに追加する（`Input` と並べる）
-- [ ] `FORM_LABEL` を `@/app/(dashboard)/styles` からインポートする
-- [ ] 担当者フィールドの生 `<select>` を共有 `Select` コンポーネントに置き換える:
+- [x] `Select` を `@/app/components` からインポートに追加する（`Input` と並べる）
+- [x] `FORM_LABEL` を `@/app/(dashboard)/styles` からインポートする
+- [x] 担当者フィールドの生 `<select>` を共有 `Select` コンポーネントに置き換える:
   ```tsx
   <Select
     value={assigneeId}
@@ -448,8 +448,8 @@
     ))}
   </Select>
   ```
-- [ ] 各 `<label>` のクラスを `text-xs text-text-muted block mb-0.5` から `${FORM_LABEL} block mb-0.5` に変更する（内容・担当者・期日・紐づけ先の 4 箇所）
-- [ ] キャンセルボタンを `BTN_SECONDARY` に置き換える:
+- [x] 各 `<label>` のクラスを `text-xs text-text-muted block mb-0.5` から `${FORM_LABEL} block mb-0.5` に変更する（内容・担当者・期日・紐づけ先の 4 箇所）
+- [x] キャンセルボタンを `BTN_SECONDARY` に置き換える:
   ```tsx
   import { BTN_PRIMARY, BTN_SECONDARY } from "@/app/(dashboard)/styles";
   // ...
@@ -472,7 +472,7 @@
 
 新規ファイル: `src/__tests__/components/SidebarNav.test.ts`
 
-- [ ] `SidebarNav.tsx` のソースを読み込んで以下を assert する:
+- [x] `SidebarNav.tsx` のソースを読み込んで以下を assert する:
   - セクションラベル文字列「メイン」「営業」「管理」「個人・設定」が含まれる
   - 絵文字アイコン「📊」「🏢」「📨」「💼」「📋」「📁」「💰」「📝」「👤」「⚙️」「🧾」が含まれる
   - `border-primary` が含まれる（active スタイル）
@@ -485,18 +485,18 @@
 
 新規ファイル: `src/__tests__/components/FormField.test.ts`
 
-- [ ] `FormField.tsx` のソースを読み込んで以下を assert する:
+- [x] `FormField.tsx` のソースを読み込んで以下を assert する:
   - `required` という文字列が含まれる（props 定義）
   - `text-danger` が含まれる（`*` スパンのクラス）
   - `FORM_LABEL` のインポートが含まれる
-- [ ] `Input` に関して: `invalid` という文字列が含まれる、`border-danger` が含まれる
-- [ ] `Textarea` に関して: `min-h-20` が含まれる
+- [x] `Input` に関して: `invalid` という文字列が含まれる、`border-danger` が含まれる
+- [x] `Textarea` に関して: `min-h-20` が含まれる
 
 ### T-14c: Toast 静的検証テスト
 
 新規ファイル: `src/__tests__/components/Toast.test.ts`
 
-- [ ] `Toast.tsx` のソースを読み込んで以下を assert する:
+- [x] `Toast.tsx` のソースを読み込んで以下を assert する:
   - `bottom-4` と `right-4` が含まれる
   - `top-4` が含まれない
   - `✓` が含まれる（success プレフィックス）
@@ -509,7 +509,7 @@
 
 新規ファイル: `src/__tests__/components/ConfirmDialog.test.ts`
 
-- [ ] `ConfirmDialog.tsx` のソースを読み込んで以下を assert する:
+- [x] `ConfirmDialog.tsx` のソースを読み込んで以下を assert する:
   - `BTN_SECONDARY` が含まれる（キャンセルボタン）
   - `BTN_PRIMARY` が含まれる（確定ボタン）
   - `BTN_DANGER` が含まれる（danger 確定ボタン）
@@ -521,7 +521,7 @@
 
 新規ファイル: `src/__tests__/components/successToasts.test.ts`
 
-- [ ] 以下の各ファイルを読み込んで、それぞれ指定の文言が含まれることを assert する:
+- [x] 以下の各ファイルを読み込んで、それぞれ指定の文言が含まれることを assert する:
   - `app/(dashboard)/clients/new/ClientForm.tsx` → `顧客を登録しました`
   - `app/(dashboard)/inquiries/new/InquiryForm.tsx` → `引き合いを登録しました`
   - `app/(dashboard)/deals/new/NewDealForm.tsx` → `案件を作成しました`
@@ -532,8 +532,8 @@
 
 既存テストに追加、または新規ファイル: `src/__tests__/components/NotificationPanel.test.ts`
 
-- [ ] `NotificationPanel.tsx` のソースを読み込んで `bg-bg-card` が含まれないことを assert する
+- [x] `NotificationPanel.tsx` のソースを読み込んで `bg-bg-card` が含まれないことを assert する
 
 **Acceptance Criteria**:
 - `bun test` で上記テストがすべて pass する
-- 既存テストが壊れていない（クラス名変更に追随した期待値修正は可）
+- 既存テストが壊れていない（クラス名変更に追随した期待値修正は可、挙動アサーションの変更は不可）

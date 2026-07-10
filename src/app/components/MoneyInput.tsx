@@ -8,6 +8,7 @@ type Props = {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  invalid?: boolean;
   onChange?: () => void;
 };
 
@@ -15,7 +16,7 @@ function formatWithComma(value: number): string {
   return `¥${value.toLocaleString("ja-JP")}`;
 }
 
-export function MoneyInput({ name, defaultValue, placeholder, className, disabled, onChange }: Props) {
+export function MoneyInput({ name, defaultValue, placeholder, className, disabled, invalid, onChange }: Props) {
   const initial = defaultValue != null ? defaultValue : null;
   const [rawValue, setRawValue] = useState<string>(initial != null ? String(initial) : "");
   const [isFocused, setIsFocused] = useState(false);
@@ -45,8 +46,10 @@ export function MoneyInput({ name, defaultValue, placeholder, className, disable
     if (e.key === "Enter") e.preventDefault();
   }
 
-  const baseClass =
-    "w-full border border-border rounded px-2.5 py-1.5 text-xs text-text bg-bg-surface focus:border-primary focus:outline-none placeholder:text-text-placeholder";
+  const borderClass = invalid
+    ? "border-danger focus:border-danger"
+    : "border-border focus:border-primary";
+  const baseClass = `w-full border ${borderClass} rounded px-2.5 py-1.5 text-xs text-text bg-bg-surface focus:outline-none placeholder:text-text-placeholder`;
 
   return (
     <>

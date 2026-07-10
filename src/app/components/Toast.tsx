@@ -35,13 +35,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       {toast && (
         <div
-          className={`fixed top-4 right-4 z-[60] bg-bg-surface border border-border shadow-md px-4 py-3 min-w-[240px] max-w-[360px] ${
-            toast.variant === "success"
-              ? "border-l-4 border-l-success"
-              : "border-l-4 border-l-danger"
-          }`}
+          key={toast.id}
+          className="fixed bottom-4 right-4 z-[60] bg-bg-toast px-4 py-3 min-w-[240px] max-w-[360px] rounded shadow-lg"
+          style={{ animation: "toast-slide-in 0.25s ease" }}
         >
-          <p className="text-xs text-text">{toast.message}</p>
+          <p className="text-xs text-text-on-dark flex items-center gap-1.5">
+            {toast.variant === "success" ? (
+              <span className="text-status-green-text font-bold">✓</span>
+            ) : (
+              <span className="text-status-red-text font-bold">✗</span>
+            )}
+            {toast.message}
+          </p>
         </div>
       )}
     </ToastContext.Provider>

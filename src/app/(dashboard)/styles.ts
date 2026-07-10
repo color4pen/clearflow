@@ -20,4 +20,4 @@ export const SECTION_CARD = "bg-bg-surface border border-border rounded-lg shado
 export const FOOTER_BAR =
   "bg-bg-toolbar border border-border border-t-0 px-2 py-0.5 text-xs text-text-muted";
 
-export const FORM_LABEL = "text-xs font-bold text-text";
+export const FORM_LABEL = "text-xs font-semibold text-text-secondary";

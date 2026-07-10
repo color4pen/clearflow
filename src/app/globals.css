@@ -56,6 +56,8 @@
   --status-red-bg: #fee2e2;
   --status-navy-text: #1e3a5f;
   --status-navy-bg: #dbeafe;
+
+  --bg-toast: #1e293b;
 }
 
 [data-theme="dark"] {
@@ -111,6 +113,8 @@
   --status-red-bg: #7f1d1d;
   --status-navy-text: #bfdbfe;
   --status-navy-bg: #1e3a5f;
+
+  --bg-toast: #334155;
 }
 
 @theme inline {
@@ -164,6 +168,7 @@
   --color-status-red-bg: var(--status-red-bg);
   --color-status-navy-text: var(--status-navy-text);
   --color-status-navy-bg: var(--status-navy-bg);
+  --color-bg-toast: var(--bg-toast);
 
   --font-sans: var(--font-noto-sans-jp);
   --font-mono: var(--font-ibm-plex-mono);
@@ -182,4 +187,15 @@ body {
   background: var(--bg-page);
   color: var(--text);
   font-size: 13px;
+}
+
+@keyframes toast-slide-in {
+  from {
+    transform: translateX(60px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
