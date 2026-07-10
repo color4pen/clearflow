@@ -10,7 +10,7 @@
  *   updateMeeting に externalAttendees: undefined が渡される（既存保持）。
  */
 
-import { describe, it, expect, beforeEach, mock } from "bun:test";
+import { describe, it, expect, beforeEach, mock, afterAll } from "bun:test";
 import type { Interaction, MeetingAttendee } from "@/domain/models/interaction";
 
 // ---------------------------------------------------------------------------
@@ -47,6 +47,18 @@ const listContactsState = {
 const revalidatedPaths: string[] = [];
 
 // ---------------------------------------------------------------------------
+// 実装を捕捉してから mock.module を呼ぶ。afterAll で復元する。
+// ---------------------------------------------------------------------------
+
+import * as createMeetingModule from "@/application/usecases/createMeeting";
+import * as updateMeetingModule from "@/application/usecases/updateMeeting";
+import * as listClientContactsModule from "@/application/usecases/listClientContacts";
+
+const realCreateMeeting = createMeetingModule.createMeeting;
+const realUpdateMeeting = updateMeetingModule.updateMeeting;
+const realListClientContacts = listClientContactsModule.listClientContacts;
+
+// ---------------------------------------------------------------------------
 // モジュールモック（静的 import より前に評価される）
 // ---------------------------------------------------------------------------
 
@@ -68,19 +80,25 @@ mock.module("@/infrastructure/rateLimit", () => ({
   RATE_LIMITS: { createRequest: { limit: 100, windowMs: 60_000 } },
 }));
 
-mock.module("@/application/usecases", () => ({
+mock.module("@/application/usecases/createMeeting", () => ({
   createMeeting: async (input: unknown) => {
     createState.calls.push(input);
     return (
       createState.returns ?? { ok: false as const, reason: "mock not configured" }
     );
   },
+}));
+
+mock.module("@/application/usecases/updateMeeting", () => ({
   updateMeeting: async (input: unknown) => {
     updateState.calls.push(input);
     return (
       updateState.returns ?? { ok: false as const, reason: "mock not configured" }
     );
   },
+}));
+
+mock.module("@/application/usecases/listClientContacts", () => ({
   listClientContacts: async (...args: unknown[]) => {
     listContactsState.callCount++;
     void args;
@@ -93,6 +111,14 @@ mock.module("next/cache", () => ({
     revalidatedPaths.push(path);
   },
 }));
+
+afterAll(() => {
+  mock.module("@/application/usecases/createMeeting", () => ({ createMeeting: realCreateMeeting }));
+  mock.module("@/application/usecases/updateMeeting", () => ({ updateMeeting: realUpdateMeeting }));
+  mock.module("@/application/usecases/listClientContacts", () => ({
+    listClientContacts: realListClientContacts,
+  }));
+});
 
 import { createMeetingAction, updateMeetingAction } from "@/app/actions/meetings";
 
