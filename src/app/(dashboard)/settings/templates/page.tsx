@@ -4,6 +4,7 @@ import { auth } from "@/infrastructure/auth";
 import { listTemplatesAction } from "@/app/actions/templates";
 import { DeleteButton } from "./DeleteButton";
 import { PageToolbar, DataTable, SectionCard } from "@/app/components";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 
 export default async function TemplatesPage() {
   const session = await auth();
@@ -22,9 +23,9 @@ export default async function TemplatesPage() {
         actions={
           <Link
             href="/settings/templates/new"
-            className="text-primary underline text-xs"
+            className={BTN_PRIMARY}
           >
-            [テンプレートを追加]
+            ＋ テンプレートを追加
           </Link>
         }
       />

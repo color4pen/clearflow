@@ -53,16 +53,27 @@ export default async function InquiryDetailPage({
 
   return (
     <div>
-      {/* Breadcrumb + title */}
-      <div className="bg-bg-toolbar border border-border px-2 py-1 mb-2 flex items-center gap-2">
-        <span className="text-xs text-text-muted">
-          <Link href="/inquiries" className="text-primary underline">引合一覧</Link>
-          {" / "}
-          <span className="text-text">{inquiry.title}</span>
-        </span>
+      {/* Breadcrumb */}
+      <div className="text-xs text-text-muted mb-0.5">
+        <Link href="/inquiries" className="text-primary underline">引合一覧</Link>
+        {" > "}
+        {inquiry.title}
+      </div>
+
+      {/* Hero row */}
+      <div className="flex items-center gap-2 flex-wrap mb-3">
+        <h1 className="text-lg font-bold text-text">{inquiry.title}</h1>
         <StatusBadge variant={INQUIRY_STATUS_VARIANT[inquiry.status] ?? "gray"}>
           {statusLabels[inquiry.status] ?? inquiry.status}
         </StatusBadge>
+        {inquiry.status !== "converted" && (
+          <div className="ml-auto flex items-center gap-3">
+            <InquiryActions
+              inquiry={{ id: inquiry.id, status: inquiry.status }}
+              canChangeStatus={canChangeStatus}
+            />
+          </div>
+        )}
       </div>
 
       {/* Status banner */}
@@ -123,12 +134,6 @@ export default async function InquiryDetailPage({
           {/* Actions section */}
           <SectionCard className="p-3">
             <h2 className="text-xs font-bold text-text mb-2">操作</h2>
-            {inquiry.status !== "converted" && (
-              <InquiryActions
-                inquiry={{ id: inquiry.id, status: inquiry.status }}
-                canChangeStatus={canChangeStatus}
-              />
-            )}
             {canChangeStatus && !deal && inquiry.status !== "converted" && (
               <div className="mt-2">
                 <DeleteInquiryButton inquiryId={id} />

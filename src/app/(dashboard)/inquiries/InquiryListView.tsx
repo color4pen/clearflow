@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import { EmptyState } from "@/app/components";
 import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
 import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
 import { statusLabels } from "@/app/(dashboard)/labels";
@@ -40,26 +41,26 @@ export function InquiryListView({ inquiries, sources }: Props) {
 
   return (
     <div>
+      {/* Status tabs */}
+      <div className="flex items-end gap-0 border-b border-border">
+        {TAB_LABELS.map((tab) => (
+          <button
+            key={tab.value}
+            type="button"
+            onClick={() => setActiveTab(tab.value)}
+            className={`px-4 py-2 text-xs font-medium transition-colors border-b-2 cursor-pointer ${
+              activeTab === tab.value
+                ? "border-primary text-primary font-bold"
+                : "border-transparent text-text-secondary hover:text-text hover:border-border"
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
       {/* Filter bar */}
       <div className="flex items-center gap-2 px-2 py-2 bg-bg-toolbar border border-border border-t-0">
-        {/* Status tabs */}
-        <div className="flex items-center gap-1">
-          {TAB_LABELS.map((tab) => (
-            <button
-              key={tab.value}
-              type="button"
-              onClick={() => setActiveTab(tab.value)}
-              className={`text-xs px-3 py-1 border cursor-pointer ${
-                activeTab === tab.value
-                  ? "bg-primary text-white border-primary font-bold"
-                  : "bg-bg-surface text-text border-border hover:bg-bg-toolbar"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
         {/* Source dropdown */}
         <select
           value={sourceFilter}
@@ -100,9 +101,7 @@ export function InquiryListView({ inquiries, sources }: Props) {
 
       {/* Table rows */}
       {filtered.length === 0 ? (
-        <div className="text-center py-8 text-text-disabled text-sm bg-bg-surface border border-border border-t-0">
-          <p>該当する引合はありません</p>
-        </div>
+        <EmptyState icon="📨" message="該当する引合はありません" />
       ) : (
         <>
           {filtered.map((row, index) => (

@@ -5,6 +5,7 @@ import { canPerform } from "@/domain/authorization";
 import { listApprovalTemplates } from "@/application/usecases";
 import { listPoliciesAction, togglePolicyAction } from "@/app/actions/policies";
 import { PageToolbar, DataTable, SectionCard } from "@/app/components";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 import { getTriggerActionLabel, formatCondition } from "./constants";
 
 export default async function PoliciesPage() {
@@ -35,9 +36,9 @@ export default async function PoliciesPage() {
           isAdmin ? (
             <Link
               href="/settings/policies/new"
-              className="text-primary underline text-xs"
+              className={BTN_PRIMARY}
             >
-              [ポリシーを追加]
+              ＋ ポリシーを追加
             </Link>
           ) : undefined
         }

@@ -1,0 +1,95 @@
+{
+  "version": 2,
+  "jobId": "8ec6b75f-ba5e-4396-a991-7da4e88bde96",
+  "createdAt": "2026-07-10T00:44:58.063Z",
+  "updatedAt": "2026-07-10T02:12:06.893Z",
+  "request": {
+    "title": "画面骨格の格上げ（一覧ツールバー・空状態・タブ・詳細ヒーロー横展開・ログイン）",
+    "type": "refactoring",
+    "baseBranch": "main"
+  },
+  "repository": {
+    "owner": "color4pen",
+    "name": "clearflow"
+  },
+  "step": "pr-create",
+  "status": "archived",
+  "branch": "refactor/page-chrome-restyle-8ec6b75f",
+  "error": null,
+  "pipelineId": "standard",
+  "reviewers": [
+    {
+      "name": "domain-invariants",
+      "maxIterations": 3,
+      "purpose": "テナント分離と監査ログの完全性を保証する。承認ワークフローの不変条件が変更によって破壊されていないことを検証する。",
+      "criteria": "### テナント分離\n\n- テナント所有リソースへのクエリは必ず organizationId で制約されている\n- organizationId はセッション（認証済みユーザー）から取得し、リクエストボディから受け取らない\n- リソース ID だけで認可判断をしていない（ID + organizationId の組み合わせで検証する）\n- 新しいリポジトリ関数が追加された場合、テナント条件が付与されている\n\n### 監査ログの完全性\n\n- 状態変更（ステータス遷移、作成、削除）は append-only の監査ログを同一トランザクション内で記録する\n- 監査レコードには actor（実行者）、target（対象リソース）、action（操作種別）、timestamp が含まれる\n- 監査ログテーブルに対する UPDATE / DELETE 操作が存在しない\n- 新しい状態変更操作が追加された場合、対応する監査ログ記録がある",
+      "judgment": "- **approved**: 全観点で違反がない\n- **needs-fix**: テナント条件の欠落、監査ログの記録漏れ、トランザクション外での監査ログ記録のいずれかが検出された",
+      "freeText": "",
+      "paths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ]
+    },
+    {
+      "name": "mcp-conformance",
+      "maxIterations": 3,
+      "purpose": "MCP 境界に固有の失敗クラスを検出する。汎用 code-review が主眼としない「接続エージェントに対する API contract（name / description / inputSchema）の正しさ」と「MCP 特有の実装上の落とし穴」を、MCP ツールを触るすべての変更で検証する。MCP はエージェントにとって contract がすべてであり、機能が実装されていても contract に表れなければ誤用される。",
+      "criteria": "### スキーマ広告（inputSchema）\n\n- `registerTool` の `inputSchema` は SDK が JSON Schema 化できる object 形（生シェイプ or `z.object`）である。**トップレベルの `z.discriminatedUnion` を渡さない**（SDK が空 properties にフォールバックし、クライアントに型情報が一切見えなくなる）。\n- `tools/list` で広告される inputSchema の `properties` が非空で、`operation` は有効な全 operation を含む enum、各フィールドが型・enum を伴って公開される。\n- 広告 object を緩く（全フィールド optional 等）した場合でも、operation 別の必須制約はハンドラ内で厳格に検証し、失敗時は明確なエラーを早期 return する。\n\n### 契約の明確さ（description / describe）\n\n- ツール description は用途に加え発見性（同義語・意図語・日英併記）を持ち、全ツール同一の定型文だけになっていない（相互に distinct）。\n- 各フィールドの `.describe()` に **用途**（何を入れるか）・**形式**（Markdown 可/改行反映・日時形式・UUID 等）・**enum 値の意味**・**必須/任意** が読み取れる。\n- 描画・保存が既に対応している形式（Markdown/改行等）は、その旨がフィールド説明に明記されている。\n\n### 部分更新（update 系）\n\n- update 系ツールは未指定引数（undefined）を「変更なし」として**保持**し、既定値（false/null/空）で上書きしない。**null（明示クリア）と undefined（変更なし）を区別**する。\n- 配列・サブ構造（例: 参加者の内部/外部リスト）を片方だけ指定したとき、他方を空で上書きしない。\n\n### 認可・テナント分離\n\n- `organizationId` は per-request の authInfo からのみ取得し、**ツール引数から受け取らない**。\n- 対応する Server Action と同じ `canPerform` 認可を通す。権限外ロールでの呼び出しは usecase 到達前に拒否される。\n\n### エラー・出力\n\n- ツールエラーの `reason` に例外詳細（DB エラー文・スタックトレース・SQL）を載せない（固定文言またはサニタイズ済みのフィールドメッセージのみ）。\n\n### サーバー構成・堅牢性\n\n- `McpServer` は per-request 生成である（module-level singleton に毎回 `connect` しない＝2 リクエスト目以降の \"Already connected\" 500 を防ぐ）。\n- 書き込み操作にレート制限がある。\n\n### テスト\n\n- behavioral である（実 transport で `tools/list`・`tools/call` を実行し、広告スキーマ・拒否・監査呼び出しを assert する）。ソース文字列照合（readFile + toContain）で代替していない。\n- `mock.module` は個別ファイルをモックし（バレルをモックしない）、`afterAll` で復元している。\n\n### 互換性・網羅\n\n- ツール名（`registerTool` の識別子）を変更していない（コネクタの参照を壊す）。\n- ドメイン enum（案件フェーズ・各種ステータス等）が増えたとき、MCP 側の該当 enum・終端判定などの分岐が網羅され、silent-drop していない。\n\n### 監査パリティ\n\n- 書き込み操作は対応する Server Action と同等の監査ログを記録する。",
+      "judgment": "- **approved**: 全観点で違反がない。\n- **needs-fix**: 次のいずれかが検出された — 空/貧弱なスキーマ広告、フィールドの用途・形式・enum 意味・必須任意の記載欠落、部分更新でのフィールド破壊、ツール引数由来の organizationId（テナント越境）、Server Action との認可差、エラーへの内部詳細漏洩、module-level singleton サーバー、書き込みのレート制限欠落、文字列照合テスト、ツール名の変更、ドメイン enum 追加時の分岐網羅漏れ。",
+      "freeText": "",
+      "paths": [
+        "src/app/api/mcp/**"
+      ]
+    }
+  ],
+  "resumePoint": null,
+  "reviewerStatuses": [
+    {
+      "name": "domain-invariants",
+      "status": "skipped",
+      "approvedAtCommit": null,
+      "activationPaths": [
+        "src/application/**",
+        "src/infrastructure/repositories/**",
+        "src/app/actions/**",
+        "src/domain/**"
+      ],
+      "invalidatedByCommit": null
+    },
+    {
+      "name": "mcp-conformance",
+      "status": "skipped",
+      "approvedAtCommit": null,
+      "activationPaths": [
+        "src/app/api/mcp/**"
+      ],
+      "invalidatedByCommit": null
+    }
+  ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/178",
+    "number": 178,
+    "createdAt": "2026-07-10T02:04:53.125Z"
+  },
+  "_journal": {
+    "historyCount": 68,
+    "stepCounts": {
+      "request-review": 2,
+      "design": 1,
+      "spec-review": 3,
+      "test-case-gen": 1,
+      "implementer": 1,
+      "verification": 1,
+      "code-review": 1,
+      "mcp-conformance": 1,
+      "domain-invariants": 1,
+      "custom-reviewers": 1,
+      "regression-gate": 1,
+      "conformance": 1,
+      "adr-gen": 1,
+      "pr-create": 1
+    }
+  }
+}

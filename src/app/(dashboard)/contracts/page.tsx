@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
 import { listContracts } from "@/application/usecases";
-import { PageToolbar, SectionCard, DataTable } from "@/app/components";
+import { PageToolbar, SectionCard, DataTable, EmptyState } from "@/app/components";
 import { contractStatusLabels, contractTypeLabels } from "@/app/(dashboard)/labels";
 import { StatusBadge } from "@/app/(dashboard)/components/StatusBadge";
 import type { StatusBadgeVariant } from "@/app/(dashboard)/components/StatusBadge";
@@ -26,7 +26,7 @@ export default async function ContractsPage() {
 
       <SectionCard className="p-2 mt-2">
         {contracts.length === 0 ? (
-          <p className="text-xs text-text-muted py-4 text-center">契約はありません</p>
+          <EmptyState icon="📁" message="契約はありません" />
         ) : (
           <DataTable<ContractWithClient>
             columns={[

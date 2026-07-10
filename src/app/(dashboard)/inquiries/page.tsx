@@ -3,6 +3,7 @@ import { auth } from "@/infrastructure/auth";
 import { listInquiries, listDeals } from "@/application/usecases";
 import { PageToolbar, ToolbarActions } from "@/app/components";
 import { sourceLabels } from "@/app/(dashboard)/labels";
+import { BTN_PRIMARY } from "@/app/(dashboard)/styles";
 import { InquiryListView } from "./InquiryListView";
 
 export default async function InquiriesPage() {
@@ -43,8 +44,8 @@ export default async function InquiriesPage() {
         title="引き合い管理"
         actions={
           <ToolbarActions>
-            <Link href="/inquiries/new" className="text-xs text-primary underline">
-              [新規登録]
+            <Link href="/inquiries/new" className={BTN_PRIMARY}>
+              ＋ 新規登録
             </Link>
           </ToolbarActions>
         }
