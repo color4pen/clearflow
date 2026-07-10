@@ -32,6 +32,8 @@ const state = {
   } | null,
   createArgs: null as Record<string, unknown> | null,
   updateArgs: null as Record<string, unknown> | null,
+  contacts: [] as Array<{ id: string; name: string }>,
+  findContactsClientId: null as string | null,
 };
 
 // ---------------------------------------------------------------------------
@@ -57,6 +59,12 @@ mock.module("@/infrastructure/repositories", () => ({
   },
   inquiryRepository: {
     findById: async () => state.inquiry,
+  },
+  clientRepository: {
+    findContactsByClientId: async (clientId: string) => {
+      state.findContactsClientId = clientId;
+      return state.contacts;
+    },
   },
 }));
 
@@ -166,6 +174,8 @@ beforeEach(() => {
   state.auditArgs = null;
   state.createArgs = null;
   state.updateArgs = null;
+  state.contacts = [];
+  state.findContactsClientId = null;
 });
 
 // ---------------------------------------------------------------------------
@@ -183,7 +193,6 @@ describe("createMeeting — kind=meeting の Interaction 作成", () => {
       kind: "meeting",
       dealId: DEAL_ID,
       date: new Date("2026-01-15T10:00:00Z"),
-      attendees: [],
       actionItems: [],
     });
 
@@ -204,7 +213,6 @@ describe("createMeeting — kind=meeting の Interaction 作成", () => {
       kind: "meeting",
       dealId: DEAL_ID,
       date: new Date("2026-01-15T10:00:00Z"),
-      attendees: [],
       actionItems: [],
     });
 
@@ -222,7 +230,6 @@ describe("createMeeting — kind=meeting の Interaction 作成", () => {
       kind: "meeting",
       dealId: DEAL_ID,
       date: new Date("2026-01-15T10:00:00Z"),
-      attendees: [],
       actionItems: [],
     });
 
@@ -238,7 +245,6 @@ describe("createMeeting — kind=meeting の Interaction 作成", () => {
       actorId: ACTOR_ID,
       kind: "meeting",
       date: new Date("2026-01-15T10:00:00Z"),
-      attendees: [],
       actionItems: [],
     });
 
@@ -257,7 +263,6 @@ describe("createMeeting — kind=meeting の Interaction 作成", () => {
       kind: "meeting",
       dealId: DEAL_ID,
       date: new Date("2026-01-15T10:00:00Z"),
-      attendees: [],
       actionItems: [],
     });
 
@@ -274,7 +279,6 @@ describe("createMeeting — kind=meeting の Interaction 作成", () => {
       kind: "meeting",
       inquiryId: INQUIRY_ID,
       date: new Date("2026-01-15T10:00:00Z"),
-      attendees: [],
       actionItems: [],
     });
 
@@ -292,12 +296,135 @@ describe("createMeeting — kind=meeting の Interaction 作成", () => {
       dealId: DEAL_ID,
       meetingType: "proposal",
       date: new Date("2026-01-15T10:00:00Z"),
-      attendees: [],
       actionItems: [],
       details: { challenge: "課題", budget: null, decisionMaker: null, timeline: null, competitors: null, notes: null },
     });
 
     expect(state.createArgs?.details).toBeNull();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// createMeeting — 社外参加者（externalContactIds）の解決
+// ---------------------------------------------------------------------------
+
+describe("createMeeting — 社外参加者の解決（externalContactIds）", () => {
+  const CONTACT_ID = "contact-001";
+  const UNKNOWN_CONTACT_ID = "contact-unknown";
+
+  it("deal の clientId から担当者を解決し、氏名スナップショット付きで attendees に含める", async () => {
+    state.deal = makeDeal();
+    state.createdInteraction = makeInteraction();
+    state.contacts = [{ id: CONTACT_ID, name: "山田 花子" }];
+
+    const result = await createMeeting({
+      organizationId: ORG_ID,
+      actorId: ACTOR_ID,
+      kind: "meeting",
+      dealId: DEAL_ID,
+      date: new Date("2026-01-15T10:00:00Z"),
+      externalContactIds: [CONTACT_ID],
+      actionItems: [],
+    });
+
+    expect(result.ok).toBe(true);
+    // deal の clientId で担当者マスタが参照される
+    expect(state.findContactsClientId).toBe("client-001");
+    const attendees = state.createArgs?.attendees as Array<{
+      contactId: string | null;
+      name: string;
+      isExternal: boolean;
+    }>;
+    const external = attendees.filter((a) => a.isExternal);
+    expect(external).toHaveLength(1);
+    expect(external[0].contactId).toBe(CONTACT_ID);
+    expect(external[0].name).toBe("山田 花子");
+  });
+
+  it("inquiry の clientId から担当者を解決できる", async () => {
+    state.inquiry = makeInquiry();
+    state.createdInteraction = makeInteraction({ dealId: null, inquiryId: INQUIRY_ID });
+    state.contacts = [{ id: CONTACT_ID, name: "山田 花子" }];
+
+    const result = await createMeeting({
+      organizationId: ORG_ID,
+      actorId: ACTOR_ID,
+      kind: "meeting",
+      inquiryId: INQUIRY_ID,
+      date: new Date("2026-01-15T10:00:00Z"),
+      externalContactIds: [CONTACT_ID],
+      actionItems: [],
+    });
+
+    expect(result.ok).toBe(true);
+    expect(state.findContactsClientId).toBe("client-001");
+  });
+
+  it("未登録の担当者 ID → field: externalContactIds 付きエラーで create は呼ばれない", async () => {
+    state.deal = makeDeal();
+    state.contacts = [{ id: CONTACT_ID, name: "山田 花子" }];
+
+    const result = await createMeeting({
+      organizationId: ORG_ID,
+      actorId: ACTOR_ID,
+      kind: "meeting",
+      dealId: DEAL_ID,
+      date: new Date("2026-01-15T10:00:00Z"),
+      externalContactIds: [UNKNOWN_CONTACT_ID],
+      actionItems: [],
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toContain("未登録の担当者ID");
+      expect(result.reason).toContain(UNKNOWN_CONTACT_ID);
+      expect(result.field).toBe("externalContactIds");
+    }
+    expect(state.createArgs).toBeNull();
+  });
+
+  it("社内参加者は contactId: null / isExternal: false に正規化されて attendees に含まれる", async () => {
+    state.deal = makeDeal();
+    state.createdInteraction = makeInteraction();
+
+    await createMeeting({
+      organizationId: ORG_ID,
+      actorId: ACTOR_ID,
+      kind: "meeting",
+      dealId: DEAL_ID,
+      date: new Date("2026-01-15T10:00:00Z"),
+      internalAttendees: [
+        { userId: null, contactId: null, name: "社内 太郎", isExternal: false },
+      ],
+      actionItems: [],
+    });
+
+    const attendees = state.createArgs?.attendees as Array<{
+      contactId: string | null;
+      name: string;
+      isExternal: boolean;
+    }>;
+    expect(attendees).toHaveLength(1);
+    expect(attendees[0].name).toBe("社内 太郎");
+    expect(attendees[0].contactId).toBeNull();
+    expect(attendees[0].isExternal).toBe(false);
+  });
+
+  it("externalContactIds が空なら担当者マスタは参照されない", async () => {
+    state.deal = makeDeal();
+    state.createdInteraction = makeInteraction();
+
+    await createMeeting({
+      organizationId: ORG_ID,
+      actorId: ACTOR_ID,
+      kind: "meeting",
+      dealId: DEAL_ID,
+      date: new Date("2026-01-15T10:00:00Z"),
+      externalContactIds: [],
+      actionItems: [],
+    });
+
+    expect(state.findContactsClientId).toBeNull();
   });
 });
 

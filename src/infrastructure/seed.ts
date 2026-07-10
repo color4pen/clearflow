@@ -759,7 +759,7 @@ async function seed() {
     attendees: [
       { userId: managerUser.id, name: managerUser.name, isExternal: false },
       { userId: memberUser.id, name: memberUser.name, isExternal: false },
-      { name: "田中 一郎", isExternal: true },
+      { contactId: yamatoContact1.id, name: yamatoContact1.name, isExternal: true },
     ],
     summary: "案件化後の提案会議。詳細スコープと費用感を確認した。",
     actionItems: [
@@ -780,8 +780,8 @@ async function seed() {
     attendees: [
       { userId: adminUser.id, name: adminUser.name, isExternal: false },
       { userId: managerUser.id, name: managerUser.name, isExternal: false },
-      { name: "山田 太郎", isExternal: true },
-      { name: "鈴木 花子", isExternal: true },
+      { contactId: techContact1.id, name: techContact1.name, isExternal: true },
+      { contactId: techContact2.id, name: techContact2.name, isExternal: true },
     ],
     summary: "契約条件の最終確認。準委任契約で合意。7月1日キックオフ予定。",
     actionItems: [
@@ -802,7 +802,7 @@ async function seed() {
     attendees: [
       { userId: managerUser.id, name: managerUser.name, isExternal: false },
       { userId: memberUser.id, name: memberUser.name, isExternal: false },
-      { name: "山田 太郎", isExternal: true },
+      { contactId: techContact1.id, name: techContact1.name, isExternal: true },
     ],
     summary: "キックオフ前の最終打ち合わせ。開発環境のセットアップ手順を共有。",
     actionItems: [
@@ -823,8 +823,8 @@ async function seed() {
     location: "さくら物流株式会社 本社",
     attendees: [
       { userId: adminUser.id, name: adminUser.name, isExternal: false },
-      { name: "高橋 美咲", isExternal: true },
-      { name: "中村 健太", isExternal: true },
+      { contactId: sakuraContact1.id, name: sakuraContact1.name, isExternal: true },
+      { contactId: sakuraContact2.id, name: sakuraContact2.name, isExternal: true },
     ],
     summary: "配送ルート最適化の価格交渉。SES契約での提案を検討中。",
     actionItems: [
@@ -843,7 +843,7 @@ async function seed() {
     location: "大和建設株式会社 第1会議室",
     attendees: [
       { userId: managerUser.id, name: managerUser.name, isExternal: false },
-      { name: "田中 一郎", isExternal: true },
+      { contactId: yamatoContact1.id, name: yamatoContact1.name, isExternal: true },
     ],
     summary: "初回ヒアリング。工事進捗管理の現状課題をヒアリングした。",
     actionItems: [
@@ -870,8 +870,8 @@ async function seed() {
     attendees: [
       { userId: managerUser.id, name: managerUser.name, isExternal: false },
       { userId: memberUser.id, name: memberUser.name, isExternal: false },
-      { name: "田中 一郎", isExternal: true },
-      { name: "佐藤 次郎", isExternal: true },
+      { contactId: yamatoContact1.id, name: yamatoContact1.name, isExternal: true },
+      { contactId: yamatoContact2.id, name: yamatoContact2.name, isExternal: true },
     ],
     summary: "工事管理ツールの提案書を提示。承認フロー機能を中心にデモを実施した。",
     actionItems: [
@@ -891,8 +891,8 @@ async function seed() {
     attendees: [
       { userId: adminUser.id, name: adminUser.name, isExternal: false },
       { userId: memberUser.id, name: memberUser.name, isExternal: false },
-      { name: "渡辺 浩二", isExternal: true },
-      { name: "伊藤 恵", isExternal: true },
+      { contactId: financeContact1.id, name: financeContact1.name, isExternal: true },
+      { contactId: financeContact2.id, name: financeContact2.name, isExternal: true },
     ],
     summary: "リスク管理ダッシュボードの要件ヒアリング。リアルタイム性と可視化の粒度を確認。",
     actionItems: [
@@ -919,7 +919,7 @@ async function seed() {
     location: "株式会社テック商事 本社",
     attendees: [
       { userId: adminUser.id, name: adminUser.name, isExternal: false },
-      { name: "山田 太郎", isExternal: true },
+      { contactId: techContact1.id, name: techContact1.name, isExternal: true },
     ],
     summary: "受注後のフォローアップ訪問。プロジェクト開始スケジュールを確認した。",
     actionItems: [

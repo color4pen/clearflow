@@ -1,5 +1,6 @@
 import { interactionRepository, dealRepository, inquiryRepository } from "@/infrastructure/repositories";
 import { recordAudit } from "@/application/services/auditRecorder";
+import { resolveExternalAttendees } from "@/application/services/externalAttendeeResolver";
 
 import { db } from "@/infrastructure/db";
 import type {
@@ -13,7 +14,7 @@ import type {
 
 export type CreateMeetingResult =
   | { ok: true; meeting: Interaction }
-  | { ok: false; reason: string };
+  | { ok: false; reason: string; field?: "externalContactIds" };
 
 export async function createMeeting(data: {
   organizationId: string;
@@ -24,7 +25,10 @@ export async function createMeeting(data: {
   meetingType?: MeetingType | null;
   date: Date;
   location?: string | null;
-  attendees: MeetingAttendee[];
+  /** 社内参加者。contactId: null / isExternal: false は usecase 側で強制する。 */
+  internalAttendees?: MeetingAttendee[];
+  /** 社外参加者の顧客担当者 ID。関連先（案件/引合）の顧客の登録済み担当者から解決する。 */
+  externalContactIds?: string[];
   summary?: string | null;
   actionItems: LegacyMeetingActionItem[];
   details?: HearingData | null;
@@ -34,12 +38,16 @@ export async function createMeeting(data: {
     return { ok: false, reason: "案件または引合のいずれかの指定が必要です" };
   }
 
+  // 関連先の顧客 ID（社外参加者の解決に使う）
+  let clientId: string | null = null;
+
   // 案件の存在確認（dealId 指定時）
   if (data.dealId) {
     const deal = await dealRepository.findById(data.dealId, data.organizationId);
     if (!deal) {
       return { ok: false, reason: "案件が見つかりません" };
     }
+    clientId = deal.clientId;
   }
 
   // 引合の存在確認（inquiryId 指定時）
@@ -48,7 +56,28 @@ export async function createMeeting(data: {
     if (!inquiry) {
       return { ok: false, reason: "引合が見つかりません" };
     }
+    clientId ??= inquiry.clientId;
   }
+
+  // 社内参加者: 呼び出し元の値によらず社内参加者として正規化する
+  const internalAttendees: MeetingAttendee[] = (data.internalAttendees ?? []).map((a) => ({
+    userId: a.userId ?? null,
+    contactId: null,
+    name: a.name,
+    isExternal: false,
+  }));
+
+  // 社外参加者: 顧客担当者マスタで解決し氏名スナップショットを取得する
+  const resolved = await resolveExternalAttendees({
+    contactIds: data.externalContactIds ?? [],
+    clientId,
+    organizationId: data.organizationId,
+  });
+  if (!resolved.ok) {
+    return { ok: false, reason: resolved.reason, field: "externalContactIds" };
+  }
+
+  const attendees = [...internalAttendees, ...resolved.attendees];
 
   // hearing 以外の meetingType では details を null に強制する
   const details = data.meetingType === "hearing" ? (data.details ?? null) : null;
@@ -64,7 +93,7 @@ export async function createMeeting(data: {
           meetingType: data.meetingType ?? null,
           date: data.date,
           location: data.location,
-          attendees: data.attendees,
+          attendees,
           summary: data.summary,
           actionItems: data.actionItems,
           details,

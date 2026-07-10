@@ -51,7 +51,12 @@ const createMeetingSchema = z.object({
   date: dateString.describe("実施日時"),
   location: z.string().optional().describe("場所"),
   internalAttendees: z.array(z.string()).optional(),
-  externalAttendees: z.array(z.string()).optional(),
+  externalContactIds: z
+    .array(z.string().uuid())
+    .optional()
+    .describe(
+      "社外参加者の顧客担当者ID（UUID）リスト。顧客に登録済みの担当者IDを指定する。未登録IDはエラー。氏名はサーバ側で解決される。create_meeting では dealId/inquiryId に紐づく顧客の担当者IDを指定すること。update_meeting では省略時は既存の外部参加者を保持する（null を指定するとクリア）。"
+    ),
   summary: z.string().optional().describe("議事録・商談要約の本文。Markdown 記法・改行が反映される"),
   actionItems: z.array(legacyActionItemSchema).optional().default([]),
   hearingData: hearingDataSchema.optional(),
@@ -71,14 +76,14 @@ const updateMeetingSchema = z.object({
     .nullable()
     .optional()
     .describe(
-      "社内参加者の名前リスト。指定した場合のみ内部参加者を差し替える。省略時は既存の内部参加者を保持する（externalAttendees とは独立して部分更新される）。null を指定すると内部参加者をクリアする。"
+      "社内参加者の名前リスト。指定した場合のみ内部参加者を差し替える。省略時は既存の内部参加者を保持する（externalContactIds とは独立して部分更新される）。null を指定すると内部参加者をクリアする。"
     ),
-  externalAttendees: z
-    .array(z.string())
+  externalContactIds: z
+    .array(z.string().uuid())
     .nullable()
     .optional()
     .describe(
-      "社外参加者の名前リスト。指定した場合のみ外部参加者を差し替える。省略時は既存の外部参加者を保持する（internalAttendees とは独立して部分更新される）。null を指定すると外部参加者をクリアする。"
+      "社外参加者の顧客担当者ID（UUID）リスト。指定した場合のみ外部参加者を差し替える。省略時は既存の外部参加者を保持する（internalAttendees とは独立して部分更新される）。null を指定すると外部参加者をクリアする。顧客に登録済みの担当者IDを指定する。未登録IDはエラー。氏名はサーバ側で解決される。"
     ),
   summary: z.string().nullable().optional().describe("議事録・商談要約の本文。Markdown 記法・改行が反映される"),
   actionItems: z.array(legacyActionItemSchema).optional(),
@@ -149,20 +154,16 @@ export function registerInteractionsTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            const attendees: MeetingAttendee[] = [
-              ...(typedArgs.internalAttendees ?? []).map((name) => ({
+            // 社内参加者のみ変換する。社外参加者は externalContactIds として usecase に渡し、
+            // 顧客担当者マスタでの解決（氏名スナップショット取得）は usecase 側で行う。
+            const internalAttendees: MeetingAttendee[] = (typedArgs.internalAttendees ?? []).map(
+              (name) => ({
                 userId: null as string | null,
                 contactId: null as string | null,
                 name,
                 isExternal: false,
-              })),
-              ...(typedArgs.externalAttendees ?? []).map((name) => ({
-                userId: null as string | null,
-                contactId: null as string | null,
-                name,
-                isExternal: true,
-              })),
-            ];
+              })
+            );
 
             const hearingData = typedArgs.hearingData
               ? {
@@ -184,14 +185,17 @@ export function registerInteractionsTools(server: McpServer): void {
               meetingType: typedArgs.type,
               date: new Date(typedArgs.date),
               location: typedArgs.location ?? null,
-              attendees,
+              internalAttendees,
+              externalContactIds: typedArgs.externalContactIds,
               summary: typedArgs.summary ?? null,
               actionItems: typedArgs.actionItems ?? [],
               details: hearingData ?? null,
             });
 
             if (!result.ok) {
-              return toToolError("商談の記録に失敗しました");
+              // field 付きエラーは入力値の検証エラー（未登録の担当者 ID 等）のためそのまま返す。
+              // それ以外は内部詳細を漏らさない固定文言を返す。
+              return toToolError(result.field ? result.reason : "商談の記録に失敗しました");
             }
             return toToolSuccess(result.meeting);
           }
@@ -209,7 +213,7 @@ export function registerInteractionsTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            // internalAttendees / externalAttendees は独立した部分更新フィールドとして usecase に渡す。
+            // internalAttendees は独立した部分更新フィールドとして usecase に渡す。
             // undefined（省略）→ usecase でその側の既存参加者を保持
             // null（明示クリア）→ 空配列として変換（その側をクリア）
             // string[]（指定）→ MeetingAttendee[] に変換してその側を差し替え
@@ -223,15 +227,8 @@ export function registerInteractionsTools(server: McpServer): void {
                     isExternal: false,
                   }));
 
-            const externalAttendees: MeetingAttendee[] | undefined =
-              typedArgs.externalAttendees === undefined
-                ? undefined
-                : (typedArgs.externalAttendees ?? []).map((name) => ({
-                    userId: null as string | null,
-                    contactId: null as string | null,
-                    name,
-                    isExternal: true,
-                  }));
+            // externalContactIds の三値意味論（undefined=保持 / null=クリア / 配列=差し替え）は
+            // usecase 側で解釈する。顧客担当者マスタでの解決も usecase 側で行う。
 
             // hearingData: undefined（変更なし）と null（クリア）を区別する
             let details: { challenge: string | null; budget: string | null; decisionMaker: string | null; timeline: string | null; competitors: string | null; notes: string | null } | null | undefined;
@@ -258,14 +255,16 @@ export function registerInteractionsTools(server: McpServer): void {
               date: typedArgs.date ? new Date(typedArgs.date) : undefined,
               location: typedArgs.location,
               internalAttendees,
-              externalAttendees,
+              externalContactIds: typedArgs.externalContactIds,
               summary: typedArgs.summary,
               actionItems: typedArgs.actionItems,
               details,
             });
 
             if (!result.ok) {
-              return toToolError("商談の更新に失敗しました");
+              // field 付きエラーは入力値の検証エラー（未登録の担当者 ID 等）のためそのまま返す。
+              // それ以外は内部詳細を漏らさない固定文言を返す。
+              return toToolError(result.field ? result.reason : "商談の更新に失敗しました");
             }
             return toToolSuccess(result.meeting);
           }

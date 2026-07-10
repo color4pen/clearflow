@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/infrastructure/auth";
-import { createMeeting, updateMeeting, createClientContact } from "@/application/usecases";
+import { createMeeting, updateMeeting } from "@/application/usecases";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import { canPerform } from "@/domain/authorization";
 
@@ -23,24 +23,17 @@ const actionItemSchema = z.object({
   done: z.boolean(),
 });
 
-const contactRegistrationSchema = z.object({
-  name: z.string(),
-  register: z.boolean(),
-});
-
 const createMeetingSchema = z.object({
   dealId: z.string().uuid("案件IDが不正です").optional(),
   inquiryId: z.string().uuid("引合IDが不正です").optional(),
-  clientId: z.string().uuid().optional(),
   type: z.enum(["hearing", "proposal", "negotiation", "closing", "followup"]),
   date: z.string().min(1, "日時は必須です"),
   location: z.string().optional(),
   internalAttendees: z.array(z.string()).optional().default([]),
-  externalAttendees: z.array(z.string()).optional().default([]),
+  externalContactIds: z.array(z.string().uuid("社外参加者IDが不正です")).optional().default([]),
   summary: z.string().optional(),
   actionItems: z.array(actionItemSchema).optional().default([]),
   hearingData: hearingDataSchema.optional(),
-  contactRegistrations: z.array(contactRegistrationSchema).optional().default([]),
 });
 
 export type CreateMeetingState = {
@@ -51,7 +44,7 @@ export type CreateMeetingState = {
     date?: string[];
     location?: string[];
     internalAttendees?: string[];
-    externalAttendees?: string[];
+    externalContactIds?: string[];
     summary?: string[];
     actionItems?: string[];
     hearingData?: string[];
@@ -85,10 +78,9 @@ export async function createMeetingAction(
 
   // 動的フィールドの JSON パース
   let internalAttendees: string[] = [];
-  let externalAttendees: string[] = [];
+  let externalContactIds: string[] = [];
   let actionItems: z.infer<typeof actionItemSchema>[] = [];
   let hearingData: z.infer<typeof hearingDataSchema> | undefined;
-  let contactRegistrations: z.infer<typeof contactRegistrationSchema>[] = [];
 
   const internalAttendeesRaw = formData.get("internalAttendees");
   if (internalAttendeesRaw && typeof internalAttendeesRaw === "string") {
@@ -99,12 +91,12 @@ export async function createMeetingAction(
     }
   }
 
-  const externalAttendeesRaw = formData.get("externalAttendees");
-  if (externalAttendeesRaw && typeof externalAttendeesRaw === "string") {
+  const externalContactIdsRaw = formData.get("externalContactIds");
+  if (externalContactIdsRaw && typeof externalContactIdsRaw === "string") {
     try {
-      externalAttendees = JSON.parse(externalAttendeesRaw);
+      externalContactIds = JSON.parse(externalContactIdsRaw);
     } catch {
-      return { errors: { externalAttendees: ["社外参加者の形式が不正です"] } };
+      return { errors: { externalContactIds: ["社外参加者IDの形式が不正です"] } };
     }
   }
 
@@ -126,32 +118,20 @@ export async function createMeetingAction(
     }
   }
 
-  const contactRegistrationsRaw = formData.get("contactRegistrations");
-  if (contactRegistrationsRaw && typeof contactRegistrationsRaw === "string") {
-    try {
-      contactRegistrations = JSON.parse(contactRegistrationsRaw);
-    } catch {
-      // contactRegistrations のパース失敗は best-effort なので無視する
-    }
-  }
-
   const dealIdRaw = formData.get("dealId");
   const inquiryIdRaw = formData.get("inquiryId");
-  const clientIdRaw = formData.get("clientId");
 
   const parsed = createMeetingSchema.safeParse({
     dealId: dealIdRaw && dealIdRaw !== "" ? dealIdRaw : undefined,
     inquiryId: inquiryIdRaw && inquiryIdRaw !== "" ? inquiryIdRaw : undefined,
-    clientId: clientIdRaw && clientIdRaw !== "" ? clientIdRaw : undefined,
     type: formData.get("type"),
     date: formData.get("date"),
     location: formData.get("location") || undefined,
     internalAttendees,
-    externalAttendees,
+    externalContactIds,
     summary: formData.get("summary") || undefined,
     actionItems,
     hearingData,
-    contactRegistrations,
   });
 
   if (!parsed.success) {
@@ -163,22 +143,6 @@ export async function createMeetingAction(
     return { errors: { dealId: ["案件または引合のいずれかの指定が必要です"] } };
   }
 
-  // internal/external の参加者リストを新構造に変換する
-  const attendees = [
-    ...parsed.data.internalAttendees.map((name) => ({
-      userId: null as string | null,
-      contactId: null as string | null,
-      name,
-      isExternal: false,
-    })),
-    ...parsed.data.externalAttendees.map((name) => ({
-      userId: null as string | null,
-      contactId: null as string | null,
-      name,
-      isExternal: true,
-    })),
-  ];
-
   const result = await createMeeting({
     organizationId: session.user.organizationId,
     actorId: session.user.id,
@@ -188,28 +152,23 @@ export async function createMeetingAction(
     meetingType: parsed.data.type,
     date: new Date(parsed.data.date),
     location: parsed.data.location ?? null,
-    attendees,
+    internalAttendees: parsed.data.internalAttendees.map((name) => ({
+      userId: null,
+      contactId: null,
+      name,
+      isExternal: false,
+    })),
+    externalContactIds: parsed.data.externalContactIds,
     summary: parsed.data.summary ?? null,
     actionItems: parsed.data.actionItems,
     details: parsed.data.hearingData ?? null,
   });
 
   if (!result.ok) {
-    return { message: result.reason };
-  }
-
-  // チェックされた外部参加者を顧客担当者として登録する（best-effort）
-  if (parsed.data.clientId && parsed.data.contactRegistrations.length > 0) {
-    for (const entry of parsed.data.contactRegistrations) {
-      if (entry.register && entry.name.trim()) {
-        await createClientContact({
-          clientId: parsed.data.clientId,
-          name: entry.name.trim(),
-          organizationId: session.user.organizationId,
-          actorId: session.user.id,
-        });
-      }
+    if (result.field) {
+      return { errors: { [result.field]: [result.reason] } };
     }
+    return { message: result.reason };
   }
 
   if (parsed.data.dealId) {
@@ -227,7 +186,7 @@ const updateMeetingSchema = z.object({
   date: z.string().optional(),
   location: z.string().nullable().optional(),
   internalAttendees: z.array(z.string()).optional(),
-  externalAttendees: z.array(z.string()).optional(),
+  externalContactIds: z.array(z.string().uuid("社外参加者IDが不正です")).optional(),
   summary: z.string().nullable().optional(),
   actionItems: z.array(actionItemSchema).optional(),
   hearingData: hearingDataSchema.nullable().optional(),
@@ -240,7 +199,7 @@ export type UpdateMeetingState = {
     date?: string[];
     location?: string[];
     internalAttendees?: string[];
-    externalAttendees?: string[];
+    externalContactIds?: string[];
     summary?: string[];
     actionItems?: string[];
     hearingData?: string[];
@@ -271,7 +230,7 @@ export async function updateMeetingAction(
   }
 
   let internalAttendees: string[] | undefined;
-  let externalAttendees: string[] | undefined;
+  let externalContactIds: string[] | undefined;
   let actionItems: z.infer<typeof actionItemSchema>[] | undefined;
   let hearingData: z.infer<typeof hearingDataSchema> | null | undefined;
 
@@ -284,12 +243,12 @@ export async function updateMeetingAction(
     }
   }
 
-  const externalAttendeesRaw = formData.get("externalAttendees");
-  if (externalAttendeesRaw && typeof externalAttendeesRaw === "string") {
+  const externalContactIdsRaw = formData.get("externalContactIds");
+  if (externalContactIdsRaw && typeof externalContactIdsRaw === "string") {
     try {
-      externalAttendees = JSON.parse(externalAttendeesRaw);
+      externalContactIds = JSON.parse(externalContactIdsRaw);
     } catch {
-      return { errors: { externalAttendees: ["社外参加者の形式が不正です"] } };
+      return { errors: { externalContactIds: ["社外参加者IDの形式が不正です"] } };
     }
   }
 
@@ -317,7 +276,7 @@ export async function updateMeetingAction(
     date: formData.get("date") || undefined,
     location: formData.get("location") ?? undefined,
     internalAttendees,
-    externalAttendees,
+    externalContactIds,
     summary: formData.get("summary") ?? undefined,
     actionItems,
     hearingData,
@@ -327,22 +286,15 @@ export async function updateMeetingAction(
     return { errors: parsed.error.flatten().fieldErrors };
   }
 
-  const attendees =
-    internalAttendees !== undefined || externalAttendees !== undefined
-      ? [
-          ...(parsed.data.internalAttendees ?? []).map((name) => ({
-            userId: null as string | null,
-            contactId: null as string | null,
-            name,
-            isExternal: false,
-          })),
-          ...(parsed.data.externalAttendees ?? []).map((name) => ({
-            userId: null as string | null,
-            contactId: null as string | null,
-            name,
-            isExternal: true,
-          })),
-        ]
+  // internalAttendees と externalContactIds は独立した部分更新（undefined = その側を保持）
+  const internalAttendeesConverted =
+    parsed.data.internalAttendees !== undefined
+      ? parsed.data.internalAttendees.map((name) => ({
+          userId: null,
+          contactId: null,
+          name,
+          isExternal: false,
+        }))
       : undefined;
 
   const result = await updateMeeting({
@@ -352,34 +304,18 @@ export async function updateMeetingAction(
     meetingType: parsed.data.type,
     date: parsed.data.date ? new Date(parsed.data.date) : undefined,
     location: parsed.data.location,
-    attendees,
+    internalAttendees: internalAttendeesConverted,
+    externalContactIds: parsed.data.externalContactIds,
     summary: parsed.data.summary,
     actionItems: parsed.data.actionItems,
     details: parsed.data.hearingData,
   });
 
   if (!result.ok) {
-    return { message: result.reason };
-  }
-
-  const clientIdRaw = formData.get("clientId");
-  const registerContactsRaw = formData.get("registerContacts");
-  if (clientIdRaw && typeof clientIdRaw === "string" && registerContactsRaw && typeof registerContactsRaw === "string") {
-    try {
-      const contacts = JSON.parse(registerContactsRaw) as Array<{ name: string; register: boolean }>;
-      for (const entry of contacts) {
-        if (entry.register && entry.name.trim()) {
-          await createClientContact({
-            clientId: clientIdRaw,
-            name: entry.name.trim(),
-            organizationId: session.user.organizationId,
-            actorId: session.user.id,
-          });
-        }
-      }
-    } catch (err) {
-      console.error("[meetings] 顧客担当者の登録に失敗:", err);
+    if (result.field) {
+      return { errors: { [result.field]: [result.reason] } };
     }
+    return { message: result.reason };
   }
 
   // dealId がある場合は関連パスを再検証する（インライン編集で FormData に含まれる）

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/infrastructure/auth";
+import { canPerform } from "@/domain/authorization";
 import { getClient, listClientContacts, listInquiriesByClient, listDealsByClient, listContractsByClient } from "@/application/usecases";
 import { SectionCard, DataTable, EmptyState } from "@/app/components";
 import { statusLabels, sourceLabels, phaseLabels, contractTypeLabels, contractStatusLabels } from "@/app/(dashboard)/labels";
@@ -15,8 +16,9 @@ export default async function ClientDetailPage({
   const { id } = await params;
   const session = await auth();
   const organizationId = session!.user.organizationId;
-  const editable =
-    session!.user.role === "admin" || session!.user.role === "manager";
+  const role = session!.user.role;
+  const editable = canPerform(role, "client", "edit");
+  const contactDeletable = canPerform(role, "client", "deleteContact");
 
   const [client, contacts, relatedInquiries, relatedDeals, relatedContracts] =
     await Promise.all([
@@ -67,6 +69,7 @@ export default async function ClientDetailPage({
               clientId={client.id}
               contacts={contacts}
               editable={editable}
+              deletable={contactDeletable}
             />
           </SectionCard>
         </div>
