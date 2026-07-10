@@ -10,10 +10,13 @@ import type { ClientContact } from "@/domain/models/client";
 type Props = {
   clientId: string;
   contacts: ClientContact[];
+  /** 担当者の追加・編集の可否（client.addContact / editContact 権限） */
   editable: boolean;
+  /** 担当者の削除の可否（client.deleteContact 権限。editable より狭い） */
+  deletable: boolean;
 };
 
-export function ClientContactsSection({ clientId, contacts, editable }: Props) {
+export function ClientContactsSection({ clientId, contacts, editable, deletable }: Props) {
   const router = useRouter();
   const { showToast } = useToast();
   const [showForm, setShowForm] = useState(false);
@@ -137,7 +140,7 @@ export function ClientContactsSection({ clientId, contacts, editable }: Props) {
                   {formatContact(contact)}
                 </div>
                 <div className="py-1 px-2 border-b border-border-light">
-                  {editable && (
+                  {deletable && (
                     <button
                       type="button"
                       onClick={(e) => {
