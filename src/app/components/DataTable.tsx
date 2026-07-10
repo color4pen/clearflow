@@ -3,7 +3,7 @@ import { RowClickHandler } from "./RowClickHandler";
 
 type Column<T> = {
   key: string;
-  header: string;
+  header: ReactNode;
   align?: "left" | "center" | "right";
   width?: string;
   render: (row: T, index: number) => ReactNode;
@@ -17,16 +17,26 @@ type Props<T> = {
   onRowClick?: (row: T) => void;
   rowHref?: (row: T) => string;
   footer?: ReactNode;
+  fixed?: boolean;
 };
 
-export function DataTable<T>({ columns, rows, rowKey, rowClass, onRowClick, rowHref, footer }: Props<T>) {
+export function DataTable<T>({
+  columns,
+  rows,
+  rowKey,
+  rowClass,
+  onRowClick,
+  rowHref,
+  footer,
+  fixed,
+}: Props<T>) {
   const alignClass = (align?: string) =>
     align === "center" ? "text-center" : align === "right" ? "text-right" : "text-left";
 
   return (
     <div>
       {rowHref && <RowClickHandler />}
-      <table className="min-w-full border-collapse">
+      <table className={fixed ? "w-full table-fixed border-collapse" : "min-w-full border-collapse"}>
         <thead>
           <tr className="bg-bg-table-head border border-border-table-head">
             {columns.map((col) => (
