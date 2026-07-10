@@ -64,9 +64,6 @@ export function MeetingAttendeesSection({
       "externalContactIds",
       JSON.stringify(externalAttendees.map((a) => a.contactId))
     );
-    if (clientId) {
-      formData.set("clientId", clientId);
-    }
 
     const result = await updateMeetingAction({}, formData);
     const success = !result.message && !result.errors;

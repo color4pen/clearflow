@@ -1,10 +1,14 @@
 /**
  * 社外参加者の顧客担当者参照化に関する behavioral テスト。
  *
- * - MCP create_meeting で externalContactIds に登録済み contactId を指定すると
- *   attendees に contactId と氏名スナップショットが保存される。
- * - 未登録 contactId を指定すると isError:true が返る。
- * - MCP update_meeting の externalContactIds 三値意味論（undefined/配列/null）を検証する。
+ * 社外参加者の解決（contactId → 氏名スナップショット）は usecase 層の責務のため、
+ * MCP ハンドラは「externalContactIds が usecase にそのまま渡ること」と
+ * 「usecase の field 付きエラーが isError:true でそのまま返ること」を検証する。
+ *
+ * - MCP create_meeting で externalContactIds が createMeeting usecase に渡る。
+ * - usecase が未登録 ID のエラー（field 付き）を返すと isError:true でエラー文言が返る。
+ * - MCP update_meeting の externalContactIds 三値意味論（undefined/配列/null）が
+ *   usecase にそのまま渡る。
  * - tools/list の inputSchema に externalContactIds が存在し externalAttendees が存在しない。
  * - description に「登録済み担当者ID」の制約が含まれる。
  *
@@ -24,17 +28,15 @@ import type { Interaction } from "@/domain/models/interaction";
 
 const state = {
   createMeetingCalls: [] as unknown[],
-  createMeetingReturns: null as { ok: true; meeting: Interaction } | { ok: false; reason: string } | null,
+  createMeetingReturns: null as
+    | { ok: true; meeting: Interaction }
+    | { ok: false; reason: string; field?: "externalContactIds" }
+    | null,
   updateMeetingCalls: [] as unknown[],
-  updateMeetingReturns: null as { ok: true; meeting: Interaction } | { ok: false; reason: string } | null,
-};
-
-// 社外参加者 contactId 解決に使用するモック状態
-const contactResolutionState = {
-  interaction: null as Record<string, unknown> | null,
-  deal: null as Record<string, unknown> | null,
-  contacts: [] as Array<{ id: string; name: string }>,
-  listClientContactsCallCount: 0,
+  updateMeetingReturns: null as
+    | { ok: true; meeting: Interaction }
+    | { ok: false; reason: string; field?: "externalContactIds" }
+    | null,
 };
 
 // ---------------------------------------------------------------------------
@@ -44,7 +46,6 @@ const contactResolutionState = {
 import * as rateLimitModule from "@/infrastructure/rateLimit";
 import * as createMeetingModule from "@/application/usecases/createMeeting";
 import * as updateMeetingModule from "@/application/usecases/updateMeeting";
-import * as listClientContactsModule from "@/application/usecases/listClientContacts";
 
 const realRateLimit = {
   checkRateLimit: rateLimitModule.checkRateLimit,
@@ -52,7 +53,6 @@ const realRateLimit = {
 };
 const realCreateMeeting = createMeetingModule.createMeeting;
 const realUpdateMeeting = updateMeetingModule.updateMeeting;
-const realListClientContacts = listClientContactsModule.listClientContacts;
 
 mock.module("@/infrastructure/rateLimit", () => ({
   checkRateLimit: async () => ({ allowed: true }),
@@ -76,32 +76,10 @@ mock.module("@/application/usecases/updateMeeting", () => ({
   },
 }));
 
-mock.module("@/application/usecases/listClientContacts", () => ({
-  listClientContacts: async () => {
-    contactResolutionState.listClientContactsCallCount++;
-    return contactResolutionState.contacts;
-  },
-}));
-
-mock.module("@/infrastructure/repositories/interactionRepository", () => ({
-  findById: async () => contactResolutionState.interaction,
-}));
-
-mock.module("@/infrastructure/repositories/dealRepository", () => ({
-  findById: async () => contactResolutionState.deal,
-}));
-
-mock.module("@/infrastructure/repositories/inquiryRepository", () => ({
-  findById: async () => null,
-}));
-
 afterAll(() => {
   mock.module("@/infrastructure/rateLimit", () => realRateLimit);
   mock.module("@/application/usecases/createMeeting", () => ({ createMeeting: realCreateMeeting }));
   mock.module("@/application/usecases/updateMeeting", () => ({ updateMeeting: realUpdateMeeting }));
-  mock.module("@/application/usecases/listClientContacts", () => ({
-    listClientContacts: realListClientContacts,
-  }));
 });
 
 // モック設定後に import する（モック済みバージョンが使われる）
@@ -114,7 +92,6 @@ const { registerInteractionsTools } = await import("../../app/api/mcp/tools/inte
 const DEAL_UUID = "123e4567-e89b-12d3-a456-426614174001";
 const MEETING_UUID = "123e4567-e89b-12d3-a456-426614174002";
 const CONTACT_UUID = "aaaaaaaa-e89b-12d3-a456-426614174001";
-const CLIENT_UUID = "bbbbbbbb-e89b-12d3-a456-426614174001";
 const UNKNOWN_CONTACT_UUID = "cccccccc-e89b-12d3-a456-426614174001";
 
 // ---------------------------------------------------------------------------
@@ -215,10 +192,6 @@ beforeEach(() => {
   state.createMeetingReturns = null;
   state.updateMeetingCalls = [];
   state.updateMeetingReturns = null;
-  contactResolutionState.interaction = null;
-  contactResolutionState.deal = null;
-  contactResolutionState.contacts = [];
-  contactResolutionState.listClientContactsCallCount = 0;
 });
 
 // ---------------------------------------------------------------------------
@@ -252,11 +225,8 @@ const mockMeeting: Interaction = {
 // ---------------------------------------------------------------------------
 
 describe("MCP externalContactIds — create_meeting", () => {
-  it("登録済み contactId を指定すると attendees に contactId と氏名スナップショットが保存される", async () => {
+  it("externalContactIds が createMeeting usecase に配列のまま渡る", async () => {
     state.createMeetingReturns = { ok: true, meeting: mockMeeting };
-    // contactId 解決: deal → client → contacts
-    contactResolutionState.deal = { clientId: CLIENT_UUID };
-    contactResolutionState.contacts = [{ id: CONTACT_UUID, name: "山田 花子" }];
 
     const result = await callInteractions({
       operation: "create_meeting",
@@ -269,23 +239,15 @@ describe("MCP externalContactIds — create_meeting", () => {
     expect(result.isError).toBeUndefined();
     expect(state.createMeetingCalls).toHaveLength(1);
     const callArgs = state.createMeetingCalls[0] as Record<string, unknown>;
-    const attendees = callArgs.attendees as Array<{
-      userId: string | null;
-      contactId: string | null;
-      name: string;
-      isExternal: boolean;
-    }>;
-    const externalAttendees = attendees.filter((a) => a.isExternal);
-    expect(externalAttendees).toHaveLength(1);
-    expect(externalAttendees[0].contactId).toBe(CONTACT_UUID);
-    expect(externalAttendees[0].name).toBe("山田 花子");
-    expect(externalAttendees[0].isExternal).toBe(true);
+    expect(callArgs.externalContactIds).toEqual([CONTACT_UUID]);
   });
 
-  it("未登録の contactId を指定すると isError:true が返る", async () => {
-    // contactId 解決: deal → client → 空の contacts
-    contactResolutionState.deal = { clientId: CLIENT_UUID };
-    contactResolutionState.contacts = [];
+  it("usecase が未登録 ID の field 付きエラーを返すと isError:true とエラー文言が返る", async () => {
+    state.createMeetingReturns = {
+      ok: false,
+      reason: `未登録の担当者IDが含まれています: ${UNKNOWN_CONTACT_UUID}`,
+      field: "externalContactIds",
+    };
 
     const result = await callInteractions({
       operation: "create_meeting",
@@ -297,11 +259,23 @@ describe("MCP externalContactIds — create_meeting", () => {
 
     expect(result.isError).toBe(true);
     expect(result.text).toContain("未登録の担当者ID");
-    // createMeeting は呼ばれない
-    expect(state.createMeetingCalls).toHaveLength(0);
   });
 
-  it("externalContactIds なしの場合は社外参加者なしで createMeeting が呼ばれる", async () => {
+  it("field なしのエラーは固定文言にマスクされる（内部詳細を漏らさない）", async () => {
+    state.createMeetingReturns = { ok: false, reason: "案件が見つかりません" };
+
+    const result = await callInteractions({
+      operation: "create_meeting",
+      dealId: DEAL_UUID,
+      type: "hearing",
+      date: "2026-01-01T00:00:00Z",
+    });
+
+    expect(result.isError).toBe(true);
+    expect(result.text).toBe("商談の記録に失敗しました");
+  });
+
+  it("externalContactIds なしの場合は undefined として createMeeting が呼ばれる", async () => {
     state.createMeetingReturns = { ok: true, meeting: mockMeeting };
 
     const result = await callInteractions({
@@ -314,15 +288,11 @@ describe("MCP externalContactIds — create_meeting", () => {
     expect(result.isError).toBeUndefined();
     expect(state.createMeetingCalls).toHaveLength(1);
     const callArgs = state.createMeetingCalls[0] as Record<string, unknown>;
-    const attendees = callArgs.attendees as Array<{ isExternal: boolean }>;
-    const externalAttendees = attendees.filter((a) => a.isExternal);
-    expect(externalAttendees).toHaveLength(0);
+    expect(callArgs.externalContactIds).toBeUndefined();
   });
 
-  it("internalAttendees と externalContactIds を同時指定できる", async () => {
+  it("internalAttendees と externalContactIds を同時指定すると独立して渡る", async () => {
     state.createMeetingReturns = { ok: true, meeting: mockMeeting };
-    contactResolutionState.deal = { clientId: CLIENT_UUID };
-    contactResolutionState.contacts = [{ id: CONTACT_UUID, name: "田中 太郎" }];
 
     const result = await callInteractions({
       operation: "create_meeting",
@@ -336,14 +306,15 @@ describe("MCP externalContactIds — create_meeting", () => {
     expect(result.isError).toBeUndefined();
     expect(state.createMeetingCalls).toHaveLength(1);
     const callArgs = state.createMeetingCalls[0] as Record<string, unknown>;
-    const attendees = callArgs.attendees as Array<{ isExternal: boolean; name: string }>;
-    expect(attendees.filter((a) => !a.isExternal).map((a) => a.name)).toContain("社内 A");
-    expect(attendees.filter((a) => a.isExternal).map((a) => a.name)).toContain("田中 太郎");
+    const internal = callArgs.internalAttendees as Array<{ name: string; isExternal: boolean }>;
+    expect(internal.map((a) => a.name)).toContain("社内 A");
+    expect(internal.every((a) => a.isExternal === false)).toBe(true);
+    expect(callArgs.externalContactIds).toEqual([CONTACT_UUID]);
   });
 });
 
 describe("MCP externalContactIds — update_meeting 部分更新意味論", () => {
-  it("externalContactIds 省略 → usecase に externalAttendees: undefined が渡る（既存を保持）", async () => {
+  it("externalContactIds 省略 → usecase に externalContactIds: undefined が渡る（既存を保持）", async () => {
     state.updateMeetingReturns = { ok: true, meeting: mockMeeting };
 
     const result = await callInteractions({
@@ -356,10 +327,10 @@ describe("MCP externalContactIds — update_meeting 部分更新意味論", () =
     expect(result.isError).toBeUndefined();
     expect(state.updateMeetingCalls).toHaveLength(1);
     const callArgs = state.updateMeetingCalls[0] as Record<string, unknown>;
-    expect(callArgs.externalAttendees).toBeUndefined();
+    expect(callArgs.externalContactIds).toBeUndefined();
   });
 
-  it("externalContactIds: null → usecase に externalAttendees: [] が渡る（クリア）", async () => {
+  it("externalContactIds: null → usecase に null が渡る（クリア）", async () => {
     state.updateMeetingReturns = { ok: true, meeting: mockMeeting };
 
     const result = await callInteractions({
@@ -371,16 +342,11 @@ describe("MCP externalContactIds — update_meeting 部分更新意味論", () =
     expect(result.isError).toBeUndefined();
     expect(state.updateMeetingCalls).toHaveLength(1);
     const callArgs = state.updateMeetingCalls[0] as Record<string, unknown>;
-    expect(Array.isArray(callArgs.externalAttendees)).toBe(true);
-    expect((callArgs.externalAttendees as unknown[]).length).toBe(0);
+    expect(callArgs.externalContactIds).toBeNull();
   });
 
-  it("externalContactIds に配列 → contactId 解決後 externalAttendees MeetingAttendee[] が渡る（差し替え）", async () => {
+  it("externalContactIds に配列 → usecase に配列のまま渡る（差し替え）", async () => {
     state.updateMeetingReturns = { ok: true, meeting: mockMeeting };
-    // update_meeting の contactId 解決: meetingId → interaction → dealId → deal → clientId
-    contactResolutionState.interaction = { dealId: DEAL_UUID, inquiryId: null };
-    contactResolutionState.deal = { clientId: CLIENT_UUID };
-    contactResolutionState.contacts = [{ id: CONTACT_UUID, name: "鈴木 次郎" }];
 
     const result = await callInteractions({
       operation: "update_meeting",
@@ -391,22 +357,15 @@ describe("MCP externalContactIds — update_meeting 部分更新意味論", () =
     expect(result.isError).toBeUndefined();
     expect(state.updateMeetingCalls).toHaveLength(1);
     const callArgs = state.updateMeetingCalls[0] as Record<string, unknown>;
-    expect(Array.isArray(callArgs.externalAttendees)).toBe(true);
-    const external = callArgs.externalAttendees as Array<{
-      contactId: string;
-      name: string;
-      isExternal: boolean;
-    }>;
-    expect(external).toHaveLength(1);
-    expect(external[0].contactId).toBe(CONTACT_UUID);
-    expect(external[0].name).toBe("鈴木 次郎");
-    expect(external[0].isExternal).toBe(true);
+    expect(callArgs.externalContactIds).toEqual([CONTACT_UUID]);
   });
 
-  it("externalContactIds に未登録 ID → isError:true が返る", async () => {
-    contactResolutionState.interaction = { dealId: DEAL_UUID, inquiryId: null };
-    contactResolutionState.deal = { clientId: CLIENT_UUID };
-    contactResolutionState.contacts = [];
+  it("usecase が未登録 ID の field 付きエラーを返すと isError:true とエラー文言が返る", async () => {
+    state.updateMeetingReturns = {
+      ok: false,
+      reason: `未登録の担当者IDが含まれています: ${UNKNOWN_CONTACT_UUID}`,
+      field: "externalContactIds",
+    };
 
     const result = await callInteractions({
       operation: "update_meeting",
@@ -416,10 +375,9 @@ describe("MCP externalContactIds — update_meeting 部分更新意味論", () =
 
     expect(result.isError).toBe(true);
     expect(result.text).toContain("未登録の担当者ID");
-    expect(state.updateMeetingCalls).toHaveLength(0);
   });
 
-  it("internalAttendees のみ指定 → externalAttendees は undefined（社外参加者は既存を保持）", async () => {
+  it("internalAttendees のみ指定 → externalContactIds は undefined（社外参加者は既存を保持）", async () => {
     state.updateMeetingReturns = { ok: true, meeting: mockMeeting };
 
     const result = await callInteractions({
@@ -432,7 +390,7 @@ describe("MCP externalContactIds — update_meeting 部分更新意味論", () =
     expect(state.updateMeetingCalls).toHaveLength(1);
     const callArgs = state.updateMeetingCalls[0] as Record<string, unknown>;
     expect(Array.isArray(callArgs.internalAttendees)).toBe(true);
-    expect(callArgs.externalAttendees).toBeUndefined();
+    expect(callArgs.externalContactIds).toBeUndefined();
   });
 });
 
@@ -477,58 +435,5 @@ describe("MCP tools/list — externalContactIds 広告スキーマ検証", () =>
     // 部分更新意味論（省略=保持、null=クリア）と登録済み担当者IDの制約が説明に含まれる
     expect(desc).toContain("省略時は既存の外部参加者を保持する");
     expect(desc).toContain("登録済みの担当者ID");
-  });
-});
-
-// ---------------------------------------------------------------------------
-// TC-020: 担当者削除後も既存商談記録の社外参加者氏名スナップショットが維持される
-//
-// 名前はスナップショットとして attendees JSONB に保存済みのため、
-// 担当者が削除されても read 経路で listClientContacts を呼ぶ必要はない。
-// update_meeting で externalContactIds を省略した場合に listClientContacts が
-// 呼ばれないことを regression として固定する。
-// ---------------------------------------------------------------------------
-
-describe("TC-020: 担当者削除後も社外参加者氏名スナップショットが維持される（listClientContacts 非呼び出し）", () => {
-  it("externalContactIds を省略した update_meeting では listClientContacts が呼ばれない", async () => {
-    state.updateMeetingReturns = { ok: true, meeting: mockMeeting };
-
-    await callInteractions({
-      operation: "update_meeting",
-      meetingId: MEETING_UUID,
-      summary: "サマリのみ更新",
-      // externalContactIds は省略 → 既存の社外参加者（氏名スナップショット）を保持
-    });
-
-    expect(contactResolutionState.listClientContactsCallCount).toBe(0);
-  });
-
-  it("externalContactIds: null（クリア）でも listClientContacts が呼ばれない", async () => {
-    state.updateMeetingReturns = { ok: true, meeting: mockMeeting };
-
-    await callInteractions({
-      operation: "update_meeting",
-      meetingId: MEETING_UUID,
-      externalContactIds: null,
-    });
-
-    expect(contactResolutionState.listClientContactsCallCount).toBe(0);
-  });
-
-  it("externalContactIds 省略 → updateMeeting に externalAttendees: undefined が渡り既存スナップショットが保持される", async () => {
-    state.updateMeetingReturns = { ok: true, meeting: mockMeeting };
-
-    await callInteractions({
-      operation: "update_meeting",
-      meetingId: MEETING_UUID,
-      internalAttendees: ["社内 参加者"],
-      // externalContactIds は省略 → 削除済み担当者の氏名スナップショットを保持
-    });
-
-    expect(state.updateMeetingCalls).toHaveLength(1);
-    const callArgs = state.updateMeetingCalls[0] as Record<string, unknown>;
-    // externalAttendees が undefined → usecase 層で既存 attendees の外部側を保持する
-    expect(callArgs.externalAttendees).toBeUndefined();
-    expect(contactResolutionState.listClientContactsCallCount).toBe(0);
   });
 });

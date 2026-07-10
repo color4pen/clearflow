@@ -6,10 +6,8 @@ import { canPerform } from "@/domain/authorization";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import { createMeeting } from "@/application/usecases/createMeeting";
 import { updateMeeting } from "@/application/usecases/updateMeeting";
-import { listClientContacts } from "@/application/usecases/listClientContacts";
 import { createContractAdjustment } from "@/application/usecases/createContractAdjustment";
 import { createInvoiceAdjustment } from "@/application/usecases/createInvoiceAdjustment";
-import { dealRepository, inquiryRepository, interactionRepository } from "@/infrastructure/repositories";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
 import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
@@ -156,48 +154,16 @@ export function registerInteractionsTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            const attendees: MeetingAttendee[] = [
-              ...(typedArgs.internalAttendees ?? []).map((name) => ({
+            // 社内参加者のみ変換する。社外参加者は externalContactIds として usecase に渡し、
+            // 顧客担当者マスタでの解決（氏名スナップショット取得）は usecase 側で行う。
+            const internalAttendees: MeetingAttendee[] = (typedArgs.internalAttendees ?? []).map(
+              (name) => ({
                 userId: null as string | null,
                 contactId: null as string | null,
                 name,
                 isExternal: false,
-              })),
-            ];
-
-            // 社外参加者 ID を顧客担当者マスタで解決する
-            if (typedArgs.externalContactIds && typedArgs.externalContactIds.length > 0) {
-              // dealId または inquiryId から clientId を解決する
-              let clientId: string | null = null;
-              if (typedArgs.dealId) {
-                const deal = await dealRepository.findById(typedArgs.dealId, organizationId);
-                if (deal) clientId = deal.clientId;
-              } else if (typedArgs.inquiryId) {
-                const inquiry = await inquiryRepository.findById(typedArgs.inquiryId, organizationId);
-                if (inquiry) clientId = inquiry.clientId;
-              }
-
-              if (!clientId) {
-                return toToolError("社外参加者を追加するには顧客の設定が必要です");
-              }
-
-              const contacts = await listClientContacts(clientId, organizationId);
-              const contactMap = new Map(contacts.map((c) => [c.id, c.name]));
-
-              const unresolvedIds = typedArgs.externalContactIds.filter((id) => !contactMap.has(id));
-              if (unresolvedIds.length > 0) {
-                return toToolError(`未登録の担当者IDが含まれています: ${unresolvedIds.join(", ")}`);
-              }
-
-              for (const contactId of typedArgs.externalContactIds) {
-                attendees.push({
-                  userId: null,
-                  contactId,
-                  name: contactMap.get(contactId)!,
-                  isExternal: true,
-                });
-              }
-            }
+              })
+            );
 
             const hearingData = typedArgs.hearingData
               ? {
@@ -219,14 +185,17 @@ export function registerInteractionsTools(server: McpServer): void {
               meetingType: typedArgs.type,
               date: new Date(typedArgs.date),
               location: typedArgs.location ?? null,
-              attendees,
+              internalAttendees,
+              externalContactIds: typedArgs.externalContactIds,
               summary: typedArgs.summary ?? null,
               actionItems: typedArgs.actionItems ?? [],
               details: hearingData ?? null,
             });
 
             if (!result.ok) {
-              return toToolError("商談の記録に失敗しました");
+              // field 付きエラーは入力値の検証エラー（未登録の担当者 ID 等）のためそのまま返す。
+              // それ以外は内部詳細を漏らさない固定文言を返す。
+              return toToolError(result.field ? result.reason : "商談の記録に失敗しました");
             }
             return toToolSuccess(result.meeting);
           }
@@ -258,56 +227,8 @@ export function registerInteractionsTools(server: McpServer): void {
                     isExternal: false,
                   }));
 
-            // externalContactIds の三値意味論:
-            // undefined → externalAttendees undefined（既存を保持）
-            // null → externalAttendees []（クリア）
-            // string[] → contactId 解決後 MeetingAttendee[]（差し替え）
-            let externalAttendees: MeetingAttendee[] | undefined;
-            if (typedArgs.externalContactIds === undefined) {
-              externalAttendees = undefined;
-            } else if (typedArgs.externalContactIds === null) {
-              externalAttendees = [];
-            } else if (typedArgs.externalContactIds.length === 0) {
-              externalAttendees = [];
-            } else {
-              // contactId を顧客担当者マスタで解決する
-              // meetingId から既存 interaction を取得し dealId / inquiryId を参照する
-              const existing = await interactionRepository.findById(
-                typedArgs.meetingId,
-                organizationId
-              );
-              if (!existing) {
-                return toToolError("商談が見つかりません");
-              }
-
-              let clientId: string | null = null;
-              if (existing.dealId) {
-                const deal = await dealRepository.findById(existing.dealId, organizationId);
-                if (deal) clientId = deal.clientId;
-              } else if (existing.inquiryId) {
-                const inquiry = await inquiryRepository.findById(existing.inquiryId, organizationId);
-                if (inquiry) clientId = inquiry.clientId;
-              }
-
-              if (!clientId) {
-                return toToolError("社外参加者を追加するには顧客の設定が必要です");
-              }
-
-              const contacts = await listClientContacts(clientId, organizationId);
-              const contactMap = new Map(contacts.map((c) => [c.id, c.name]));
-
-              const unresolvedIds = typedArgs.externalContactIds.filter((id) => !contactMap.has(id));
-              if (unresolvedIds.length > 0) {
-                return toToolError(`未登録の担当者IDが含まれています: ${unresolvedIds.join(", ")}`);
-              }
-
-              externalAttendees = typedArgs.externalContactIds.map((contactId) => ({
-                userId: null as string | null,
-                contactId,
-                name: contactMap.get(contactId)!,
-                isExternal: true,
-              }));
-            }
+            // externalContactIds の三値意味論（undefined=保持 / null=クリア / 配列=差し替え）は
+            // usecase 側で解釈する。顧客担当者マスタでの解決も usecase 側で行う。
 
             // hearingData: undefined（変更なし）と null（クリア）を区別する
             let details: { challenge: string | null; budget: string | null; decisionMaker: string | null; timeline: string | null; competitors: string | null; notes: string | null } | null | undefined;
@@ -334,14 +255,16 @@ export function registerInteractionsTools(server: McpServer): void {
               date: typedArgs.date ? new Date(typedArgs.date) : undefined,
               location: typedArgs.location,
               internalAttendees,
-              externalAttendees,
+              externalContactIds: typedArgs.externalContactIds,
               summary: typedArgs.summary,
               actionItems: typedArgs.actionItems,
               details,
             });
 
             if (!result.ok) {
-              return toToolError("商談の更新に失敗しました");
+              // field 付きエラーは入力値の検証エラー（未登録の担当者 ID 等）のためそのまま返す。
+              // それ以外は内部詳細を漏らさない固定文言を返す。
+              return toToolError(result.field ? result.reason : "商談の更新に失敗しました");
             }
             return toToolSuccess(result.meeting);
           }

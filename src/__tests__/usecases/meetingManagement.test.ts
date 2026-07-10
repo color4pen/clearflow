@@ -175,12 +175,20 @@ describe("interactionRepository 静的検証（旧 meetingRepository）", () => 
 });
 
 describe("createMeetingAction 静的検証", () => {
-  it("internal/external 参加者を新構造に変換するコードが含まれる", async () => {
+  it("社内参加者を新構造（isExternal: false）に変換するコードが含まれる", async () => {
     // 準備 - ソースファイルを読み込む
     const content = await readSrc("app/actions/meetings.ts");
-    // 実行・検証 - isExternal フラグを使った変換がある
+    // 実行・検証 - 社内参加者の変換がある
     expect(content).toContain("isExternal: false");
-    expect(content).toContain("isExternal: true");
+  });
+
+  it("社外参加者の解決は usecase に委譲される（action に解決ロジックがない）", async () => {
+    // 準備 - ソースファイルを読み込む
+    const content = await readSrc("app/actions/meetings.ts");
+    // 実行・検証 - externalContactIds を usecase に渡し、担当者マスタは直接参照しない
+    expect(content).toContain("externalContactIds");
+    expect(content).not.toContain("listClientContacts");
+    expect(content).not.toContain("isExternal: true");
   });
 
   it("inquiryId が createMeetingSchema に含まれる", async () => {

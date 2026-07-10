@@ -59,11 +59,6 @@ export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers =
         formData.set("hearingData", JSON.stringify(hearingData));
       }
 
-      // clientId を FormData にセットする
-      if (clientId) {
-        formData.set("clientId", clientId);
-      }
-
       const result = await createMeetingAction(prev, formData);
       if (result.dealId) {
         router.push(`/deals/${result.dealId}`);
