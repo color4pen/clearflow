@@ -95,3 +95,11 @@
 {"type":"transition","ts":"2026-07-10T11:02:55.247Z","step":"verification","status":"ok","message":"verification iteration 2 completed with verdict: passed"}
 {"type":"transition","ts":"2026-07-10T11:02:55.247Z","step":"step-transition","status":"ok","message":"verification → adr-gen"}
 {"type":"transition","ts":"2026-07-10T11:02:55.250Z","step":"adr-gen-started","status":"started","message":"Starting adr-gen step"}
+{"type":"transition","ts":"2026-07-10T11:03:17.658Z","step":"adr-gen-verdict","status":"ok","message":"adr-gen verdict: success"}
+{"type":"step-attempt","step":"adr-gen","sessionId":"a2ab885c-b428-4953-8abf-d5e44540c33a","outcome":{"verdict":"success","findingsPath":null,"error":null,"toolResult":{"ok":true,"status":"success"},"followUpAttempts":1,"transientRetryAttempts":0},"startedAt":"2026-07-10T11:02:55.262Z","endedAt":"2026-07-10T11:03:16.242Z"}
+{"type":"transition","ts":"2026-07-10T11:03:17.665Z","step":"step-transition","status":"ok","message":"adr-gen → pr-create"}
+{"type":"transition","ts":"2026-07-10T11:03:17.668Z","step":"step-transition","status":"ok","message":"Transitioning to pr-create step"}
+{"type":"transition","ts":"2026-07-10T11:03:19.995Z","step":"pr-create-verdict","status":"ok","message":"pr-create verdict: success"}
+{"type":"step-attempt","step":"pr-create","sessionId":null,"outcome":{"verdict":"success","findingsPath":"specrunner/changes/interaction-external-attendee-contact/pr-create-result.md","error":null,"toolResult":null,"followUpAttempts":0},"startedAt":"2026-07-10T11:03:17.669Z","endedAt":"2026-07-10T11:03:19.995Z"}
+{"type":"lineage","step":"pr-create","ts":"2026-07-10T11:03:19.995Z","outputs":[{"path":"specrunner/changes/interaction-external-attendee-contact/pr-create-result.md","hash":"sha256:551b5837e64508548e042af9a8d9c242fe150f3a05c1583ff046bd8e4e40a2d5"}],"inputs":[{"path":"change/interaction-external-attendee-contact-d2145fe2","hash":null}]}
+{"type":"transition","ts":"2026-07-10T11:03:19.998Z","step":"pipeline","status":"ok","message":"running → awaiting-archive: pipeline complete"}

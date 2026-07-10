@@ -2,7 +2,7 @@
   "version": 2,
   "jobId": "d2145fe2-ba3d-4dfb-8bee-b9c96943a2ee",
   "createdAt": "2026-07-10T09:07:33.623Z",
-  "updatedAt": "2026-07-10T11:02:55.250Z",
+  "updatedAt": "2026-07-10T11:03:19.998Z",
   "request": {
     "title": "商談記録の社外参加者を顧客担当者参照に変更",
     "type": "spec-change",
@@ -12,8 +12,8 @@
     "owner": "color4pen",
     "name": "clearflow"
   },
-  "step": "adr-gen",
-  "status": "running",
+  "step": "pr-create",
+  "status": "awaiting-archive",
   "branch": "change/interaction-external-attendee-contact-d2145fe2",
   "error": null,
   "pipelineId": "standard",
@@ -68,8 +68,13 @@
       "invalidatedByCommit": null
     }
   ],
+  "pullRequest": {
+    "url": "https://github.com/color4pen/clearflow/pull/183",
+    "number": 183,
+    "createdAt": "2026-07-10T11:03:19.994Z"
+  },
   "_journal": {
-    "historyCount": 65,
+    "historyCount": 70,
     "stepCounts": {
       "request-review": 1,
       "design": 1,
@@ -84,7 +89,9 @@
       "custom-reviewers": 1,
       "regression-gate": 1,
       "conformance": 1,
-      "build-fixer": 1
+      "build-fixer": 1,
+      "adr-gen": 1,
+      "pr-create": 1
     }
   }
 }
