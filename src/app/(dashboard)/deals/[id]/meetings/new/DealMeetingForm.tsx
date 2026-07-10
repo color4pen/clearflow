@@ -8,8 +8,8 @@ import { FormField, Input, Select, Textarea, SubmitButton, preventEnterSubmit } 
 import type { LegacyMeetingActionItem, HearingData } from "@/domain/models/interaction";
 
 type ExternalAttendee = {
+  contactId: string;
   name: string;
-  registerAsContact: boolean;
 };
 
 type Props = {
@@ -41,9 +41,7 @@ export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers =
   const router = useRouter();
   const [selectedType, setSelectedType] = useState("");
   const [internalAttendees, setInternalAttendees] = useState<string[]>([""]);
-  const [externalAttendees, setExternalAttendees] = useState<ExternalAttendee[]>([
-    { name: "", registerAsContact: false },
-  ]);
+  const [externalAttendees, setExternalAttendees] = useState<ExternalAttendee[]>([]);
   const [actionItems, setActionItems] = useState<LegacyMeetingActionItem[]>([]);
   const [hearingData, setHearingData] = useState<HearingData>({ ...emptyHearingData });
 
@@ -51,8 +49,8 @@ export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers =
     async (prev: Parameters<typeof createMeetingAction>[0], formData: FormData) => {
       formData.set("internalAttendees", JSON.stringify(internalAttendees.filter((a) => a.trim())));
       formData.set(
-        "externalAttendees",
-        JSON.stringify(externalAttendees.filter((a) => a.name.trim()).map((a) => a.name))
+        "externalContactIds",
+        JSON.stringify(externalAttendees.map((a) => a.contactId))
       );
       formData.set("actionItems", JSON.stringify(actionItems));
 
@@ -60,16 +58,6 @@ export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers =
       if (selectedType === "hearing") {
         formData.set("hearingData", JSON.stringify(hearingData));
       }
-
-      // contactRegistrations を JSON として設定する
-      formData.set(
-        "contactRegistrations",
-        JSON.stringify(
-          externalAttendees
-            .filter((a) => a.name.trim())
-            .map((a) => ({ name: a.name, register: a.registerAsContact }))
-        )
-      );
 
       // clientId を FormData にセットする
       if (clientId) {
@@ -98,26 +86,8 @@ export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers =
     setInternalAttendees((prev) => prev.map((a, i) => (i === idx ? value : a)));
   }
 
-  function addExternalAttendee() {
-    setExternalAttendees((prev) => [...prev, { name: "", registerAsContact: false }]);
-  }
-
-  function removeExternalAttendee(idx: number) {
-    setExternalAttendees((prev) => prev.filter((_, i) => i !== idx));
-  }
-
-  function updateExternalAttendeeName(idx: number, value: string) {
-    setExternalAttendees((prev) =>
-      prev.map((a, i) => (i === idx ? { ...a, name: value } : a))
-    );
-  }
-
-  function toggleRegisterAsContact(idx: number) {
-    setExternalAttendees((prev) =>
-      prev.map((a, i) =>
-        i === idx ? { ...a, registerAsContact: !a.registerAsContact } : a
-      )
-    );
+  function removeExternalAttendee(contactId: string) {
+    setExternalAttendees((prev) => prev.filter((a) => a.contactId !== contactId));
   }
 
   function addActionItem() {
@@ -238,17 +208,28 @@ export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers =
 
         <div>
           <p className="text-xs font-bold text-text mb-1">社外参加者</p>
-          {existingContacts.length > 0 && (
+          {state.errors?.externalContactIds?.[0] && (
+            <p className="text-danger text-xs mb-1">{state.errors.externalContactIds[0]}</p>
+          )}
+          {!clientId ? (
+            <p className="text-xs text-text-muted">顧客が未設定のため社外参加者を追加できません</p>
+          ) : existingContacts.length === 0 ? (
+            <p className="text-xs text-text-muted">
+              担当者が登録されていません。
+              <Link href={`/clients/${clientId}`} className="text-primary underline ml-1">
+                顧客詳細で登録してください
+              </Link>
+            </p>
+          ) : (
             <div className="mb-2">
               <Select
                 value=""
                 onChange={(e) => {
                   const contact = existingContacts.find((c) => c.id === e.target.value);
-                  if (contact && !externalAttendees.some((a) => a.name === contact.name)) {
+                  if (contact && !externalAttendees.some((a) => a.contactId === contact.id)) {
                     setExternalAttendees((prev) => [
-                      ...prev.filter((a) => a.name.trim()),
-                      { name: contact.name, registerAsContact: false },
-                      { name: "", registerAsContact: false },
+                      ...prev,
+                      { contactId: contact.id, name: contact.name },
                     ]);
                   }
                   e.target.value = "";
@@ -261,45 +242,18 @@ export function DealMeetingForm({ dealId, clientId, existingContacts, orgUsers =
               </Select>
             </div>
           )}
-          {externalAttendees.map((attendee, idx) => (
-            <div key={idx} className="mb-1">
-              <div className="flex gap-1">
-                <Input
-                  value={attendee.name}
-                  onChange={(e) => updateExternalAttendeeName(idx, e.target.value)}
-                  placeholder="氏名"
-                />
-                {externalAttendees.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeExternalAttendee(idx)}
-                    className="text-xs text-danger underline whitespace-nowrap"
-                  >
-                    削除
-                  </button>
-                )}
-              </div>
-              {/* clientId が存在する場合のみ「顧客担当者として登録」チェックボックスを表示する */}
-              {clientId && (
-                <label className="flex items-center gap-1 text-xs text-text-muted mt-0.5">
-                  <input
-                    type="checkbox"
-                    checked={attendee.registerAsContact}
-                    onChange={() => toggleRegisterAsContact(idx)}
-                    className="accent-primary"
-                  />
-                  顧客担当者として登録
-                </label>
-              )}
+          {externalAttendees.map((attendee) => (
+            <div key={attendee.contactId} className="flex gap-1 mb-1 items-center">
+              <span className="text-xs text-text flex-1">{attendee.name}</span>
+              <button
+                type="button"
+                onClick={() => removeExternalAttendee(attendee.contactId)}
+                className="text-xs text-danger underline whitespace-nowrap"
+              >
+                削除
+              </button>
             </div>
           ))}
-          <button
-            type="button"
-            onClick={addExternalAttendee}
-            className="text-xs text-primary underline"
-          >
-            + 追加
-          </button>
         </div>
       </div>
 

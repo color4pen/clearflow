@@ -6,8 +6,10 @@ import { canPerform } from "@/domain/authorization";
 import { checkRateLimit, RATE_LIMITS } from "@/infrastructure/rateLimit";
 import { createMeeting } from "@/application/usecases/createMeeting";
 import { updateMeeting } from "@/application/usecases/updateMeeting";
+import { listClientContacts } from "@/application/usecases/listClientContacts";
 import { createContractAdjustment } from "@/application/usecases/createContractAdjustment";
 import { createInvoiceAdjustment } from "@/application/usecases/createInvoiceAdjustment";
+import { dealRepository, inquiryRepository, interactionRepository } from "@/infrastructure/repositories";
 import { toToolError, toToolSuccess, handleToolError } from "../errors";
 import { buildAdvertisementSchema, validateAndParse } from "../schemaHelpers";
 import type { Role } from "@/domain/models/user";
@@ -51,7 +53,12 @@ const createMeetingSchema = z.object({
   date: dateString.describe("実施日時"),
   location: z.string().optional().describe("場所"),
   internalAttendees: z.array(z.string()).optional(),
-  externalAttendees: z.array(z.string()).optional(),
+  externalContactIds: z
+    .array(z.string().uuid())
+    .optional()
+    .describe(
+      "社外参加者の顧客担当者ID（UUID）リスト。顧客に登録済みの担当者IDを指定する。未登録IDはエラー。氏名はサーバ側で解決される。create_meeting では dealId/inquiryId に紐づく顧客の担当者IDを指定すること。update_meeting では省略時は既存の外部参加者を保持する（null を指定するとクリア）。"
+    ),
   summary: z.string().optional().describe("議事録・商談要約の本文。Markdown 記法・改行が反映される"),
   actionItems: z.array(legacyActionItemSchema).optional().default([]),
   hearingData: hearingDataSchema.optional(),
@@ -71,14 +78,14 @@ const updateMeetingSchema = z.object({
     .nullable()
     .optional()
     .describe(
-      "社内参加者の名前リスト。指定した場合のみ内部参加者を差し替える。省略時は既存の内部参加者を保持する（externalAttendees とは独立して部分更新される）。null を指定すると内部参加者をクリアする。"
+      "社内参加者の名前リスト。指定した場合のみ内部参加者を差し替える。省略時は既存の内部参加者を保持する（externalContactIds とは独立して部分更新される）。null を指定すると内部参加者をクリアする。"
     ),
-  externalAttendees: z
-    .array(z.string())
+  externalContactIds: z
+    .array(z.string().uuid())
     .nullable()
     .optional()
     .describe(
-      "社外参加者の名前リスト。指定した場合のみ外部参加者を差し替える。省略時は既存の外部参加者を保持する（internalAttendees とは独立して部分更新される）。null を指定すると外部参加者をクリアする。"
+      "社外参加者の顧客担当者ID（UUID）リスト。指定した場合のみ外部参加者を差し替える。省略時は既存の外部参加者を保持する（internalAttendees とは独立して部分更新される）。null を指定すると外部参加者をクリアする。顧客に登録済みの担当者IDを指定する。未登録IDはエラー。氏名はサーバ側で解決される。"
     ),
   summary: z.string().nullable().optional().describe("議事録・商談要約の本文。Markdown 記法・改行が反映される"),
   actionItems: z.array(legacyActionItemSchema).optional(),
@@ -156,13 +163,41 @@ export function registerInteractionsTools(server: McpServer): void {
                 name,
                 isExternal: false,
               })),
-              ...(typedArgs.externalAttendees ?? []).map((name) => ({
-                userId: null as string | null,
-                contactId: null as string | null,
-                name,
-                isExternal: true,
-              })),
             ];
+
+            // 社外参加者 ID を顧客担当者マスタで解決する
+            if (typedArgs.externalContactIds && typedArgs.externalContactIds.length > 0) {
+              // dealId または inquiryId から clientId を解決する
+              let clientId: string | null = null;
+              if (typedArgs.dealId) {
+                const deal = await dealRepository.findById(typedArgs.dealId, organizationId);
+                if (deal) clientId = deal.clientId;
+              } else if (typedArgs.inquiryId) {
+                const inquiry = await inquiryRepository.findById(typedArgs.inquiryId, organizationId);
+                if (inquiry) clientId = inquiry.clientId;
+              }
+
+              if (!clientId) {
+                return toToolError("社外参加者を追加するには顧客の設定が必要です");
+              }
+
+              const contacts = await listClientContacts(clientId, organizationId);
+              const contactMap = new Map(contacts.map((c) => [c.id, c.name]));
+
+              const unresolvedIds = typedArgs.externalContactIds.filter((id) => !contactMap.has(id));
+              if (unresolvedIds.length > 0) {
+                return toToolError(`未登録の担当者IDが含まれています: ${unresolvedIds.join(", ")}`);
+              }
+
+              for (const contactId of typedArgs.externalContactIds) {
+                attendees.push({
+                  userId: null,
+                  contactId,
+                  name: contactMap.get(contactId)!,
+                  isExternal: true,
+                });
+              }
+            }
 
             const hearingData = typedArgs.hearingData
               ? {
@@ -209,7 +244,7 @@ export function registerInteractionsTools(server: McpServer): void {
               return toToolError("レート制限超過。しばらく待ってから再試行してください");
             }
 
-            // internalAttendees / externalAttendees は独立した部分更新フィールドとして usecase に渡す。
+            // internalAttendees は独立した部分更新フィールドとして usecase に渡す。
             // undefined（省略）→ usecase でその側の既存参加者を保持
             // null（明示クリア）→ 空配列として変換（その側をクリア）
             // string[]（指定）→ MeetingAttendee[] に変換してその側を差し替え
@@ -223,15 +258,56 @@ export function registerInteractionsTools(server: McpServer): void {
                     isExternal: false,
                   }));
 
-            const externalAttendees: MeetingAttendee[] | undefined =
-              typedArgs.externalAttendees === undefined
-                ? undefined
-                : (typedArgs.externalAttendees ?? []).map((name) => ({
-                    userId: null as string | null,
-                    contactId: null as string | null,
-                    name,
-                    isExternal: true,
-                  }));
+            // externalContactIds の三値意味論:
+            // undefined → externalAttendees undefined（既存を保持）
+            // null → externalAttendees []（クリア）
+            // string[] → contactId 解決後 MeetingAttendee[]（差し替え）
+            let externalAttendees: MeetingAttendee[] | undefined;
+            if (typedArgs.externalContactIds === undefined) {
+              externalAttendees = undefined;
+            } else if (typedArgs.externalContactIds === null) {
+              externalAttendees = [];
+            } else if (typedArgs.externalContactIds.length === 0) {
+              externalAttendees = [];
+            } else {
+              // contactId を顧客担当者マスタで解決する
+              // meetingId から既存 interaction を取得し dealId / inquiryId を参照する
+              const existing = await interactionRepository.findById(
+                typedArgs.meetingId,
+                organizationId
+              );
+              if (!existing) {
+                return toToolError("商談が見つかりません");
+              }
+
+              let clientId: string | null = null;
+              if (existing.dealId) {
+                const deal = await dealRepository.findById(existing.dealId, organizationId);
+                if (deal) clientId = deal.clientId;
+              } else if (existing.inquiryId) {
+                const inquiry = await inquiryRepository.findById(existing.inquiryId, organizationId);
+                if (inquiry) clientId = inquiry.clientId;
+              }
+
+              if (!clientId) {
+                return toToolError("社外参加者を追加するには顧客の設定が必要です");
+              }
+
+              const contacts = await listClientContacts(clientId, organizationId);
+              const contactMap = new Map(contacts.map((c) => [c.id, c.name]));
+
+              const unresolvedIds = typedArgs.externalContactIds.filter((id) => !contactMap.has(id));
+              if (unresolvedIds.length > 0) {
+                return toToolError(`未登録の担当者IDが含まれています: ${unresolvedIds.join(", ")}`);
+              }
+
+              externalAttendees = typedArgs.externalContactIds.map((contactId) => ({
+                userId: null as string | null,
+                contactId,
+                name: contactMap.get(contactId)!,
+                isExternal: true,
+              }));
+            }
 
             // hearingData: undefined（変更なし）と null（クリア）を区別する
             let details: { challenge: string | null; budget: string | null; decisionMaker: string | null; timeline: string | null; competitors: string | null; notes: string | null } | null | undefined;

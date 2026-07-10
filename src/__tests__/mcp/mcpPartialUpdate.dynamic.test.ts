@@ -50,6 +50,7 @@ import * as updateRevenueTargetModule from "@/application/usecases/updateRevenue
 import * as updateTemplateModule from "@/application/usecases/updateTemplate";
 import * as updatePolicyModule from "@/application/usecases/updatePolicy";
 import * as updateMeetingModule from "@/application/usecases/updateMeeting";
+import * as listClientContactsModule from "@/application/usecases/listClientContacts";
 
 const realRateLimit = {
   checkRateLimit: rateLimitModule.checkRateLimit,
@@ -66,6 +67,20 @@ const realUpdateRevenueTarget = updateRevenueTargetModule.updateRevenueTarget;
 const realUpdateTemplate = updateTemplateModule.updateTemplate;
 const realUpdatePolicy = updatePolicyModule.updatePolicy;
 const realUpdateMeeting = updateMeetingModule.updateMeeting;
+const realListClientContacts = listClientContactsModule.listClientContacts;
+
+// ---------------------------------------------------------------------------
+// 社外参加者 contactId 解決のためのモック状態
+// ---------------------------------------------------------------------------
+
+const EXTERNAL_CONTACT_UUID = "aaaabbbb-e89b-12d3-a456-426614174001";
+const EXTERNAL_CLIENT_UUID = "ccccdddd-e89b-12d3-a456-426614174002";
+
+const contactResolutionState = {
+  interaction: null as Record<string, unknown> | null,
+  deal: null as Record<string, unknown> | null,
+  contacts: [] as Array<{ id: string; name: string }>,
+};
 
 // ---------------------------------------------------------------------------
 // モック設定
@@ -168,6 +183,19 @@ mock.module("@/application/usecases/updateMeeting", () => ({
   },
 }));
 
+// 社外参加者 contactId 解決に必要なモック
+mock.module("@/infrastructure/repositories/interactionRepository", () => ({
+  findById: async () => contactResolutionState.interaction,
+}));
+
+mock.module("@/infrastructure/repositories/dealRepository", () => ({
+  findById: async () => contactResolutionState.deal,
+}));
+
+mock.module("@/application/usecases/listClientContacts", () => ({
+  listClientContacts: async () => contactResolutionState.contacts,
+}));
+
 afterAll(() => {
   mock.module("@/infrastructure/rateLimit", () => realRateLimit);
   mock.module("@/application/usecases/updateDeal", () => ({ updateDeal: realUpdateDeal }));
@@ -187,6 +215,9 @@ afterAll(() => {
   mock.module("@/application/usecases/updateTemplate", () => ({ updateTemplate: realUpdateTemplate }));
   mock.module("@/application/usecases/updatePolicy", () => ({ updatePolicy: realUpdatePolicy }));
   mock.module("@/application/usecases/updateMeeting", () => ({ updateMeeting: realUpdateMeeting }));
+  mock.module("@/application/usecases/listClientContacts", () => ({
+    listClientContacts: realListClientContacts,
+  }));
 });
 
 // ---------------------------------------------------------------------------
@@ -310,6 +341,9 @@ beforeEach(() => {
   state.updateTemplateCalls = [];
   state.updatePolicyCalls = [];
   state.updateMeetingCalls = [];
+  contactResolutionState.interaction = null;
+  contactResolutionState.deal = null;
+  contactResolutionState.contacts = [];
 });
 
 // ===========================================================================
@@ -688,19 +722,25 @@ describe("T-06: interactions update_meeting — attendees 内部/外部独立部
     expect(args.externalAttendees).toBeUndefined();
   });
 
-  it("externalAttendees のみ指定 → usecase に externalAttendees が渡り internalAttendees は undefined", async () => {
+  it("externalContactIds のみ指定 → contactId 解決後に externalAttendees が渡り internalAttendees は undefined", async () => {
+    // 社外参加者 contactId 解決の mock 設定
+    contactResolutionState.interaction = { dealId: DEAL_UUID, inquiryId: null };
+    contactResolutionState.deal = { clientId: EXTERNAL_CLIENT_UUID };
+    contactResolutionState.contacts = [{ id: EXTERNAL_CONTACT_UUID, name: "外部C" }];
+
     const result = await callInteractions({
       operation: "update_meeting",
       meetingId: MEETING_UUID,
-      externalAttendees: ["外部C"],
+      externalContactIds: [EXTERNAL_CONTACT_UUID],
     });
 
     expect(result.isError).toBeUndefined();
     expect(state.updateMeetingCalls).toHaveLength(1);
     const args = state.updateMeetingCalls[0] as Record<string, unknown>;
     expect(Array.isArray(args.externalAttendees)).toBe(true);
-    const external = args.externalAttendees as { name: string; isExternal: boolean }[];
+    const external = args.externalAttendees as { contactId: string; name: string; isExternal: boolean }[];
     expect(external).toHaveLength(1);
+    expect(external[0].contactId).toBe(EXTERNAL_CONTACT_UUID);
     expect(external[0].name).toBe("外部C");
     expect(external[0].isExternal).toBe(true);
     // internalAttendees は省略されたので undefined（反対側を保持する）
@@ -708,11 +748,16 @@ describe("T-06: interactions update_meeting — attendees 内部/外部独立部
   });
 
   it("両方指定 → internalAttendees と externalAttendees の両方が渡る", async () => {
+    // 社外参加者 contactId 解決の mock 設定
+    contactResolutionState.interaction = { dealId: DEAL_UUID, inquiryId: null };
+    contactResolutionState.deal = { clientId: EXTERNAL_CLIENT_UUID };
+    contactResolutionState.contacts = [{ id: EXTERNAL_CONTACT_UUID, name: "外部X" }];
+
     const result = await callInteractions({
       operation: "update_meeting",
       meetingId: MEETING_UUID,
       internalAttendees: ["内部A", "内部B"],
-      externalAttendees: ["外部X"],
+      externalContactIds: [EXTERNAL_CONTACT_UUID],
     });
 
     expect(result.isError).toBeUndefined();
@@ -754,5 +799,22 @@ describe("T-06: interactions update_meeting — attendees 内部/外部独立部
     expect((args.internalAttendees as unknown[]).length).toBe(0);
     // externalAttendees は省略されたので undefined
     expect(args.externalAttendees).toBeUndefined();
+  });
+
+  it("externalContactIds: null → 空配列（クリア）として externalAttendees に渡る", async () => {
+    const result = await callInteractions({
+      operation: "update_meeting",
+      meetingId: MEETING_UUID,
+      externalContactIds: null,
+    });
+
+    expect(result.isError).toBeUndefined();
+    expect(state.updateMeetingCalls).toHaveLength(1);
+    const args = state.updateMeetingCalls[0] as Record<string, unknown>;
+    // null は空配列に変換される（社外参加者クリア）
+    expect(Array.isArray(args.externalAttendees)).toBe(true);
+    expect((args.externalAttendees as unknown[]).length).toBe(0);
+    // internalAttendees は省略されたので undefined
+    expect(args.internalAttendees).toBeUndefined();
   });
 });
